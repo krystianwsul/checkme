@@ -1,5 +1,9 @@
 package com.example.krystianwsul.organizatortest.timing;
 
+import android.content.Context;
+
+import com.example.krystianwsul.organizatortest.R;
+
 import junit.framework.Assert;
 
 import java.util.Calendar;
@@ -63,5 +67,27 @@ public class Date implements Comparable<Date> {
 
     public String toString() {
         return String.format("%04d", mYear) + "-" + String.format("%02d", mMonth) + "-" +String.format("%02d", mDay);
+    }
+
+    public String getDisplayText(Context context) {
+        Calendar todayCalendar = Calendar.getInstance();
+        Date todayDate = new Date(todayCalendar);
+
+        Calendar yesterdayCalendar = Calendar.getInstance();
+        yesterdayCalendar.add(Calendar.DATE, -1);
+        Date yesterdayDate = new Date(yesterdayCalendar);
+
+        Calendar tomorrowCalendar = Calendar.getInstance();
+        tomorrowCalendar.add(Calendar.DATE, -1);
+        Date tomorrowDate = new Date(tomorrowCalendar);
+
+        if (this.compareTo(todayDate) == 0)
+            return context.getString(R.string.today);
+        else if (this.compareTo(yesterdayDate) == 0)
+            return context.getString(R.string.yesterday);
+        else if (this.compareTo(tomorrowDate) == 0)
+            return context.getString(R.string.tomorrow);
+        else
+            return getDayOfWeek().toString() + ", " + toString();
     }
 }

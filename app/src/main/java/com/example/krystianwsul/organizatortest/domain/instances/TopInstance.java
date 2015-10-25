@@ -7,4 +7,5 @@ import com.example.krystianwsul.organizatortest.timing.DateTime;
  */
 public interface TopInstance extends Instance, Comparable<TopInstance> {
     DateTime getDateTime();
+    boolean hasChildren();
 }

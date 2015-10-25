@@ -36,4 +36,8 @@ public class StubInstance implements Instance, TipInstance, TopInstance {
     public Task getTask() {
         return mTask;
     }
+
+    public boolean hasChildren() {
+        return false;
+    }
 }

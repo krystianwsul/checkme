@@ -1,7 +1,10 @@
 package com.example.krystianwsul.organizatortest.domain;
 
+import com.example.krystianwsul.organizatortest.domain.tasks.BranchTask;
+import com.example.krystianwsul.organizatortest.domain.tasks.LeafTask;
 import com.example.krystianwsul.organizatortest.domain.tasks.StubTask;
 import com.example.krystianwsul.organizatortest.domain.tasks.TopTask;
+import com.example.krystianwsul.organizatortest.domain.tasks.TrunkTask;
 import com.example.krystianwsul.organizatortest.timing.Date;
 import com.example.krystianwsul.organizatortest.timing.DateTime;
 import com.example.krystianwsul.organizatortest.timing.TimeStamp;
@@ -10,6 +13,7 @@ import com.example.krystianwsul.organizatortest.timing.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.timing.schedules.WeeklySchedule;
 import com.example.krystianwsul.organizatortest.timing.times.CustomTime;
 import com.example.krystianwsul.organizatortest.timing.times.HourMinute;
+import com.example.krystianwsul.organizatortest.timing.times.NormalTime;
 import com.example.krystianwsul.organizatortest.timing.times.Time;
 
 import junit.framework.Assert;
@@ -32,14 +36,14 @@ public class Root implements Iterable<TopTask> {
         Calendar calendarFewDaysAgo = Calendar.getInstance();
         calendarFewDaysAgo.add(Calendar.DATE, -10);
 
-        Calendar calendarTomorrow = Calendar.getInstance();
-        calendarTomorrow.add(Calendar.DATE, 1);
+        Calendar calendarYesterday = Calendar.getInstance();
+        calendarYesterday.add(Calendar.DATE, -1);
 
         Calendar calendarNextYear = Calendar.getInstance();
         calendarNextYear.add(Calendar.DATE, 365);
 
         Date today = new Date(calendarToday);
-        Date tomorrow = new Date(calendarTomorrow);
+        Date yesterday = new Date(calendarYesterday);
         Date nextYear = new Date(calendarNextYear);
 
         HourMinute sixAm = new HourMinute(6, 0);
@@ -51,10 +55,10 @@ public class Root implements Iterable<TopTask> {
         Time afterWork = new CustomTime("Po Pracy", fivePm, fivePm, fivePm, fivePm, fivePm, null, null);
 
         Schedule todayAfterWaking = new SingleSchedule(new DateTime(today, afterWaking));
-        Schedule tomorrowAfterWaking = new SingleSchedule(new DateTime(tomorrow, afterWaking));
+        Schedule yesterdayAfterWaking = new SingleSchedule(new DateTime(yesterday, afterWaking));
 
-        //Schedule todayAfterWork = new SingleSchedule(new DateTime(today, afterWork));
-        //Schedule tomorrowAfterWork = new SingleSchedule(new DateTime(tomorrow, afterWork));
+        Schedule today15 = new SingleSchedule(new DateTime(today, new NormalTime(new HourMinute(15, 0))));
+        Schedule yesterday16 = new SingleSchedule(new DateTime(yesterday, new NormalTime(new HourMinute(16, 0))));
 
         Schedule alwaysAfterWaking = new WeeklySchedule(new TimeStamp(calendarFewDaysAgo), new TimeStamp(calendarNextYear), afterWaking);
         Schedule alwaysAfterWork = new WeeklySchedule(new TimeStamp(calendarFewDaysAgo), new TimeStamp(calendarNextYear), afterWork);
@@ -64,15 +68,19 @@ public class Root implements Iterable<TopTask> {
         afterWakingAfterWork.add(afterWork);
         Schedule alwaysAfterWakingAfterWork = new WeeklySchedule(new TimeStamp(calendarFewDaysAgo), new TimeStamp(calendarNextYear), afterWakingAfterWork);
 
-        //TrunkTask zakupy = new TrunkTask("Zakupy", todayAfterWork);
-        //zakupy.addChild(new LeafTask("halls", zakupy));
-        //BranchTask biedronka = new BranchTask("Biedronka", zakupy);
-        //biedronka.addChild(new LeafTask("piersi", biedronka));
-        //biedronka.addChild(new LeafTask("czosnek", biedronka));
-        //zakupy.addChild(biedronka);
+        TrunkTask zakupy = new TrunkTask("Zakupy", today15);
 
-        //StubTask rachunek = new StubTask("Zapłacić rachunek", tomorrowAfterWork);
-        //root.addChild(rachunek);
+        zakupy.addChild(new LeafTask("halls", zakupy));
+
+        BranchTask biedronka = new BranchTask("Biedronka", zakupy);
+        biedronka.addChild(new LeafTask("piersi", biedronka));
+        biedronka.addChild(new LeafTask("czosnek", biedronka));
+        zakupy.addChild(biedronka);
+
+        mChildren.add(zakupy);
+
+        StubTask rachunek = new StubTask("Zapłacić rachunek", yesterday16);
+        mChildren.add(rachunek);
 
         StubTask banany = new StubTask("Banany", todayAfterWaking);
         mChildren.add(banany);

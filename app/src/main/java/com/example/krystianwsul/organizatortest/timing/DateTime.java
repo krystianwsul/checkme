@@ -1,5 +1,7 @@
 package com.example.krystianwsul.organizatortest.timing;
 
+import android.content.Context;
+
 import com.example.krystianwsul.organizatortest.timing.times.HourMinute;
 import com.example.krystianwsul.organizatortest.timing.times.Time;
 
@@ -47,5 +49,9 @@ public class DateTime implements Comparable<DateTime> {
 
     public String toString() {
         return mDate.toString() + " " + mTime.toString();
+    }
+
+    public String getDisplayText(Context context) {
+        return mDate.getDisplayText(context) + ", " + mTime.toString();
     }
 }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domain.instances.TopInstance;
@@ -34,10 +35,19 @@ public class TestAdapter extends ArrayAdapter<TopInstance> {
 
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = mActivity.getLayoutInflater();
-        View rowView = inflater.inflate(R.layout.show_tasks_row, parent, false);
-        TextView textView = (TextView) rowView.findViewById(R.id.tasks_row_label);
         TopInstance instance = mInstances.get(position);
-        textView.setText(instance.getTask().getName() + " " + instance.getDateTime().getDate().getDayOfWeek().toString() + ", " + instance.getDateTime().toString());
+
+        View rowView = inflater.inflate(R.layout.show_tasks_row, parent, false);
+
+        TextView tasksRowLabel = (TextView) rowView.findViewById(R.id.tasks_row_label);
+        tasksRowLabel.setText(instance.getTask().getName());
+
+        TextView tasksRowDetails = (TextView) rowView.findViewById(R.id.tasks_row_details);
+        tasksRowDetails.setText(instance.getDateTime().getDisplayText(mActivity));
+
+        ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
+        imgList.setVisibility(instance.hasChildren() ? View.VISIBLE : View.INVISIBLE);
+
         return rowView;
     }
 }

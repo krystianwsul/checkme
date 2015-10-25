@@ -43,4 +43,8 @@ public class TrunkInstance implements Instance, ParentInstance, TopInstance {
 
         return mTask.getName().compareTo(instance.getTask().getName());
     }
+
+    public boolean hasChildren() {
+        return true;
+    }
 }

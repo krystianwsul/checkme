@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,25 +9,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.example.krystianwsul.organizatortest.domain.instances.TopInstance;
-import com.example.krystianwsul.organizatortest.domain.tasks.TopTask;
-import com.example.krystianwsul.organizatortest.timing.Date;
-import com.example.krystianwsul.organizatortest.timing.DateTime;
-import com.example.krystianwsul.organizatortest.timing.TimeStamp;
-import com.example.krystianwsul.organizatortest.timing.schedules.Schedule;
-import com.example.krystianwsul.organizatortest.timing.schedules.SingleSchedule;
-import com.example.krystianwsul.organizatortest.timing.schedules.WeeklySchedule;
-import com.example.krystianwsul.organizatortest.timing.times.CustomTime;
-import com.example.krystianwsul.organizatortest.timing.times.HourMinute;
-import com.example.krystianwsul.organizatortest.timing.times.Time;
-import com.example.krystianwsul.organizatortest.domain.Root;
-import com.example.krystianwsul.organizatortest.domain.tasks.StubTask;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 
 public class ShowTasks extends AppCompatActivity {
 
@@ -46,7 +32,18 @@ public class ShowTasks extends AppCompatActivity {
             }
         });
 
-        loadTasksTest();
+        ListView showTasksList = (ListView) findViewById(R.id.show_tasks_list);
+        showTasksList.setAdapter(new TaskAdapter(this, Task.getTopTasks()));
+
+        showTasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Task task = (Task) parent.getItemAtPosition(position);
+                Intent intent = new Intent(view.getContext(), ShowTask.class);
+                intent.putExtra("taskId", task.getId());
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -69,19 +66,5 @@ public class ShowTasks extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void loadTasksTest()
-    {
-        Root root = Root.getInstance();
-
-        ArrayList<TopInstance> instances = new ArrayList<>();
-        for (TopTask child : root)
-            instances.addAll(child.getInstances(null, new TimeStamp(Calendar.getInstance())));
-
-        Collections.sort(instances);
-
-        ListView showTasksList = (ListView) findViewById(R.id.show_tasks_list);
-        showTasksList.setAdapter(new TestAdapter(this, instances));
     }
 }

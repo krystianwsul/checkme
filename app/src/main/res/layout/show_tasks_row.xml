@@ -17,7 +17,7 @@
         android:id="@+id/tasks_row_img_list"/>
 
     <TextView
-        android:id="@+id/tasks_row_label"
+        android:id="@+id/tasks_row_name"
         android:singleLine="true"
         android:layout_columnSpan="1"
         android:layout_column="1"
@@ -26,7 +26,7 @@
         android:text="test" />
 
     <TextView
-        android:id="@+id/tasks_row_details"
+        android:id="@+id/tasks_row_schedule"
         android:singleLine="true"
         android:layout_columnSpan="1"
         android:layout_column="1"

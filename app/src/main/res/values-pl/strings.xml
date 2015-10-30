@@ -4,4 +4,5 @@
     <string name="today">Dzisiaj</string>
     <string name="yesterday">Wczoraj</string>
     <string name="tomorrow">Jutro</string>
+    <string name="daily">Codziennie</string>
 </resources>

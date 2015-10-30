@@ -34,9 +34,9 @@ public class PersistenceManger {
         Calendar calendarNextYear = Calendar.getInstance();
         calendarNextYear.add(Calendar.DATE, 365);
 
-        TimeRecord afterWaking = new TimeRecord(0, "Po wstaniu", 9, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 9, 0);
+        TimeRecord afterWaking = new TimeRecord(0, "po wstaniu", 9, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 9, 0);
         mTimeRecords.put(afterWaking.getId(), afterWaking);
-        TimeRecord afterWork = new TimeRecord(1, "Po pracy", null, null, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0);
+        TimeRecord afterWork = new TimeRecord(1, "po pracy", null, null, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0);
         mTimeRecords.put(afterWork.getId(), afterWork);
 
         SingleScheduleRecord todayAfterWaking = new SingleScheduleRecord(0, calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), afterWaking.getId(), null, null);
@@ -59,27 +59,27 @@ public class PersistenceManger {
         WeeklyScheduleTimeRecord alwaysAfterWakingAfterWork1 = new WeeklyScheduleTimeRecord(2, alwaysAfterWakingAfterWork.getId(), afterWork.getId(), null, null);
         mWeeklyScheduleTimeRecords.put(alwaysAfterWakingAfterWork1.getId(), alwaysAfterWakingAfterWork1);
 
-        TaskRecord zakupy = new TaskRecord(0, null, "Zakupy", today15.getId(), null);
+        TaskRecord zakupy = new TaskRecord(0, null, "zakupy", today15.getId(), null);
         mTaskRecords.put(zakupy.getId(), zakupy);
-        TaskRecord halls = new TaskRecord(1, zakupy.getId(), "Halls", null, null);
+        TaskRecord halls = new TaskRecord(1, zakupy.getId(), "halls", null, null);
         mTaskRecords.put(halls.getId(), halls);
-        TaskRecord biedronka = new TaskRecord(2, zakupy.getId(), "Biedronka", null, null);
+        TaskRecord biedronka = new TaskRecord(2, zakupy.getId(), "biedronka", null, null);
         mTaskRecords.put(biedronka.getId(), biedronka);
-        TaskRecord czosnek = new TaskRecord(3, biedronka.getId(), "Czosnek", null, null);
+        TaskRecord czosnek = new TaskRecord(3, biedronka.getId(), "czosnek", null, null);
         mTaskRecords.put(czosnek.getId(), czosnek);
-        TaskRecord piersi = new TaskRecord(4, biedronka.getId(), "Piersi", null, null);
+        TaskRecord piersi = new TaskRecord(4, biedronka.getId(), "piersi", null, null);
         mTaskRecords.put(piersi.getId(), piersi);
 
-        TaskRecord rachunek = new TaskRecord(5, null, "Rachunek", yesterday16.getId(), null);
+        TaskRecord rachunek = new TaskRecord(5, null, "rachunek", yesterday16.getId(), null);
         mTaskRecords.put(rachunek.getId(), rachunek);
 
-        TaskRecord banany = new TaskRecord(6, null, "Banany", today15.getId(), null);
+        TaskRecord banany = new TaskRecord(6, null, "banany", today15.getId(), null);
         mTaskRecords.put(banany.getId(), banany);
 
-        TaskRecord iliotibial = new TaskRecord(7, null, "Iliotibial band stretch", null, alwaysAfterWakingAfterWork.getId());
+        TaskRecord iliotibial = new TaskRecord(7, null, "iliotibial band stretch", null, alwaysAfterWakingAfterWork.getId());
         mTaskRecords.put(iliotibial.getId(), iliotibial);
 
-        TaskRecord hamstring = new TaskRecord(8, null, "Hamstring stretch", null, alwaysAfterWork.getId());
+        TaskRecord hamstring = new TaskRecord(8, null, "hamstring stretch", null, alwaysAfterWork.getId());
         mTaskRecords.put(hamstring.getId(), hamstring);
     }
 

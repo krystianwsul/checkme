@@ -50,7 +50,10 @@ public class TaskAdapter extends ArrayAdapter<Task> {
             tasksRowSchedule.setText(schedule.getTaskText(mActivity));
 
         ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
-        imgList.setVisibility(task.getChildTasks() == null ?  View.INVISIBLE : View.VISIBLE);
+        if (task.getChildTasks() == null)
+            imgList.setBackground(mActivity.getResources().getDrawable(R.drawable.ic_label_outline_black_18dp));
+        else
+            imgList.setBackground(mActivity.getResources().getDrawable(R.drawable.ic_list_black_18dp));
 
         return rowView;
     }

@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
@@ -144,6 +145,6 @@ public class WeeklySchedule implements Schedule {
     }
 
     public String getTaskText(Context context) {
-        return TextUtils.join(", ", getTimes());
+        return context.getString(R.string.daily) + " " + TextUtils.join(", ", getTimes());
     }
 }

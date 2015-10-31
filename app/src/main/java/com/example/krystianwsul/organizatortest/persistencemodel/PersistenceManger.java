@@ -15,6 +15,8 @@ public class PersistenceManger {
     private HashMap<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords = new HashMap<>();
     private HashMap<Integer, WeeklyScheduleTimeRecord> mWeeklyScheduleTimeRecords = new HashMap<>();
     private HashMap<Integer, TaskRecord> mTaskRecords = new HashMap<>();
+    private HashMap<Integer, WeeklyInstanceRecord> mInstanceRecords = new HashMap<>();
+    private HashMap<Integer, WeeklyInstanceRecord> mWeeklyInstanceRecords = new HashMap<>();
 
     public static PersistenceManger getInstance() {
         if (mInstance == null)
@@ -39,12 +41,12 @@ public class PersistenceManger {
         TimeRecord afterWork = new TimeRecord(1, "po pracy", null, null, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0);
         mTimeRecords.put(afterWork.getId(), afterWork);
 
-        SingleScheduleRecord todayAfterWaking = new SingleScheduleRecord(0, calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), afterWaking.getId(), null, null);
+        SingleScheduleRecord todayAfterWaking = new SingleScheduleRecord(0, calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), afterWaking.getId(), null, null, false);
         mSingleScheduleRecords.put(todayAfterWaking.getId(), todayAfterWaking);
 
-        SingleScheduleRecord today15 = new SingleScheduleRecord(1, calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 15, 0);
+        SingleScheduleRecord today15 = new SingleScheduleRecord(1, calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 15, 0, false);
         mSingleScheduleRecords.put(today15.getId(), today15);
-        SingleScheduleRecord yesterday16 = new SingleScheduleRecord(2, calendarYesterday.get(Calendar.YEAR), calendarYesterday.get(Calendar.MONTH) + 1, calendarYesterday.get(Calendar.DAY_OF_MONTH), null, 16, 0);
+        SingleScheduleRecord yesterday16 = new SingleScheduleRecord(2, calendarYesterday.get(Calendar.YEAR), calendarYesterday.get(Calendar.MONTH) + 1, calendarYesterday.get(Calendar.DAY_OF_MONTH), null, 16, 0, false);
         mSingleScheduleRecords.put(yesterday16.getId(), yesterday16);
 
         WeeklyScheduleRecord alwaysAfterWork = new WeeklyScheduleRecord(0, calendarFewDaysAgo.getTimeInMillis(), null);
@@ -117,5 +119,13 @@ public class PersistenceManger {
             if (taskRecord.getParentTaskId() == parentTaskId)
                 taskIds.add(taskRecord.getId());
         return taskIds;
+    }
+
+    public WeeklyInstanceRecord getInstanceRecord(int instanceRecordId) {
+        return mInstanceRecords.get(instanceRecordId);
+    }
+
+    public WeeklyInstanceRecord getWeeklyInstanceRecord(int instanceRecordId) {
+        return mWeeklyInstanceRecords.get(instanceRecordId);
     }
 }

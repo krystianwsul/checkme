@@ -1,5 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
+import android.content.Context;
+
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 
 import junit.framework.Assert;
@@ -29,7 +31,7 @@ public class BranchTask extends Task {
         return mChildrenTasks;
     }
 
-    public Schedule getSchedule() {
+    public String getScheduleText(Context context) {
         return null;
     }
 }

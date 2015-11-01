@@ -1,5 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
+import android.content.Context;
+
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklySchedule;
@@ -39,7 +41,7 @@ public class TrunkTask extends Task {
         return mChildrenTasks;
     }
 
-    public Schedule getSchedule() {
-        return mSchedule;
+    public String getScheduleText(Context context) {
+        return mSchedule.getTaskText(context);
     }
 }

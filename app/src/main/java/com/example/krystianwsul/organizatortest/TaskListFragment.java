@@ -22,7 +22,7 @@ public class TaskListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ListView showTasksList = (ListView) getView().findViewById(R.id.show_tasks_list);
+        ListView showTasksList = (ListView) getView().findViewById(R.id.tasks_list);
         showTasksList.setAdapter(new TaskAdapter(getContext(), Task.getTopTasks()));
 
         showTasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {

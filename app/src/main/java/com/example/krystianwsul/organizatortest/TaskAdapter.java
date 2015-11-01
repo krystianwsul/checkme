@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,11 +46,11 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         tasksRowName.setText(task.getName());
 
         TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.tasks_row_schedule);
-        Schedule schedule = task.getSchedule();
-        if (schedule == null)
+        String scheduleText = task.getScheduleText(mContext);
+        if ( TextUtils.isEmpty(scheduleText))
             tasksRowSchedule.setVisibility(View.GONE);
         else
-            tasksRowSchedule.setText(schedule.getTaskText(mContext));
+            tasksRowSchedule.setText(scheduleText);
 
         Resources resources = mContext.getResources();
 

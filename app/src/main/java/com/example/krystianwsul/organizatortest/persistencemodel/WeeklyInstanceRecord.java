@@ -26,9 +26,8 @@ public class WeeklyInstanceRecord {
     private final boolean mDone;
 
     public WeeklyInstanceRecord(int id, int weeklyScheduleTimeId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer timeId, Integer hour, Integer minute, boolean done) {
-        Assert.assertTrue((instanceYear == null) == (instanceMonth == null) == (instanceDay == null));
         Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) != (timeId == null));
+        Assert.assertTrue((hour == null) || (timeId == null));
 
         mId = id;
 
@@ -52,6 +51,22 @@ public class WeeklyInstanceRecord {
 
     public int getId() {
         return mId;
+    }
+
+    public int getWeeklyScheduleTimeId() {
+        return mWeeklyScheduleTimeId;
+    }
+
+    public int getScheduleYear() {
+        return mScheduleYear;
+    }
+
+    public int getScheduleMonth() {
+        return mScheduleMonth;
+    }
+
+    public int getScheduleDay() {
+        return mScheduleDay;
     }
 
     public Integer getInstanceYear() {

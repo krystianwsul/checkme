@@ -1,5 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
+import android.content.Context;
+
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklySchedule;
@@ -33,7 +38,7 @@ public class StubTask extends Task {
         return null;
     }
 
-    public Schedule getSchedule() {
-        return mSchedule;
+    public String getScheduleText(Context context) {
+        return mSchedule.getTaskText(context);
     }
 }

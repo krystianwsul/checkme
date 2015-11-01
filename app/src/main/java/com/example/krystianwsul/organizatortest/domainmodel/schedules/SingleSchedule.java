@@ -2,6 +2,9 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
@@ -55,24 +58,24 @@ public abstract class SingleSchedule implements Schedule {
 
     protected abstract Time getTime();
 
-    public ArrayList<DateTime> getDateTimes(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
+    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);
 
-        ArrayList<DateTime> dateTimes = new ArrayList<>();
+        ArrayList<Instance> instances = new ArrayList<>();
 
         DateTime dateTime = getDateTime();
 
         TimeStamp timeStamp = new TimeStamp(dateTime.getDate(), dateTime.getTime().getTimeByDay(dateTime.getDate().getDayOfWeek()));
 
         if (givenStartTimeStamp != null && (givenStartTimeStamp.compareTo(timeStamp) > 0))
-            return dateTimes;
+            return instances;
 
         if (givenEndTimeStamp.compareTo(timeStamp) < 0)
-            return dateTimes;
+            return instances;
 
-        dateTimes.add(dateTime);
+        instances.add(new SingleInstance());
 
-        return dateTimes;
+        return instances;
     }
 
     public String getTaskText(Context context) {

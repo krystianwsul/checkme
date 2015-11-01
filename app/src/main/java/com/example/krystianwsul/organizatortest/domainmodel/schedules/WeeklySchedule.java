@@ -4,6 +4,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.R;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
@@ -61,14 +63,14 @@ public class WeeklySchedule implements Schedule {
             return new TimeStamp(mWeeklyScheduleRecord.getEndTime());
     }
 
-    public ArrayList<DateTime> getDateTimes(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
+    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);
 
         TimeStamp myStartTimeStamp = getStartTimeStamp();
         TimeStamp myEndTimeStamp = getEndTimeStamp();
         Assert.assertTrue(mWeeklyScheduleRecord.getEndTime() != null);
 
-        ArrayList<DateTime> dateTimes = new ArrayList<>();
+        ArrayList<Instance> instances = new ArrayList<>();
 
         TimeStamp startTimeStamp = null;
         TimeStamp endTimeStamp = null;
@@ -84,16 +86,16 @@ public class WeeklySchedule implements Schedule {
             endTimeStamp = myEndTimeStamp;
 
         if (startTimeStamp.compareTo(endTimeStamp) >= 0)
-            return dateTimes;
+            return instances;
 
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(startTimeStamp.compareTo(endTimeStamp) < 0);
 
         if (startTimeStamp.getDate().compareTo(endTimeStamp.getDate()) == 0) {
-            return getTimesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), endTimeStamp.getHourMinute());
+            return getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), endTimeStamp.getHourMinute());
         } else {
-            dateTimes.addAll(getTimesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));
+            instances.addAll(getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));
 
             Calendar loopStartCalendar = startTimeStamp.getCalendar();
             loopStartCalendar.add(Calendar.DATE, 1);
@@ -101,12 +103,12 @@ public class WeeklySchedule implements Schedule {
             loopEndCalendar.add(Calendar.DATE, -1);
 
             for (Calendar calendar = loopStartCalendar; calendar.before(loopEndCalendar); calendar.add(Calendar.DATE, 1))
-                dateTimes.addAll(getTimesInDate(new Date(calendar), null, null));
+                instances.addAll(getInstancesInDate(new Date(calendar), null, null));
 
-            dateTimes.addAll(getTimesInDate(endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
+            instances.addAll(getInstancesInDate(endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
         }
 
-        return dateTimes;
+        return instances;
     }
 
     private ArrayList<Time> getTimes() {
@@ -120,15 +122,15 @@ public class WeeklySchedule implements Schedule {
         return times;
     }
 
-    private ArrayList<DateTime> getTimesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
+    private ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
 
-        ArrayList<DateTime> ret = new ArrayList<>();
+        ArrayList<Instance> instances = new ArrayList<>();
 
-        for (Time time : getTimes()) {
-            HourMinute hourMinute = time.getTimeByDay(day);
+        for (WeeklyScheduleTime weeklyScheduleTime : mWeeklyScheduleTimes) {
+            HourMinute hourMinute = weeklyScheduleTime.getTime().getTimeByDay(day);
             if (hourMinute == null)
                 continue;
 
@@ -138,10 +140,10 @@ public class WeeklySchedule implements Schedule {
             if (endHourMinute != null && endHourMinute.compareTo(hourMinute) < 0)
                 continue;
 
-            ret.add(new DateTime(date, time));
+            instances.add(weeklyScheduleTime.getInstance(date));
         }
 
-        return ret;
+        return instances;
     }
 
     public String getTaskText(Context context) {

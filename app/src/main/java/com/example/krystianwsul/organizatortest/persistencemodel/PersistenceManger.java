@@ -1,5 +1,9 @@
 package com.example.krystianwsul.organizatortest.persistencemodel;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleTime;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -10,13 +14,14 @@ import java.util.HashMap;
 public class PersistenceManger {
     private static PersistenceManger mInstance;
 
-    private HashMap<Integer, TimeRecord> mTimeRecords = new HashMap<>();
-    private HashMap<Integer, SingleScheduleRecord> mSingleScheduleRecords = new HashMap<>();
-    private HashMap<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords = new HashMap<>();
-    private HashMap<Integer, WeeklyScheduleTimeRecord> mWeeklyScheduleTimeRecords = new HashMap<>();
-    private HashMap<Integer, TaskRecord> mTaskRecords = new HashMap<>();
-    private HashMap<Integer, WeeklyInstanceRecord> mInstanceRecords = new HashMap<>();
-    private HashMap<Integer, WeeklyInstanceRecord> mWeeklyInstanceRecords = new HashMap<>();
+    private final HashMap<Integer, TimeRecord> mTimeRecords = new HashMap<>();
+    private final HashMap<Integer, SingleScheduleRecord> mSingleScheduleRecords = new HashMap<>();
+    private final HashMap<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords = new HashMap<>();
+    private final HashMap<Integer, WeeklyScheduleTimeRecord> mWeeklyScheduleTimeRecords = new HashMap<>();
+    private final HashMap<Integer, TaskRecord> mTaskRecords = new HashMap<>();
+    private final HashMap<Integer, WeeklyInstanceRecord> mWeeklyInstanceRecords = new HashMap<>();
+
+    private final int mMaxWeeklyInstanceId = 0;
 
     public static PersistenceManger getInstance() {
         if (mInstance == null)
@@ -121,11 +126,20 @@ public class PersistenceManger {
         return taskIds;
     }
 
-    public WeeklyInstanceRecord getInstanceRecord(int instanceRecordId) {
-        return mInstanceRecords.get(instanceRecordId);
-    }
-
     public WeeklyInstanceRecord getWeeklyInstanceRecord(int instanceRecordId) {
         return mWeeklyInstanceRecords.get(instanceRecordId);
+    }
+
+    public WeeklyInstanceRecord getWeeklyInstanceRecord(int weeklyScheduleTimeId, Date scheduleDate) {
+        for (WeeklyInstanceRecord weeklyInstanceRecord : mWeeklyInstanceRecords.values()) {
+            if (weeklyInstanceRecord.getWeeklyScheduleTimeId() == weeklyScheduleTimeId && weeklyInstanceRecord.getScheduleYear() == scheduleDate.getYear() && weeklyInstanceRecord.getScheduleMonth() == scheduleDate.getMonth() && weeklyInstanceRecord.getScheduleDay() == scheduleDate.getDay()) {
+                return weeklyInstanceRecord;
+            }
+        }
+        return null;
+    }
+
+    public int getMaxWeeklyInstanceId() {
+        return mMaxWeeklyInstanceId;
     }
 }

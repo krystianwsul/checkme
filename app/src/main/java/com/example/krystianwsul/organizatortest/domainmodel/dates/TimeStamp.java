@@ -4,6 +4,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
+import java.security.Timestamp;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -22,6 +23,10 @@ public class TimeStamp implements Comparable<TimeStamp> {
     public TimeStamp(Calendar calendar) {
         Assert.assertTrue(calendar != null);
         mLong = calendar.getTimeInMillis();
+    }
+
+    public static TimeStamp getNow() {
+        return new TimeStamp(Calendar.getInstance());
     }
 
     public TimeStamp(long milis) {

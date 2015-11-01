@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -29,11 +30,11 @@ public class ShowTask extends AppCompatActivity {
         tasksHeadingLabel.setText(task.getName());
 
         TextView tasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
-        Schedule schedule = task.getSchedule();
-        if (schedule == null)
+        String scheduleText = task.getScheduleText(this);
+        if (TextUtils.isEmpty(scheduleText))
             tasksRowSchedule.setVisibility(View.GONE);
         else
-            tasksRowSchedule.setText(schedule.getTaskText(this));
+            tasksRowSchedule.setText(scheduleText);
 
         ListView showTaskList = (ListView) findViewById(R.id.show_task_list);
         if (task.getChildTasks() == null)

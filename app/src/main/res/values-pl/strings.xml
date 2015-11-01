@@ -5,4 +5,6 @@
     <string name="yesterday">Wczoraj</string>
     <string name="tomorrow">Jutro</string>
     <string name="daily">Codziennie</string>
+    <string name="tasks">Zadania</string>
+    <string name="instances">Instancje</string>
 </resources>

@@ -17,9 +17,7 @@ public class SingleScheduleRecord {
     private final Integer mHour;
     private final Integer mMinute;
 
-    private final boolean mDone;
-
-    public SingleScheduleRecord(int id, int year, int month, int day, Integer timeRecordId, Integer hour, Integer minute, boolean done) {
+    public SingleScheduleRecord(int id, int year, int month, int day, Integer timeRecordId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (timeRecordId == null));
         Assert.assertTrue((hour != null) || (timeRecordId != null));
@@ -34,8 +32,6 @@ public class SingleScheduleRecord {
 
         mHour = hour;
         mMinute = minute;
-
-        mDone = done;
     }
 
     public int getId() {

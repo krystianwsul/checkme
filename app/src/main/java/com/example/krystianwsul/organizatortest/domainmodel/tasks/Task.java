@@ -2,15 +2,11 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 
-import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
 import junit.framework.Assert;
 
-import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 

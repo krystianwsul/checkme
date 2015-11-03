@@ -5,25 +5,26 @@ import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceMang
 /**
  * Created by Krystian on 11/3/2015.
  */
-public class VirtualWeeklyInstance extends WeeklyInstance {
+public class VirtualSingleInstance extends SingleInstance {
     private final int mId;
 
     private final int mTaskId;
 
-    private final int mWeeklyRepetitionId;
+    private final int mSingleScheduleId;
 
     private final boolean mDone = false;
 
-    private static int sVirtualWeeklyInstanceCount = 0;
+    private static int sVirtualSingleInstanceCount = 0;
 
-    public VirtualWeeklyInstance(int taskId, int weeklyRepetitionId) {
+    public VirtualSingleInstance(int taskId, int singleScheduleId) {
         mTaskId = taskId;
-        mWeeklyRepetitionId = weeklyRepetitionId;
+        mSingleScheduleId = singleScheduleId;
 
-        sVirtualWeeklyInstanceCount++;
+        sVirtualSingleInstanceCount++;
 
-        mId = PersistenceManger.getInstance().getMaxWeeklyInstanceId() + sVirtualWeeklyInstanceCount;
+        mId = PersistenceManger.getInstance().getMaxSingleInstanceId() + sVirtualSingleInstanceCount;
     }
+
 
     public int getId() {
         return mId;
@@ -33,8 +34,8 @@ public class VirtualWeeklyInstance extends WeeklyInstance {
         return mTaskId;
     }
 
-    public int getWeeklyRepetitionId() {
-        return mWeeklyRepetitionId;
+    public int getSingleScheduleId() {
+        return mSingleScheduleId;
     }
 
     public boolean getDone() {

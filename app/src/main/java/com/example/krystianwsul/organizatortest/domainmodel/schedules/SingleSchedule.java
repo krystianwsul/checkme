@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.Repetition;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
@@ -58,7 +60,8 @@ public abstract class SingleSchedule implements Schedule {
 
     protected abstract Time getTime();
 
-    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
+    public ArrayList<Instance> getInstances(Task task, TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
+        Assert.assertTrue(task != null);
         Assert.assertTrue(givenEndTimeStamp != null);
 
         ArrayList<Instance> instances = new ArrayList<>();
@@ -73,7 +76,7 @@ public abstract class SingleSchedule implements Schedule {
         if (givenEndTimeStamp.compareTo(timeStamp) < 0)
             return instances;
 
-        instances.add(new SingleInstance());
+        instances.add(SingleInstance.getSingleInstance(task.getId(), mSingleScheduleRecord.getId()));
 
         return instances;
     }

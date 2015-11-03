@@ -2,7 +2,9 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.Repetition;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleTimeRecord;
@@ -48,7 +50,7 @@ public abstract class WeeklyScheduleTime {
         return mWeeklyScheduleTimeRecord.getId();
     }
 
-    public Instance getInstance(Date scheduleDate) {
-        return WeeklyInstance.getWeeklyInstance(this, scheduleDate);
+    public Instance getInstance(Task task, Date scheduleDate) {
+        return WeeklyRepetition.getWeeklyRepetition(this, scheduleDate).getInstance(task);
     }
 }

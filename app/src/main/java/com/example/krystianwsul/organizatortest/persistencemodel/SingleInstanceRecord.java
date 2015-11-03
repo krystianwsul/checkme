@@ -5,21 +5,21 @@ import junit.framework.Assert;
 /**
  * Created by Krystian on 11/2/2015.
  */
-public class WeeklyInstanceRecord {
+public class SingleInstanceRecord {
     private final int mId;
 
     private final int mTaskId;
 
-    private final int mWeeklyRepetitionId;
+    private final int mSingleScheduleId;
 
     private final boolean mDone;
 
-    public WeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, boolean done) {
+    public SingleInstanceRecord(int id, int taskId, int singleScheduleId, boolean done) {
         mId = id;
 
         mTaskId = taskId;
 
-        mWeeklyRepetitionId = weeklyRepetitionId;
+        mSingleScheduleId = singleScheduleId;
 
         mDone = done;
     }
@@ -32,8 +32,8 @@ public class WeeklyInstanceRecord {
         return mTaskId;
     }
 
-    public int getWeeklyRepetitionId() {
-        return mWeeklyRepetitionId;
+    public int getSingleScheduleId() {
+        return mSingleScheduleId;
     }
 
     public boolean getDone() {

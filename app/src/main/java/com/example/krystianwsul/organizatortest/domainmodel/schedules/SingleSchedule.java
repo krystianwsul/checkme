@@ -76,12 +76,16 @@ public abstract class SingleSchedule implements Schedule {
         if (givenEndTimeStamp.compareTo(timeStamp) < 0)
             return instances;
 
-        instances.add(SingleInstance.getSingleInstance(task.getId(), mSingleScheduleRecord.getId()));
+        instances.add(SingleInstance.getSingleInstance(task, mSingleScheduleRecord.getId()));
 
         return instances;
     }
 
     public String getTaskText(Context context) {
         return getDateTime().getDisplayText(context);
+    }
+
+    public int getId() {
+        return mSingleScheduleRecord.getId();
     }
 }

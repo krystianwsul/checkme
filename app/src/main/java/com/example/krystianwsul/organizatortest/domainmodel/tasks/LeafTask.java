@@ -11,7 +11,7 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 10/12/2015.
  */
-public class LeafTask extends Task {
+public class LeafTask extends Task implements ChildTask {
     protected LeafTask(int taskId) {
         super(taskId);
 
@@ -21,7 +21,7 @@ public class LeafTask extends Task {
         Assert.assertTrue(mTaskRecord.getWeeklyScheduleId() == null);
     }
 
-    public ArrayList<Task> getChildTasks() {
+    public ArrayList<TaskTest> getChildTasks() {
         return null;
     }
 

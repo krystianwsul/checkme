@@ -1,5 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
+import android.content.Context;
+
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyInstanceRecord;
 
 import junit.framework.Assert;
@@ -10,7 +15,8 @@ import junit.framework.Assert;
 public class RealWeeklyInstance extends WeeklyInstance {
     private final WeeklyInstanceRecord mWeeklyInstanceRecord;
 
-    public RealWeeklyInstance(WeeklyInstanceRecord weeklyInstanceRecord) {
+    public RealWeeklyInstance(Task task, WeeklyInstanceRecord weeklyInstanceRecord, WeeklyRepetition weeklyRepetition) {
+        super(task, weeklyRepetition);
         Assert.assertTrue(weeklyInstanceRecord != null);
         mWeeklyInstanceRecord = weeklyInstanceRecord;
     }
@@ -21,10 +27,6 @@ public class RealWeeklyInstance extends WeeklyInstance {
 
     public int getTaskId() {
         return mWeeklyInstanceRecord.getTaskId();
-    }
-
-    public int getWeeklyRepetitionId() {
-        return mWeeklyInstanceRecord.getWeeklyRepetitionId();
     }
 
     public boolean getDone() {

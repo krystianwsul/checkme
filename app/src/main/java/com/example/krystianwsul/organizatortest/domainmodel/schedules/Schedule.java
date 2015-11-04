@@ -13,6 +13,7 @@ import java.util.ArrayList;
  * Created by Krystian on 10/17/2015.
  */
 public interface Schedule {
+    int getId();
     String getTaskText(Context context);
     ArrayList<Instance> getInstances(Task task, TimeStamp startTimeStamp, TimeStamp endTimeStamp);
 }

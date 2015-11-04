@@ -69,7 +69,6 @@ public class WeeklySchedule implements Schedule {
 
         TimeStamp myStartTimeStamp = getStartTimeStamp();
         TimeStamp myEndTimeStamp = getEndTimeStamp();
-        Assert.assertTrue(mWeeklyScheduleRecord.getEndTime() != null);
 
         ArrayList<Instance> instances = new ArrayList<>();
 
@@ -150,5 +149,9 @@ public class WeeklySchedule implements Schedule {
 
     public String getTaskText(Context context) {
         return context.getString(R.string.daily) + " " + TextUtils.join(", ", getTimes());
+    }
+
+    public int getId() {
+        return mWeeklyScheduleRecord.getId();
     }
 }

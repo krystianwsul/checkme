@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
@@ -52,5 +53,25 @@ public class VirtualWeeklyRepetition extends WeeklyRepetition {
 
     public int getScheduleDay() {
         return mScheduleDay;
+    }
+
+    public Integer getRepetitionYear() {
+        return null;
+    }
+
+    public Integer getRepetitionMonth() {
+        return null;
+    }
+
+    public Integer getRepetitionDay() {
+        return null;
+    }
+
+    public Date getDate() {
+        return new Date(mScheduleYear, mScheduleMonth, mScheduleDay);
+    }
+
+    public Time getTime() {
+        return mWeeklyScheduleTime.getTime();
     }
 }

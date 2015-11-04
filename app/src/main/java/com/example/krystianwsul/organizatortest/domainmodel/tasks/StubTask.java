@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 10/13/2015.
  */
-public class StubTask extends Task {
+public class StubTask extends Task implements RootTask {
     private final Schedule mSchedule;
 
     protected StubTask(int taskId) {
@@ -34,11 +34,15 @@ public class StubTask extends Task {
         Assert.assertTrue(mSchedule != null);
     }
 
-    public ArrayList<Task> getChildTasks() {
+    public ArrayList<TaskTest> getChildTasks() {
         return null;
     }
 
     public String getScheduleText(Context context) {
         return mSchedule.getTaskText(context);
+    }
+
+    public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
+        return mSchedule.getInstances(this, startTimeStamp, endTimeStamp);
     }
 }

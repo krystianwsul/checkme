@@ -1,10 +1,12 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyRepetitionRecord;
 
@@ -60,7 +62,21 @@ public abstract class WeeklyRepetition implements Repetition {
 
     public abstract int getScheduleDay();
 
+    public abstract Integer getRepetitionYear();
+
+    public abstract Integer getRepetitionMonth();
+
+    public abstract Integer getRepetitionDay();
+
+    public abstract Time getTime();
+
+    public abstract Date getDate();
+
+    public DateTime getDateTime() {
+        return new DateTime(getDate(), getTime());
+    }
+
     public Instance getInstance(Task task) {
-        return WeeklyInstance.getWeeklyInstance(task.getId(), getId());
+        return WeeklyInstance.getWeeklyInstance(task, this);
     }
 }

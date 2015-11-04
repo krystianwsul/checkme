@@ -14,16 +14,16 @@ public class WeeklyRepetitionRecord {
     private final int mScheduleMonth;
     private final int mScheduleDay;
 
-    private final Integer mInstanceYear;
-    private final Integer mInstanceMonth;
-    private final Integer mInstanceDay;
+    private final Integer mRepetitionYear;
+    private final Integer mRepetitionMonth;
+    private final Integer mRepetitionDay;
 
     private final Integer mTimeId;
 
     private final Integer mHour;
     private final Integer mMinute;
 
-    public WeeklyRepetitionRecord(int id, int weeklyScheduleTimeId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer timeId, Integer hour, Integer minute) {
+    public WeeklyRepetitionRecord(int id, int weeklyScheduleTimeId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer repetitionYear, Integer repetitionMonth, Integer repetitionDay, Integer timeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (timeId == null));
 
@@ -35,9 +35,9 @@ public class WeeklyRepetitionRecord {
         mScheduleMonth = scheduleMonth;
         mScheduleDay = scheduleDay;
 
-        mInstanceYear = instanceYear;
-        mInstanceMonth = instanceMonth;
-        mInstanceDay = instanceDay;
+        mRepetitionYear = repetitionYear;
+        mRepetitionMonth = repetitionMonth;
+        mRepetitionDay = repetitionDay;
 
         mTimeId = timeId;
 
@@ -65,16 +65,16 @@ public class WeeklyRepetitionRecord {
         return mScheduleDay;
     }
 
-    public Integer getInstanceYear() {
-        return mInstanceYear;
+    public Integer getRepetitionYear() {
+        return mRepetitionYear;
     }
 
-    public Integer getInstanceMonth() {
-        return mInstanceMonth;
+    public Integer getRepetitionMonth() {
+        return mRepetitionMonth;
     }
 
-    public Integer getInstanceDay() {
-        return mInstanceDay;
+    public Integer getRepetitionDay() {
+        return mRepetitionDay;
     }
 
     public Integer getTimeId() {

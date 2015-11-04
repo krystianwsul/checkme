@@ -13,7 +13,7 @@ import java.util.HashMap;
 /**
  * Created by Krystian on 10/13/2015.
  */
-public abstract class Task {
+public abstract class Task implements TaskTest {
     protected final TaskRecord mTaskRecord;
 
     private static final HashMap<Integer, Task> sTasks = new HashMap<>();
@@ -28,14 +28,14 @@ public abstract class Task {
         }
     }
 
-    public static ArrayList<Task> getTopTasks() {
-        ArrayList<Integer> topTaskIds = PersistenceManger.getInstance().getTaskIds(null);
-        Assert.assertTrue(!topTaskIds.isEmpty());
+    public static ArrayList<RootTask> getRootTasks() {
+        ArrayList<Integer> rootTaskIds = PersistenceManger.getInstance().getTaskIds(null);
+        Assert.assertTrue(!rootTaskIds.isEmpty());
 
-        ArrayList<Task> topTasks = new ArrayList<>();
-        for (Integer topTaskId : topTaskIds)
-            topTasks.add(getTask(topTaskId));
-        return topTasks;
+        ArrayList<RootTask> rootTasks = new ArrayList<>();
+        for (Integer rootTaskId : rootTaskIds)
+            rootTasks.add((RootTask) getTask(rootTaskId));
+        return rootTasks;
     }
 
     private static Task createTask(int taskId) {
@@ -67,7 +67,7 @@ public abstract class Task {
         return mTaskRecord.getName();
     }
 
-    public abstract ArrayList<Task> getChildTasks();
+    public abstract ArrayList<TaskTest> getChildTasks();
 
     public int getId() {
         return mTaskRecord.getId();

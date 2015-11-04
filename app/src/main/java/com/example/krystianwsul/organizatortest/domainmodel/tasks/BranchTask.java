@@ -11,7 +11,7 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 10/12/2015.
  */
-public class BranchTask extends Task {
+public class BranchTask extends Task implements ChildTask {
     private final ArrayList<Task> mChildrenTasks = new ArrayList<>();
 
     protected BranchTask(int taskId, ArrayList<Integer> childTaskIds) {
@@ -27,8 +27,11 @@ public class BranchTask extends Task {
         Assert.assertTrue(mTaskRecord.getWeeklyScheduleId() == null);
     }
 
-    public ArrayList<Task> getChildTasks() {
-        return mChildrenTasks;
+    public ArrayList<TaskTest> getChildTasks() {
+        ArrayList<TaskTest> childTasks = new ArrayList<>();
+        for (Task task : mChildrenTasks)
+            childTasks.add(task);
+        return childTasks;
     }
 
     public String getScheduleText(Context context) {

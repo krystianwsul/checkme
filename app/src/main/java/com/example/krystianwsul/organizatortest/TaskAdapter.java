@@ -1,6 +1,5 @@
 package com.example.krystianwsul.organizatortest;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -11,9 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskTest;
 
 import junit.framework.Assert;
 
@@ -22,11 +19,11 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 10/23/2015.
  */
-public class TaskAdapter extends ArrayAdapter<TaskTest> {
+public class TaskAdapter extends ArrayAdapter<Task> {
     private final Context mContext;
-    private final ArrayList<TaskTest> mTasks;
+    private final ArrayList<Task> mTasks;
 
-    public TaskAdapter(Context context, ArrayList<TaskTest> tasks) {
+    public TaskAdapter(Context context, ArrayList<Task> tasks) {
         super(context, -1, tasks);
 
         Assert.assertTrue(context != null);
@@ -39,7 +36,7 @@ public class TaskAdapter extends ArrayAdapter<TaskTest> {
 
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        TaskTest task = mTasks.get(position);
+        Task task = mTasks.get(position);
 
         View rowView = inflater.inflate(R.layout.show_tasks_row, parent, false);
 

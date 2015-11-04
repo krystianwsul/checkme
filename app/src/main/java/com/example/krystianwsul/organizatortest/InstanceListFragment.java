@@ -29,7 +29,7 @@ public class InstanceListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ListView showTasksList = (ListView) getView().findViewById(R.id.instances_list);
+        ListView instanceList = (ListView) getView().findViewById(R.id.instances_list);
 
         ArrayList<RootTask> rootTasks = Task.getRootTasks();
 
@@ -37,9 +37,10 @@ public class InstanceListFragment extends Fragment {
         for (RootTask rootTask : rootTasks)
             instances.addAll(rootTask.getInstances(new TimeStamp(Date.today(), new HourMinute(0, 0)), new TimeStamp(Date.today(), new HourMinute(23, 59))));
 
-        showTasksList.setAdapter(new InstanceAdapter(getContext(), instances));
+        instanceList.setAdapter(new InstanceAdapter(getContext(), instances));
 
-        showTasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*
+        instanceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task task = (Task) parent.getItemAtPosition(position);
@@ -48,5 +49,6 @@ public class InstanceListFragment extends Fragment {
                 startActivity(intent);
             }
         });
+        */
     }
 }

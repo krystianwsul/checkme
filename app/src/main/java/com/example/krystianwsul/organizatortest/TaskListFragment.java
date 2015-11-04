@@ -9,9 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskTest;
 
 import java.util.ArrayList;
 
@@ -26,13 +24,10 @@ public class TaskListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ListView showTasksList = (ListView) getView().findViewById(R.id.tasks_list);
-        ArrayList<TaskTest> tasks = new ArrayList<>();
-        for (RootTask task : Task.getRootTasks())
-            tasks.add((RootTask) task);
-        showTasksList.setAdapter(new TaskAdapter(getContext(), tasks));
+        ListView tasksList = (ListView) getView().findViewById(R.id.tasks_list);
+        tasksList.setAdapter(new TaskAdapter(getContext(), new ArrayList<Task>(Task.getRootTasks())));
 
-        showTasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        tasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task task = (Task) parent.getItemAtPosition(position);

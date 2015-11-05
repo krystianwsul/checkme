@@ -14,9 +14,11 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by Krystian on 10/31/2015.
@@ -31,7 +33,7 @@ public class InstanceListFragment extends Fragment {
 
         ListView instanceList = (ListView) getView().findViewById(R.id.instances_list);
 
-        ArrayList<RootTask> rootTasks = Task.getRootTasks();
+        Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (RootTask rootTask : rootTasks)

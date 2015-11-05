@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyInstanceRecord;
 
@@ -26,7 +27,7 @@ public abstract class DailyInstance implements Instance {
         } else {
             PersistenceManger persistenceManger = PersistenceManger.getInstance();
             DailyInstanceRecord dailyInstanceRecord = persistenceManger.getDailyInstanceRecord(dailyInstanceId);
-            DailyInstance dailyInstance = new RealDailyInstance(Task.getTask(dailyInstanceRecord.getTaskId()), dailyInstanceRecord, DailyRepetition.getDailyRepetition(dailyInstanceRecord.getDailyRepetitionId()));
+            DailyInstance dailyInstance = new RealDailyInstance(TaskFactory.getInstance().getTask(dailyInstanceRecord.getTaskId()), dailyInstanceRecord, DailyRepetition.getDailyRepetition(dailyInstanceRecord.getDailyRepetitionId()));
             sDailyInstances.put(dailyInstanceId, dailyInstance);
             return dailyInstance;
         }

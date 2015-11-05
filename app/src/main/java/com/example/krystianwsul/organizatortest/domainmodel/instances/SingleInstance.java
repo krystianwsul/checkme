@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleInstanceRecord;
 
@@ -23,7 +24,7 @@ public abstract class SingleInstance implements Instance {
         } else {
             PersistenceManger persistenceManger = PersistenceManger.getInstance();
             SingleInstanceRecord singleInstanceRecord = persistenceManger.getSingleInstanceRecord(taskId);
-            SingleInstance singleInstance = new RealSingleInstance(Task.getTask(singleInstanceRecord.getTaskId()), singleInstanceRecord);
+            SingleInstance singleInstance = new RealSingleInstance(TaskFactory.getInstance().getTask(singleInstanceRecord.getTaskId()), singleInstanceRecord);
             sSingleInstances.put(taskId, singleInstance);
             return singleInstance;
         }

@@ -11,8 +11,11 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
 import junit.framework.Assert;
+
+import java.util.ArrayList;
 
 public class ShowTask extends AppCompatActivity {
 
@@ -23,7 +26,7 @@ public class ShowTask extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         int taskId = extras.getInt("taskId");
-        Task task = Task.getTask(taskId);
+        Task task = TaskFactory.getInstance().getTask(taskId);
         Assert.assertTrue(task != null);
 
         TextView tasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
@@ -40,7 +43,7 @@ public class ShowTask extends AppCompatActivity {
         if (task.getChildTasks().isEmpty())
             showTaskList.setVisibility(View.GONE);
         else
-            showTaskList.setAdapter(new TaskAdapter(this, task.getChildTasks()));
+            showTaskList.setAdapter(new TaskAdapter(this, new ArrayList(task.getChildTasks())));
 
         showTaskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

@@ -15,56 +15,31 @@ import java.util.HashMap;
  */
 public abstract class Task {
     protected final TaskRecord mTaskRecord;
+    protected ArrayList<ChildTask> mChildrenTasks = new ArrayList<>();
 
     private static final HashMap<Integer, Task> sTasks = new HashMap<>();
 
-    public static Task getTask(int taskId) {
-        if (sTasks.containsKey(taskId)) {
-            return sTasks.get(taskId);
-        } else {
-            Task task = createTask(taskId);
-            sTasks.put(taskId, task);
-            return task;
-        }
-    }
-
-    public static ArrayList<RootTask> getRootTasks() {
-        ArrayList<Integer> rootTaskIds = PersistenceManger.getInstance().getTaskIds(null);
-        Assert.assertTrue(!rootTaskIds.isEmpty());
-
-        ArrayList<RootTask> rootTasks = new ArrayList<>();
-        for (Integer rootTaskId : rootTaskIds)
-            rootTasks.add((RootTask) getTask(rootTaskId));
-        return rootTasks;
-    }
-
-    private static Task createTask(int taskId) {
-        PersistenceManger persistenceManger = PersistenceManger.getInstance();
-        TaskRecord taskRecord = persistenceManger.getTaskRecord(taskId);
+    protected Task(TaskRecord taskRecord) {
         Assert.assertTrue(taskRecord != null);
-
-        ArrayList<Integer> childTaskIds = persistenceManger.getTaskIds(taskId);
-
-        if (taskRecord.getParentTaskId() == null)
-            return new RootTask(taskId, childTaskIds);
-        else
-            return new ChildTask(taskId, childTaskIds);
-    }
-
-    protected Task(int taskId) {
-        mTaskRecord = PersistenceManger.getInstance().getTaskRecord(taskId);
-        Assert.assertTrue(mTaskRecord != null);
+        mTaskRecord = taskRecord;
     }
 
     public String getName() {
         return mTaskRecord.getName();
     }
 
-    public abstract ArrayList<Task> getChildTasks();
+    public ArrayList<ChildTask> getChildTasks() {
+        return mChildrenTasks;
+    }
 
     public int getId() {
         return mTaskRecord.getId();
     }
 
     public abstract String getScheduleText(Context context);
+
+    public void addChildTask(ChildTask childTask) {
+        Assert.assertTrue(childTask != null);
+        mChildrenTasks.add(childTask);
+    }
 }

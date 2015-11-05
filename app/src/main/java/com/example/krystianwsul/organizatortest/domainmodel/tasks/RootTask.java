@@ -4,14 +4,10 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.Repetition;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklySchedule;
 
 import junit.framework.Assert;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -30,13 +26,7 @@ public class RootTask extends Task {
         for (Integer childTaskId : childTaskIds)
             mChildrenTasks.add(Task.getTask(childTaskId));
 
-        Assert.assertTrue(mTaskRecord.getSingleScheduleId() == null || mTaskRecord.getWeeklyScheduleId() == null);
-        Assert.assertTrue(mTaskRecord.getSingleScheduleId() != null || mTaskRecord.getWeeklyScheduleId() != null);
-
-        if (mTaskRecord.getSingleScheduleId() != null)
-            mSchedule = SingleSchedule.getSingleSchedule(mTaskRecord.getSingleScheduleId());
-        else
-            mSchedule = WeeklySchedule.getWeeklySchedule(mTaskRecord.getWeeklyScheduleId());
+        mSchedule = Schedule.getSchedule(taskId);
         Assert.assertTrue(mSchedule != null);
     }
 

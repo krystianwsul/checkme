@@ -21,7 +21,7 @@ public class VirtualSingleInstance extends SingleInstance {
 
     private static int sVirtualSingleInstanceCount = 0;
 
-    public VirtualSingleInstance(Task task, int singleScheduleId) {
+    public VirtualSingleInstance(Task task) {
         super(task);
 
         mTask = task;
@@ -30,21 +30,12 @@ public class VirtualSingleInstance extends SingleInstance {
 
         mId = PersistenceManger.getInstance().getMaxSingleInstanceId() + sVirtualSingleInstanceCount;
 
-        mSingleSchedule = SingleSchedule.getSingleSchedule(singleScheduleId);
+        mSingleSchedule = SingleSchedule.getSingleSchedule(task.getId());
         Assert.assertTrue(mSingleSchedule != null);
-    }
-
-
-    public int getId() {
-        return mId;
     }
 
     public int getTaskId() {
         return mTask.getId();
-    }
-
-    public int getSingleScheduleId() {
-        return mSingleSchedule.getId();
     }
 
     public boolean getDone() {

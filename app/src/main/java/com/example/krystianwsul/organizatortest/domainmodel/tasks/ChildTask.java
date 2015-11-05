@@ -19,9 +19,6 @@ public class ChildTask extends Task {
 
         for (Integer childTaskId : childTaskIds)
             mChildrenTasks.add(Task.getTask(childTaskId));
-
-        Assert.assertTrue(mTaskRecord.getSingleScheduleId() == null);
-        Assert.assertTrue(mTaskRecord.getWeeklyScheduleId() == null);
     }
 
     public ArrayList<Task> getChildTasks() {

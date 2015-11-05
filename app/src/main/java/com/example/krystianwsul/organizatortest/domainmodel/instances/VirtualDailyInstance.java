@@ -1,25 +1,25 @@
 package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 /**
  * Created by Krystian on 11/3/2015.
  */
-public class VirtualWeeklyInstance extends WeeklyInstance {
+public class VirtualDailyInstance extends DailyInstance {
     private final int mId;
 
     private final boolean mDone = false;
 
-    private static int sVirtualWeeklyInstanceCount = 0;
+    private static int sVirtualDailyInstanceCount = 0;
 
-    public VirtualWeeklyInstance(Task task, WeeklyRepetition weeklyRepetition) {
-        super(task, weeklyRepetition);
+    public VirtualDailyInstance(Task task, DailyRepetition dailyRepetition) {
+        super(task, dailyRepetition);
 
-        sVirtualWeeklyInstanceCount++;
+        sVirtualDailyInstanceCount++;
 
-        mId = PersistenceManger.getInstance().getMaxWeeklyInstanceId() + sVirtualWeeklyInstanceCount;
+        mId = PersistenceManger.getInstance().getMaxDailyInstanceId() + sVirtualDailyInstanceCount;
     }
 
     public int getId() {

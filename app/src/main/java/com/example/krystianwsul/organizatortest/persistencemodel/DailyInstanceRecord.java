@@ -1,25 +1,23 @@
 package com.example.krystianwsul.organizatortest.persistencemodel;
 
-import junit.framework.Assert;
-
 /**
  * Created by Krystian on 11/2/2015.
  */
-public class WeeklyInstanceRecord {
+public class DailyInstanceRecord {
     private final int mId;
 
     private final int mTaskId;
 
-    private final int mWeeklyRepetitionId;
+    private final int mDailyRepetitionId;
 
     private final boolean mDone;
 
-    public WeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, boolean done) {
+    public DailyInstanceRecord(int id, int taskId, int dailyRepetitionId, boolean done) {
         mId = id;
 
         mTaskId = taskId;
 
-        mWeeklyRepetitionId = weeklyRepetitionId;
+        mDailyRepetitionId = dailyRepetitionId;
 
         mDone = done;
     }
@@ -32,8 +30,8 @@ public class WeeklyInstanceRecord {
         return mTaskId;
     }
 
-    public int getWeeklyRepetitionId() {
-        return mWeeklyRepetitionId;
+    public int getDailyRepetitionId() {
+        return mDailyRepetitionId;
     }
 
     public boolean getDone() {

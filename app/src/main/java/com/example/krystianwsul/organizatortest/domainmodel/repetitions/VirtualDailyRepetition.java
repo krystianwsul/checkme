@@ -1,7 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleTime;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
@@ -10,8 +10,8 @@ import junit.framework.Assert;
 /**
  * Created by Krystian on 11/1/2015.
  */
-public class VirtualWeeklyRepetition extends WeeklyRepetition {
-    private final WeeklyScheduleTime mWeeklyScheduleTime;
+public class VirtualDailyRepetition extends DailyRepetition {
+    private final DailyScheduleTime mDailyScheduleTime;
 
     private final int mId;
 
@@ -21,10 +21,10 @@ public class VirtualWeeklyRepetition extends WeeklyRepetition {
 
     private static int sRepetitionCount = 0;
 
-    public VirtualWeeklyRepetition(WeeklyScheduleTime weeklyScheduleTime, Date scheduleDate) {
-        Assert.assertTrue(weeklyScheduleTime != null);
+    public VirtualDailyRepetition(DailyScheduleTime dailyScheduleTime, Date scheduleDate) {
+        Assert.assertTrue(dailyScheduleTime != null);
 
-        mWeeklyScheduleTime = weeklyScheduleTime;
+        mDailyScheduleTime = dailyScheduleTime;
 
         mScheduleYear = scheduleDate.getYear();
         mScheduleMonth = scheduleDate.getMonth();
@@ -32,15 +32,15 @@ public class VirtualWeeklyRepetition extends WeeklyRepetition {
 
         sRepetitionCount++;
 
-        mId = PersistenceManger.getInstance().getMaxWeeklyRepetitionId() + sRepetitionCount;
+        mId = PersistenceManger.getInstance().getMaxDailyRepetitionId() + sRepetitionCount;
     }
 
     public int getId() {
         return mId;
     }
 
-    public int getWeeklyScheduleTimeId() {
-        return mWeeklyScheduleTime.getId();
+    public int getDailyScheduleTimeId() {
+        return mDailyScheduleTime.getId();
     }
 
     public int getScheduleYear() {
@@ -72,6 +72,6 @@ public class VirtualWeeklyRepetition extends WeeklyRepetition {
     }
 
     public Time getTime() {
-        return mWeeklyScheduleTime.getTime();
+        return mDailyScheduleTime.getTime();
     }
 }

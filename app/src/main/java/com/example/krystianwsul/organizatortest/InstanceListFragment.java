@@ -45,7 +45,7 @@ public class InstanceListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task task = (Task) parent.getItemAtPosition(position);
                 Intent intent = new Intent(view.getContext(), ShowTask.class);
-                intent.putExtra("taskId", task.getId());
+                intent.putExtra("taskId", task.getTaskId());
                 startActivity(intent);
             }
         });

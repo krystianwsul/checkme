@@ -37,7 +37,7 @@ public class ShowTask extends AppCompatActivity {
             tasksRowSchedule.setText(scheduleText);
 
         ListView showTaskList = (ListView) findViewById(R.id.show_task_list);
-        if (task.getChildTasks() == null)
+        if (task.getChildTasks().isEmpty())
             showTaskList.setVisibility(View.GONE);
         else
             showTaskList.setAdapter(new TaskAdapter(this, task.getChildTasks()));

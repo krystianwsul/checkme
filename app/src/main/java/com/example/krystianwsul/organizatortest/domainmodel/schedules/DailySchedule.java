@@ -5,10 +5,9 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.Repetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
@@ -24,43 +23,54 @@ import java.util.HashMap;
 /**
  * Created by Krystian on 10/17/2015.
  */
-public class WeeklySchedule implements Schedule {
-    private final WeeklyScheduleRecord mWeeklyScheduleRecord;
-    private final ArrayList<WeeklyScheduleTime> mWeeklyScheduleTimes = new ArrayList<>();
+public class DailySchedule extends Schedule {
+    private final DailyScheduleRecord mDailyScheduleRecord;
+    private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
 
-    private static final HashMap<Integer, WeeklySchedule> sWeeklySchedules = new HashMap<>();
+    private static final HashMap<Integer, DailySchedule> sDailySchedules = new HashMap<>();
 
-    public static WeeklySchedule getWeeklySchedule(int weeklyScheduleId) {
-        if (sWeeklySchedules.containsKey(weeklyScheduleId)) {
-            return sWeeklySchedules.get(weeklyScheduleId);
+    public static DailySchedule getDailySchedule(int taskId) {
+        if (sDailySchedules.containsKey(taskId)) {
+            return sDailySchedules.get(taskId);
         } else {
-            WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleId);
-            sWeeklySchedules.put(weeklyScheduleId, weeklySchedule);
-            return weeklySchedule;
+            DailySchedule dailySchedule = createDailySchedule(taskId);
+            if (dailySchedule == null)
+                return null;
+
+            sDailySchedules.put(taskId, dailySchedule);
+            return dailySchedule;
         }
     }
 
-    private WeeklySchedule(int weeklyScheduleId) {
-        PersistenceManger persistenceManger = PersistenceManger.getInstance();
-        mWeeklyScheduleRecord = persistenceManger.getWeeklyScheduleRecord(weeklyScheduleId);
-        Assert.assertTrue(mWeeklyScheduleRecord != null);
+    private static DailySchedule createDailySchedule(int taskId) {
+        DailyScheduleRecord dailyScheduleRecord = PersistenceManger.getInstance().getDailyScheduleRecord(taskId);
+        if (dailyScheduleRecord == null)
+            return null;
 
-        ArrayList<Integer> weeklyScheduleTimeIds = persistenceManger.getWeeklyScheduleTimeIds(mWeeklyScheduleRecord.getId());
-        Assert.assertTrue(!weeklyScheduleTimeIds.isEmpty());
+        return new DailySchedule(dailyScheduleRecord);
+    }
 
-        for (Integer weeklyScheduleTimeRecordId : weeklyScheduleTimeIds)
-            mWeeklyScheduleTimes.add(WeeklyScheduleTime.getWeeklyScheduleTime(weeklyScheduleTimeRecordId));
+    private DailySchedule(DailyScheduleRecord dailyScheduleRecord) {
+        Assert.assertTrue(dailyScheduleRecord != null);
+        mDailyScheduleRecord = dailyScheduleRecord;
+        Assert.assertTrue(mDailyScheduleRecord != null);
+
+        ArrayList<Integer> DailyScheduleTimeIds = PersistenceManger.getInstance().getDailyScheduleTimeIds(mDailyScheduleRecord.getTaskId());
+        Assert.assertTrue(!DailyScheduleTimeIds.isEmpty());
+
+        for (Integer DailyScheduleTimeRecordId : DailyScheduleTimeIds)
+            mDailyScheduleTimes.add(DailyScheduleTime.getDailyScheduleTime(DailyScheduleTimeRecordId));
     }
 
     private TimeStamp getStartTimeStamp() {
-        return new TimeStamp(mWeeklyScheduleRecord.getStartTime());
+        return new TimeStamp(mDailyScheduleRecord.getStartTime());
     }
 
     private TimeStamp getEndTimeStamp() {
-        if (mWeeklyScheduleRecord.getEndTime() == null)
+        if (mDailyScheduleRecord.getEndTime() == null)
             return null;
         else
-            return new TimeStamp(mWeeklyScheduleRecord.getEndTime());
+            return new TimeStamp(mDailyScheduleRecord.getEndTime());
     }
 
     public ArrayList<Instance> getInstances(Task task, TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
@@ -114,8 +124,8 @@ public class WeeklySchedule implements Schedule {
     private ArrayList<Time> getTimes() {
         ArrayList<Time> times = new ArrayList<>();
 
-        for (WeeklyScheduleTime weeklyScheduleTime : mWeeklyScheduleTimes) {
-            times.add(weeklyScheduleTime.getTime());
+        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
+            times.add(dailyScheduleTime.getTime());
         }
 
         Assert.assertTrue(!times.isEmpty());
@@ -130,8 +140,8 @@ public class WeeklySchedule implements Schedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        for (WeeklyScheduleTime weeklyScheduleTime : mWeeklyScheduleTimes) {
-            HourMinute hourMinute = weeklyScheduleTime.getTime().getTimeByDay(day);
+        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
+            HourMinute hourMinute = dailyScheduleTime.getTime().getTimeByDay(day);
             if (hourMinute == null)
                 continue;
 
@@ -141,7 +151,7 @@ public class WeeklySchedule implements Schedule {
             if (endHourMinute != null && endHourMinute.compareTo(hourMinute) < 0)
                 continue;
 
-            instances.add(weeklyScheduleTime.getInstance(task, date));
+            instances.add(dailyScheduleTime.getInstance(task, date));
         }
 
         return instances;
@@ -151,7 +161,7 @@ public class WeeklySchedule implements Schedule {
         return context.getString(R.string.daily) + " " + TextUtils.join(", ", getTimes());
     }
 
-    public int getId() {
-        return mWeeklyScheduleRecord.getId();
+    public int getTaskId() {
+        return mDailyScheduleRecord.getTaskId();
     }
 }

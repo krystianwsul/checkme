@@ -5,22 +5,22 @@ import junit.framework.Assert;
 /**
  * Created by Krystian on 10/27/2015.
  */
-public class WeeklyScheduleTimeRecord {
+public class DailyScheduleTimeRecord {
     private final int mId;
-    private final int mWeeklyScheduleRecordId;
+    private final int taskId;
 
     private final Integer mTimeRecordId;
 
     private final Integer mHour;
     private final Integer mMinute;
 
-    public WeeklyScheduleTimeRecord(int id, int weeklyScheduleId, Integer timeId, Integer hour, Integer minute) {
+    public DailyScheduleTimeRecord(int id, int taskId, Integer timeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (timeId == null));
         Assert.assertTrue((hour != null) || (timeId != null));
 
         mId = id;
-        mWeeklyScheduleRecordId = weeklyScheduleId;
+        this.taskId = taskId;
 
         mTimeRecordId = timeId;
 
@@ -32,8 +32,8 @@ public class WeeklyScheduleTimeRecord {
         return mId;
     }
 
-    public int getWeeklyScheduleId() {
-        return mWeeklyScheduleRecordId;
+    public int getTaskId() {
+        return taskId;
     }
 
     public Integer getTimeRecordId() {

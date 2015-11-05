@@ -9,20 +9,13 @@ public class TaskRecord {
     private final int mId;
     private final Integer mParentTaskId;
     private final String mName;
-    private final Integer mSingleScheduleId;
-    private final Integer mWeeklyScheduleId;
 
-    public TaskRecord(int id, Integer parentId, String name, Integer singleScheduleId, Integer weeklyScheduleId) {
+    public TaskRecord(int id, Integer parentId, String name) {
         Assert.assertTrue(name != null);
-        Assert.assertTrue(parentId == null || (singleScheduleId == null && weeklyScheduleId == null));
-        Assert.assertTrue(parentId != null || singleScheduleId != null || weeklyScheduleId != null);
-        Assert.assertTrue(singleScheduleId == null || weeklyScheduleId == null);
 
         mId = id;
         mParentTaskId = parentId;
         mName = name;
-        mSingleScheduleId = singleScheduleId;
-        mWeeklyScheduleId = weeklyScheduleId;
     }
 
     public int getId() {
@@ -31,14 +24,6 @@ public class TaskRecord {
 
     public Integer getParentTaskId() {
         return mParentTaskId;
-    }
-
-    public Integer getSingleScheduleId() {
-        return mSingleScheduleId;
-    }
-
-    public Integer getWeeklyScheduleId() {
-        return mWeeklyScheduleId;
     }
 
     public String getName() {

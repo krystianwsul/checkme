@@ -6,7 +6,7 @@ import junit.framework.Assert;
  * Created by Krystian on 10/27/2015.
  */
 public class SingleScheduleRecord {
-    private final int mId;
+    private final int mTaskId;
 
     private final int mYear;
     private final int mMonth;
@@ -17,12 +17,12 @@ public class SingleScheduleRecord {
     private final Integer mHour;
     private final Integer mMinute;
 
-    public SingleScheduleRecord(int id, int year, int month, int day, Integer timeRecordId, Integer hour, Integer minute) {
+    public SingleScheduleRecord(int taskId, int year, int month, int day, Integer timeRecordId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (timeRecordId == null));
         Assert.assertTrue((hour != null) || (timeRecordId != null));
 
-        mId = id;
+        mTaskId = taskId;
 
         mYear = year;
         mMonth = month;
@@ -34,8 +34,8 @@ public class SingleScheduleRecord {
         mMinute = minute;
     }
 
-    public int getId() {
-        return mId;
+    public int getTaskId() {
+        return mTaskId;
     }
 
     public int getYear() {

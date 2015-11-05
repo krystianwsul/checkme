@@ -17,40 +17,33 @@ public abstract class SingleInstance implements Instance {
 
     private static final HashMap<Integer, SingleInstance> sSingleInstances = new HashMap<>();
 
-    public static SingleInstance getSingleInstance(int singleInstanceId) {
-        if (sSingleInstances.containsKey(singleInstanceId)) {
-            return sSingleInstances.get(singleInstanceId);
+    public static SingleInstance getSingleInstance(int taskId) {
+        if (sSingleInstances.containsKey(taskId)) {
+            return sSingleInstances.get(taskId);
         } else {
             PersistenceManger persistenceManger = PersistenceManger.getInstance();
-            SingleInstanceRecord singleInstanceRecord = persistenceManger.getSingleInstanceRecord(singleInstanceId);
+            SingleInstanceRecord singleInstanceRecord = persistenceManger.getSingleInstanceRecord(taskId);
             SingleInstance singleInstance = new RealSingleInstance(Task.getTask(singleInstanceRecord.getTaskId()), singleInstanceRecord);
-            sSingleInstances.put(singleInstanceId, singleInstance);
+            sSingleInstances.put(taskId, singleInstance);
             return singleInstance;
         }
     }
 
-    public static SingleInstance getSingleInstance(Task task, int singleScheduleId) {
-        SingleInstance existingSingleInstance = getExistingSingleInstance(task.getId(), singleScheduleId);
+    public static SingleInstance getSingleInstance(Task task) {
+        SingleInstance existingSingleInstance = sSingleInstances.get(task.getId());
         if (existingSingleInstance != null)
             return existingSingleInstance;
 
-        SingleInstanceRecord singleInstanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId(), singleScheduleId);
+        SingleInstanceRecord singleInstanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
         if (singleInstanceRecord != null) {
             RealSingleInstance realSingleInstance = new RealSingleInstance(task, singleInstanceRecord);
-            sSingleInstances.put(realSingleInstance.getId(), realSingleInstance);
+            sSingleInstances.put(realSingleInstance.getTaskId(), realSingleInstance);
             return realSingleInstance;
         }
 
-        VirtualSingleInstance virtualSingleInstance = new VirtualSingleInstance(task, singleScheduleId);
-        sSingleInstances.put(virtualSingleInstance.getId(), virtualSingleInstance);
+        VirtualSingleInstance virtualSingleInstance = new VirtualSingleInstance(task);
+        sSingleInstances.put(virtualSingleInstance.getTaskId(), virtualSingleInstance);
         return virtualSingleInstance;
-    }
-
-    private static SingleInstance getExistingSingleInstance(int taskId, int singleScheduleId) {
-        for (SingleInstance singleInstance : sSingleInstances.values())
-            if (singleInstance.getTaskId() == taskId && singleInstance.getSingleScheduleId() == singleScheduleId)
-                return singleInstance;
-        return null;
     }
 
     public SingleInstance(Task task) {
@@ -58,13 +51,9 @@ public abstract class SingleInstance implements Instance {
         mTask = task;
     }
 
-    public abstract int getId();
-
     public int getTaskId() {
         return mTask.getId();
     }
-
-    public abstract int getSingleScheduleId();
 
     public abstract boolean getDone();
 

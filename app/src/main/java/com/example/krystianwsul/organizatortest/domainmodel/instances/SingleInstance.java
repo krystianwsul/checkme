@@ -70,4 +70,12 @@ public abstract class SingleInstance implements Instance {
             childInstances.add(getSingleInstance(childTask));
         return childInstances;
     }
+
+    public String getIntentKey() {
+        return "singleInstanceId";
+    }
+
+    public int getIntentValue() {
+        return mTask.getId();
+    }
 }

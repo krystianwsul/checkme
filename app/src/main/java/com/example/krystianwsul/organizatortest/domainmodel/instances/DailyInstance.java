@@ -85,4 +85,12 @@ public abstract class DailyInstance implements Instance {
             childInstances.add(getDailyInstance(childTask, mDailyRepetition));
         return childInstances;
     }
+
+    public String getIntentKey() {
+        return "dailyInstanceId";
+    }
+
+    public int getIntentValue() {
+        return getId();
+    }
 }

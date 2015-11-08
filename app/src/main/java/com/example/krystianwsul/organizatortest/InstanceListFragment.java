@@ -35,22 +35,20 @@ public class InstanceListFragment extends Fragment {
 
         Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
 
-        ArrayList<Instance> instances = new ArrayList<>();
+        final ArrayList<Instance> instances = new ArrayList<>();
         for (RootTask rootTask : rootTasks)
             instances.addAll(rootTask.getInstances(new TimeStamp(Date.today(), new HourMinute(0, 0)), new TimeStamp(Date.today(), new HourMinute(23, 59))));
 
         instanceList.setAdapter(new InstanceAdapter(getContext(), instances));
 
-        /*
         instanceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Task task = (Task) parent.getItemAtPosition(position);
-                Intent intent = new Intent(view.getContext(), ShowTask.class);
-                intent.putExtra("taskId", task.getTaskId());
+                Instance instance = (Instance) parent.getItemAtPosition(position);
+                Intent intent = new Intent(view.getContext(), ShowInstance.class);
+                intent.putExtra(instance.getIntentKey(), instance.getIntentValue());
                 startActivity(intent);
             }
         });
-        */
     }
 }

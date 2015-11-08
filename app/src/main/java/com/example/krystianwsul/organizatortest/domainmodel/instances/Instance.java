@@ -13,4 +13,6 @@ public interface Instance {
     String getName();
     String getScheduleText(Context context);
     ArrayList<Instance> getChildInstances();
+    String getIntentKey();
+    int getIntentValue();
 }

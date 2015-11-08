@@ -11,8 +11,8 @@ import junit.framework.Assert;
 public class DailyScheduleCustomTime extends DailyScheduleTime {
     private final CustomTime mCustomTime;
 
-    protected DailyScheduleCustomTime(int dailyScheduleTimeId) {
-        super(dailyScheduleTimeId);
+    protected DailyScheduleCustomTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
+        super(dailyScheduleTimeId, dailySchedule);
         Assert.assertTrue(mDailyScheduleTimeRecord.getTimeRecordId() != null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getHour() == null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getMinute() == null);

@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -15,7 +16,8 @@ import junit.framework.Assert;
 public class RealDailyRepetition extends DailyRepetition {
     private final DailyRepetitionRecord mDailyRepetitionRecord;
 
-    protected RealDailyRepetition(DailyRepetitionRecord dailyRepetitionRecord) {
+    protected RealDailyRepetition(DailyRepetitionRecord dailyRepetitionRecord, DailyScheduleTime dailyScheduleTime) {
+        super(dailyScheduleTime);
         Assert.assertTrue(dailyRepetitionRecord != null);
         mDailyRepetitionRecord = dailyRepetitionRecord;
     }
@@ -28,47 +30,27 @@ public class RealDailyRepetition extends DailyRepetition {
         return mDailyRepetitionRecord.getDailyScheduleTimeId();
     }
 
-    public int getScheduleYear() {
-        return mDailyRepetitionRecord.getScheduleYear();
+    public Date getScheduleDate() {
+        return new Date(mDailyRepetitionRecord.getScheduleYear(), mDailyRepetitionRecord.getScheduleMonth(), mDailyRepetitionRecord.getScheduleDay());
     }
 
-    public int getScheduleMonth() {
-        return mDailyRepetitionRecord.getScheduleMonth();
+    public Time getScheduleTime() {
+        return mDailyScheduleTime.getTime();
     }
 
-    public int getScheduleDay() {
-        return mDailyRepetitionRecord.getScheduleDay();
-    }
-
-    public Integer getRepetitionYear() {
-        return mDailyRepetitionRecord.getRepetitionYear();
-    }
-
-    public Integer getRepetitionMonth() {
-        return mDailyRepetitionRecord.getRepetitionMonth();
-    }
-
-    public Integer getRepetitionDay() {
-        return mDailyRepetitionRecord.getRepetitionDay();
-    }
-
-    private DailyScheduleTime getDailyScheduleTime() {
-        return DailyScheduleTime.getDailyScheduleTime(mDailyRepetitionRecord.getDailyScheduleTimeId());
-    }
-
-    public Time getTime() {
-        if (mDailyRepetitionRecord.getTimeId() != null)
-            return CustomTime.getCustomTime(mDailyRepetitionRecord.getTimeId());
-        else if (mDailyRepetitionRecord.getHour() != null)
-                return new NormalTime(mDailyRepetitionRecord.getHour(), mDailyRepetitionRecord.getMinute());
-        else
-            return getDailyScheduleTime().getTime();
-    }
-
-    public Date getDate() {
+    public Date getRepetitionDate() {
         if (mDailyRepetitionRecord.getRepetitionYear() != null)
             return new Date(mDailyRepetitionRecord.getRepetitionYear(), mDailyRepetitionRecord.getRepetitionMonth(), mDailyRepetitionRecord.getRepetitionDay());
         else
-            return new Date(mDailyRepetitionRecord.getScheduleYear(), mDailyRepetitionRecord.getScheduleMonth(), mDailyRepetitionRecord.getScheduleDay());
+            return getScheduleDate();
+    }
+
+    public Time getRepetitionTime() {
+        if (mDailyRepetitionRecord.getTimeId() != null)
+            return CustomTime.getCustomTime(mDailyRepetitionRecord.getTimeId());
+        else if (mDailyRepetitionRecord.getHour() != null)
+            return new NormalTime(mDailyRepetitionRecord.getHour(), mDailyRepetitionRecord.getMinute());
+        else
+            return mDailyScheduleTime.getTime();
     }
 }

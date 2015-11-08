@@ -36,6 +36,6 @@ public class RootTask extends Task {
     public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
         Assert.assertTrue(mSchedule != null);
         Assert.assertTrue(endTimeStamp != null);
-        return mSchedule.getInstances(this, startTimeStamp, endTimeStamp);
+        return mSchedule.getInstances(startTimeStamp, endTimeStamp);
     }
 }

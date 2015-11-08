@@ -10,19 +10,23 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyRepetitionRecord;
 
+import junit.framework.Assert;
+
 import java.util.HashMap;
 
 /**
  * Created by Krystian on 10/31/2015.
  */
 public abstract class DailyRepetition implements Repetition {
+    protected final DailyScheduleTime mDailyScheduleTime;
+
     private static final HashMap<Integer, DailyRepetition> sDailyRepetitions = new HashMap<>();
 
-    public static DailyRepetition getDailyRepetition(int dailyRepetitionId) {
+    public static DailyRepetition getDailyRepetition(int dailyRepetitionId, DailyScheduleTime dailyScheduleTime) {
         if (sDailyRepetitions.containsKey(dailyRepetitionId)) {
             return sDailyRepetitions.get(dailyRepetitionId);
         } else {
-            DailyRepetition dailyRepetition = new RealDailyRepetition(PersistenceManger.getInstance().getDailyRepetitionRecord(dailyRepetitionId));
+            DailyRepetition dailyRepetition = new RealDailyRepetition(PersistenceManger.getInstance().getDailyRepetitionRecord(dailyRepetitionId), dailyScheduleTime);
             sDailyRepetitions.put(dailyRepetitionId, dailyRepetition);
             return dailyRepetition;
         }
@@ -35,7 +39,7 @@ public abstract class DailyRepetition implements Repetition {
 
         DailyRepetitionRecord dailyRepetitionRecord = PersistenceManger.getInstance().getDailyRepetitionRecord(dailyScheduleTime.getId(), scheduleDate);
         if (dailyRepetitionRecord != null) {
-            RealDailyRepetition realDailyInstance = new RealDailyRepetition(dailyRepetitionRecord);
+            RealDailyRepetition realDailyInstance = new RealDailyRepetition(dailyRepetitionRecord, dailyScheduleTime);
             sDailyRepetitions.put(existingDailyRepetition.getId(), existingDailyRepetition);
             return realDailyInstance;
         }
@@ -47,33 +51,34 @@ public abstract class DailyRepetition implements Repetition {
 
     private static DailyRepetition getExistingDailyRepetition(int dailyScheduleTimeId, Date scheduleDate) {
         for (DailyRepetition dailyRepetition : sDailyRepetitions.values())
-            if (dailyRepetition.getDailyScheduleTimeId() == dailyScheduleTimeId && dailyRepetition.getScheduleYear() == scheduleDate.getYear() && dailyRepetition.getScheduleMonth() == scheduleDate.getMonth() && dailyRepetition.getScheduleDay() == scheduleDate.getDay())
+            if (dailyRepetition.getDailyScheduleTimeId() == dailyScheduleTimeId && dailyRepetition.getScheduleDate() == scheduleDate)
                 return dailyRepetition;
         return null;
+    }
+
+    protected DailyRepetition(DailyScheduleTime dailyScheduleTime) {
+        Assert.assertTrue(dailyScheduleTime != null);
+        mDailyScheduleTime = dailyScheduleTime;
     }
 
     public abstract int getId();
 
     public abstract int getDailyScheduleTimeId();
 
-    public abstract int getScheduleYear();
+    public abstract Date getScheduleDate();
 
-    public abstract int getScheduleMonth();
+    public abstract Time getScheduleTime();
 
-    public abstract int getScheduleDay();
+    public DateTime getScheduleDateTime() {
+        return new DateTime(getScheduleDate(), getScheduleTime());
+    }
 
-    public abstract Integer getRepetitionYear();
+    public abstract Date getRepetitionDate();
 
-    public abstract Integer getRepetitionMonth();
+    public abstract Time getRepetitionTime();
 
-    public abstract Integer getRepetitionDay();
-
-    public abstract Time getTime();
-
-    public abstract Date getDate();
-
-    public DateTime getDateTime() {
-        return new DateTime(getDate(), getTime());
+    public DateTime getRepetitionDateTime() {
+        return new DateTime(getRepetitionDate(), getRepetitionTime());
     }
 
     public Instance getInstance(Task task) {

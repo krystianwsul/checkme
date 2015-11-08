@@ -25,33 +25,37 @@ public abstract class SingleSchedule extends Schedule {
 
     private final static HashMap<Integer, SingleSchedule> sSingleSchedules = new HashMap<>();
 
-    public static SingleSchedule getSingleSchedule(int taskId) {
-        if (sSingleSchedules.containsKey(taskId)) {
-            return sSingleSchedules.get(taskId);
+    public static SingleSchedule getSingleSchedule(Task task) {
+        Assert.assertTrue(task != null);
+        if (sSingleSchedules.containsKey(task.getId())) {
+            return sSingleSchedules.get(task.getId());
         } else {
-            SingleSchedule singleSchedule = createSingleSchedule(taskId);
+            SingleSchedule singleSchedule = createSingleSchedule(task);
             if (singleSchedule == null)
                 return null;
 
-            sSingleSchedules.put(taskId, singleSchedule);
+            sSingleSchedules.put(task.getId(), singleSchedule);
             return singleSchedule;
         }
     }
 
-    private static SingleSchedule createSingleSchedule(int taskId) {
-        SingleScheduleRecord singleScheduleRecord = PersistenceManger.getInstance().getSingleScheduleRecord(taskId);
+    private static SingleSchedule createSingleSchedule(Task task) {
+        SingleScheduleRecord singleScheduleRecord = PersistenceManger.getInstance().getSingleScheduleRecord(task.getId());
         if (singleScheduleRecord == null)
             return null;
 
         if (singleScheduleRecord.getTimeRecordId() == null)
-            return new SingleNormalSchedule(taskId);
+            return new SingleNormalSchedule(singleScheduleRecord, task);
         else
-            return new SingleCustomSchedule(taskId);
+            return new SingleCustomSchedule(singleScheduleRecord, task);
     }
 
-    protected SingleSchedule(int taskId) {
-        mSingleScheduleRecord = PersistenceManger.getInstance().getSingleScheduleRecord(taskId);
-        Assert.assertTrue(mSingleScheduleRecord != null);
+    protected SingleSchedule(SingleScheduleRecord singleScheduleRecord, Task task) {
+        super(task);
+
+        Assert.assertTrue(singleScheduleRecord != null);
+
+        mSingleScheduleRecord = singleScheduleRecord;
     }
 
     private DateTime getDateTime() {
@@ -64,8 +68,7 @@ public abstract class SingleSchedule extends Schedule {
 
     protected abstract Time getTime();
 
-    public ArrayList<Instance> getInstances(Task task, TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
-        Assert.assertTrue(task != null);
+    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);
 
         ArrayList<Instance> instances = new ArrayList<>();
@@ -80,16 +83,12 @@ public abstract class SingleSchedule extends Schedule {
         if (givenEndTimeStamp.compareTo(timeStamp) < 0)
             return instances;
 
-        instances.add(SingleInstance.getSingleInstance(task));
+        instances.add(SingleInstance.getSingleInstance(mTask));
 
         return instances;
     }
 
     public String getTaskText(Context context) {
         return getDateTime().getDisplayText(context);
-    }
-
-    public int getTaskId() {
-        return mSingleScheduleRecord.getTaskId();
     }
 }

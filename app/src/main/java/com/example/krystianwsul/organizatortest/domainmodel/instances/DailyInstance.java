@@ -22,15 +22,8 @@ public abstract class DailyInstance implements Instance {
     private static final HashMap<Integer, DailyInstance> sDailyInstances = new HashMap<>();
 
     public static DailyInstance getDailyInstance(int dailyInstanceId) {
-        if (sDailyInstances.containsKey(dailyInstanceId)) {
-            return sDailyInstances.get(dailyInstanceId);
-        } else {
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
-            DailyInstanceRecord dailyInstanceRecord = persistenceManger.getDailyInstanceRecord(dailyInstanceId);
-            DailyInstance dailyInstance = new RealDailyInstance(TaskFactory.getInstance().getTask(dailyInstanceRecord.getTaskId()), dailyInstanceRecord, DailyRepetition.getDailyRepetition(dailyInstanceRecord.getDailyRepetitionId()));
-            sDailyInstances.put(dailyInstanceId, dailyInstance);
-            return dailyInstance;
-        }
+        Assert.assertTrue(sDailyInstances.containsKey(dailyInstanceId));
+        return sDailyInstances.get(dailyInstanceId);
     }
 
     public static DailyInstance getDailyInstance(Task task, DailyRepetition dailyRepetition) {
@@ -81,6 +74,6 @@ public abstract class DailyInstance implements Instance {
     }
 
     public String getScheduleText(Context context) {
-        return mDailyRepetition.getDateTime().getDisplayText(context);
+        return mDailyRepetition.getRepetitionDateTime().getDisplayText(context);
     }
 }

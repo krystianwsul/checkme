@@ -29,37 +29,50 @@ public class DailySchedule extends Schedule {
 
     private static final HashMap<Integer, DailySchedule> sDailySchedules = new HashMap<>();
 
-    public static DailySchedule getDailySchedule(int taskId) {
-        if (sDailySchedules.containsKey(taskId)) {
-            return sDailySchedules.get(taskId);
+    public static DailySchedule getDailySchedule(Task task) {
+        Assert.assertTrue(task != null);
+        if (sDailySchedules.containsKey(task.getId())) {
+            return sDailySchedules.get(task);
         } else {
-            DailySchedule dailySchedule = createDailySchedule(taskId);
+            DailySchedule dailySchedule = createDailySchedule(task);
             if (dailySchedule == null)
                 return null;
 
-            sDailySchedules.put(taskId, dailySchedule);
+            sDailySchedules.put(task.getId(), dailySchedule);
             return dailySchedule;
         }
     }
 
-    private static DailySchedule createDailySchedule(int taskId) {
-        DailyScheduleRecord dailyScheduleRecord = PersistenceManger.getInstance().getDailyScheduleRecord(taskId);
+    private static DailySchedule createDailySchedule(Task task) {
+        Assert.assertTrue(task != null);
+
+        PersistenceManger persistenceManger = PersistenceManger.getInstance();
+
+        DailyScheduleRecord dailyScheduleRecord = persistenceManger.getDailyScheduleRecord(task.getId());
         if (dailyScheduleRecord == null)
             return null;
 
-        return new DailySchedule(dailyScheduleRecord);
-    }
+        DailySchedule dailySchedule = new DailySchedule(dailyScheduleRecord, task);
 
-    private DailySchedule(DailyScheduleRecord dailyScheduleRecord) {
-        Assert.assertTrue(dailyScheduleRecord != null);
-        mDailyScheduleRecord = dailyScheduleRecord;
-        Assert.assertTrue(mDailyScheduleRecord != null);
-
-        ArrayList<Integer> DailyScheduleTimeIds = PersistenceManger.getInstance().getDailyScheduleTimeIds(mDailyScheduleRecord.getTaskId());
+        ArrayList<Integer> DailyScheduleTimeIds = persistenceManger.getDailyScheduleTimeIds(task.getId());
         Assert.assertTrue(!DailyScheduleTimeIds.isEmpty());
 
         for (Integer DailyScheduleTimeRecordId : DailyScheduleTimeIds)
-            mDailyScheduleTimes.add(DailyScheduleTime.getDailyScheduleTime(DailyScheduleTimeRecordId));
+            dailySchedule.addDailyScheduleTime(DailyScheduleTime.getDailyScheduleTime(DailyScheduleTimeRecordId, dailySchedule));
+
+        return dailySchedule;
+    }
+
+    private DailySchedule(DailyScheduleRecord dailyScheduleRecord, Task task) {
+        super(task);
+
+        Assert.assertTrue(dailyScheduleRecord != null);
+        mDailyScheduleRecord = dailyScheduleRecord;
+    }
+
+    private void addDailyScheduleTime(DailyScheduleTime dailyScheduleTime) {
+        Assert.assertTrue(dailyScheduleTime != null);
+        mDailyScheduleTimes.add(dailyScheduleTime);
     }
 
     private TimeStamp getStartTimeStamp() {
@@ -73,8 +86,7 @@ public class DailySchedule extends Schedule {
             return new TimeStamp(mDailyScheduleRecord.getEndTime());
     }
 
-    public ArrayList<Instance> getInstances(Task task, TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
-        Assert.assertTrue(task != null);
+    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);
 
         TimeStamp myStartTimeStamp = getStartTimeStamp();
@@ -103,9 +115,9 @@ public class DailySchedule extends Schedule {
         Assert.assertTrue(startTimeStamp.compareTo(endTimeStamp) < 0);
 
         if (startTimeStamp.getDate().compareTo(endTimeStamp.getDate()) == 0) {
-            return getInstancesInDate(task, startTimeStamp.getDate(), startTimeStamp.getHourMinute(), endTimeStamp.getHourMinute());
+            return getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), endTimeStamp.getHourMinute());
         } else {
-            instances.addAll(getInstancesInDate(task, startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));
+            instances.addAll(getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));
 
             Calendar loopStartCalendar = startTimeStamp.getCalendar();
             loopStartCalendar.add(Calendar.DATE, 1);
@@ -113,9 +125,9 @@ public class DailySchedule extends Schedule {
             loopEndCalendar.add(Calendar.DATE, -1);
 
             for (Calendar calendar = loopStartCalendar; calendar.before(loopEndCalendar); calendar.add(Calendar.DATE, 1))
-                instances.addAll(getInstancesInDate(task, new Date(calendar), null, null));
+                instances.addAll(getInstancesInDate(new Date(calendar), null, null));
 
-            instances.addAll(getInstancesInDate(task, endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
+            instances.addAll(getInstancesInDate(endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
         }
 
         return instances;
@@ -132,8 +144,7 @@ public class DailySchedule extends Schedule {
         return times;
     }
 
-    private ArrayList<Instance> getInstancesInDate(Task task, Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
-        Assert.assertTrue(task != null);
+    private ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
@@ -151,7 +162,7 @@ public class DailySchedule extends Schedule {
             if (endHourMinute != null && endHourMinute.compareTo(hourMinute) < 0)
                 continue;
 
-            instances.add(dailyScheduleTime.getInstance(task, date));
+            instances.add(dailyScheduleTime.getInstance(mTask, date));
         }
 
         return instances;
@@ -159,9 +170,5 @@ public class DailySchedule extends Schedule {
 
     public String getTaskText(Context context) {
         return context.getString(R.string.daily) + " " + TextUtils.join(", ", getTimes());
-    }
-
-    public int getTaskId() {
-        return mDailyScheduleRecord.getTaskId();
     }
 }

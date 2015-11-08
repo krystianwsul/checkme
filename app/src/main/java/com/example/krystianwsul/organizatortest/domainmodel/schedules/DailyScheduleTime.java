@@ -17,30 +17,33 @@ import java.util.HashMap;
  */
 public abstract class DailyScheduleTime {
     protected final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
+    protected final DailySchedule mDailySchedule;
 
     private final static HashMap<Integer, DailyScheduleTime> sDailyScheduleTimes = new HashMap<>();
 
-    public static DailyScheduleTime getDailyScheduleTime(int dailyScheduleTimeId) {
+    public static DailyScheduleTime getDailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         if (sDailyScheduleTimes.containsKey(dailyScheduleTimeId)) {
             return sDailyScheduleTimes.get(dailyScheduleTimeId);
         } else {
-            DailyScheduleTime dailyScheduleTime = createDailyScheduleTime(dailyScheduleTimeId);
+            DailyScheduleTime dailyScheduleTime = createDailyScheduleTime(dailyScheduleTimeId, dailySchedule);
             sDailyScheduleTimes.put(dailyScheduleTimeId, dailyScheduleTime);
             return dailyScheduleTime;
         }
     }
 
-    private static DailyScheduleTime createDailyScheduleTime(int dailyScheduleTimeId) {
+    private static DailyScheduleTime createDailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         DailyScheduleTimeRecord dailyScheduleTimeRecord = PersistenceManger.getInstance().getDailyScheduleTimeRecord(dailyScheduleTimeId);
         if (dailyScheduleTimeRecord.getTimeRecordId() == null)
-            return new DailyScheduleNormalTime(dailyScheduleTimeId);
+            return new DailyScheduleNormalTime(dailyScheduleTimeId, dailySchedule);
         else
-            return new DailyScheduleCustomTime(dailyScheduleTimeId);
+            return new DailyScheduleCustomTime(dailyScheduleTimeId, dailySchedule);
     }
 
-    protected DailyScheduleTime(int dailyScheduleTimeId) {
+    protected DailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         mDailyScheduleTimeRecord = PersistenceManger.getInstance().getDailyScheduleTimeRecord(dailyScheduleTimeId);
         Assert.assertTrue(mDailyScheduleTimeRecord != null);
+        Assert.assertTrue(dailySchedule != null);
+        mDailySchedule = dailySchedule;
     }
 
     public abstract Time getTime();

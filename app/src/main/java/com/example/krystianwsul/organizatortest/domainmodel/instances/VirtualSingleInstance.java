@@ -30,7 +30,7 @@ public class VirtualSingleInstance extends SingleInstance {
 
         mId = PersistenceManger.getInstance().getMaxSingleInstanceId() + sVirtualSingleInstanceCount;
 
-        mSingleSchedule = SingleSchedule.getSingleSchedule(task.getId());
+        mSingleSchedule = SingleSchedule.getSingleSchedule(task);
         Assert.assertTrue(mSingleSchedule != null);
     }
 

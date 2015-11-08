@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -11,24 +12,17 @@ import junit.framework.Assert;
  * Created by Krystian on 11/1/2015.
  */
 public class VirtualDailyRepetition extends DailyRepetition {
-    private final DailyScheduleTime mDailyScheduleTime;
-
     private final int mId;
 
-    private final int mScheduleYear;
-    private final int mScheduleMonth;
-    private final int mScheduleDay;
+    private final Date mScheduleDate;
 
     private static int sRepetitionCount = 0;
 
     public VirtualDailyRepetition(DailyScheduleTime dailyScheduleTime, Date scheduleDate) {
-        Assert.assertTrue(dailyScheduleTime != null);
+        super(dailyScheduleTime);
 
-        mDailyScheduleTime = dailyScheduleTime;
-
-        mScheduleYear = scheduleDate.getYear();
-        mScheduleMonth = scheduleDate.getMonth();
-        mScheduleDay = scheduleDate.getDay();
+        Assert.assertTrue(scheduleDate != null);
+        mScheduleDate = scheduleDate;
 
         sRepetitionCount++;
 
@@ -43,35 +37,19 @@ public class VirtualDailyRepetition extends DailyRepetition {
         return mDailyScheduleTime.getId();
     }
 
-    public int getScheduleYear() {
-        return mScheduleYear;
+    public Date getScheduleDate() {
+        return mScheduleDate;
     }
 
-    public int getScheduleMonth() {
-        return mScheduleMonth;
-    }
-
-    public int getScheduleDay() {
-        return mScheduleDay;
-    }
-
-    public Integer getRepetitionYear() {
-        return null;
-    }
-
-    public Integer getRepetitionMonth() {
-        return null;
-    }
-
-    public Integer getRepetitionDay() {
-        return null;
-    }
-
-    public Date getDate() {
-        return new Date(mScheduleYear, mScheduleMonth, mScheduleDay);
-    }
-
-    public Time getTime() {
+    public Time getScheduleTime() {
         return mDailyScheduleTime.getTime();
+    }
+
+    public Date getRepetitionDate() {
+        return getScheduleDate();
+    }
+
+    public Time getRepetitionTime() {
+        return getScheduleTime();
     }
 }

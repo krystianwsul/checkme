@@ -21,7 +21,7 @@ public class RealSingleInstance extends SingleInstance {
         Assert.assertTrue(singleInstanceRecord != null);
         mSingleInstanceRecord = singleInstanceRecord;
 
-        mSingleSchedule = SingleSchedule.getSingleSchedule(mSingleInstanceRecord.getTaskId());
+        mSingleSchedule = SingleSchedule.getSingleSchedule(task);
         Assert.assertTrue(mSingleSchedule != null);
     }
 

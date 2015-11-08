@@ -1,8 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
+import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
 
 import junit.framework.Assert;
 
@@ -12,8 +14,8 @@ import junit.framework.Assert;
 public class SingleCustomSchedule extends SingleSchedule {
     private final CustomTime mCustomTime;
 
-    protected SingleCustomSchedule(int singleScheduleRecordId) {
-        super(singleScheduleRecordId);
+    protected SingleCustomSchedule(SingleScheduleRecord singleScheduleRecord, Task task) {
+        super(singleScheduleRecord, task);
         Assert.assertTrue(mSingleScheduleRecord.getTimeRecordId() != null);
         Assert.assertTrue(mSingleScheduleRecord.getHour() == null);
         Assert.assertTrue(mSingleScheduleRecord.getMinute() == null);

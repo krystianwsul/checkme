@@ -38,7 +38,7 @@ public class TaskFactory {
 
             RootTask rootTask = new RootTask(taskRecord);
 
-            Schedule schedule = Schedule.getSchedule(rootTask.getId());
+            Schedule schedule = Schedule.getSchedule(rootTask);
             Assert.assertTrue(schedule != null);
             rootTask.setSchedule(schedule);
 

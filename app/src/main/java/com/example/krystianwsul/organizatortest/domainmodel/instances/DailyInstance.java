@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -10,6 +11,7 @@ import com.example.krystianwsul.organizatortest.persistencemodel.DailyInstanceRe
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -75,5 +77,12 @@ public abstract class DailyInstance implements Instance {
 
     public String getScheduleText(Context context) {
         return mDailyRepetition.getRepetitionDateTime().getDisplayText(context);
+    }
+
+    public ArrayList<Instance> getChildInstances() {
+        ArrayList<Instance> childInstances = new ArrayList<>();
+        for (ChildTask childTask : mTask.getChildTasks())
+            childInstances.add(getDailyInstance(childTask, mDailyRepetition));
+        return childInstances;
     }
 }

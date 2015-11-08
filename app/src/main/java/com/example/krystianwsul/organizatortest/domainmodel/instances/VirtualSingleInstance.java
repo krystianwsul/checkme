@@ -13,7 +13,6 @@ import junit.framework.Assert;
  */
 public class VirtualSingleInstance extends SingleInstance {
     private final Task mTask;
-    private final SingleSchedule mSingleSchedule;
 
     private final int mId;
 
@@ -29,9 +28,6 @@ public class VirtualSingleInstance extends SingleInstance {
         sVirtualSingleInstanceCount++;
 
         mId = PersistenceManger.getInstance().getMaxSingleInstanceId() + sVirtualSingleInstanceCount;
-
-        mSingleSchedule = SingleSchedule.getSingleSchedule(task);
-        Assert.assertTrue(mSingleSchedule != null);
     }
 
     public int getTaskId() {
@@ -43,6 +39,6 @@ public class VirtualSingleInstance extends SingleInstance {
     }
 
     public String getScheduleText(Context context) {
-        return mSingleSchedule.getTaskText(context);
+        return mTask.getSchedule().getTaskText(context);
     }
 }

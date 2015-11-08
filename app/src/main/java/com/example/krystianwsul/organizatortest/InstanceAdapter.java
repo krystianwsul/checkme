@@ -53,11 +53,12 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
 
         Resources resources = mContext.getResources();
 
-        //ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
-        //if (instance.getChildTasks() == null)
-        //    imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
-        //else
-        //    imgList.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+        ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
+        ArrayList<Instance> childInstances = instance.getChildInstances();
+        if (childInstances.isEmpty())
+            imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+        else
+            imgList.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
 
         return rowView;
     }

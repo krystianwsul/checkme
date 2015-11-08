@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
@@ -42,4 +43,6 @@ public abstract class Task {
         Assert.assertTrue(childTask != null);
         mChildrenTasks.add(childTask);
     }
+
+    public abstract Schedule getSchedule();
 }

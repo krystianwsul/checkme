@@ -38,4 +38,8 @@ public class RootTask extends Task {
         Assert.assertTrue(endTimeStamp != null);
         return mSchedule.getInstances(startTimeStamp, endTimeStamp);
     }
+
+    public Schedule getSchedule() {
+        return mSchedule;
+    }
 }

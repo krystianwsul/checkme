@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
 import junit.framework.Assert;
@@ -25,5 +26,9 @@ public class ChildTask extends Task {
 
     public String getScheduleText(Context context) {
         return null;
+    }
+
+    public Schedule getSchedule() {
+        return mParentTask.getSchedule();
     }
 }

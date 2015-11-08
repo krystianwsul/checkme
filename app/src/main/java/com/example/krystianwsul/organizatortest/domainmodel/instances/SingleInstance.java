@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -8,6 +9,7 @@ import com.example.krystianwsul.organizatortest.persistencemodel.SingleInstanceR
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -60,5 +62,12 @@ public abstract class SingleInstance implements Instance {
 
     public String getName() {
         return mTask.getName();
+    }
+
+    public ArrayList<Instance> getChildInstances() {
+        ArrayList<Instance> childInstances = new ArrayList<>();
+        for (ChildTask childTask : mTask.getChildTasks())
+            childInstances.add(getSingleInstance(childTask));
+        return childInstances;
     }
 }

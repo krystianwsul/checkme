@@ -17,7 +17,7 @@ import java.util.HashMap;
 /**
  * Created by Krystian on 10/31/2015.
  */
-public abstract class DailyRepetition implements Repetition {
+public abstract class DailyRepetition {
     protected final DailyScheduleTime mDailyScheduleTime;
 
     private static final HashMap<Integer, DailyRepetition> sDailyRepetitions = new HashMap<>();

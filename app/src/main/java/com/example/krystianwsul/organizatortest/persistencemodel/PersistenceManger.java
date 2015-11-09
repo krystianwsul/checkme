@@ -115,10 +115,10 @@ public class PersistenceManger {
         return mDailyScheduleTimeRecords.get(dailyScheduleTimeId);
     }
 
-    public ArrayList<Integer> getDailyScheduleTimeIds(int dailyScheduleTimeId) {
+    public ArrayList<Integer> getDailyScheduleTimeIds(int taskId) {
         ArrayList<Integer> dailyScheduleTimeIds = new ArrayList<>();
         for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
-            if (dailyScheduleTimeRecord.getTaskId() == dailyScheduleTimeId)
+            if (dailyScheduleTimeRecord.getTaskId() == taskId)
                 dailyScheduleTimeIds.add(dailyScheduleTimeRecord.getId());
         return dailyScheduleTimeIds;
     }

@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 
 import java.util.ArrayList;
@@ -15,4 +16,5 @@ public interface Instance {
     ArrayList<Instance> getChildInstances();
     String getIntentKey();
     int getIntentValue();
+    DateTime getDateTime();
 }

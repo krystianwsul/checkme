@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
@@ -76,7 +77,7 @@ public abstract class DailyInstance implements Instance {
     }
 
     public String getScheduleText(Context context) {
-        return mDailyRepetition.getRepetitionDateTime().getDisplayText(context);
+        return getDateTime().getDisplayText(context);
     }
 
     public ArrayList<Instance> getChildInstances() {
@@ -92,5 +93,9 @@ public abstract class DailyInstance implements Instance {
 
     public int getIntentValue() {
         return getId();
+    }
+
+    public DateTime getDateTime() {
+        return mDailyRepetition.getRepetitionDateTime();
     }
 }

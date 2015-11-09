@@ -13,6 +13,9 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Krystian on 10/31/2015.
@@ -26,7 +29,17 @@ public class TaskListFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         ListView tasksList = (ListView) getView().findViewById(R.id.tasks_list);
-        tasksList.setAdapter(new TaskAdapter(getContext(), new ArrayList<Task>(TaskFactory.getInstance().getRootTasks())));
+
+        ArrayList<Task> rootTasks = new ArrayList<Task>(TaskFactory.getInstance().getRootTasks());
+
+        Collections.sort(rootTasks, new Comparator<Task>() {
+            @Override
+            public int compare(Task lhs, Task rhs) {
+                return lhs.getName().compareTo(rhs.getName());
+            }
+        });
+
+        tasksList.setAdapter(new TaskAdapter(getContext(), rootTasks));
 
         tasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

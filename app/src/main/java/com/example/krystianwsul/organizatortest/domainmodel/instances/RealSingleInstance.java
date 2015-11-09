@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleInstanceRecord;
@@ -21,7 +22,7 @@ public class RealSingleInstance extends SingleInstance {
         Assert.assertTrue(singleInstanceRecord != null);
         mSingleInstanceRecord = singleInstanceRecord;
 
-        mSingleSchedule = SingleSchedule.getSingleSchedule(task);
+        mSingleSchedule = SingleSchedule.getSingleSchedule(task.getRootTask());
         Assert.assertTrue(mSingleSchedule != null);
     }
 
@@ -35,5 +36,9 @@ public class RealSingleInstance extends SingleInstance {
 
     public String getScheduleText(Context context) {
         return mSingleSchedule.getTaskText(context);
+    }
+
+    public DateTime getDateTime() {
+        return mSingleSchedule.getDateTime();
     }
 }

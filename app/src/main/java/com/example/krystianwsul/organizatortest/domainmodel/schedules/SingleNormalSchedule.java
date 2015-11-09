@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
@@ -14,8 +15,8 @@ import junit.framework.Assert;
 public class SingleNormalSchedule extends SingleSchedule {
     private final NormalTime mNormalTime;
 
-    protected SingleNormalSchedule(SingleScheduleRecord singleScheduleRecord, Task task) {
-        super(singleScheduleRecord, task);
+    protected SingleNormalSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
+        super(singleScheduleRecord, rootTask);
         Assert.assertTrue(mSingleScheduleRecord.getTimeRecordId() == null);
         Assert.assertTrue(mSingleScheduleRecord.getHour() != null);
         Assert.assertTrue(mSingleScheduleRecord.getMinute() != null);

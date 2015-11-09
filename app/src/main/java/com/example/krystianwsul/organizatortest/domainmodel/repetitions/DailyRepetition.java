@@ -39,9 +39,9 @@ public abstract class DailyRepetition {
 
         DailyRepetitionRecord dailyRepetitionRecord = PersistenceManger.getInstance().getDailyRepetitionRecord(dailyScheduleTime.getId(), scheduleDate);
         if (dailyRepetitionRecord != null) {
-            RealDailyRepetition realDailyInstance = new RealDailyRepetition(dailyRepetitionRecord, dailyScheduleTime);
-            sDailyRepetitions.put(existingDailyRepetition.getId(), existingDailyRepetition);
-            return realDailyInstance;
+            RealDailyRepetition realDailyRepetition = new RealDailyRepetition(dailyRepetitionRecord, dailyScheduleTime);
+            sDailyRepetitions.put(realDailyRepetition.getId(), realDailyRepetition);
+            return realDailyRepetition;
         }
 
         VirtualDailyRepetition virtualDailyRepetition = new VirtualDailyRepetition(dailyScheduleTime, scheduleDate);

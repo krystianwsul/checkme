@@ -18,7 +18,10 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Krystian on 10/31/2015.
@@ -35,9 +38,23 @@ public class InstanceListFragment extends Fragment {
 
         Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
 
+        Calendar calendarWeekAgo = Calendar.getInstance();
+        calendarWeekAgo.add(Calendar.DATE, -7);
+
         final ArrayList<Instance> instances = new ArrayList<>();
         for (RootTask rootTask : rootTasks)
-            instances.addAll(rootTask.getInstances(new TimeStamp(Date.today(), new HourMinute(0, 0)), new TimeStamp(Date.today(), new HourMinute(23, 59))));
+            instances.addAll(rootTask.getInstances(new TimeStamp(calendarWeekAgo), new TimeStamp(Date.today(), new HourMinute(23, 59))));
+
+        Collections.sort(instances, new Comparator<Instance>() {
+            @Override
+            public int compare(Instance lhs, Instance rhs) {
+                int dateTimeComparison = lhs.getDateTime().compareTo(rhs.getDateTime());
+                if (dateTimeComparison != 0)
+                    return dateTimeComparison;
+
+                return lhs.getName().compareTo(rhs.getName());
+            }
+        });
 
         instanceList.setAdapter(new InstanceAdapter(getContext(), instances));
 

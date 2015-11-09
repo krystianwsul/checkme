@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -65,6 +66,10 @@ public class ShowInstance extends AppCompatActivity {
         if (dailyInstanceId != null)
             return DailyInstance.getDailyInstance(dailyInstanceId);
 
-        throw new IllegalArgumentException("singleInstanceId == " + singleInstanceId + " and dailyInstanceId == " + dailyInstanceId + " don't match an instance.");
+        Integer weeklyInstanceId = extras.getInt("weeklyInstanceId");
+        if (weeklyInstanceId != null)
+            return WeeklyInstance.getWeeklyInstance(weeklyInstanceId);
+
+        throw new IllegalArgumentException("singleInstanceId == " + singleInstanceId + ", dailyInstanceId == " + dailyInstanceId + ", and weeklyInstanceId == " + weeklyInstanceId + " don't match an instance.");
     }
 }

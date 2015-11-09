@@ -45,4 +45,6 @@ public abstract class Task {
     }
 
     public abstract Schedule getSchedule();
+
+    public abstract RootTask getRootTask();
 }

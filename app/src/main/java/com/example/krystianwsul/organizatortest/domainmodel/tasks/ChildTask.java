@@ -31,4 +31,8 @@ public class ChildTask extends Task {
     public Schedule getSchedule() {
         return mParentTask.getSchedule();
     }
+
+    public RootTask getRootTask() {
+        return mParentTask.getRootTask();
+    }
 }

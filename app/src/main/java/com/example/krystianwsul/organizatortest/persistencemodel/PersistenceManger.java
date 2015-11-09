@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizatortest.persistencemodel;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,10 +21,16 @@ public class PersistenceManger {
     private final HashMap<Integer, DailyRepetitionRecord> mDailyRepetitionRecords = new HashMap<>();
     private final HashMap<Integer, SingleInstanceRecord> mSingleInstanceRecords = new HashMap<>();
     private final HashMap<Integer, DailyInstanceRecord> mDailyInstanceRecords = new HashMap<>();
+    private final HashMap<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords = new HashMap<>();
+    private final HashMap<Integer, WeeklyScheduleDayTimeRecord> mWeeklyScheduleDayTimeRecords = new HashMap<>();
+    private final HashMap<Integer, WeeklyRepetitionRecord> mWeeklyRepetitionRecords = new HashMap<>();
+    private final HashMap<Integer, WeeklyInstanceRecord> mWeeklyInstanceRecords = new HashMap<>();
 
     private final int mMaxDailyRepetitionId = 0;
     private final int mMaxSingleInstanceId = 0;
     private final int mMaxDailyInstanceId = 0;
+    private final int mMaxWeeklyRepetitionId = 0;
+    private final int mMaxWeeklyInstanceId = 0;
 
     public static PersistenceManger getInstance() {
         if (mInstance == null)
@@ -97,6 +104,18 @@ public class PersistenceManger {
 
         SingleScheduleRecord todayAfterWaking = new SingleScheduleRecord(piecyk.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), afterWaking.getId(), null, null);
         mSingleScheduleRecords.put(todayAfterWaking.getTaskId(), todayAfterWaking);
+
+        TaskRecord paznokcie = new TaskRecord(10, null, "paznokcie");
+        mTaskRecords.put(paznokcie.getId(), paznokcie);
+
+        WeeklyScheduleRecord crazyWeekend = new WeeklyScheduleRecord(paznokcie.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
+        mWeeklyScheduleRecords.put(crazyWeekend.getTaskId(), crazyWeekend);
+        WeeklyScheduleDayTimeRecord crazyWeekend0 = new WeeklyScheduleDayTimeRecord(0, crazyWeekend.getTaskId(), DayOfWeek.SATURDAY.ordinal(), afterWaking.getId(), null, null);
+        mWeeklyScheduleDayTimeRecords.put(crazyWeekend0.getId(), crazyWeekend0);
+        WeeklyScheduleDayTimeRecord crazyWeekend1 = new WeeklyScheduleDayTimeRecord(1, crazyWeekend.getTaskId(), DayOfWeek.SUNDAY.ordinal(), afterWaking.getId(), null, null);
+        mWeeklyScheduleDayTimeRecords.put(crazyWeekend1.getId(), crazyWeekend1);
+        WeeklyScheduleDayTimeRecord crazyWeekend2 = new WeeklyScheduleDayTimeRecord(2, crazyWeekend.getTaskId(), DayOfWeek.SUNDAY.ordinal(), null, 17, 0);
+        mWeeklyScheduleDayTimeRecords.put(crazyWeekend2.getId(), crazyWeekend2);
     }
 
     public SingleScheduleRecord getSingleScheduleRecord(int taskId) {
@@ -135,8 +154,8 @@ public class PersistenceManger {
         return taskIds;
     }
 
-    public DailyRepetitionRecord getDailyRepetitionRecord(int repetitionId) {
-        return mDailyRepetitionRecords.get(repetitionId);
+    public DailyRepetitionRecord getDailyRepetitionRecord(int dailyRepetitionId) {
+        return mDailyRepetitionRecords.get(dailyRepetitionId);
     }
 
     public DailyRepetitionRecord getDailyRepetitionRecord(int dailyScheduleTimeId, Date scheduleDate) {
@@ -175,5 +194,55 @@ public class PersistenceManger {
 
     public int getMaxDailyInstanceId() {
         return mMaxDailyInstanceId;
+    }
+
+    public WeeklyScheduleRecord getWeeklyScheduleRecord(int taskId) {
+        return mWeeklyScheduleRecords.get(taskId);
+    }
+
+    public ArrayList<Integer> getWeeklyScheduleDayTimeIds(int taskId) {
+        ArrayList<Integer> weeklyScheduleDayTimeIds = new ArrayList<>();
+        for (WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord : mWeeklyScheduleDayTimeRecords.values())
+            if (weeklyScheduleDayTimeRecord.getTaskId() == taskId)
+                weeklyScheduleDayTimeIds.add(weeklyScheduleDayTimeRecord.getId());
+        return weeklyScheduleDayTimeIds;
+    }
+
+    public WeeklyScheduleDayTimeRecord getWeeklyScheduleDayTimeRecord(int weeklyScheduleDayTimeId) {
+        return mWeeklyScheduleDayTimeRecords.get(weeklyScheduleDayTimeId);
+    }
+
+    public WeeklyRepetitionRecord getWeeklyRepetitionRecord(int weeklyRepetitionId) {
+        return mWeeklyRepetitionRecords.get(weeklyRepetitionId);
+    }
+
+    public WeeklyRepetitionRecord getWeeklyRepetitionRecord(int weeklyScheduleDayTimeId, Date scheduleDate) {
+        for (WeeklyRepetitionRecord weeklyRepetitionRecord : mWeeklyRepetitionRecords.values()) {
+            if (weeklyRepetitionRecord.getWeeklyScheduleTimeId() == weeklyScheduleDayTimeId && weeklyRepetitionRecord.getScheduleYear() == scheduleDate.getYear() && weeklyRepetitionRecord.getScheduleMonth() == scheduleDate.getMonth() && weeklyRepetitionRecord.getScheduleDay() == scheduleDate.getDay()) {
+                return weeklyRepetitionRecord;
+            }
+        }
+        return null;
+    }
+
+    public int getMaxWeeklyRepetitionId() {
+        return mMaxWeeklyRepetitionId;
+    }
+
+    public WeeklyInstanceRecord getWeeklyInstanceRecord(int weeklyInstanceId) {
+        return mWeeklyInstanceRecords.get(weeklyInstanceId);
+    }
+
+    public WeeklyInstanceRecord getWeeklyInstanceRecord(int taskId, int weeklyRepetitionId) {
+        for (WeeklyInstanceRecord weeklyInstanceRecord : mWeeklyInstanceRecords.values()) {
+            if (weeklyInstanceRecord.getTaskId() == taskId && weeklyInstanceRecord.getWeeklyRepetitionId() == weeklyRepetitionId) {
+                return weeklyInstanceRecord;
+            }
+        }
+        return null;
+    }
+
+    public int getMaxWeeklyInstanceId() {
+        return mMaxWeeklyInstanceId;
     }
 }

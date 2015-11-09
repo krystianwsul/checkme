@@ -42,4 +42,8 @@ public class RootTask extends Task {
     public Schedule getSchedule() {
         return mSchedule;
     }
+
+    public RootTask getRootTask() {
+        return this;
+    }
 }

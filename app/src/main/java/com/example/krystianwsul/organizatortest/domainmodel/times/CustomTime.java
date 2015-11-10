@@ -16,18 +16,25 @@ public class CustomTime implements Time {
 
     private static HashMap<Integer, CustomTime> sCustomTimes = new HashMap<>();
 
-    public static CustomTime getCustomTime(int timeRecordId) {
-        if (sCustomTimes.containsKey(timeRecordId)) {
-            return sCustomTimes.get(timeRecordId);
+    public static CustomTime getCustomTime(int timeId) {
+        if (sCustomTimes.containsKey(timeId)) {
+            return sCustomTimes.get(timeId);
         } else {
-            CustomTime customTime = new CustomTime(timeRecordId);
-            sCustomTimes.put(timeRecordId, customTime);
+            CustomTime customTime = new CustomTime(timeId);
+            sCustomTimes.put(timeId, customTime);
             return customTime;
         }
     }
 
-    private CustomTime(int timeRecordId) {
-        mTimeRecord = PersistenceManger.getInstance().getTimeRecord(timeRecordId);
+    public static CustomTime getCustomTime(DayOfWeek day, HourMinute hourMinute) {
+        for (CustomTime customTime : sCustomTimes.values())
+            if (customTime.getTimeByDay(day).compareTo(hourMinute) == 0)
+                return customTime;
+        return null;
+    }
+
+    private CustomTime(int timeId) {
+        mTimeRecord = PersistenceManger.getInstance().getTimeRecord(timeId);
         Assert.assertTrue(mTimeRecord != null);
     }
 

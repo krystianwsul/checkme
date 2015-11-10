@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
@@ -39,7 +40,11 @@ public class Group {
         if (mInstances.size() == 1) {
             return mInstances.get(0).getName();
         } else {
-            return mDate.getDisplayText(context) + ", " + mHourMinute.toString();
+            CustomTime customTime = CustomTime.getCustomTime(mDate.getDayOfWeek(), mHourMinute);
+            if (customTime != null)
+                return mDate.getDisplayText(context) + ", " + customTime.toString();
+            else
+                return mDate.getDisplayText(context) + ", " + mHourMinute.toString();
         }
     }
 
@@ -51,7 +56,7 @@ public class Group {
             ArrayList<String> names = new ArrayList<>();
             for (Instance instance : mInstances)
                 names.add(instance.getName());
-            return TextUtils.join("; ", names);
+            return TextUtils.join(", ", names);
         }
     }
 

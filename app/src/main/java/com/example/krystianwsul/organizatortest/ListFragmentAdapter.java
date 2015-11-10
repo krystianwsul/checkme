@@ -19,7 +19,7 @@ public class ListFragmentAdapter extends FragmentPagerAdapter {
         Assert.assertTrue(position <= 1);
         switch (position) {
             case 0:
-                return new InstanceListFragment();
+                return new GroupListFragment();
             case 1:
                 return new TaskListFragment();
             default:

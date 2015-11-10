@@ -21,7 +21,7 @@
         <activity android:name=".ShowTask" >
         </activity>
         <activity
-            android:name=".ShowInstance"
+            android:name=".ShowGroup"
             android:label="@string/title_activity_show_instance"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme" >

@@ -11,9 +11,10 @@ import android.widget.ListView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
+import com.example.krystianwsul.organizatortest.domainmodel.groups.InstanceGroup;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
@@ -26,15 +27,15 @@ import java.util.Comparator;
 /**
  * Created by Krystian on 10/31/2015.
  */
-public class InstanceListFragment extends Fragment {
+public class GroupListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.instance_list_fragment, container, false);
+        return inflater.inflate(R.layout.group_list_fragment, container, false);
     }
 
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ListView instanceList = (ListView) getView().findViewById(R.id.instances_list);
+        ListView groupList = (ListView) getView().findViewById(R.id.groups_list);
 
         Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
 
@@ -45,9 +46,13 @@ public class InstanceListFragment extends Fragment {
         for (RootTask rootTask : rootTasks)
             instances.addAll(rootTask.getInstances(new TimeStamp(calendarWeekAgo), new TimeStamp(Date.today(), new HourMinute(23, 59))));
 
-        Collections.sort(instances, new Comparator<Instance>() {
+        ArrayList<Group> groups = new ArrayList<>();
+        for (Instance instance : instances)
+            groups.add(new InstanceGroup(instance));
+
+        Collections.sort(groups, new Comparator<Group>() {
             @Override
-            public int compare(Instance lhs, Instance rhs) {
+            public int compare(Group lhs, Group rhs) {
                 int dateTimeComparison = lhs.getDateTime().compareTo(rhs.getDateTime());
                 if (dateTimeComparison != 0)
                     return dateTimeComparison;
@@ -56,14 +61,14 @@ public class InstanceListFragment extends Fragment {
             }
         });
 
-        instanceList.setAdapter(new InstanceAdapter(getContext(), instances));
+        groupList.setAdapter(new GroupAdapter(getContext(), groups));
 
-        instanceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        groupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Instance instance = (Instance) parent.getItemAtPosition(position);
-                Intent intent = new Intent(view.getContext(), ShowInstance.class);
-                intent.putExtra(instance.getIntentKey(), instance.getIntentValue());
+                Group group = (Group) parent.getItemAtPosition(position);
+                Intent intent = new Intent(view.getContext(), ShowGroup.class);
+                intent.putExtra(group.getIntentKey(), group.getIntentValue());
                 startActivity(intent);
             }
         });

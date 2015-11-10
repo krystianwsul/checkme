@@ -7,6 +7,6 @@
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/instances_list" />
+        android:id="@+id/groups_list" />
 
 </RelativeLayout>

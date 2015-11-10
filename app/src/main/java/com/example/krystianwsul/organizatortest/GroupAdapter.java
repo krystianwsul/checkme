@@ -10,8 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 
 import junit.framework.Assert;
 
@@ -20,32 +20,32 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 10/23/2015.
  */
-public class InstanceAdapter extends ArrayAdapter<Instance> {
+public class GroupAdapter extends ArrayAdapter<Group> {
     private final Context mContext;
-    private final ArrayList<Instance> mInstances;
+    private final ArrayList<Group> mGroups;
 
-    public InstanceAdapter(Context context, ArrayList<Instance> instances) {
-        super(context, -1, instances);
+    public GroupAdapter(Context context, ArrayList<Group> groups) {
+        super(context, -1, groups);
 
         Assert.assertTrue(context != null);
-        Assert.assertTrue(instances != null);
-        Assert.assertTrue(!instances.isEmpty());
+        Assert.assertTrue(groups != null);
+        Assert.assertTrue(!groups.isEmpty());
 
         mContext = context;
-        mInstances = instances;
+        mGroups = groups;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        Instance instance = mInstances.get(position);
+        Group group = mGroups.get(position);
 
         View rowView = inflater.inflate(R.layout.show_tasks_row, parent, false);
 
         TextView tasksRowName = (TextView) rowView.findViewById(R.id.tasks_row_name);
-        tasksRowName.setText(instance.getName());
+        tasksRowName.setText(group.getName());
 
         TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.tasks_row_schedule);
-        String scheduleText = instance.getScheduleText(mContext);
+        String scheduleText = group.getScheduleText(mContext);
         if (TextUtils.isEmpty(scheduleText))
             tasksRowSchedule.setVisibility(View.GONE);
         else
@@ -54,8 +54,8 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
         Resources resources = mContext.getResources();
 
         ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
-        ArrayList<Instance> childInstances = instance.getChildInstances();
-        if (childInstances.isEmpty())
+        ArrayList<Group> childGroups = group.getChildGroups();
+        if (childGroups.isEmpty())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
             imgList.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));

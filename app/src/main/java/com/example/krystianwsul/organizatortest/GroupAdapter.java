@@ -42,7 +42,7 @@ public class GroupAdapter extends ArrayAdapter<Group> {
         View rowView = inflater.inflate(R.layout.show_tasks_row, parent, false);
 
         TextView tasksRowName = (TextView) rowView.findViewById(R.id.tasks_row_name);
-        tasksRowName.setText(group.getName());
+        tasksRowName.setText(group.getName(mContext));
 
         TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.tasks_row_schedule);
         String scheduleText = group.getScheduleText(mContext);
@@ -54,8 +54,7 @@ public class GroupAdapter extends ArrayAdapter<Group> {
         Resources resources = mContext.getResources();
 
         ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
-        ArrayList<Group> childGroups = group.getChildGroups();
-        if (childGroups.isEmpty())
+        if (group.getInstances().size() == 1)
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
             imgList.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));

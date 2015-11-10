@@ -20,15 +20,6 @@
         </activity>
         <activity android:name=".ShowTask" >
         </activity>
-        <activity
-            android:name=".ShowGroup"
-            android:label="@string/title_activity_show_instance"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="MainActivity" />
-        </activity>
     </application>
 
 </manifest>

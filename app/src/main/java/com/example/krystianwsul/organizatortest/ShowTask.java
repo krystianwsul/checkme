@@ -9,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -32,7 +31,7 @@ public class ShowTask extends AppCompatActivity {
         TextView tasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
         tasksHeadingLabel.setText(task.getName());
 
-        TextView tasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
+        TextView tasksRowSchedule = (TextView) findViewById(R.id.show_task_details);
         String scheduleText = task.getScheduleText(this);
         if (TextUtils.isEmpty(scheduleText))
             tasksRowSchedule.setVisibility(View.GONE);

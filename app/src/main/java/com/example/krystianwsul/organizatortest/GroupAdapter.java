@@ -2,7 +2,6 @@ package com.example.krystianwsul.organizatortest;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 
 import junit.framework.Assert;
 
@@ -42,19 +40,15 @@ public class GroupAdapter extends ArrayAdapter<Group> {
         View rowView = inflater.inflate(R.layout.show_tasks_row, parent, false);
 
         TextView tasksRowName = (TextView) rowView.findViewById(R.id.tasks_row_name);
-        tasksRowName.setText(group.getName(mContext));
+        tasksRowName.setText(group.getNameText(mContext));
 
-        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.tasks_row_schedule);
-        String scheduleText = group.getScheduleText(mContext);
-        if (TextUtils.isEmpty(scheduleText))
-            tasksRowSchedule.setVisibility(View.GONE);
-        else
-            tasksRowSchedule.setText(scheduleText);
+        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.tasks_row_details);
+        tasksRowSchedule.setText(group.getDetailsText(mContext));
 
         Resources resources = mContext.getResources();
 
         ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
-        if (group.getInstances().size() == 1)
+        if (group.singleInstance())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
             imgList.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));

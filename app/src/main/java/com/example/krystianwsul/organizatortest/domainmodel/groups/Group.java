@@ -35,10 +35,10 @@ public class Group {
         mInstances.add(instance);
     }
 
-    public String getName(Context context) {
+    public String getNameText(Context context) {
         Assert.assertTrue(!mInstances.isEmpty());
-        if (mInstances.size() == 1) {
-            return mInstances.get(0).getName();
+        if (singleInstance()) {
+            return getSingleSinstance().getName();
         } else {
             CustomTime customTime = CustomTime.getCustomTime(mDate.getDayOfWeek(), mHourMinute);
             if (customTime != null)
@@ -48,10 +48,10 @@ public class Group {
         }
     }
 
-    public String getScheduleText(Context context) {
+    public String getDetailsText(Context context) {
         Assert.assertTrue(!mInstances.isEmpty());
-        if (mInstances.size() == 1) {
-            return mInstances.get(0).getScheduleText(context);
+        if (singleInstance()) {
+            return getSingleSinstance().getScheduleText(context);
         } else {
             ArrayList<String> names = new ArrayList<>();
             for (Instance instance : mInstances)
@@ -70,5 +70,15 @@ public class Group {
 
     public ArrayList<Instance> getInstances() {
         return mInstances;
+    }
+
+    public boolean singleInstance() {
+        Assert.assertTrue(!mInstances.isEmpty());
+        return (mInstances.size() == 1);
+    }
+
+    public Instance getSingleSinstance() {
+        Assert.assertTrue(mInstances.size() == 1);
+        return mInstances.get(0);
     }
 }

@@ -43,7 +43,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         TextView tasksRowName = (TextView) rowView.findViewById(R.id.tasks_row_name);
         tasksRowName.setText(task.getName());
 
-        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.tasks_row_schedule);
+        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.tasks_row_details);
         String scheduleText = task.getScheduleText(mContext);
         if (TextUtils.isEmpty(scheduleText))
             tasksRowSchedule.setVisibility(View.GONE);

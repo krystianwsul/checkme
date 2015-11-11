@@ -78,8 +78,8 @@ public class PersistenceManger {
         TaskRecord banany = new TaskRecord(6, null, "banany");
         mTaskRecords.put(banany.getId(), banany);
 
-        SingleScheduleRecord today16 = new SingleScheduleRecord(banany.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 16, 0);
-        mSingleScheduleRecords.put(today16.getTaskId(), today16);
+        SingleScheduleRecord today17 = new SingleScheduleRecord(banany.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 17, 0);
+        mSingleScheduleRecords.put(today17.getTaskId(), today17);
 
         TaskRecord iliotibial = new TaskRecord(7, null, "iliotibial band stretch");
         mTaskRecords.put(iliotibial.getId(), iliotibial);

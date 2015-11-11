@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,7 +18,13 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTask extends AppCompatActivity {
-    public static final String INTENT_KEY = "taskId";
+    private static final String INTENT_KEY = "taskId";
+
+    public static Intent getIntent(Task task, Context context) {
+        Intent intent = new Intent(context, ShowTask.class);
+        intent.putExtra(INTENT_KEY, task.getId());
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +57,8 @@ public class ShowTask extends AppCompatActivity {
         showTaskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Task task = (Task) parent.getItemAtPosition(position);
-                Intent intent = new Intent(view.getContext(), ShowTask.class);
-                intent.putExtra("taskId", task.getId());
-                startActivity(intent);
+                Task childTask = (Task) parent.getItemAtPosition(position);
+                startActivity(ShowTask.getIntent(childTask, view.getContext()));
             }
         });
     }

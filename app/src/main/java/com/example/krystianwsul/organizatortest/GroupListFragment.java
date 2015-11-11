@@ -55,13 +55,9 @@ public class GroupListFragment extends Fragment {
             private Intent getIntent(Group group, Context context) {
                 if (group.singleInstance()) {
                     Instance instance = group.getSingleSinstance();
-                    Intent intent = new Intent(context, ShowInstance.class);
-                    intent.putExtra(instance.getIntentKey(), instance.getIntentValue());
-                    return intent;
+                    return ShowInstance.getIntent(instance, context);
                 } else {
-                    Intent intent = new Intent(context, ShowGroup.class);
-                    intent.putExtra(ShowGroup.INTENT_KEY, group.getTimeStamp().getLong());
-                    return intent;
+                    return ShowGroup.getIntent(group, context);
                 }
             }
         });

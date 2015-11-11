@@ -45,9 +45,7 @@ public class TaskListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task task = (Task) parent.getItemAtPosition(position);
-                Intent intent = new Intent(view.getContext(), ShowTask.class);
-                intent.putExtra(ShowTask.INTENT_KEY, task.getId());
-                startActivity(intent);
+                startActivity(ShowTask.getIntent(task, view.getContext()));
             }
         });
     }

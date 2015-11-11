@@ -37,7 +37,7 @@ public class Group {
     public String getNameText(Context context) {
         Assert.assertTrue(!mInstances.isEmpty());
         if (singleInstance()) {
-            return getSingleSinstance().getName();
+            return getSingleSinstance().getScheduleText(context);
         } else {
             Date date = mTimeStamp.getDate();
             HourMinute hourMinute = mTimeStamp.getHourMinute();
@@ -52,7 +52,7 @@ public class Group {
     public String getDetailsText(Context context) {
         Assert.assertTrue(!mInstances.isEmpty());
         if (singleInstance()) {
-            return getSingleSinstance().getScheduleText(context);
+            return getSingleSinstance().getName();
         } else {
             ArrayList<String> names = new ArrayList<>();
             for (Instance instance : mInstances)

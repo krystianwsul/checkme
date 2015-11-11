@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +22,11 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowInstance extends AppCompatActivity {
+    public static Intent getIntent(Instance instance, Context context) {
+        Intent intent = new Intent(context, ShowInstance.class);
+        intent.putExtra(instance.getIntentKey(), instance.getIntentValue());
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +52,7 @@ public class ShowInstance extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Instance childInstance = (Instance) parent.getItemAtPosition(position);
-                Intent intent = new Intent(view.getContext(), ShowInstance.class);
-                intent.putExtra(childInstance.getIntentKey(), childInstance.getIntentValue());
-                startActivity(intent);
+                startActivity(ShowInstance.getIntent(childInstance, view.getContext()));
             }
         });
     }

@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,7 +22,13 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowGroup extends AppCompatActivity {
-    public static final String INTENT_KEY = "groupLong";
+    private static final String INTENT_KEY = "groupLong";
+
+    public static Intent getIntent(Group group, Context context) {
+        Intent intent = new Intent(context, ShowGroup.class);
+        intent.putExtra(ShowGroup.INTENT_KEY, group.getTimeStamp().getLong());
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +54,7 @@ public class ShowGroup extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Instance instance = (Instance) parent.getItemAtPosition(position);
-                Intent intent = new Intent(view.getContext(), ShowInstance.class);
-                intent.putExtra(instance.getIntentKey(), instance.getIntentValue());
-                startActivity(intent);
+                startActivity(ShowInstance.getIntent(instance, view.getContext()));
             }
         });
     }

@@ -39,16 +39,6 @@ public class GroupListFragment extends Fragment {
 
         ArrayList<Group> groupArray = new ArrayList<>(GroupFactory.getInstance().getGroups());
 
-        Collections.sort(groupArray, new Comparator<Group>() {
-            @Override
-            public int compare(Group lhs, Group rhs) {
-                int dateComparison = lhs.getDate().compareTo(rhs.getDate());
-                if (dateComparison != 0)
-                    return dateComparison;
-                return lhs.getHourMinute().compareTo(rhs.getHourMinute());
-            }
-        });
-
         groupList.setAdapter(new GroupAdapter(getContext(), groupArray));
 
         /*

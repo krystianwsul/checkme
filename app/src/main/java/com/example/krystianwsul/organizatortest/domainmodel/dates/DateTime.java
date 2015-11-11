@@ -55,20 +55,7 @@ public class DateTime implements Comparable<DateTime> {
         return mDate.getDisplayText(context) + ", " + mTime.toString();
     }
 
-    public int hashCode() {
-        HourMinute hourMinute = mTime.getTimeByDay(mDate.getDayOfWeek());
-        return mDate.getYear() + mDate.getMonth() + mDate.getDay() + hourMinute.getHour() + hourMinute.getMinute();
-    }
-
-    public boolean equals(Object obj) {
-        if (!(obj instanceof DateTime))
-            return false;
-
-        if (obj == this)
-            return true;
-
-        DateTime other = (DateTime) obj;
-
-        return (mDate.compareTo(other.getDate()) == 0 && mTime.getTimeByDay(mDate.getDayOfWeek()).compareTo(other.getTime().getTimeByDay(other.mDate.getDayOfWeek())) == 0);
+    public TimeStamp getTimeStamp() {
+        return new TimeStamp(mDate, mTime.getTimeByDay(mDate.getDayOfWeek()));
     }
 }

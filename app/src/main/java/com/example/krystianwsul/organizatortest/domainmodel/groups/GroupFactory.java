@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
  * Created by Krystian on 11/11/2015.
@@ -19,7 +20,7 @@ import java.util.HashMap;
 public class GroupFactory {
     private static GroupFactory sInstance;
 
-    private HashMap<DateTime, Group> mGroups = new HashMap<>();
+    private TreeMap<TimeStamp, Group> mGroups = new TreeMap<>();
 
     public static GroupFactory getInstance() {
         if (sInstance == null)
@@ -39,13 +40,13 @@ public class GroupFactory {
             instances.addAll(rootTask.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
 
         for (Instance instance : instances) {
-            DateTime dateTime = instance.getDateTime();
-            if (mGroups.containsKey(dateTime)) {
-                mGroups.get(dateTime).addInstance(instance);
+            TimeStamp timeStamp = instance.getDateTime().getTimeStamp();
+            if (mGroups.containsKey(timeStamp)) {
+                mGroups.get(timeStamp).addInstance(instance);
             } else {
-                Group group = new Group(dateTime.getDate(), dateTime.getTime().getTimeByDay(dateTime.getDate().getDayOfWeek()));
+                Group group = new Group(timeStamp);
                 group.addInstance(instance);
-                mGroups.put(dateTime, group);
+                mGroups.put(timeStamp, group);
             }
         }
     }

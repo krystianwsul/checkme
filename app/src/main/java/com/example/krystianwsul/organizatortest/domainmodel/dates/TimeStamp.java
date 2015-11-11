@@ -58,4 +58,19 @@ public class TimeStamp implements Comparable<TimeStamp> {
     public String toString() {
         return getDate().toString() + " " + getHourMinute().toString();
     }
+
+    public int hashCode() {
+        return mLong.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TimeStamp))
+            return false;
+
+        if (obj == this)
+            return true;
+
+        TimeStamp other = (TimeStamp) obj;
+        return mLong.equals(other.getLong());
+    }
 }

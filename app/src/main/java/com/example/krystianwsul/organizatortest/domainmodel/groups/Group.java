@@ -5,9 +5,12 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
@@ -17,17 +20,13 @@ import java.util.ArrayList;
  * Created by Krystian on 11/9/2015.
  */
 public class Group {
-    private final Date mDate;
-    private final HourMinute mHourMinute;
+    private final TimeStamp mTimeStamp;
 
     private final ArrayList<Instance> mInstances = new ArrayList<>();
 
-    public Group(Date date, HourMinute hourMinute) {
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(hourMinute != null);
-
-        mDate = date;
-        mHourMinute = hourMinute;
+    public Group(TimeStamp timeStamp) {
+        Assert.assertTrue(timeStamp != null);
+        mTimeStamp = timeStamp;
     }
 
     public void addInstance(Instance instance) {
@@ -40,11 +39,13 @@ public class Group {
         if (singleInstance()) {
             return getSingleSinstance().getName();
         } else {
-            CustomTime customTime = CustomTime.getCustomTime(mDate.getDayOfWeek(), mHourMinute);
-            if (customTime != null)
-                return mDate.getDisplayText(context) + ", " + customTime.toString();
-            else
-                return mDate.getDisplayText(context) + ", " + mHourMinute.toString();
+            Date date = mTimeStamp.getDate();
+            HourMinute hourMinute = mTimeStamp.getHourMinute();
+            Time time = CustomTime.getCustomTime(date.getDayOfWeek(), hourMinute);
+            if (time == null)
+                time = new NormalTime(hourMinute);
+            DateTime dateTime = new DateTime(date, time);
+            return dateTime.getDisplayText(context);
         }
     }
 
@@ -60,12 +61,8 @@ public class Group {
         }
     }
 
-    public Date getDate() {
-        return mDate;
-    }
-
-    public HourMinute getHourMinute() {
-        return mHourMinute;
+    public TimeStamp getTimeStamp() {
+        return mTimeStamp;
     }
 
     public ArrayList<Instance> getInstances() {

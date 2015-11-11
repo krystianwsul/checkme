@@ -33,21 +33,22 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
         mInstances = instances;
     }
 
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         Instance instance = mInstances.get(position);
 
-        View rowView = inflater.inflate(R.layout.show_row, parent, false);
+        View rowView = inflater.inflate(R.layout.show_task_row, parent, false);
 
-        TextView rowName = (TextView) rowView.findViewById(R.id.row_name);
+        TextView rowName = (TextView) rowView.findViewById(R.id.task_row_name);
         rowName.setText(instance.getName());
 
-        TextView rowDetails = (TextView) rowView.findViewById(R.id.row_details);
+        TextView rowDetails = (TextView) rowView.findViewById(R.id.task_row_details);
         rowDetails.setVisibility(View.GONE);
 
         Resources resources = mContext.getResources();
 
-        ImageView imgList = (ImageView) rowView.findViewById(R.id.row_img);
+        ImageView imgList = (ImageView) rowView.findViewById(R.id.task_row_img);
         if (instance.getChildInstances().isEmpty())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else

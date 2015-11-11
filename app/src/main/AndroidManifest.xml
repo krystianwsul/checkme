@@ -24,7 +24,7 @@
         </activity>
         <activity android:name=".ShowInstanceActivity" >
         </activity>
-        <activity android:name=".ShowTimesActivity" >
+        <activity android:name=".ShowCustomTimesActivity" >
         </activity>
         <activity
             android:name=".SettingsActivity"

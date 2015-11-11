@@ -34,16 +34,17 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         mTasks = tasks;
     }
 
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         Task task = mTasks.get(position);
 
-        View rowView = inflater.inflate(R.layout.show_row, parent, false);
+        View rowView = inflater.inflate(R.layout.show_task_row, parent, false);
 
-        TextView tasksRowName = (TextView) rowView.findViewById(R.id.row_name);
+        TextView tasksRowName = (TextView) rowView.findViewById(R.id.task_row_name);
         tasksRowName.setText(task.getName());
 
-        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.row_details);
+        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.task_row_details);
         String scheduleText = task.getScheduleText(mContext);
         if (TextUtils.isEmpty(scheduleText))
             tasksRowSchedule.setVisibility(View.GONE);
@@ -52,7 +53,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
         Resources resources = mContext.getResources();
 
-        ImageView imgList = (ImageView) rowView.findViewById(R.id.row_img);
+        ImageView imgList = (ImageView) rowView.findViewById(R.id.task_row_img);
         if (task.getChildTasks().isEmpty())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else

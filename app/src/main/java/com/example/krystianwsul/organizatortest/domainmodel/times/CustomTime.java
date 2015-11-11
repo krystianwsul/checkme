@@ -6,6 +6,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 
 import junit.framework.Assert;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -31,6 +32,10 @@ public class CustomTime implements Time {
             if (customTime.getTimeByDay(day).compareTo(hourMinute) == 0)
                 return customTime;
         return null;
+    }
+
+    public static Collection<CustomTime> getCustomTimes() {
+        return sCustomTimes.values();
     }
 
     private CustomTime(int timeId) {

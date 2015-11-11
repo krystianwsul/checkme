@@ -20,10 +20,12 @@ import java.util.ArrayList;
  * Created by Krystian on 10/31/2015.
  */
 public class GroupListFragment extends Fragment {
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.group_list_fragment, container, false);
     }
 
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 

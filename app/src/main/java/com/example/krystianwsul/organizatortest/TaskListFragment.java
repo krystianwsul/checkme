@@ -23,6 +23,7 @@ public class TaskListFragment extends Fragment {
         return inflater.inflate(R.layout.task_list_fragment, container, false);
     }
 
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 

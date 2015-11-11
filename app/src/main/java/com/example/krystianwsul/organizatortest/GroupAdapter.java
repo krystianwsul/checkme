@@ -33,21 +33,22 @@ public class GroupAdapter extends ArrayAdapter<Group> {
         mGroups = groups;
     }
 
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         Group group = mGroups.get(position);
 
-        View rowView = inflater.inflate(R.layout.show_row, parent, false);
+        View rowView = inflater.inflate(R.layout.show_task_row, parent, false);
 
-        TextView tasksRowName = (TextView) rowView.findViewById(R.id.row_name);
+        TextView tasksRowName = (TextView) rowView.findViewById(R.id.task_row_name);
         tasksRowName.setText(group.getNameText(mContext));
 
-        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.row_details);
+        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.task_row_details);
         tasksRowSchedule.setText(group.getDetailsText(mContext));
 
         Resources resources = mContext.getResources();
 
-        ImageView imgList = (ImageView) rowView.findViewById(R.id.row_img);
+        ImageView imgList = (ImageView) rowView.findViewById(R.id.task_row_img);
         if (group.singleInstance() && group.getSingleSinstance().getChildInstances().isEmpty())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else

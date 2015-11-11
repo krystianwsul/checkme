@@ -92,4 +92,8 @@ public class CustomTime implements Time {
     public String toString() {
         return getName();
     }
+
+    public int getId() {
+        return mTimeRecord.getId();
+    }
 }

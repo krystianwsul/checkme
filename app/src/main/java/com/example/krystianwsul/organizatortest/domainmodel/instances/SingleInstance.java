@@ -17,6 +17,8 @@ import java.util.HashMap;
 public abstract class SingleInstance implements Instance {
     protected final Task mTask;
 
+    public static final String INTENT_KEY = "singleInstanceId";
+
     private static final HashMap<Integer, SingleInstance> sSingleInstances = new HashMap<>();
 
     public static SingleInstance getSingleInstance(int taskId) {
@@ -71,7 +73,7 @@ public abstract class SingleInstance implements Instance {
     }
 
     public String getIntentKey() {
-        return "singleInstanceId";
+        return INTENT_KEY;
     }
 
     public int getIntentValue() {

@@ -8,6 +8,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -53,5 +55,10 @@ public class GroupFactory {
 
     public Collection<Group> getGroups() {
         return mGroups.values();
+    }
+
+    public Group getGroup(TimeStamp timeStamp) {
+        Assert.assertTrue(mGroups.containsKey(timeStamp));
+        return mGroups.get(timeStamp);
     }
 }

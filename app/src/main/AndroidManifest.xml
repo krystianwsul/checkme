@@ -20,6 +20,10 @@
         </activity>
         <activity android:name=".ShowTask" >
         </activity>
+        <activity android:name=".ShowGroup" >
+        </activity>
+        <activity android:name=".ShowInstance" >
+        </activity>
     </application>
 
 </manifest>

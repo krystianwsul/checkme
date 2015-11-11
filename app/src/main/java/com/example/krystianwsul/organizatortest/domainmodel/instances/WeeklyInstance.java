@@ -21,6 +21,8 @@ public abstract class WeeklyInstance implements Instance {
     private final Task mTask;
     private final WeeklyRepetition mWeeklyRepetition;
 
+    public static final String INTENT_KEY = "weeklyInstanceId";
+
     private static final HashMap<Integer, WeeklyInstance> sWeeklyInstances = new HashMap<>();
 
     public static WeeklyInstance getWeeklyInstance(int weeklyInstanceId) {
@@ -87,7 +89,7 @@ public abstract class WeeklyInstance implements Instance {
     }
 
     public String getIntentKey() {
-        return "weeklyInstanceId";
+        return INTENT_KEY;
     }
 
     public int getIntentValue() {

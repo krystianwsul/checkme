@@ -21,6 +21,8 @@ public abstract class DailyInstance implements Instance {
     private final Task mTask;
     private final DailyRepetition mDailyRepetition;
 
+    public static final String INTENT_KEY = "dailyInstanceId";
+
     private static final HashMap<Integer, DailyInstance> sDailyInstances = new HashMap<>();
 
     public static DailyInstance getDailyInstance(int dailyInstanceId) {
@@ -87,7 +89,7 @@ public abstract class DailyInstance implements Instance {
     }
 
     public String getIntentKey() {
-        return "dailyInstanceId";
+        return INTENT_KEY;
     }
 
     public int getIntentValue() {

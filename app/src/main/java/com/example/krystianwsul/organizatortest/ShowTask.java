@@ -17,6 +17,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTask extends AppCompatActivity {
+    public static final String INTENT_KEY = "taskId";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +25,9 @@ public class ShowTask extends AppCompatActivity {
         setContentView(R.layout.activity_show_task);
 
         Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra("taskId"));
-        int taskId = intent.getIntExtra("taskId", 0);
+        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
+        int taskId = intent.getIntExtra(INTENT_KEY, -1);
+        Assert.assertTrue(taskId != -1);
         Task task = TaskFactory.getInstance().getTask(taskId);
         Assert.assertTrue(task != null);
 

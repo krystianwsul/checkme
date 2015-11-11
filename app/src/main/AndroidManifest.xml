@@ -18,11 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ShowTask" >
+        <activity android:name=".ShowTaskActivity" >
         </activity>
-        <activity android:name=".ShowGroup" >
+        <activity android:name=".ShowGroupActivity" >
         </activity>
-        <activity android:name=".ShowInstance" >
+        <activity android:name=".ShowInstanceActivity" >
+        </activity>
+        <activity android:name=".ShowTimesActivity" >
         </activity>
     </application>
 

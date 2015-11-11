@@ -10,22 +10,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.GroupFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 10/31/2015.
@@ -55,9 +44,9 @@ public class GroupListFragment extends Fragment {
             private Intent getIntent(Group group, Context context) {
                 if (group.singleInstance()) {
                     Instance instance = group.getSingleSinstance();
-                    return ShowInstance.getIntent(instance, context);
+                    return ShowInstanceActivity.getIntent(instance, context);
                 } else {
-                    return ShowGroup.getIntent(group, context);
+                    return ShowGroupActivity.getIntent(group, context);
                 }
             }
         });

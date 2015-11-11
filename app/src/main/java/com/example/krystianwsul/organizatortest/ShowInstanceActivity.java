@@ -14,16 +14,14 @@ import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInsta
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowInstance extends AppCompatActivity {
+public class ShowInstanceActivity extends AppCompatActivity {
     public static Intent getIntent(Instance instance, Context context) {
-        Intent intent = new Intent(context, ShowInstance.class);
+        Intent intent = new Intent(context, ShowInstanceActivity.class);
         intent.putExtra(instance.getIntentKey(), instance.getIntentValue());
         return intent;
     }
@@ -56,7 +54,7 @@ public class ShowInstance extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Instance childInstance = (Instance) parent.getItemAtPosition(position);
-                startActivity(ShowInstance.getIntent(childInstance, view.getContext()));
+                startActivity(ShowInstanceActivity.getIntent(childInstance, view.getContext()));
             }
         });
     }

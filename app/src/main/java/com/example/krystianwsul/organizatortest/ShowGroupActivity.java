@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -14,19 +13,15 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.GroupFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
-public class ShowGroup extends AppCompatActivity {
+public class ShowGroupActivity extends AppCompatActivity {
     private static final String INTENT_KEY = "groupLong";
 
     public static Intent getIntent(Group group, Context context) {
-        Intent intent = new Intent(context, ShowGroup.class);
-        intent.putExtra(ShowGroup.INTENT_KEY, group.getTimeStamp().getLong());
+        Intent intent = new Intent(context, ShowGroupActivity.class);
+        intent.putExtra(ShowGroupActivity.INTENT_KEY, group.getTimeStamp().getLong());
         return intent;
     }
 
@@ -54,7 +49,7 @@ public class ShowGroup extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Instance instance = (Instance) parent.getItemAtPosition(position);
-                startActivity(ShowInstance.getIntent(instance, view.getContext()));
+                startActivity(ShowInstanceActivity.getIntent(instance, view.getContext()));
             }
         });
     }

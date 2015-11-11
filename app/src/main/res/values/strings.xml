@@ -8,4 +8,5 @@
     <string name="tasks">Tasks</string>
     <string name="instances">Instances</string>
     <string name="title_activity_show_instance">ShowInstance</string>
+    <string name="action_times">Times</string>
 </resources>

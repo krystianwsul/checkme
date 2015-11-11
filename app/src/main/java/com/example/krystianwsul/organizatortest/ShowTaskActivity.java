@@ -17,11 +17,11 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowTask extends AppCompatActivity {
+public class ShowTaskActivity extends AppCompatActivity {
     private static final String INTENT_KEY = "taskId";
 
     public static Intent getIntent(Task task, Context context) {
-        Intent intent = new Intent(context, ShowTask.class);
+        Intent intent = new Intent(context, ShowTaskActivity.class);
         intent.putExtra(INTENT_KEY, task.getId());
         return intent;
     }
@@ -58,7 +58,7 @@ public class ShowTask extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task childTask = (Task) parent.getItemAtPosition(position);
-                startActivity(ShowTask.getIntent(childTask, view.getContext()));
+                startActivity(ShowTaskActivity.getIntent(childTask, view.getContext()));
             }
         });
     }

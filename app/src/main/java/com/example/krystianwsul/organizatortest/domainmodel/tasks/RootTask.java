@@ -46,4 +46,8 @@ public class RootTask extends Task {
     public RootTask getRootTask() {
         return this;
     }
+
+    public Task getParentTask() {
+        return null;
+    }
 }

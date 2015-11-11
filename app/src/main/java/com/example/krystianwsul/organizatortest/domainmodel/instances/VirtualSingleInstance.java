@@ -13,9 +13,6 @@ import junit.framework.Assert;
  * Created by Krystian on 11/3/2015.
  */
 public class VirtualSingleInstance extends SingleInstance {
-    private final Task mTask;
-    private final SingleSchedule mSingleSchedule;
-
     private final int mId;
 
     private final boolean mDone = false;
@@ -25,26 +22,13 @@ public class VirtualSingleInstance extends SingleInstance {
     public VirtualSingleInstance(Task task) {
         super(task);
 
-        mTask = task;
-
         sVirtualSingleInstanceCount++;
 
         mId = PersistenceManger.getInstance().getMaxSingleInstanceId() + sVirtualSingleInstanceCount;
-
-        mSingleSchedule = SingleSchedule.getSingleSchedule(task.getRootTask());
-        Assert.assertTrue(mSingleSchedule != null);
-    }
-
-    public int getTaskId() {
-        return mTask.getId();
     }
 
     public boolean getDone() {
         return mDone;
-    }
-
-    public String getScheduleText(Context context) {
-        return mTask.getSchedule().getTaskText(context);
     }
 
     public DateTime getDateTime() {

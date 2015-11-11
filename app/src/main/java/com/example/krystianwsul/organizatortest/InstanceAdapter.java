@@ -43,11 +43,11 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
         rowName.setText(instance.getName());
 
         TextView rowDetails = (TextView) rowView.findViewById(R.id.row_details);
-        rowDetails.setText(instance.getScheduleText(mContext));
+        rowDetails.setVisibility(View.GONE);
 
         Resources resources = mContext.getResources();
 
-        ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
+        ImageView imgList = (ImageView) rowView.findViewById(R.id.row_img);
         if (instance.getChildInstances().isEmpty())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else

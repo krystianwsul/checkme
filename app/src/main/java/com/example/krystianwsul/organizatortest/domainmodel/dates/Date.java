@@ -90,4 +90,8 @@ public class Date implements Comparable<Date> {
         else
             return getDayOfWeek().toString() + ", " + toString();
     }
+
+    public Calendar getCalendar() {
+        return new GregorianCalendar(mYear, mMonth - 1, mDay);
+    }
 }

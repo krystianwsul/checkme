@@ -78,7 +78,10 @@ public abstract class DailyInstance implements Instance {
     }
 
     public String getScheduleText(Context context) {
-        return getDateTime().getDisplayText(context);
+        if (mTask.getParentTask() == null)
+            return getDateTime().getDisplayText(context);
+        else
+            return null;
     }
 
     public ArrayList<Instance> getChildInstances() {

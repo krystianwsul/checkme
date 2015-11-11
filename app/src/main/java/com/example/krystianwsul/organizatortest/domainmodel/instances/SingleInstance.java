@@ -1,5 +1,8 @@
 package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
+import android.content.Context;
+
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
@@ -16,6 +19,7 @@ import java.util.HashMap;
  */
 public abstract class SingleInstance implements Instance {
     protected final Task mTask;
+    protected final SingleSchedule mSingleSchedule;
 
     public static final String INTENT_KEY = "singleInstanceId";
 
@@ -50,9 +54,12 @@ public abstract class SingleInstance implements Instance {
         return virtualSingleInstance;
     }
 
-    public SingleInstance(Task task) {
+    protected SingleInstance(Task task) {
         Assert.assertTrue(task != null);
         mTask = task;
+
+        mSingleSchedule = SingleSchedule.getSingleSchedule(task.getRootTask());
+        Assert.assertTrue(mSingleSchedule != null);
     }
 
     public int getTaskId() {
@@ -78,5 +85,12 @@ public abstract class SingleInstance implements Instance {
 
     public int getIntentValue() {
         return mTask.getId();
+    }
+
+    public String getScheduleText(Context context) {
+        if (mTask.getParentTask() == null)
+            return mSingleSchedule.getTaskText(context);
+        else
+            return null;
     }
 }

@@ -14,28 +14,16 @@ import junit.framework.Assert;
  */
 public class RealSingleInstance extends SingleInstance {
     private final SingleInstanceRecord mSingleInstanceRecord;
-    private final SingleSchedule mSingleSchedule;
 
     public RealSingleInstance(Task task, SingleInstanceRecord singleInstanceRecord) {
         super(task);
 
         Assert.assertTrue(singleInstanceRecord != null);
         mSingleInstanceRecord = singleInstanceRecord;
-
-        mSingleSchedule = SingleSchedule.getSingleSchedule(task.getRootTask());
-        Assert.assertTrue(mSingleSchedule != null);
-    }
-
-    public int getTaskId() {
-        return mSingleInstanceRecord.getTaskId();
     }
 
     public boolean getDone() {
         return mSingleInstanceRecord.getDone();
-    }
-
-    public String getScheduleText(Context context) {
-        return mSingleSchedule.getTaskText(context);
     }
 
     public DateTime getDateTime() {

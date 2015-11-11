@@ -118,10 +118,9 @@ public class WeeklySchedule extends Schedule {
         } else {
             instances.addAll(getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));
 
-            Calendar loopStartCalendar = startTimeStamp.getCalendar();
+            Calendar loopStartCalendar = startTimeStamp.getDate().getCalendar();
             loopStartCalendar.add(Calendar.DATE, 1);
-            Calendar loopEndCalendar = endTimeStamp.getCalendar();
-            loopEndCalendar.add(Calendar.DATE, -1);
+            Calendar loopEndCalendar = endTimeStamp.getDate().getCalendar();
 
             for (Calendar calendar = loopStartCalendar; calendar.before(loopEndCalendar); calendar.add(Calendar.DATE, 1))
                 instances.addAll(getInstancesInDate(new Date(calendar), null, null));

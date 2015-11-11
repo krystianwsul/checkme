@@ -78,7 +78,10 @@ public abstract class WeeklyInstance implements Instance {
     }
 
     public String getScheduleText(Context context) {
-        return mWeeklyRepetition.getRepetitionDateTime().getDisplayText(context);
+        if (mTask.getParentTask() == null)
+            return mWeeklyRepetition.getRepetitionDateTime().getDisplayText(context);
+        else
+            return null;
     }
 
     public ArrayList<Instance> getChildInstances() {

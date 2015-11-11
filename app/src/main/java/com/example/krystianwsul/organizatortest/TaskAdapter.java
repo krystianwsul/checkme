@@ -52,7 +52,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
         Resources resources = mContext.getResources();
 
-        ImageView imgList = (ImageView) rowView.findViewById(R.id.tasks_row_img_list);
+        ImageView imgList = (ImageView) rowView.findViewById(R.id.row_img);
         if (task.getChildTasks().isEmpty())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else

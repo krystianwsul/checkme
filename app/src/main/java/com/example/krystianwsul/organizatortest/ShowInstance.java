@@ -40,7 +40,11 @@ public class ShowInstance extends AppCompatActivity {
         showInstanceName.setText(instance.getName());
 
         TextView showInstanceDetails = (TextView) findViewById(R.id.show_instance_details);
-        showInstanceDetails.setText(instance.getScheduleText(this));
+        String scheduleText = instance.getScheduleText(this);
+        if (TextUtils.isEmpty(scheduleText))
+            showInstanceDetails.setVisibility(View.GONE);
+        else
+            showInstanceDetails.setText(scheduleText);
 
         ListView showInstanceList = (ListView) findViewById(R.id.show_instance_list);
         if (instance.getChildInstances().isEmpty())

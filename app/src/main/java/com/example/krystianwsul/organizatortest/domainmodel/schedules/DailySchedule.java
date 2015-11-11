@@ -160,7 +160,7 @@ public class DailySchedule extends Schedule {
             if (startHourMinute != null && startHourMinute.compareTo(hourMinute) > 0)
                 continue;
 
-            if (endHourMinute != null && endHourMinute.compareTo(hourMinute) < 0)
+            if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
                 continue;
 
             instances.add(dailyScheduleTime.getInstance(mRootTask, date));

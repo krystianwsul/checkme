@@ -38,12 +38,13 @@ public class GroupListFragment extends Fragment {
 
         Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
 
-        Calendar calendarWeekAgo = Calendar.getInstance();
-        calendarWeekAgo.add(Calendar.DATE, -7);
+        Calendar tomorrowCalendar = Calendar.getInstance();
+        tomorrowCalendar.add(Calendar.DATE, 1);
+        Date tomorrowDate = new Date(tomorrowCalendar);
 
         final ArrayList<Instance> instances = new ArrayList<>();
         for (RootTask rootTask : rootTasks)
-            instances.addAll(rootTask.getInstances(new TimeStamp(calendarWeekAgo), new TimeStamp(Date.today(), new HourMinute(23, 59))));
+            instances.addAll(rootTask.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
 
         HashMap<DateTime, Group> groupHash = new HashMap<>();
         for (Instance instance : instances) {

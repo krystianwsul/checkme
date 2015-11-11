@@ -23,8 +23,9 @@ public class ShowTask extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
 
-        Bundle extras = getIntent().getExtras();
-        int taskId = extras.getInt("taskId");
+        Intent intent = getIntent();
+        Assert.assertTrue(intent.hasExtra("taskId"));
+        int taskId = intent.getIntExtra("taskId", 0);
         Task task = TaskFactory.getInstance().getTask(taskId);
         Assert.assertTrue(task != null);
 

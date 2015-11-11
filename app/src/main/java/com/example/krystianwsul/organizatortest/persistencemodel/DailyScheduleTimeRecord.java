@@ -9,20 +9,20 @@ public class DailyScheduleTimeRecord {
     private final int mId;
     private final int mTaskId;
 
-    private final Integer mTimeRecordId;
+    private final Integer mCustomTimeId;
 
     private final Integer mHour;
     private final Integer mMinute;
 
-    public DailyScheduleTimeRecord(int id, int taskId, Integer timeId, Integer hour, Integer minute) {
+    public DailyScheduleTimeRecord(int id, int taskId, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (timeId == null));
-        Assert.assertTrue((hour != null) || (timeId != null));
+        Assert.assertTrue((hour == null) || (customTimeId == null));
+        Assert.assertTrue((hour != null) || (customTimeId != null));
 
         mId = id;
         mTaskId = taskId;
 
-        mTimeRecordId = timeId;
+        mCustomTimeId = customTimeId;
 
         mHour = hour;
         mMinute = minute;
@@ -36,8 +36,8 @@ public class DailyScheduleTimeRecord {
         return mTaskId;
     }
 
-    public Integer getTimeRecordId() {
-        return mTimeRecordId;
+    public Integer getCustomTimeId() {
+        return mCustomTimeId;
     }
 
     public Integer getHour() {

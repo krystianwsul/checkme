@@ -13,7 +13,7 @@ public class DailyScheduleNormalTime extends DailyScheduleTime {
 
     protected DailyScheduleNormalTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         super(dailyScheduleTimeId, dailySchedule);
-        Assert.assertTrue(mDailyScheduleTimeRecord.getTimeRecordId() == null);
+        Assert.assertTrue(mDailyScheduleTimeRecord.getCustomTimeId() == null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getHour() != null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getMinute() != null);
 

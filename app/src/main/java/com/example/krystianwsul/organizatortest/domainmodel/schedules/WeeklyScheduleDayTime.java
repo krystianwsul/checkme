@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
@@ -35,7 +34,7 @@ public abstract class WeeklyScheduleDayTime {
 
     private static WeeklyScheduleDayTime createWeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
         WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord = PersistenceManger.getInstance().getWeeklyScheduleDayTimeRecord(weeklyScheduleDayTimeId);
-        if (weeklyScheduleDayTimeRecord.getTimeRecordId() == null)
+        if (weeklyScheduleDayTimeRecord.getCustomTimeId() == null)
             return new WeeklyScheduleNormalDayTime(weeklyScheduleDayTimeId, weeklySchedule);
         else
             return new WeeklyScheduleCustomDayTime(weeklyScheduleDayTimeId, weeklySchedule);

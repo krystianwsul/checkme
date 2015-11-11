@@ -38,8 +38,8 @@ public class CustomTime implements Time {
         return sCustomTimes.values();
     }
 
-    private CustomTime(int timeId) {
-        mCustomTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(timeId);
+    private CustomTime(int customTimeId) {
+        mCustomTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(customTimeId);
         Assert.assertTrue(mCustomTimeRecord != null);
     }
 

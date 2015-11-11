@@ -44,7 +44,7 @@ public abstract class SingleSchedule extends Schedule {
         if (singleScheduleRecord == null)
             return null;
 
-        if (singleScheduleRecord.getTimeRecordId() == null)
+        if (singleScheduleRecord.getCustomTimeId() == null)
             return new SingleNormalSchedule(singleScheduleRecord, rootTask);
         else
             return new SingleCustomSchedule(singleScheduleRecord, rootTask);

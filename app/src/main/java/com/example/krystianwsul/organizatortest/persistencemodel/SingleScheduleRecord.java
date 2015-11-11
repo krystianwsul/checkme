@@ -12,15 +12,15 @@ public class SingleScheduleRecord {
     private final int mMonth;
     private final int mDay;
 
-    private final Integer mTimeRecordId;
+    private final Integer mCustomTimeId;
 
     private final Integer mHour;
     private final Integer mMinute;
 
-    public SingleScheduleRecord(int taskId, int year, int month, int day, Integer timeRecordId, Integer hour, Integer minute) {
+    public SingleScheduleRecord(int taskId, int year, int month, int day, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (timeRecordId == null));
-        Assert.assertTrue((hour != null) || (timeRecordId != null));
+        Assert.assertTrue((hour == null) || (customTimeId == null));
+        Assert.assertTrue((hour != null) || (customTimeId != null));
 
         mTaskId = taskId;
 
@@ -28,7 +28,7 @@ public class SingleScheduleRecord {
         mMonth = month;
         mDay = day;
 
-        mTimeRecordId = timeRecordId;
+        mCustomTimeId = customTimeId;
 
         mHour = hour;
         mMinute = minute;
@@ -50,8 +50,8 @@ public class SingleScheduleRecord {
         return mDay;
     }
 
-    public Integer getTimeRecordId() {
-        return mTimeRecordId;
+    public Integer getCustomTimeId() {
+        return mCustomTimeId;
     }
 
     public Integer getHour() {

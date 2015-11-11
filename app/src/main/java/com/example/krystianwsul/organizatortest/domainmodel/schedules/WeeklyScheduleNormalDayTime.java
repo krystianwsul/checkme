@@ -13,7 +13,7 @@ public class WeeklyScheduleNormalDayTime extends WeeklyScheduleDayTime {
 
     protected WeeklyScheduleNormalDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
         super(weeklyScheduleDayTimeId, weeklySchedule);
-        Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getTimeRecordId() == null);
+        Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getCustomTimeId() == null);
         Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getHour() != null);
         Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getMinute() != null);
 

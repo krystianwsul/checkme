@@ -13,11 +13,11 @@ public class DailyScheduleCustomTime extends DailyScheduleTime {
 
     protected DailyScheduleCustomTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         super(dailyScheduleTimeId, dailySchedule);
-        Assert.assertTrue(mDailyScheduleTimeRecord.getTimeRecordId() != null);
+        Assert.assertTrue(mDailyScheduleTimeRecord.getCustomTimeId() != null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getHour() == null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getMinute() == null);
 
-        mCustomTime = CustomTime.getCustomTime(mDailyScheduleTimeRecord.getTimeRecordId());
+        mCustomTime = CustomTime.getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
         Assert.assertTrue(mCustomTime != null);
     }
 

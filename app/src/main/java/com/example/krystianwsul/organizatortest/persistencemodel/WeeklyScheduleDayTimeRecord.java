@@ -10,21 +10,21 @@ public class WeeklyScheduleDayTimeRecord {
     private final int mTaskId;
     private final int mDayOfWeek;
 
-    private final Integer mTimeRecordId;
+    private final Integer mCustomTimeId;
 
     private final Integer mHour;
     private final Integer mMinute;
 
-    public WeeklyScheduleDayTimeRecord(int id, int taskId, int dayOfWeek, Integer timeId, Integer hour, Integer minute) {
+    public WeeklyScheduleDayTimeRecord(int id, int taskId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (timeId == null));
-        Assert.assertTrue((hour != null) || (timeId != null));
+        Assert.assertTrue((hour == null) || (customTimeId == null));
+        Assert.assertTrue((hour != null) || (customTimeId != null));
 
         mId = id;
         mTaskId = taskId;
         mDayOfWeek = dayOfWeek;
 
-        mTimeRecordId = timeId;
+        mCustomTimeId = customTimeId;
 
         mHour = hour;
         mMinute = minute;
@@ -42,8 +42,8 @@ public class WeeklyScheduleDayTimeRecord {
         return mDayOfWeek;
     }
 
-    public Integer getTimeRecordId() {
-        return mTimeRecordId;
+    public Integer getCustomTimeId() {
+        return mCustomTimeId;
     }
 
     public Integer getHour() {

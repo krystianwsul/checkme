@@ -18,15 +18,15 @@ public class WeeklyRepetitionRecord {
     private final Integer mRepetitionMonth;
     private final Integer mRepetitionDay;
 
-    private final Integer mTimeId;
+    private final Integer mCustomTimeId;
 
     private final Integer mHour;
     private final Integer mMinute;
 
-    public WeeklyRepetitionRecord(int id, int weeklyScheduleTimeId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer repetitionYear, Integer repetitionMonth, Integer repetitionDay, Integer timeId, Integer hour, Integer minute) {
+    public WeeklyRepetitionRecord(int id, int weeklyScheduleTimeId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer repetitionYear, Integer repetitionMonth, Integer repetitionDay, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((repetitionYear == null) == (repetitionMonth == null) == (repetitionDay == null));
         Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (timeId == null));
+        Assert.assertTrue((hour == null) || (customTimeId == null));
 
         mId = id;
 
@@ -40,7 +40,7 @@ public class WeeklyRepetitionRecord {
         mRepetitionMonth = repetitionMonth;
         mRepetitionDay = repetitionDay;
 
-        mTimeId = timeId;
+        mCustomTimeId = customTimeId;
 
         mHour = hour;
         mMinute = minute;
@@ -78,8 +78,8 @@ public class WeeklyRepetitionRecord {
         return mRepetitionDay;
     }
 
-    public Integer getTimeId() {
-        return mTimeId;
+    public Integer getCustomTimeId() {
+        return mCustomTimeId;
     }
 
     public Integer getHour() {

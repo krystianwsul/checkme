@@ -13,11 +13,11 @@ public class WeeklyScheduleCustomDayTime extends WeeklyScheduleDayTime {
 
     protected WeeklyScheduleCustomDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
         super(weeklyScheduleDayTimeId, weeklySchedule);
-        Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getTimeRecordId() != null);
+        Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getCustomTimeId() != null);
         Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getHour() == null);
         Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getMinute() == null);
 
-        mCustomTime = CustomTime.getCustomTime(mWeeklyScheduleDayTimeRecord.getTimeRecordId());
+        mCustomTime = CustomTime.getCustomTime(mWeeklyScheduleDayTimeRecord.getCustomTimeId());
         Assert.assertTrue(mCustomTime != null);
     }
 

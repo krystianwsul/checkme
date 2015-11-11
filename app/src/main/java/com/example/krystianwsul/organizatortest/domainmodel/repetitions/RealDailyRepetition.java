@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -46,8 +45,8 @@ public class RealDailyRepetition extends DailyRepetition {
     }
 
     public Time getRepetitionTime() {
-        if (mDailyRepetitionRecord.getTimeId() != null)
-            return CustomTime.getCustomTime(mDailyRepetitionRecord.getTimeId());
+        if (mDailyRepetitionRecord.getCustomTimeId() != null)
+            return CustomTime.getCustomTime(mDailyRepetitionRecord.getCustomTimeId());
         else if (mDailyRepetitionRecord.getHour() != null)
             return new NormalTime(mDailyRepetitionRecord.getHour(), mDailyRepetitionRecord.getMinute());
         else

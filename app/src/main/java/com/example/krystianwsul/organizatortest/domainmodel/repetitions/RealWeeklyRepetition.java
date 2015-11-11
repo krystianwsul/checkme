@@ -1,12 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleDayTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
-import com.example.krystianwsul.organizatortest.persistencemodel.DailyRepetitionRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyRepetitionRecord;
 
 import junit.framework.Assert;
@@ -47,8 +45,8 @@ public class RealWeeklyRepetition extends WeeklyRepetition {
     }
 
     public Time getRepetitionTime() {
-        if (mWeeklyRepetitionRecord.getTimeId() != null)
-            return CustomTime.getCustomTime(mWeeklyRepetitionRecord.getTimeId());
+        if (mWeeklyRepetitionRecord.getCustomTimeId() != null)
+            return CustomTime.getCustomTime(mWeeklyRepetitionRecord.getCustomTimeId());
         else if (mWeeklyRepetitionRecord.getHour() != null)
             return new NormalTime(mWeeklyRepetitionRecord.getHour(), mWeeklyRepetitionRecord.getMinute());
         else

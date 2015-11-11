@@ -33,7 +33,7 @@ public abstract class DailyScheduleTime {
 
     private static DailyScheduleTime createDailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         DailyScheduleTimeRecord dailyScheduleTimeRecord = PersistenceManger.getInstance().getDailyScheduleTimeRecord(dailyScheduleTimeId);
-        if (dailyScheduleTimeRecord.getTimeRecordId() == null)
+        if (dailyScheduleTimeRecord.getCustomTimeId() == null)
             return new DailyScheduleNormalTime(dailyScheduleTimeId, dailySchedule);
         else
             return new DailyScheduleCustomTime(dailyScheduleTimeId, dailySchedule);

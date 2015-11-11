@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizatortest.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 
 import junit.framework.Assert;

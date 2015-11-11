@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizatortest.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -9,47 +9,48 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
+import com.example.krystianwsul.organizatortest.R;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
 /**
- * Created by Krystian on 10/23/2015.
+ * Created by Krystian on 11/11/2015.
  */
-public class GroupAdapter extends ArrayAdapter<Group> {
+public class InstanceAdapter extends ArrayAdapter<Instance> {
     private final Context mContext;
-    private final ArrayList<Group> mGroups;
+    private final ArrayList<Instance> mInstances;
 
-    public GroupAdapter(Context context, ArrayList<Group> groups) {
-        super(context, -1, groups);
+    public InstanceAdapter(Context context, ArrayList<Instance> instances) {
+        super(context, -1, instances);
 
         Assert.assertTrue(context != null);
-        Assert.assertTrue(groups != null);
-        Assert.assertTrue(!groups.isEmpty());
+        Assert.assertTrue(instances != null);
+        Assert.assertTrue(!instances.isEmpty());
 
         mContext = context;
-        mGroups = groups;
+        mInstances = instances;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        Group group = mGroups.get(position);
+        Instance instance = mInstances.get(position);
 
         View rowView = inflater.inflate(R.layout.show_task_row, parent, false);
 
-        TextView tasksRowName = (TextView) rowView.findViewById(R.id.task_row_name);
-        tasksRowName.setText(group.getNameText(mContext));
+        TextView rowName = (TextView) rowView.findViewById(R.id.task_row_name);
+        rowName.setText(instance.getName());
 
-        TextView tasksRowSchedule = (TextView) rowView.findViewById(R.id.task_row_details);
-        tasksRowSchedule.setText(group.getDetailsText(mContext));
+        TextView rowDetails = (TextView) rowView.findViewById(R.id.task_row_details);
+        rowDetails.setVisibility(View.GONE);
 
         Resources resources = mContext.getResources();
 
         ImageView imgList = (ImageView) rowView.findViewById(R.id.task_row_img);
-        if (group.singleInstance() && group.getSingleSinstance().getChildInstances().isEmpty())
+        if (instance.getChildInstances().isEmpty())
             imgList.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
             imgList.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));

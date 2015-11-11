@@ -5,7 +5,7 @@ import junit.framework.Assert;
 /**
  * Created by Krystian on 10/27/2015.
  */
-public class TimeRecord {
+public class CustomTimeRecord {
     private final int mId;
     private final String mName;
 
@@ -30,7 +30,7 @@ public class TimeRecord {
     private final Integer mSaturdayHour;
     private final Integer mSaturdayMinute;
 
-    public TimeRecord(int id, String name, Integer sundayHour, Integer sundayMinute, Integer mondayHour, Integer mondayMinute, Integer tuesdayHour, Integer tuesdayMinute, Integer wednesdayHour, Integer wednesdayMinute, Integer thursdayHour, Integer thursdayMinute, Integer fridayHour, Integer fridayMinute, Integer saturdayHour, Integer saturdayMinute) {
+    public CustomTimeRecord(int id, String name, Integer sundayHour, Integer sundayMinute, Integer mondayHour, Integer mondayMinute, Integer tuesdayHour, Integer tuesdayMinute, Integer wednesdayHour, Integer wednesdayMinute, Integer thursdayHour, Integer thursdayMinute, Integer fridayHour, Integer fridayMinute, Integer saturdayHour, Integer saturdayMinute) {
         Assert.assertTrue(name != null);
         Assert.assertTrue((sundayHour == null) == (sundayMinute == null));
         Assert.assertTrue((mondayHour == null) == (mondayMinute == null));

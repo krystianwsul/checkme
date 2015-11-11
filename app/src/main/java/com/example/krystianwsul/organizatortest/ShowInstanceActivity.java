@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.krystianwsul.organizatortest.adapters.InstanceAdapter;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;

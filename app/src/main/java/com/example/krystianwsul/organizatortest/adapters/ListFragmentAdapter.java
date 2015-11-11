@@ -1,8 +1,11 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizatortest.adapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+
+import com.example.krystianwsul.organizatortest.GroupListFragment;
+import com.example.krystianwsul.organizatortest.TaskListFragment;
 
 import junit.framework.Assert;
 

@@ -9,6 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.krystianwsul.organizatortest.adapters.ListFragmentAdapter;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override

@@ -1,7 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.times;
 
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.TimeRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 
 import junit.framework.Assert;
@@ -13,7 +13,7 @@ import java.util.HashMap;
  * Created by Krystian on 10/12/2015.
  */
 public class CustomTime implements Time {
-    private final TimeRecord mTimeRecord;
+    private final CustomTimeRecord mCustomTimeRecord;
 
     private static HashMap<Integer, CustomTime> sCustomTimes = new HashMap<>();
 
@@ -39,49 +39,49 @@ public class CustomTime implements Time {
     }
 
     private CustomTime(int timeId) {
-        mTimeRecord = PersistenceManger.getInstance().getTimeRecord(timeId);
-        Assert.assertTrue(mTimeRecord != null);
+        mCustomTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(timeId);
+        Assert.assertTrue(mCustomTimeRecord != null);
     }
 
     public String getName() {
-        return mTimeRecord.getName();
+        return mCustomTimeRecord.getName();
     }
 
     public HourMinute getTimeByDay(DayOfWeek day) {
         switch (day) {
             case SUNDAY:
-                if (mTimeRecord.getSundayHour() != null)
-                    return new HourMinute(mTimeRecord.getSundayHour(), mTimeRecord.getSundayMinute());
+                if (mCustomTimeRecord.getSundayHour() != null)
+                    return new HourMinute(mCustomTimeRecord.getSundayHour(), mCustomTimeRecord.getSundayMinute());
                 else
                     return null;
             case MONDAY:
-                if (mTimeRecord.getMondayHour() != null)
-                    return new HourMinute(mTimeRecord.getMondayHour(), mTimeRecord.getMondayMinute());
+                if (mCustomTimeRecord.getMondayHour() != null)
+                    return new HourMinute(mCustomTimeRecord.getMondayHour(), mCustomTimeRecord.getMondayMinute());
                 else
                     return null;
             case TUESDAY:
-                if (mTimeRecord.getTuesdayHour() != null)
-                    return new HourMinute(mTimeRecord.getTuesdayHour(), mTimeRecord.getTuesdayMinute());
+                if (mCustomTimeRecord.getTuesdayHour() != null)
+                    return new HourMinute(mCustomTimeRecord.getTuesdayHour(), mCustomTimeRecord.getTuesdayMinute());
                 else
                     return null;
             case WEDNESDAY:
-                if (mTimeRecord.getWednesdayHour() != null)
-                    return new HourMinute(mTimeRecord.getWednesdayHour(), mTimeRecord.getWednesdayMinute());
+                if (mCustomTimeRecord.getWednesdayHour() != null)
+                    return new HourMinute(mCustomTimeRecord.getWednesdayHour(), mCustomTimeRecord.getWednesdayMinute());
                 else
                     return null;
             case THURSDAY:
-                if (mTimeRecord.getThursdayHour() != null)
-                    return new HourMinute(mTimeRecord.getThursdayHour(), mTimeRecord.getThursdayMinute());
+                if (mCustomTimeRecord.getThursdayHour() != null)
+                    return new HourMinute(mCustomTimeRecord.getThursdayHour(), mCustomTimeRecord.getThursdayMinute());
                 else
                     return null;
             case FRIDAY:
-                if (mTimeRecord.getFridayHour() != null)
-                    return new HourMinute(mTimeRecord.getFridayHour(), mTimeRecord.getFridayMinute());
+                if (mCustomTimeRecord.getFridayHour() != null)
+                    return new HourMinute(mCustomTimeRecord.getFridayHour(), mCustomTimeRecord.getFridayMinute());
                 else
                     return null;
             case SATURDAY:
-                if (mTimeRecord.getSaturdayHour() != null)
-                    return new HourMinute(mTimeRecord.getSaturdayHour(), mTimeRecord.getSaturdayMinute());
+                if (mCustomTimeRecord.getSaturdayHour() != null)
+                    return new HourMinute(mCustomTimeRecord.getSaturdayHour(), mCustomTimeRecord.getSaturdayMinute());
                 else
                     return null;
             default:
@@ -94,6 +94,6 @@ public class CustomTime implements Time {
     }
 
     public int getId() {
-        return mTimeRecord.getId();
+        return mCustomTimeRecord.getId();
     }
 }

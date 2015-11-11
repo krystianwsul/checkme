@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class PersistenceManger {
     private static PersistenceManger mInstance;
 
-    private final HashMap<Integer, TimeRecord> mTimeRecords = new HashMap<>();
+    private final HashMap<Integer, CustomTimeRecord> mCustomTimeRecords = new HashMap<>();
     private final HashMap<Integer, SingleScheduleRecord> mSingleScheduleRecords = new HashMap<>();
     private final HashMap<Integer, DailyScheduleRecord> mDailyScheduleRecords = new HashMap<>();
     private final HashMap<Integer, DailyScheduleTimeRecord> mDailyScheduleTimeRecords = new HashMap<>();
@@ -50,10 +50,10 @@ public class PersistenceManger {
         Calendar calendarNextYear = Calendar.getInstance();
         calendarNextYear.add(Calendar.DATE, 365);
 
-        TimeRecord afterWaking = new TimeRecord(0, "po wstaniu", 9, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 9, 0);
-        mTimeRecords.put(afterWaking.getId(), afterWaking);
-        TimeRecord afterWork = new TimeRecord(1, "po pracy", null, null, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, null, null);
-        mTimeRecords.put(afterWork.getId(), afterWork);
+        CustomTimeRecord afterWaking = new CustomTimeRecord(0, "po wstaniu", 9, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 9, 0);
+        mCustomTimeRecords.put(afterWaking.getId(), afterWaking);
+        CustomTimeRecord afterWork = new CustomTimeRecord(1, "po pracy", null, null, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, null, null);
+        mCustomTimeRecords.put(afterWork.getId(), afterWork);
 
         TaskRecord zakupy = new TaskRecord(0, null, "zakupy");
         mTaskRecords.put(zakupy.getId(), zakupy);
@@ -122,8 +122,8 @@ public class PersistenceManger {
         return mSingleScheduleRecords.get(taskId);
     }
 
-    public TimeRecord getTimeRecord(int timeRecordId) {
-        return mTimeRecords.get(timeRecordId);
+    public CustomTimeRecord getCustomTimeRecord(int timeRecordId) {
+        return mCustomTimeRecords.get(timeRecordId);
     }
 
     public DailyScheduleRecord getDailyScheduleRecord(int taskId) {

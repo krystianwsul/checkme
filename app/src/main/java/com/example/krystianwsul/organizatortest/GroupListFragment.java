@@ -11,6 +11,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
+import com.example.krystianwsul.organizatortest.domainmodel.groups.GroupFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
@@ -36,29 +37,7 @@ public class GroupListFragment extends Fragment {
 
         ListView groupList = (ListView) getView().findViewById(R.id.groups_list);
 
-        Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
-
-        Calendar tomorrowCalendar = Calendar.getInstance();
-        tomorrowCalendar.add(Calendar.DATE, 1);
-        Date tomorrowDate = new Date(tomorrowCalendar);
-
-        final ArrayList<Instance> instances = new ArrayList<>();
-        for (RootTask rootTask : rootTasks)
-            instances.addAll(rootTask.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
-
-        HashMap<DateTime, Group> groupHash = new HashMap<>();
-        for (Instance instance : instances) {
-            DateTime dateTime = instance.getDateTime();
-            if (groupHash.containsKey(dateTime)) {
-                groupHash.get(dateTime).addInstance(instance);
-            } else {
-                Group group = new Group(dateTime.getDate(), dateTime.getTime().getTimeByDay(dateTime.getDate().getDayOfWeek()));
-                group.addInstance(instance);
-                groupHash.put(dateTime, group);
-            }
-        }
-
-        ArrayList<Group> groupArray = new ArrayList<>(groupHash.values());
+        ArrayList<Group> groupArray = new ArrayList<>(GroupFactory.getInstance().getGroups());
 
         Collections.sort(groupArray, new Comparator<Group>() {
             @Override

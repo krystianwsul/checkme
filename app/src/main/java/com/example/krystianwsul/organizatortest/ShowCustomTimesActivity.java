@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.example.krystianwsul.organizatortest.adapters.CustomTimesAdapter;
+import com.example.krystianwsul.organizatortest.arrayadapters.CustomTimesAdapter;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 
 public class ShowCustomTimesActivity extends AppCompatActivity {

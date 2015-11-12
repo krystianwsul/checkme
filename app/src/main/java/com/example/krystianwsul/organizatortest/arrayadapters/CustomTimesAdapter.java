@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest.adapters;
+package com.example.krystianwsul.organizatortest.arrayadapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -34,14 +34,25 @@ public class CustomTimesAdapter extends ArrayAdapter<CustomTime> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
+        if (convertView == null) {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            convertView = inflater.inflate(R.layout.show_custom_times_row, parent, false);
+
+            CustomTimeHolder customTimeHolder = new CustomTimeHolder();
+            customTimeHolder.timesRowName = (TextView) convertView.findViewById(R.id.times_row_name);
+            convertView.setTag(customTimeHolder);
+        }
+
+        CustomTimeHolder customTimeHolder = (CustomTimeHolder) convertView.getTag();
+
         CustomTime customTime = mCustomTimes.get(position);
 
-        View showTimesRow = inflater.inflate(R.layout.show_custom_times_row, parent, false);
+        customTimeHolder.timesRowName.setText(customTime.getName());
 
-        TextView timesRowName = (TextView) showTimesRow.findViewById(R.id.times_row_name);
-        timesRowName.setText(customTime.getName());
+        return convertView;
+    }
 
-        return showTimesRow;
+    private class CustomTimeHolder {
+        public TextView timesRowName;
     }
 }

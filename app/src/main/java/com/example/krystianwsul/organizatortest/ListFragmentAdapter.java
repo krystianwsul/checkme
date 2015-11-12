@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest.adapters;
+package com.example.krystianwsul.organizatortest;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

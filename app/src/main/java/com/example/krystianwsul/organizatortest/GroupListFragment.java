@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.example.krystianwsul.organizatortest.adapters.GroupAdapter;
+import com.example.krystianwsul.organizatortest.arrayadapters.GroupAdapter;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.GroupFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;

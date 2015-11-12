@@ -1,5 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.times;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -37,6 +42,8 @@ public class HourMinute implements Comparable<HourMinute> {
     }
 
     public String toString() {
-        return String.format("%02d", mHour) + ":" +String.format("%02d", mMinute);
+        Date date = TimeStamp.getNow().getDate();
+        java.util.Date javaDate = new java.util.Date(date.getYear(), date.getMonth(), date.getDay(), mHour, mMinute);
+        return SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(javaDate);
     }
 }

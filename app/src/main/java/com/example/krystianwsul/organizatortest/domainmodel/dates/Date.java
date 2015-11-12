@@ -6,6 +6,7 @@ import com.example.krystianwsul.organizatortest.R;
 
 import junit.framework.Assert;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -66,7 +67,8 @@ public class Date implements Comparable<Date> {
     }
 
     public String toString() {
-        return String.format("%04d", mYear) + "-" + String.format("%02d", mMonth) + "-" +String.format("%02d", mDay);
+        java.util.Date javaDate = new java.util.Date(mYear, mMonth, mDay);
+        return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(javaDate);
     }
 
     public String getDisplayText(Context context) {

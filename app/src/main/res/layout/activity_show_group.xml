@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:id="@+id/show_group_name"
-        android:singleLine="true"
         android:text="test"/>
 
     <ListView

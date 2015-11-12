@@ -12,14 +12,12 @@
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:id="@+id/show_task_name"
-        android:singleLine="true"
         android:text="test"/>
 
     <TextView
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:id="@+id/show_task_details"
-        android:singleLine="true"
         android:text="test"/>
 
     <ListView

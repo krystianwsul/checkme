@@ -30,6 +30,10 @@ public class GroupFactory {
         return sInstance;
     }
 
+    public static void refresh() {
+        sInstance = new GroupFactory();
+    }
+
     private GroupFactory() {
         Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
 

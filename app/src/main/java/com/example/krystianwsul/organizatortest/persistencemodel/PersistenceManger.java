@@ -116,6 +116,14 @@ public class PersistenceManger {
         mWeeklyScheduleDayTimeRecords.put(crazyWeekend1.getId(), crazyWeekend1);
         WeeklyScheduleDayTimeRecord crazyWeekend2 = new WeeklyScheduleDayTimeRecord(2, crazyWeekend.getTaskId(), DayOfWeek.SUNDAY.ordinal(), null, 17, 0);
         mWeeklyScheduleDayTimeRecords.put(crazyWeekend2.getId(), crazyWeekend2);
+
+        TaskRecord task6 = new TaskRecord(10, null, "task 6");
+        mTaskRecords.put(task6.getId(), task6);
+
+        DailyScheduleRecord task6schedule = new DailyScheduleRecord(task6.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
+        mDailyScheduleRecords.put(task6schedule.getTaskId(), task6schedule);
+        DailyScheduleTimeRecord task6schedule0 = new DailyScheduleTimeRecord(3, task6schedule.getTaskId(), null, 6, 0);
+        mDailyScheduleTimeRecords.put(task6schedule0.getId(), task6schedule0);
     }
 
     public SingleScheduleRecord getSingleScheduleRecord(int taskId) {

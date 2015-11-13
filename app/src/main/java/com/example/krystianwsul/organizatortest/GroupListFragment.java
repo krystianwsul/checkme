@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
  * Created by Krystian on 10/31/2015.
  */
 public class GroupListFragment extends Fragment {
+    private ListView mGroupList;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.group_list_fragment, container, false);
@@ -30,13 +33,9 @@ public class GroupListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ListView groupList = (ListView) getView().findViewById(R.id.groups_list);
+        mGroupList = (ListView) getView().findViewById(R.id.groups_list);
 
-        ArrayList<Group> groupArray = new ArrayList<>(GroupFactory.getInstance().getGroups());
-
-        groupList.setAdapter(new GroupAdapter(getContext(), groupArray));
-
-        groupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGroupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Group group = (Group) parent.getItemAtPosition(position);
@@ -53,5 +52,14 @@ public class GroupListFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        GroupFactory.refresh();
+        ArrayList<Group> groupArray = new ArrayList<>(GroupFactory.getInstance().getGroups());
+        mGroupList.setAdapter(new GroupAdapter(getContext(), groupArray));
     }
 }

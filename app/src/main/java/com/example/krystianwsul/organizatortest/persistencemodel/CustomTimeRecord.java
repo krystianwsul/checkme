@@ -155,11 +155,11 @@ public class CustomTimeRecord {
     }
 
     public void setWednesdayHour(int hour) {
-        mTuesdayHour = hour;
+        mWednesdayHour = hour;
     }
 
     public void setWednesdayMinute(int minute) {
-        mTuesdayMinute = minute;
+        mWednesdayMinute = minute;
     }
 
     public void setThursdayHour(int hour) {
@@ -171,18 +171,18 @@ public class CustomTimeRecord {
     }
 
     public void setFridayHour(int hour) {
-        mThursdayHour = hour;
+        mFridayHour = hour;
     }
 
     public void setFridayMinute(int minute) {
-        mThursdayMinute = minute;
+        mFridayMinute = minute;
     }
 
     public void setSaturdayHour(int hour) {
-        mThursdayHour = hour;
+        mSaturdayHour = hour;
     }
 
     public void setSaturdayMinute(int minute) {
-        mThursdayMinute = minute;
+        mSaturdayMinute = minute;
     }
 }

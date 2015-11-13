@@ -17,19 +17,19 @@ public class CustomTime implements Time {
 
     private static HashMap<Integer, CustomTime> sCustomTimes = new HashMap<>();
 
-    public static CustomTime getCustomTime(int timeId) {
-        if (sCustomTimes.containsKey(timeId)) {
-            return sCustomTimes.get(timeId);
+    public static CustomTime getCustomTime(int customTimeId) {
+        if (sCustomTimes.containsKey(customTimeId)) {
+            return sCustomTimes.get(customTimeId);
         } else {
-            CustomTime customTime = new CustomTime(timeId);
-            sCustomTimes.put(timeId, customTime);
+            CustomTime customTime = new CustomTime(customTimeId);
+            sCustomTimes.put(customTimeId, customTime);
             return customTime;
         }
     }
 
-    public static CustomTime getCustomTime(DayOfWeek day, HourMinute hourMinute) {
+    public static CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
         for (CustomTime customTime : sCustomTimes.values())
-            if (customTime.getTimeByDay(day).compareTo(hourMinute) == 0)
+            if (customTime.getTimeByDay(dayOfWeek).compareTo(hourMinute) == 0)
                 return customTime;
         return null;
     }
@@ -47,8 +47,8 @@ public class CustomTime implements Time {
         return mCustomTimeRecord.getName();
     }
 
-    public HourMinute getTimeByDay(DayOfWeek day) {
-        switch (day) {
+    public HourMinute getTimeByDay(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
             case SUNDAY:
                 if (mCustomTimeRecord.getSundayHour() != null)
                     return new HourMinute(mCustomTimeRecord.getSundayHour(), mCustomTimeRecord.getSundayMinute());
@@ -85,7 +85,7 @@ public class CustomTime implements Time {
                 else
                     return null;
             default:
-                throw new IllegalArgumentException("invalid day: " + day);
+                throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }
     }
 

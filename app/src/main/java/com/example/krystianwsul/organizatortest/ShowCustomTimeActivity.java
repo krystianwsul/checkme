@@ -56,6 +56,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
     }
 
     private void initializeDay(final CustomTime customTime, final DayOfWeek dayOfWeek, int nameId, int timeId) {
+        Assert.assertTrue(customTime != null);
+        Assert.assertTrue(dayOfWeek != null);
+
         TextView timeSundayName = (TextView) findViewById(nameId);
         timeSundayName.setText(dayOfWeek.toString());
 
@@ -80,6 +83,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
 
     public static class TimePickerFragment extends DialogFragment {
         public static TimePickerFragment newInstance(CustomTime customTime, DayOfWeek dayOfWeek) {
+            Assert.assertTrue(customTime != null);
+            Assert.assertTrue(dayOfWeek != null);
+
             TimePickerFragment timePickerFragment = new TimePickerFragment();
 
             Bundle args = new Bundle();
@@ -93,9 +99,14 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             Bundle args = getArguments();
+
             int customTimeId = args.getInt("customTimeId");
             CustomTime customTime = CustomTime.getCustomTime(customTimeId);
+            Assert.assertTrue(customTime != null);
+
             DayOfWeek dayOfWeek = (DayOfWeek) args.getSerializable("dayOfWeek");
+            Assert.assertTrue(dayOfWeek != null);
+
             HourMinute hourMinute = customTime.getTimeByDay(dayOfWeek);
 
             return new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {

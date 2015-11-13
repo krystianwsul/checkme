@@ -8,7 +8,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
@@ -142,7 +141,7 @@ public class WeeklySchedule extends Schedule {
             if (weeklyScheduleDayTime.getDayOfWeek() != day)
                 continue;
 
-            HourMinute hourMinute = weeklyScheduleDayTime.getTime().getTimeByDay(day);
+            HourMinute hourMinute = weeklyScheduleDayTime.getTime().getHourMinute(day);
             if (hourMinute == null)
                 continue;
 

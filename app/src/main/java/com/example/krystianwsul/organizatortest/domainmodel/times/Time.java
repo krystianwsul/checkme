@@ -7,5 +7,5 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
  */
 public interface Time {
     String getName();
-    HourMinute getTimeByDay(DayOfWeek day);
+    HourMinute getHourMinute(DayOfWeek dayOfWeek);
 }

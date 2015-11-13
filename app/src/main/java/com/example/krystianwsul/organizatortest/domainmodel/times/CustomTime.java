@@ -29,7 +29,7 @@ public class CustomTime implements Time {
 
     public static CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
         for (CustomTime customTime : sCustomTimes.values())
-            if (customTime.getTimeByDay(dayOfWeek).compareTo(hourMinute) == 0)
+            if (customTime.getHourMinute(dayOfWeek).compareTo(hourMinute) == 0)
                 return customTime;
         return null;
     }
@@ -47,7 +47,9 @@ public class CustomTime implements Time {
         return mCustomTimeRecord.getName();
     }
 
-    public HourMinute getTimeByDay(DayOfWeek dayOfWeek) {
+    public HourMinute getHourMinute(DayOfWeek dayOfWeek) {
+        Assert.assertTrue(dayOfWeek != null);
+
         switch (dayOfWeek) {
             case SUNDAY:
                 if (mCustomTimeRecord.getSundayHour() != null)
@@ -84,6 +86,37 @@ public class CustomTime implements Time {
                     return new HourMinute(mCustomTimeRecord.getSaturdayHour(), mCustomTimeRecord.getSaturdayMinute());
                 else
                     return null;
+            default:
+                throw new IllegalArgumentException("invalid day: " + dayOfWeek);
+        }
+    }
+
+    public void setHourMinute(DayOfWeek dayOfWeek, HourMinute hourMinute) {
+        Assert.assertTrue(dayOfWeek != null);
+        Assert.assertTrue(hourMinute != null);
+
+        switch (dayOfWeek) {
+            case SUNDAY:
+                mCustomTimeRecord.setSundayHour(hourMinute.getHour());
+                mCustomTimeRecord.setSundayMinute(hourMinute.getMinute());
+            case MONDAY:
+                mCustomTimeRecord.setMondayHour(hourMinute.getHour());
+                mCustomTimeRecord.setMondayMinute(hourMinute.getMinute());
+            case TUESDAY:
+                mCustomTimeRecord.setTuesdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setTuesdayMinute(hourMinute.getMinute());
+            case WEDNESDAY:
+                mCustomTimeRecord.setWednesdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setWednesdayMinute(hourMinute.getMinute());
+            case THURSDAY:
+                mCustomTimeRecord.setThursdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setThursdayMinute(hourMinute.getMinute());
+            case FRIDAY:
+                mCustomTimeRecord.setFridayHour(hourMinute.getHour());
+                mCustomTimeRecord.setFridayMinute(hourMinute.getMinute());
+            case SATURDAY:
+                mCustomTimeRecord.setSaturdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setSaturdayMinute(hourMinute.getMinute());
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }

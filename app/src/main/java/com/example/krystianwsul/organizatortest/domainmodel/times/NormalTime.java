@@ -20,7 +20,7 @@ public class NormalTime implements com.example.krystianwsul.organizatortest.doma
         return mTime.getHour() + ":" + mTime.getMinute();
     }
 
-    public HourMinute getTimeByDay(DayOfWeek day) {
+    public HourMinute getHourMinute(DayOfWeek dayOfWeek) {
         return mTime;
     }
 

@@ -14,9 +14,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
@@ -63,7 +60,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
         timeSundayName.setText(dayOfWeek.toString());
 
         TextView timeSundayTime = (TextView) findViewById(timeId);
-        timeSundayTime.setText(timeText(customTime.getTimeByDay(dayOfWeek)));
+        timeSundayTime.setText(timeText(customTime.getHourMinute(dayOfWeek)));
         timeSundayTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,18 +98,19 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
             Bundle args = getArguments();
 
             int customTimeId = args.getInt("customTimeId");
-            CustomTime customTime = CustomTime.getCustomTime(customTimeId);
+            final CustomTime customTime = CustomTime.getCustomTime(customTimeId);
             Assert.assertTrue(customTime != null);
 
-            DayOfWeek dayOfWeek = (DayOfWeek) args.getSerializable("dayOfWeek");
+            final DayOfWeek dayOfWeek = (DayOfWeek) args.getSerializable("dayOfWeek");
             Assert.assertTrue(dayOfWeek != null);
 
-            HourMinute hourMinute = customTime.getTimeByDay(dayOfWeek);
+            HourMinute hourMinute = customTime.getHourMinute(dayOfWeek);
 
             return new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                 @Override
                 public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                    //edit CustomTime
+                    HourMinute newHourMinute = new HourMinute(hourOfDay, minute);
+                    customTime.setHourMinute(dayOfWeek, newHourMinute);
                 }
             }, hourMinute.getHour(), hourMinute.getMinute(), DateFormat.is24HourFormat(getActivity()));
         }

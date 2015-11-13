@@ -75,7 +75,7 @@ public abstract class SingleSchedule extends Schedule {
 
         DateTime dateTime = getDateTime();
 
-        TimeStamp timeStamp = new TimeStamp(dateTime.getDate(), dateTime.getTime().getTimeByDay(dateTime.getDate().getDayOfWeek()));
+        TimeStamp timeStamp = new TimeStamp(dateTime.getDate(), dateTime.getTime().getHourMinute(dateTime.getDate().getDayOfWeek()));
 
         if (givenStartTimeStamp != null && (givenStartTimeStamp.compareTo(timeStamp) >= 0))
             return instances;

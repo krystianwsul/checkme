@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
@@ -152,7 +151,7 @@ public class DailySchedule extends Schedule {
         ArrayList<Instance> instances = new ArrayList<>();
 
         for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
-            HourMinute hourMinute = dailyScheduleTime.getTime().getTimeByDay(day);
+            HourMinute hourMinute = dailyScheduleTime.getTime().getHourMinute(day);
             if (hourMinute == null)
                 continue;
 

@@ -9,26 +9,26 @@ public class CustomTimeRecord {
     private final int mId;
     private final String mName;
 
-    private final Integer mSundayHour;
-    private final Integer mSundayMinute;
+    private Integer mSundayHour;
+    private Integer mSundayMinute;
 
-    private final Integer mMondayHour;
-    private final Integer mMondayMinute;
+    private Integer mMondayHour;
+    private Integer mMondayMinute;
 
-    private final Integer mTuesdayHour;
-    private final Integer mTuesdayMinute;
+    private Integer mTuesdayHour;
+    private Integer mTuesdayMinute;
 
-    private final Integer mWednesdayHour;
-    private final Integer mWednesdayMinute;
+    private Integer mWednesdayHour;
+    private Integer mWednesdayMinute;
 
-    private final Integer mThursdayHour;
-    private final Integer mThursdayMinute;
+    private Integer mThursdayHour;
+    private Integer mThursdayMinute;
 
-    private final Integer mFridayHour;
-    private final Integer mFridayMinute;
+    private Integer mFridayHour;
+    private Integer mFridayMinute;
 
-    private final Integer mSaturdayHour;
-    private final Integer mSaturdayMinute;
+    private Integer mSaturdayHour;
+    private Integer mSaturdayMinute;
 
     public CustomTimeRecord(int id, String name, Integer sundayHour, Integer sundayMinute, Integer mondayHour, Integer mondayMinute, Integer tuesdayHour, Integer tuesdayMinute, Integer wednesdayHour, Integer wednesdayMinute, Integer thursdayHour, Integer thursdayMinute, Integer fridayHour, Integer fridayMinute, Integer saturdayHour, Integer saturdayMinute) {
         Assert.assertTrue(name != null);
@@ -128,5 +128,61 @@ public class CustomTimeRecord {
 
     public Integer getSaturdayMinute() {
         return mSaturdayMinute;
+    }
+
+    public void setSundayHour(int hour) {
+        mSundayHour = hour;
+    }
+
+    public void setSundayMinute(int minute) {
+        mSundayMinute = minute;
+    }
+
+    public void setMondayHour(int hour) {
+        mMondayHour = hour;
+    }
+
+    public void setMondayMinute(int minute) {
+        mMondayMinute = minute;
+    }
+
+    public void setTuesdayHour(int hour) {
+        mTuesdayHour = hour;
+    }
+
+    public void setTuesdayMinute(int minute) {
+        mTuesdayMinute = minute;
+    }
+
+    public void setWednesdayHour(int hour) {
+        mTuesdayHour = hour;
+    }
+
+    public void setWednesdayMinute(int minute) {
+        mTuesdayMinute = minute;
+    }
+
+    public void setThursdayHour(int hour) {
+        mThursdayHour = hour;
+    }
+
+    public void setThursdayMinute(int minute) {
+        mThursdayMinute = minute;
+    }
+
+    public void setFridayHour(int hour) {
+        mThursdayHour = hour;
+    }
+
+    public void setFridayMinute(int minute) {
+        mThursdayMinute = minute;
+    }
+
+    public void setSaturdayHour(int hour) {
+        mThursdayHour = hour;
+    }
+
+    public void setSaturdayMinute(int minute) {
+        mThursdayMinute = minute;
     }
 }

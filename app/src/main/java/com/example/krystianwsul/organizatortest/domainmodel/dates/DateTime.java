@@ -17,7 +17,7 @@ public class DateTime implements Comparable<DateTime> {
     public DateTime(Date date, Time time) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(time != null);
-        Assert.assertTrue(time.getTimeByDay(date.getDayOfWeek()) != null);
+        Assert.assertTrue(time.getHourMinute(date.getDayOfWeek()) != null);
 
         mDate = date;
         mTime = time;
@@ -37,8 +37,8 @@ public class DateTime implements Comparable<DateTime> {
             return dateComparison;
 
         DayOfWeek day = mDate.getDayOfWeek();
-        HourMinute myHourMinute = mTime.getTimeByDay(day);
-        HourMinute otherHourMinute = dateTime.getTime().getTimeByDay(day);
+        HourMinute myHourMinute = mTime.getHourMinute(day);
+        HourMinute otherHourMinute = dateTime.getTime().getHourMinute(day);
 
         Assert.assertTrue(myHourMinute != null);
         Assert.assertTrue(otherHourMinute != null);
@@ -56,6 +56,6 @@ public class DateTime implements Comparable<DateTime> {
     }
 
     public TimeStamp getTimeStamp() {
-        return new TimeStamp(mDate, mTime.getTimeByDay(mDate.getDayOfWeek()));
+        return new TimeStamp(mDate, mTime.getHourMinute(mDate.getDayOfWeek()));
     }
 }

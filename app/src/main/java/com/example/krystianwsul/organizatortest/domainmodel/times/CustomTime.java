@@ -99,24 +99,31 @@ public class CustomTime implements Time {
             case SUNDAY:
                 mCustomTimeRecord.setSundayHour(hourMinute.getHour());
                 mCustomTimeRecord.setSundayMinute(hourMinute.getMinute());
+                break;
             case MONDAY:
                 mCustomTimeRecord.setMondayHour(hourMinute.getHour());
                 mCustomTimeRecord.setMondayMinute(hourMinute.getMinute());
+                break;
             case TUESDAY:
                 mCustomTimeRecord.setTuesdayHour(hourMinute.getHour());
                 mCustomTimeRecord.setTuesdayMinute(hourMinute.getMinute());
+                break;
             case WEDNESDAY:
                 mCustomTimeRecord.setWednesdayHour(hourMinute.getHour());
                 mCustomTimeRecord.setWednesdayMinute(hourMinute.getMinute());
+                break;
             case THURSDAY:
                 mCustomTimeRecord.setThursdayHour(hourMinute.getHour());
                 mCustomTimeRecord.setThursdayMinute(hourMinute.getMinute());
+                break;
             case FRIDAY:
                 mCustomTimeRecord.setFridayHour(hourMinute.getHour());
                 mCustomTimeRecord.setFridayMinute(hourMinute.getMinute());
+                break;
             case SATURDAY:
                 mCustomTimeRecord.setSaturdayHour(hourMinute.getHour());
                 mCustomTimeRecord.setSaturdayMinute(hourMinute.getMinute());
+                break;
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }

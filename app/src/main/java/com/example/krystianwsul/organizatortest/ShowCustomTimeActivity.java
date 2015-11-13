@@ -1,17 +1,12 @@
 package com.example.krystianwsul.organizatortest;
 
-import android.app.Dialog;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
@@ -19,7 +14,9 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-public class ShowCustomTimeActivity extends AppCompatActivity {
+import java.util.HashMap;
+
+public class ShowCustomTimeActivity extends AppCompatActivity implements TimePickerFragment.TimePickerFragmentListener {
     private static final String INTENT_KEY = "customTimeId";
 
     public static Intent getIntent(CustomTime customTime, Context context) {
@@ -27,6 +24,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
         intent.putExtra(INTENT_KEY, customTime.getId());
         return intent;
     }
+
+    private CustomTime mCustomTime;
+    private HashMap<DayOfWeek, TextView> mTimes = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,38 +37,38 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int customTimeId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(customTimeId != -1);
-        final CustomTime customTime = CustomTime.getCustomTime(customTimeId);
-        Assert.assertTrue(customTime != null);
+        mCustomTime = CustomTime.getCustomTime(customTimeId);
+        Assert.assertTrue(mCustomTime != null);
 
         TextView customTimeName = (TextView) findViewById(R.id.custom_time_name);
-        customTimeName.setText(customTime.getName());
+        customTimeName.setText(mCustomTime.getName());
 
-        initializeDay(customTime, DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
-        initializeDay(customTime, DayOfWeek.MONDAY, R.id.time_monday_name, R.id.time_monday_time);
-        initializeDay(customTime, DayOfWeek.TUESDAY, R.id.time_tuesday_name, R.id.time_tuesday_time);
-        initializeDay(customTime, DayOfWeek.WEDNESDAY, R.id.time_wednesday_name, R.id.time_wednesday_time);
-        initializeDay(customTime, DayOfWeek.THURSDAY, R.id.time_thursday_name, R.id.time_thursday_time);
-        initializeDay(customTime, DayOfWeek.FRIDAY, R.id.time_friday_name, R.id.time_friday_time);
-        initializeDay(customTime, DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time);
+        initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
+        initializeDay(DayOfWeek.MONDAY, R.id.time_monday_name, R.id.time_monday_time);
+        initializeDay(DayOfWeek.TUESDAY, R.id.time_tuesday_name, R.id.time_tuesday_time);
+        initializeDay(DayOfWeek.WEDNESDAY, R.id.time_wednesday_name, R.id.time_wednesday_time);
+        initializeDay(DayOfWeek.THURSDAY, R.id.time_thursday_name, R.id.time_thursday_time);
+        initializeDay(DayOfWeek.FRIDAY, R.id.time_friday_name, R.id.time_friday_time);
+        initializeDay(DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time);
     }
 
-    private void initializeDay(final CustomTime customTime, final DayOfWeek dayOfWeek, int nameId, int timeId) {
-        Assert.assertTrue(customTime != null);
+    private void initializeDay(final DayOfWeek dayOfWeek, int nameId, int timeId) {
         Assert.assertTrue(dayOfWeek != null);
 
         TextView timeSundayName = (TextView) findViewById(nameId);
         timeSundayName.setText(dayOfWeek.toString());
 
         TextView timeSundayTime = (TextView) findViewById(timeId);
-        timeSundayTime.setText(timeText(customTime.getHourMinute(dayOfWeek)));
+        timeSundayTime.setText(timeText(mCustomTime.getHourMinute(dayOfWeek)));
         timeSundayTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(customTime, dayOfWeek);
+                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mCustomTime, dayOfWeek);
                 timePickerFragment.show(fragmentManager, "tag");
             }
         });
+        mTimes.put(dayOfWeek, timeSundayTime);
     }
 
     private String timeText(HourMinute hourMinute) {
@@ -78,41 +78,10 @@ public class ShowCustomTimeActivity extends AppCompatActivity {
             return hourMinute.toString();
     }
 
-    public static class TimePickerFragment extends DialogFragment {
-        public static TimePickerFragment newInstance(CustomTime customTime, DayOfWeek dayOfWeek) {
-            Assert.assertTrue(customTime != null);
-            Assert.assertTrue(dayOfWeek != null);
-
-            TimePickerFragment timePickerFragment = new TimePickerFragment();
-
-            Bundle args = new Bundle();
-            args.putInt("customTimeId", customTime.getId());
-            args.putSerializable("dayOfWeek", dayOfWeek);
-            timePickerFragment.setArguments(args);
-
-            return timePickerFragment;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            Bundle args = getArguments();
-
-            int customTimeId = args.getInt("customTimeId");
-            final CustomTime customTime = CustomTime.getCustomTime(customTimeId);
-            Assert.assertTrue(customTime != null);
-
-            final DayOfWeek dayOfWeek = (DayOfWeek) args.getSerializable("dayOfWeek");
-            Assert.assertTrue(dayOfWeek != null);
-
-            HourMinute hourMinute = customTime.getHourMinute(dayOfWeek);
-
-            return new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                @Override
-                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                    HourMinute newHourMinute = new HourMinute(hourOfDay, minute);
-                    customTime.setHourMinute(dayOfWeek, newHourMinute);
-                }
-            }, hourMinute.getHour(), hourMinute.getMinute(), DateFormat.is24HourFormat(getActivity()));
-        }
+    public void onTimePickerFragmentResult(DayOfWeek dayOfWeek) {
+        Assert.assertTrue(dayOfWeek != null);
+        Assert.assertTrue(mTimes.containsKey(dayOfWeek));
+        mTimes.get(dayOfWeek).setText(mCustomTime.getHourMinute(dayOfWeek).toString());
     }
 }
+

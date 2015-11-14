@@ -38,9 +38,9 @@ public class DateTime implements Comparable<DateTime> {
 
         DayOfWeek day = mDate.getDayOfWeek();
         HourMinute myHourMinute = mTime.getHourMinute(day);
-        HourMinute otherHourMinute = dateTime.getTime().getHourMinute(day);
-
         Assert.assertTrue(myHourMinute != null);
+
+        HourMinute otherHourMinute = dateTime.getTime().getHourMinute(day);
         Assert.assertTrue(otherHourMinute != null);
 
         int x = myHourMinute.compareTo(otherHourMinute);

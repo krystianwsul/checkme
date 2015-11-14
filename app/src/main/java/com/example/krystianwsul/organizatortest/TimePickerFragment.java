@@ -52,6 +52,7 @@ public class TimePickerFragment extends DialogFragment {
         Assert.assertTrue(dayOfWeek != null);
 
         HourMinute hourMinute = customTime.getHourMinute(dayOfWeek);
+        Assert.assertTrue(hourMinute != null);
 
         return new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
             @Override

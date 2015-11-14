@@ -9,37 +9,29 @@ public class CustomTimeRecord {
     private final int mId;
     private final String mName;
 
-    private Integer mSundayHour;
-    private Integer mSundayMinute;
+    private int mSundayHour;
+    private int mSundayMinute;
 
-    private Integer mMondayHour;
-    private Integer mMondayMinute;
+    private int mMondayHour;
+    private int mMondayMinute;
 
-    private Integer mTuesdayHour;
-    private Integer mTuesdayMinute;
+    private int mTuesdayHour;
+    private int mTuesdayMinute;
 
-    private Integer mWednesdayHour;
-    private Integer mWednesdayMinute;
+    private int mWednesdayHour;
+    private int mWednesdayMinute;
 
-    private Integer mThursdayHour;
-    private Integer mThursdayMinute;
+    private int mThursdayHour;
+    private int mThursdayMinute;
 
-    private Integer mFridayHour;
-    private Integer mFridayMinute;
+    private int mFridayHour;
+    private int mFridayMinute;
 
-    private Integer mSaturdayHour;
-    private Integer mSaturdayMinute;
+    private int mSaturdayHour;
+    private int mSaturdayMinute;
 
-    public CustomTimeRecord(int id, String name, Integer sundayHour, Integer sundayMinute, Integer mondayHour, Integer mondayMinute, Integer tuesdayHour, Integer tuesdayMinute, Integer wednesdayHour, Integer wednesdayMinute, Integer thursdayHour, Integer thursdayMinute, Integer fridayHour, Integer fridayMinute, Integer saturdayHour, Integer saturdayMinute) {
+    public CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
         Assert.assertTrue(name != null);
-        Assert.assertTrue((sundayHour == null) == (sundayMinute == null));
-        Assert.assertTrue((mondayHour == null) == (mondayMinute == null));
-        Assert.assertTrue((tuesdayHour == null) == (tuesdayMinute == null));
-        Assert.assertTrue((wednesdayHour == null) == (wednesdayMinute == null));
-        Assert.assertTrue((thursdayHour == null) == (thursdayMinute == null));
-        Assert.assertTrue((fridayHour == null) == (fridayMinute == null));
-        Assert.assertTrue((saturdayHour == null) == (saturdayMinute == null));
-        Assert.assertTrue((sundayHour != null) || (mondayHour != null) || (tuesdayHour != null) || (wednesdayHour != null) || (thursdayHour != null) || (fridayHour != null) || (saturdayHour != null));
 
         mId = id;
         mName = name;
@@ -74,59 +66,59 @@ public class CustomTimeRecord {
         return mName;
     }
 
-    public Integer getSundayHour() {
+    public int getSundayHour() {
         return mSundayHour;
     }
 
-    public Integer getSundayMinute() {
+    public int getSundayMinute() {
         return mSundayMinute;
     }
 
-    public Integer getMondayHour() {
+    public int getMondayHour() {
         return mMondayHour;
     }
 
-    public Integer getMondayMinute() {
+    public int getMondayMinute() {
         return mMondayMinute;
     }
 
-    public Integer getTuesdayHour() {
+    public int getTuesdayHour() {
         return mTuesdayHour;
     }
 
-    public Integer getTuesdayMinute() {
+    public int getTuesdayMinute() {
         return mTuesdayMinute;
     }
 
-    public Integer getWednesdayHour() {
+    public int getWednesdayHour() {
         return mWednesdayHour;
     }
 
-    public Integer getWednesdayMinute() {
+    public int getWednesdayMinute() {
         return mWednesdayMinute;
     }
 
-    public Integer getThursdayHour() {
+    public int getThursdayHour() {
         return mThursdayHour;
     }
 
-    public Integer getThursdayMinute() {
+    public int getThursdayMinute() {
         return mThursdayMinute;
     }
 
-    public Integer getFridayHour() {
+    public int getFridayHour() {
         return mFridayHour;
     }
 
-    public Integer getFridayMinute() {
+    public int getFridayMinute() {
         return mFridayMinute;
     }
 
-    public Integer getSaturdayHour() {
+    public int getSaturdayHour() {
         return mSaturdayHour;
     }
 
-    public Integer getSaturdayMinute() {
+    public int getSaturdayMinute() {
         return mSaturdayMinute;
     }
 

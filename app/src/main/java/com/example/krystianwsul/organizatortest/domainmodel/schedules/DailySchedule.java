@@ -152,8 +152,7 @@ public class DailySchedule extends Schedule {
 
         for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
             HourMinute hourMinute = dailyScheduleTime.getTime().getHourMinute(day);
-            if (hourMinute == null)
-                continue;
+            Assert.assertTrue(hourMinute != null);
 
             if (startHourMinute != null && startHourMinute.compareTo(hourMinute) > 0)
                 continue;

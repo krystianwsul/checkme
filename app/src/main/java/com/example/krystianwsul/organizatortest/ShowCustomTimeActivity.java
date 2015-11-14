@@ -59,7 +59,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
         timeSundayName.setText(dayOfWeek.toString());
 
         TextView timeSundayTime = (TextView) findViewById(timeId);
-        timeSundayTime.setText(timeText(mCustomTime.getHourMinute(dayOfWeek)));
+        timeSundayTime.setText(mCustomTime.getHourMinute(dayOfWeek).toString());
         timeSundayTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,13 +69,6 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
             }
         });
         mTimes.put(dayOfWeek, timeSundayTime);
-    }
-
-    private String timeText(HourMinute hourMinute) {
-        if (hourMinute == null)
-            return getResources().getString(R.string.none);
-        else
-            return hourMinute.toString();
     }
 
     public void onTimePickerFragmentResult(DayOfWeek dayOfWeek) {

@@ -142,8 +142,7 @@ public class WeeklySchedule extends Schedule {
                 continue;
 
             HourMinute hourMinute = weeklyScheduleDayTime.getTime().getHourMinute(day);
-            if (hourMinute == null)
-                continue;
+            Assert.assertTrue(hourMinute != null);
 
             if (startHourMinute != null && startHourMinute.compareTo(hourMinute) > 0)
                 continue;

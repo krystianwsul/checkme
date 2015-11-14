@@ -52,7 +52,7 @@ public class PersistenceManger {
 
         CustomTimeRecord afterWaking = new CustomTimeRecord(0, "po wstaniu", 9, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 9, 0);
         mCustomTimeRecords.put(afterWaking.getId(), afterWaking);
-        CustomTimeRecord afterWork = new CustomTimeRecord(1, "po pracy", null, null, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, null, null);
+        CustomTimeRecord afterWork = new CustomTimeRecord(1, "po pracy", 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0);
         mCustomTimeRecords.put(afterWork.getId(), afterWork);
 
         TaskRecord zakupy = new TaskRecord(0, null, "zakupy");

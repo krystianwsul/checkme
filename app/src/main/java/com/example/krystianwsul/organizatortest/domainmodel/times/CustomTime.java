@@ -52,40 +52,19 @@ public class CustomTime implements Time {
 
         switch (dayOfWeek) {
             case SUNDAY:
-                if (mCustomTimeRecord.getSundayHour() != null)
-                    return new HourMinute(mCustomTimeRecord.getSundayHour(), mCustomTimeRecord.getSundayMinute());
-                else
-                    return null;
+                return new HourMinute(mCustomTimeRecord.getSundayHour(), mCustomTimeRecord.getSundayMinute());
             case MONDAY:
-                if (mCustomTimeRecord.getMondayHour() != null)
-                    return new HourMinute(mCustomTimeRecord.getMondayHour(), mCustomTimeRecord.getMondayMinute());
-                else
-                    return null;
+                return new HourMinute(mCustomTimeRecord.getMondayHour(), mCustomTimeRecord.getMondayMinute());
             case TUESDAY:
-                if (mCustomTimeRecord.getTuesdayHour() != null)
-                    return new HourMinute(mCustomTimeRecord.getTuesdayHour(), mCustomTimeRecord.getTuesdayMinute());
-                else
-                    return null;
+                return new HourMinute(mCustomTimeRecord.getTuesdayHour(), mCustomTimeRecord.getTuesdayMinute());
             case WEDNESDAY:
-                if (mCustomTimeRecord.getWednesdayHour() != null)
-                    return new HourMinute(mCustomTimeRecord.getWednesdayHour(), mCustomTimeRecord.getWednesdayMinute());
-                else
-                    return null;
+                return new HourMinute(mCustomTimeRecord.getWednesdayHour(), mCustomTimeRecord.getWednesdayMinute());
             case THURSDAY:
-                if (mCustomTimeRecord.getThursdayHour() != null)
-                    return new HourMinute(mCustomTimeRecord.getThursdayHour(), mCustomTimeRecord.getThursdayMinute());
-                else
-                    return null;
+                return new HourMinute(mCustomTimeRecord.getThursdayHour(), mCustomTimeRecord.getThursdayMinute());
             case FRIDAY:
-                if (mCustomTimeRecord.getFridayHour() != null)
-                    return new HourMinute(mCustomTimeRecord.getFridayHour(), mCustomTimeRecord.getFridayMinute());
-                else
-                    return null;
+                return new HourMinute(mCustomTimeRecord.getFridayHour(), mCustomTimeRecord.getFridayMinute());
             case SATURDAY:
-                if (mCustomTimeRecord.getSaturdayHour() != null)
-                    return new HourMinute(mCustomTimeRecord.getSaturdayHour(), mCustomTimeRecord.getSaturdayMinute());
-                else
-                    return null;
+                return new HourMinute(mCustomTimeRecord.getSaturdayHour(), mCustomTimeRecord.getSaturdayMinute());
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }

@@ -30,7 +30,7 @@ public class CustomTimeRecord {
     private int mSaturdayHour;
     private int mSaturdayMinute;
 
-    public CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
+    CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
         Assert.assertTrue(name != null);
 
         mId = id;

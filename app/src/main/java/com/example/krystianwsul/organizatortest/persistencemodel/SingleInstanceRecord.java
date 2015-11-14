@@ -10,7 +10,7 @@ public class SingleInstanceRecord {
 
     private final boolean mDone;
 
-    public SingleInstanceRecord(int taskId, int rootTaskId, boolean done) {
+    SingleInstanceRecord(int taskId, int rootTaskId, boolean done) {
         mTaskId = taskId;
 
         mRootTaskId = rootTaskId;

@@ -12,7 +12,7 @@ public class WeeklyInstanceRecord {
 
     private final boolean mDone;
 
-    public WeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, boolean done) {
+    WeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, boolean done) {
         mId = id;
 
         mTaskId = taskId;

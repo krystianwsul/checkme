@@ -18,8 +18,6 @@ public abstract class Task {
     protected final TaskRecord mTaskRecord;
     protected ArrayList<ChildTask> mChildrenTasks = new ArrayList<>();
 
-    private static final HashMap<Integer, Task> sTasks = new HashMap<>();
-
     protected Task(TaskRecord taskRecord) {
         Assert.assertTrue(taskRecord != null);
         mTaskRecord = taskRecord;

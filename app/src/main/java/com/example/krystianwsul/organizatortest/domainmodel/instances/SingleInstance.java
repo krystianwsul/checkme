@@ -25,30 +25,6 @@ public abstract class SingleInstance implements Instance {
 
     public static final String INTENT_KEY = "singleInstanceId";
 
-    private static final HashMap<Integer, SingleInstance> sSingleInstances = new HashMap<>();
-
-    public static SingleInstance getSingleInstance(int taskId) {
-        Assert.assertTrue(sSingleInstances.containsKey(taskId));
-        return sSingleInstances.get(taskId);
-    }
-
-    public static SingleInstance getSingleInstance(Task task, SingleRepetition singleRepetition) {
-        SingleInstance existingSingleInstance = sSingleInstances.get(task.getId());
-        if (existingSingleInstance != null)
-            return existingSingleInstance;
-
-        SingleInstanceRecord singleInstanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
-        if (singleInstanceRecord != null) {
-            RealSingleInstance realSingleInstance = new RealSingleInstance(task, singleInstanceRecord, singleRepetition);
-            sSingleInstances.put(realSingleInstance.getTaskId(), realSingleInstance);
-            return realSingleInstance;
-        }
-
-        VirtualSingleInstance virtualSingleInstance = new VirtualSingleInstance(task, singleRepetition);
-        sSingleInstances.put(virtualSingleInstance.getTaskId(), virtualSingleInstance);
-        return virtualSingleInstance;
-    }
-
     protected SingleInstance(Task task, SingleRepetition singleRepetition) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(singleRepetition != null);
@@ -70,7 +46,7 @@ public abstract class SingleInstance implements Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(getSingleInstance(childTask, mSingleRepetition));
+            childInstances.add(SingleInstanceFactory.getInstance().getSingleInstance(childTask, mSingleRepetition));
         return childInstances;
     }
 

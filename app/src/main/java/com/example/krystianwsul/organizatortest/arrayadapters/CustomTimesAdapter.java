@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 
 import junit.framework.Assert;
 
@@ -22,12 +23,12 @@ public class CustomTimesAdapter extends ArrayAdapter<CustomTime> {
     private final ArrayList<CustomTime> mCustomTimes;
 
     public CustomTimesAdapter(Context context) {
-        super(context, -1, new ArrayList<>(CustomTime.getCustomTimes()));
+        super(context, -1, new ArrayList<>(CustomTimeFactory.getCustomTimes()));
 
         Assert.assertTrue(context != null);
         mContext = context;
 
-        mCustomTimes = new ArrayList<>(CustomTime.getCustomTimes());
+        mCustomTimes = new ArrayList<>(CustomTimeFactory.getCustomTimes());
         Assert.assertTrue(mCustomTimes != null);
     }
 

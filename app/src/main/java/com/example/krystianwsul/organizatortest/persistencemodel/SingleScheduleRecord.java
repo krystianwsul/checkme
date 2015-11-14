@@ -17,7 +17,7 @@ public class SingleScheduleRecord {
     private final Integer mHour;
     private final Integer mMinute;
 
-    public SingleScheduleRecord(int rootTaskId, int year, int month, int day, Integer customTimeId, Integer hour, Integer minute) {
+    SingleScheduleRecord(int rootTaskId, int year, int month, int day, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));

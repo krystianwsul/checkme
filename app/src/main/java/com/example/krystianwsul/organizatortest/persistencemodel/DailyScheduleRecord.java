@@ -13,7 +13,7 @@ public class DailyScheduleRecord {
     private final long mStartTime;
     private final Long mEndTime;
 
-    public DailyScheduleRecord(int id, int rootTaskId, long startTime, Long endTime) {
+    DailyScheduleRecord(int id, int rootTaskId, long startTime, Long endTime) {
         Assert.assertTrue((endTime == null) || startTime < endTime);
 
         mId = id;

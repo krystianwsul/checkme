@@ -8,6 +8,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
@@ -41,7 +42,7 @@ public class Group {
         } else {
             Date date = mTimeStamp.getDate();
             HourMinute hourMinute = mTimeStamp.getHourMinute();
-            Time time = CustomTime.getCustomTime(date.getDayOfWeek(), hourMinute);
+            Time time = CustomTimeFactory.getCustomTime(date.getDayOfWeek(), hourMinute);
             if (time == null)
                 time = new NormalTime(hourMinute);
             DateTime dateTime = new DateTime(date, time);

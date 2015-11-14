@@ -27,51 +27,14 @@ public class DailySchedule extends Schedule {
     private final DailyScheduleRecord mDailyScheduleRecord;
     private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
 
-    private static final HashMap<Integer, DailySchedule> sDailySchedules = new HashMap<>();
-
-    public static DailySchedule getDailySchedule(int dailyScheduleId, RootTask rootTask) {
-        Assert.assertTrue(rootTask != null);
-
-        if (sDailySchedules.containsKey(dailyScheduleId)) {
-            return sDailySchedules.get(dailyScheduleId);
-        } else {
-            DailySchedule dailySchedule = createDailySchedule(dailyScheduleId, rootTask);
-            if (dailySchedule == null)
-                return null;
-
-            sDailySchedules.put(dailyScheduleId, dailySchedule);
-            return dailySchedule;
-        }
-    }
-
-    private static DailySchedule createDailySchedule(int dailyScheduleId, RootTask rootTask) {
-        Assert.assertTrue(rootTask != null);
-
-        PersistenceManger persistenceManger = PersistenceManger.getInstance();
-
-        DailyScheduleRecord dailyScheduleRecord = persistenceManger.getDailyScheduleRecord(dailyScheduleId);
-        if (dailyScheduleRecord == null)
-            return null;
-
-        DailySchedule dailySchedule = new DailySchedule(dailyScheduleRecord, rootTask);
-
-        ArrayList<Integer> dailyScheduleTimeIds = persistenceManger.getDailyScheduleTimeIds(dailyScheduleId);
-        Assert.assertTrue(!dailyScheduleTimeIds.isEmpty());
-
-        for (Integer dailyScheduleTimeId : dailyScheduleTimeIds)
-            dailySchedule.addDailyScheduleTime(DailyScheduleTime.getDailyScheduleTime(dailyScheduleTimeId, dailySchedule));
-
-        return dailySchedule;
-    }
-
-    private DailySchedule(DailyScheduleRecord dailyScheduleRecord, RootTask rootTask) {
+    DailySchedule(DailyScheduleRecord dailyScheduleRecord, RootTask rootTask) {
         super(rootTask);
 
         Assert.assertTrue(dailyScheduleRecord != null);
         mDailyScheduleRecord = dailyScheduleRecord;
     }
 
-    private void addDailyScheduleTime(DailyScheduleTime dailyScheduleTime) {
+    void addDailyScheduleTime(DailyScheduleTime dailyScheduleTime) {
         Assert.assertTrue(dailyScheduleTime != null);
         mDailyScheduleTimes.add(dailyScheduleTime);
     }

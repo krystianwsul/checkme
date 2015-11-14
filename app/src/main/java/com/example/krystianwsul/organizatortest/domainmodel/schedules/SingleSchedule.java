@@ -5,6 +5,7 @@ import android.content.Context;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
@@ -23,33 +24,6 @@ import java.util.HashMap;
  */
 public abstract class SingleSchedule extends Schedule {
     protected final SingleScheduleRecord mSingleScheduleRecord;
-
-    private final static HashMap<Integer, SingleSchedule> sSingleSchedules = new HashMap<>();
-
-    public static SingleSchedule getSingleSchedule(RootTask rootTask) {
-        Assert.assertTrue(rootTask != null);
-        if (sSingleSchedules.containsKey(rootTask.getId())) {
-            return sSingleSchedules.get(rootTask.getId());
-        } else {
-            SingleSchedule singleSchedule = createSingleSchedule(rootTask);
-            if (singleSchedule == null)
-                return null;
-
-            sSingleSchedules.put(rootTask.getId(), singleSchedule);
-            return singleSchedule;
-        }
-    }
-
-    private static SingleSchedule createSingleSchedule(RootTask rootTask) {
-        SingleScheduleRecord singleScheduleRecord = PersistenceManger.getInstance().getSingleScheduleRecord(rootTask.getId());
-        if (singleScheduleRecord == null)
-            return null;
-
-        if (singleScheduleRecord.getCustomTimeId() == null)
-            return new SingleNormalSchedule(singleScheduleRecord, rootTask);
-        else
-            return new SingleCustomSchedule(singleScheduleRecord, rootTask);
-    }
 
     protected SingleSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
         super(rootTask);
@@ -84,7 +58,7 @@ public abstract class SingleSchedule extends Schedule {
         if (givenEndTimeStamp.compareTo(timeStamp) < 0)
             return instances;
 
-        instances.add(SingleRepetition.getSingleRepetition(this).getInstance(mRootTask));
+        instances.add(SingleRepetitionFactory.getInstance().getSingleRepetition(this).getInstance(mRootTask));
 
         return instances;
     }

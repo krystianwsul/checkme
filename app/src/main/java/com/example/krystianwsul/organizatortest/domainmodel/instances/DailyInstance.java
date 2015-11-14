@@ -23,38 +23,7 @@ public abstract class DailyInstance implements Instance {
 
     public static final String INTENT_KEY = "dailyInstanceId";
 
-    private static final HashMap<Integer, DailyInstance> sDailyInstances = new HashMap<>();
-
-    public static DailyInstance getDailyInstance(int dailyInstanceId) {
-        Assert.assertTrue(sDailyInstances.containsKey(dailyInstanceId));
-        return sDailyInstances.get(dailyInstanceId);
-    }
-
-    public static DailyInstance getDailyInstance(Task task, DailyRepetition dailyRepetition) {
-        DailyInstance existingDailyInstance = getExistingDailyInstance(task.getId(), dailyRepetition.getId());
-        if (existingDailyInstance != null)
-            return existingDailyInstance;
-
-        DailyInstanceRecord dailyInstanceRecord = PersistenceManger.getInstance().getDailyInstanceRecord(task.getId(), dailyRepetition.getId());
-        if (dailyInstanceRecord != null) {
-            RealDailyInstance realDailyInstance = new RealDailyInstance(task, dailyInstanceRecord, dailyRepetition);
-            sDailyInstances.put(realDailyInstance.getId(), realDailyInstance);
-            return realDailyInstance;
-        }
-
-        VirtualDailyInstance virtualDailyInstance = new VirtualDailyInstance(task, dailyRepetition);
-        sDailyInstances.put(virtualDailyInstance.getId(), virtualDailyInstance);
-        return virtualDailyInstance;
-    }
-
-    private static DailyInstance getExistingDailyInstance(int taskId, int dailyRepetitionId) {
-        for (DailyInstance dailyInstance : sDailyInstances.values())
-            if (dailyInstance.getTaskId() == taskId && dailyInstance.getDailyRepetitionId() == dailyRepetitionId)
-                return dailyInstance;
-        return null;
-    }
-
-    public DailyInstance(Task task, DailyRepetition dailyRepetition) {
+    protected DailyInstance(Task task, DailyRepetition dailyRepetition) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(dailyRepetition != null);
         mTask = task;
@@ -87,7 +56,7 @@ public abstract class DailyInstance implements Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(getDailyInstance(childTask, mDailyRepetition));
+            childInstances.add(DailyInstanceFactory.getInstance().getDailyInstance(childTask, mDailyRepetition));
         return childInstances;
     }
 

@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.ScheduleFactory;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
@@ -38,7 +39,7 @@ public class TaskFactory {
 
             RootTask rootTask = new RootTask(taskRecord);
 
-            ArrayList<Schedule> schedules = Schedule.getSchedules(rootTask);
+            ArrayList<Schedule> schedules = ScheduleFactory.getInstance().getSchedules(rootTask);
             Assert.assertTrue(schedules != null);
             Assert.assertTrue(!schedules.isEmpty());
             rootTask.setSchedules(schedules);

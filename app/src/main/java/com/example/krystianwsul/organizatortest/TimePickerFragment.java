@@ -10,6 +10,7 @@ import android.widget.TimePicker;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
@@ -45,7 +46,7 @@ public class TimePickerFragment extends DialogFragment {
         Bundle args = getArguments();
 
         int customTimeId = args.getInt("customTimeId");
-        final CustomTime customTime = CustomTime.getCustomTime(customTimeId);
+        final CustomTime customTime = CustomTimeFactory.getCustomTime(customTimeId);
         Assert.assertTrue(customTime != null);
 
         final DayOfWeek dayOfWeek = (DayOfWeek) args.getSerializable("dayOfWeek");

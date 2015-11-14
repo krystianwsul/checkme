@@ -23,7 +23,7 @@ public class DailyRepetitionRecord {
     private final Integer mHour;
     private final Integer mMinute;
 
-    public DailyRepetitionRecord(int id, int dailyScheduleTimeId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer repetitionYear, Integer repetitionMonth, Integer repetitionDay, Integer customTimeId, Integer hour, Integer minute) {
+    DailyRepetitionRecord(int id, int dailyScheduleTimeId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer repetitionYear, Integer repetitionMonth, Integer repetitionDay, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((repetitionYear == null) == (repetitionMonth == null) == (repetitionDay == null));
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));

@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
 
@@ -19,7 +20,7 @@ public class SingleCustomSchedule extends SingleSchedule {
         Assert.assertTrue(mSingleScheduleRecord.getHour() == null);
         Assert.assertTrue(mSingleScheduleRecord.getMinute() == null);
 
-        mCustomTime = CustomTime.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
+        mCustomTime = CustomTimeFactory.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
     }
 
     public Time getTime() {

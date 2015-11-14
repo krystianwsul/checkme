@@ -5,6 +5,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
@@ -22,26 +23,6 @@ import java.util.HashMap;
  */
 public abstract class SingleRepetition {
     protected final SingleSchedule mSingleSchedule;
-
-    private static final HashMap<Integer, SingleRepetition> sSingleRepetitions = new HashMap<>();
-
-    public static SingleRepetition getSingleRepetition(SingleSchedule singleSchedule) {
-        Assert.assertTrue(singleSchedule != null);
-
-        if (sSingleRepetitions.containsKey(singleSchedule.getRootTaskId()))
-            return sSingleRepetitions.get(singleSchedule.getRootTaskId());
-
-        SingleRepetitionRecord singleRepetitionRecord = PersistenceManger.getInstance().getSingleRepetitionRecord(singleSchedule.getRootTaskId());
-        if (singleRepetitionRecord != null) {
-            RealSingleRepetition realSingleRepetition = new RealSingleRepetition(singleRepetitionRecord, singleSchedule);
-            sSingleRepetitions.put(realSingleRepetition.getRootTaskId(), realSingleRepetition);
-            return realSingleRepetition;
-        }
-
-        VirtualSingleRepetition virtualSingleRepetition = new VirtualSingleRepetition(singleSchedule);
-        sSingleRepetitions.put(virtualSingleRepetition.getRootTaskId(), virtualSingleRepetition);
-        return virtualSingleRepetition;
-    }
 
     protected SingleRepetition(SingleSchedule singleSchedule) {
         Assert.assertTrue(singleSchedule != null);
@@ -73,6 +54,6 @@ public abstract class SingleRepetition {
     }
 
     public Instance getInstance(Task task) {
-        return SingleInstance.getSingleInstance(task, this);
+        return SingleInstanceFactory.getInstance().getSingleInstance(task, this);
     }
 }

@@ -14,7 +14,7 @@ public class DailyScheduleTimeRecord {
     private final Integer mHour;
     private final Integer mMinute;
 
-    public DailyScheduleTimeRecord(int id, int dailyScheduleId, Integer customTimeId, Integer hour, Integer minute) {
+    DailyScheduleTimeRecord(int id, int dailyScheduleId, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));

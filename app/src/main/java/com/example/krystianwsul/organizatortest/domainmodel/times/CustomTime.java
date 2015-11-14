@@ -16,32 +16,9 @@ import java.util.HashMap;
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
 
-    private static HashMap<Integer, CustomTime> sCustomTimes = new HashMap<>();
-
     private final ArrayList<CustomTimeListener> mCustomTimeListeners = new ArrayList<>();
 
-    public static CustomTime getCustomTime(int customTimeId) {
-        if (sCustomTimes.containsKey(customTimeId)) {
-            return sCustomTimes.get(customTimeId);
-        } else {
-            CustomTime customTime = new CustomTime(customTimeId);
-            sCustomTimes.put(customTimeId, customTime);
-            return customTime;
-        }
-    }
-
-    public static CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
-        for (CustomTime customTime : sCustomTimes.values())
-            if (customTime.getHourMinute(dayOfWeek).compareTo(hourMinute) == 0)
-                return customTime;
-        return null;
-    }
-
-    public static Collection<CustomTime> getCustomTimes() {
-        return sCustomTimes.values();
-    }
-
-    private CustomTime(int customTimeId) {
+    CustomTime(int customTimeId) {
         mCustomTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(customTimeId);
         Assert.assertTrue(mCustomTimeRecord != null);
     }

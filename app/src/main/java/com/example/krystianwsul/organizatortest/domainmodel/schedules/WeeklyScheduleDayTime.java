@@ -4,6 +4,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -19,26 +20,6 @@ import java.util.HashMap;
 public abstract class WeeklyScheduleDayTime {
     protected final WeeklyScheduleDayTimeRecord mWeeklyScheduleDayTimeRecord;
     protected final WeeklySchedule mWeeklySchedule;
-
-    private final static HashMap<Integer, WeeklyScheduleDayTime> sWeeklyScheduleDayTimes = new HashMap<>();
-
-    public static WeeklyScheduleDayTime getWeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
-        if (sWeeklyScheduleDayTimes.containsKey(weeklyScheduleDayTimeId)) {
-            return sWeeklyScheduleDayTimes.get(weeklyScheduleDayTimeId);
-        } else {
-            WeeklyScheduleDayTime weeklyScheduleDayTime = createWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule);
-            sWeeklyScheduleDayTimes.put(weeklyScheduleDayTimeId, weeklyScheduleDayTime);
-            return weeklyScheduleDayTime;
-        }
-    }
-
-    private static WeeklyScheduleDayTime createWeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
-        WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord = PersistenceManger.getInstance().getWeeklyScheduleDayTimeRecord(weeklyScheduleDayTimeId);
-        if (weeklyScheduleDayTimeRecord.getCustomTimeId() == null)
-            return new WeeklyScheduleNormalDayTime(weeklyScheduleDayTimeId, weeklySchedule);
-        else
-            return new WeeklyScheduleCustomDayTime(weeklyScheduleDayTimeId, weeklySchedule);
-    }
 
     protected WeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
         mWeeklyScheduleDayTimeRecord = PersistenceManger.getInstance().getWeeklyScheduleDayTimeRecord(weeklyScheduleDayTimeId);
@@ -58,6 +39,6 @@ public abstract class WeeklyScheduleDayTime {
     }
 
     public Instance getInstance(Task task, Date scheduleDate) {
-        return WeeklyRepetition.getWeeklyRepetition(this, scheduleDate).getInstance(task);
+        return WeeklyRepetitionFactory.getInstance().getWeeklyRepetition(this, scheduleDate).getInstance(task);
     }
 }

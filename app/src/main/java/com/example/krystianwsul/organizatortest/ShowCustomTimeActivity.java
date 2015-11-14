@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
@@ -37,7 +38,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int customTimeId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(customTimeId != -1);
-        mCustomTime = CustomTime.getCustomTime(customTimeId);
+        mCustomTime = CustomTimeFactory.getCustomTime(customTimeId);
         Assert.assertTrue(mCustomTime != null);
 
         TextView customTimeName = (TextView) findViewById(R.id.custom_time_name);

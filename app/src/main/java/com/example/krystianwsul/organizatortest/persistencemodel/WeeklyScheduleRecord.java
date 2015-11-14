@@ -13,7 +13,7 @@ public class WeeklyScheduleRecord {
     private final long mStartTime;
     private final Long mEndTime;
 
-    public WeeklyScheduleRecord(int id, int taskId, long startTime, Long endTime) {
+    WeeklyScheduleRecord(int id, int taskId, long startTime, Long endTime) {
         Assert.assertTrue((endTime == null) || startTime < endTime);
 
         mId = id;

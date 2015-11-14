@@ -12,9 +12,12 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.arrayadapters.InstanceAdapter;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstanceFactory;
 
 import junit.framework.Assert;
 
@@ -66,19 +69,19 @@ public class ShowInstanceActivity extends AppCompatActivity {
         if (intent.hasExtra(SingleInstance.INTENT_KEY)) {
             int taskId = intent.getIntExtra(SingleInstance.INTENT_KEY, -1);
             Assert.assertTrue(taskId != -1);
-            SingleInstance singleInstance = SingleInstance.getSingleInstance(taskId);
+            SingleInstance singleInstance = SingleInstanceFactory.getInstance().getSingleInstance(taskId);
             Assert.assertTrue(singleInstance != null);
             return singleInstance;
         } else if (intent.hasExtra(DailyInstance.INTENT_KEY)) {
             int dailyInstanceId = intent.getIntExtra(DailyInstance.INTENT_KEY, -1);
             Assert.assertTrue(dailyInstanceId != -1);
-            DailyInstance dailyInstance = DailyInstance.getDailyInstance(dailyInstanceId);
+            DailyInstance dailyInstance = DailyInstanceFactory.getInstance().getDailyInstance(dailyInstanceId);
             Assert.assertTrue(dailyInstance != null);
             return dailyInstance;
         } else if (intent.hasExtra(WeeklyInstance.INTENT_KEY)) {
             int weeklyInstanceId = intent.getIntExtra(WeeklyInstance.INTENT_KEY, -1);
             Assert.assertTrue(weeklyInstanceId != -1);
-            WeeklyInstance weeklyInstance = WeeklyInstance.getWeeklyInstance(weeklyInstanceId);
+            WeeklyInstance weeklyInstance = WeeklyInstanceFactory.getInstance().getWeeklyInstance(weeklyInstanceId);
             Assert.assertTrue(weeklyInstance != null);
             return weeklyInstance;
         } else {

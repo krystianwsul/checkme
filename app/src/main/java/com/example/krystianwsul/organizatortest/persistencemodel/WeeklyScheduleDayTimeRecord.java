@@ -15,7 +15,7 @@ public class WeeklyScheduleDayTimeRecord {
     private final Integer mHour;
     private final Integer mMinute;
 
-    public WeeklyScheduleDayTimeRecord(int id, int weeklyScheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
+    WeeklyScheduleDayTimeRecord(int id, int weeklyScheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));

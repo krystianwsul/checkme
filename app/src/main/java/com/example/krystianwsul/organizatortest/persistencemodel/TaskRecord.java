@@ -10,7 +10,7 @@ public class TaskRecord {
     private final Integer mParentTaskId;
     private final String mName;
 
-    public TaskRecord(int id, Integer parentId, String name) {
+    TaskRecord(int id, Integer parentId, String name) {
         Assert.assertTrue(name != null);
 
         mId = id;

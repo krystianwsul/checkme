@@ -12,7 +12,7 @@ public class DailyInstanceRecord {
 
     private final boolean mDone;
 
-    public DailyInstanceRecord(int id, int taskId, int dailyRepetitionId, boolean done) {
+    DailyInstanceRecord(int id, int taskId, int dailyRepetitionId, boolean done) {
         mId = id;
 
         mTaskId = taskId;

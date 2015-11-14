@@ -4,6 +4,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleRepetitionRecord;
@@ -32,7 +33,7 @@ public class RealSingleRepetition extends SingleRepetition {
 
     public Time getRepetitionTime() {
         if (mSingleRepetitionRecord.getCustomTimeId() != null)
-            return CustomTime.getCustomTime(mSingleRepetitionRecord.getCustomTimeId());
+            return CustomTimeFactory.getCustomTime(mSingleRepetitionRecord.getCustomTimeId());
         else if (mSingleRepetitionRecord.getHour() != null)
             return new NormalTime(mSingleRepetitionRecord.getHour(), mSingleRepetitionRecord.getMinute());
         else

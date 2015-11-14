@@ -25,50 +25,14 @@ public class WeeklySchedule extends Schedule {
     private final WeeklyScheduleRecord mWeelyScheduleRecord;
     private final ArrayList<WeeklyScheduleDayTime> mWeeklyScheduleDayTimes = new ArrayList<>();
 
-    private static final HashMap<Integer, WeeklySchedule> sWeeklySchedules = new HashMap<>();
-
-    public static WeeklySchedule getWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
-        Assert.assertTrue(rootTask != null);
-        if (sWeeklySchedules.containsKey(weeklyScheduleId)) {
-            return sWeeklySchedules.get(rootTask);
-        } else {
-            WeeklySchedule weeklySchedule = createWeeklySchedule(weeklyScheduleId, rootTask);
-            if (weeklySchedule == null)
-                return null;
-
-            sWeeklySchedules.put(weeklyScheduleId, weeklySchedule);
-            return weeklySchedule;
-        }
-    }
-
-    private static WeeklySchedule createWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
-        Assert.assertTrue(rootTask != null);
-
-        PersistenceManger persistenceManger = PersistenceManger.getInstance();
-
-        WeeklyScheduleRecord weeklyScheduleRecord = persistenceManger.getWeeklyScheduleRecord(weeklyScheduleId);
-        if (weeklyScheduleRecord == null)
-            return null;
-
-        WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleRecord, rootTask);
-
-        ArrayList<Integer> weeklyScheduleDayTimeIds = persistenceManger.getWeeklyScheduleDayTimeIds(weeklyScheduleId);
-        Assert.assertTrue(!weeklyScheduleDayTimeIds.isEmpty());
-
-        for (Integer weeklyScheduleDayTimeId : weeklyScheduleDayTimeIds)
-            weeklySchedule.addWeeklyScheduleDayTime(WeeklyScheduleDayTime.getWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule));
-
-        return weeklySchedule;
-    }
-
-    private WeeklySchedule(WeeklyScheduleRecord weeklyScheduleRecord, RootTask rootTask) {
+    WeeklySchedule(WeeklyScheduleRecord weeklyScheduleRecord, RootTask rootTask) {
         super(rootTask);
 
         Assert.assertTrue(weeklyScheduleRecord != null);
         mWeelyScheduleRecord = weeklyScheduleRecord;
     }
 
-    private void addWeeklyScheduleDayTime(WeeklyScheduleDayTime weeklyScheduleDayTime) {
+    void addWeeklyScheduleDayTime(WeeklyScheduleDayTime weeklyScheduleDayTime) {
         Assert.assertTrue(weeklyScheduleDayTime != null);
         mWeeklyScheduleDayTimes.add(weeklyScheduleDayTime);
     }

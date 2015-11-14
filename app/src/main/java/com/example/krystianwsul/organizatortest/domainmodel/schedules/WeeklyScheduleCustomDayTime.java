@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
@@ -17,7 +18,7 @@ public class WeeklyScheduleCustomDayTime extends WeeklyScheduleDayTime {
         Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getHour() == null);
         Assert.assertTrue(mWeeklyScheduleDayTimeRecord.getMinute() == null);
 
-        mCustomTime = CustomTime.getCustomTime(mWeeklyScheduleDayTimeRecord.getCustomTimeId());
+        mCustomTime = CustomTimeFactory.getCustomTime(mWeeklyScheduleDayTimeRecord.getCustomTimeId());
         Assert.assertTrue(mCustomTime != null);
     }
 

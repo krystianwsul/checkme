@@ -6,13 +6,10 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyInstanceRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 11/9/2015.
@@ -22,37 +19,6 @@ public abstract class WeeklyInstance implements Instance {
     private final WeeklyRepetition mWeeklyRepetition;
 
     public static final String INTENT_KEY = "weeklyInstanceId";
-
-    private static final HashMap<Integer, WeeklyInstance> sWeeklyInstances = new HashMap<>();
-
-    public static WeeklyInstance getWeeklyInstance(int weeklyInstanceId) {
-        Assert.assertTrue(sWeeklyInstances.containsKey(weeklyInstanceId));
-        return sWeeklyInstances.get(weeklyInstanceId);
-    }
-
-    public static WeeklyInstance getWeeklyInstance(Task task, WeeklyRepetition weeklyRepetition) {
-        WeeklyInstance existingWeeklyInstance = getExistingWeeklyInstance(task.getId(), weeklyRepetition.getId());
-        if (existingWeeklyInstance != null)
-            return existingWeeklyInstance;
-
-        WeeklyInstanceRecord weeklyInstanceRecord = PersistenceManger.getInstance().getWeeklyInstanceRecord(task.getId(), weeklyRepetition.getId());
-        if (weeklyInstanceRecord != null) {
-            RealWeeklyInstance realWeeklyInstance = new RealWeeklyInstance(task, weeklyInstanceRecord, weeklyRepetition);
-            sWeeklyInstances.put(realWeeklyInstance.getId(), realWeeklyInstance);
-            return realWeeklyInstance;
-        }
-
-        VirtualWeeklyInstance virtualWeeklyInstance = new VirtualWeeklyInstance(task, weeklyRepetition);
-        sWeeklyInstances.put(virtualWeeklyInstance.getId(), virtualWeeklyInstance);
-        return virtualWeeklyInstance;
-    }
-
-    private static WeeklyInstance getExistingWeeklyInstance(int taskId, int weeklyRepetitionId) {
-        for (WeeklyInstance weeklyInstance : sWeeklyInstances.values())
-            if (weeklyInstance.getTaskId() == taskId && weeklyInstance.getWeeklyRepetitionId() == weeklyRepetitionId)
-                return weeklyInstance;
-        return null;
-    }
 
     public WeeklyInstance(Task task, WeeklyRepetition weeklyRepetition) {
         Assert.assertTrue(task != null);
@@ -87,7 +53,7 @@ public abstract class WeeklyInstance implements Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(getWeeklyInstance(childTask, mWeeklyRepetition));
+            childInstances.add(WeeklyInstanceFactory.getInstance().getWeeklyInstance(childTask, mWeeklyRepetition));
         return childInstances;
     }
 

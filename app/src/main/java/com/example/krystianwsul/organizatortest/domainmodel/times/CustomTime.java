@@ -129,11 +129,13 @@ public class CustomTime implements Time {
 
     public void addCustomTimeListener(CustomTimeListener customTimeListener) {
         Assert.assertTrue(customTimeListener != null);
-        mCustomTimeListeners.add(customTimeListener);
+        if (!mCustomTimeListeners.contains(customTimeListener))
+            mCustomTimeListeners.add(customTimeListener);
     }
 
     public void removeCustomTimeListener(CustomTimeListener customTimeListener) {
         Assert.assertTrue(customTimeListener != null);
+        Assert.assertTrue(mCustomTimeListeners.contains(customTimeListener));
         mCustomTimeListeners.remove(customTimeListener);
     }
 

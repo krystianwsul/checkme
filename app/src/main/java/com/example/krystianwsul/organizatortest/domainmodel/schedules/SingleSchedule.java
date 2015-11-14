@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
@@ -83,12 +84,16 @@ public abstract class SingleSchedule extends Schedule {
         if (givenEndTimeStamp.compareTo(timeStamp) < 0)
             return instances;
 
-        instances.add(SingleInstance.getSingleInstance(mRootTask));
+        instances.add(SingleRepetition.getSingleRepetition(this).getInstance(mRootTask));
 
         return instances;
     }
 
     public String getTaskText(Context context) {
         return getDateTime().getDisplayText(context);
+    }
+
+    public TimeStamp getEndTimeStamp() {
+        return null;
     }
 }

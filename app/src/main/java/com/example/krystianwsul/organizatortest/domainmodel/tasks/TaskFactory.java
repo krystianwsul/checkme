@@ -38,9 +38,10 @@ public class TaskFactory {
 
             RootTask rootTask = new RootTask(taskRecord);
 
-            Schedule schedule = Schedule.getSchedule(rootTask);
-            Assert.assertTrue(schedule != null);
-            rootTask.setSchedule(schedule);
+            ArrayList<Schedule> schedules = Schedule.getSchedules(rootTask);
+            Assert.assertTrue(schedules != null);
+            Assert.assertTrue(!schedules.isEmpty());
+            rootTask.setSchedules(schedules);
 
             initializeChildren(rootTask);
 

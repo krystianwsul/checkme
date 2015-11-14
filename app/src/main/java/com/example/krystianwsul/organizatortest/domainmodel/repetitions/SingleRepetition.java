@@ -52,10 +52,6 @@ public abstract class SingleRepetition {
         return mSingleSchedule.getRootTaskId();
     }
 
-    public Instance getInstance(Task task) {
-        return SingleInstance.getSingleInstance(task);
-    }
-
     public Date getScheduleDate() {
         return mSingleSchedule.getDate();
     }
@@ -74,5 +70,9 @@ public abstract class SingleRepetition {
 
     public DateTime getRepetitionDateTime() {
         return new DateTime(getRepetitionDate(), getRepetitionTime());
+    }
+
+    public Instance getInstance(Task task) {
+        return SingleInstance.getSingleInstance(task, this);
     }
 }

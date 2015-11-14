@@ -44,8 +44,6 @@ public abstract class Task {
         mChildrenTasks.add(childTask);
     }
 
-    public abstract Schedule getSchedule();
-
     public abstract RootTask getRootTask();
 
     public abstract Task getParentTask();

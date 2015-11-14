@@ -28,40 +28,33 @@ public abstract class SingleInstance implements Instance {
     private static final HashMap<Integer, SingleInstance> sSingleInstances = new HashMap<>();
 
     public static SingleInstance getSingleInstance(int taskId) {
-        if (sSingleInstances.containsKey(taskId)) {
-            return sSingleInstances.get(taskId);
-        } else {
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
-            SingleInstanceRecord singleInstanceRecord = persistenceManger.getSingleInstanceRecord(taskId);
-            SingleInstance singleInstance = new RealSingleInstance(TaskFactory.getInstance().getTask(singleInstanceRecord.getTaskId()), singleInstanceRecord);
-            sSingleInstances.put(taskId, singleInstance);
-            return singleInstance;
-        }
+        Assert.assertTrue(sSingleInstances.containsKey(taskId));
+        return sSingleInstances.get(taskId);
     }
 
-    public static SingleInstance getSingleInstance(Task task) {
+    public static SingleInstance getSingleInstance(Task task, SingleRepetition singleRepetition) {
         SingleInstance existingSingleInstance = sSingleInstances.get(task.getId());
         if (existingSingleInstance != null)
             return existingSingleInstance;
 
         SingleInstanceRecord singleInstanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
         if (singleInstanceRecord != null) {
-            RealSingleInstance realSingleInstance = new RealSingleInstance(task, singleInstanceRecord);
+            RealSingleInstance realSingleInstance = new RealSingleInstance(task, singleInstanceRecord, singleRepetition);
             sSingleInstances.put(realSingleInstance.getTaskId(), realSingleInstance);
             return realSingleInstance;
         }
 
-        VirtualSingleInstance virtualSingleInstance = new VirtualSingleInstance(task);
+        VirtualSingleInstance virtualSingleInstance = new VirtualSingleInstance(task, singleRepetition);
         sSingleInstances.put(virtualSingleInstance.getTaskId(), virtualSingleInstance);
         return virtualSingleInstance;
     }
 
-    protected SingleInstance(Task task) {
+    protected SingleInstance(Task task, SingleRepetition singleRepetition) {
         Assert.assertTrue(task != null);
-        mTask = task;
+        Assert.assertTrue(singleRepetition != null);
 
-        mSingleRepetition = SingleRepetition.getSingleRepetition((SingleSchedule) task.getRootTask().getSchedule());
-        Assert.assertTrue(mSingleRepetition != null);
+        mTask = task;
+        mSingleRepetition = singleRepetition;
     }
 
     public int getTaskId() {
@@ -77,7 +70,7 @@ public abstract class SingleInstance implements Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(getSingleInstance(childTask));
+            childInstances.add(getSingleInstance(childTask, mSingleRepetition));
         return childInstances;
     }
 

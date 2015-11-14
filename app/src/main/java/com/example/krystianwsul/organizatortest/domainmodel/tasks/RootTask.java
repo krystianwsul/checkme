@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Created by Krystian on 10/13/2015.
  */
 public class RootTask extends Task {
-    private Schedule mSchedule;
+    private ArrayList<Schedule> mSchedules;
 
     protected RootTask(TaskRecord taskRecord) {
         super(taskRecord);
@@ -23,24 +23,45 @@ public class RootTask extends Task {
         Assert.assertTrue(mTaskRecord.getParentTaskId() == null);
     }
 
-    public void setSchedule(Schedule schedule) {
-        Assert.assertTrue(schedule != null);
-        mSchedule = schedule;
+    public void setSchedules(ArrayList<Schedule> schedules) {
+        Assert.assertTrue(schedules != null);
+        Assert.assertTrue(!schedules.isEmpty());
+        mSchedules = schedules;
     }
 
     public String getScheduleText(Context context) {
-        Assert.assertTrue(mSchedule != null);
-        return mSchedule.getTaskText(context);
+        return getNewestSchedule().getTaskText(context);
+    }
+
+    private Schedule getNewestSchedule() {
+        Assert.assertTrue(mSchedules != null);
+        Assert.assertTrue(!mSchedules.isEmpty());
+
+        Schedule newestSchedule = mSchedules.get(0);
+        if (newestSchedule.getEndTimeStamp() == null)
+            return newestSchedule;
+
+        for (Schedule schedule: mSchedules) {
+            TimeStamp endTimeStamp = schedule.getEndTimeStamp();
+            if (schedule.getEndTimeStamp() == null)
+                return schedule;
+            Assert.assertTrue(newestSchedule.getEndTimeStamp() != null);
+            if (newestSchedule.getEndTimeStamp().compareTo(schedule.getEndTimeStamp()) < 0)
+                newestSchedule = schedule;
+        }
+
+        return newestSchedule;
     }
 
     public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
-        Assert.assertTrue(mSchedule != null);
+        Assert.assertTrue(mSchedules != null);
         Assert.assertTrue(endTimeStamp != null);
-        return mSchedule.getInstances(startTimeStamp, endTimeStamp);
-    }
 
-    public Schedule getSchedule() {
-        return mSchedule;
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (Schedule schedule : mSchedules)
+            instances.addAll(schedule.getInstances(startTimeStamp, endTimeStamp));
+
+        return instances;
     }
 
     public RootTask getRootTask() {

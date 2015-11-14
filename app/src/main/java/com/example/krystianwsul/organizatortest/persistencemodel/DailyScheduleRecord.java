@@ -6,21 +6,26 @@ import junit.framework.Assert;
  * Created by Krystian on 10/27/2015.
  */
 public class DailyScheduleRecord {
-    private final int mTaskId;
+    private final int mId;
+
+    private final int mRootTaskId;
 
     private final long mStartTime;
     private final Long mEndTime;
 
-    public DailyScheduleRecord(int taskId, long startTime, Long endTime) {
+    public DailyScheduleRecord(int id, int rootTaskId, long startTime, Long endTime) {
         Assert.assertTrue((endTime == null) || startTime < endTime);
 
-        mTaskId = taskId;
+        mId = id;
+        mRootTaskId = rootTaskId;
         mStartTime = startTime;
         mEndTime = endTime;
     }
 
-    public int getTaskId() {
-        return mTaskId;
+    public int getId() { return mId; }
+
+    public int getRootTaskId() {
+        return mRootTaskId;
     }
 
     public long getStartTime() {

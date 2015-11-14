@@ -29,32 +29,33 @@ public class DailySchedule extends Schedule {
 
     private static final HashMap<Integer, DailySchedule> sDailySchedules = new HashMap<>();
 
-    public static DailySchedule getDailySchedule(RootTask rootTask) {
+    public static DailySchedule getDailySchedule(int dailyScheduleId, RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
-        if (sDailySchedules.containsKey(rootTask.getId())) {
-            return sDailySchedules.get(rootTask);
+
+        if (sDailySchedules.containsKey(dailyScheduleId)) {
+            return sDailySchedules.get(dailyScheduleId);
         } else {
-            DailySchedule dailySchedule = createDailySchedule(rootTask);
+            DailySchedule dailySchedule = createDailySchedule(dailyScheduleId, rootTask);
             if (dailySchedule == null)
                 return null;
 
-            sDailySchedules.put(rootTask.getId(), dailySchedule);
+            sDailySchedules.put(dailyScheduleId, dailySchedule);
             return dailySchedule;
         }
     }
 
-    private static DailySchedule createDailySchedule(RootTask rootTask) {
+    private static DailySchedule createDailySchedule(int dailyScheduleId, RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        DailyScheduleRecord dailyScheduleRecord = persistenceManger.getDailyScheduleRecord(rootTask.getId());
+        DailyScheduleRecord dailyScheduleRecord = persistenceManger.getDailyScheduleRecord(dailyScheduleId);
         if (dailyScheduleRecord == null)
             return null;
 
         DailySchedule dailySchedule = new DailySchedule(dailyScheduleRecord, rootTask);
 
-        ArrayList<Integer> dailyScheduleTimeIds = persistenceManger.getDailyScheduleTimeIds(rootTask.getId());
+        ArrayList<Integer> dailyScheduleTimeIds = persistenceManger.getDailyScheduleTimeIds(dailyScheduleId);
         Assert.assertTrue(!dailyScheduleTimeIds.isEmpty());
 
         for (Integer dailyScheduleTimeId : dailyScheduleTimeIds)
@@ -79,7 +80,7 @@ public class DailySchedule extends Schedule {
         return new TimeStamp(mDailyScheduleRecord.getStartTime());
     }
 
-    private TimeStamp getEndTimeStamp() {
+    public TimeStamp getEndTimeStamp() {
         if (mDailyScheduleRecord.getEndTime() == null)
             return null;
         else

@@ -2,7 +2,6 @@ package com.example.krystianwsul.organizatortest.persistencemodel;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,62 +72,62 @@ public class PersistenceManger {
         mTaskRecords.put(piersi.getId(), piersi);
 
         SingleScheduleRecord today15 = new SingleScheduleRecord(zakupy.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 15, 0);
-        mSingleScheduleRecords.put(today15.getTaskId(), today15);
+        mSingleScheduleRecords.put(today15.getRootTaskId(), today15);
 
         TaskRecord rachunek = new TaskRecord(5, null, "rachunek");
         mTaskRecords.put(rachunek.getId(), rachunek);
 
         SingleScheduleRecord yesterday16 = new SingleScheduleRecord(rachunek.getId(), calendarYesterday.get(Calendar.YEAR), calendarYesterday.get(Calendar.MONTH) + 1, calendarYesterday.get(Calendar.DAY_OF_MONTH), null, 16, 0);
-        mSingleScheduleRecords.put(yesterday16.getTaskId(), yesterday16);
+        mSingleScheduleRecords.put(yesterday16.getRootTaskId(), yesterday16);
 
         TaskRecord banany = new TaskRecord(6, null, "banany");
         mTaskRecords.put(banany.getId(), banany);
 
         SingleScheduleRecord today17 = new SingleScheduleRecord(banany.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 17, 0);
-        mSingleScheduleRecords.put(today17.getTaskId(), today17);
+        mSingleScheduleRecords.put(today17.getRootTaskId(), today17);
 
         TaskRecord iliotibial = new TaskRecord(7, null, "iliotibial band stretch");
         mTaskRecords.put(iliotibial.getId(), iliotibial);
 
-        DailyScheduleRecord alwaysAfterWakingAfterWork = new DailyScheduleRecord(iliotibial.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
-        mDailyScheduleRecords.put(alwaysAfterWakingAfterWork.getTaskId(), alwaysAfterWakingAfterWork);
-        DailyScheduleTimeRecord alwaysAfterWakingAfterWork0 = new DailyScheduleTimeRecord(1, alwaysAfterWakingAfterWork.getTaskId(), afterWaking.getId(), null, null);
+        DailyScheduleRecord alwaysAfterWakingAfterWork = new DailyScheduleRecord(0, iliotibial.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
+        mDailyScheduleRecords.put(alwaysAfterWakingAfterWork.getId(), alwaysAfterWakingAfterWork);
+        DailyScheduleTimeRecord alwaysAfterWakingAfterWork0 = new DailyScheduleTimeRecord(1, alwaysAfterWakingAfterWork.getId(), afterWaking.getId(), null, null);
         mDailyScheduleTimeRecords.put(alwaysAfterWakingAfterWork0.getId(), alwaysAfterWakingAfterWork0);
-        DailyScheduleTimeRecord alwaysAfterWakingAfterWork1 = new DailyScheduleTimeRecord(2, alwaysAfterWakingAfterWork.getTaskId(), afterWork.getId(), null, null);
+        DailyScheduleTimeRecord alwaysAfterWakingAfterWork1 = new DailyScheduleTimeRecord(2, alwaysAfterWakingAfterWork.getId(), afterWork.getId(), null, null);
         mDailyScheduleTimeRecords.put(alwaysAfterWakingAfterWork1.getId(), alwaysAfterWakingAfterWork1);
 
         TaskRecord hamstring = new TaskRecord(8, null, "hamstring stretch");
         mTaskRecords.put(hamstring.getId(), hamstring);
 
-        DailyScheduleRecord alwaysAfterWork = new DailyScheduleRecord(hamstring.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
-        mDailyScheduleRecords.put(alwaysAfterWork.getTaskId(), alwaysAfterWork);
-        DailyScheduleTimeRecord alwaysAfterWork0 = new DailyScheduleTimeRecord(0, alwaysAfterWork.getTaskId(), afterWork.getId(), null, null);
+        DailyScheduleRecord alwaysAfterWork = new DailyScheduleRecord(1, hamstring.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
+        mDailyScheduleRecords.put(alwaysAfterWork.getId(), alwaysAfterWork);
+        DailyScheduleTimeRecord alwaysAfterWork0 = new DailyScheduleTimeRecord(0, alwaysAfterWork.getId(), afterWork.getId(), null, null);
         mDailyScheduleTimeRecords.put(alwaysAfterWork0.getId(), alwaysAfterWork0);
 
         TaskRecord piecyk = new TaskRecord(9, null, "piecyk");
         mTaskRecords.put(piecyk.getId(), piecyk);
 
         SingleScheduleRecord todayAfterWaking = new SingleScheduleRecord(piecyk.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), afterWaking.getId(), null, null);
-        mSingleScheduleRecords.put(todayAfterWaking.getTaskId(), todayAfterWaking);
+        mSingleScheduleRecords.put(todayAfterWaking.getRootTaskId(), todayAfterWaking);
 
         TaskRecord paznokcie = new TaskRecord(10, null, "paznokcie");
         mTaskRecords.put(paznokcie.getId(), paznokcie);
 
-        WeeklyScheduleRecord crazyWeekend = new WeeklyScheduleRecord(paznokcie.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
-        mWeeklyScheduleRecords.put(crazyWeekend.getTaskId(), crazyWeekend);
-        WeeklyScheduleDayTimeRecord crazyWeekend0 = new WeeklyScheduleDayTimeRecord(0, crazyWeekend.getTaskId(), DayOfWeek.SATURDAY.ordinal(), afterWaking.getId(), null, null);
+        WeeklyScheduleRecord crazyWeekend = new WeeklyScheduleRecord(0, paznokcie.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
+        mWeeklyScheduleRecords.put(crazyWeekend.getId(), crazyWeekend);
+        WeeklyScheduleDayTimeRecord crazyWeekend0 = new WeeklyScheduleDayTimeRecord(0, crazyWeekend.getId(), DayOfWeek.SATURDAY.ordinal(), afterWaking.getId(), null, null);
         mWeeklyScheduleDayTimeRecords.put(crazyWeekend0.getId(), crazyWeekend0);
-        WeeklyScheduleDayTimeRecord crazyWeekend1 = new WeeklyScheduleDayTimeRecord(1, crazyWeekend.getTaskId(), DayOfWeek.SUNDAY.ordinal(), afterWaking.getId(), null, null);
+        WeeklyScheduleDayTimeRecord crazyWeekend1 = new WeeklyScheduleDayTimeRecord(1, crazyWeekend.getId(), DayOfWeek.SUNDAY.ordinal(), afterWaking.getId(), null, null);
         mWeeklyScheduleDayTimeRecords.put(crazyWeekend1.getId(), crazyWeekend1);
-        WeeklyScheduleDayTimeRecord crazyWeekend2 = new WeeklyScheduleDayTimeRecord(2, crazyWeekend.getTaskId(), DayOfWeek.SUNDAY.ordinal(), null, 17, 0);
+        WeeklyScheduleDayTimeRecord crazyWeekend2 = new WeeklyScheduleDayTimeRecord(2, crazyWeekend.getId(), DayOfWeek.SUNDAY.ordinal(), null, 17, 0);
         mWeeklyScheduleDayTimeRecords.put(crazyWeekend2.getId(), crazyWeekend2);
 
-        TaskRecord task6 = new TaskRecord(10, null, "task 6");
+        TaskRecord task6 = new TaskRecord(11, null, "task 6");
         mTaskRecords.put(task6.getId(), task6);
 
-        DailyScheduleRecord task6schedule = new DailyScheduleRecord(task6.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
-        mDailyScheduleRecords.put(task6schedule.getTaskId(), task6schedule);
-        DailyScheduleTimeRecord task6schedule0 = new DailyScheduleTimeRecord(3, task6schedule.getTaskId(), null, 6, 0);
+        DailyScheduleRecord task6schedule = new DailyScheduleRecord(2, task6.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
+        mDailyScheduleRecords.put(task6schedule.getId(), task6schedule);
+        DailyScheduleTimeRecord task6schedule0 = new DailyScheduleTimeRecord(3, task6schedule.getId(), null, 6, 0);
         mDailyScheduleTimeRecords.put(task6schedule0.getId(), task6schedule0);
     }
 
@@ -164,18 +163,26 @@ public class PersistenceManger {
         return mMaxSingleInstanceId;
     }
 
-    public DailyScheduleRecord getDailyScheduleRecord(int rootTaskId) {
-        return mDailyScheduleRecords.get(rootTaskId);
+    public DailyScheduleRecord getDailyScheduleRecord(int dailyScheduleId) {
+        return mDailyScheduleRecords.get(dailyScheduleId);
+    }
+
+    public ArrayList<Integer> getDailyScheduleIds(int rootTaskId) {
+        ArrayList<Integer> dailyScheduleIds = new ArrayList<>();
+        for (DailyScheduleRecord dailyScheduleRecord : mDailyScheduleRecords.values())
+            if (dailyScheduleRecord.getRootTaskId() == rootTaskId)
+                dailyScheduleIds.add(dailyScheduleRecord.getId());
+        return dailyScheduleIds;
     }
 
     public DailyScheduleTimeRecord getDailyScheduleTimeRecord(int dailyScheduleTimeId) {
         return mDailyScheduleTimeRecords.get(dailyScheduleTimeId);
     }
 
-    public ArrayList<Integer> getDailyScheduleTimeIds(int taskId) {
+    public ArrayList<Integer> getDailyScheduleTimeIds(int dailyScheduleTimeId) {
         ArrayList<Integer> dailyScheduleTimeIds = new ArrayList<>();
         for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
-            if (dailyScheduleTimeRecord.getTaskId() == taskId)
+            if (dailyScheduleTimeRecord.getDailyScheduleId() == dailyScheduleTimeId)
                 dailyScheduleTimeIds.add(dailyScheduleTimeRecord.getId());
         return dailyScheduleTimeIds;
     }
@@ -214,14 +221,22 @@ public class PersistenceManger {
         return mMaxDailyInstanceId;
     }
 
-    public WeeklyScheduleRecord getWeeklyScheduleRecord(int rootTaskId) {
-        return mWeeklyScheduleRecords.get(rootTaskId);
+    public WeeklyScheduleRecord getWeeklyScheduleRecord(int weeklyScheduleId) {
+        return mWeeklyScheduleRecords.get(weeklyScheduleId);
     }
 
-    public ArrayList<Integer> getWeeklyScheduleDayTimeIds(int taskId) {
+    public ArrayList<Integer> getWeeklyScheduleIds(int rootTaskId) {
+        ArrayList<Integer> weeklyScheduleIds = new ArrayList<>();
+        for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values())
+            if (weeklyScheduleRecord.getRootTaskId() == rootTaskId)
+                weeklyScheduleIds.add(weeklyScheduleRecord.getId());
+        return weeklyScheduleIds;
+    }
+
+    public ArrayList<Integer> getWeeklyScheduleDayTimeIds(int weeklyScheduleId) {
         ArrayList<Integer> weeklyScheduleDayTimeIds = new ArrayList<>();
         for (WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord : mWeeklyScheduleDayTimeRecords.values())
-            if (weeklyScheduleDayTimeRecord.getTaskId() == taskId)
+            if (weeklyScheduleDayTimeRecord.getWeeklyScheduleId() == weeklyScheduleId)
                 weeklyScheduleDayTimeIds.add(weeklyScheduleDayTimeRecord.getId());
         return weeklyScheduleDayTimeIds;
     }

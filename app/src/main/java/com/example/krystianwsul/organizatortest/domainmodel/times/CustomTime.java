@@ -1,14 +1,11 @@
 package com.example.krystianwsul.organizatortest.domainmodel.times;
 
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 10/12/2015.
@@ -18,9 +15,9 @@ public class CustomTime implements Time {
 
     private final ArrayList<CustomTimeListener> mCustomTimeListeners = new ArrayList<>();
 
-    CustomTime(int customTimeId) {
-        mCustomTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(customTimeId);
-        Assert.assertTrue(mCustomTimeRecord != null);
+    CustomTime(CustomTimeRecord customTimeRecord) {
+        Assert.assertTrue(customTimeRecord != null);
+        mCustomTimeRecord = customTimeRecord;
     }
 
     public String getName() {

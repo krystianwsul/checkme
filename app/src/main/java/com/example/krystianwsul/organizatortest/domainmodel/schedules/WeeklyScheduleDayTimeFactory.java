@@ -34,8 +34,8 @@ public class WeeklyScheduleDayTimeFactory {
     private WeeklyScheduleDayTime createWeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
         WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord = PersistenceManger.getInstance().getWeeklyScheduleDayTimeRecord(weeklyScheduleDayTimeId);
         if (weeklyScheduleDayTimeRecord.getCustomTimeId() == null)
-            return new WeeklyScheduleNormalDayTime(weeklyScheduleDayTimeId, weeklySchedule);
+            return new WeeklyScheduleNormalDayTime(weeklyScheduleDayTimeRecord, weeklySchedule);
         else
-            return new WeeklyScheduleCustomDayTime(weeklyScheduleDayTimeId, weeklySchedule);
+            return new WeeklyScheduleCustomDayTime(weeklyScheduleDayTimeRecord, weeklySchedule);
     }
 }

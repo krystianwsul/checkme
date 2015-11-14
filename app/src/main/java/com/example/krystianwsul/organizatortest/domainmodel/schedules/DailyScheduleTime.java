@@ -2,11 +2,9 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleTimeRecord;
 
 import junit.framework.Assert;
@@ -20,10 +18,11 @@ public abstract class DailyScheduleTime {
     protected final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
     protected final DailySchedule mDailySchedule;
 
-    protected DailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
-        mDailyScheduleTimeRecord = PersistenceManger.getInstance().getDailyScheduleTimeRecord(dailyScheduleTimeId);
-        Assert.assertTrue(mDailyScheduleTimeRecord != null);
+    protected DailyScheduleTime(DailyScheduleTimeRecord dailyScheduleTimeRecord, DailySchedule dailySchedule) {
+        Assert.assertTrue(dailyScheduleTimeRecord != null);
         Assert.assertTrue(dailySchedule != null);
+
+        mDailyScheduleTimeRecord = dailyScheduleTimeRecord;
         mDailySchedule = dailySchedule;
     }
 

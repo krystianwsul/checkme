@@ -4,17 +4,12 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.SingleInstanceRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 11/2/2015.

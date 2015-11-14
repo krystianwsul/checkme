@@ -34,8 +34,8 @@ public class DailyScheduleTimeFactory {
     private DailyScheduleTime createDailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         DailyScheduleTimeRecord dailyScheduleTimeRecord = PersistenceManger.getInstance().getDailyScheduleTimeRecord(dailyScheduleTimeId);
         if (dailyScheduleTimeRecord.getCustomTimeId() == null)
-            return new DailyScheduleNormalTime(dailyScheduleTimeId, dailySchedule);
+            return new DailyScheduleNormalTime(dailyScheduleTimeRecord, dailySchedule);
         else
-            return new DailyScheduleCustomTime(dailyScheduleTimeId, dailySchedule);
+            return new DailyScheduleCustomTime(dailyScheduleTimeRecord, dailySchedule);
     }
 }

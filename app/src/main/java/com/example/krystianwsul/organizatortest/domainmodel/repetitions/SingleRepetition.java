@@ -2,21 +2,13 @@ package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstanceFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
-import com.example.krystianwsul.organizatortest.persistencemodel.DailyRepetitionRecord;
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.SingleRepetitionRecord;
 
 import junit.framework.Assert;
-
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 11/14/2015.

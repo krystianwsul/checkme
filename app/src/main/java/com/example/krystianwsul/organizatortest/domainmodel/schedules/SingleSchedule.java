@@ -3,11 +3,8 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
@@ -17,7 +14,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 10/17/2015.

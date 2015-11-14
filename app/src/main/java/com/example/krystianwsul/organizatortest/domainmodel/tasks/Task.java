@@ -2,14 +2,11 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 10/13/2015.

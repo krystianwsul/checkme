@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
+import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleTimeRecord;
 
 import junit.framework.Assert;
 
@@ -11,8 +12,8 @@ import junit.framework.Assert;
 public class DailyScheduleNormalTime extends DailyScheduleTime {
     private final NormalTime mNormalTime;
 
-    protected DailyScheduleNormalTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
-        super(dailyScheduleTimeId, dailySchedule);
+    protected DailyScheduleNormalTime(DailyScheduleTimeRecord dailyScheduleTimeRecord, DailySchedule dailySchedule) {
+        super(dailyScheduleTimeRecord, dailySchedule);
         Assert.assertTrue(mDailyScheduleTimeRecord.getCustomTimeId() == null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getHour() != null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getMinute() != null);

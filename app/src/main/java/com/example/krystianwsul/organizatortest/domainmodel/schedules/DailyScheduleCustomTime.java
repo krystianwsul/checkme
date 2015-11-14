@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
+import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleTimeRecord;
 
 import junit.framework.Assert;
 
@@ -12,8 +13,8 @@ import junit.framework.Assert;
 public class DailyScheduleCustomTime extends DailyScheduleTime {
     private final CustomTime mCustomTime;
 
-    protected DailyScheduleCustomTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
-        super(dailyScheduleTimeId, dailySchedule);
+    protected DailyScheduleCustomTime(DailyScheduleTimeRecord dailyScheduleTimeRecord, DailySchedule dailySchedule) {
+        super(dailyScheduleTimeRecord, dailySchedule);
         Assert.assertTrue(mDailyScheduleTimeRecord.getCustomTimeId() != null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getHour() == null);
         Assert.assertTrue(mDailyScheduleTimeRecord.getMinute() == null);

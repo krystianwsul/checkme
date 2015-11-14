@@ -1,6 +1,8 @@
 package com.example.krystianwsul.organizatortest.domainmodel.times;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
+import com.example.krystianwsul.organizatortest.persistencemodel.CustomTimeRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +18,8 @@ public class CustomTimeFactory {
         if (sCustomTimes.containsKey(customTimeId)) {
             return sCustomTimes.get(customTimeId);
         } else {
-            CustomTime customTime = new CustomTime(customTimeId);
+            CustomTimeRecord customTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(customTimeId);
+            CustomTime customTime = new CustomTime(customTimeRecord);
             sCustomTimes.put(customTimeId, customTime);
             return customTime;
         }

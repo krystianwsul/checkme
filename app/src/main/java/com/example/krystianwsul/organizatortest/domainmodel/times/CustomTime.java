@@ -6,6 +6,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -16,6 +17,8 @@ public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
 
     private static HashMap<Integer, CustomTime> sCustomTimes = new HashMap<>();
+
+    private final ArrayList<CustomTimeListener> mCustomTimeListeners = new ArrayList<>();
 
     public static CustomTime getCustomTime(int customTimeId) {
         if (sCustomTimes.containsKey(customTimeId)) {
@@ -70,42 +73,46 @@ public class CustomTime implements Time {
         }
     }
 
-    public void setHourMinute(DayOfWeek dayOfWeek, HourMinute hourMinute) {
+    public void setHourMinute(DayOfWeek dayOfWeek, HourMinute newHourMinute) {
         Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(hourMinute != null);
+        Assert.assertTrue(newHourMinute != null);
+
+        HourMinute oldHourMinute = getHourMinute(dayOfWeek);
 
         switch (dayOfWeek) {
             case SUNDAY:
-                mCustomTimeRecord.setSundayHour(hourMinute.getHour());
-                mCustomTimeRecord.setSundayMinute(hourMinute.getMinute());
+                mCustomTimeRecord.setSundayHour(newHourMinute.getHour());
+                mCustomTimeRecord.setSundayMinute(newHourMinute.getMinute());
                 break;
             case MONDAY:
-                mCustomTimeRecord.setMondayHour(hourMinute.getHour());
-                mCustomTimeRecord.setMondayMinute(hourMinute.getMinute());
+                mCustomTimeRecord.setMondayHour(newHourMinute.getHour());
+                mCustomTimeRecord.setMondayMinute(newHourMinute.getMinute());
                 break;
             case TUESDAY:
-                mCustomTimeRecord.setTuesdayHour(hourMinute.getHour());
-                mCustomTimeRecord.setTuesdayMinute(hourMinute.getMinute());
+                mCustomTimeRecord.setTuesdayHour(newHourMinute.getHour());
+                mCustomTimeRecord.setTuesdayMinute(newHourMinute.getMinute());
                 break;
             case WEDNESDAY:
-                mCustomTimeRecord.setWednesdayHour(hourMinute.getHour());
-                mCustomTimeRecord.setWednesdayMinute(hourMinute.getMinute());
+                mCustomTimeRecord.setWednesdayHour(newHourMinute.getHour());
+                mCustomTimeRecord.setWednesdayMinute(newHourMinute.getMinute());
                 break;
             case THURSDAY:
-                mCustomTimeRecord.setThursdayHour(hourMinute.getHour());
-                mCustomTimeRecord.setThursdayMinute(hourMinute.getMinute());
+                mCustomTimeRecord.setThursdayHour(newHourMinute.getHour());
+                mCustomTimeRecord.setThursdayMinute(newHourMinute.getMinute());
                 break;
             case FRIDAY:
-                mCustomTimeRecord.setFridayHour(hourMinute.getHour());
-                mCustomTimeRecord.setFridayMinute(hourMinute.getMinute());
+                mCustomTimeRecord.setFridayHour(newHourMinute.getHour());
+                mCustomTimeRecord.setFridayMinute(newHourMinute.getMinute());
                 break;
             case SATURDAY:
-                mCustomTimeRecord.setSaturdayHour(hourMinute.getHour());
-                mCustomTimeRecord.setSaturdayMinute(hourMinute.getMinute());
+                mCustomTimeRecord.setSaturdayHour(newHourMinute.getHour());
+                mCustomTimeRecord.setSaturdayMinute(newHourMinute.getMinute());
                 break;
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }
+
+        notifyCustomTimeHourMinuteChange(dayOfWeek, oldHourMinute, newHourMinute);
     }
 
     public String toString() {
@@ -114,5 +121,28 @@ public class CustomTime implements Time {
 
     public int getId() {
         return mCustomTimeRecord.getId();
+    }
+
+    public interface CustomTimeListener {
+        void onCustomTimeHourMinuteChange(CustomTime customTime, DayOfWeek dayOfWeek, HourMinute oldHourMinute, HourMinute newHourMinute);
+    }
+
+    public void addCustomTimeListener(CustomTimeListener customTimeListener) {
+        Assert.assertTrue(customTimeListener != null);
+        mCustomTimeListeners.add(customTimeListener);
+    }
+
+    public void removeCustomTimeListener(CustomTimeListener customTimeListener) {
+        Assert.assertTrue(customTimeListener != null);
+        mCustomTimeListeners.remove(customTimeListener);
+    }
+
+    private void notifyCustomTimeHourMinuteChange(DayOfWeek dayOfWeek, HourMinute oldHourMinute, HourMinute newHourMinute) {
+        Assert.assertTrue(dayOfWeek != null);
+        Assert.assertTrue(oldHourMinute != null);
+        Assert.assertTrue(newHourMinute != null);
+
+        for (CustomTimeListener customTimeListener : mCustomTimeListeners)
+            customTimeListener.onCustomTimeHourMinuteChange(this, dayOfWeek, oldHourMinute, newHourMinute);
     }
 }

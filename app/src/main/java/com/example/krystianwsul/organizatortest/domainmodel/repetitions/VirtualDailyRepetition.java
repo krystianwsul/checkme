@@ -41,10 +41,6 @@ public class VirtualDailyRepetition extends DailyRepetition {
         return mScheduleDate;
     }
 
-    public Time getScheduleTime() {
-        return mDailyScheduleTime.getTime();
-    }
-
     public Date getRepetitionDate() {
         return getScheduleDate();
     }

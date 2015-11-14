@@ -38,4 +38,8 @@ public abstract class Schedule {
         Assert.assertTrue(rootTask != null);
         mRootTask = rootTask;
     }
+
+    public int getRootTaskId() {
+        return mRootTask.getId();
+    }
 }

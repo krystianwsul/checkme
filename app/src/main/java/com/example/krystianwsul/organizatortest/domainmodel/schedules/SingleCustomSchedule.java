@@ -22,7 +22,7 @@ public class SingleCustomSchedule extends SingleSchedule {
         mCustomTime = CustomTime.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
     }
 
-    protected Time getTime() {
+    public Time getTime() {
         return mCustomTime;
     }
 }

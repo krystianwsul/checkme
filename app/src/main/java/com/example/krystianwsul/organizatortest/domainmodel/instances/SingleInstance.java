@@ -2,6 +2,8 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
@@ -19,7 +21,7 @@ import java.util.HashMap;
  */
 public abstract class SingleInstance implements Instance {
     protected final Task mTask;
-    protected final SingleSchedule mSingleSchedule;
+    protected final SingleRepetition mSingleRepetition;
 
     public static final String INTENT_KEY = "singleInstanceId";
 
@@ -58,8 +60,8 @@ public abstract class SingleInstance implements Instance {
         Assert.assertTrue(task != null);
         mTask = task;
 
-        mSingleSchedule = SingleSchedule.getSingleSchedule(task.getRootTask());
-        Assert.assertTrue(mSingleSchedule != null);
+        mSingleRepetition = SingleRepetition.getSingleRepetition((SingleSchedule) task.getRootTask().getSchedule());
+        Assert.assertTrue(mSingleRepetition != null);
     }
 
     public int getTaskId() {
@@ -89,8 +91,12 @@ public abstract class SingleInstance implements Instance {
 
     public String getScheduleText(Context context) {
         if (mTask.getParentTask() == null)
-            return mSingleSchedule.getTaskText(context);
+            return getDateTime().getDisplayText(context);
         else
             return null;
+    }
+
+    public DateTime getDateTime() {
+        return mSingleRepetition.getRepetitionDateTime();
     }
 }

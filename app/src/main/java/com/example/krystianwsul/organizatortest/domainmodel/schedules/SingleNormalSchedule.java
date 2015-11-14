@@ -22,7 +22,7 @@ public class SingleNormalSchedule extends SingleSchedule {
         mNormalTime = new NormalTime(mSingleScheduleRecord.getHour(), mSingleScheduleRecord.getMinute());
     }
 
-    protected Time getTime() {
+    public Time getTime() {
         return mNormalTime;
     }
 }

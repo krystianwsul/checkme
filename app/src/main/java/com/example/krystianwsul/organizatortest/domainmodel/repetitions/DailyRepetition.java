@@ -67,7 +67,9 @@ public abstract class DailyRepetition {
 
     public abstract Date getScheduleDate();
 
-    public abstract Time getScheduleTime();
+    public Time getScheduleTime() {
+        return mDailyScheduleTime.getTime();
+    }
 
     public DateTime getScheduleDateTime() {
         return new DateTime(getScheduleDate(), getScheduleTime());

@@ -1,23 +1,29 @@
 package com.example.krystianwsul.organizatortest.persistencemodel;
 
-import junit.framework.Assert;
-
 /**
  * Created by Krystian on 11/2/2015.
  */
 public class SingleInstanceRecord {
     private final int mTaskId;
 
+    private final int mRootTaskId;
+
     private final boolean mDone;
 
-    public SingleInstanceRecord(int taskId, boolean done) {
+    public SingleInstanceRecord(int taskId, int rootTaskId, boolean done) {
         mTaskId = taskId;
+
+        mRootTaskId = rootTaskId;
 
         mDone = done;
     }
 
     public int getTaskId() {
         return mTaskId;
+    }
+
+    public int getRootTaskId() {
+        return mRootTaskId;
     }
 
     public boolean getDone() {

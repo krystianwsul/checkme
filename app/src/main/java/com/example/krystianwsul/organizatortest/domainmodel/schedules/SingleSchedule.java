@@ -62,11 +62,11 @@ public abstract class SingleSchedule extends Schedule {
         return new DateTime(getDate(), getTime());
     }
 
-    private Date getDate() {
+    public Date getDate() {
         return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
     }
 
-    protected abstract Time getTime();
+    public abstract Time getTime();
 
     public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);

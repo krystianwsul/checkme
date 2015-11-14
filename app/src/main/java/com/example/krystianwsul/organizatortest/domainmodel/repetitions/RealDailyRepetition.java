@@ -21,7 +21,7 @@ public class RealDailyRepetition extends DailyRepetition {
         mDailyRepetitionRecord = dailyRepetitionRecord;
     }
 
-    public  int getId() {
+    public int getId() {
         return mDailyRepetitionRecord.getId();
     }
 
@@ -31,10 +31,6 @@ public class RealDailyRepetition extends DailyRepetition {
 
     public Date getScheduleDate() {
         return new Date(mDailyRepetitionRecord.getScheduleYear(), mDailyRepetitionRecord.getScheduleMonth(), mDailyRepetitionRecord.getScheduleDay());
-    }
-
-    public Time getScheduleTime() {
-        return mDailyScheduleTime.getTime();
     }
 
     public Date getRepetitionDate() {
@@ -50,6 +46,6 @@ public class RealDailyRepetition extends DailyRepetition {
         else if (mDailyRepetitionRecord.getHour() != null)
             return new NormalTime(mDailyRepetitionRecord.getHour(), mDailyRepetitionRecord.getMinute());
         else
-            return mDailyScheduleTime.getTime();
+            return getScheduleTime();
     }
 }

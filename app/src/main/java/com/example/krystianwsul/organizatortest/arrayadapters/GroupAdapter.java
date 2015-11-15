@@ -38,12 +38,12 @@ public class GroupAdapter extends ArrayAdapter<Group> {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.show_task_row, parent, false);
+            convertView = inflater.inflate(R.layout.show_group_row, parent, false);
 
             GroupHolder groupHolder = new GroupHolder();
-            groupHolder.taskRowName = (TextView) convertView.findViewById(R.id.task_row_name);
-            groupHolder.taskRowDetails = (TextView) convertView.findViewById(R.id.task_row_details);
-            groupHolder.taskRowImg = (ImageView) convertView.findViewById(R.id.task_row_img);
+            groupHolder.groupRowName = (TextView) convertView.findViewById(R.id.group_row_name);
+            groupHolder.groupRowDetails = (TextView) convertView.findViewById(R.id.group_row_details);
+            groupHolder.groupRowImg = (ImageView) convertView.findViewById(R.id.group_row_img);
             convertView.setTag(groupHolder);
         }
 
@@ -51,23 +51,23 @@ public class GroupAdapter extends ArrayAdapter<Group> {
 
         Group group = mGroups.get(position);
 
-        groupHolder.taskRowName.setText(group.getNameText(mContext));
+        groupHolder.groupRowName.setText(group.getNameText(mContext));
 
-        groupHolder.taskRowDetails.setText(group.getDetailsText(mContext));
+        groupHolder.groupRowDetails.setText(group.getDetailsText(mContext));
 
         Resources resources = mContext.getResources();
 
         if (group.singleInstance() && group.getSingleSinstance().getChildInstances().isEmpty())
-            groupHolder.taskRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+            groupHolder.groupRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
-            groupHolder.taskRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+            groupHolder.groupRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
 
         return convertView;
     }
 
     private class GroupHolder {
-        public TextView taskRowName;
-        public TextView taskRowDetails;
-        public ImageView taskRowImg;
+        public TextView groupRowName;
+        public TextView groupRowDetails;
+        public ImageView groupRowImg;
     }
 }

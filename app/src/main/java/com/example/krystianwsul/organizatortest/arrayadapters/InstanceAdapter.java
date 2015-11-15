@@ -40,35 +40,35 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
 
         if (convertView == null)  {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.show_task_row, parent, false);
+            convertView = inflater.inflate(R.layout.show_instance_row, parent, false);
 
             InstanceHolder instanceHolder = new InstanceHolder();
-            instanceHolder.taskRowName = (TextView) convertView.findViewById(R.id.task_row_name);
-            instanceHolder.taskRowDetails = (TextView) convertView.findViewById(R.id.task_row_details);
-            instanceHolder.taskRowImg = (ImageView) convertView.findViewById(R.id.task_row_img);
+            instanceHolder.instanceRowName = (TextView) convertView.findViewById(R.id.instance_row_name);
+            instanceHolder.instanceRowDetails = (TextView) convertView.findViewById(R.id.instance_row_details);
+            instanceHolder.instanceRowImg = (ImageView) convertView.findViewById(R.id.instance_row_img);
 
             convertView.setTag(instanceHolder);
         }
 
         InstanceHolder instanceHolder = (InstanceHolder) convertView.getTag();
 
-        instanceHolder.taskRowName.setText(instance.getName());
+        instanceHolder.instanceRowName.setText(instance.getName());
 
-        instanceHolder.taskRowDetails.setVisibility(View.GONE);
+        instanceHolder.instanceRowDetails.setVisibility(View.GONE);
 
         Resources resources = mContext.getResources();
 
         if (instance.getChildInstances().isEmpty())
-            instanceHolder.taskRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+            instanceHolder.instanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
-            instanceHolder.taskRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+            instanceHolder.instanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
 
         return convertView;
     }
 
     private class InstanceHolder {
-        public TextView taskRowName;
-        public TextView taskRowDetails;
-        public ImageView taskRowImg;
+        public TextView instanceRowName;
+        public TextView instanceRowDetails;
+        public ImageView instanceRowImg;
     }
 }

@@ -10,16 +10,12 @@ public class DailyInstanceRecord {
 
     private final int mDailyRepetitionId;
 
-    private final boolean mDone;
-
-    DailyInstanceRecord(int id, int taskId, int dailyRepetitionId, boolean done) {
+    DailyInstanceRecord(int id, int taskId, int dailyRepetitionId) {
         mId = id;
 
         mTaskId = taskId;
 
         mDailyRepetitionId = dailyRepetitionId;
-
-        mDone = done;
     }
 
     public int getId() {
@@ -32,9 +28,5 @@ public class DailyInstanceRecord {
 
     public int getDailyRepetitionId() {
         return mDailyRepetitionId;
-    }
-
-    public boolean getDone() {
-        return mDone;
     }
 }

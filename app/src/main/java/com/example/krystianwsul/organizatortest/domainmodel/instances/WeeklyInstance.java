@@ -37,8 +37,6 @@ public abstract class WeeklyInstance implements Instance {
         return mWeeklyRepetition.getId();
     }
 
-    public abstract boolean getDone();
-
     public String getName() {
         return mTask.getName();
     }

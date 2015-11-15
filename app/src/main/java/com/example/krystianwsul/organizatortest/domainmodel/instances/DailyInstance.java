@@ -38,8 +38,6 @@ public abstract class DailyInstance implements Instance {
         return mDailyRepetition.getId();
     }
 
-    public abstract boolean getDone();
-
     public String getName() {
         return mTask.getName();
     }

@@ -20,8 +20,4 @@ public class RealSingleInstance extends SingleInstance {
         Assert.assertTrue(singleInstanceRecord != null);
         mSingleInstanceRecord = singleInstanceRecord;
     }
-
-    public boolean getDone() {
-        return mSingleInstanceRecord.getDone();
-    }
 }

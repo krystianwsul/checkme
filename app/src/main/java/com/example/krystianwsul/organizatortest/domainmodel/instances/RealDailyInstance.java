@@ -25,8 +25,4 @@ public class RealDailyInstance extends DailyInstance {
     public int getTaskId() {
         return mDailyInstanceRecord.getTaskId();
     }
-
-    public boolean getDone() {
-        return mDailyInstanceRecord.getDone();
-    }
 }

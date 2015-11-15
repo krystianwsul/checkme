@@ -27,8 +27,4 @@ public class RealWeeklyInstance extends WeeklyInstance {
     public int getTaskId() {
         return mWeeklyInstanceRecord.getTaskId();
     }
-
-    public boolean getDone() {
-        return mWeeklyInstanceRecord.getDone();
-    }
 }

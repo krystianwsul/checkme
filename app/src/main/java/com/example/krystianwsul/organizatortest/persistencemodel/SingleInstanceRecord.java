@@ -8,14 +8,10 @@ public class SingleInstanceRecord {
 
     private final int mRootTaskId;
 
-    private final boolean mDone;
-
-    SingleInstanceRecord(int taskId, int rootTaskId, boolean done) {
+    SingleInstanceRecord(int taskId, int rootTaskId) {
         mTaskId = taskId;
 
         mRootTaskId = rootTaskId;
-
-        mDone = done;
     }
 
     public int getTaskId() {
@@ -24,9 +20,5 @@ public class SingleInstanceRecord {
 
     public int getRootTaskId() {
         return mRootTaskId;
-    }
-
-    public boolean getDone() {
-        return mDone;
     }
 }

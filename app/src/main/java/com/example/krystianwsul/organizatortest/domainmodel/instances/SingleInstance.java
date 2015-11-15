@@ -32,8 +32,6 @@ public abstract class SingleInstance implements Instance {
         return mTask.getId();
     }
 
-    public abstract boolean getDone();
-
     public String getName() {
         return mTask.getName();
     }

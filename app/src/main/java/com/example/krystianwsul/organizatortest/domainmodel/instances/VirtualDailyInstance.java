@@ -25,8 +25,4 @@ public class VirtualDailyInstance extends DailyInstance {
     public int getId() {
         return mId;
     }
-
-    public boolean getDone() {
-        return mDone;
-    }
 }

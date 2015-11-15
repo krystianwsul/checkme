@@ -22,8 +22,4 @@ public class VirtualSingleInstance extends SingleInstance {
 
         mId = PersistenceManger.getInstance().getMaxSingleInstanceId() + sVirtualSingleInstanceCount;
     }
-
-    public boolean getDone() {
-        return mDone;
-    }
 }

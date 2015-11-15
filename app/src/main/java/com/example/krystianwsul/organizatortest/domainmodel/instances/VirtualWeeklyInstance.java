@@ -25,8 +25,4 @@ public class VirtualWeeklyInstance extends WeeklyInstance {
     public int getId() {
         return mId;
     }
-
-    public boolean getDone() {
-        return mDone;
-    }
 }

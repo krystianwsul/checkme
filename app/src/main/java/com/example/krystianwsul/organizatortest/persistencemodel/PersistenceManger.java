@@ -5,6 +5,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -133,6 +134,10 @@ public class PersistenceManger {
 
     public CustomTimeRecord getCustomTimeRecord(int timeRecordId) {
         return mCustomTimeRecords.get(timeRecordId);
+    }
+
+    public Collection<Integer> getCustomTimeRecordIds() {
+        return mCustomTimeRecords.keySet();
     }
 
     public TaskRecord getTaskRecord(int taskId) {

@@ -33,7 +33,7 @@ public class RealSingleRepetition extends SingleRepetition {
 
     public Time getRepetitionTime() {
         if (mSingleRepetitionRecord.getCustomTimeId() != null)
-            return CustomTimeFactory.getCustomTime(mSingleRepetitionRecord.getCustomTimeId());
+            return CustomTimeFactory.getInstance().getCustomTime(mSingleRepetitionRecord.getCustomTimeId());
         else if (mSingleRepetitionRecord.getHour() != null)
             return new NormalTime(mSingleRepetitionRecord.getHour(), mSingleRepetitionRecord.getMinute());
         else

@@ -38,7 +38,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int customTimeId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(customTimeId != -1);
-        mCustomTime = CustomTimeFactory.getCustomTime(customTimeId);
+        mCustomTime = CustomTimeFactory.getInstance().getCustomTime(customTimeId);
         Assert.assertTrue(mCustomTime != null);
 
         TextView customTimeName = (TextView) findViewById(R.id.custom_time_name);

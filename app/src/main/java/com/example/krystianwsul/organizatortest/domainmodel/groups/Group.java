@@ -42,7 +42,7 @@ public class Group {
         } else {
             Date date = mTimeStamp.getDate();
             HourMinute hourMinute = mTimeStamp.getHourMinute();
-            Time time = CustomTimeFactory.getCustomTime(date.getDayOfWeek(), hourMinute);
+            Time time = CustomTimeFactory.getInstance().getCustomTime(date.getDayOfWeek(), hourMinute);
             if (time == null)
                 time = new NormalTime(hourMinute);
             DateTime dateTime = new DateTime(date, time);

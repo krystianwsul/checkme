@@ -46,7 +46,7 @@ public class TimePickerFragment extends DialogFragment {
         Bundle args = getArguments();
 
         int customTimeId = args.getInt("customTimeId");
-        final CustomTime customTime = CustomTimeFactory.getCustomTime(customTimeId);
+        final CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(customTimeId);
         Assert.assertTrue(customTime != null);
 
         final DayOfWeek dayOfWeek = (DayOfWeek) args.getSerializable("dayOfWeek");

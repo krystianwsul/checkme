@@ -32,7 +32,7 @@ public class DailyScheduleTime {
     public Time getTime() {
         Integer customTimeId = mDailyScheduleTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = CustomTimeFactory.getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
+            CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {

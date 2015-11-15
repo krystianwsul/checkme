@@ -47,7 +47,7 @@ public class RealWeeklyRepetition extends WeeklyRepetition {
 
     public Time getRepetitionTime() {
         if (mWeeklyRepetitionRecord.getCustomTimeId() != null)
-            return CustomTimeFactory.getCustomTime(mWeeklyRepetitionRecord.getCustomTimeId());
+            return CustomTimeFactory.getInstance().getCustomTime(mWeeklyRepetitionRecord.getCustomTimeId());
         else if (mWeeklyRepetitionRecord.getHour() != null)
             return new NormalTime(mWeeklyRepetitionRecord.getHour(), mWeeklyRepetitionRecord.getMinute());
         else

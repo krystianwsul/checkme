@@ -23,12 +23,12 @@ public class CustomTimesAdapter extends ArrayAdapter<CustomTime> {
     private final ArrayList<CustomTime> mCustomTimes;
 
     public CustomTimesAdapter(Context context) {
-        super(context, -1, new ArrayList<>(CustomTimeFactory.getCustomTimes()));
+        super(context, -1, new ArrayList<>(CustomTimeFactory.getInstance().getCustomTimes()));
 
         Assert.assertTrue(context != null);
         mContext = context;
 
-        mCustomTimes = new ArrayList<>(CustomTimeFactory.getCustomTimes());
+        mCustomTimes = new ArrayList<>(CustomTimeFactory.getInstance().getCustomTimes());
         Assert.assertTrue(mCustomTimes != null);
     }
 

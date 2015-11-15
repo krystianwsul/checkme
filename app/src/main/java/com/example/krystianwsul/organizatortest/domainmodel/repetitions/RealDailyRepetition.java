@@ -43,7 +43,7 @@ public class RealDailyRepetition extends DailyRepetition {
 
     public Time getRepetitionTime() {
         if (mDailyRepetitionRecord.getCustomTimeId() != null)
-            return CustomTimeFactory.getCustomTime(mDailyRepetitionRecord.getCustomTimeId());
+            return CustomTimeFactory.getInstance().getCustomTime(mDailyRepetitionRecord.getCustomTimeId());
         else if (mDailyRepetitionRecord.getHour() != null)
             return new NormalTime(mDailyRepetitionRecord.getHour(), mDailyRepetitionRecord.getMinute());
         else

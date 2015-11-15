@@ -31,7 +31,7 @@ public class WeeklyScheduleDayTime {
     public Time getTime() {
         Integer customTimeId = mWeeklyScheduleDayTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = CustomTimeFactory.getCustomTime(mWeeklyScheduleDayTimeRecord.getCustomTimeId());
+            CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(mWeeklyScheduleDayTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {

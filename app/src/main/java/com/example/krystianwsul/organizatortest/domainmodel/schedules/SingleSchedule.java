@@ -43,7 +43,7 @@ public class SingleSchedule extends Schedule {
     public Time getTime() {
         Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = CustomTimeFactory.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
+            CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(mSingleScheduleRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {

@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleDayTimeRecord;
 
+import junit.framework.Assert;
+
 import java.util.HashMap;
 
 /**
@@ -33,9 +35,7 @@ public class WeeklyScheduleDayTimeFactory {
 
     private WeeklyScheduleDayTime createWeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
         WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord = PersistenceManger.getInstance().getWeeklyScheduleDayTimeRecord(weeklyScheduleDayTimeId);
-        if (weeklyScheduleDayTimeRecord.getCustomTimeId() == null)
-            return new WeeklyScheduleNormalDayTime(weeklyScheduleDayTimeRecord, weeklySchedule);
-        else
-            return new WeeklyScheduleCustomDayTime(weeklyScheduleDayTimeRecord, weeklySchedule);
+        Assert.assertTrue(weeklyScheduleDayTimeRecord != null);
+        return new WeeklyScheduleDayTime(weeklyScheduleDayTimeRecord, weeklySchedule);
     }
 }

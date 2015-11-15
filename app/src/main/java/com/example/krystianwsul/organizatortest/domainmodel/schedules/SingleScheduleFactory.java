@@ -43,9 +43,6 @@ public class SingleScheduleFactory {
         if (singleScheduleRecord == null)
             return null;
 
-        if (singleScheduleRecord.getCustomTimeId() == null)
-            return new SingleNormalSchedule(singleScheduleRecord, rootTask);
-        else
-            return new SingleCustomSchedule(singleScheduleRecord, rootTask);
+        return new SingleSchedule(singleScheduleRecord, rootTask);
     }
 }

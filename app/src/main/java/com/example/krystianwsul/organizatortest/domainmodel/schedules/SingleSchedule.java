@@ -5,6 +5,9 @@ import android.content.Context;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
@@ -18,7 +21,7 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 10/17/2015.
  */
-public abstract class SingleSchedule extends Schedule {
+public class SingleSchedule extends Schedule {
     protected final SingleScheduleRecord mSingleScheduleRecord;
 
     protected SingleSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
@@ -37,7 +40,20 @@ public abstract class SingleSchedule extends Schedule {
         return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
     }
 
-    public abstract Time getTime();
+    public Time getTime() {
+        Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
+        if (customTimeId != null) {
+            CustomTime customTime = CustomTimeFactory.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
+            Assert.assertTrue(customTime != null);
+            return customTime;
+        } else {
+            Integer hour = mSingleScheduleRecord.getHour();
+            Integer minute = mSingleScheduleRecord.getMinute();
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+            return new NormalTime(hour, minute);
+        }
+    }
 
     public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);

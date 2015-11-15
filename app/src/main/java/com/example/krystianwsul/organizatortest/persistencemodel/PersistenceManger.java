@@ -136,7 +136,7 @@ public class PersistenceManger {
         return mCustomTimeRecords.get(timeRecordId);
     }
 
-    public Collection<Integer> getCustomTimeRecordIds() {
+    public Collection<Integer> getCustomTimeIds() {
         return mCustomTimeRecords.keySet();
     }
 

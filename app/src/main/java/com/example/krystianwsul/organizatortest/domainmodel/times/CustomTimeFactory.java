@@ -4,6 +4,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
+import junit.framework.Assert;
+
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -21,15 +23,23 @@ public class CustomTimeFactory {
 
     private HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
 
-    public CustomTime getCustomTime(int customTimeId) {
-        if (mCustomTimes.containsKey(customTimeId)) {
-            return mCustomTimes.get(customTimeId);
-        } else {
+    private CustomTimeFactory() {
+        Collection<Integer> customTimeIds = PersistenceManger.getInstance().getCustomTimeIds();
+        Assert.assertTrue(customTimeIds != null);
+        Assert.assertTrue(!customTimeIds.isEmpty());
+
+        for (Integer customTimeId : customTimeIds) {
+            Assert.assertTrue(customTimeId != null);
+
             CustomTimeRecord customTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(customTimeId);
             CustomTime customTime = new CustomTime(customTimeRecord);
             mCustomTimes.put(customTimeId, customTime);
-            return customTime;
         }
+    }
+
+    public CustomTime getCustomTime(int customTimeId) {
+        Assert.assertTrue(mCustomTimes.containsKey(customTimeId));
+        return mCustomTimes.get(customTimeId);
     }
 
     public CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {

@@ -65,4 +65,9 @@ public class GroupAdapter extends ArrayAdapter<Group> {
         return convertView;
     }
 
+    private class GroupHolder {
+        public TextView groupRowName;
+        public TextView groupRowDetails;
+        public ImageView groupRowImg;
+    }
 }

@@ -40,29 +40,31 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
 
         if (convertView == null)  {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.show_group_row, parent, false);
+            convertView = inflater.inflate(R.layout.show_instance_row, parent, false);
 
-            GroupHolder groupHolder = new GroupHolder();
-            groupHolder.groupRowName = (TextView) convertView.findViewById(R.id.group_row_name);
-            groupHolder.groupRowDetails = (TextView) convertView.findViewById(R.id.group_row_details);
-            groupHolder.groupRowImg = (ImageView) convertView.findViewById(R.id.group_row_img);
+            InstanceHolder instanceHolder = new InstanceHolder();
+            instanceHolder.instanceRowName = (TextView) convertView.findViewById(R.id.instance_row_name);
+            instanceHolder.instanceRowImg = (ImageView) convertView.findViewById(R.id.instance_row_img);
 
-            convertView.setTag(groupHolder);
+            convertView.setTag(instanceHolder);
         }
 
-        GroupHolder instanceHolder = (GroupHolder) convertView.getTag();
+        InstanceHolder instanceHolder = (InstanceHolder) convertView.getTag();
 
-        instanceHolder.groupRowName.setText(instance.getName());
-
-        instanceHolder.groupRowDetails.setVisibility(View.GONE);
+        instanceHolder.instanceRowName.setText(instance.getName());
 
         Resources resources = mContext.getResources();
 
         if (instance.getChildInstances().isEmpty())
-            instanceHolder.groupRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+            instanceHolder.instanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
-            instanceHolder.groupRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+            instanceHolder.instanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
 
         return convertView;
+    }
+
+    private class InstanceHolder {
+        public TextView instanceRowName;
+        public ImageView instanceRowImg;
     }
 }

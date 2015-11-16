@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class RootTask extends Task {
     private ArrayList<Schedule> mSchedules;
 
-    protected RootTask(TaskRecord taskRecord) {
+    RootTask(TaskRecord taskRecord) {
         super(taskRecord);
 
         Assert.assertTrue(mTaskRecord.getParentTaskId() == null);

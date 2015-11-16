@@ -17,10 +17,10 @@ import junit.framework.Assert;
  * Created by Krystian on 11/9/2015.
  */
 public class WeeklyScheduleDayTime {
-    protected final WeeklyScheduleDayTimeRecord mWeeklyScheduleDayTimeRecord;
-    protected final WeeklySchedule mWeeklySchedule;
+    private final WeeklyScheduleDayTimeRecord mWeeklyScheduleDayTimeRecord;
+    private final WeeklySchedule mWeeklySchedule;
 
-    protected WeeklyScheduleDayTime(WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord, WeeklySchedule weeklySchedule) {
+    WeeklyScheduleDayTime(WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord, WeeklySchedule weeklySchedule) {
         Assert.assertTrue(weeklyScheduleDayTimeRecord != null);
         Assert.assertTrue(weeklySchedule != null);
 

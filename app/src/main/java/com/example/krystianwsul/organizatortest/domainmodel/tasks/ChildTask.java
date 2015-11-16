@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class ChildTask extends Task {
     private final Task mParentTask;
 
-    protected ChildTask(TaskRecord taskRecord, Task parentTask) {
+    ChildTask(TaskRecord taskRecord, Task parentTask) {
         super(taskRecord);
 
         Assert.assertTrue(mTaskRecord.getParentTaskId() != null);

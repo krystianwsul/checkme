@@ -31,20 +31,17 @@ public class WeeklyInstanceFactory {
     }
 
     public WeeklyInstance getWeeklyInstance(Task task, WeeklyRepetition weeklyRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(weeklyRepetition != null);
+
         WeeklyInstance existingWeeklyInstance = getExistingWeeklyInstance(task.getId(), weeklyRepetition.getId());
         if (existingWeeklyInstance != null)
             return existingWeeklyInstance;
 
-        WeeklyInstanceRecord weeklyInstanceRecord = PersistenceManger.getInstance().getWeeklyInstanceRecord(task.getId(), weeklyRepetition.getId());
-        if (weeklyInstanceRecord != null) {
-            RealWeeklyInstance realWeeklyInstance = new RealWeeklyInstance(task, weeklyInstanceRecord, weeklyRepetition);
-            mWeeklyInstances.put(realWeeklyInstance.getId(), realWeeklyInstance);
-            return realWeeklyInstance;
-        }
-
-        VirtualWeeklyInstance virtualWeeklyInstance = new VirtualWeeklyInstance(task, weeklyRepetition);
-        mWeeklyInstances.put(virtualWeeklyInstance.getId(), virtualWeeklyInstance);
-        return virtualWeeklyInstance;
+        WeeklyInstance weeklyInstance = new WeeklyInstance(task, weeklyRepetition);
+        Assert.assertTrue(weeklyInstance != null);
+        mWeeklyInstances.put(weeklyInstance.getId(), weeklyInstance);
+        return weeklyInstance;
     }
 
     private WeeklyInstance getExistingWeeklyInstance(int taskId, int weeklyRepetitionId) {
@@ -52,5 +49,16 @@ public class WeeklyInstanceFactory {
             if (weeklyInstance.getTaskId() == taskId && weeklyInstance.getWeeklyRepetitionId() == weeklyRepetitionId)
                 return weeklyInstance;
         return null;
+    }
+
+    private WeeklyInstance createWeeklyInstance(Task task, WeeklyRepetition weeklyRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(weeklyRepetition != null);
+
+        WeeklyInstanceRecord weeklyInstanceRecord = PersistenceManger.getInstance().getWeeklyInstanceRecord(task.getId(), weeklyRepetition.getId());
+        if (weeklyInstanceRecord != null)
+            return new WeeklyInstance(task, weeklyRepetition, weeklyInstanceRecord);
+        else
+            return new WeeklyInstance(task, weeklyRepetition);
     }
 }

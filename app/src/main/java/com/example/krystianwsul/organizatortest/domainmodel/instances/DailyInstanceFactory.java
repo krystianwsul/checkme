@@ -31,20 +31,17 @@ public class DailyInstanceFactory {
     }
 
     public DailyInstance getDailyInstance(Task task, DailyRepetition dailyRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(dailyRepetition != null);
+
         DailyInstance existingDailyInstance = getExistingDailyInstance(task.getId(), dailyRepetition.getId());
         if (existingDailyInstance != null)
             return existingDailyInstance;
 
-        DailyInstanceRecord dailyInstanceRecord = PersistenceManger.getInstance().getDailyInstanceRecord(task.getId(), dailyRepetition.getId());
-        if (dailyInstanceRecord != null) {
-            RealDailyInstance realDailyInstance = new RealDailyInstance(task, dailyInstanceRecord, dailyRepetition);
-            mDailyInstances.put(realDailyInstance.getId(), realDailyInstance);
-            return realDailyInstance;
-        }
-
-        VirtualDailyInstance virtualDailyInstance = new VirtualDailyInstance(task, dailyRepetition);
-        mDailyInstances.put(virtualDailyInstance.getId(), virtualDailyInstance);
-        return virtualDailyInstance;
+        DailyInstance dailyInstance = new DailyInstance(task, dailyRepetition);
+        Assert.assertTrue(dailyInstance != null);
+        mDailyInstances.put(dailyInstance.getId(), dailyInstance);
+        return dailyInstance;
     }
 
     private DailyInstance getExistingDailyInstance(int taskId, int dailyRepetitionId) {
@@ -52,5 +49,16 @@ public class DailyInstanceFactory {
             if (dailyInstance.getTaskId() == taskId && dailyInstance.getDailyRepetitionId() == dailyRepetitionId)
                 return dailyInstance;
         return null;
+    }
+
+    private DailyInstance createDailyInstance(Task task, DailyRepetition dailyRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(dailyRepetition != null);
+
+        DailyInstanceRecord dailyInstanceRecord = PersistenceManger.getInstance().getDailyInstanceRecord(task.getId(), dailyRepetition.getId());
+        if (dailyInstanceRecord != null)
+            return new DailyInstance(task, dailyRepetition, dailyInstanceRecord);
+        else
+            return new DailyInstance(task, dailyRepetition);
     }
 }

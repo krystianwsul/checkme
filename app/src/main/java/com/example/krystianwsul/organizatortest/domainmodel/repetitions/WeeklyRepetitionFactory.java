@@ -5,6 +5,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklySche
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyRepetitionRecord;
 
+import junit.framework.Assert;
+
 import java.util.HashMap;
 
 /**
@@ -23,37 +25,42 @@ public class WeeklyRepetitionFactory {
 
     private final HashMap<Integer, WeeklyRepetition> mWeeklyRepetitions = new HashMap<>();
 
-    public WeeklyRepetition getWeeklyRepetition(int weeklyRepetitionId, WeeklyScheduleDayTime weeklyScheduleDayTime) {
-        if (mWeeklyRepetitions.containsKey(weeklyRepetitionId)) {
-            return mWeeklyRepetitions.get(weeklyRepetitionId);
-        } else {
-            WeeklyRepetition weeklyRepetition = new RealWeeklyRepetition(PersistenceManger.getInstance().getWeeklyRepetitionRecord(weeklyRepetitionId), weeklyScheduleDayTime);
-            mWeeklyRepetitions.put(weeklyRepetitionId, weeklyRepetition);
-            return weeklyRepetition;
-        }
+    public WeeklyRepetition getWeeklyRepetition(int weeklyRepetitionId) {
+        Assert.assertTrue(mWeeklyRepetitions.containsKey(weeklyRepetitionId));
+        return mWeeklyRepetitions.get(weeklyRepetitionId);
     }
 
     public WeeklyRepetition getWeeklyRepetition(WeeklyScheduleDayTime weeklyScheduleDayTime, Date scheduleDate) {
+        Assert.assertTrue(weeklyScheduleDayTime != null);
+        Assert.assertTrue(scheduleDate != null);
+
         WeeklyRepetition existingWeeklyRepetition = getExistingWeeklyRepetition(weeklyScheduleDayTime.getId(), scheduleDate);
         if (existingWeeklyRepetition != null)
             return existingWeeklyRepetition;
 
-        WeeklyRepetitionRecord weeklyRepetitionRecord = PersistenceManger.getInstance().getWeeklyRepetitionRecord(weeklyScheduleDayTime.getId(), scheduleDate);
-        if (weeklyRepetitionRecord != null) {
-            RealWeeklyRepetition realWeeklyRepetition = new RealWeeklyRepetition(weeklyRepetitionRecord, weeklyScheduleDayTime);
-            mWeeklyRepetitions.put(realWeeklyRepetition.getId(), realWeeklyRepetition);
-            return realWeeklyRepetition;
-        }
-
-        VirtualWeeklyRepetition virtualWeeklyRepetition = new VirtualWeeklyRepetition(weeklyScheduleDayTime, scheduleDate);
-        mWeeklyRepetitions.put(virtualWeeklyRepetition.getId(), virtualWeeklyRepetition);
-        return virtualWeeklyRepetition;
+        WeeklyRepetition weeklyRepetition = createWeeklyRepetition(weeklyScheduleDayTime, scheduleDate);
+        Assert.assertTrue(weeklyRepetition != null);
+        mWeeklyRepetitions.put(weeklyRepetition.getId(), weeklyRepetition);
+        return weeklyRepetition;
     }
 
     private WeeklyRepetition getExistingWeeklyRepetition(int weeklyScheduleDayTimeId, Date scheduleDate) {
+        Assert.assertTrue(scheduleDate != null);
+
         for (WeeklyRepetition weeklyRepetition : mWeeklyRepetitions.values())
             if (weeklyRepetition.getWeeklyScheduleDayTimeId() == weeklyScheduleDayTimeId && weeklyRepetition.getScheduleDate() == scheduleDate)
                 return weeklyRepetition;
         return null;
+    }
+
+    private WeeklyRepetition createWeeklyRepetition(WeeklyScheduleDayTime weeklyScheduleDayTime, Date scheduleDate) {
+        Assert.assertTrue(weeklyScheduleDayTime != null);
+        Assert.assertTrue(scheduleDate != null);
+
+        WeeklyRepetitionRecord weeklyRepetitionRecord = PersistenceManger.getInstance().getWeeklyRepetitionRecord(weeklyScheduleDayTime.getId(), scheduleDate);
+        if (weeklyRepetitionRecord != null)
+            return new WeeklyRepetition(weeklyScheduleDayTime, weeklyRepetitionRecord);
+        else
+            return new WeeklyRepetition(weeklyScheduleDayTime, scheduleDate);
     }
 }

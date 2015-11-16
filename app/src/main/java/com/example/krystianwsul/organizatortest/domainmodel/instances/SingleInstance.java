@@ -6,6 +6,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
+import com.example.krystianwsul.organizatortest.persistencemodel.SingleInstanceRecord;
 
 import junit.framework.Assert;
 
@@ -14,18 +16,33 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 11/2/2015.
  */
-public abstract class SingleInstance implements Instance {
-    protected final Task mTask;
-    protected final SingleRepetition mSingleRepetition;
+public class SingleInstance implements Instance {
+    private final Task mTask;
+    private final SingleRepetition mSingleRepetition;
+
+    private final SingleInstanceRecord mSingleInstanceRecord;
 
     public static final String INTENT_KEY = "singleInstanceId";
 
-    protected SingleInstance(Task task, SingleRepetition singleRepetition) {
+    SingleInstance(Task task, SingleRepetition singleRepetition, SingleInstanceRecord singleInstanceRecord) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(singleRepetition != null);
+        Assert.assertTrue(singleInstanceRecord != null);
+
+        mTask = task;
+        mSingleRepetition = singleRepetition;
+
+        mSingleInstanceRecord = singleInstanceRecord;
+    }
+
+    SingleInstance(Task task, SingleRepetition singleRepetition) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(singleRepetition != null);
 
         mTask = task;
         mSingleRepetition = singleRepetition;
+
+        mSingleInstanceRecord = null;
     }
 
     public int getTaskId() {

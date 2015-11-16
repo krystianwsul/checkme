@@ -22,9 +22,9 @@ import java.util.ArrayList;
  * Created by Krystian on 10/17/2015.
  */
 public class SingleSchedule extends Schedule {
-    protected final SingleScheduleRecord mSingleScheduleRecord;
+    private final SingleScheduleRecord mSingleScheduleRecord;
 
-    protected SingleSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
+    SingleSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
         super(rootTask);
 
         Assert.assertTrue(singleScheduleRecord != null);

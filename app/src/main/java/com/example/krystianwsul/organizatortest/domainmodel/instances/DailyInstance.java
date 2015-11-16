@@ -6,6 +6,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.persistencemodel.DailyInstanceRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
 
@@ -15,20 +17,46 @@ import java.util.HashMap;
 /**
  * Created by Krystian on 11/2/2015.
  */
-public abstract class DailyInstance implements Instance {
+public class DailyInstance implements Instance {
     private final Task mTask;
     private final DailyRepetition mDailyRepetition;
 
+    private final DailyInstanceRecord mDailyInstanceRecord;
+
+    private final int mId;
+
+    private static int sVirtualDailyInstanceCount = 0;
+
     public static final String INTENT_KEY = "dailyInstanceId";
 
-    protected DailyInstance(Task task, DailyRepetition dailyRepetition) {
+    DailyInstance(Task task, DailyRepetition dailyRepetition, DailyInstanceRecord dailyInstanceRecord) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(dailyRepetition != null);
+        Assert.assertTrue(dailyInstanceRecord != null);
+
         mTask = task;
         mDailyRepetition = dailyRepetition;
+
+        mDailyInstanceRecord = dailyInstanceRecord;
+
+        mId = mDailyInstanceRecord.getId();
     }
 
-    public abstract int getId();
+    DailyInstance(Task task, DailyRepetition dailyRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(dailyRepetition != null);
+
+        mTask = task;
+        mDailyRepetition = dailyRepetition;
+
+        mDailyInstanceRecord = null;
+
+        mId = PersistenceManger.getInstance().getMaxDailyInstanceId() + ++sVirtualDailyInstanceCount;
+    }
+
+    public int getId() {
+        return mId;
+    }
 
     public int getTaskId() {
         return mTask.getId();

@@ -31,19 +31,28 @@ public class SingleInstanceFactory {
     }
 
     public SingleInstance getSingleInstance(Task task, SingleRepetition singleRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(singleRepetition != null);
+
         SingleInstance existingSingleInstance = mSingleInstances.get(task.getId());
         if (existingSingleInstance != null)
             return existingSingleInstance;
 
-        SingleInstanceRecord singleInstanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
-        if (singleInstanceRecord != null) {
-            RealSingleInstance realSingleInstance = new RealSingleInstance(task, singleInstanceRecord, singleRepetition);
-            mSingleInstances.put(realSingleInstance.getTaskId(), realSingleInstance);
-            return realSingleInstance;
-        }
+        SingleInstance singleInstance = createSingleInstance(task, singleRepetition);
+        Assert.assertTrue(singleInstance != null);
+        mSingleInstances.put(singleInstance.getTaskId(), singleInstance);
+        return singleInstance;
+    }
 
-        VirtualSingleInstance virtualSingleInstance = new VirtualSingleInstance(task, singleRepetition);
-        mSingleInstances.put(virtualSingleInstance.getTaskId(), virtualSingleInstance);
-        return virtualSingleInstance;
+    private SingleInstance createSingleInstance(Task task, SingleRepetition singleRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(singleRepetition != null);
+
+        SingleInstanceRecord singleInstanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
+        if (singleInstanceRecord != null)
+            return new SingleInstance(task, singleRepetition, singleInstanceRecord);
+        else
+            return new SingleInstance(task, singleRepetition);
+
     }
 }

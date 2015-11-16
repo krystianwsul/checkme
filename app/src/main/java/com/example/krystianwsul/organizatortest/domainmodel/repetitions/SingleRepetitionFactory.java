@@ -27,18 +27,23 @@ public class SingleRepetitionFactory {
     public SingleRepetition getSingleRepetition(SingleSchedule singleSchedule) {
         Assert.assertTrue(singleSchedule != null);
 
-        if (mSingleRepetitions.containsKey(singleSchedule.getRootTaskId()))
+        if (mSingleRepetitions.containsKey(singleSchedule.getRootTaskId())) {
             return mSingleRepetitions.get(singleSchedule.getRootTaskId());
+        } else {
+            SingleRepetition singleRepetition = createSingleRepetition(singleSchedule);
+            Assert.assertTrue(singleRepetition != null);
+            mSingleRepetitions.put(singleRepetition.getRootTaskId(), singleRepetition);
+            return singleRepetition;
+        }
+    }
+
+    private SingleRepetition createSingleRepetition(SingleSchedule singleSchedule) {
+        Assert.assertTrue(singleSchedule != null);
 
         SingleRepetitionRecord singleRepetitionRecord = PersistenceManger.getInstance().getSingleRepetitionRecord(singleSchedule.getRootTaskId());
-        if (singleRepetitionRecord != null) {
-            RealSingleRepetition realSingleRepetition = new RealSingleRepetition(singleRepetitionRecord, singleSchedule);
-            mSingleRepetitions.put(realSingleRepetition.getRootTaskId(), realSingleRepetition);
-            return realSingleRepetition;
-        }
-
-        VirtualSingleRepetition virtualSingleRepetition = new VirtualSingleRepetition(singleSchedule);
-        mSingleRepetitions.put(virtualSingleRepetition.getRootTaskId(), virtualSingleRepetition);
-        return virtualSingleRepetition;
+        if (singleRepetitionRecord != null)
+            return new SingleRepetition(singleSchedule, singleRepetitionRecord);
+        else
+            return new SingleRepetition(singleSchedule);
     }
 }

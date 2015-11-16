@@ -40,35 +40,29 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
 
         if (convertView == null)  {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.show_instance_row, parent, false);
+            convertView = inflater.inflate(R.layout.show_group_row, parent, false);
 
-            InstanceHolder instanceHolder = new InstanceHolder();
-            instanceHolder.instanceRowName = (TextView) convertView.findViewById(R.id.instance_row_name);
-            instanceHolder.instanceRowDetails = (TextView) convertView.findViewById(R.id.instance_row_details);
-            instanceHolder.instanceRowImg = (ImageView) convertView.findViewById(R.id.instance_row_img);
+            GroupHolder groupHolder = new GroupHolder();
+            groupHolder.groupRowName = (TextView) convertView.findViewById(R.id.group_row_name);
+            groupHolder.groupRowDetails = (TextView) convertView.findViewById(R.id.group_row_details);
+            groupHolder.groupRowImg = (ImageView) convertView.findViewById(R.id.group_row_img);
 
-            convertView.setTag(instanceHolder);
+            convertView.setTag(groupHolder);
         }
 
-        InstanceHolder instanceHolder = (InstanceHolder) convertView.getTag();
+        GroupHolder instanceHolder = (GroupHolder) convertView.getTag();
 
-        instanceHolder.instanceRowName.setText(instance.getName());
+        instanceHolder.groupRowName.setText(instance.getName());
 
-        instanceHolder.instanceRowDetails.setVisibility(View.GONE);
+        instanceHolder.groupRowDetails.setVisibility(View.GONE);
 
         Resources resources = mContext.getResources();
 
         if (instance.getChildInstances().isEmpty())
-            instanceHolder.instanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+            instanceHolder.groupRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
         else
-            instanceHolder.instanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+            instanceHolder.groupRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
 
         return convertView;
-    }
-
-    private class InstanceHolder {
-        public TextView instanceRowName;
-        public TextView instanceRowDetails;
-        public ImageView instanceRowImg;
     }
 }

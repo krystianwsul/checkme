@@ -18,10 +18,10 @@ import java.util.HashMap;
  * Created by Krystian on 10/29/2015.
  */
 public class DailyScheduleTime {
-    protected final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
-    protected final DailySchedule mDailySchedule;
+    private final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
+    private final DailySchedule mDailySchedule;
 
-    protected DailyScheduleTime(DailyScheduleTimeRecord dailyScheduleTimeRecord, DailySchedule dailySchedule) {
+    DailyScheduleTime(DailyScheduleTimeRecord dailyScheduleTimeRecord, DailySchedule dailySchedule) {
         Assert.assertTrue(dailyScheduleTimeRecord != null);
         Assert.assertTrue(dailySchedule != null);
 

@@ -18,11 +18,11 @@ import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import junit.framework.Assert;
 
 public class ShowGroupActivity extends AppCompatActivity {
-    private static final String INTENT_KEY = "groupLong";
+    private static final String INTENT_KEY = "groupId";
 
     public static Intent getIntent(Group group, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
-        intent.putExtra(ShowGroupActivity.INTENT_KEY, group.getTimeStamp().getLong());
+        intent.putExtra(ShowGroupActivity.INTENT_KEY, group.getId());
         return intent;
     }
 
@@ -33,10 +33,9 @@ public class ShowGroupActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        long groupLong = intent.getLongExtra(INTENT_KEY, -1);
-        Assert.assertTrue(groupLong != -1);
-        TimeStamp timeStamp = new TimeStamp(groupLong);
-        Group group = GroupFactory.getInstance().getGroup(timeStamp);
+        int groupId = intent.getIntExtra(INTENT_KEY, -1);
+        Assert.assertTrue(groupId != -1);
+        Group group = GroupFactory.getInstance().getGroup(groupId);
         Assert.assertTrue(group != null);
 
         TextView showGroupName = (TextView) findViewById(R.id.show_group_name);

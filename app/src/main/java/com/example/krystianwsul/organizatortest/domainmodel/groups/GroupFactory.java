@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
@@ -24,6 +25,8 @@ public class GroupFactory {
 
     private TreeMap<TimeStamp, Group> mDoneGroups = new TreeMap<>();
     private TreeMap<TimeStamp, Group> mNotDoneGroups = new TreeMap<>();
+
+    private HashMap<Integer, Group> mGroups = new HashMap<>();
 
     public static GroupFactory getInstance() {
         if (sInstance == null)
@@ -55,10 +58,13 @@ public class GroupFactory {
                 notDoneInstances.add(instance);
         }
 
+        int groupId = 0;
+
         for (Instance instance : doneInstances) {
-            Group group = new Group(instance.getDone());
+            Group group = new Group(instance.getDone(), groupId++);
             group.addInstance(instance);
             mDoneGroups.put(group.getTimeStamp(), group);
+            mGroups.put(group.getId(), group);
         }
 
         for (Instance instance : notDoneInstances) {
@@ -66,9 +72,10 @@ public class GroupFactory {
             if (mNotDoneGroups.containsKey(timeStamp)) {
                 mNotDoneGroups.get(timeStamp).addInstance(instance);
             } else {
-                Group group = new Group(timeStamp);
+                Group group = new Group(timeStamp, groupId++);
                 group.addInstance(instance);
                 mNotDoneGroups.put(timeStamp, group);
+                mGroups.put(group.getId(), group);
             }
         }
     }
@@ -80,8 +87,8 @@ public class GroupFactory {
         return groups;
     }
 
-    public Group getGroup(TimeStamp timeStamp) {
-        Assert.assertTrue(mNotDoneGroups.containsKey(timeStamp));
-        return mNotDoneGroups.get(timeStamp);
+    public Group getGroup(int groupId) {
+        Assert.assertTrue(mGroups.containsKey(groupId));
+        return mGroups.get(groupId);
     }
 }

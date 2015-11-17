@@ -22,12 +22,19 @@ import java.util.ArrayList;
  */
 public class Group {
     private final TimeStamp mTimeStamp;
+    private final int mId;
 
     private final ArrayList<Instance> mInstances = new ArrayList<>();
 
-    public Group(TimeStamp timeStamp) {
+    public Group(TimeStamp timeStamp, int id) {
         Assert.assertTrue(timeStamp != null);
+
         mTimeStamp = timeStamp;
+        mId = id;
+    }
+
+    public int getId() {
+        return mId;
     }
 
     public void addInstance(Instance instance) {

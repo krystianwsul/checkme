@@ -44,7 +44,7 @@ public class CustomTimeFactory {
 
     public CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
         for (CustomTime customTime : mCustomTimes.values())
-            if (customTime.getHourMinute(dayOfWeek).compareTo(hourMinute) == 0)
+            if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
                 return customTime;
         return null;
     }

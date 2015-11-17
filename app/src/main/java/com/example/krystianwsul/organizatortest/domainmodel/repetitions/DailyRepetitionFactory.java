@@ -48,7 +48,7 @@ public class DailyRepetitionFactory {
         Assert.assertTrue(scheduleDate != null);
 
         for (DailyRepetition dailyRepetition : mDailyRepetitions.values())
-            if (dailyRepetition.getDailyScheduleTimeId() == dailyScheduleTimeId && dailyRepetition.getScheduleDate() == scheduleDate)
+            if (dailyRepetition.getDailyScheduleTimeId() == dailyScheduleTimeId && dailyRepetition.getScheduleDate().equals(scheduleDate))
                 return dailyRepetition;
         return null;
     }

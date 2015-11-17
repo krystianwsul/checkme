@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
@@ -20,7 +21,7 @@ public class WeeklyInstance implements Instance {
     private final Task mTask;
     private final WeeklyRepetition mWeeklyRepetition;
 
-    private final WeeklyInstanceRecord mWeeklyInstanceRecord;
+    private WeeklyInstanceRecord mWeeklyInstanceRecord;
 
     private final int mId;
 
@@ -93,5 +94,30 @@ public class WeeklyInstance implements Instance {
 
     public DateTime getDateTime() {
         return mWeeklyRepetition.getRepetitionDateTime();
+    }
+
+    public TimeStamp getDone() {
+        if (mWeeklyInstanceRecord == null)
+            return null;
+
+        Long done = mWeeklyInstanceRecord.getDone();
+        if (done != null)
+            return new TimeStamp(done);
+        else
+            return null;
+    }
+
+    public void setDone(boolean done) {
+        if (mWeeklyInstanceRecord == null) {
+            if (done)
+                mWeeklyInstanceRecord = PersistenceManger.getInstance().createWeeklyInstanceRecord(mId, mTask.getId(), mWeeklyInstanceRecord.getId(), TimeStamp.getNow().getLong());
+            else
+                return;
+        } else {
+            if (done)
+                mWeeklyInstanceRecord.setDone(TimeStamp.getNow().getLong());
+            else
+                mWeeklyInstanceRecord.setDone(null);
+        }
     }
 }

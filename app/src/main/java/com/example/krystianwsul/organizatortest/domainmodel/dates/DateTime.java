@@ -32,6 +32,8 @@ public class DateTime implements Comparable<DateTime> {
     }
 
     public int compareTo(DateTime dateTime) {
+        Assert.assertTrue(dateTime != null);
+
         int dateComparison = mDate.compareTo(dateTime.getDate());
         if (dateComparison != 0)
             return dateComparison;
@@ -43,8 +45,12 @@ public class DateTime implements Comparable<DateTime> {
         HourMinute otherHourMinute = dateTime.getTime().getHourMinute(day);
         Assert.assertTrue(otherHourMinute != null);
 
-        int x = myHourMinute.compareTo(otherHourMinute);
         return myHourMinute.compareTo(otherHourMinute);
+    }
+
+    public boolean equals(DateTime dateTime) {
+        Assert.assertTrue(dateTime != null);
+        return (compareTo(dateTime) == 0);
     }
 
     public String toString() {

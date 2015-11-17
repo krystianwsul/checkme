@@ -2,10 +2,13 @@ package com.example.krystianwsul.organizatortest.arrayadapters;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -44,12 +47,13 @@ public class GroupAdapter extends ArrayAdapter<Group> {
             groupHolder.groupRowName = (TextView) convertView.findViewById(R.id.group_row_name);
             groupHolder.groupRowDetails = (TextView) convertView.findViewById(R.id.group_row_details);
             groupHolder.groupRowImg = (ImageView) convertView.findViewById(R.id.group_row_img);
+            groupHolder.groupRowCheckBox = (CheckBox) convertView.findViewById(R.id.group_row_checkbox);
             convertView.setTag(groupHolder);
         }
 
         GroupHolder groupHolder = (GroupHolder) convertView.getTag();
 
-        Group group = mGroups.get(position);
+        final Group group = mGroups.get(position);
 
         groupHolder.groupRowName.setText(group.getNameText(mContext));
 
@@ -62,6 +66,22 @@ public class GroupAdapter extends ArrayAdapter<Group> {
         else
             groupHolder.groupRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
 
+        if (group.singleInstance()) {
+            groupHolder.groupRowCheckBox.setVisibility(View.VISIBLE);
+
+            groupHolder.groupRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    Assert.assertTrue(group.singleInstance());
+                    group.getSingleSinstance().setDone(isChecked);
+                }
+            });
+
+            groupHolder.groupRowCheckBox.setChecked(group.getSingleSinstance().getDone() != null);
+        } else {
+            groupHolder.groupRowCheckBox.setVisibility(View.INVISIBLE);
+        }
+
         return convertView;
     }
 
@@ -69,5 +89,6 @@ public class GroupAdapter extends ArrayAdapter<Group> {
         public TextView groupRowName;
         public TextView groupRowDetails;
         public ImageView groupRowImg;
+        public CheckBox groupRowCheckBox;
     }
 }

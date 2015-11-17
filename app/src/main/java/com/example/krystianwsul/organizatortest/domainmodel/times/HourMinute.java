@@ -4,6 +4,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 
+import junit.framework.Assert;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -33,12 +35,19 @@ public class HourMinute implements Comparable<HourMinute> {
     }
 
     public int compareTo(HourMinute hourMinute) {
+        Assert.assertTrue(hourMinute != null);
+
         int comparisonHour = mHour.compareTo(hourMinute.getHour());
 
         if (comparisonHour != 0)
             return comparisonHour;
 
         return mMinute.compareTo(hourMinute.getMinute());
+    }
+
+    public boolean equals(HourMinute hourMinute) {
+        Assert.assertTrue(hourMinute != null);
+        return (compareTo(hourMinute) == 0);
     }
 
     public String toString() {

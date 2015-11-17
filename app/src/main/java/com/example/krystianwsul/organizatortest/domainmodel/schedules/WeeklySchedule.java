@@ -74,7 +74,7 @@ public class WeeklySchedule extends Schedule {
         Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(startTimeStamp.compareTo(endTimeStamp) < 0);
 
-        if (startTimeStamp.getDate().compareTo(endTimeStamp.getDate()) == 0) {
+        if (startTimeStamp.getDate().equals(endTimeStamp.getDate())) {
             return getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), endTimeStamp.getHourMinute());
         } else {
             instances.addAll(getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));

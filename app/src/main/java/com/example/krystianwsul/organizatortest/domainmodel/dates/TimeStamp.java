@@ -48,7 +48,13 @@ public class TimeStamp implements Comparable<TimeStamp> {
     }
 
     public int compareTo(TimeStamp timeStamp) {
+        Assert.assertTrue(timeStamp != null);
         return mLong.compareTo(timeStamp.getLong());
+    }
+
+    public boolean equals(TimeStamp timeStamp) {
+        Assert.assertTrue(timeStamp != null);
+        return (compareTo(timeStamp) == 0);
     }
 
     public Long getLong() {

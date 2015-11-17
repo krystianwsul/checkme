@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,7 +38,7 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Instance instance = mInstances.get(position);
+        final Instance instance = mInstances.get(position);
 
         if (convertView == null)  {
             LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -45,6 +47,7 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
             InstanceHolder instanceHolder = new InstanceHolder();
             instanceHolder.instanceRowName = (TextView) convertView.findViewById(R.id.instance_row_name);
             instanceHolder.instanceRowImg = (ImageView) convertView.findViewById(R.id.instance_row_img);
+            instanceHolder.instanceRowCheckBox = (CheckBox) convertView.findViewById(R.id.instance_row_checkbox);
 
             convertView.setTag(instanceHolder);
         }
@@ -60,11 +63,20 @@ public class InstanceAdapter extends ArrayAdapter<Instance> {
         else
             instanceHolder.instanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
 
+        instanceHolder.instanceRowCheckBox.setChecked(instance.getDone() != null);
+        instanceHolder.instanceRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                instance.setDone(isChecked);
+            }
+        });
+
         return convertView;
     }
 
     private class InstanceHolder {
         public TextView instanceRowName;
         public ImageView instanceRowImg;
+        public CheckBox instanceRowCheckBox;
     }
 }

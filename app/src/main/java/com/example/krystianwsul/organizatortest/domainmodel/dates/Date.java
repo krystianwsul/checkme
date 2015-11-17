@@ -62,6 +62,11 @@ public class Date implements Comparable<Date> {
         return mDay.compareTo(date.getDay());
     }
 
+    public boolean equals(Date date) {
+        Assert.assertTrue(date != null);
+        return (compareTo(date) == 0);
+    }
+
     public DayOfWeek getDayOfWeek() {
         return DayOfWeek.getDayFromCalendar(new GregorianCalendar(mYear, mMonth - 1, mDay));
     }
@@ -83,11 +88,11 @@ public class Date implements Comparable<Date> {
         tomorrowCalendar.add(Calendar.DATE, -1);
         Date tomorrowDate = new Date(tomorrowCalendar);
 
-        if (this.compareTo(todayDate) == 0)
+        if (this.equals(todayDate))
             return context.getString(R.string.today);
-        else if (this.compareTo(yesterdayDate) == 0)
+        else if (this.equals(yesterdayDate))
             return context.getString(R.string.yesterday);
-        else if (this.compareTo(tomorrowDate) == 0)
+        else if (this.equals(tomorrowDate))
             return context.getString(R.string.tomorrow);
         else
             return getDayOfWeek().toString() + ", " + toString();

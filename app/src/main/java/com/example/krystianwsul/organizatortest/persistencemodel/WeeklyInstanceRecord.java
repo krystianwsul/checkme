@@ -10,12 +10,16 @@ public class WeeklyInstanceRecord {
 
     private final int mWeeklyRepetitionId;
 
-    WeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId) {
+    private Long mDone;
+
+    WeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, Long done) {
         mId = id;
 
         mTaskId = taskId;
 
         mWeeklyRepetitionId = weeklyRepetitionId;
+
+        mDone = done;
     }
 
     public int getId() {
@@ -28,5 +32,13 @@ public class WeeklyInstanceRecord {
 
     public int getWeeklyRepetitionId() {
         return mWeeklyRepetitionId;
+    }
+
+    public Long getDone() {
+        return mDone;
+    }
+
+    public void setDone(Long done) {
+        mDone = done;
     }
 }

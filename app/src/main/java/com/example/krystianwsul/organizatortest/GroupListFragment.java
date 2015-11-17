@@ -58,7 +58,6 @@ public class GroupListFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        GroupFactory.refresh();
         ArrayList<Group> groupArray = new ArrayList<>(GroupFactory.getInstance().getGroups());
         mGroupList.setAdapter(new GroupAdapter(getContext(), groupArray));
     }

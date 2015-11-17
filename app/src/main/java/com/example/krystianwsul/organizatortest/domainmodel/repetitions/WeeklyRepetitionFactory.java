@@ -48,7 +48,7 @@ public class WeeklyRepetitionFactory {
         Assert.assertTrue(scheduleDate != null);
 
         for (WeeklyRepetition weeklyRepetition : mWeeklyRepetitions.values())
-            if (weeklyRepetition.getWeeklyScheduleDayTimeId() == weeklyScheduleDayTimeId && weeklyRepetition.getScheduleDate() == scheduleDate)
+            if (weeklyRepetition.getWeeklyScheduleDayTimeId() == weeklyScheduleDayTimeId && weeklyRepetition.getScheduleDate().equals(scheduleDate))
                 return weeklyRepetition;
         return null;
     }

@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizatortest.persistencemodel;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -146,9 +148,11 @@ public class PersistenceManger {
 
     public ArrayList<Integer> getTaskIds(Integer parentTaskId) {
         ArrayList<Integer> taskIds = new ArrayList();
-        for (TaskRecord taskRecord : mTaskRecords.values())
-            if (taskRecord.getParentTaskId() == parentTaskId)
+        for (TaskRecord taskRecord : mTaskRecords.values()) {
+            Integer thisParentTaskId = taskRecord.getParentTaskId();
+            if ((thisParentTaskId == null && parentTaskId == null) || (thisParentTaskId != null && parentTaskId != null && thisParentTaskId.equals(parentTaskId)))
                 taskIds.add(taskRecord.getId());
+        }
         return taskIds;
     }
 
@@ -162,6 +166,14 @@ public class PersistenceManger {
 
     public SingleInstanceRecord getSingleInstanceRecord(int rootTaskId) {
         return mSingleInstanceRecords.get(rootTaskId);
+    }
+
+    public SingleInstanceRecord createSingleInstanceRecord(int taskId, int rootTaskId, Long done) {
+        Assert.assertTrue(!mSingleInstanceRecords.containsKey(taskId));
+
+        SingleInstanceRecord singleInstanceRecord = new SingleInstanceRecord(taskId, rootTaskId, done);
+        mSingleInstanceRecords.put(singleInstanceRecord.getTaskId(), singleInstanceRecord);
+        return singleInstanceRecord;
     }
 
     public int getMaxSingleInstanceId() {
@@ -222,6 +234,14 @@ public class PersistenceManger {
         return null;
     }
 
+    public DailyInstanceRecord createDailyInstanceRecord(int id, int taskId, int dailyRepetitionId, Long done) {
+        Assert.assertTrue(!mDailyInstanceRecords.containsKey(id));
+
+        DailyInstanceRecord dailyInstanceRecord = new DailyInstanceRecord(id, taskId, dailyRepetitionId, done);
+        mDailyInstanceRecords.put(dailyInstanceRecord.getId(), dailyInstanceRecord);
+        return dailyInstanceRecord;
+    }
+
     public int getMaxDailyInstanceId() {
         return mMaxDailyInstanceId;
     }
@@ -278,6 +298,14 @@ public class PersistenceManger {
             }
         }
         return null;
+    }
+
+    public WeeklyInstanceRecord createWeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, Long done) {
+        Assert.assertTrue(!mWeeklyInstanceRecords.containsKey(id));
+
+        WeeklyInstanceRecord weeklyInstanceRecord = new WeeklyInstanceRecord(id, taskId, weeklyRepetitionId, done);
+        mWeeklyInstanceRecords.put(weeklyInstanceRecord.getId(), weeklyInstanceRecord);
+        return weeklyInstanceRecord;
     }
 
     public int getMaxWeeklyInstanceId() {

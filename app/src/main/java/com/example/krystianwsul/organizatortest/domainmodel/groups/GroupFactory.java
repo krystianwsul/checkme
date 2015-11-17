@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.groups;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
@@ -13,7 +12,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.TreeMap;
 
 /**
@@ -22,12 +22,17 @@ import java.util.TreeMap;
 public class GroupFactory {
     private static GroupFactory sInstance;
 
-    private TreeMap<TimeStamp, Group> mGroups = new TreeMap<>();
+    private TreeMap<TimeStamp, Group> mDoneGroups = new TreeMap<>();
+    private TreeMap<TimeStamp, Group> mNotDoneGroups = new TreeMap<>();
 
     public static GroupFactory getInstance() {
         if (sInstance == null)
             sInstance = new GroupFactory();
         return sInstance;
+    }
+
+    public static void refresh() {
+        sInstance = null;
     }
 
     private GroupFactory() {
@@ -37,28 +42,46 @@ public class GroupFactory {
         tomorrowCalendar.add(Calendar.DATE, 1);
         Date tomorrowDate = new Date(tomorrowCalendar);
 
-        final ArrayList<Instance> instances = new ArrayList<>();
+        ArrayList<Instance> instances = new ArrayList<>();
         for (RootTask rootTask : rootTasks)
             instances.addAll(rootTask.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
 
+        ArrayList<Instance> doneInstances = new ArrayList<>();
+        ArrayList<Instance> notDoneInstances = new ArrayList<>();
         for (Instance instance : instances) {
+            if (instance.getDone() != null)
+                doneInstances.add(instance);
+            else
+                notDoneInstances.add(instance);
+        }
+
+        for (Instance instance : doneInstances) {
+            Group group = new Group(instance.getDone());
+            group.addInstance(instance);
+            mDoneGroups.put(group.getTimeStamp(), group);
+        }
+
+        for (Instance instance : notDoneInstances) {
             TimeStamp timeStamp = instance.getDateTime().getTimeStamp();
-            if (mGroups.containsKey(timeStamp)) {
-                mGroups.get(timeStamp).addInstance(instance);
+            if (mNotDoneGroups.containsKey(timeStamp)) {
+                mNotDoneGroups.get(timeStamp).addInstance(instance);
             } else {
                 Group group = new Group(timeStamp);
                 group.addInstance(instance);
-                mGroups.put(timeStamp, group);
+                mNotDoneGroups.put(timeStamp, group);
             }
         }
     }
 
     public Collection<Group> getGroups() {
-        return mGroups.values();
+        ArrayList<Group> groups = new ArrayList<>();
+        groups.addAll(mDoneGroups.values());
+        groups.addAll(mNotDoneGroups.values());
+        return groups;
     }
 
     public Group getGroup(TimeStamp timeStamp) {
-        Assert.assertTrue(mGroups.containsKey(timeStamp));
-        return mGroups.get(timeStamp);
+        Assert.assertTrue(mNotDoneGroups.containsKey(timeStamp));
+        return mNotDoneGroups.get(timeStamp);
     }
 }

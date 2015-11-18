@@ -7,14 +7,12 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.persistencemodel.DailyInstanceRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
 
-import java.security.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by Krystian on 11/2/2015.
@@ -23,37 +21,35 @@ public class DailyInstance implements Instance {
     private final Task mTask;
     private final DailyRepetition mDailyRepetition;
 
-    private DailyInstanceRecord mDailyInstanceRecord;
+    private InstanceRecord mInstanceRecord;
 
     private final int mId;
 
-    private static int sVirtualDailyInstanceCount = 0;
-
     public static final String INTENT_KEY = "dailyInstanceId";
 
-    DailyInstance(Task task, DailyRepetition dailyRepetition, DailyInstanceRecord dailyInstanceRecord) {
+    DailyInstance(Task task, DailyRepetition dailyRepetition, InstanceRecord instanceRecord) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(dailyRepetition != null);
-        Assert.assertTrue(dailyInstanceRecord != null);
+        Assert.assertTrue(instanceRecord != null);
 
         mTask = task;
         mDailyRepetition = dailyRepetition;
 
-        mDailyInstanceRecord = dailyInstanceRecord;
+        mInstanceRecord = instanceRecord;
 
-        mId = mDailyInstanceRecord.getId();
+        mId = mInstanceRecord.getId();
     }
 
-    DailyInstance(Task task, DailyRepetition dailyRepetition) {
+    DailyInstance(Task task, DailyRepetition dailyRepetition, int id) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(dailyRepetition != null);
 
         mTask = task;
         mDailyRepetition = dailyRepetition;
 
-        mDailyInstanceRecord = null;
+        mInstanceRecord = null;
 
-        mId = PersistenceManger.getInstance().getMaxDailyInstanceId() + ++sVirtualDailyInstanceCount;
+        mId = id;
     }
 
     public int getId() {
@@ -82,7 +78,7 @@ public class DailyInstance implements Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(DailyInstanceFactory.getInstance().getDailyInstance(childTask, mDailyRepetition));
+            childInstances.add(InstanceFactory.getInstance().getDailyInstance(childTask, mDailyRepetition));
         return childInstances;
     }
 
@@ -99,10 +95,10 @@ public class DailyInstance implements Instance {
     }
 
     public TimeStamp getDone() {
-        if (mDailyInstanceRecord == null)
+        if (mInstanceRecord == null)
             return null;
 
-        Long done = mDailyInstanceRecord.getDone();
+        Long done = mInstanceRecord.getDone();
         if (done != null)
             return new TimeStamp(done);
         else
@@ -110,16 +106,16 @@ public class DailyInstance implements Instance {
     }
 
     public void setDone(boolean done) {
-        if (mDailyInstanceRecord == null) {
+        if (mInstanceRecord == null) {
             if (done)
-                mDailyInstanceRecord = PersistenceManger.getInstance().createDailyInstanceRecord(mId, mTask.getId(), mDailyRepetition.getId(), TimeStamp.getNow().getLong());
+                mInstanceRecord = PersistenceManger.getInstance().createDailyInstanceRecord(mId, mTask.getId(), mDailyRepetition.getId(), TimeStamp.getNow().getLong());
             else
                 return;
         } else {
             if (done)
-                mDailyInstanceRecord.setDone(TimeStamp.getNow().getLong());
+                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
             else
-                mDailyInstanceRecord.setDone(null);
+                mInstanceRecord.setDone(null);
         }
     }
 }

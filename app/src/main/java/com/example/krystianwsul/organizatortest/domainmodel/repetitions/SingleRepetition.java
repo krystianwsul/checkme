@@ -3,7 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstanceFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
@@ -76,6 +76,6 @@ public class SingleRepetition {
     }
 
     public Instance getInstance(Task task) {
-        return SingleInstanceFactory.getInstance().getSingleInstance(task, this);
+        return InstanceFactory.getInstance().getSingleInstance(task, this);
     }
 }

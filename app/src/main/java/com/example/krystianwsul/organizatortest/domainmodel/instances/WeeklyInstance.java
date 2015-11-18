@@ -7,8 +7,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyInstanceRecord;
 
 import junit.framework.Assert;
 
@@ -21,37 +21,35 @@ public class WeeklyInstance implements Instance {
     private final Task mTask;
     private final WeeklyRepetition mWeeklyRepetition;
 
-    private WeeklyInstanceRecord mWeeklyInstanceRecord;
+    private InstanceRecord mInstanceRecord;
 
     private final int mId;
 
-    private static int sVirtualWeeklyInstanceCount = 0;
-
     public static final String INTENT_KEY = "weeklyInstanceId";
 
-    WeeklyInstance(Task task, WeeklyRepetition weeklyRepetition, WeeklyInstanceRecord weeklyInstanceRecord) {
+    WeeklyInstance(Task task, WeeklyRepetition weeklyRepetition, InstanceRecord instanceRecord) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(weeklyRepetition != null);
-        Assert.assertTrue(weeklyInstanceRecord != null);
+        Assert.assertTrue(instanceRecord != null);
 
         mTask = task;
         mWeeklyRepetition = weeklyRepetition;
 
-        mWeeklyInstanceRecord = weeklyInstanceRecord;
+        mInstanceRecord = instanceRecord;
 
-        mId = mWeeklyInstanceRecord.getId();
+        mId = mInstanceRecord.getId();
     }
 
-    WeeklyInstance(Task task, WeeklyRepetition weeklyRepetition) {
+    WeeklyInstance(Task task, WeeklyRepetition weeklyRepetition, int id) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(weeklyRepetition != null);
 
         mTask = task;
         mWeeklyRepetition = weeklyRepetition;
 
-        mWeeklyInstanceRecord = null;
+        mInstanceRecord = null;
 
-        mId = PersistenceManger.getInstance().getMaxWeeklyInstanceId() + ++sVirtualWeeklyInstanceCount;
+        mId = id;
     }
 
     public int getId() {
@@ -80,7 +78,7 @@ public class WeeklyInstance implements Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(WeeklyInstanceFactory.getInstance().getWeeklyInstance(childTask, mWeeklyRepetition));
+            childInstances.add(InstanceFactory.getInstance().getWeeklyInstance(childTask, mWeeklyRepetition));
         return childInstances;
     }
 
@@ -97,10 +95,10 @@ public class WeeklyInstance implements Instance {
     }
 
     public TimeStamp getDone() {
-        if (mWeeklyInstanceRecord == null)
+        if (mInstanceRecord == null)
             return null;
 
-        Long done = mWeeklyInstanceRecord.getDone();
+        Long done = mInstanceRecord.getDone();
         if (done != null)
             return new TimeStamp(done);
         else
@@ -108,16 +106,16 @@ public class WeeklyInstance implements Instance {
     }
 
     public void setDone(boolean done) {
-        if (mWeeklyInstanceRecord == null) {
+        if (mInstanceRecord == null) {
             if (done)
-                mWeeklyInstanceRecord = PersistenceManger.getInstance().createWeeklyInstanceRecord(mId, mTask.getId(), mWeeklyInstanceRecord.getId(), TimeStamp.getNow().getLong());
+                mInstanceRecord = PersistenceManger.getInstance().createWeeklyInstanceRecord(mId, mTask.getId(), mInstanceRecord.getId(), TimeStamp.getNow().getLong());
             else
                 return;
         } else {
             if (done)
-                mWeeklyInstanceRecord.setDone(TimeStamp.getNow().getLong());
+                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
             else
-                mWeeklyInstanceRecord.setDone(null);
+                mInstanceRecord.setDone(null);
         }
     }
 }

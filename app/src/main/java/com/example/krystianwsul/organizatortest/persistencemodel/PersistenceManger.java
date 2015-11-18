@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.persistencemodel;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 
 import junit.framework.Assert;
 
@@ -22,23 +23,21 @@ public class PersistenceManger {
 
     private final HashMap<Integer, SingleScheduleRecord> mSingleScheduleRecords = new HashMap<>();
     private final HashMap<Integer, SingleRepetitionRecord> mSingleRepetitionRecords = new HashMap<>();
-    private final HashMap<Integer, SingleInstanceRecord> mSingleInstanceRecords = new HashMap<>();
 
     private final HashMap<Integer, DailyScheduleRecord> mDailyScheduleRecords = new HashMap<>();
     private final HashMap<Integer, DailyScheduleTimeRecord> mDailyScheduleTimeRecords = new HashMap<>();
     private final HashMap<Integer, DailyRepetitionRecord> mDailyRepetitionRecords = new HashMap<>();
-    private final HashMap<Integer, DailyInstanceRecord> mDailyInstanceRecords = new HashMap<>();
 
     private final HashMap<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords = new HashMap<>();
     private final HashMap<Integer, WeeklyScheduleDayTimeRecord> mWeeklyScheduleDayTimeRecords = new HashMap<>();
     private final HashMap<Integer, WeeklyRepetitionRecord> mWeeklyRepetitionRecords = new HashMap<>();
-    private final HashMap<Integer, WeeklyInstanceRecord> mWeeklyInstanceRecords = new HashMap<>();
+
+    private final HashMap<Integer, InstanceRecord> mInstanceRecords = new HashMap<>();
 
     private final int mMaxDailyRepetitionId = 0;
-    private final int mMaxSingleInstanceId = 0;
-    private final int mMaxDailyInstanceId = 0;
     private final int mMaxWeeklyRepetitionId = 0;
-    private final int mMaxWeeklyInstanceId = 0;
+
+    private final int mMaxInstanceId = 0;
 
     public static PersistenceManger getInstance() {
         if (mInstance == null)
@@ -164,20 +163,19 @@ public class PersistenceManger {
         return mSingleRepetitionRecords.get(rootTaskId);
     }
 
-    public SingleInstanceRecord getSingleInstanceRecord(int rootTaskId) {
-        return mSingleInstanceRecords.get(rootTaskId);
+    public InstanceRecord getSingleInstanceRecord(int rootTaskId) {
+        for (InstanceRecord instanceRecord : mInstanceRecords.values())
+            if (instanceRecord.getRootTaskId() != null && instanceRecord.getRootTaskId().equals(rootTaskId))
+                return instanceRecord;
+        return null;
     }
 
-    public SingleInstanceRecord createSingleInstanceRecord(int taskId, int rootTaskId, Long done) {
-        Assert.assertTrue(!mSingleInstanceRecords.containsKey(taskId));
+    public InstanceRecord createSingleInstanceRecord(int id, int taskId, int rootTaskId, Long done) {
+        Assert.assertTrue(!mInstanceRecords.containsKey(taskId));
 
-        SingleInstanceRecord singleInstanceRecord = new SingleInstanceRecord(taskId, rootTaskId, done);
-        mSingleInstanceRecords.put(singleInstanceRecord.getTaskId(), singleInstanceRecord);
-        return singleInstanceRecord;
-    }
-
-    public int getMaxSingleInstanceId() {
-        return mMaxSingleInstanceId;
+        InstanceRecord instanceRecord = new InstanceRecord(id, taskId, done, rootTaskId, null, null);
+        mInstanceRecords.put(instanceRecord.getTaskId(), instanceRecord);
+        return instanceRecord;
     }
 
     public DailyScheduleRecord getDailyScheduleRecord(int dailyScheduleId) {
@@ -221,29 +219,27 @@ public class PersistenceManger {
         return mMaxDailyRepetitionId;
     }
 
-    public DailyInstanceRecord getDailyInstanceRecord(int dailyInstanceId) {
-        return mDailyInstanceRecords.get(dailyInstanceId);
+    public InstanceRecord getInstanceRecord(int instanceId) {
+        return mInstanceRecords.get(instanceId);
     }
 
-    public DailyInstanceRecord getDailyInstanceRecord(int taskId, int dailyRepetitionId) {
-        for (DailyInstanceRecord dailyInstanceRecord : mDailyInstanceRecords.values()) {
-            if (dailyInstanceRecord.getTaskId() == taskId && dailyInstanceRecord.getDailyRepetitionId() == dailyRepetitionId) {
-                return dailyInstanceRecord;
-            }
-        }
+    public InstanceRecord getDailyInstanceRecord(int taskId, int dailyRepetitionId) {
+        for (InstanceRecord instanceRecord : mInstanceRecords.values())
+            if (instanceRecord.getTaskId() == taskId && instanceRecord.getDailyRepetitionId() != null && instanceRecord.getDailyRepetitionId().equals(dailyRepetitionId))
+                return instanceRecord;
         return null;
     }
 
-    public DailyInstanceRecord createDailyInstanceRecord(int id, int taskId, int dailyRepetitionId, Long done) {
-        Assert.assertTrue(!mDailyInstanceRecords.containsKey(id));
+    public InstanceRecord createDailyInstanceRecord(int id, int taskId, int dailyRepetitionId, Long done) {
+        Assert.assertTrue(!mInstanceRecords.containsKey(id));
 
-        DailyInstanceRecord dailyInstanceRecord = new DailyInstanceRecord(id, taskId, dailyRepetitionId, done);
-        mDailyInstanceRecords.put(dailyInstanceRecord.getId(), dailyInstanceRecord);
-        return dailyInstanceRecord;
+        InstanceRecord instanceRecord = new InstanceRecord(id, taskId, done, null, dailyRepetitionId, null);
+        mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
+        return instanceRecord;
     }
 
-    public int getMaxDailyInstanceId() {
-        return mMaxDailyInstanceId;
+    public int getMaxInstanceId() {
+        return mMaxInstanceId;
     }
 
     public WeeklyScheduleRecord getWeeklyScheduleRecord(int weeklyScheduleId) {
@@ -275,11 +271,9 @@ public class PersistenceManger {
     }
 
     public WeeklyRepetitionRecord getWeeklyRepetitionRecord(int weeklyScheduleDayTimeId, Date scheduleDate) {
-        for (WeeklyRepetitionRecord weeklyRepetitionRecord : mWeeklyRepetitionRecords.values()) {
-            if (weeklyRepetitionRecord.getWeeklyScheduleTimeId() == weeklyScheduleDayTimeId && weeklyRepetitionRecord.getScheduleYear() == scheduleDate.getYear() && weeklyRepetitionRecord.getScheduleMonth() == scheduleDate.getMonth() && weeklyRepetitionRecord.getScheduleDay() == scheduleDate.getDay()) {
+        for (WeeklyRepetitionRecord weeklyRepetitionRecord : mWeeklyRepetitionRecords.values())
+            if (weeklyRepetitionRecord.getWeeklyScheduleTimeId() == weeklyScheduleDayTimeId && weeklyRepetitionRecord.getScheduleYear() == scheduleDate.getYear() && weeklyRepetitionRecord.getScheduleMonth() == scheduleDate.getMonth() && weeklyRepetitionRecord.getScheduleDay() == scheduleDate.getDay())
                 return weeklyRepetitionRecord;
-            }
-        }
         return null;
     }
 
@@ -287,28 +281,18 @@ public class PersistenceManger {
         return mMaxWeeklyRepetitionId;
     }
 
-    public WeeklyInstanceRecord getWeeklyInstanceRecord(int weeklyInstanceId) {
-        return mWeeklyInstanceRecords.get(weeklyInstanceId);
-    }
-
-    public WeeklyInstanceRecord getWeeklyInstanceRecord(int taskId, int weeklyRepetitionId) {
-        for (WeeklyInstanceRecord weeklyInstanceRecord : mWeeklyInstanceRecords.values()) {
-            if (weeklyInstanceRecord.getTaskId() == taskId && weeklyInstanceRecord.getWeeklyRepetitionId() == weeklyRepetitionId) {
-                return weeklyInstanceRecord;
-            }
-        }
+    public InstanceRecord getWeeklyInstanceRecord(int taskId, int weeklyRepetitionId) {
+        for (InstanceRecord instanceRecord : mInstanceRecords.values())
+            if (instanceRecord.getTaskId() == taskId && instanceRecord.getWeeklyRepetitionId() != null && instanceRecord.getWeeklyRepetitionId().equals(weeklyRepetitionId))
+                return instanceRecord;
         return null;
     }
 
-    public WeeklyInstanceRecord createWeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, Long done) {
-        Assert.assertTrue(!mWeeklyInstanceRecords.containsKey(id));
+    public InstanceRecord createWeeklyInstanceRecord(int id, int taskId, int weeklyRepetitionId, Long done) {
+        Assert.assertTrue(!mInstanceRecords.containsKey(id));
 
-        WeeklyInstanceRecord weeklyInstanceRecord = new WeeklyInstanceRecord(id, taskId, weeklyRepetitionId, done);
-        mWeeklyInstanceRecords.put(weeklyInstanceRecord.getId(), weeklyInstanceRecord);
-        return weeklyInstanceRecord;
-    }
-
-    public int getMaxWeeklyInstanceId() {
-        return mMaxWeeklyInstanceId;
+        InstanceRecord instanceRecord = new InstanceRecord(id, taskId, done, null, null, weeklyRepetitionId);
+        mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
+        return instanceRecord;
     }
 }

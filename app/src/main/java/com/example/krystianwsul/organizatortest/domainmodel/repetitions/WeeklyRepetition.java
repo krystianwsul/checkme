@@ -3,7 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstanceFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleDayTime;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
@@ -96,6 +96,6 @@ public class WeeklyRepetition {
     }
 
     public Instance getInstance(Task task) {
-        return WeeklyInstanceFactory.getInstance().getWeeklyInstance(task, this);
+        return InstanceFactory.getInstance().getWeeklyInstance(task, this);
     }
 }

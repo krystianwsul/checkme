@@ -7,8 +7,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.SingleInstanceRecord;
 
 import junit.framework.Assert;
 
@@ -21,33 +21,47 @@ public class SingleInstance implements Instance {
     private final Task mTask;
     private final SingleRepetition mSingleRepetition;
 
-    private SingleInstanceRecord mSingleInstanceRecord;
+    private InstanceRecord mInstanceRecord;
+
+    private final int mId;
 
     public static final String INTENT_KEY = "singleInstanceId";
 
-    SingleInstance(Task task, SingleRepetition singleRepetition, SingleInstanceRecord singleInstanceRecord) {
+    SingleInstance(Task task, SingleRepetition singleRepetition, InstanceRecord instanceRecord) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(singleRepetition != null);
-        Assert.assertTrue(singleInstanceRecord != null);
+        Assert.assertTrue(instanceRecord != null);
 
         mTask = task;
         mSingleRepetition = singleRepetition;
 
-        mSingleInstanceRecord = singleInstanceRecord;
+        mInstanceRecord = instanceRecord;
+
+        mId = mInstanceRecord.getId();
     }
 
-    SingleInstance(Task task, SingleRepetition singleRepetition) {
+    SingleInstance(Task task, SingleRepetition singleRepetition, int id) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(singleRepetition != null);
 
         mTask = task;
         mSingleRepetition = singleRepetition;
 
-        mSingleInstanceRecord = null;
+        mInstanceRecord = null;
+
+        mId = id;
+    }
+
+    public int getId() {
+        return mId;
     }
 
     public int getTaskId() {
         return mTask.getId();
+    }
+
+    public int getRootTaskId() {
+        return mSingleRepetition.getRootTaskId();
     }
 
     public String getName() {
@@ -57,7 +71,7 @@ public class SingleInstance implements Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(SingleInstanceFactory.getInstance().getSingleInstance(childTask, mSingleRepetition));
+            childInstances.add(InstanceFactory.getInstance().getSingleInstance(childTask, mSingleRepetition));
         return childInstances;
     }
 
@@ -66,7 +80,7 @@ public class SingleInstance implements Instance {
     }
 
     public int getIntentValue() {
-        return mTask.getId();
+        return mId;
     }
 
     public String getScheduleText(Context context) {
@@ -81,10 +95,10 @@ public class SingleInstance implements Instance {
     }
 
     public TimeStamp getDone() {
-        if (mSingleInstanceRecord == null)
+        if (mInstanceRecord == null)
             return null;
 
-        Long done = mSingleInstanceRecord.getDone();
+        Long done = mInstanceRecord.getDone();
         if (done != null)
             return new TimeStamp(done);
         else
@@ -92,16 +106,16 @@ public class SingleInstance implements Instance {
     }
 
     public void setDone(boolean done) {
-        if (mSingleInstanceRecord == null) {
+        if (mInstanceRecord == null) {
             if (done)
-                mSingleInstanceRecord = PersistenceManger.getInstance().createSingleInstanceRecord(mTask.getId(), mTask.getRootTask().getId(), TimeStamp.getNow().getLong());
+                mInstanceRecord = PersistenceManger.getInstance().createSingleInstanceRecord(mId, mTask.getId(), mTask.getRootTask().getId(), TimeStamp.getNow().getLong());
             else
                 return;
         } else {
             if (done)
-                mSingleInstanceRecord.setDone(TimeStamp.getNow().getLong());
+                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
             else
-                mSingleInstanceRecord.setDone(null);
+                mInstanceRecord.setDone(null);
         }
     }
 }

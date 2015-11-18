@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +24,7 @@ import java.util.ArrayList;
  * Created by Krystian on 10/31/2015.
  */
 public class GroupListFragment extends Fragment {
-    private ListView mGroupList;
+    private RecyclerView mGroupList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,25 +35,8 @@ public class GroupListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mGroupList = (ListView) getView().findViewById(R.id.groups_list);
-
-        mGroupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Group group = (Group) parent.getItemAtPosition(position);
-                Intent intent = getIntent(group, view.getContext());
-                startActivity(intent);
-            }
-
-            private Intent getIntent(Group group, Context context) {
-                if (group.singleInstance()) {
-                    Instance instance = group.getSingleSinstance();
-                    return ShowInstanceActivity.getIntent(instance, context);
-                } else {
-                    return ShowGroupActivity.getIntent(group, context);
-                }
-            }
-        });
+        mGroupList = (RecyclerView) getView().findViewById(R.id.groups_list);
+        mGroupList.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     @Override

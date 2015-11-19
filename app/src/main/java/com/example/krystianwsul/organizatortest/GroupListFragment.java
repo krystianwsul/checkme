@@ -1,22 +1,15 @@
 package com.example.krystianwsul.organizatortest;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.example.krystianwsul.organizatortest.arrayadapters.GroupAdapter;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
-import com.example.krystianwsul.organizatortest.domainmodel.groups.GroupFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 
 import java.util.ArrayList;
 
@@ -25,6 +18,11 @@ import java.util.ArrayList;
  */
 public class GroupListFragment extends Fragment {
     private RecyclerView mGroupList;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,10 +40,6 @@ public class GroupListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
-        GroupFactory.refresh();
-
-        ArrayList<Group> groupArray = new ArrayList<>(GroupFactory.getInstance().getGroups());
-        mGroupList.setAdapter(new GroupAdapter(getContext(), groupArray));
+        mGroupList.setAdapter(new GroupAdapter(getContext()));
     }
 }

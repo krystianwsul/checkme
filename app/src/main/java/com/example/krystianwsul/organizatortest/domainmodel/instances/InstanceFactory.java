@@ -29,15 +29,50 @@ public class InstanceFactory {
     private final HashMap<Integer, DailyInstance> mDailyInstances = new HashMap<>();
     private final HashMap<Integer, WeeklyInstance> mWeeklyInstances = new HashMap<>();
 
+    private final HashMap<Integer, Instance> mInstances = new HashMap<>();
+
     private static int mVirtualInstanceCount = 0;
 
     private int getNextInstanceId() {
         return PersistenceManger.getInstance().getMaxInstanceId() + ++mVirtualInstanceCount;
     }
 
-    public DailyInstance getDailyInstance(int dailyInstanceId) {
-        Assert.assertTrue(mDailyInstances.containsKey(dailyInstanceId));
-        return mDailyInstances.get(dailyInstanceId);
+    public Instance getInstance(int instanceId) {
+        Assert.assertTrue(mInstances.containsKey(instanceId));
+        return mInstances.get(instanceId);
+    }
+
+    public SingleInstance getSingleInstance(Task task, SingleRepetition singleRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(singleRepetition != null);
+
+        SingleInstance existingSingleInstance = getExistingSingleInstance(task.getId(), singleRepetition.getRootTaskId());
+        if (existingSingleInstance != null)
+            return existingSingleInstance;
+
+        SingleInstance singleInstance = createSingleInstance(task, singleRepetition);
+        Assert.assertTrue(singleInstance != null);
+        mSingleInstances.put(singleInstance.getId(), singleInstance);
+        mInstances.put(singleInstance.getId(), singleInstance);
+        return singleInstance;
+    }
+
+    private SingleInstance getExistingSingleInstance(int taskId, int rootTaskId) {
+        for (SingleInstance singleInstance : mSingleInstances.values())
+            if (singleInstance.getTaskId() == taskId && singleInstance.getRootTaskId() == rootTaskId)
+                return singleInstance;
+        return null;
+    }
+
+    private SingleInstance createSingleInstance(Task task, SingleRepetition singleRepetition) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(singleRepetition != null);
+
+        InstanceRecord instanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
+        if (instanceRecord != null)
+            return new SingleInstance(task, singleRepetition, instanceRecord);
+        else
+            return new SingleInstance(task, singleRepetition, getNextInstanceId());
     }
 
     public DailyInstance getDailyInstance(Task task, DailyRepetition dailyRepetition) {
@@ -51,6 +86,7 @@ public class InstanceFactory {
         DailyInstance dailyInstance = createDailyInstance(task, dailyRepetition);
         Assert.assertTrue(dailyInstance != null);
         mDailyInstances.put(dailyInstance.getId(), dailyInstance);
+        mInstances.put(dailyInstance.getId(), dailyInstance);
         return dailyInstance;
     }
 
@@ -72,11 +108,6 @@ public class InstanceFactory {
             return new DailyInstance(task, dailyRepetition, getNextInstanceId());
     }
 
-    public WeeklyInstance getWeeklyInstance(int weeklyInstanceId) {
-        Assert.assertTrue(mWeeklyInstances.containsKey(weeklyInstanceId));
-        return mWeeklyInstances.get(weeklyInstanceId);
-    }
-
     public WeeklyInstance getWeeklyInstance(Task task, WeeklyRepetition weeklyRepetition) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(weeklyRepetition != null);
@@ -88,6 +119,7 @@ public class InstanceFactory {
         WeeklyInstance weeklyInstance = createWeeklyInstance(task, weeklyRepetition);
         Assert.assertTrue(weeklyInstance != null);
         mWeeklyInstances.put(weeklyInstance.getId(), weeklyInstance);
+        mInstances.put(weeklyInstance.getId(), weeklyInstance);
         return weeklyInstance;
     }
 
@@ -107,42 +139,5 @@ public class InstanceFactory {
             return new WeeklyInstance(task, weeklyRepetition, instanceRecord);
         else
             return new WeeklyInstance(task, weeklyRepetition, getNextInstanceId());
-    }
-
-    public SingleInstance getSingleInstance(int singleInstanceId) {
-        Assert.assertTrue(mSingleInstances.containsKey(singleInstanceId));
-        return mSingleInstances.get(singleInstanceId);
-    }
-
-    public SingleInstance getSingleInstance(Task task, SingleRepetition singleRepetition) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(singleRepetition != null);
-
-        SingleInstance existingSingleInstance = getExistingSingleInstance(task.getId(), singleRepetition.getRootTaskId());
-        if (existingSingleInstance != null)
-            return existingSingleInstance;
-
-        SingleInstance singleInstance = createSingleInstance(task, singleRepetition);
-        Assert.assertTrue(singleInstance != null);
-        mSingleInstances.put(singleInstance.getId(), singleInstance);
-        return singleInstance;
-    }
-
-    private SingleInstance getExistingSingleInstance(int taskId, int rootTaskId) {
-        for (SingleInstance singleInstance : mSingleInstances.values())
-            if (singleInstance.getTaskId() == taskId && singleInstance.getRootTaskId() == rootTaskId)
-                return singleInstance;
-        return null;
-    }
-
-    private SingleInstance createSingleInstance(Task task, SingleRepetition singleRepetition) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(singleRepetition != null);
-
-        InstanceRecord instanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
-        if (instanceRecord != null)
-            return new SingleInstance(task, singleRepetition, instanceRecord);
-        else
-            return new SingleInstance(task, singleRepetition, getNextInstanceId());
     }
 }

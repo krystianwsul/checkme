@@ -26,8 +26,6 @@ public class GroupFactory {
     private TreeMap<TimeStamp, Group> mDoneGroups = new TreeMap<>();
     private TreeMap<TimeStamp, Group> mNotDoneGroups = new TreeMap<>();
 
-    private HashMap<Integer, Group> mGroups = new HashMap<>();
-
     public static GroupFactory getInstance() {
         if (sInstance == null)
             sInstance = new GroupFactory();
@@ -58,13 +56,10 @@ public class GroupFactory {
                 notDoneInstances.add(instance);
         }
 
-        int groupId = 0;
-
         for (Instance instance : doneInstances) {
-            Group group = new Group(instance.getDone(), groupId++);
+            Group group = new Group(instance.getDone());
             group.addInstance(instance);
             mDoneGroups.put(group.getTimeStamp(), group);
-            mGroups.put(group.getId(), group);
         }
 
         for (Instance instance : notDoneInstances) {
@@ -72,10 +67,9 @@ public class GroupFactory {
             if (mNotDoneGroups.containsKey(timeStamp)) {
                 mNotDoneGroups.get(timeStamp).addInstance(instance);
             } else {
-                Group group = new Group(timeStamp, groupId++);
+                Group group = new Group(timeStamp);
                 group.addInstance(instance);
                 mNotDoneGroups.put(timeStamp, group);
-                mGroups.put(group.getId(), group);
             }
         }
     }
@@ -85,10 +79,5 @@ public class GroupFactory {
         groups.addAll(mDoneGroups.values());
         groups.addAll(mNotDoneGroups.values());
         return groups;
-    }
-
-    public Group getGroup(int groupId) {
-        Assert.assertTrue(mGroups.containsKey(groupId));
-        return mGroups.get(groupId);
     }
 }

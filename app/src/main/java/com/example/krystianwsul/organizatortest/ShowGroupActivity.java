@@ -10,19 +10,34 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.arrayadapters.InstanceAdapter;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.GroupFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
+
 public class ShowGroupActivity extends AppCompatActivity {
-    private static final String INTENT_KEY = "groupId";
+    private static final String INTENT_KEY = "instanceIds";
 
     public static Intent getIntent(Group group, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
-        intent.putExtra(ShowGroupActivity.INTENT_KEY, group.getId());
+
+        ArrayList<Integer> instanceIds = new ArrayList<>();
+        for (Instance instance : group.getInstances())
+            instanceIds.add(instance.getId());
+
+        intent.putIntegerArrayListExtra(ShowGroupActivity.INTENT_KEY, instanceIds);
         return intent;
     }
 
@@ -33,17 +48,22 @@ public class ShowGroupActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        int groupId = intent.getIntExtra(INTENT_KEY, -1);
-        Assert.assertTrue(groupId != -1);
-        Group group = GroupFactory.getInstance().getGroup(groupId);
-        Assert.assertTrue(group != null);
+        ArrayList<Integer> instanceIds = intent.getIntegerArrayListExtra(INTENT_KEY);
+        Assert.assertTrue(instanceIds != null);
+        Assert.assertTrue(instanceIds.size() > 1);
+
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (Integer instanceId : instanceIds) {
+            Instance instance = InstanceFactory.getInstance().getInstance(instanceId);
+            Assert.assertTrue(instance != null);
+            instances.add(instance);
+        }
 
         TextView showGroupName = (TextView) findViewById(R.id.show_group_name);
-        showGroupName.setText(group.getNameText(this));
+        showGroupName.setText(getDisplayText(instances.get(0)));
 
         ListView showGroupList = (ListView) findViewById(R.id.show_group_list);
-        Assert.assertTrue(!group.singleInstance());
-        showGroupList.setAdapter(new InstanceAdapter(this, group.getInstances()));
+        showGroupList.setAdapter(new InstanceAdapter(this, instances));
 
         showGroupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -52,5 +72,24 @@ public class ShowGroupActivity extends AppCompatActivity {
                 startActivity(ShowInstanceActivity.getIntent(instance, view.getContext()));
             }
         });
+    }
+
+    private String getDisplayText(Instance instance) {
+        Assert.assertTrue(instance != null);
+
+        Time time = getTime(instance.getDateTime());
+        Assert.assertTrue(time != null);
+        return new DateTime(instance.getDateTime().getDate(), time).getDisplayText(this);
+    }
+
+    private Time getTime(DateTime dateTime) {
+        Assert.assertTrue(dateTime != null);
+
+        DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
+        HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
+        Time time = CustomTimeFactory.getInstance().getCustomTime(dayOfWeek, hourMinute);
+        if (time == null)
+            time = new NormalTime(hourMinute);
+        return time;
     }
 }

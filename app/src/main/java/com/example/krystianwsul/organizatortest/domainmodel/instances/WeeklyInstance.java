@@ -17,105 +17,46 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 11/9/2015.
  */
-public class WeeklyInstance implements Instance {
-    private final Task mTask;
+public class WeeklyInstance extends Instance {
     private final WeeklyRepetition mWeeklyRepetition;
 
-    private InstanceRecord mInstanceRecord;
-
-    private final int mId;
-
-    public static final String INTENT_KEY = "weeklyInstanceId";
-
     WeeklyInstance(Task task, WeeklyRepetition weeklyRepetition, InstanceRecord instanceRecord) {
-        Assert.assertTrue(task != null);
+        super(task, instanceRecord);
+
         Assert.assertTrue(weeklyRepetition != null);
-        Assert.assertTrue(instanceRecord != null);
-
-        mTask = task;
         mWeeklyRepetition = weeklyRepetition;
-
-        mInstanceRecord = instanceRecord;
-
-        mId = mInstanceRecord.getId();
     }
 
     WeeklyInstance(Task task, WeeklyRepetition weeklyRepetition, int id) {
-        Assert.assertTrue(task != null);
+        super(task, id);
+
         Assert.assertTrue(weeklyRepetition != null);
-
-        mTask = task;
         mWeeklyRepetition = weeklyRepetition;
-
-        mInstanceRecord = null;
-
-        mId = id;
-    }
-
-    public int getId() {
-        return mId;
-    }
-
-    public int getTaskId() {
-        return mTask.getId();
     }
 
     public int getWeeklyRepetitionId() {
         return mWeeklyRepetition.getId();
     }
 
-    public String getName() {
-        return mTask.getName();
-    }
-
     public String getScheduleText(Context context) {
+        Assert.assertTrue(context != null);
+
         if (mTask.getParentTask() == null)
             return mWeeklyRepetition.getRepetitionDateTime().getDisplayText(context);
         else
             return null;
     }
 
-    public ArrayList<Instance> getChildInstances() {
-        ArrayList<Instance> childInstances = new ArrayList<>();
-        for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(InstanceFactory.getInstance().getWeeklyInstance(childTask, mWeeklyRepetition));
-        return childInstances;
-    }
-
-    public String getIntentKey() {
-        return INTENT_KEY;
-    }
-
-    public int getIntentValue() {
-        return getId();
+    public Instance getChildInstance(ChildTask childTask) {
+        Assert.assertTrue(childTask != null);
+        return InstanceFactory.getInstance().getWeeklyInstance(childTask, mWeeklyRepetition);
     }
 
     public DateTime getDateTime() {
         return mWeeklyRepetition.getRepetitionDateTime();
     }
 
-    public TimeStamp getDone() {
-        if (mInstanceRecord == null)
-            return null;
-
-        Long done = mInstanceRecord.getDone();
-        if (done != null)
-            return new TimeStamp(done);
-        else
-            return null;
-    }
-
-    public void setDone(boolean done) {
-        if (mInstanceRecord == null) {
-            if (done)
-                mInstanceRecord = PersistenceManger.getInstance().createWeeklyInstanceRecord(mId, mTask.getId(), mInstanceRecord.getId(), TimeStamp.getNow().getLong());
-            else
-                return;
-        } else {
-            if (done)
-                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
-            else
-                mInstanceRecord.setDone(null);
-        }
+    protected InstanceRecord createInstanceRecord() {
+        return PersistenceManger.getInstance().createWeeklyInstanceRecord(mId, mTask.getId(), mInstanceRecord.getId(), TimeStamp.getNow().getLong());
     }
 }

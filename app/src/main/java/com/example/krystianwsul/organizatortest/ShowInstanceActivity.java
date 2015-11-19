@@ -22,9 +22,11 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowInstanceActivity extends AppCompatActivity {
+    private static final String INTENT_KEY = "instanceId";
+
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(instance.getIntentKey(), instance.getIntentValue());
+        intent.putExtra(INTENT_KEY, instance.getId());
         return intent;
     }
 
@@ -33,7 +35,11 @@ public class ShowInstanceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_instance);
 
-        Instance instance = getInstance();
+        Intent intent = getIntent();
+        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
+        int instanceId = intent.getIntExtra(INTENT_KEY, -1);
+        Assert.assertTrue(instanceId != -1);
+        Instance instance = InstanceFactory.getInstance().getInstance(instanceId);
         Assert.assertTrue(instance != null);
 
         TextView showInstanceName = (TextView) findViewById(R.id.show_instance_name);
@@ -59,31 +65,5 @@ public class ShowInstanceActivity extends AppCompatActivity {
                 startActivity(ShowInstanceActivity.getIntent(childInstance, view.getContext()));
             }
         });
-    }
-
-    private Instance getInstance() {
-        Intent intent = getIntent();
-
-        if (intent.hasExtra(SingleInstance.INTENT_KEY)) {
-            int singleInstanceId = intent.getIntExtra(SingleInstance.INTENT_KEY, -1);
-            Assert.assertTrue(singleInstanceId != -1);
-            SingleInstance singleInstance = InstanceFactory.getInstance().getSingleInstance(singleInstanceId);
-            Assert.assertTrue(singleInstance != null);
-            return singleInstance;
-        } else if (intent.hasExtra(DailyInstance.INTENT_KEY)) {
-            int dailyInstanceId = intent.getIntExtra(DailyInstance.INTENT_KEY, -1);
-            Assert.assertTrue(dailyInstanceId != -1);
-            DailyInstance dailyInstance = InstanceFactory.getInstance().getDailyInstance(dailyInstanceId);
-            Assert.assertTrue(dailyInstance != null);
-            return dailyInstance;
-        } else if (intent.hasExtra(WeeklyInstance.INTENT_KEY)) {
-            int weeklyInstanceId = intent.getIntExtra(WeeklyInstance.INTENT_KEY, -1);
-            Assert.assertTrue(weeklyInstanceId != -1);
-            WeeklyInstance weeklyInstance = InstanceFactory.getInstance().getWeeklyInstance(weeklyInstanceId);
-            Assert.assertTrue(weeklyInstance != null);
-            return weeklyInstance;
-        } else {
-            throw new IllegalArgumentException("instance key not found");
-        }
     }
 }

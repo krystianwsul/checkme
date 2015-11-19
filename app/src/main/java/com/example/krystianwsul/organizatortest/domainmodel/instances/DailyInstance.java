@@ -17,105 +17,46 @@ import java.util.ArrayList;
 /**
  * Created by Krystian on 11/2/2015.
  */
-public class DailyInstance implements Instance {
-    private final Task mTask;
+public class DailyInstance extends Instance {
     private final DailyRepetition mDailyRepetition;
 
-    private InstanceRecord mInstanceRecord;
-
-    private final int mId;
-
-    public static final String INTENT_KEY = "dailyInstanceId";
-
     DailyInstance(Task task, DailyRepetition dailyRepetition, InstanceRecord instanceRecord) {
-        Assert.assertTrue(task != null);
+        super(task, instanceRecord);
+
         Assert.assertTrue(dailyRepetition != null);
-        Assert.assertTrue(instanceRecord != null);
-
-        mTask = task;
         mDailyRepetition = dailyRepetition;
-
-        mInstanceRecord = instanceRecord;
-
-        mId = mInstanceRecord.getId();
     }
 
     DailyInstance(Task task, DailyRepetition dailyRepetition, int id) {
-        Assert.assertTrue(task != null);
+        super(task, id);
+
         Assert.assertTrue(dailyRepetition != null);
-
-        mTask = task;
         mDailyRepetition = dailyRepetition;
-
-        mInstanceRecord = null;
-
-        mId = id;
-    }
-
-    public int getId() {
-        return mId;
-    }
-
-    public int getTaskId() {
-        return mTask.getId();
     }
 
     public int getDailyRepetitionId() {
         return mDailyRepetition.getId();
     }
 
-    public String getName() {
-        return mTask.getName();
-    }
-
     public String getScheduleText(Context context) {
+        Assert.assertTrue(context != null);
+
         if (mTask.getParentTask() == null)
             return getDateTime().getDisplayText(context);
         else
             return null;
     }
 
-    public ArrayList<Instance> getChildInstances() {
-        ArrayList<Instance> childInstances = new ArrayList<>();
-        for (ChildTask childTask : mTask.getChildTasks())
-            childInstances.add(InstanceFactory.getInstance().getDailyInstance(childTask, mDailyRepetition));
-        return childInstances;
-    }
-
-    public String getIntentKey() {
-        return INTENT_KEY;
-    }
-
-    public int getIntentValue() {
-        return getId();
+    public Instance getChildInstance(ChildTask childTask) {
+        Assert.assertTrue(childTask != null);
+        return InstanceFactory.getInstance().getDailyInstance(childTask, mDailyRepetition);
     }
 
     public DateTime getDateTime() {
         return mDailyRepetition.getRepetitionDateTime();
     }
 
-    public TimeStamp getDone() {
-        if (mInstanceRecord == null)
-            return null;
-
-        Long done = mInstanceRecord.getDone();
-        if (done != null)
-            return new TimeStamp(done);
-        else
-            return null;
-    }
-
-    public void setDone(boolean done) {
-        if (mInstanceRecord == null) {
-            if (done)
-                mInstanceRecord = PersistenceManger.getInstance().createDailyInstanceRecord(mId, mTask.getId(), mDailyRepetition.getId(), TimeStamp.getNow().getLong());
-            else
-                return;
-        } else {
-            if (done)
-                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
-            else
-                mInstanceRecord.setDone(null);
-        }
+    protected InstanceRecord createInstanceRecord() {
+        return PersistenceManger.getInstance().createDailyInstanceRecord(mId, mTask.getId(), mDailyRepetition.getId(), TimeStamp.getNow().getLong());
     }
 }

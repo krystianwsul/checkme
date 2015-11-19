@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -39,7 +40,7 @@ public class ShowInstanceActivity extends AppCompatActivity {
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int instanceId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(instanceId != -1);
-        Instance instance = InstanceFactory.getInstance().getInstance(instanceId);
+        final Instance instance = InstanceFactory.getInstance().getInstance(instanceId);
         Assert.assertTrue(instance != null);
 
         TextView showInstanceName = (TextView) findViewById(R.id.show_instance_name);
@@ -57,6 +58,16 @@ public class ShowInstanceActivity extends AppCompatActivity {
             showInstanceList.setVisibility(View.GONE);
         else
             showInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList(instance.getChildInstances())));
+
+        final CheckBox checkBox = (CheckBox) findViewById(R.id.show_instance_checkbox);
+        checkBox.setChecked(instance.getDone() != null);
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isChecked = checkBox.isChecked();
+                instance.setDone(isChecked);
+            }
+        });
 
         showInstanceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

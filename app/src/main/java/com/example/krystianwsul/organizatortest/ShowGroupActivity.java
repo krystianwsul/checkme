@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -59,16 +61,9 @@ public class ShowGroupActivity extends AppCompatActivity {
         TextView showGroupName = (TextView) findViewById(R.id.show_group_name);
         showGroupName.setText(getDisplayText(instances.get(0)));
 
-        ListView showGroupList = (ListView) findViewById(R.id.show_group_list);
+        RecyclerView showGroupList = (RecyclerView) findViewById(R.id.show_group_list);
+        showGroupList.setLayoutManager(new LinearLayoutManager(this));
         showGroupList.setAdapter(new InstanceAdapter(this, instances));
-
-        showGroupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Instance instance = (Instance) parent.getItemAtPosition(position);
-                startActivity(ShowInstanceActivity.getIntent(instance, view.getContext()));
-            }
-        });
     }
 
     private String getDisplayText(Instance instance) {

@@ -4,13 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -42,10 +39,10 @@ import java.util.TreeMap;
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder> {
     private final Context mContext;
 
-    private ArrayList<Group> mDoneGroups = new ArrayList<>();
-    private ArrayList<Group> mNotDoneGroups = new ArrayList<>();
+    private DoneGroupContainer mDoneGroupContainer = new DoneGroupContainer();
+    private NotDoneGroupContainer mNotDoneGroupContainer = new NotDoneGroupContainer();
 
-    private Comparator<Group> mComparator = new Comparator<Group>() {
+    private static Comparator<Group> sComparator = new Comparator<Group>() {
         @Override
         public int compare(Group lhs, Group rhs) {
             return lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
@@ -76,48 +73,26 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
                 notDoneInstances.add(instance);
         }
 
-        for (Instance instance : doneInstances) {
-            Group group = new Group(instance.getDone());
-            group.addInstance(instance);
-            mDoneGroups.add(group);
-        }
-
-        Collections.sort(mDoneGroups, mComparator);
-
-        HashMap<TimeStamp, Group> notDoneGroupsHash = new HashMap();
-        for (Instance instance : notDoneInstances) {
-            TimeStamp timeStamp = instance.getDateTime().getTimeStamp();
-            if (notDoneGroupsHash.containsKey(timeStamp)) {
-                notDoneGroupsHash.get(timeStamp).addInstance(instance);
-            } else {
-                Group group = new Group(timeStamp);
-                group.addInstance(instance);
-                notDoneGroupsHash.put(timeStamp, group);
-            }
-        }
-
-        for (Group group : notDoneGroupsHash.values())
-            mNotDoneGroups.add(group);
-
-        Collections.sort(mNotDoneGroups, mComparator);
+        mDoneGroupContainer.addInstanceRange(doneInstances);
+        mNotDoneGroupContainer.addInstanceRange(notDoneInstances);
     }
 
     private Group getGroup(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < getItemCount());
 
-        if (position < mDoneGroups.size())
-            return mDoneGroups.get(position);
+        if (position < mDoneGroupContainer.size())
+            return mDoneGroupContainer.get(position);
         else
-            return mNotDoneGroups.get(position - mDoneGroups.size());
+            return mNotDoneGroupContainer.get(position - mDoneGroupContainer.size());
     }
 
     private int indexOf(Group group) {
-        if (mDoneGroups.contains(group)) {
-            return mDoneGroups.indexOf(group);
+        if (mDoneGroupContainer.contains(group)) {
+            return mDoneGroupContainer.indexOf(group);
         } else {
-            Assert.assertTrue(mNotDoneGroups.contains(group));
-            return mDoneGroups.size() + mNotDoneGroups.indexOf(group);
+            Assert.assertTrue(mNotDoneGroupContainer.contains(group));
+            return mDoneGroupContainer.size() + mNotDoneGroupContainer.indexOf(group);
         }
     }
 
@@ -131,12 +106,13 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
 
         GroupHolder groupHolder = new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
+
         return groupHolder;
     }
 
     @Override
-    public void onBindViewHolder(GroupHolder groupHolder, int position) {
-        final Group group = getGroup(position);
+    public void onBindViewHolder(final GroupHolder groupHolder, int position) {
+        Group group = getGroup(position);
 
         groupHolder.mGroupRowName.setText(group.getNameText(mContext));
 
@@ -155,37 +131,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
             groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Assert.assertTrue(group.singleInstance());
-
-                    CheckBox checkBox = (CheckBox) v;
-                    boolean isChecked = checkBox.isChecked();
-
-                    group.getSingleSinstance().setDone(isChecked);
-
-                    if (isChecked) {
-                        Assert.assertTrue(mNotDoneGroups.contains(group));
-
-                        int oldPosition = indexOf(group);
-
-                        mNotDoneGroups.remove(group);
-                        mDoneGroups.add(group);
-
-                        int newPosition = indexOf(group);
-
-                        notifyItemMoved(oldPosition, newPosition);
-                    } else {
-                        Assert.assertTrue(mDoneGroups.contains(group));
-
-                        int oldPosition = indexOf(group);
-
-                        mDoneGroups.remove(group);
-                        mNotDoneGroups.add(group);
-                        Collections.sort(mNotDoneGroups, mComparator);
-
-                        int newPosition = indexOf(group);
-
-                        notifyItemMoved(oldPosition, newPosition);
-                    }
+                    groupHolder.onCheckBoxClick((CheckBox) v);
                 }
             });
 
@@ -197,27 +143,17 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = getIntent(group, view.getContext());
-                mContext.startActivity(intent);
-            }
-
-            private Intent getIntent(Group group, Context context) {
-                if (group.singleInstance()) {
-                    Instance instance = group.getSingleSinstance();
-                    return ShowInstanceActivity.getIntent(instance, context);
-                } else {
-                    return ShowGroupActivity.getIntent(group, context);
-                }
+                groupHolder.onRowClick(view);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return mDoneGroups.size() + mNotDoneGroups.size();
+        return mDoneGroupContainer.size() + mNotDoneGroupContainer.size();
     }
 
-    public static class GroupHolder extends RecyclerView.ViewHolder {
+    public class GroupHolder extends RecyclerView.ViewHolder {
         public final TableLayout mGroupRow;
         public final TextView mGroupRowName;
         public final TextView mGroupRowDetails;
@@ -238,6 +174,191 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
             mGroupRowDetails = groupRowDetails;
             mGroupRowImg = groupRowImg;
             mGroupRowCheckBox = groupRowCheckBox;
+        }
+
+        public void onCheckBoxClick(CheckBox checkBox) {
+            Assert.assertTrue(checkBox != null);
+
+            int position = getAdapterPosition();
+            Group group = getGroup(position);
+            Assert.assertTrue(group != null);
+            Assert.assertTrue(group.singleInstance());
+
+            boolean isChecked = checkBox.isChecked();
+
+            group.getSingleSinstance().setDone(isChecked);
+
+            if (isChecked) {
+                Assert.assertTrue(mNotDoneGroupContainer.contains(group));
+
+                int oldPosition = indexOf(group);
+
+                mNotDoneGroupContainer.remove(group);
+                Group newGroup = mDoneGroupContainer.addInstance(group.getSingleSinstance());
+
+                int newPosition = indexOf(newGroup);
+
+                notifyItemMoved(oldPosition, newPosition);
+            } else {
+                Assert.assertTrue(mDoneGroupContainer.contains(group));
+
+                int oldPosition = indexOf(group);
+
+                mDoneGroupContainer.remove(group);
+                Group newGroup = mNotDoneGroupContainer.addInstance(group.getSingleSinstance());
+
+                int newPosition = indexOf(newGroup);
+
+                if (newGroup.singleInstance()) {
+                    notifyItemMoved(oldPosition, newPosition);
+                } else {
+                    notifyItemRemoved(oldPosition);
+                    notifyItemChanged(newPosition);
+                }
+            }
+        }
+
+        public void onRowClick(View view) {
+            Assert.assertTrue(view != null);
+
+            Group group = getGroup(getAdapterPosition());
+            Assert.assertTrue(group != null);
+
+            Intent intent = getIntent(group, view.getContext());
+            mContext.startActivity(intent);
+        }
+
+        private Intent getIntent(Group group, Context context) {
+            Assert.assertTrue(group != null);
+            Assert.assertTrue(context != null);
+
+            if (group.singleInstance()) {
+                Instance instance = group.getSingleSinstance();
+                return ShowInstanceActivity.getIntent(instance, context);
+            } else {
+                return ShowGroupActivity.getIntent(group, context);
+            }
+        }
+    }
+
+    private static class DoneGroupContainer {
+        private ArrayList<Group> mGroups = new ArrayList<>();
+
+        public Group addInstance(Instance instance) {
+            Assert.assertTrue(instance != null);
+            Assert.assertTrue(instance.getDone() != null);
+
+            Group group = new Group(instance.getDone());
+            group.addInstance(instance);
+            mGroups.add(group);
+
+            Collections.sort(mGroups, sComparator);
+
+            return group;
+        }
+
+        public void addInstanceRange(Collection<Instance> instances) {
+            Assert.assertTrue(instances != null);
+
+            for (Instance instance : instances) {
+                Assert.assertTrue(instance.getDone() != null);
+
+                Group group = new Group(instance.getDone());
+                group.addInstance(instance);
+                mGroups.add(group);
+            }
+
+            Collections.sort(mGroups, sComparator);
+        }
+
+        public int size() {
+            return mGroups.size();
+        }
+
+        public Group get(int index) {
+            return mGroups.get(index);
+        }
+
+        public int indexOf(Group group) {
+            Assert.assertTrue(mGroups.contains(group));
+            return mGroups.indexOf(group);
+        }
+
+        public boolean contains(Group group) {
+            return mGroups.contains(group);
+        }
+
+        public void remove(Group group) {
+            Assert.assertTrue(mGroups.contains(group));
+            mGroups.remove(group);
+        }
+    }
+
+    private static class NotDoneGroupContainer {
+        private ArrayList<Group> mGroupArray = new ArrayList<>();
+        private TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
+
+        public Group addInstance(Instance instance) {
+            Assert.assertTrue(instance != null);
+            Assert.assertTrue(instance.getDone() == null);
+
+            Group group = addInstanceHelper(instance);
+            makeArray();
+
+            return group;
+        }
+
+        public void addInstanceRange(Collection<Instance> instances) {
+            Assert.assertTrue(instances != null);
+
+            for (Instance instance : instances)
+                addInstanceHelper(instance);
+            makeArray();
+        }
+
+        private Group addInstanceHelper(Instance instance) {
+            Assert.assertTrue(instance != null);
+            Assert.assertTrue(instance.getDone() == null);
+
+            TimeStamp timeStamp = instance.getDateTime().getTimeStamp();
+
+            if (mGroupTree.containsKey(timeStamp)) {
+                Group group = mGroupTree.get(timeStamp);
+                group.addInstance(instance);
+                return group;
+            } else {
+                Group group = new Group(timeStamp);
+                group.addInstance(instance);
+                mGroupTree.put(timeStamp, group);
+                return group;
+            }
+        }
+
+        private void makeArray() {
+            mGroupArray = new ArrayList<Group>(mGroupTree.values());
+        }
+
+        public int size() {
+            return mGroupArray.size();
+        }
+
+        public Group get(int index) {
+            return mGroupArray.get(index);
+        }
+
+        public int indexOf(Group group) {
+            Assert.assertTrue(mGroupArray.contains(group));
+            return mGroupArray.indexOf(group);
+        }
+
+        public boolean contains(Group group) {
+            return mGroupArray.contains(group);
+        }
+
+        public void remove(Group group) {
+            Assert.assertTrue(mGroupArray.contains(group));
+            mGroupTree.remove(group.getTimeStamp());
+            mGroupArray.remove(group);
         }
     }
 }

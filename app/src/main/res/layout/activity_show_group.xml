@@ -16,7 +16,7 @@
         android:id="@+id/show_group_name"
         android:text="test"/>
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/show_group_list" />

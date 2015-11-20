@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
@@ -53,11 +55,13 @@ public class ShowInstanceActivity extends AppCompatActivity {
         else
             showInstanceDetails.setText(scheduleText);
 
-        ListView showInstanceList = (ListView) findViewById(R.id.show_instance_list);
-        if (instance.getChildInstances().isEmpty())
+        RecyclerView showInstanceList = (RecyclerView) findViewById(R.id.show_instance_list);
+        if (instance.getChildInstances().isEmpty()) {
             showInstanceList.setVisibility(View.GONE);
-        else
+        } else {
+            showInstanceList.setLayoutManager(new LinearLayoutManager(this));
             showInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList(instance.getChildInstances())));
+        }
 
         final CheckBox checkBox = (CheckBox) findViewById(R.id.show_instance_checkbox);
         checkBox.setChecked(instance.getDone() != null);
@@ -66,14 +70,6 @@ public class ShowInstanceActivity extends AppCompatActivity {
             public void onClick(View v) {
                 boolean isChecked = checkBox.isChecked();
                 instance.setDone(isChecked);
-            }
-        });
-
-        showInstanceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Instance childInstance = (Instance) parent.getItemAtPosition(position);
-                startActivity(ShowInstanceActivity.getIntent(childInstance, view.getContext()));
             }
         });
     }

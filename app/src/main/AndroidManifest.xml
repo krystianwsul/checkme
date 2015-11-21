@@ -32,6 +32,8 @@
         </activity>
         <activity android:name=".ShowCustomTimeActivity" >
         </activity>
+        <activity android:name=".CreateTaskActivity" >
+        </activity>
     </application>
 
 </manifest>

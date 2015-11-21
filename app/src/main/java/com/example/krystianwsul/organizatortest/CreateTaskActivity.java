@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -49,23 +49,45 @@ public class CreateTaskActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         createTaskSpinner.setAdapter(adapter);
 
-        createTaskSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        createTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0:
-                        //single
-                        break;
-                    case 1:
-                        //daily
-                        break;
-                    case 2:
-                        //weekly
-                        break;
-                    default:
-                        throw new IllegalArgumentException("invalid spinner selection: " + position);
-                }
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Assert.assertTrue(position >= 0);
+                Assert.assertTrue(position < 3);
+
+                loadFragment(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
+    }
+
+    private Fragment createFragment(int position) {
+        Assert.assertTrue(position >= 0);
+        Assert.assertTrue(position < 3);
+
+        switch (position) {
+            case 0:
+                return SingleScheduleFragment.newInstance();
+            case 1:
+                return DailyScheduleFragment.newInstance();
+            case 2:
+                return WeeklyScheduleFragment.newInstance();
+            default:
+                return null;
+        }
+    }
+
+    private void loadFragment(int position) {
+        Assert.assertTrue(position >= 0);
+        Assert.assertTrue(position < 3);
+
+        Fragment fragment = createFragment(position);
+        Assert.assertTrue(fragment != null);
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.create_task_frame, fragment).commit();
     }
 }

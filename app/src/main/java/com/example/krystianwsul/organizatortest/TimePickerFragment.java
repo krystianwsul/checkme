@@ -15,8 +15,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-import java.security.AccessControlContext;
-
 /**
  * Created by Krystian on 11/13/2015.
  */

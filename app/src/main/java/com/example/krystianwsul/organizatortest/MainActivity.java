@@ -3,11 +3,16 @@ package com.example.krystianwsul.organizatortest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,7 +29,28 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
-        viewPager.setAdapter(new ListFragmentAdapter(getSupportFragmentManager()));
+        viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                Assert.assertTrue(position >= 0);
+                Assert.assertTrue(position <= 1);
+
+                switch (position) {
+                    case 0:
+                        return new GroupListFragment();
+                    case 1:
+                        return new TaskListFragment();
+                    default:
+                        return null;
+                }
+            }
+
+            @Override
+            public int getCount() {
+                return 2;
+            }
+        });
+
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             public void onTabSelected(TabLayout.Tab tab) {

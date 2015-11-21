@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
@@ -77,5 +76,6 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
         Assert.assertTrue(mTimes.containsKey(dayOfWeek));
         mTimes.get(dayOfWeek).setText(mCustomTime.getHourMinute(dayOfWeek).toString());
     }
+
 }
 

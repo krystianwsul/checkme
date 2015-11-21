@@ -35,4 +35,8 @@ public class ChildTask extends Task {
     public Task getParentTask() {
         return mParentTask;
     }
+
+    public boolean isRootTask() {
+        return false;
+    }
 }

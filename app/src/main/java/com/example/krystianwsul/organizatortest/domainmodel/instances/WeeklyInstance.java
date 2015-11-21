@@ -12,8 +12,6 @@ import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceMang
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 /**
  * Created by Krystian on 11/9/2015.
  */
@@ -41,7 +39,7 @@ public class WeeklyInstance extends Instance {
     public String getScheduleText(Context context) {
         Assert.assertTrue(context != null);
 
-        if (mTask.getParentTask() == null)
+        if (isRootInstance())
             return mWeeklyRepetition.getRepetitionDateTime().getDisplayText(context);
         else
             return null;

@@ -41,5 +41,5 @@ public abstract class Task {
 
     public abstract RootTask getRootTask();
 
-    public abstract Task getParentTask();
+    public abstract boolean isRootTask();
 }

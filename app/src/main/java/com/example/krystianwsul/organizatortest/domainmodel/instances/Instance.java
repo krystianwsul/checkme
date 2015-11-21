@@ -68,6 +68,10 @@ public abstract class Instance {
         return childInstances;
     }
 
+    public boolean isRootInstance() {
+        return (mTask.isRootTask());
+    }
+
     public abstract DateTime getDateTime();
 
     public TimeStamp getDone() {

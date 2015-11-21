@@ -71,4 +71,8 @@ public class RootTask extends Task {
     public Task getParentTask() {
         return null;
     }
+
+    public boolean isRootTask() {
+        return true;
+    }
 }

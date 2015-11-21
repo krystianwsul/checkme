@@ -20,6 +20,8 @@ import java.util.Comparator;
  * Created by Krystian on 10/31/2015.
  */
 public class TaskListFragment extends Fragment {
+    private ListView mTasksList;
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.task_list_fragment, container, false);
     }
@@ -28,7 +30,20 @@ public class TaskListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ListView tasksList = (ListView) getView().findViewById(R.id.tasks_list);
+        mTasksList = (ListView) getView().findViewById(R.id.tasks_list);
+
+        mTasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Task task = (Task) parent.getItemAtPosition(position);
+                startActivity(ShowTaskActivity.getIntent(task, view.getContext()));
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         ArrayList<Task> rootTasks = new ArrayList<Task>(TaskFactory.getInstance().getRootTasks());
 
@@ -39,14 +54,6 @@ public class TaskListFragment extends Fragment {
             }
         });
 
-        tasksList.setAdapter(new TaskAdapter(getContext(), rootTasks));
-
-        tasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Task task = (Task) parent.getItemAtPosition(position);
-                startActivity(ShowTaskActivity.getIntent(task, view.getContext()));
-            }
-        });
+        mTasksList.setAdapter(new TaskAdapter(getContext(), rootTasks));
     }
 }

@@ -14,18 +14,33 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.ShowInstanceActivity;
+import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Krystian on 11/11/2015.
  */
 public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.InstanceHolder> {
     private final Context mContext;
-    private final ArrayList<Instance> mInstances;
+
+    private final ArrayList<Instance> mDoneInstances = new ArrayList<>();
+    private final ArrayList<Instance> mNotDoneInstances = new ArrayList<>();
+
+    private static Comparator<Instance> sComparator = new Comparator<Instance>() {
+        @Override
+        public int compare(Instance lhs, Instance rhs) {
+            Assert.assertTrue(lhs.getDone() != null);
+            Assert.assertTrue(rhs.getDone() != null);
+
+            return lhs.getDone().compareTo(rhs.getDone());
+        }
+    };
 
     public InstanceAdapter(Context context, ArrayList<Instance> instances) {
         Assert.assertTrue(context != null);
@@ -33,7 +48,29 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         Assert.assertTrue(!instances.isEmpty());
 
         mContext = context;
-        mInstances = instances;
+
+        for (Instance instance : instances) {
+            if (instance.getDone() != null)
+                mDoneInstances.add(instance);
+            else
+                mNotDoneInstances.add(instance);
+        }
+
+        sort();
+    }
+
+    private void sort() {
+        Collections.sort(mDoneInstances, sComparator);
+    }
+
+    private Instance getInstance(int position) {
+        Assert.assertTrue(position >= 0);
+        Assert.assertTrue(position < mDoneInstances.size() + mNotDoneInstances.size());
+
+        if (position < mDoneInstances.size())
+            return mDoneInstances.get(position);
+        else
+            return mNotDoneInstances.get(position - mDoneInstances.size());
     }
 
     @Override
@@ -48,8 +85,8 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     }
 
     @Override
-    public void onBindViewHolder(InstanceHolder instanceHolder, int position) {
-        final Instance instance = mInstances.get(position);
+    public void onBindViewHolder(final InstanceHolder instanceHolder, int position) {
+        Instance instance = getInstance(position);
 
         instanceHolder.mInstanceRowName.setText(instance.getName());
 
@@ -63,10 +100,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         instanceHolder.mInstanceRowCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CheckBox checkBox = (CheckBox) v;
-                boolean isChecked = checkBox.isChecked();
-
-                instance.setDone(isChecked);
+                instanceHolder.onCheckBoxClick((CheckBox) v);
             }
         });
 
@@ -75,14 +109,25 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         instanceHolder.mInstanceRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mContext.startActivity(ShowInstanceActivity.getIntent(instance, mContext));
+                instanceHolder.onRowClick();
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return mInstances.size();
+        return mDoneInstances.size() + mNotDoneInstances.size();
+    }
+
+    private int indexOf(Instance instance) {
+        Assert.assertTrue(instance != null);
+
+        if (mDoneInstances.contains(instance)) {
+            return mDoneInstances.indexOf(instance);
+        } else {
+            Assert.assertTrue(mNotDoneInstances.contains(instance));
+            return mDoneInstances.size() + mNotDoneInstances.indexOf(instance);
+        }
     }
 
     public class InstanceHolder extends RecyclerView.ViewHolder {
@@ -103,6 +148,49 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             mInstanceRowName = instanceRowName;
             mInstanceRowImg = instanceRowImg;
             mInstanceRowCheckBox = instanceRowCheckBox;
+        }
+
+        public void onCheckBoxClick(CheckBox checkBox) {
+            Assert.assertTrue(checkBox != null);
+
+            int position = getAdapterPosition();
+            Instance instance = getInstance(position);
+            Assert.assertTrue(instance != null);
+
+            boolean isChecked = checkBox.isChecked();
+            instance.setDone(isChecked);
+
+            if (isChecked) {
+                Assert.assertTrue(mNotDoneInstances.contains(instance));
+
+                int oldPosition = indexOf(instance);
+
+                mNotDoneInstances.remove(instance);
+                mDoneInstances.add(instance);
+                sort();
+
+                int newPosition = indexOf(instance);
+
+                notifyItemMoved(oldPosition, newPosition);
+            } else {
+                Assert.assertTrue(mDoneInstances.contains(instance));
+
+                int oldPosition = indexOf(instance);
+
+                mDoneInstances.remove(instance);
+                mNotDoneInstances.add(instance);
+
+                int newPosition = indexOf(instance);
+
+                notifyItemMoved(oldPosition, newPosition);
+            }
+        }
+
+        public void onRowClick() {
+            Instance instance = getInstance(getAdapterPosition());
+            Assert.assertTrue(instance != null);
+
+            mContext.startActivity(ShowInstanceActivity.getIntent(instance, mContext));
         }
     }
 }

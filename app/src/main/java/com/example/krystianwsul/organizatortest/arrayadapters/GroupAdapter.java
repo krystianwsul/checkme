@@ -88,6 +88,8 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
     }
 
     private int indexOf(Group group) {
+        Assert.assertTrue(group != null);
+
         if (mDoneGroupContainer.contains(group)) {
             return mDoneGroupContainer.indexOf(group);
         } else {
@@ -143,7 +145,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
             @Override
             public void onClick(View view) {
-                groupHolder.onRowClick(view);
+                groupHolder.onRowClick();
             }
         });
     }
@@ -185,7 +187,6 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
             Assert.assertTrue(group.singleInstance());
 
             boolean isChecked = checkBox.isChecked();
-
             group.getSingleSinstance().setDone(isChecked);
 
             if (isChecked) {
@@ -218,13 +219,11 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
             }
         }
 
-        public void onRowClick(View view) {
-            Assert.assertTrue(view != null);
-
+        public void onRowClick() {
             Group group = getGroup(getAdapterPosition());
             Assert.assertTrue(group != null);
 
-            Intent intent = getIntent(group, view.getContext());
+            Intent intent = getIntent(group, mContext);
             mContext.startActivity(intent);
         }
 

@@ -27,6 +27,9 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowGroupActivity extends AppCompatActivity {
+    private RecyclerView mShowGroupList;
+    private ArrayList<Instance> mInstances;
+
     private static final String INTENT_KEY = "instanceIds";
 
     public static Intent getIntent(Group group, Context context) {
@@ -51,19 +54,26 @@ public class ShowGroupActivity extends AppCompatActivity {
         Assert.assertTrue(instanceIds != null);
         Assert.assertTrue(instanceIds.size() > 1);
 
-        ArrayList<Instance> instances = new ArrayList<>();
+        mInstances = new ArrayList<>();
         for (Integer instanceId : instanceIds) {
             Instance instance = InstanceFactory.getInstance().getInstance(instanceId);
             Assert.assertTrue(instance != null);
-            instances.add(instance);
+            mInstances.add(instance);
         }
 
-        TextView showGroupName = (TextView) findViewById(R.id.show_group_name);
-        showGroupName.setText(getDisplayText(instances.get(0)));
+        Assert.assertTrue(mInstances.size() > 1);
 
-        RecyclerView showGroupList = (RecyclerView) findViewById(R.id.show_group_list);
-        showGroupList.setLayoutManager(new LinearLayoutManager(this));
-        showGroupList.setAdapter(new InstanceAdapter(this, instances));
+        TextView showGroupName = (TextView) findViewById(R.id.show_group_name);
+        showGroupName.setText(getDisplayText(mInstances.get(0)));
+
+        mShowGroupList = (RecyclerView) findViewById(R.id.show_group_list);
+        mShowGroupList.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mShowGroupList.setAdapter(new InstanceAdapter(this, mInstances));
     }
 
     private String getDisplayText(Instance instance) {

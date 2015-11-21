@@ -1,7 +1,9 @@
 package com.example.krystianwsul.organizatortest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -59,6 +61,16 @@ public class ShowTaskActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task childTask = (Task) parent.getItemAtPosition(position);
                 startActivity(ShowTaskActivity.getIntent(childTask, view.getContext()));
+            }
+        });
+
+        final AppCompatActivity activity = this;
+
+        FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.show_task_fab);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(CreateTaskActivity.getIntent(activity, mTask));
             }
         });
     }

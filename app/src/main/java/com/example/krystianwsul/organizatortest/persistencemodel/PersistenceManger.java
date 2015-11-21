@@ -215,6 +215,16 @@ public class PersistenceManger {
         return null;
     }
 
+    public ArrayList<DailyRepetitionRecord> getDailyRepetitionRecords(int dailyScheduleTimeId) {
+        ArrayList<DailyRepetitionRecord> dailyRepetitionRecords = new ArrayList<>();
+        for (DailyRepetitionRecord dailyRepetitionRecord : mDailyRepetitionRecords.values()) {
+            if (dailyRepetitionRecord.getDailyScheduleTimeId() == dailyScheduleTimeId) {
+                dailyRepetitionRecords.add(dailyRepetitionRecord);
+            }
+        }
+        return dailyRepetitionRecords;
+    }
+
     public int getMaxDailyRepetitionId() {
         return mMaxDailyRepetitionId;
     }
@@ -275,6 +285,16 @@ public class PersistenceManger {
             if (weeklyRepetitionRecord.getWeeklyScheduleTimeId() == weeklyScheduleDayTimeId && weeklyRepetitionRecord.getScheduleYear() == scheduleDate.getYear() && weeklyRepetitionRecord.getScheduleMonth() == scheduleDate.getMonth() && weeklyRepetitionRecord.getScheduleDay() == scheduleDate.getDay())
                 return weeklyRepetitionRecord;
         return null;
+    }
+
+    public ArrayList<WeeklyRepetitionRecord> getWeeklyRepetitionRecords(int weeklyScheduleDayTimeId) {
+        ArrayList<WeeklyRepetitionRecord> weeklyRepetitionRecords = new ArrayList<>();
+        for (WeeklyRepetitionRecord weeklyRepetitionRecord : mWeeklyRepetitionRecords.values()) {
+            if (weeklyRepetitionRecord.getWeeklyScheduleTimeId() == weeklyScheduleDayTimeId) {
+                weeklyRepetitionRecords.add(weeklyRepetitionRecord);
+            }
+        }
+        return weeklyRepetitionRecords;
     }
 
     public int getMaxWeeklyRepetitionId() {

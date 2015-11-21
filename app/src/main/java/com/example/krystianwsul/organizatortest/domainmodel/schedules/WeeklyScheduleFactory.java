@@ -27,16 +27,10 @@ public class WeeklyScheduleFactory {
 
     public WeeklySchedule getWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
-        if (mWeeklySchedules.containsKey(weeklyScheduleId)) {
+        if (mWeeklySchedules.containsKey(weeklyScheduleId))
             return mWeeklySchedules.get(rootTask);
-        } else {
-            WeeklySchedule weeklySchedule = createWeeklySchedule(weeklyScheduleId, rootTask);
-            if (weeklySchedule == null)
-                return null;
-
-            mWeeklySchedules.put(weeklyScheduleId, weeklySchedule);
-            return weeklySchedule;
-        }
+        else
+            return createWeeklySchedule(weeklyScheduleId, rootTask);
     }
 
     private WeeklySchedule createWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
@@ -56,6 +50,7 @@ public class WeeklyScheduleFactory {
         for (Integer weeklyScheduleDayTimeId : weeklyScheduleDayTimeIds)
             weeklySchedule.addWeeklyScheduleDayTime(WeeklyScheduleDayTimeFactory.getInstance().getWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule));
 
+        mWeeklySchedules.put(weeklyScheduleId, weeklySchedule);
         return weeklySchedule;
     }
 }

@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleRepetitionRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
 
 import junit.framework.Assert;
 
@@ -24,26 +25,24 @@ public class SingleRepetitionFactory {
 
     private final HashMap<Integer, SingleRepetition> mSingleRepetitions = new HashMap<>();
 
+    public void loadExistingSingleRepetition(SingleSchedule singleSchedule) {
+        SingleRepetitionRecord singleRepetitionRecord = PersistenceManger.getInstance().getSingleRepetitionRecord(singleSchedule.getRootTaskId());
+        if (singleRepetitionRecord == null)
+            return;
+
+        SingleRepetition singleRepetition = new SingleRepetition(singleSchedule, singleRepetitionRecord);
+        mSingleRepetitions.put(singleRepetition.getRootTaskId(), singleRepetition);
+    }
+
     public SingleRepetition getSingleRepetition(SingleSchedule singleSchedule) {
         Assert.assertTrue(singleSchedule != null);
 
         if (mSingleRepetitions.containsKey(singleSchedule.getRootTaskId())) {
             return mSingleRepetitions.get(singleSchedule.getRootTaskId());
         } else {
-            SingleRepetition singleRepetition = createSingleRepetition(singleSchedule);
-            Assert.assertTrue(singleRepetition != null);
+            SingleRepetition singleRepetition = new SingleRepetition(singleSchedule);
             mSingleRepetitions.put(singleRepetition.getRootTaskId(), singleRepetition);
             return singleRepetition;
         }
-    }
-
-    private SingleRepetition createSingleRepetition(SingleSchedule singleSchedule) {
-        Assert.assertTrue(singleSchedule != null);
-
-        SingleRepetitionRecord singleRepetitionRecord = PersistenceManger.getInstance().getSingleRepetitionRecord(singleSchedule.getRootTaskId());
-        if (singleRepetitionRecord != null)
-            return new SingleRepetition(singleSchedule, singleRepetitionRecord);
-        else
-            return new SingleRepetition(singleSchedule);
     }
 }

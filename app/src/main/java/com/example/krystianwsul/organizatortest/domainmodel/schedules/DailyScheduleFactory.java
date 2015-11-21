@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -28,16 +29,10 @@ public class DailyScheduleFactory {
     public DailySchedule getDailySchedule(int dailyScheduleId, RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
-        if (mDailySchedules.containsKey(dailyScheduleId)) {
+        if (mDailySchedules.containsKey(dailyScheduleId))
             return mDailySchedules.get(dailyScheduleId);
-        } else {
-            DailySchedule dailySchedule = createDailySchedule(dailyScheduleId, rootTask);
-            if (dailySchedule == null)
-                return null;
-
-            mDailySchedules.put(dailyScheduleId, dailySchedule);
-            return dailySchedule;
-        }
+        else
+            return createDailySchedule(dailyScheduleId, rootTask);
     }
 
     private DailySchedule createDailySchedule(int dailyScheduleId, RootTask rootTask) {
@@ -57,6 +52,7 @@ public class DailyScheduleFactory {
         for (Integer dailyScheduleTimeId : dailyScheduleTimeIds)
             dailySchedule.addDailyScheduleTime(DailyScheduleTimeFactory.getInstance().getDailyScheduleTime(dailyScheduleTimeId, dailySchedule));
 
+        mDailySchedules.put(dailyScheduleId, dailySchedule);
         return dailySchedule;
     }
 }

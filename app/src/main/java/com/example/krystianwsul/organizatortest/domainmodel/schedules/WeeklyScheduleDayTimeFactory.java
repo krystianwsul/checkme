@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetitionFactory;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleDayTimeRecord;
 
@@ -24,18 +25,20 @@ public class WeeklyScheduleDayTimeFactory {
     private final HashMap<Integer, WeeklyScheduleDayTime> mWeeklyScheduleDayTimes = new HashMap<>();
 
     public WeeklyScheduleDayTime getWeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
-        if (mWeeklyScheduleDayTimes.containsKey(weeklyScheduleDayTimeId)) {
+        if (mWeeklyScheduleDayTimes.containsKey(weeklyScheduleDayTimeId))
             return mWeeklyScheduleDayTimes.get(weeklyScheduleDayTimeId);
-        } else {
-            WeeklyScheduleDayTime weeklyScheduleDayTime = createWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule);
-            mWeeklyScheduleDayTimes.put(weeklyScheduleDayTimeId, weeklyScheduleDayTime);
-            return weeklyScheduleDayTime;
-        }
+        else
+            return createWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule);
     }
 
     private WeeklyScheduleDayTime createWeeklyScheduleDayTime(int weeklyScheduleDayTimeId, WeeklySchedule weeklySchedule) {
         WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord = PersistenceManger.getInstance().getWeeklyScheduleDayTimeRecord(weeklyScheduleDayTimeId);
         Assert.assertTrue(weeklyScheduleDayTimeRecord != null);
-        return new WeeklyScheduleDayTime(weeklyScheduleDayTimeRecord, weeklySchedule);
+
+        WeeklyScheduleDayTime weeklyScheduleDayTime = new WeeklyScheduleDayTime(weeklyScheduleDayTimeRecord, weeklySchedule);
+        WeeklyRepetitionFactory.getInstance().loadExistingWeeklyRepetitions(weeklyScheduleDayTime);
+
+        mWeeklyScheduleDayTimes.put(weeklyScheduleDayTimeId, weeklyScheduleDayTime);
+        return weeklyScheduleDayTime;
     }
 }

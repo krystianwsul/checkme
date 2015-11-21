@@ -1,12 +1,15 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleDayTime;
+import com.example.krystianwsul.organizatortest.persistencemodel.DailyRepetitionRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyRepetitionRecord;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -25,6 +28,14 @@ public class WeeklyRepetitionFactory {
 
     private final HashMap<Integer, WeeklyRepetition> mWeeklyRepetitions = new HashMap<>();
 
+    public void loadExistingWeeklyRepetitions(WeeklyScheduleDayTime weeklyScheduleDayTime) {
+        ArrayList<WeeklyRepetitionRecord> weeklyRepetitionRecords = PersistenceManger.getInstance().getWeeklyRepetitionRecords(weeklyScheduleDayTime.getId());
+        for (WeeklyRepetitionRecord weeklyRepetitionRecord : weeklyRepetitionRecords) {
+            WeeklyRepetition weeklyRepetition = new WeeklyRepetition(weeklyScheduleDayTime, weeklyRepetitionRecord);
+            mWeeklyRepetitions.put(weeklyRepetition.getId(), weeklyRepetition);
+        }
+    }
+
     public WeeklyRepetition getWeeklyRepetition(int weeklyRepetitionId) {
         Assert.assertTrue(mWeeklyRepetitions.containsKey(weeklyRepetitionId));
         return mWeeklyRepetitions.get(weeklyRepetitionId);
@@ -38,8 +49,7 @@ public class WeeklyRepetitionFactory {
         if (existingWeeklyRepetition != null)
             return existingWeeklyRepetition;
 
-        WeeklyRepetition weeklyRepetition = createWeeklyRepetition(weeklyScheduleDayTime, scheduleDate);
-        Assert.assertTrue(weeklyRepetition != null);
+        WeeklyRepetition weeklyRepetition = new WeeklyRepetition(weeklyScheduleDayTime, scheduleDate);
         mWeeklyRepetitions.put(weeklyRepetition.getId(), weeklyRepetition);
         return weeklyRepetition;
     }
@@ -51,16 +61,5 @@ public class WeeklyRepetitionFactory {
             if (weeklyRepetition.getWeeklyScheduleDayTimeId() == weeklyScheduleDayTimeId && weeklyRepetition.getScheduleDate().equals(scheduleDate))
                 return weeklyRepetition;
         return null;
-    }
-
-    private WeeklyRepetition createWeeklyRepetition(WeeklyScheduleDayTime weeklyScheduleDayTime, Date scheduleDate) {
-        Assert.assertTrue(weeklyScheduleDayTime != null);
-        Assert.assertTrue(scheduleDate != null);
-
-        WeeklyRepetitionRecord weeklyRepetitionRecord = PersistenceManger.getInstance().getWeeklyRepetitionRecord(weeklyScheduleDayTime.getId(), scheduleDate);
-        if (weeklyRepetitionRecord != null)
-            return new WeeklyRepetition(weeklyScheduleDayTime, weeklyRepetitionRecord);
-        else
-            return new WeeklyRepetition(weeklyScheduleDayTime, scheduleDate);
     }
 }

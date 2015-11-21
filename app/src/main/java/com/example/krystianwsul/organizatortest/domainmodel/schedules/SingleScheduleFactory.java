@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
+import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
@@ -26,16 +27,10 @@ public class SingleScheduleFactory {
 
     public SingleSchedule getSingleSchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
-        if (mSingleSchedules.containsKey(rootTask.getId())) {
+        if (mSingleSchedules.containsKey(rootTask.getId()))
             return mSingleSchedules.get(rootTask.getId());
-        } else {
-            SingleSchedule singleSchedule = createSingleSchedule(rootTask);
-            if (singleSchedule == null)
-                return null;
-
-            mSingleSchedules.put(rootTask.getId(), singleSchedule);
-            return singleSchedule;
-        }
+        else
+            return createSingleSchedule(rootTask);
     }
 
     private SingleSchedule createSingleSchedule(RootTask rootTask) {
@@ -43,6 +38,10 @@ public class SingleScheduleFactory {
         if (singleScheduleRecord == null)
             return null;
 
-        return new SingleSchedule(singleScheduleRecord, rootTask);
+        SingleSchedule singleSchedule = new SingleSchedule(singleScheduleRecord, rootTask);
+        SingleRepetitionFactory.getInstance().loadExistingSingleRepetition(singleSchedule);
+
+        mSingleSchedules.put(rootTask.getId(), singleSchedule);
+        return singleSchedule;
     }
 }

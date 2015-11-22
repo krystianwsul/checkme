@@ -10,12 +10,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-public class CreateTaskActivity extends AppCompatActivity {
+public class CreateTaskActivity extends AppCompatActivity implements TimePickerFragment.TimePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
 
     private static final String INTENT_KEY = "parentTaskId";
 
@@ -89,5 +91,25 @@ public class CreateTaskActivity extends AppCompatActivity {
         Assert.assertTrue(fragment != null);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.create_task_frame, fragment).commit();
+    }
+
+    @Override
+    public void onDatePickerFragmentResult(Date date) {
+        Assert.assertTrue(date != null);
+
+        SingleScheduleFragment singleScheduleFragment = (SingleScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        Assert.assertTrue(singleScheduleFragment != null);
+
+        singleScheduleFragment.onDatePickerFragmentResult(date);
+    }
+
+    @Override
+    public void onTimePickerFragmentResult(HourMinute hourMinute) {
+        Assert.assertTrue(hourMinute != null);
+
+        SingleScheduleFragment singleScheduleFragment = (SingleScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        Assert.assertTrue(singleScheduleFragment != null);
+
+        singleScheduleFragment.onTimePickerFragmentResult(hourMinute);
     }
 }

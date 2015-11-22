@@ -72,7 +72,7 @@ public class Date implements Comparable<Date> {
     }
 
     public String toString() {
-        java.util.Date javaDate = new java.util.Date(mYear, mMonth, mDay);
+        java.util.Date javaDate = new java.util.Date(mYear, mMonth - 1, mDay);
         return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(javaDate);
     }
 

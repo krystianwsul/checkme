@@ -19,15 +19,14 @@ import junit.framework.Assert;
  * Created by Krystian on 11/13/2015.
  */
 public class TimePickerFragment extends DialogFragment {
-    public static TimePickerFragment newInstance(CustomTime customTime, DayOfWeek dayOfWeek) {
-        Assert.assertTrue(customTime != null);
-        Assert.assertTrue(dayOfWeek != null);
+    public static TimePickerFragment newInstance(HourMinute hourMinute) {
+        Assert.assertTrue(hourMinute != null);
 
         TimePickerFragment timePickerFragment = new TimePickerFragment();
 
         Bundle args = new Bundle();
-        args.putInt("customTimeId", customTime.getId());
-        args.putSerializable("dayOfWeek", dayOfWeek);
+        args.putInt("hour", hourMinute.getHour());
+        args.putInt("minute", hourMinute.getMinute());
         timePickerFragment.setArguments(args);
 
         return timePickerFragment;
@@ -43,29 +42,23 @@ public class TimePickerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
 
-        int customTimeId = args.getInt("customTimeId");
-        final CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(customTimeId);
-        Assert.assertTrue(customTime != null);
+        int hour = args.getInt("hour");
+        int minute = args.getInt("minute");
 
-        final DayOfWeek dayOfWeek = (DayOfWeek) args.getSerializable("dayOfWeek");
-        Assert.assertTrue(dayOfWeek != null);
-
-        HourMinute hourMinute = customTime.getHourMinute(dayOfWeek);
-        Assert.assertTrue(hourMinute != null);
+        HourMinute hourMinute = new HourMinute(hour, minute);
 
         return new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 HourMinute newHourMinute = new HourMinute(hourOfDay, minute);
-                customTime.setHourMinute(dayOfWeek, newHourMinute);
 
                 TimePickerFragmentListener timePickerFragmentListener = (TimePickerFragmentListener) getActivity();
-                timePickerFragmentListener.onTimePickerFragmentResult(dayOfWeek);
+                timePickerFragmentListener.onTimePickerFragmentResult(newHourMinute);
             }
         }, hourMinute.getHour(), hourMinute.getMinute(), DateFormat.is24HourFormat(getActivity()));
     }
 
     public interface TimePickerFragmentListener {
-        void onTimePickerFragmentResult(DayOfWeek dayOfWeek);
+        void onTimePickerFragmentResult(HourMinute hourMinute);
     }
 }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
@@ -27,6 +28,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
 
     private CustomTime mCustomTime;
     private HashMap<DayOfWeek, TextView> mTimes = new HashMap<>();
+
+    private DayOfWeek editedDayOfWeek = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,19 +66,21 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
         timeSundayTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                editedDayOfWeek = dayOfWeek;
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mCustomTime, dayOfWeek);
+                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mCustomTime.getHourMinute(dayOfWeek));
                 timePickerFragment.show(fragmentManager, "tag");
             }
         });
         mTimes.put(dayOfWeek, timeSundayTime);
     }
 
-    public void onTimePickerFragmentResult(DayOfWeek dayOfWeek) {
-        Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(mTimes.containsKey(dayOfWeek));
-        mTimes.get(dayOfWeek).setText(mCustomTime.getHourMinute(dayOfWeek).toString());
+    public void onTimePickerFragmentResult(HourMinute hourMinute) {
+        Assert.assertTrue(hourMinute != null);
+        Assert.assertTrue(editedDayOfWeek != null);
+        Assert.assertTrue(mTimes.containsKey(editedDayOfWeek));
+
+        mCustomTime.setHourMinute(editedDayOfWeek, hourMinute);
+        mTimes.get(editedDayOfWeek).setText(mCustomTime.getHourMinute(editedDayOfWeek).toString());
     }
-
 }
-

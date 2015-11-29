@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.arrayadapters;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,28 +18,20 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-/**
- * Created by Krystian on 10/23/2015.
- */
 public class TaskAdapter extends ArrayAdapter<Task> {
-    private final Context mContext;
     private final ArrayList<Task> mTasks;
 
     public TaskAdapter(Context context, ArrayList<Task> tasks) {
         super(context, -1, tasks);
 
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(tasks != null);
         Assert.assertTrue(!tasks.isEmpty());
-
-        mContext = context;
         mTasks = tasks;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            LayoutInflater inflater = LayoutInflater.from(mContext);
+            LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.show_task_row, parent, false);
 
             TaskHolder taskHolder = new TaskHolder();
@@ -54,18 +47,16 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
         taskHolder.taskRowName.setText(task.getName());
 
-        String scheduleText = task.getScheduleText(mContext);
+        String scheduleText = task.getScheduleText(getContext());
         if (TextUtils.isEmpty(scheduleText))
             taskHolder.taskRowDetails.setVisibility(View.GONE);
         else
             taskHolder.taskRowDetails.setText(scheduleText);
 
-        Resources resources = mContext.getResources();
-
         if (task.getChildTasks().isEmpty())
-            taskHolder.taskRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+            taskHolder.taskRowImg.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.ic_label_outline_black_24dp));
         else
-            taskHolder.taskRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+            taskHolder.taskRowImg.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.ic_list_black_24dp));
 
         return convertView;
     }

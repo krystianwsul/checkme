@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.arrayadapters;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,9 +34,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.TreeMap;
 
-/**
- * Created by Krystian on 10/23/2015.
- */
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder> {
     private final Context mContext;
 
@@ -107,9 +105,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         ImageView groupRowImg = (ImageView) groupRow.findViewById(R.id.group_row_img);
         CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
 
-        GroupHolder groupHolder = new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
-
-        return groupHolder;
+        return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
     }
 
     @Override
@@ -120,12 +116,10 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
 
         groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
 
-        Resources resources = mContext.getResources();
-
         if (group.singleInstance() && group.getSingleSinstance().getChildInstances().isEmpty())
-            groupHolder.mGroupRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+            groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
         else
-            groupHolder.mGroupRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+            groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
 
         if (group.singleInstance()) {
             groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
@@ -165,7 +159,6 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         public GroupHolder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
             super(groupRow);
 
-            Assert.assertTrue(groupRow != null);
             Assert.assertTrue(groupRowName != null);
             Assert.assertTrue(groupRowDetails != null);
             Assert.assertTrue(groupRowImg != null);
@@ -334,7 +327,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         }
 
         private void makeArray() {
-            mGroupArray = new ArrayList<Group>(mGroupTree.values());
+            mGroupArray = new ArrayList<>(mGroupTree.values());
         }
 
         public int size() {

@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.arrayadapters;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,9 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-/**
- * Created by Krystian on 11/11/2015.
- */
 public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.InstanceHolder> {
     private final Context mContext;
 
@@ -93,9 +91,9 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         Resources resources = mContext.getResources();
 
         if (instance.getChildInstances().isEmpty())
-            instanceHolder.mInstanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_label_outline_black_18dp));
+            instanceHolder.mInstanceRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
         else
-            instanceHolder.mInstanceRowImg.setBackground(resources.getDrawable(R.drawable.ic_list_black_18dp));
+            instanceHolder.mInstanceRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
 
         instanceHolder.mInstanceRowCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,7 +137,6 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         public InstanceHolder(TableLayout instanceRow, TextView instanceRowName, ImageView instanceRowImg, CheckBox instanceRowCheckBox) {
             super(instanceRow);
 
-            Assert.assertTrue(instanceRow != null);
             Assert.assertTrue(instanceRowName != null);
             Assert.assertTrue(instanceRowImg != null);
             Assert.assertTrue(instanceRowCheckBox != null);

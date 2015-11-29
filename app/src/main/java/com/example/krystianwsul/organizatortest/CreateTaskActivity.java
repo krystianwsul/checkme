@@ -20,7 +20,6 @@ import junit.framework.Assert;
 
 public class CreateTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
     private static final String INTENT_KEY = "parentTaskId";
-    private static final String FRAGMENT_KEY = "fragment";
 
     public static Intent getIntent(Context context) {
         return new Intent(context, CreateTaskActivity.class);
@@ -46,17 +45,8 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
             Assert.assertTrue(parentTask != null);
         }
 
-        if (savedInstanceState != null) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            Assert.assertTrue(fragmentManager != null);
-
-            Fragment fragment = fragmentManager.getFragment(savedInstanceState, FRAGMENT_KEY);
-            Assert.assertTrue(fragment != null);
-
-            fragmentManager.beginTransaction().replace(R.id.create_task_frame, fragment).commit();
-        } else {
+        if (savedInstanceState == null)
             loadFragment(0);
-        }
 
         Spinner createTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
@@ -82,19 +72,6 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
 
             }
         });
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        Assert.assertTrue(fragmentManager != null);
-
-        Fragment fragment = fragmentManager.findFragmentById(R.id.create_task_frame);
-        Assert.assertTrue(fragment != null);
-
-        fragmentManager.putFragment(outState, FRAGMENT_KEY, fragment);
     }
 
     private Fragment createFragment(int position) {

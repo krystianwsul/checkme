@@ -6,19 +6,12 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
-
-import java.util.ArrayList;
 
 public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener {
     private TextView mDateView;
@@ -28,8 +21,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     private static String YEAR_KEY = "year";
     private static String MONTH_KEY = "month";
     private static String DAY_KEY = "day";
-
-    private static String SCHEDULE_TIME_FRAGMENT_KEY = "scheduleTimeFragment";
 
     public static SingleScheduleFragment newInstance() {
         return new SingleScheduleFragment();
@@ -44,7 +35,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        int initialCount = 1;
         if (savedInstanceState != null) {
 
             int year = savedInstanceState.getInt(YEAR_KEY, -1);
@@ -56,14 +46,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             Assert.assertTrue(day != -1);
 
             mDate = new Date(year, month, day);
-
-            FragmentManager fragmentManager = getChildFragmentManager();
-            Assert.assertTrue(fragmentManager != null);
-
-            Fragment fragment = fragmentManager.getFragment(savedInstanceState, SCHEDULE_TIME_FRAGMENT_KEY);
-            Assert.assertTrue(fragment != null);
-
-            fragmentManager.beginTransaction().replace(R.id.single_schedule_time, fragment).commit();
         } else {
             mDate = Date.today();
         }
@@ -95,13 +77,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         outState.putInt(YEAR_KEY, mDate.getYear());
         outState.putInt(MONTH_KEY, mDate.getMonth());
         outState.putInt(DAY_KEY, mDate.getDay());
-
-        FragmentManager fragmentManager = getChildFragmentManager();
-
-        Fragment fragment = fragmentManager.findFragmentById(R.id.single_schedule_time);
-        Assert.assertTrue(fragment != null);
-
-        fragmentManager.putFragment(outState, SCHEDULE_TIME_FRAGMENT_KEY, fragment);
     }
 
     private void updateDateText() {

@@ -17,7 +17,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowCustomTimeActivity extends AppCompatActivity implements TimePickerFragment.TimePickerFragmentListener {
+public class ShowCustomTimeActivity extends AppCompatActivity implements HourMinutePickerFragment.TimePickerFragmentListener {
     private static final String INTENT_KEY = "customTimeId";
 
     public static Intent getIntent(CustomTime customTime, Context context) {
@@ -68,8 +68,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements TimePic
             public void onClick(View v) {
                 editedDayOfWeek = dayOfWeek;
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mCustomTime.getHourMinute(dayOfWeek));
-                timePickerFragment.show(fragmentManager, "tag");
+                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(mCustomTime.getHourMinute(dayOfWeek));
+                hourMinutePickerFragment.show(fragmentManager, "tag");
             }
         });
         mTimes.put(dayOfWeek, timeSundayTime);

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,18 +13,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 
 import junit.framework.Assert;
 
-import java.security.Timestamp;
 import java.util.ArrayList;
 
-public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, TimePickerFragment.TimePickerFragmentListener {
+public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.TimePickerFragmentListener {
     private TextView mDateView;
     private Spinner mCustomTimeView;
     private TextView mNormalTimeView;
@@ -170,8 +166,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getChildFragmentManager();
-                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance(mHourMinute);
-                timePickerFragment.show(fragmentManager, "time");
+                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(mHourMinute);
+                hourMinutePickerFragment.show(fragmentManager, "time");
             }
         });
 

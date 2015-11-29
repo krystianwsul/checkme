@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,7 +18,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-public class CreateTaskActivity extends AppCompatActivity implements TimePickerFragment.TimePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
+public class CreateTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.TimePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
     private static final String INTENT_KEY = "parentTaskId";
 
     public static Intent getIntent(Context context) {

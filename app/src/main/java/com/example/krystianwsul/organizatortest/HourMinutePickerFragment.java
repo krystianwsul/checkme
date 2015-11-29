@@ -4,32 +4,27 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
 import android.widget.TimePicker;
 
-import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 11/13/2015.
- */
-public class TimePickerFragment extends DialogFragment {
-    public static TimePickerFragment newInstance(HourMinute hourMinute) {
+public class HourMinutePickerFragment extends DialogFragment {
+    public static HourMinutePickerFragment newInstance(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
 
-        TimePickerFragment timePickerFragment = new TimePickerFragment();
+        HourMinutePickerFragment hourMinutePickerFragment = new HourMinutePickerFragment();
 
         Bundle args = new Bundle();
         args.putInt("hour", hourMinute.getHour());
         args.putInt("minute", hourMinute.getMinute());
-        timePickerFragment.setArguments(args);
+        hourMinutePickerFragment.setArguments(args);
 
-        return timePickerFragment;
+        return hourMinutePickerFragment;
     }
 
     @Override
@@ -39,6 +34,7 @@ public class TimePickerFragment extends DialogFragment {
     }
 
     @Override
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
 

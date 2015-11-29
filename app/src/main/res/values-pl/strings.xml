@@ -9,4 +9,5 @@
     <string name="instances">Instancje</string>
     <string name="action_times">Czasy</string>
     <string name="none">Brak</string>
+    <string name="other">Inny</string>
 </resources>

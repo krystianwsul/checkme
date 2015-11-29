@@ -17,7 +17,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowCustomTimeActivity extends AppCompatActivity implements HourMinutePickerFragment.TimePickerFragmentListener {
+public class ShowCustomTimeActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener {
     private static final String INTENT_KEY = "customTimeId";
 
     public static Intent getIntent(CustomTime customTime, Context context) {
@@ -63,19 +63,20 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
 
         TextView timeSundayTime = (TextView) findViewById(timeId);
         timeSundayTime.setText(mCustomTime.getHourMinute(dayOfWeek).toString());
+        final ShowCustomTimeActivity showCustomTimeActivity = this;
         timeSundayTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editedDayOfWeek = dayOfWeek;
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(mCustomTime.getHourMinute(dayOfWeek));
+                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(showCustomTimeActivity, mCustomTime.getHourMinute(dayOfWeek));
                 hourMinutePickerFragment.show(fragmentManager, "tag");
             }
         });
         mTimes.put(dayOfWeek, timeSundayTime);
     }
 
-    public void onTimePickerFragmentResult(HourMinute hourMinute) {
+    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
         Assert.assertTrue(editedDayOfWeek != null);
         Assert.assertTrue(mTimes.containsKey(editedDayOfWeek));

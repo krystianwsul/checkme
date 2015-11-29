@@ -14,7 +14,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import junit.framework.Assert;
 
 public class HourMinutePickerFragment extends DialogFragment {
-    public static HourMinutePickerFragment newInstance(HourMinute hourMinute) {
+    public static HourMinutePickerFragment newInstance(HourMinutePickerFragmentListener hourMinutePickerFragmentListener, HourMinute hourMinute) {
+        Assert.assertTrue(hourMinutePickerFragmentListener != null);
         Assert.assertTrue(hourMinute != null);
 
         HourMinutePickerFragment hourMinutePickerFragment = new HourMinutePickerFragment();
@@ -30,7 +31,7 @@ public class HourMinutePickerFragment extends DialogFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Assert.assertTrue(activity instanceof TimePickerFragmentListener);
+        Assert.assertTrue(activity instanceof HourMinutePickerFragmentListener);
     }
 
     @Override
@@ -48,13 +49,13 @@ public class HourMinutePickerFragment extends DialogFragment {
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 HourMinute newHourMinute = new HourMinute(hourOfDay, minute);
 
-                TimePickerFragmentListener timePickerFragmentListener = (TimePickerFragmentListener) getActivity();
-                timePickerFragmentListener.onTimePickerFragmentResult(newHourMinute);
+                HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragmentListener) getActivity();
+                hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(newHourMinute);
             }
         }, hourMinute.getHour(), hourMinute.getMinute(), DateFormat.is24HourFormat(getActivity()));
     }
 
-    public interface TimePickerFragmentListener {
-        void onTimePickerFragmentResult(HourMinute hourMinute);
+    public interface HourMinutePickerFragmentListener {
+        void onHourMinutePickerFragmentResult(HourMinute hourMinute);
     }
 }

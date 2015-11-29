@@ -1,6 +1,5 @@
 package com.example.krystianwsul.organizatortest;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -21,31 +20,19 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.TimePickerFragmentListener {
+public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener {
     private TextView mDateView;
-    private Spinner mCustomTimeView;
-    private TextView mNormalTimeView;
-
-    private ArrayAdapter<SpinnerItem> mSpinnerAdapter;
-    private OtherSpinnerItem mOtherSpinnerItem;
 
     private Date mDate;
-    private CustomTime mCustomTime;
-    private HourMinute mHourMinute;
 
     private static String YEAR_KEY = "year";
     private static String MONTH_KEY = "month";
     private static String DAY_KEY = "day";
-    private static String CUSTOM_TIME_KEY = "customTimeId";
-    private static String HOUR_KEY = "hour";
-    private static String MINUTE_KEY = "minute";
-    private static String SELECTION_KEY = "selection";
+
+    private static String SCHEDULE_TIME_FRAGMENT_KEY = "scheduleTimeFragment";
 
     public static SingleScheduleFragment newInstance() {
-        SingleScheduleFragment fragment = new SingleScheduleFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
+        return new SingleScheduleFragment();
     }
 
     @Override
@@ -70,35 +57,16 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
             mDate = new Date(year, month, day);
 
-            int customTimeId = savedInstanceState.getInt(CUSTOM_TIME_KEY, -1);
-            int hour = savedInstanceState.getInt(HOUR_KEY, -1);
-            int minute = savedInstanceState.getInt(MINUTE_KEY, -1);
+            FragmentManager fragmentManager = getChildFragmentManager();
+            Assert.assertTrue(fragmentManager != null);
 
-            Assert.assertTrue((hour == -1) == (minute == -1));
-            Assert.assertTrue((hour == -1) != (customTimeId == -1));
+            Fragment fragment = fragmentManager.getFragment(savedInstanceState, SCHEDULE_TIME_FRAGMENT_KEY);
+            Assert.assertTrue(fragment != null);
 
-            if (customTimeId != -1) {
-                mCustomTime = CustomTimeFactory.getInstance().getCustomTime(customTimeId);
-                Assert.assertTrue(mCustomTime != null);
-
-                mHourMinute = null;
-            } else {
-                mCustomTime = null;
-                mHourMinute = new HourMinute(hour, minute);
-            }
-
-            int selection = savedInstanceState.getInt(SELECTION_KEY, -1);
-            Assert.assertTrue(selection != -1);
-            if (selection != 0)
-                initialCount = 2;
+            fragmentManager.beginTransaction().replace(R.id.single_schedule_time, fragment).commit();
         } else {
             mDate = Date.today();
-
-            mCustomTime = null;
-            mHourMinute = HourMinute.getNow();
         }
-
-        final int finalCount = initialCount;
 
         View view = getView();
         Assert.assertTrue(view != null);
@@ -115,64 +83,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             }
         });
 
-        ArrayList<SpinnerItem> spinnerTimes = new ArrayList<>();
-        for (CustomTime customTime : CustomTimeFactory.getInstance().getCustomTimes())
-            spinnerTimes.add(new TimeSpinnerItem(customTime));
-        mOtherSpinnerItem = new OtherSpinnerItem(getActivity());
-        spinnerTimes.add(mOtherSpinnerItem);
-
-        mSpinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerTimes);
-        mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        mCustomTimeView = (Spinner) view.findViewById(R.id.single_schedule_customtime);
-        mCustomTimeView.setAdapter(mSpinnerAdapter);
-
-        if (savedInstanceState == null)
-            mCustomTimeView.setSelection(mSpinnerAdapter.getPosition(mOtherSpinnerItem));
-
-        mCustomTimeView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private int mInitialCount = finalCount;
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                SpinnerItem spinnerItem = mSpinnerAdapter.getItem(position);
-                Assert.assertTrue(spinnerItem != null);
-
-                if (mInitialCount > 0) {
-                    mInitialCount--;
-                    return;
-                }
-
-                if (spinnerItem == mOtherSpinnerItem) {
-                    mCustomTime = null;
-                    mHourMinute = HourMinute.getNow();
-                } else {
-                    TimeSpinnerItem timeSpinnerItem = (TimeSpinnerItem) spinnerItem;
-                    mCustomTime = timeSpinnerItem.getCustomTime();
-                    mHourMinute = null;
-                }
-
-                updateTimeText();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        mNormalTimeView = (TextView) view.findViewById(R.id.single_schedule_normaltime);
-        mNormalTimeView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getChildFragmentManager();
-                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(mHourMinute);
-                hourMinutePickerFragment.show(fragmentManager, "time");
-            }
-        });
-
         updateDateText();
-        updateTimeText();
     }
 
     @Override
@@ -180,20 +91,17 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         super.onSaveInstanceState(outState);
 
         Assert.assertTrue(mDate != null);
-        Assert.assertTrue((mCustomTime == null) != (mHourMinute == null));
 
         outState.putInt(YEAR_KEY, mDate.getYear());
         outState.putInt(MONTH_KEY, mDate.getMonth());
         outState.putInt(DAY_KEY, mDate.getDay());
 
-        if (mCustomTime != null) {
-            outState.putInt(CUSTOM_TIME_KEY, mCustomTime.getId());
-        } else {
-            outState.putInt(HOUR_KEY, mHourMinute.getHour());
-            outState.putInt(MINUTE_KEY, mHourMinute.getMinute());
-        }
+        FragmentManager fragmentManager = getChildFragmentManager();
 
-        outState.putInt(SELECTION_KEY, mCustomTimeView.getSelectedItemPosition());
+        Fragment fragment = fragmentManager.findFragmentById(R.id.single_schedule_time);
+        Assert.assertTrue(fragment != null);
+
+        fragmentManager.putFragment(outState, SCHEDULE_TIME_FRAGMENT_KEY, fragment);
     }
 
     private void updateDateText() {
@@ -201,18 +109,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         Assert.assertTrue(mDateView != null);
 
         mDateView.setText(mDate.getDisplayText(getContext()));
-    }
-
-    private void updateTimeText() {
-        Assert.assertTrue(mNormalTimeView != null);
-        Assert.assertTrue((mCustomTime == null) != (mHourMinute == null));
-
-        if (mCustomTime != null) {
-            mNormalTimeView.setVisibility(View.INVISIBLE);
-        } else {
-            mNormalTimeView.setVisibility(View.VISIBLE);
-            mNormalTimeView.setText(mHourMinute.toString());
-        }
     }
 
     @Override
@@ -223,45 +119,12 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         updateDateText();
     }
 
-    @Override
-    public void onTimePickerFragmentResult(HourMinute hourMinute) {
+    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
 
-        mHourMinute = hourMinute;
-        updateTimeText();
-    }
+        ScheduleTimeFragment scheduleTimeFragment = (ScheduleTimeFragment) getChildFragmentManager().findFragmentById(R.id.single_schedule_time);
+        Assert.assertTrue(scheduleTimeFragment != null);
 
-    private interface SpinnerItem {
-
-    }
-
-    private class TimeSpinnerItem implements SpinnerItem {
-        private final CustomTime mCustomTime;
-
-        public TimeSpinnerItem(CustomTime customTime) {
-            Assert.assertTrue(customTime != null);
-            mCustomTime = customTime;
-        }
-
-        public String toString() {
-            return mCustomTime.toString();
-        }
-
-        public CustomTime getCustomTime() {
-            return mCustomTime;
-        }
-    }
-
-    private class OtherSpinnerItem implements SpinnerItem {
-        private final String mOther;
-
-        public OtherSpinnerItem(Context context) {
-            Assert.assertTrue(context != null);
-            mOther = context.getString(R.string.other);
-        }
-
-        public String toString() {
-            return mOther;
-        }
+        scheduleTimeFragment.onHourMinutePickerFragmentResult(hourMinute);
     }
 }

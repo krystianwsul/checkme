@@ -18,8 +18,9 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-public class CreateTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.TimePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
+public class CreateTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
     private static final String INTENT_KEY = "parentTaskId";
+    private static final String FRAGMENT_KEY = "fragment";
 
     public static Intent getIntent(Context context) {
         return new Intent(context, CreateTaskActivity.class);
@@ -49,7 +50,7 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
             FragmentManager fragmentManager = getSupportFragmentManager();
             Assert.assertTrue(fragmentManager != null);
 
-            Fragment fragment = fragmentManager.getFragment(savedInstanceState, "fragment");
+            Fragment fragment = fragmentManager.getFragment(savedInstanceState, FRAGMENT_KEY);
             Assert.assertTrue(fragment != null);
 
             fragmentManager.beginTransaction().replace(R.id.create_task_frame, fragment).commit();
@@ -87,10 +88,13 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Assert.assertTrue(fragmentManager != null);
+
+        Fragment fragment = fragmentManager.findFragmentById(R.id.create_task_frame);
         Assert.assertTrue(fragment != null);
 
-        getSupportFragmentManager().putFragment(outState, "fragment", fragment);
+        fragmentManager.putFragment(outState, FRAGMENT_KEY, fragment);
     }
 
     private Fragment createFragment(int position) {
@@ -130,12 +134,12 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
     }
 
     @Override
-    public void onTimePickerFragmentResult(HourMinute hourMinute) {
+    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
 
         SingleScheduleFragment singleScheduleFragment = (SingleScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
         Assert.assertTrue(singleScheduleFragment != null);
 
-        singleScheduleFragment.onTimePickerFragmentResult(hourMinute);
+        singleScheduleFragment.onHourMinutePickerFragmentResult(hourMinute);
     }
 }

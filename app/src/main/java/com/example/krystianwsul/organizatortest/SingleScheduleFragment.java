@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
@@ -23,8 +22,7 @@ import java.util.ArrayList;
 
 public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener {
     private TextView mDateView;
-    private Spinner mCustomTimeView;
-    private TextView mNormalTimeView;
+    private TimePickerView mTimePickerView;
 
     private ArrayAdapter<SpinnerItem> mSpinnerAdapter;
     private OtherSpinnerItem mOtherSpinnerItem;
@@ -123,13 +121,13 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         mSpinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, spinnerTimes);
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        mCustomTimeView = (Spinner) view.findViewById(R.id.single_schedule_customtime);
-        mCustomTimeView.setAdapter(mSpinnerAdapter);
+        mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
+        mTimePickerView.setAdapter(mSpinnerAdapter);
 
         if (savedInstanceState == null)
-            mCustomTimeView.setSelection(mSpinnerAdapter.getPosition(mOtherSpinnerItem));
+            mTimePickerView.setSelection(mSpinnerAdapter.getPosition(mOtherSpinnerItem));
 
-        mCustomTimeView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mTimePickerView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             private int mInitialCount = finalCount;
 
             @Override
@@ -160,10 +158,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             }
         });
 
-        mNormalTimeView = (TextView) view.findViewById(R.id.single_schedule_normaltime);
-
         final SingleScheduleFragment singleScheduleFragment = this;
-        mNormalTimeView.setOnClickListener(new View.OnClickListener() {
+        mTimePickerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getChildFragmentManager();
@@ -192,7 +188,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             outState.putInt(MINUTE_KEY, mHourMinute.getMinute());
         }
 
-        outState.putInt(SELECTION_KEY, mCustomTimeView.getSelectedItemPosition());
+        outState.putInt(SELECTION_KEY, mTimePickerView.getSelectedItemPosition());
     }
 
     private void updateDateText() {
@@ -203,14 +199,14 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     private void updateTimeText() {
-        Assert.assertTrue(mNormalTimeView != null);
+        Assert.assertTrue(mTimePickerView != null);
         Assert.assertTrue((mCustomTime == null) != (mHourMinute == null));
 
         if (mCustomTime != null) {
-            mNormalTimeView.setVisibility(View.INVISIBLE);
+            mTimePickerView.setHourMinuteVisibility(View.INVISIBLE);
         } else {
-            mNormalTimeView.setVisibility(View.VISIBLE);
-            mNormalTimeView.setText(mHourMinute.toString());
+            mTimePickerView.setHourMinuteVisibility(View.VISIBLE);
+            mTimePickerView.setText(mHourMinute.toString());
         }
     }
 

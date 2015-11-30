@@ -12,16 +12,10 @@
         android:layout_height="wrap_content"
         android:text="date" />
 
-    <Spinner
-        android:id="@+id/single_schedule_customtime"
+    <com.example.krystianwsul.organizatortest.TimePickerView
+        android:id="@+id/single_schedule_timepickerview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp" />
-
-    <TextView
-        android:id="@+id/single_schedule_normaltime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"/>
+        android:orientation="horizontal"/>
 
 </LinearLayout>

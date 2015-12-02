@@ -14,8 +14,9 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import junit.framework.Assert;
 
 public class HourMinutePickerFragment extends DialogFragment {
-    public static HourMinutePickerFragment newInstance(HourMinutePickerFragmentListener hourMinutePickerFragmentListener, HourMinute hourMinute) {
-        Assert.assertTrue(hourMinutePickerFragmentListener != null);
+    public static HourMinutePickerFragment newInstance(Activity activity, HourMinute hourMinute) {
+        Assert.assertTrue(activity != null);
+        Assert.assertTrue(activity instanceof HourMinutePickerFragmentListener);
         Assert.assertTrue(hourMinute != null);
 
         HourMinutePickerFragment hourMinutePickerFragment = new HourMinutePickerFragment();

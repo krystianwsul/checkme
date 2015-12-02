@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.dates;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.example.krystianwsul.organizatortest.R;
 
@@ -10,9 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-/**
- * Created by Krystian on 10/17/2015.
- */
 public class Date implements Comparable<Date> {
     private final Integer mYear;
     private final Integer mMonth;
@@ -48,9 +46,7 @@ public class Date implements Comparable<Date> {
         return mDay;
     }
 
-    public int compareTo(Date date) {
-        Assert.assertTrue(date != null);
-
+    public int compareTo(@NonNull Date date) {
         int yearComparison = mYear.compareTo(date.getYear());
         if (yearComparison != 0)
             return yearComparison;
@@ -71,6 +67,7 @@ public class Date implements Comparable<Date> {
         return DayOfWeek.getDayFromCalendar(new GregorianCalendar(mYear, mMonth - 1, mDay));
     }
 
+    @SuppressWarnings({"deprecation"})
     public String toString() {
         java.util.Date javaDate = new java.util.Date(mYear, mMonth - 1, mDay);
         return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(javaDate);
@@ -85,7 +82,7 @@ public class Date implements Comparable<Date> {
         Date yesterdayDate = new Date(yesterdayCalendar);
 
         Calendar tomorrowCalendar = Calendar.getInstance();
-        tomorrowCalendar.add(Calendar.DATE, -1);
+        tomorrowCalendar.add(Calendar.DATE, 1);
         Date tomorrowDate = new Date(tomorrowCalendar);
 
         if (this.equals(todayDate))

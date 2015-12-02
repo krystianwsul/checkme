@@ -3,23 +3,19 @@ package com.example.krystianwsul.organizatortest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.text.format.DateFormat;
 import android.widget.DatePicker;
-import android.widget.TimePicker;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 11/13/2015.
- */
 public class DatePickerFragment extends DialogFragment {
-    public static DatePickerFragment newInstance(Date date) {
+    public static DatePickerFragment newInstance(Activity activity, Date date) {
+        Assert.assertTrue(activity != null);
+        Assert.assertTrue(activity instanceof DatePickerFragmentListener);
         Assert.assertTrue(date != null);
 
         DatePickerFragment timePickerFragment = new DatePickerFragment();
@@ -40,6 +36,7 @@ public class DatePickerFragment extends DialogFragment {
     }
 
     @Override
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
 

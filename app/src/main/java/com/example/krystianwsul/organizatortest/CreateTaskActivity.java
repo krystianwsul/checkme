@@ -2,10 +2,9 @@ package com.example.krystianwsul.organizatortest;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -104,19 +103,19 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
     public void onDatePickerFragmentResult(Date date) {
         Assert.assertTrue(date != null);
 
-        SingleScheduleFragment singleScheduleFragment = (SingleScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
-        Assert.assertTrue(singleScheduleFragment != null);
+        DatePickerFragment.DatePickerFragmentListener datePickerFragmentListener = (DatePickerFragment.DatePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        Assert.assertTrue(datePickerFragmentListener != null);
 
-        singleScheduleFragment.onDatePickerFragmentResult(date);
+        datePickerFragmentListener.onDatePickerFragmentResult(date);
     }
 
     @Override
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
 
-        SingleScheduleFragment singleScheduleFragment = (SingleScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
-        Assert.assertTrue(singleScheduleFragment != null);
+        HourMinutePickerFragment.HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragment.HourMinutePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        Assert.assertTrue(hourMinutePickerFragmentListener != null);
 
-        singleScheduleFragment.onHourMinutePickerFragmentResult(hourMinute);
+        hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(hourMinute);
     }
 }

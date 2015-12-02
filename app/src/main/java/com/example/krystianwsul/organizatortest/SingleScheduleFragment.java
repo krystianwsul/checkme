@@ -63,7 +63,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getChildFragmentManager();
-                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(mDate);
+                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(getActivity(), mDate);
                 datePickerFragment.show(fragmentManager, "date");
             }
         });
@@ -72,7 +72,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
 
-        final SingleScheduleFragment singleScheduleFragment = this;
         mTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
             public void onCustomTimeSelected(CustomTime customTime) {
@@ -87,7 +86,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             @Override
             public void onHourMinuteClick() {
                 FragmentManager fragmentManager = getChildFragmentManager();
-                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(singleScheduleFragment, mTimePickerView.getHourMinute());
+                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(getActivity(), mTimePickerView.getHourMinute());
                 hourMinutePickerFragment.show(fragmentManager, "time");
             }
         });

@@ -19,6 +19,9 @@ import junit.framework.Assert;
 
 public class CreateTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
     private static final String INTENT_KEY = "parentTaskId";
+    private static final String POSITION_KEY = "position";
+
+    private Spinner mCreateTaskSpinner;
 
     public static Intent getIntent(Context context) {
         return new Intent(context, CreateTaskActivity.class);
@@ -44,26 +47,38 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
             Assert.assertTrue(parentTask != null);
         }
 
+        int count = 1;
+        if (savedInstanceState != null) {
+            int position = savedInstanceState.getInt(POSITION_KEY, -1);
+            Assert.assertTrue(position != -1);
+            if (position > 0)
+                count = 2;
+        }
+
+        final int finalCount = count;
+
         if (savedInstanceState == null)
             loadFragment(0);
 
-        Spinner createTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
+        mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        createTaskSpinner.setAdapter(adapter);
+        mCreateTaskSpinner.setAdapter(adapter);
 
-        createTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private boolean mFirst = true;
+        mCreateTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            private int mCount = finalCount;
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Assert.assertTrue(position >= 0);
                 Assert.assertTrue(position < 3);
 
-                if (!mFirst)
-                    loadFragment(position);
+                if (mCount > 0) {
+                    mCount--;
+                    return;
+                }
 
-                mFirst = false;
+                loadFragment(position);
             }
 
             @Override
@@ -117,5 +132,12 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
         Assert.assertTrue(hourMinutePickerFragmentListener != null);
 
         hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(hourMinute);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(POSITION_KEY, mCreateTaskSpinner.getSelectedItemPosition());
     }
 }

@@ -9,20 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizatortest.arrayadapters.GroupAdapter;
-import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 
-import java.util.ArrayList;
+import junit.framework.Assert;
 
-/**
- * Created by Krystian on 10/31/2015.
- */
 public class GroupListFragment extends Fragment {
     private RecyclerView mGroupList;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,7 +24,9 @@ public class GroupListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mGroupList = (RecyclerView) getView().findViewById(R.id.groups_list);
+        View view = getView();
+        Assert.assertTrue(view != null);
+        mGroupList = (RecyclerView) view.findViewById(R.id.groups_list);
         mGroupList.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 

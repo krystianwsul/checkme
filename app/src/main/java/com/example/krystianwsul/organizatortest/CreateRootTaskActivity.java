@@ -46,9 +46,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         if (savedInstanceState == null)
             loadFragment(0);
 
-        final EditText createTaskName = (EditText) findViewById(R.id.create_task_name);
+        final EditText createTaskName = (EditText) findViewById(R.id.create_root_task_name);
 
-        Button createTaskSave = (Button) findViewById(R.id.create_task_save);
+        Button createTaskSave = (Button) findViewById(R.id.create_root_task_save);
         createTaskSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,7 +60,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                     return;
                 }
 
-                ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+                ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
                 Assert.assertTrue(scheduleFragment != null);
 
                 scheduleFragment.createRootTask(name);
@@ -69,7 +69,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             }
         });
 
-        mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
+        mCreateTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCreateTaskSpinner.setAdapter(adapter);
@@ -120,14 +120,14 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         Fragment fragment = createFragment(position);
         Assert.assertTrue(fragment != null);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.create_task_frame, fragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commit();
     }
 
     @Override
     public void onDatePickerFragmentResult(Date date) {
         Assert.assertTrue(date != null);
 
-        DatePickerFragment.DatePickerFragmentListener datePickerFragmentListener = (DatePickerFragment.DatePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        DatePickerFragment.DatePickerFragmentListener datePickerFragmentListener = (DatePickerFragment.DatePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
         Assert.assertTrue(datePickerFragmentListener != null);
 
         datePickerFragmentListener.onDatePickerFragmentResult(date);
@@ -137,7 +137,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
 
-        HourMinutePickerFragment.HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragment.HourMinutePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        HourMinutePickerFragment.HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragment.HourMinutePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
         Assert.assertTrue(hourMinutePickerFragmentListener != null);
 
         hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(hourMinute);

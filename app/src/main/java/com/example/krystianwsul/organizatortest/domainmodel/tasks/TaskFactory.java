@@ -154,4 +154,20 @@ public class TaskFactory {
 
         return rootTask;
     }
+
+    public ChildTask createChildTask(Task parentTask, String name) {
+        Assert.assertTrue(parentTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(parentTask, name);
+        Assert.assertTrue(taskRecord != null);
+
+        ChildTask childTask = new ChildTask(taskRecord, parentTask);
+
+        parentTask.addChildTask(childTask);
+
+        mTasks.put(childTask.getId(), childTask);
+
+        return childTask;
+    }
 }

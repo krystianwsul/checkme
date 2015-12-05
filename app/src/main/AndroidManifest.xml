@@ -34,6 +34,8 @@
         </activity>
         <activity android:name=".CreateRootTaskActivity" >
         </activity>
+        <activity android:name=".CreateChildTaskActivity" >
+        </activity>
     </application>
 
 </manifest>

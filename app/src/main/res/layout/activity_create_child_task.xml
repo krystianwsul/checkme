@@ -8,32 +8,20 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".CreateRootTaskActivity">
+    tools:context=".CreateChildTaskActivity">
 
     <Button
-        android:id="@+id/create_root_task_save"
+        android:id="@+id/create_child_task_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:text="@string/save"/>
 
     <EditText
-        android:id="@+id/create_root_task_name"
+        android:id="@+id/create_child_task_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/create_root_task_save"
+        android:layout_below="@id/create_child_task_save"
         android:singleLine="true" />
-
-    <Spinner
-        android:id="@+id/create_root_task_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/create_root_task_name" />
-    
-    <FrameLayout
-        android:id="@+id/create_root_task_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/create_root_task_spinner" />
 
 </RelativeLayout>

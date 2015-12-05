@@ -69,8 +69,7 @@ public class ShowTaskActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startActivity(CreateRootTaskActivity.getIntent(activity, mTask));
-                throw new UnsupportedOperationException();
+                startActivity(CreateChildTaskActivity.getIntent(activity, mTask));
             }
         });
     }

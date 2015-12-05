@@ -1,21 +1,22 @@
 package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
-import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import android.text.TextUtils;
+
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.ScheduleFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
 import junit.framework.Assert;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 11/5/2015.
- */
 public class TaskFactory {
     private static TaskFactory sInstance;
 
@@ -54,10 +55,10 @@ public class TaskFactory {
     private void initializeChildren(Task task) {
         ArrayList<Integer> childTaskIds = PersistenceManger.getInstance().getTaskIds(task.getId());
         for (Integer childTaskId : childTaskIds)
-            task.addChildTask(createChildTask(task, childTaskId));
+            task.addChildTask(loadChildTask(task, childTaskId));
     }
 
-    private ChildTask createChildTask(Task parentTask, int childTaskId) {
+    private ChildTask loadChildTask(Task parentTask, int childTaskId) {
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
         TaskRecord taskRecord = persistenceManger.getTaskRecord(childTaskId);
 
@@ -76,5 +77,29 @@ public class TaskFactory {
 
     public Task getTask(int taskId) {
         return mTasks.get(taskId);
+    }
+
+    public RootTask createSingleScheduleTask(String name, Date date, CustomTime customTime, HourMinute hourMinute) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(date != null);
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(null, name);
+        Assert.assertTrue(taskRecord != null);
+
+        RootTask rootTask = new RootTask(taskRecord);
+
+        SingleSchedule singleSchedule = ScheduleFactory.getInstance().createSingleSchedule(rootTask, date, customTime, hourMinute);
+        Assert.assertTrue(singleSchedule != null);
+
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        schedules.add(singleSchedule);
+
+        rootTask.setSchedules(schedules);
+
+        mRootTasks.put(rootTask.getId(), rootTask);
+        mTasks.put(rootTask.getId(), rootTask);
+
+        return rootTask;
     }
 }

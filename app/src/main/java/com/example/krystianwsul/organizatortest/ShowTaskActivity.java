@@ -1,11 +1,10 @@
 package com.example.krystianwsul.organizatortest;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
@@ -70,7 +69,8 @@ public class ShowTaskActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateTaskActivity.getIntent(activity, mTask));
+                //startActivity(CreateRootTaskActivity.getIntent(activity, mTask));
+                throw new UnsupportedOperationException();
             }
         });
     }
@@ -82,6 +82,6 @@ public class ShowTaskActivity extends AppCompatActivity {
         if (mTask.getChildTasks().isEmpty())
             mShowTaskList.setVisibility(View.GONE);
         else
-            mShowTaskList.setAdapter(new TaskAdapter(this, new ArrayList(mTask.getChildTasks())));
+            mShowTaskList.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks())));
     }
 }

@@ -1,15 +1,15 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-/**
- * Created by Krystian on 11/14/2015.
- */
 public class ScheduleFactory {
     private static ScheduleFactory sInstance;
 
@@ -54,5 +54,16 @@ public class ScheduleFactory {
         }
 
         throw new IllegalArgumentException("no schedule for rootTask == " + rootTask);
+    }
+
+    public SingleSchedule createSingleSchedule(RootTask rootTask, Date date, CustomTime customTime, HourMinute hourMinute) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(date != null);
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        SingleSchedule singleSchedule = SingleScheduleFactory.getInstance().createSingleSchedule(rootTask, date, customTime, hourMinute);
+        Assert.assertTrue(singleSchedule != null);
+
+        return singleSchedule;
     }
 }

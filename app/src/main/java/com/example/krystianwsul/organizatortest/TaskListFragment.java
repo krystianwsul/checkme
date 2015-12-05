@@ -1,6 +1,5 @@
 package com.example.krystianwsul.organizatortest;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -14,13 +13,12 @@ import com.example.krystianwsul.organizatortest.arrayadapters.TaskAdapter;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
+import junit.framework.Assert;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-/**
- * Created by Krystian on 10/31/2015.
- */
 public class TaskListFragment extends Fragment {
     private ListView mTasksList;
 
@@ -32,7 +30,10 @@ public class TaskListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mTasksList = (ListView) getView().findViewById(R.id.tasks_list);
+        View view = getView();
+        Assert.assertTrue(view != null);
+
+        mTasksList = (ListView) view.findViewById(R.id.tasks_list);
 
         mTasksList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -46,7 +47,7 @@ public class TaskListFragment extends Fragment {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateTaskActivity.getIntent(getContext()));
+                startActivity(CreateRootTaskActivity.getIntent(getContext()));
             }
         });
     }

@@ -2,18 +2,18 @@ package com.example.krystianwsul.organizatortest.persistencemodel;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 10/27/2015.
- */
 public class PersistenceManger {
     private static PersistenceManger mInstance;
 
@@ -146,7 +146,7 @@ public class PersistenceManger {
     }
 
     public ArrayList<Integer> getTaskIds(Integer parentTaskId) {
-        ArrayList<Integer> taskIds = new ArrayList();
+        ArrayList<Integer> taskIds = new ArrayList<>();
         for (TaskRecord taskRecord : mTaskRecords.values()) {
             Integer thisParentTaskId = taskRecord.getParentTaskId();
             if ((thisParentTaskId == null && parentTaskId == null) || (thisParentTaskId != null && parentTaskId != null && thisParentTaskId.equals(parentTaskId)))
@@ -314,5 +314,33 @@ public class PersistenceManger {
         InstanceRecord instanceRecord = new InstanceRecord(id, taskId, done, null, null, weeklyRepetitionId);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
+    }
+
+    public TaskRecord createTaskRecord(Task parentTask, String name) {
+        Assert.assertTrue(name != null);
+
+        int taskId = Collections.max(mTaskRecords.keySet()) + 1;
+
+        Integer parentId = (parentTask != null ? parentTask.getId() : null);
+
+        TaskRecord taskRecord = new TaskRecord(taskId, parentId, name);
+        mTaskRecords.put(taskRecord.getId(), taskRecord);
+
+        return taskRecord;
+    }
+
+    public SingleScheduleRecord createSingleScheduleRecord(int rootTaskId, Date date, CustomTime customTime, HourMinute hourMinute) {
+        Assert.assertTrue(date != null);
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+
+        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
+        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+
+        SingleScheduleRecord singleScheduleRecord = new SingleScheduleRecord(rootTaskId, date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
+        mSingleScheduleRecords.put(singleScheduleRecord.getRootTaskId(), singleScheduleRecord);
+
+        return singleScheduleRecord;
     }
 }

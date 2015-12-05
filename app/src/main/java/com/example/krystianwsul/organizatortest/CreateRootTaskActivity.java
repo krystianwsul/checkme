@@ -15,41 +15,23 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-public class CreateTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
-    private static final String INTENT_KEY = "parentTaskId";
+public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
     private static final String POSITION_KEY = "position";
 
     private Spinner mCreateTaskSpinner;
 
     public static Intent getIntent(Context context) {
-        return new Intent(context, CreateTaskActivity.class);
-    }
-
-    public static Intent getIntent(Context context, Task task) {
-        Intent intent = new Intent(context, CreateTaskActivity.class);
-        intent.putExtra(INTENT_KEY, task.getId());
-        return intent;
+        return new Intent(context, CreateRootTaskActivity.class);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_task);
-
-        Integer parentTaskId;
-        if (getIntent().hasExtra(INTENT_KEY)) {
-            parentTaskId = getIntent().getIntExtra(INTENT_KEY, -1);
-            Assert.assertTrue(parentTaskId != -1);
-
-            Task parentTask = TaskFactory.getInstance().getTask(parentTaskId);
-            Assert.assertTrue(parentTask != null);
-        }
+        setContentView(R.layout.activity_create_root_task);
 
         int count = 1;
         if (savedInstanceState != null) {
@@ -81,6 +63,9 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
                 ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
                 Assert.assertTrue(scheduleFragment != null);
 
+                scheduleFragment.createRootTask(name);
+
+                finish();
             }
         });
 

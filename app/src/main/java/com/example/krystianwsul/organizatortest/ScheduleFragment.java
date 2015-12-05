@@ -1,7 +1,7 @@
 package com.example.krystianwsul.organizatortest;
 
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 
 public interface ScheduleFragment {
-    Schedule getSchedule();
+    RootTask createRootTask(String name);
 }

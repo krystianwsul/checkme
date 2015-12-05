@@ -37,7 +37,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        int initialCount = 1;
         if (savedInstanceState != null) {
 
             int year = savedInstanceState.getInt(YEAR_KEY, -1);

@@ -25,12 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DailyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener {
-    private int mPickerTimeEntryPosition = -1;
+    private int mHourMinutePickerPosition = -1;
 
     private TimeEntryAdapter mTimeEntryAdapter;
 
     private static final String TIME_ENTRY_KEY = "timeEntries";
-    private static final String PICKER_POSITION_KEY = "pickerPosition";
+    private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
 
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
@@ -54,11 +54,11 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             List<TimeEntry> timeEntries = savedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
 
-            mPickerTimeEntryPosition = savedInstanceState.getInt(PICKER_POSITION_KEY, -2);
-            Assert.assertTrue(mPickerTimeEntryPosition != -2);
+            mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
+            Assert.assertTrue(mHourMinutePickerPosition != -2);
         } else {
             mTimeEntryAdapter = new TimeEntryAdapter(getContext());
-            mPickerTimeEntryPosition = -1;
+            mHourMinutePickerPosition = -1;
         }
         dailyScheduleTimes.setAdapter(mTimeEntryAdapter);
 
@@ -75,15 +75,15 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
-        Assert.assertTrue(mPickerTimeEntryPosition != -1);
+        Assert.assertTrue(mHourMinutePickerPosition != -1);
 
-        TimeEntry timeEntry = mTimeEntryAdapter.getTimeEntry(mPickerTimeEntryPosition);
+        TimeEntry timeEntry = mTimeEntryAdapter.getTimeEntry(mHourMinutePickerPosition);
         Assert.assertTrue(timeEntry != null);
 
         timeEntry.setHourMinute(hourMinute);
-        mTimeEntryAdapter.notifyItemChanged(mPickerTimeEntryPosition);
+        mTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
-        mPickerTimeEntryPosition = -1;
+        mHourMinutePickerPosition = -1;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         super.onSaveInstanceState(outState);
 
         outState.putParcelableArrayList(TIME_ENTRY_KEY, mTimeEntryAdapter.getTimeEntries());
-        outState.putInt(PICKER_POSITION_KEY, mPickerTimeEntryPosition);
+        outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {
@@ -137,6 +137,14 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             final TimeEntry timeEntry = mTimeEntries.get(position);
             Assert.assertTrue(timeEntry != null);
 
+            if (timeEntry.getCustomTime() != null) {
+                Assert.assertTrue(timeEntry.getHourMinute() == null);
+                timeHolder.mDailyScheduleTime.setCustomTime(timeEntry.getCustomTime());
+            } else {
+                Assert.assertTrue(timeEntry.getHourMinute() != null);
+                timeHolder.mDailyScheduleTime.setHourMinute(timeEntry.getHourMinute());
+            }
+
             timeHolder.mDailyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
                 @Override
                 public void onCustomTimeSelected(CustomTime customTime) {
@@ -153,14 +161,6 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
                     timeHolder.onHourMinuteClick();
                 }
             });
-
-            if (timeEntry.getCustomTime() != null) {
-                Assert.assertTrue(timeEntry.getHourMinute() == null);
-                timeHolder.mDailyScheduleTime.setCustomTime(timeEntry.getCustomTime());
-            } else {
-                Assert.assertTrue(timeEntry.getHourMinute() != null);
-                timeHolder.mDailyScheduleTime.setHourMinute(timeEntry.getHourMinute());
-            }
 
             timeHolder.mDailyScheduleImage.setVisibility(timeEntry.getShowDelete() ? View.VISIBLE : View.INVISIBLE);
 
@@ -225,8 +225,8 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             }
 
             public void onHourMinuteClick() {
-                mPickerTimeEntryPosition = getAdapterPosition();
-                TimeEntry timeEntry = mTimeEntries.get(mPickerTimeEntryPosition);
+                mHourMinutePickerPosition = getAdapterPosition();
+                TimeEntry timeEntry = mTimeEntries.get(mHourMinutePickerPosition);
                 Assert.assertTrue(timeEntry != null);
 
                 FragmentManager fragmentManager = getChildFragmentManager();

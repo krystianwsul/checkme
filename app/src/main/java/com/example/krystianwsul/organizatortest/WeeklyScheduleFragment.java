@@ -14,7 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -24,13 +26,15 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeeklyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener {
-    private int mPickerDateTimeEntryPosition = -1;
+public class WeeklyScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener {
+    private int mHourMinutePickerPosition = -1;
+    private int mDatePickerPosition = -1;
 
     private DateTimeEntryAdapter mDateTimeEntryAdapter;
 
     private static final String DATE_TIME_ENTRY_KEY = "dateTimeEntries";
-    private static final String PICKER_POSITION_KEY = "pickerPosition";
+    private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
+    private static final String DATE_PICKER_POSITION_KEY = "datePickerPosition";
 
     public static WeeklyScheduleFragment newInstance() {
         return new WeeklyScheduleFragment();
@@ -54,11 +58,15 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             List<DateTimeEntry> dateTimeEntries = savedInstanceState.getParcelableArrayList(DATE_TIME_ENTRY_KEY);
             mDateTimeEntryAdapter = new DateTimeEntryAdapter(getContext(), dateTimeEntries);
 
-            mPickerDateTimeEntryPosition = savedInstanceState.getInt(PICKER_POSITION_KEY, -2);
-            Assert.assertTrue(mPickerDateTimeEntryPosition != -2);
+            mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
+            Assert.assertTrue(mHourMinutePickerPosition != -2);
+
+            mDatePickerPosition = savedInstanceState.getInt(DATE_PICKER_POSITION_KEY, -2);
+            Assert.assertTrue(mDatePickerPosition != -2);
         } else {
             mDateTimeEntryAdapter = new DateTimeEntryAdapter(getContext());
-            mPickerDateTimeEntryPosition = -1;
+            mHourMinutePickerPosition = -1;
+            mDatePickerPosition = -1;
         }
         dailyScheduleTimes.setAdapter(mDateTimeEntryAdapter);
 
@@ -73,16 +81,28 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         });
     }
 
+    public void onDatePickerFragmentResult(Date date) {
+        Assert.assertTrue(date != null);
+        Assert.assertTrue(mDatePickerPosition != -1);
+
+        DateTimeEntry dateTimeEntry = mDateTimeEntryAdapter.getDateTimeEntry(mDatePickerPosition);
+
+        dateTimeEntry.setDate(date);
+        mDateTimeEntryAdapter.notifyItemChanged(mDatePickerPosition);
+
+        mDatePickerPosition = -1;
+    }
+
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
-        Assert.assertTrue(mPickerDateTimeEntryPosition != -1);
+        Assert.assertTrue(mHourMinutePickerPosition != -1);
 
-        DateTimeEntry dateTimeEntry = mDateTimeEntryAdapter.getDateTimeEntry(mPickerDateTimeEntryPosition);
+        DateTimeEntry dateTimeEntry = mDateTimeEntryAdapter.getDateTimeEntry(mHourMinutePickerPosition);
 
         dateTimeEntry.setHourMinute(hourMinute);
-        mDateTimeEntryAdapter.notifyItemChanged(mPickerDateTimeEntryPosition);
+        mDateTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
-        mPickerDateTimeEntryPosition = -1;
+        mHourMinutePickerPosition = -1;
     }
 
     @Override
@@ -90,7 +110,8 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         super.onSaveInstanceState(outState);
 
         outState.putParcelableArrayList(DATE_TIME_ENTRY_KEY, mDateTimeEntryAdapter.getDateTimeEntries());
-        outState.putInt(PICKER_POSITION_KEY, mPickerDateTimeEntryPosition);
+        outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
+        outState.putInt(DATE_PICKER_POSITION_KEY, mDatePickerPosition);
     }
 
     private class DateTimeEntryAdapter extends RecyclerView.Adapter<DateTimeEntryAdapter.DateTimeHolder> {
@@ -102,7 +123,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
             mContext = context;
             mDateTimeEntries = new ArrayList<>();
-            mDateTimeEntries.add(new DateTimeEntry(HourMinute.getNow(), false));
+            mDateTimeEntries.add(new DateTimeEntry(Date.today(), HourMinute.getNow(), false));
         }
 
         public DateTimeEntryAdapter(Context context, List<DateTimeEntry> dateTimeEntries) {
@@ -125,16 +146,34 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         public DateTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             RelativeLayout weeklyScheduleRow = (RelativeLayout) LayoutInflater.from(mContext).inflate(R.layout.weekly_schedule_row, parent, false);
 
+            TextView weeklyScheduleDate = (TextView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_date);
             TimePickerView weeklyScheduleTime = (TimePickerView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_time);
             ImageView weeklyScheduleImage = (ImageView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_image);
 
-            return new DateTimeHolder(weeklyScheduleRow, weeklyScheduleTime, weeklyScheduleImage);
+            return new DateTimeHolder(weeklyScheduleRow, weeklyScheduleDate, weeklyScheduleTime, weeklyScheduleImage);
         }
 
         @Override
         public void onBindViewHolder(final DateTimeHolder dateTimeHolder, int position) {
             final DateTimeEntry dateTimeEntry = mDateTimeEntries.get(position);
             Assert.assertTrue(dateTimeEntry != null);
+
+            dateTimeHolder.mWeeklyScheduleDate.setText(dateTimeEntry.getDate().getDisplayText(getContext()));
+
+            dateTimeHolder.mWeeklyScheduleDate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dateTimeHolder.onDateClick();
+                }
+            });
+
+            if (dateTimeEntry.getCustomTime() != null) {
+                Assert.assertTrue(dateTimeEntry.getHourMinute() == null);
+                dateTimeHolder.mWeeklyScheduleTime.setCustomTime(dateTimeEntry.getCustomTime());
+            } else {
+                Assert.assertTrue(dateTimeEntry.getHourMinute() != null);
+                dateTimeHolder.mWeeklyScheduleTime.setHourMinute(dateTimeEntry.getHourMinute());
+            }
 
             dateTimeHolder.mWeeklyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
                 @Override
@@ -152,14 +191,6 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
                     dateTimeHolder.onHourMinuteClick();
                 }
             });
-
-            if (dateTimeEntry.getCustomTime() != null) {
-                Assert.assertTrue(dateTimeEntry.getHourMinute() == null);
-                dateTimeHolder.mWeeklyScheduleTime.setCustomTime(dateTimeEntry.getCustomTime());
-            } else {
-                Assert.assertTrue(dateTimeEntry.getHourMinute() != null);
-                dateTimeHolder.mWeeklyScheduleTime.setHourMinute(dateTimeEntry.getHourMinute());
-            }
 
             dateTimeHolder.mWeeklyScheduleImage.setVisibility(dateTimeEntry.getShowDelete() ? View.VISIBLE : View.INVISIBLE);
 
@@ -191,7 +222,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
                 notifyItemChanged(0);
             }
 
-            DateTimeEntry dateTimeEntry = new DateTimeEntry(HourMinute.getNow(), true);
+            DateTimeEntry dateTimeEntry = new DateTimeEntry(Date.today(), HourMinute.getNow(), true);
             mDateTimeEntries.add(position, dateTimeEntry);
             notifyItemInserted(position);
         }
@@ -209,23 +240,36 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         public class DateTimeHolder extends RecyclerView.ViewHolder {
             public final RelativeLayout mWeeklyScheduleRow;
+            public final TextView mWeeklyScheduleDate;
             public final TimePickerView mWeeklyScheduleTime;
             public final ImageView mWeeklyScheduleImage;
 
-            public DateTimeHolder(RelativeLayout weeklyScheduleRow, TimePickerView weeklyScheduleTime, ImageView weeklyScheduleImage) {
+            public DateTimeHolder(RelativeLayout weeklyScheduleRow, TextView weeklyScheduleDate, TimePickerView weeklyScheduleTime, ImageView weeklyScheduleImage) {
                 super(weeklyScheduleRow);
 
+                Assert.assertTrue(weeklyScheduleDate != null);
                 Assert.assertTrue(weeklyScheduleTime != null);
                 Assert.assertTrue(weeklyScheduleImage != null);
 
+                mWeeklyScheduleDate = weeklyScheduleDate;
                 mWeeklyScheduleRow = weeklyScheduleRow;
                 mWeeklyScheduleTime = weeklyScheduleTime;
                 mWeeklyScheduleImage = weeklyScheduleImage;
             }
 
+            public void onDateClick() {
+                mDatePickerPosition = getAdapterPosition();
+                DateTimeEntry dateTimeEntry = mDateTimeEntries.get(mDatePickerPosition);
+                Assert.assertTrue(dateTimeEntry != null);
+
+                FragmentManager fragmentManager = getChildFragmentManager();
+                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(getActivity(), dateTimeEntry.getDate());
+                datePickerFragment.show(fragmentManager, "date");
+            }
+
             public void onHourMinuteClick() {
-                mPickerDateTimeEntryPosition = getAdapterPosition();
-                DateTimeEntry dateTimeEntry = mDateTimeEntries.get(mPickerDateTimeEntryPosition);
+                mHourMinutePickerPosition = getAdapterPosition();
+                DateTimeEntry dateTimeEntry = mDateTimeEntries.get(mHourMinutePickerPosition);
                 Assert.assertTrue(dateTimeEntry != null);
 
                 FragmentManager fragmentManager = getChildFragmentManager();
@@ -242,22 +286,31 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     }
 
     private static class DateTimeEntry implements Parcelable {
+        private Date mDate;
         private CustomTime mCustomTime;
         private HourMinute mHourMinute;
         private boolean mShowDelete = false;
 
-        public DateTimeEntry(CustomTime customTime, boolean showDelete) {
+        public DateTimeEntry(Date date, CustomTime customTime, boolean showDelete) {
+            Assert.assertTrue(date != null);
             Assert.assertTrue(customTime != null);
 
+            mDate = date;
             setCustomTime(customTime);
             mShowDelete = showDelete;
         }
 
-        public DateTimeEntry(HourMinute hourMinute, boolean showDelete) {
+        public DateTimeEntry(Date date, HourMinute hourMinute, boolean showDelete) {
+            Assert.assertTrue(date != null);
             Assert.assertTrue(hourMinute != null);
 
+            mDate = date;
             setHourMinute(hourMinute);
             mShowDelete = showDelete;
+        }
+
+        public Date getDate() {
+            return mDate;
         }
 
         public CustomTime getCustomTime() {
@@ -266,6 +319,11 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         public HourMinute getHourMinute() {
             return mHourMinute;
+        }
+
+        public void setDate(Date date) {
+            Assert.assertTrue(date != null);
+            mDate = date;
         }
 
         public void setCustomTime(CustomTime customTime) {
@@ -291,6 +349,10 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         public void writeToParcel(Parcel out, int flags) {
             Assert.assertTrue((mCustomTime == null) != (mHourMinute == null));
 
+            out.writeInt(mDate.getYear());
+            out.writeInt(mDate.getMonth());
+            out.writeInt(mDate.getDay());
+
             if (mCustomTime != null)
                 out.writeInt(mCustomTime.getId());
             else
@@ -309,6 +371,9 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         public static final Parcelable.Creator<DateTimeEntry> CREATOR = new Parcelable.Creator<DateTimeEntry>() {
             public DateTimeEntry createFromParcel(Parcel in) {
+                int year = in.readInt();
+                int month = in.readInt();
+                int day = in.readInt();
                 int customTimeId = in.readInt();
                 int hour = in.readInt();
                 int minute = in.readInt();
@@ -319,10 +384,12 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
                 Assert.assertTrue((hour == -1) == (minute == -1));
                 Assert.assertTrue((hour == -1) != (customTimeId == -1));
 
+                Date date = new Date(year, month, day);
+
                 if (customTimeId != -1)
-                    return new DateTimeEntry(CustomTimeFactory.getInstance().getCustomTime(customTimeId), showDelete);
+                    return new DateTimeEntry(date, CustomTimeFactory.getInstance().getCustomTime(customTimeId), showDelete);
                 else
-                    return new DateTimeEntry(new HourMinute(hour, minute), showDelete);
+                    return new DateTimeEntry(date, new HourMinute(hour, minute), showDelete);
             }
 
             public DateTimeEntry[] newArray(int size) {

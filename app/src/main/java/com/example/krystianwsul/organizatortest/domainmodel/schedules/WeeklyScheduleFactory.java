@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
+import com.example.krystianwsul.organizatortest.WeeklyScheduleFragment;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
@@ -9,9 +10,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 11/14/2015.
- */
 public class WeeklyScheduleFactory {
     private static WeeklyScheduleFactory sInstance;
 
@@ -28,12 +26,12 @@ public class WeeklyScheduleFactory {
     public WeeklySchedule getWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
         if (mWeeklySchedules.containsKey(weeklyScheduleId))
-            return mWeeklySchedules.get(rootTask);
+            return mWeeklySchedules.get(weeklyScheduleId);
         else
-            return createWeeklySchedule(weeklyScheduleId, rootTask);
+            return loadWeeklySchedule(weeklyScheduleId, rootTask);
     }
 
-    private WeeklySchedule createWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
+    private WeeklySchedule loadWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
@@ -51,6 +49,25 @@ public class WeeklyScheduleFactory {
             weeklySchedule.addWeeklyScheduleDayTime(WeeklyScheduleDayTimeFactory.getInstance().getWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule));
 
         mWeeklySchedules.put(weeklyScheduleId, weeklySchedule);
+        return weeklySchedule;
+    }
+
+    public WeeklySchedule createWeeklySchedule(RootTask rootTask, ArrayList<WeeklyScheduleFragment.DayOfWeekTimeEntry> dayOfWeekTimeEntries) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(dayOfWeekTimeEntries != null);
+        Assert.assertTrue(!dayOfWeekTimeEntries.isEmpty());
+
+        WeeklyScheduleRecord weeklyScheduleRecord = PersistenceManger.getInstance().createWeeklyScheduleRecord(rootTask.getId());
+        Assert.assertTrue(weeklyScheduleRecord != null);
+
+        WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleRecord, rootTask);
+
+        WeeklyScheduleDayTimeFactory weeklyScheduleDayTimeFactory = WeeklyScheduleDayTimeFactory.getInstance();
+
+        for (WeeklyScheduleFragment.DayOfWeekTimeEntry dayOfWeekTimeEntry : dayOfWeekTimeEntries)
+            weeklySchedule.addWeeklyScheduleDayTime(weeklyScheduleDayTimeFactory.createWeeklyScheduleDayTime(weeklySchedule, dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getCustomTime(), dayOfWeekTimeEntry.getHourMinute()));
+
+        mWeeklySchedules.put(weeklySchedule.getId(), weeklySchedule);
         return weeklySchedule;
     }
 }

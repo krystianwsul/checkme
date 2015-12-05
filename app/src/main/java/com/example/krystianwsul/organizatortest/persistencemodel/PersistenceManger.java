@@ -4,6 +4,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailySchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -369,5 +370,31 @@ public class PersistenceManger {
         DailyScheduleTimeRecord dailyScheduleTimeRecord = new DailyScheduleTimeRecord(dailyScheduleTimeRecordId, dailySchedule.getId(), customTimeId, hour, minute);
         mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
         return dailyScheduleTimeRecord;
+    }
+
+    public WeeklyScheduleRecord createWeeklyScheduleRecord(int rootTaskId) {
+        int weeklyScheduleId = Collections.max(mWeeklyScheduleRecords.keySet()) + 1;
+
+        WeeklyScheduleRecord weeklyScheduleRecord = new WeeklyScheduleRecord(weeklyScheduleId, rootTaskId, TimeStamp.getNow().getLong(), null);
+        mWeeklyScheduleRecords.put(weeklyScheduleRecord.getId(), weeklyScheduleRecord);
+
+        return weeklyScheduleRecord;
+    }
+
+    public WeeklyScheduleDayTimeRecord createWeeklyScheduleDayTimeRecord(WeeklySchedule weeklySchedule, DayOfWeek dayOfWeek, CustomTime customTime, HourMinute hourMinute) {
+        Assert.assertTrue(weeklySchedule != null);
+        Assert.assertTrue(dayOfWeek != null);
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        int weeklyScheduleDayTimeRecordId = Collections.max(mWeeklyScheduleDayTimeRecords.keySet()) + 1;
+
+        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+
+        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
+        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+
+        WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord = new WeeklyScheduleDayTimeRecord(weeklyScheduleDayTimeRecordId, weeklySchedule.getId(), dayOfWeek.ordinal(), customTimeId, hour, minute);
+        mWeeklyScheduleDayTimeRecords.put(weeklyScheduleDayTimeRecord.getId(), weeklyScheduleDayTimeRecord);
+        return weeklyScheduleDayTimeRecord;
     }
 }

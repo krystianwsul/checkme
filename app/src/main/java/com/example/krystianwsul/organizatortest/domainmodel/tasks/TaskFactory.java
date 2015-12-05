@@ -3,11 +3,13 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.DailyScheduleFragment;
+import com.example.krystianwsul.organizatortest.WeeklyScheduleFragment;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.ScheduleFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -120,6 +122,30 @@ public class TaskFactory {
 
         ArrayList<Schedule> schedules = new ArrayList<>();
         schedules.add(dailySchedule);
+
+        rootTask.setSchedules(schedules);
+
+        mRootTasks.put(rootTask.getId(), rootTask);
+        mTasks.put(rootTask.getId(), rootTask);
+
+        return rootTask;
+    }
+
+    public RootTask createWeeklyScheduleTask(String name, ArrayList<WeeklyScheduleFragment.DayOfWeekTimeEntry> dayOfWeekTimeEntries) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(dayOfWeekTimeEntries != null);
+        Assert.assertTrue(!dayOfWeekTimeEntries.isEmpty());
+
+        TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(null, name);
+        Assert.assertTrue(taskRecord != null);
+
+        RootTask rootTask = new RootTask(taskRecord);
+
+        WeeklySchedule weeklySchedule = ScheduleFactory.getInstance().createWeeklySchedule(rootTask, dayOfWeekTimeEntries);
+        Assert.assertTrue(weeklySchedule != null);
+
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        schedules.add(weeklySchedule);
 
         rootTask.setSchedules(schedules);
 

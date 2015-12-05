@@ -5,9 +5,6 @@ import junit.framework.Assert;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
-/**
- * Created by Krystian on 10/13/2015.
- */
 public enum DayOfWeek {
     SUNDAY,
     MONDAY,
@@ -26,5 +23,9 @@ public enum DayOfWeek {
 
     public String toString() {
         return DateFormatSymbols.getInstance().getWeekdays()[this.ordinal() + 1];
+    }
+
+    public static DayOfWeek today() {
+        return Date.today().getDayOfWeek();
     }
 }

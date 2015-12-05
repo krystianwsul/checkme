@@ -16,9 +16,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-/**
- * Created by Krystian on 11/9/2015.
- */
 public class WeeklySchedule extends Schedule {
     private final WeeklyScheduleRecord mWeelyScheduleRecord;
     private final ArrayList<WeeklyScheduleDayTime> mWeeklyScheduleDayTimes = new ArrayList<>();
@@ -33,6 +30,10 @@ public class WeeklySchedule extends Schedule {
     void addWeeklyScheduleDayTime(WeeklyScheduleDayTime weeklyScheduleDayTime) {
         Assert.assertTrue(weeklyScheduleDayTime != null);
         mWeeklyScheduleDayTimes.add(weeklyScheduleDayTime);
+    }
+
+    public int getId() {
+        return mWeelyScheduleRecord.getId();
     }
 
     private TimeStamp getStartTimeStamp() {
@@ -54,8 +55,8 @@ public class WeeklySchedule extends Schedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        TimeStamp startTimeStamp = null;
-        TimeStamp endTimeStamp = null;
+        TimeStamp startTimeStamp;
+        TimeStamp endTimeStamp;
 
         if (givenStartTimeStamp == null || (givenStartTimeStamp.compareTo(myStartTimeStamp) < 0))
             startTimeStamp = myStartTimeStamp;
@@ -70,8 +71,6 @@ public class WeeklySchedule extends Schedule {
         if (startTimeStamp.compareTo(endTimeStamp) >= 0)
             return instances;
 
-        Assert.assertTrue(startTimeStamp != null);
-        Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(startTimeStamp.compareTo(endTimeStamp) < 0);
 
         if (startTimeStamp.getDate().equals(endTimeStamp.getDate())) {
@@ -83,8 +82,8 @@ public class WeeklySchedule extends Schedule {
             loopStartCalendar.add(Calendar.DATE, 1);
             Calendar loopEndCalendar = endTimeStamp.getDate().getCalendar();
 
-            for (Calendar calendar = loopStartCalendar; calendar.before(loopEndCalendar); calendar.add(Calendar.DATE, 1))
-                instances.addAll(getInstancesInDate(new Date(calendar), null, null));
+            for (; loopStartCalendar.before(loopEndCalendar); loopStartCalendar.add(Calendar.DATE, 1))
+                instances.addAll(getInstancesInDate(new Date(loopStartCalendar), null, null));
 
             instances.addAll(getInstancesInDate(endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
         }

@@ -5,17 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/weekly_schedule_date"
+    <Spinner
+        android:id="@+id/weekly_schedule_day"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="date" />
+        android:text="day" />
 
     <com.example.krystianwsul.organizatortest.TimePickerView
         android:id="@+id/weekly_schedule_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/weekly_schedule_date"/>
+        android:layout_toRightOf="@id/weekly_schedule_day"/>
 
     <ImageView
         android:id="@+id/weekly_schedule_image"

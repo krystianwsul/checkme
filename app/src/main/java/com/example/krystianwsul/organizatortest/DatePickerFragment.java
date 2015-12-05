@@ -47,8 +47,15 @@ public class DatePickerFragment extends DialogFragment {
         Date date = new Date(year, month, day);
 
         return new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+            private boolean mFirst = true;
+
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                if (mFirst) {
+                    mFirst = false;
+                    return;
+                }
+
                 Date newDate = new Date(year, monthOfYear + 1, dayOfMonth);
 
                 DatePickerFragmentListener datePickerFragmentListener = (DatePickerFragmentListener) getActivity();

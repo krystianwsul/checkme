@@ -2,7 +2,9 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.text.TextUtils;
 
+import com.example.krystianwsul.organizatortest.DailyScheduleFragment;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.ScheduleFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
@@ -94,6 +96,30 @@ public class TaskFactory {
 
         ArrayList<Schedule> schedules = new ArrayList<>();
         schedules.add(singleSchedule);
+
+        rootTask.setSchedules(schedules);
+
+        mRootTasks.put(rootTask.getId(), rootTask);
+        mTasks.put(rootTask.getId(), rootTask);
+
+        return rootTask;
+    }
+
+    public RootTask createDailyScheduleTask(String name, ArrayList<DailyScheduleFragment.TimeEntry> timeEntries) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(timeEntries != null);
+        Assert.assertTrue(!timeEntries.isEmpty());
+
+        TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(null, name);
+        Assert.assertTrue(taskRecord != null);
+
+        RootTask rootTask = new RootTask(taskRecord);
+
+        DailySchedule dailySchedule = ScheduleFactory.getInstance().createDailySchedule(rootTask, timeEntries);
+        Assert.assertTrue(dailySchedule != null);
+
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        schedules.add(dailySchedule);
 
         rootTask.setSchedules(schedules);
 

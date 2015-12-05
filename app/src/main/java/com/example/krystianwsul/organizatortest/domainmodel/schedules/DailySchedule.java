@@ -4,23 +4,20 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.R;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
-import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
+import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 
-/**
- * Created by Krystian on 10/17/2015.
- */
 public class DailySchedule extends Schedule {
     private final DailyScheduleRecord mDailyScheduleRecord;
     private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
@@ -35,6 +32,10 @@ public class DailySchedule extends Schedule {
     void addDailyScheduleTime(DailyScheduleTime dailyScheduleTime) {
         Assert.assertTrue(dailyScheduleTime != null);
         mDailyScheduleTimes.add(dailyScheduleTime);
+    }
+
+    public int getId() {
+        return mDailyScheduleRecord.getId();
     }
 
     private TimeStamp getStartTimeStamp() {
@@ -56,8 +57,8 @@ public class DailySchedule extends Schedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        TimeStamp startTimeStamp = null;
-        TimeStamp endTimeStamp = null;
+        TimeStamp startTimeStamp;
+        TimeStamp endTimeStamp;
 
         if (givenStartTimeStamp == null || (givenStartTimeStamp.compareTo(myStartTimeStamp) < 0))
             startTimeStamp = myStartTimeStamp;
@@ -72,8 +73,6 @@ public class DailySchedule extends Schedule {
         if (startTimeStamp.compareTo(endTimeStamp) >= 0)
             return instances;
 
-        Assert.assertTrue(startTimeStamp != null);
-        Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(startTimeStamp.compareTo(endTimeStamp) < 0);
 
         if (startTimeStamp.getDate().equals(endTimeStamp.getDate())) {
@@ -85,8 +84,8 @@ public class DailySchedule extends Schedule {
             loopStartCalendar.add(Calendar.DATE, 1);
             Calendar loopEndCalendar = endTimeStamp.getDate().getCalendar();
 
-            for (Calendar calendar = loopStartCalendar; calendar.before(loopEndCalendar); calendar.add(Calendar.DATE, 1))
-                instances.addAll(getInstancesInDate(new Date(calendar), null, null));
+            for (; loopStartCalendar.before(loopEndCalendar); loopStartCalendar.add(Calendar.DATE, 1))
+                instances.addAll(getInstancesInDate(new Date(loopStartCalendar), null, null));
 
             instances.addAll(getInstancesInDate(endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
         }

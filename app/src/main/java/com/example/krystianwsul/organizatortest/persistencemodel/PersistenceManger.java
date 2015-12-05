@@ -2,6 +2,8 @@ package com.example.krystianwsul.organizatortest.persistencemodel;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -342,5 +344,30 @@ public class PersistenceManger {
         mSingleScheduleRecords.put(singleScheduleRecord.getRootTaskId(), singleScheduleRecord);
 
         return singleScheduleRecord;
+    }
+
+    public DailyScheduleRecord createDailyScheduleRecord(int rootTaskId) {
+        int dailyScheduleId = Collections.max(mDailyScheduleRecords.keySet()) + 1;
+
+        DailyScheduleRecord dailyScheduleRecord = new DailyScheduleRecord(dailyScheduleId, rootTaskId, TimeStamp.getNow().getLong(), null);
+        mDailyScheduleRecords.put(dailyScheduleRecord.getId(), dailyScheduleRecord);
+
+        return dailyScheduleRecord;
+    }
+
+    public DailyScheduleTimeRecord createDailyScheduleTimeRecord(DailySchedule dailySchedule, CustomTime customTime, HourMinute hourMinute) {
+        Assert.assertTrue(dailySchedule != null);
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        int dailyScheduleTimeRecordId = Collections.max(mDailyScheduleTimeRecords.keySet()) + 1;
+
+        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+
+        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
+        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+
+        DailyScheduleTimeRecord dailyScheduleTimeRecord = new DailyScheduleTimeRecord(dailyScheduleTimeRecordId, dailySchedule.getId(), customTimeId, hour, minute);
+        mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
+        return dailyScheduleTimeRecord;
     }
 }

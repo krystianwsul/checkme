@@ -1,6 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetitionFactory;
+import com.example.krystianwsul.organizatortest.DailyScheduleFragment;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -10,9 +10,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 11/14/2015.
- */
 public class DailyScheduleFactory {
     private static DailyScheduleFactory sInstance;
 
@@ -32,10 +29,10 @@ public class DailyScheduleFactory {
         if (mDailySchedules.containsKey(dailyScheduleId))
             return mDailySchedules.get(dailyScheduleId);
         else
-            return createDailySchedule(dailyScheduleId, rootTask);
+            return loadDailySchedule(dailyScheduleId, rootTask);
     }
 
-    private DailySchedule createDailySchedule(int dailyScheduleId, RootTask rootTask) {
+    private DailySchedule loadDailySchedule(int dailyScheduleId, RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
@@ -49,10 +46,31 @@ public class DailyScheduleFactory {
         ArrayList<Integer> dailyScheduleTimeIds = persistenceManger.getDailyScheduleTimeIds(dailyScheduleId);
         Assert.assertTrue(!dailyScheduleTimeIds.isEmpty());
 
+        DailyScheduleTimeFactory dailyScheduleTimeFactory = DailyScheduleTimeFactory.getInstance();
+
         for (Integer dailyScheduleTimeId : dailyScheduleTimeIds)
-            dailySchedule.addDailyScheduleTime(DailyScheduleTimeFactory.getInstance().getDailyScheduleTime(dailyScheduleTimeId, dailySchedule));
+            dailySchedule.addDailyScheduleTime(dailyScheduleTimeFactory.getDailyScheduleTime(dailyScheduleTimeId, dailySchedule));
 
         mDailySchedules.put(dailyScheduleId, dailySchedule);
+        return dailySchedule;
+    }
+
+    public DailySchedule createDailySchedule(RootTask rootTask, ArrayList<DailyScheduleFragment.TimeEntry> timeEntries) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(timeEntries != null);
+        Assert.assertTrue(!timeEntries.isEmpty());
+
+        DailyScheduleRecord dailyScheduleRecord = PersistenceManger.getInstance().createDailyScheduleRecord(rootTask.getId());
+        Assert.assertTrue(dailyScheduleRecord != null);
+
+        DailySchedule dailySchedule = new DailySchedule(dailyScheduleRecord, rootTask);
+
+        DailyScheduleTimeFactory dailyScheduleTimeFactory = DailyScheduleTimeFactory.getInstance();
+
+        for (DailyScheduleFragment.TimeEntry timeEntry : timeEntries)
+            dailySchedule.addDailyScheduleTime(dailyScheduleTimeFactory.createDailyScheduleTime(dailySchedule, timeEntry.getCustomTime(), timeEntry.getHourMinute()));
+
+        mDailySchedules.put(dailySchedule.getId(), dailySchedule);
         return dailySchedule;
     }
 }

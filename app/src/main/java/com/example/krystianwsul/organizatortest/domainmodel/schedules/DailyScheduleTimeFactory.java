@@ -1,6 +1,8 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetitionFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleTimeRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
@@ -8,9 +10,6 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 11/14/2015.
- */
 public class DailyScheduleTimeFactory {
     private static DailyScheduleTimeFactory sInstance;
 
@@ -28,17 +27,30 @@ public class DailyScheduleTimeFactory {
         if (mDailyScheduleTimes.containsKey(dailyScheduleTimeId))
             return mDailyScheduleTimes.get(dailyScheduleTimeId);
         else
-            return createDailyScheduleTime(dailyScheduleTimeId, dailySchedule);
+            return loadDailyScheduleTime(dailyScheduleTimeId, dailySchedule);
     }
 
-    private DailyScheduleTime createDailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
+    private DailyScheduleTime loadDailyScheduleTime(int dailyScheduleTimeId, DailySchedule dailySchedule) {
         DailyScheduleTimeRecord dailyScheduleTimeRecord = PersistenceManger.getInstance().getDailyScheduleTimeRecord(dailyScheduleTimeId);
         Assert.assertTrue(dailyScheduleTimeRecord != null);
 
         DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(dailyScheduleTimeRecord, dailySchedule);
         DailyRepetitionFactory.getInstance().loadExistingDailyRepetitions(dailyScheduleTime);
 
-        mDailyScheduleTimes.put(dailyScheduleTimeId, dailyScheduleTime);
+        mDailyScheduleTimes.put(dailyScheduleTime.getId(), dailyScheduleTime);
+        return dailyScheduleTime;
+    }
+
+    public DailyScheduleTime createDailyScheduleTime(DailySchedule dailySchedule, CustomTime customTime, HourMinute hourMinute) {
+        Assert.assertTrue(dailySchedule != null);
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        DailyScheduleTimeRecord dailyScheduleTimeRecord = PersistenceManger.getInstance().createDailyScheduleTimeRecord(dailySchedule, customTime, hourMinute);
+        Assert.assertTrue(dailyScheduleTimeRecord != null);
+
+        DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(dailyScheduleTimeRecord, dailySchedule);
+        mDailyScheduleTimes.put(dailyScheduleTime.getId(), dailyScheduleTime);
+
         return dailyScheduleTime;
     }
 }

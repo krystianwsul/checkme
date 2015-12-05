@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -100,7 +101,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     public RootTask createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        throw new UnsupportedOperationException();
+        return TaskFactory.getInstance().createDailyScheduleTask(name, mTimeEntryAdapter.getTimeEntries());
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {
@@ -251,7 +252,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         }
     }
 
-    private static class TimeEntry implements Parcelable {
+    public static class TimeEntry implements Parcelable {
         private CustomTime mCustomTime;
         private HourMinute mHourMinute;
         private boolean mShowDelete;

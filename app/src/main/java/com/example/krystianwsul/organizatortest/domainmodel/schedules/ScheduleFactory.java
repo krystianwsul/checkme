@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
+import com.example.krystianwsul.organizatortest.DailyScheduleFragment;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
@@ -65,5 +66,16 @@ public class ScheduleFactory {
         Assert.assertTrue(singleSchedule != null);
 
         return singleSchedule;
+    }
+
+    public DailySchedule createDailySchedule(RootTask rootTask, ArrayList<DailyScheduleFragment.TimeEntry> timeEntries) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(timeEntries != null);
+        Assert.assertTrue(!timeEntries.isEmpty());
+
+        DailySchedule dailySchedule = DailyScheduleFactory.getInstance().createDailySchedule(rootTask, timeEntries);
+        Assert.assertTrue(dailySchedule != null);
+
+        return dailySchedule;
     }
 }

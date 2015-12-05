@@ -11,6 +11,8 @@
     <string name="title_activity_settings">Settings</string>
     <string name="none">None</string>
     <string name="other">Other</string>
+    <string name="save">Save</string>
+    <string name="task_name_toast">Please enter a name.</string>
 
     <!-- Strings related to Settings -->
 

@@ -10,4 +10,6 @@
     <string name="action_times">Czasy</string>
     <string name="none">Brak</string>
     <string name="other">Inny</string>
+    <string name="save">Zapisz</string>
+    <string name="task_name_toast">Proszę podać imię.</string>
 </resources>

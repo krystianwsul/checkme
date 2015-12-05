@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -26,7 +27,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeeklyScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener {
+public class WeeklyScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment {
     private int mHourMinutePickerPosition = -1;
     private int mDatePickerPosition = -1;
 
@@ -112,6 +113,11 @@ public class WeeklyScheduleFragment extends Fragment implements DatePickerFragme
         outState.putParcelableArrayList(DATE_TIME_ENTRY_KEY, mDateTimeEntryAdapter.getDateTimeEntries());
         outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
         outState.putInt(DATE_PICKER_POSITION_KEY, mDatePickerPosition);
+    }
+
+    @Override
+    public Schedule getSchedule() {
+        throw new UnsupportedOperationException();
     }
 
     private class DateTimeEntryAdapter extends RecyclerView.Adapter<DateTimeEntryAdapter.DateTimeHolder> {

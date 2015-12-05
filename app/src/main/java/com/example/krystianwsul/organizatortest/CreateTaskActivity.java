@@ -5,10 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
@@ -59,6 +63,26 @@ public class CreateTaskActivity extends AppCompatActivity implements HourMinuteP
 
         if (savedInstanceState == null)
             loadFragment(0);
+
+        final EditText createTaskName = (EditText) findViewById(R.id.create_task_name);
+
+        Button createTaskSave = (Button) findViewById(R.id.create_task_save);
+        createTaskSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = createTaskName.getText().toString().trim();
+
+                if (TextUtils.isEmpty(name)) {
+                    Toast.makeText(v.getContext(), R.string.task_name_toast, Toast.LENGTH_SHORT).show();
+                    createTaskName.requestFocus();
+                    return;
+                }
+
+                ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+                Assert.assertTrue(scheduleFragment != null);
+
+            }
+        });
 
         mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);

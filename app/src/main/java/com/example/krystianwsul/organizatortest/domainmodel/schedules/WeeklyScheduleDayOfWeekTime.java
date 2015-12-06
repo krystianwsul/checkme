@@ -9,34 +9,31 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
-import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleDayTimeRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleDayOfWeekTimeRecord;
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 11/9/2015.
- */
-public class WeeklyScheduleDayTime {
-    private final WeeklyScheduleDayTimeRecord mWeeklyScheduleDayTimeRecord;
+public class WeeklyScheduleDayOfWeekTime {
+    private final WeeklyScheduleDayOfWeekTimeRecord mWeeklyScheduleDayOfWeekTimeRecord;
     private final WeeklySchedule mWeeklySchedule;
 
-    WeeklyScheduleDayTime(WeeklyScheduleDayTimeRecord weeklyScheduleDayTimeRecord, WeeklySchedule weeklySchedule) {
-        Assert.assertTrue(weeklyScheduleDayTimeRecord != null);
+    WeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord, WeeklySchedule weeklySchedule) {
+        Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
         Assert.assertTrue(weeklySchedule != null);
 
-        mWeeklyScheduleDayTimeRecord = weeklyScheduleDayTimeRecord;
+        mWeeklyScheduleDayOfWeekTimeRecord = weeklyScheduleDayOfWeekTimeRecord;
         mWeeklySchedule = weeklySchedule;
     }
 
     public Time getTime() {
-        Integer customTimeId = mWeeklyScheduleDayTimeRecord.getCustomTimeId();
+        Integer customTimeId = mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(mWeeklyScheduleDayTimeRecord.getCustomTimeId());
+            CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {
-            Integer hour = mWeeklyScheduleDayTimeRecord.getHour();
-            Integer minute = mWeeklyScheduleDayTimeRecord.getMinute();
+            Integer hour = mWeeklyScheduleDayOfWeekTimeRecord.getHour();
+            Integer minute = mWeeklyScheduleDayOfWeekTimeRecord.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
@@ -44,11 +41,11 @@ public class WeeklyScheduleDayTime {
     }
 
     public int getId() {
-        return mWeeklyScheduleDayTimeRecord.getId();
+        return mWeeklyScheduleDayOfWeekTimeRecord.getId();
     }
 
     public DayOfWeek getDayOfWeek() {
-        return DayOfWeek.values()[mWeeklyScheduleDayTimeRecord.getDayOfWeek()];
+        return DayOfWeek.values()[mWeeklyScheduleDayOfWeekTimeRecord.getDayOfWeek()];
     }
 
     public Instance getInstance(Task task, Date scheduleDate) {

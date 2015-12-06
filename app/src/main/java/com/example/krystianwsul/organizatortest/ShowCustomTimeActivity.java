@@ -2,9 +2,9 @@ package com.example.krystianwsul.organizatortest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
@@ -58,13 +58,13 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
     private void initializeDay(final DayOfWeek dayOfWeek, int nameId, int timeId) {
         Assert.assertTrue(dayOfWeek != null);
 
-        TextView timeSundayName = (TextView) findViewById(nameId);
-        timeSundayName.setText(dayOfWeek.toString());
+        TextView timeName = (TextView) findViewById(nameId);
+        timeName.setText(dayOfWeek.toString());
 
-        TextView timeSundayTime = (TextView) findViewById(timeId);
-        timeSundayTime.setText(mCustomTime.getHourMinute(dayOfWeek).toString());
+        TextView timeTime = (TextView) findViewById(timeId);
+        timeTime.setText(mCustomTime.getHourMinute(dayOfWeek).toString());
         final ShowCustomTimeActivity showCustomTimeActivity = this;
-        timeSundayTime.setOnClickListener(new View.OnClickListener() {
+        timeTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editedDayOfWeek = dayOfWeek;
@@ -73,7 +73,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
                 hourMinutePickerFragment.show(fragmentManager, "tag");
             }
         });
-        mTimes.put(dayOfWeek, timeSundayTime);
+        mTimes.put(dayOfWeek, timeTime);
     }
 
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {

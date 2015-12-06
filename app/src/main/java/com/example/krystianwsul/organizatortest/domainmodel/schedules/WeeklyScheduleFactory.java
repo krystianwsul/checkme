@@ -42,11 +42,11 @@ public class WeeklyScheduleFactory {
 
         WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleRecord, rootTask);
 
-        ArrayList<Integer> weeklyScheduleDayTimeIds = persistenceManger.getWeeklyScheduleDayTimeIds(rootTask.getId());
-        Assert.assertTrue(!weeklyScheduleDayTimeIds.isEmpty());
+        ArrayList<Integer> weeklyScheduleDayOfWeekTimeIds = persistenceManger.getWeeklyScheduleDayOfWeekTimeIds(rootTask.getId());
+        Assert.assertTrue(!weeklyScheduleDayOfWeekTimeIds.isEmpty());
 
-        for (Integer weeklyScheduleDayTimeId : weeklyScheduleDayTimeIds)
-            weeklySchedule.addWeeklyScheduleDayTime(WeeklyScheduleDayTimeFactory.getInstance().getWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule));
+        for (Integer weeklyScheduleDayOfWeekTimeId : weeklyScheduleDayOfWeekTimeIds)
+            weeklySchedule.addWeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTimeFactory.getInstance().getWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeId, weeklySchedule));
 
         mWeeklySchedules.put(rootTask.getId(), weeklySchedule);
         return weeklySchedule;
@@ -62,10 +62,10 @@ public class WeeklyScheduleFactory {
 
         WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleRecord, rootTask);
 
-        WeeklyScheduleDayTimeFactory weeklyScheduleDayTimeFactory = WeeklyScheduleDayTimeFactory.getInstance();
+        WeeklyScheduleDayOfWeekTimeFactory weeklyScheduleDayOfWeekTimeFactory = WeeklyScheduleDayOfWeekTimeFactory.getInstance();
 
         for (WeeklyScheduleFragment.DayOfWeekTimeEntry dayOfWeekTimeEntry : dayOfWeekTimeEntries)
-            weeklySchedule.addWeeklyScheduleDayTime(weeklyScheduleDayTimeFactory.createWeeklyScheduleDayTime(weeklySchedule, dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getCustomTime(), dayOfWeekTimeEntry.getHourMinute()));
+            weeklySchedule.addWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeFactory.createWeeklyScheduleDayOfWeekTime(weeklySchedule, dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getCustomTime(), dayOfWeekTimeEntry.getHourMinute()));
 
         mWeeklySchedules.put(weeklySchedule.getRootTaskId(), weeklySchedule);
         return weeklySchedule;

@@ -4,7 +4,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleDayTime;
+import com.example.krystianwsul.organizatortest.domainmodel.schedules.WeeklyScheduleDayOfWeekTime;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -14,11 +14,8 @@ import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyRepetitio
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 11/9/2015.
- */
 public class WeeklyRepetition {
-    private final WeeklyScheduleDayTime mWeeklyScheduleDayTime;
+    private final WeeklyScheduleDayOfWeekTime mWeeklyScheduleDayOfWeekTime;
 
     private final WeeklyRepetitionRecord mWeeklyRepetitionRecord;
 
@@ -27,11 +24,11 @@ public class WeeklyRepetition {
 
     private static int sRepetitionCount = 0;
 
-    WeeklyRepetition(WeeklyScheduleDayTime weeklyScheduleDayTime, WeeklyRepetitionRecord weeklyRepetitionRecord) {
-        Assert.assertTrue(weeklyScheduleDayTime != null);
+    WeeklyRepetition(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime, WeeklyRepetitionRecord weeklyRepetitionRecord) {
+        Assert.assertTrue(weeklyScheduleDayOfWeekTime != null);
         Assert.assertTrue(weeklyRepetitionRecord != null);
 
-        mWeeklyScheduleDayTime = weeklyScheduleDayTime;
+        mWeeklyScheduleDayOfWeekTime = weeklyScheduleDayOfWeekTime;
 
         mWeeklyRepetitionRecord = weeklyRepetitionRecord;
 
@@ -39,11 +36,11 @@ public class WeeklyRepetition {
         mScheduleDate = new Date(weeklyRepetitionRecord.getScheduleYear(), weeklyRepetitionRecord.getScheduleMonth(), weeklyRepetitionRecord.getScheduleDay());
     }
 
-    WeeklyRepetition(WeeklyScheduleDayTime weeklyScheduleDayTime, Date scheduleDate) {
-        Assert.assertTrue(weeklyScheduleDayTime != null);
+    WeeklyRepetition(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime, Date scheduleDate) {
+        Assert.assertTrue(weeklyScheduleDayOfWeekTime != null);
         Assert.assertTrue(scheduleDate != null);
 
-        mWeeklyScheduleDayTime = weeklyScheduleDayTime;
+        mWeeklyScheduleDayOfWeekTime = weeklyScheduleDayOfWeekTime;
 
         mWeeklyRepetitionRecord = null;
 
@@ -55,8 +52,8 @@ public class WeeklyRepetition {
         return mId;
     }
 
-    public int getWeeklyScheduleDayTimeId() {
-        return mWeeklyScheduleDayTime.getId();
+    public int getWeeklyScheduleDayOfWeekTimeId() {
+        return mWeeklyScheduleDayOfWeekTime.getId();
     }
 
     public Date getScheduleDate() {
@@ -64,7 +61,7 @@ public class WeeklyRepetition {
     }
 
     public Time getScheduleTime() {
-        return mWeeklyScheduleDayTime.getTime();
+        return mWeeklyScheduleDayOfWeekTime.getTime();
     }
 
     public DateTime getScheduleDateTime() {
@@ -87,7 +84,7 @@ public class WeeklyRepetition {
                 return new NormalTime(mWeeklyRepetitionRecord.getHour(), mWeeklyRepetitionRecord.getMinute());
             }
         } else {
-            return mWeeklyScheduleDayTime.getTime();
+            return mWeeklyScheduleDayOfWeekTime.getTime();
         }
     }
 

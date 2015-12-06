@@ -18,7 +18,7 @@ import java.util.Calendar;
 
 public class WeeklySchedule extends Schedule {
     private final WeeklyScheduleRecord mWeelyScheduleRecord;
-    private final ArrayList<WeeklyScheduleDayTime> mWeeklyScheduleDayTimes = new ArrayList<>();
+    private final ArrayList<WeeklyScheduleDayOfWeekTime> mWeeklyScheduleDayOfWeekTimes = new ArrayList<>();
 
     WeeklySchedule(WeeklyScheduleRecord weeklyScheduleRecord, RootTask rootTask) {
         super(rootTask);
@@ -27,9 +27,9 @@ public class WeeklySchedule extends Schedule {
         mWeelyScheduleRecord = weeklyScheduleRecord;
     }
 
-    void addWeeklyScheduleDayTime(WeeklyScheduleDayTime weeklyScheduleDayTime) {
-        Assert.assertTrue(weeklyScheduleDayTime != null);
-        mWeeklyScheduleDayTimes.add(weeklyScheduleDayTime);
+    void addWeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime) {
+        Assert.assertTrue(weeklyScheduleDayOfWeekTime != null);
+        mWeeklyScheduleDayOfWeekTimes.add(weeklyScheduleDayOfWeekTime);
     }
 
     public int getRootTaskId() {
@@ -98,11 +98,11 @@ public class WeeklySchedule extends Schedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        for (WeeklyScheduleDayTime weeklyScheduleDayTime : mWeeklyScheduleDayTimes) {
-            if (weeklyScheduleDayTime.getDayOfWeek() != day)
+        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes) {
+            if (weeklyScheduleDayOfWeekTime.getDayOfWeek() != day)
                 continue;
 
-            HourMinute hourMinute = weeklyScheduleDayTime.getTime().getHourMinute(day);
+            HourMinute hourMinute = weeklyScheduleDayOfWeekTime.getTime().getHourMinute(day);
             Assert.assertTrue(hourMinute != null);
 
             if (startHourMinute != null && startHourMinute.compareTo(hourMinute) > 0)
@@ -111,7 +111,7 @@ public class WeeklySchedule extends Schedule {
             if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
                 continue;
 
-            instances.add(weeklyScheduleDayTime.getInstance(mRootTask, date));
+            instances.add(weeklyScheduleDayOfWeekTime.getInstance(mRootTask, date));
         }
 
         return instances;
@@ -119,8 +119,8 @@ public class WeeklySchedule extends Schedule {
 
     public String getTaskText(Context context) {
         ArrayList<String> ret = new ArrayList<>();
-        for (WeeklyScheduleDayTime weeklyScheduleDayTime : mWeeklyScheduleDayTimes)
-            ret.add(weeklyScheduleDayTime.getDayOfWeek().toString() + ", " + weeklyScheduleDayTime.getTime().toString());
+        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
+            ret.add(weeklyScheduleDayOfWeekTime.getDayOfWeek().toString() + ", " + weeklyScheduleDayOfWeekTime.getTime().toString());
         return TextUtils.join("; ", ret);
     }
 }

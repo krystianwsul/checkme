@@ -25,7 +25,6 @@ public class PersistenceManger {
     private final HashMap<Integer, TaskRecord> mTaskRecords = new HashMap<>();
 
     private final HashMap<Integer, SingleScheduleRecord> mSingleScheduleRecords = new HashMap<>();
-    private final HashMap<Integer, SingleRepetitionRecord> mSingleRepetitionRecords = new HashMap<>();
 
     private final HashMap<Integer, DailyScheduleRecord> mDailyScheduleRecords = new HashMap<>();
     private final HashMap<Integer, DailyScheduleTimeRecord> mDailyScheduleTimeRecords = new HashMap<>();
@@ -160,10 +159,6 @@ public class PersistenceManger {
 
     public SingleScheduleRecord getSingleScheduleRecord(int rootTaskId) {
         return mSingleScheduleRecords.get(rootTaskId);
-    }
-
-    public SingleRepetitionRecord getSingleRepetitionRecord(int rootTaskId) {
-        return mSingleRepetitionRecords.get(rootTaskId);
     }
 
     public InstanceRecord getSingleInstanceRecord(int rootTaskId) {

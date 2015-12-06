@@ -6,7 +6,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
 
@@ -23,37 +22,19 @@ public class ScheduleFactory {
 
     private ScheduleFactory() {}
 
-    public ArrayList<Schedule> getSchedules(RootTask rootTask) {
+    public Schedule getSchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
         SingleSchedule singleSchedule = SingleScheduleFactory.getInstance().getSingleSchedule(rootTask);
-        if (singleSchedule != null) {
-            ArrayList<Schedule> singleSchedules = new ArrayList<>();
-            singleSchedules.add(singleSchedule);
-            return singleSchedules;
-        }
+        if (singleSchedule != null)
+            return singleSchedule;
 
-        PersistenceManger persistenceManger = PersistenceManger.getInstance();
-        ArrayList<Integer> dailyScheduleIds = persistenceManger.getDailyScheduleIds(rootTask.getId());
-        if (!dailyScheduleIds.isEmpty()) {
-            ArrayList<Schedule> dailySchedules = new ArrayList<>();
-            for (int dailyScheduleId : dailyScheduleIds) {
-                DailySchedule dailySchedule = DailyScheduleFactory.getInstance().getDailySchedule(dailyScheduleId, rootTask);
-                Assert.assertTrue(dailySchedule != null);
-                dailySchedules.add(dailySchedule);
-            }
-            return dailySchedules;
-        }
+        DailySchedule dailySchedule = DailyScheduleFactory.getInstance().getDailySchedule(rootTask);
+        if (dailySchedule != null)
+            return dailySchedule;
 
-        ArrayList<Integer> weeklyScheduleIds = persistenceManger.getWeeklyScheduleIds(rootTask.getId());
-        if (!weeklyScheduleIds.isEmpty()) {
-            ArrayList<Schedule> weeklySchedules = new ArrayList<>();
-            for (int weeklyScheduleId : weeklyScheduleIds) {
-                WeeklySchedule weeklySchedule = WeeklyScheduleFactory.getInstance().getWeeklySchedule(weeklyScheduleId, rootTask);
-                Assert.assertTrue(weeklySchedule != null);
-                weeklySchedules.add(weeklySchedule);
-            }
-            return weeklySchedules;
-        }
+        WeeklySchedule weeklySchedule = WeeklyScheduleFactory.getInstance().getWeeklySchedule(rootTask);
+        if (weeklySchedule != null)
+            return weeklySchedule;
 
         throw new IllegalArgumentException("no schedule for rootTask == " + rootTask);
     }

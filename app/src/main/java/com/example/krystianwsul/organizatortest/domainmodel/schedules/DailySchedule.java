@@ -34,8 +34,8 @@ public class DailySchedule extends Schedule {
         mDailyScheduleTimes.add(dailyScheduleTime);
     }
 
-    public int getId() {
-        return mDailyScheduleRecord.getId();
+    public int getRootTaskId() {
+        return mDailyScheduleRecord.getRootTaskId();
     }
 
     private TimeStamp getStartTimeStamp() {

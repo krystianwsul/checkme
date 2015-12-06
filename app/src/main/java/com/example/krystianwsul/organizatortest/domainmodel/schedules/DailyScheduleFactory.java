@@ -23,27 +23,27 @@ public class DailyScheduleFactory {
 
     private final HashMap<Integer, DailySchedule> mDailySchedules = new HashMap<>();
 
-    public DailySchedule getDailySchedule(int dailyScheduleId, RootTask rootTask) {
+    public DailySchedule getDailySchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
-        if (mDailySchedules.containsKey(dailyScheduleId))
-            return mDailySchedules.get(dailyScheduleId);
+        if (mDailySchedules.containsKey(rootTask.getId()))
+            return mDailySchedules.get(rootTask.getId());
         else
-            return loadDailySchedule(dailyScheduleId, rootTask);
+            return loadDailySchedule(rootTask);
     }
 
-    private DailySchedule loadDailySchedule(int dailyScheduleId, RootTask rootTask) {
+    private DailySchedule loadDailySchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        DailyScheduleRecord dailyScheduleRecord = persistenceManger.getDailyScheduleRecord(dailyScheduleId);
+        DailyScheduleRecord dailyScheduleRecord = persistenceManger.getDailyScheduleRecord(rootTask.getId());
         if (dailyScheduleRecord == null)
             return null;
 
         DailySchedule dailySchedule = new DailySchedule(dailyScheduleRecord, rootTask);
 
-        ArrayList<Integer> dailyScheduleTimeIds = persistenceManger.getDailyScheduleTimeIds(dailyScheduleId);
+        ArrayList<Integer> dailyScheduleTimeIds = persistenceManger.getDailyScheduleTimeIds(rootTask.getId());
         Assert.assertTrue(!dailyScheduleTimeIds.isEmpty());
 
         DailyScheduleTimeFactory dailyScheduleTimeFactory = DailyScheduleTimeFactory.getInstance();
@@ -51,7 +51,7 @@ public class DailyScheduleFactory {
         for (Integer dailyScheduleTimeId : dailyScheduleTimeIds)
             dailySchedule.addDailyScheduleTime(dailyScheduleTimeFactory.getDailyScheduleTime(dailyScheduleTimeId, dailySchedule));
 
-        mDailySchedules.put(dailyScheduleId, dailySchedule);
+        mDailySchedules.put(rootTask.getId(), dailySchedule);
         return dailySchedule;
     }
 
@@ -70,7 +70,7 @@ public class DailyScheduleFactory {
         for (DailyScheduleFragment.TimeEntry timeEntry : timeEntries)
             dailySchedule.addDailyScheduleTime(dailyScheduleTimeFactory.createDailyScheduleTime(dailySchedule, timeEntry.getCustomTime(), timeEntry.getHourMinute()));
 
-        mDailySchedules.put(dailySchedule.getId(), dailySchedule);
+        mDailySchedules.put(dailySchedule.getRootTaskId(), dailySchedule);
         return dailySchedule;
     }
 }

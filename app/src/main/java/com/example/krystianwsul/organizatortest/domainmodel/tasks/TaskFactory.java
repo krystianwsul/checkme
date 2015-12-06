@@ -44,10 +44,9 @@ public class TaskFactory {
 
             RootTask rootTask = new RootTask(taskRecord);
 
-            ArrayList<Schedule> schedules = ScheduleFactory.getInstance().getSchedules(rootTask);
-            Assert.assertTrue(schedules != null);
-            Assert.assertTrue(!schedules.isEmpty());
-            rootTask.setSchedules(schedules);
+            Schedule schedule = ScheduleFactory.getInstance().getSchedule(rootTask);
+            Assert.assertTrue(schedule != null);
+            rootTask.setSchedule(schedule);
 
             initializeChildren(rootTask);
 
@@ -96,10 +95,7 @@ public class TaskFactory {
         SingleSchedule singleSchedule = ScheduleFactory.getInstance().createSingleSchedule(rootTask, date, customTime, hourMinute);
         Assert.assertTrue(singleSchedule != null);
 
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        schedules.add(singleSchedule);
-
-        rootTask.setSchedules(schedules);
+        rootTask.setSchedule(singleSchedule);
 
         mRootTasks.put(rootTask.getId(), rootTask);
         mTasks.put(rootTask.getId(), rootTask);
@@ -120,10 +116,7 @@ public class TaskFactory {
         DailySchedule dailySchedule = ScheduleFactory.getInstance().createDailySchedule(rootTask, timeEntries);
         Assert.assertTrue(dailySchedule != null);
 
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        schedules.add(dailySchedule);
-
-        rootTask.setSchedules(schedules);
+        rootTask.setSchedule(dailySchedule);
 
         mRootTasks.put(rootTask.getId(), rootTask);
         mTasks.put(rootTask.getId(), rootTask);
@@ -144,10 +137,7 @@ public class TaskFactory {
         WeeklySchedule weeklySchedule = ScheduleFactory.getInstance().createWeeklySchedule(rootTask, dayOfWeekTimeEntries);
         Assert.assertTrue(weeklySchedule != null);
 
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        schedules.add(weeklySchedule);
-
-        rootTask.setSchedules(schedules);
+        rootTask.setSchedule(weeklySchedule);
 
         mRootTasks.put(rootTask.getId(), rootTask);
         mTasks.put(rootTask.getId(), rootTask);

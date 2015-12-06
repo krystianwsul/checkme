@@ -32,8 +32,8 @@ public class WeeklySchedule extends Schedule {
         mWeeklyScheduleDayTimes.add(weeklyScheduleDayTime);
     }
 
-    public int getId() {
-        return mWeelyScheduleRecord.getId();
+    public int getRootTaskId() {
+        return mWeelyScheduleRecord.getRootTaskId();
     }
 
     private TimeStamp getStartTimeStamp() {

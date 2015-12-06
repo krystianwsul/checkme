@@ -23,32 +23,32 @@ public class WeeklyScheduleFactory {
 
     private final HashMap<Integer, WeeklySchedule> mWeeklySchedules = new HashMap<>();
 
-    public WeeklySchedule getWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
+    public WeeklySchedule getWeeklySchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
-        if (mWeeklySchedules.containsKey(weeklyScheduleId))
-            return mWeeklySchedules.get(weeklyScheduleId);
+        if (mWeeklySchedules.containsKey(rootTask.getId()))
+            return mWeeklySchedules.get(rootTask.getId());
         else
-            return loadWeeklySchedule(weeklyScheduleId, rootTask);
+            return loadWeeklySchedule(rootTask);
     }
 
-    private WeeklySchedule loadWeeklySchedule(int weeklyScheduleId, RootTask rootTask) {
+    private WeeklySchedule loadWeeklySchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        WeeklyScheduleRecord weeklyScheduleRecord = persistenceManger.getWeeklyScheduleRecord(weeklyScheduleId);
+        WeeklyScheduleRecord weeklyScheduleRecord = persistenceManger.getWeeklyScheduleRecord(rootTask.getId());
         if (weeklyScheduleRecord == null)
             return null;
 
         WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleRecord, rootTask);
 
-        ArrayList<Integer> weeklyScheduleDayTimeIds = persistenceManger.getWeeklyScheduleDayTimeIds(weeklyScheduleId);
+        ArrayList<Integer> weeklyScheduleDayTimeIds = persistenceManger.getWeeklyScheduleDayTimeIds(rootTask.getId());
         Assert.assertTrue(!weeklyScheduleDayTimeIds.isEmpty());
 
         for (Integer weeklyScheduleDayTimeId : weeklyScheduleDayTimeIds)
             weeklySchedule.addWeeklyScheduleDayTime(WeeklyScheduleDayTimeFactory.getInstance().getWeeklyScheduleDayTime(weeklyScheduleDayTimeId, weeklySchedule));
 
-        mWeeklySchedules.put(weeklyScheduleId, weeklySchedule);
+        mWeeklySchedules.put(rootTask.getId(), weeklySchedule);
         return weeklySchedule;
     }
 
@@ -67,7 +67,7 @@ public class WeeklyScheduleFactory {
         for (WeeklyScheduleFragment.DayOfWeekTimeEntry dayOfWeekTimeEntry : dayOfWeekTimeEntries)
             weeklySchedule.addWeeklyScheduleDayTime(weeklyScheduleDayTimeFactory.createWeeklyScheduleDayTime(weeklySchedule, dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getCustomTime(), dayOfWeekTimeEntry.getHourMinute()));
 
-        mWeeklySchedules.put(weeklySchedule.getId(), weeklySchedule);
+        mWeeklySchedules.put(weeklySchedule.getRootTaskId(), weeklySchedule);
         return weeklySchedule;
     }
 }

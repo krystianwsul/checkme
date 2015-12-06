@@ -1,5 +1,7 @@
 package com.example.krystianwsul.organizatortest.persistencemodel;
 
+import android.support.v4.util.Pair;
+
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
@@ -8,6 +10,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
@@ -135,26 +138,18 @@ public class PersistenceManger {
         mDailyScheduleTimeRecords.put(task6schedule0.getId(), task6schedule0);
     }
 
-    public CustomTimeRecord getCustomTimeRecord(int timeRecordId) {
-        return mCustomTimeRecords.get(timeRecordId);
+    public Collection<CustomTimeRecord> getCustomTimeRecords() {
+        return mCustomTimeRecords.values();
     }
 
-    public Collection<Integer> getCustomTimeIds() {
-        return mCustomTimeRecords.keySet();
-    }
-
-    public TaskRecord getTaskRecord(int taskId) {
-        return mTaskRecords.get(taskId);
-    }
-
-    public ArrayList<Integer> getTaskIds(Integer parentTaskId) {
-        ArrayList<Integer> taskIds = new ArrayList<>();
+    public ArrayList<TaskRecord> getTaskRecords(Integer parentTaskId) {
+        ArrayList<TaskRecord> taskRecords = new ArrayList<>();
         for (TaskRecord taskRecord : mTaskRecords.values()) {
             Integer thisParentTaskId = taskRecord.getParentTaskId();
             if ((thisParentTaskId == null && parentTaskId == null) || (thisParentTaskId != null && parentTaskId != null && thisParentTaskId.equals(parentTaskId)))
-                taskIds.add(taskRecord.getId());
+                taskRecords.add(taskRecord);
         }
-        return taskIds;
+        return taskRecords;
     }
 
     public SingleScheduleRecord getSingleScheduleRecord(int rootTaskId) {
@@ -275,8 +270,15 @@ public class PersistenceManger {
         return taskRecord;
     }
 
-    public SingleScheduleRecord createSingleScheduleRecord(int rootTaskId, Date date, CustomTime customTime, HourMinute hourMinute) {
+    public SingleScheduleRecord createSingleScheduleRecord(int rootTaskId, Date date, Time time) {
         Assert.assertTrue(date != null);
+        Assert.assertTrue(time != null);
+
+        Pair<CustomTime, HourMinute> pair = time.getPair();
+
+        CustomTime customTime = pair.first;
+        HourMinute hourMinute = pair.second;
+
         Assert.assertTrue((customTime == null) != (hourMinute == null));
 
         Integer customTimeId = (customTime != null ? customTime.getId() : null);
@@ -297,8 +299,15 @@ public class PersistenceManger {
         return dailyScheduleRecord;
     }
 
-    public DailyScheduleTimeRecord createDailyScheduleTimeRecord(DailySchedule dailySchedule, CustomTime customTime, HourMinute hourMinute) {
+    public DailyScheduleTimeRecord createDailyScheduleTimeRecord(DailySchedule dailySchedule, Time time) {
         Assert.assertTrue(dailySchedule != null);
+        Assert.assertTrue(time != null);
+
+        Pair<CustomTime, HourMinute> pair = time.getPair();
+
+        CustomTime customTime = pair.first;
+        HourMinute hourMinute = pair.second;
+
         Assert.assertTrue((customTime == null) != (hourMinute == null));
 
         int dailyScheduleTimeRecordId = Collections.max(mDailyScheduleTimeRecords.keySet()) + 1;
@@ -320,9 +329,16 @@ public class PersistenceManger {
         return weeklyScheduleRecord;
     }
 
-    public WeeklyScheduleDayOfWeekTimeRecord createWeeklyScheduleDayOfWeekTimeRecord(WeeklySchedule weeklySchedule, DayOfWeek dayOfWeek, CustomTime customTime, HourMinute hourMinute) {
+    public WeeklyScheduleDayOfWeekTimeRecord createWeeklyScheduleDayOfWeekTimeRecord(WeeklySchedule weeklySchedule, DayOfWeek dayOfWeek, Time time) {
         Assert.assertTrue(weeklySchedule != null);
         Assert.assertTrue(dayOfWeek != null);
+        Assert.assertTrue(time != null);
+
+        Pair<CustomTime, HourMinute> pair = time.getPair();
+
+        CustomTime customTime = pair.first;
+        HourMinute hourMinute = pair.second;
+
         Assert.assertTrue((customTime == null) != (hourMinute == null));
 
         int weeklyScheduleDayOfWeekTimeRecordId = Collections.max(mWeeklyScheduleDayOfWeekTimeRecords.keySet()) + 1;

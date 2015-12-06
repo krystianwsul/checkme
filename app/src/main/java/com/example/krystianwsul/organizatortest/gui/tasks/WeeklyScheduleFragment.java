@@ -27,6 +27,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
@@ -107,9 +109,9 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries().isEmpty());
 
-        ArrayList<Pair<DayOfWeek, Pair<CustomTime, HourMinute>>> dayOfWeekTimePairs = new ArrayList<>();
+        ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = new ArrayList<>();
         for (DayOfWeekTimeEntry dayOfWeekTimeEntry : mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
-            dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), new Pair<>(dayOfWeekTimeEntry.getCustomTime(), dayOfWeekTimeEntry.getHourMinute())));
+            dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getTime()));
 
         return TaskFactory.getInstance().createWeeklyScheduleTask(name, dayOfWeekTimePairs);
     }
@@ -351,6 +353,16 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
             mHourMinute = hourMinute;
             mCustomTime = null;
+        }
+
+        public Time getTime() {
+            if (mCustomTime != null) {
+                Assert.assertTrue(mHourMinute == null);
+                return mCustomTime;
+            } else {
+                Assert.assertTrue(mHourMinute != null);
+                return new NormalTime(mHourMinute);
+            }
         }
 
         @Override

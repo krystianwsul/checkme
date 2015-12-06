@@ -9,9 +9,6 @@ import junit.framework.Assert;
 import java.util.Collection;
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 11/14/2015.
- */
 public class CustomTimeFactory {
     private static CustomTimeFactory sInstance;
 
@@ -24,16 +21,15 @@ public class CustomTimeFactory {
     private HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
 
     private CustomTimeFactory() {
-        Collection<Integer> customTimeIds = PersistenceManger.getInstance().getCustomTimeIds();
-        Assert.assertTrue(customTimeIds != null);
-        Assert.assertTrue(!customTimeIds.isEmpty());
+        Collection<CustomTimeRecord> customTimeRecords = PersistenceManger.getInstance().getCustomTimeRecords();
+        Assert.assertTrue(customTimeRecords != null);
+        Assert.assertTrue(!customTimeRecords.isEmpty());
 
-        for (Integer customTimeId : customTimeIds) {
-            Assert.assertTrue(customTimeId != null);
+        for (CustomTimeRecord customTimeRecord : customTimeRecords) {
+            Assert.assertTrue(customTimeRecord != null);
 
-            CustomTimeRecord customTimeRecord = PersistenceManger.getInstance().getCustomTimeRecord(customTimeId);
             CustomTime customTime = new CustomTime(customTimeRecord);
-            mCustomTimes.put(customTimeId, customTime);
+            mCustomTimes.put(customTime.getId(), customTime);
         }
     }
 

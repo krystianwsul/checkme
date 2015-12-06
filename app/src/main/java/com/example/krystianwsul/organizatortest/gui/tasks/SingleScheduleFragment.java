@@ -131,6 +131,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public RootTask createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        return TaskFactory.getInstance().createSingleScheduleTask(name, mDate, mTimePickerView.getCustomTime(), mTimePickerView.getHourMinute());
+        return TaskFactory.getInstance().createSingleScheduleTask(name, mDate, mTimePickerView.getTime());
     }
 }

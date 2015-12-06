@@ -7,7 +7,6 @@ import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -23,6 +22,8 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
@@ -103,12 +104,12 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     public RootTask createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        ArrayList<Pair<CustomTime, HourMinute>> timePairs = new ArrayList<>();
+        ArrayList<Time> times = new ArrayList<>();
         Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
         for (TimeEntry timeEntry : mTimeEntryAdapter.getTimeEntries())
-            timePairs.add(new Pair<>(timeEntry.getCustomTime(), timeEntry.getHourMinute()));
+            times.add(timeEntry.getTime());
 
-        return TaskFactory.getInstance().createDailyScheduleTask(name, timePairs);
+        return TaskFactory.getInstance().createDailyScheduleTask(name, times);
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {
@@ -298,6 +299,16 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
             mHourMinute = hourMinute;
             mCustomTime = null;
+        }
+
+        public Time getTime() {
+            if (mCustomTime != null) {
+                Assert.assertTrue(mHourMinute == null);
+                return mCustomTime;
+            } else {
+                Assert.assertTrue(mHourMinute != null);
+                return new NormalTime(mHourMinute);
+            }
         }
 
         @Override

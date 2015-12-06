@@ -17,6 +17,8 @@ import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
@@ -186,6 +188,16 @@ public class TimePickerView extends LinearLayout {
 
     public CustomTime getCustomTime() {
         return mCustomTime;
+    }
+
+    public Time getTime() {
+        if (mCustomTime != null) {
+            Assert.assertTrue(mHourMinute == null);
+            return mCustomTime;
+        } else {
+            Assert.assertTrue(mHourMinute != null);
+            return new NormalTime(mHourMinute);
+        }
     }
 
     private void setSpinnerPosition(int position) {

@@ -1,7 +1,6 @@
-package com.example.krystianwsul.organizatortest.arrayadapters;
+package com.example.krystianwsul.organizatortest.gui.tasks;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;

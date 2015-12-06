@@ -18,23 +18,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ShowTaskActivity" >
+        <activity android:name=".gui.tasks.ShowTaskActivity" >
         </activity>
-        <activity android:name=".ShowGroupActivity" >
+        <activity android:name=".gui.instances.ShowGroupActivity" >
         </activity>
-        <activity android:name=".ShowInstanceActivity" >
+        <activity android:name=".gui.instances.ShowInstanceActivity" >
         </activity>
-        <activity android:name=".ShowCustomTimesActivity" >
+        <activity android:name=".gui.customtimes.ShowCustomTimesActivity" >
         </activity>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
-        <activity android:name=".ShowCustomTimeActivity" >
+        <activity android:name=".gui.customtimes.ShowCustomTimeActivity" >
         </activity>
-        <activity android:name=".CreateRootTaskActivity" >
+        <activity android:name=".gui.tasks.CreateRootTaskActivity" >
         </activity>
-        <activity android:name=".CreateChildTaskActivity" >
+        <activity android:name=".gui.tasks.CreateChildTaskActivity" >
         </activity>
     </application>
 

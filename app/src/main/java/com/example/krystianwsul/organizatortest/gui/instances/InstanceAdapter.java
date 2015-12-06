@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest.arrayadapters;
+package com.example.krystianwsul.organizatortest.gui.instances;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -8,14 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
-import com.example.krystianwsul.organizatortest.ShowInstanceActivity;
-import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 
 import junit.framework.Assert;

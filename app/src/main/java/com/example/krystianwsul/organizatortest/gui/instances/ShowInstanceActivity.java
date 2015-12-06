@@ -1,24 +1,19 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizatortest.gui.instances;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.krystianwsul.organizatortest.arrayadapters.InstanceAdapter;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.DailyInstance;
+import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.SingleInstance;
-import com.example.krystianwsul.organizatortest.domainmodel.instances.WeeklyInstance;
 
 import junit.framework.Assert;
 
@@ -80,6 +75,6 @@ public class ShowInstanceActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (!mInstance.getChildInstances().isEmpty())
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList(mInstance.getChildInstances())));
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(mInstance.getChildInstances())));
     }
 }

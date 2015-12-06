@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizatortest.gui.tasks;
 
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 

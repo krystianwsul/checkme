@@ -57,7 +57,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
 
                 Intent result = new Intent();
                 result.putExtra(NEW_PARENT_TASK_ID_KEY, newPair.second.getId());
-                setResult(0, result);
+                setResult(RESULT_OK, result);
                 finish();
             }
         });

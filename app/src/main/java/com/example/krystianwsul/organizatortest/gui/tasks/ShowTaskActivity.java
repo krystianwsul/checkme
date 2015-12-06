@@ -5,10 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
@@ -20,7 +20,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTaskActivity extends AppCompatActivity {
-    private ListView mShowTaskList;
+    private RecyclerView mShowTaskRecycler;
     private Task mTask;
 
     private static final String INTENT_KEY = "taskId";
@@ -47,22 +47,15 @@ public class ShowTaskActivity extends AppCompatActivity {
         TextView tasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
         tasksHeadingLabel.setText(mTask.getName());
 
-        TextView tasksRowSchedule = (TextView) findViewById(R.id.show_task_details);
+        TextView tasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
         String scheduleText = mTask.getScheduleText(this);
         if (TextUtils.isEmpty(scheduleText))
             tasksRowSchedule.setVisibility(View.GONE);
         else
             tasksRowSchedule.setText(scheduleText);
 
-        mShowTaskList = (ListView) findViewById(R.id.show_task_list);
-
-        mShowTaskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Task childTask = (Task) parent.getItemAtPosition(position);
-                startActivity(ShowTaskActivity.getIntent(childTask, view.getContext()));
-            }
-        });
+        mShowTaskRecycler = (RecyclerView) findViewById(R.id.show_task_recycler);
+        mShowTaskRecycler.setLayoutManager(new LinearLayoutManager(this));
 
         final AppCompatActivity activity = this;
 
@@ -94,10 +87,10 @@ public class ShowTaskActivity extends AppCompatActivity {
         super.onStart();
 
         if (mTask.getChildTasks().isEmpty()) {
-            mShowTaskList.setVisibility(View.GONE);
+            mShowTaskRecycler.setVisibility(View.GONE);
         } else {
-            mShowTaskList.setVisibility(View.VISIBLE);
-            mShowTaskList.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks())));
+            mShowTaskRecycler.setVisibility(View.VISIBLE);
+            mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks())));
         }
     }
 }

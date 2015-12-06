@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
@@ -43,8 +44,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
         TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
         ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
+        ImageView taskRowDelete = (ImageView) showTaskRow.findViewById(R.id.task_row_delete);
 
-        return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage);
+        return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage, taskRowDelete);
     }
 
     @Override
@@ -67,7 +69,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         taskHolder.mShowTaskRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                taskHolder.onClick();
+                taskHolder.onRowClick();
+            }
+        });
+
+        taskHolder.mTaskRowDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                taskHolder.onDeleteClick();
             }
         });
     }
@@ -77,25 +86,37 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         public final TextView mTaskRowName;
         public final TextView mTaskRowDetails;
         public final ImageView mTaskRowImg;
+        public final ImageView mTaskRowDelete;
 
-        public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg) {
+        public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg, ImageView taskRowDelete) {
             super(showTaskRow);
 
             Assert.assertTrue(taskRowName != null);
             Assert.assertTrue(taskRowDetails != null);
             Assert.assertTrue(taskRowImg != null);
+            Assert.assertTrue(taskRowDelete != null);
 
             mShowTaskRow = showTaskRow;
             mTaskRowName = taskRowName;
             mTaskRowDetails = taskRowDetails;
             mTaskRowImg = taskRowImg;
+            mTaskRowDelete = taskRowDelete;
         }
 
-        public void onClick() {
+        public void onRowClick() {
             Task task = mTasks.get(getAdapterPosition());
             Assert.assertTrue(task != null);
 
             mActivity.startActivity(ShowTaskActivity.getIntent(task, mActivity));
+        }
+
+        public void onDeleteClick() {
+            int position = getAdapterPosition();
+
+            Task task = mTasks.get(position);
+            Assert.assertTrue(task != null);
+
+            Toast.makeText(mActivity, "todo", Toast.LENGTH_SHORT).show()    ;
         }
     }
 }

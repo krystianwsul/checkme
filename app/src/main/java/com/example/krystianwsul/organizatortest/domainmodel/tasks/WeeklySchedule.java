@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest.domainmodel.schedules;
+package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -7,7 +7,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
 
@@ -139,7 +138,7 @@ public class WeeklySchedule extends Schedule {
 
     Schedule copy(RootTask newRootTask) {
         Assert.assertTrue(newRootTask != null);
-        return WeeklyScheduleFactory.getInstance().copy(this, newRootTask);
+        return TaskFactory.getInstance().copyWeeklySchedule(this, newRootTask);
     }
 
     public boolean current() {

@@ -1,6 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.SingleSchedule;
 
 import junit.framework.Assert;
 

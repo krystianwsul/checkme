@@ -1,20 +1,15 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyRepetitionRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 11/14/2015.
- */
 public class DailyRepetitionFactory {
     private static DailyRepetitionFactory sInstance;
 

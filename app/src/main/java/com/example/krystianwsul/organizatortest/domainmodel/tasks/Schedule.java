@@ -1,10 +1,9 @@
-package com.example.krystianwsul.organizatortest.domainmodel.schedules;
+package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 
 import junit.framework.Assert;
 

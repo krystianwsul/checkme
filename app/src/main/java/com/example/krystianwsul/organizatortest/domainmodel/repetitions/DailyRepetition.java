@@ -4,7 +4,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.DailyScheduleTime;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -14,9 +14,6 @@ import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceMang
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 10/31/2015.
- */
 public class DailyRepetition {
     private final DailyScheduleTime mDailyScheduleTime;
 

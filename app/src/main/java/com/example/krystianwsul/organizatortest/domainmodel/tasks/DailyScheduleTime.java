@@ -1,9 +1,8 @@
-package com.example.krystianwsul.organizatortest.domainmodel.schedules;
+package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetitionFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -12,11 +11,6 @@ import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleTi
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
-
-/**
- * Created by Krystian on 10/29/2015.
- */
 public class DailyScheduleTime {
     private final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
     private final DailySchedule mDailySchedule;

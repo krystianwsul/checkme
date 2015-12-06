@@ -1,8 +1,9 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
-import com.example.krystianwsul.organizatortest.DailyScheduleFragment;
-import com.example.krystianwsul.organizatortest.WeeklyScheduleFragment;
+import android.support.v4.util.Pair;
+
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -50,25 +51,32 @@ public class ScheduleFactory {
         return singleSchedule;
     }
 
-    public DailySchedule createDailySchedule(RootTask rootTask, ArrayList<DailyScheduleFragment.TimeEntry> timeEntries) {
+    public DailySchedule createDailySchedule(RootTask rootTask, ArrayList<Pair<CustomTime, HourMinute>> timePairs) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(timeEntries != null);
-        Assert.assertTrue(!timeEntries.isEmpty());
+        Assert.assertTrue(timePairs != null);
+        Assert.assertTrue(!timePairs.isEmpty());
 
-        DailySchedule dailySchedule = DailyScheduleFactory.getInstance().createDailySchedule(rootTask, timeEntries);
+        DailySchedule dailySchedule = DailyScheduleFactory.getInstance().createDailySchedule(rootTask, timePairs);
         Assert.assertTrue(dailySchedule != null);
 
         return dailySchedule;
     }
 
-    public WeeklySchedule createWeeklySchedule(RootTask rootTask, ArrayList<WeeklyScheduleFragment.DayOfWeekTimeEntry> dayOfWeekTimeEntries) {
+    public WeeklySchedule createWeeklySchedule(RootTask rootTask, ArrayList<Pair<DayOfWeek, Pair<CustomTime, HourMinute>>> dayOfWeekTimePairs) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(dayOfWeekTimeEntries != null);
-        Assert.assertTrue(!dayOfWeekTimeEntries.isEmpty());
+        Assert.assertTrue(dayOfWeekTimePairs != null);
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        WeeklySchedule weeklySchedule = WeeklyScheduleFactory.getInstance().createWeeklySchedule(rootTask, dayOfWeekTimeEntries);
+        WeeklySchedule weeklySchedule = WeeklyScheduleFactory.getInstance().createWeeklySchedule(rootTask, dayOfWeekTimePairs);
         Assert.assertTrue(weeklySchedule != null);
 
         return weeklySchedule;
+    }
+
+    public Schedule copy(Schedule schedule, RootTask newRootTask) {
+        Assert.assertTrue(schedule != null);
+        Assert.assertTrue(newRootTask != null);
+
+        return schedule.copy(newRootTask);
     }
 }

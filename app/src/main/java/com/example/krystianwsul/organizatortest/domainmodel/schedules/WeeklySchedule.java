@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class WeeklySchedule extends Schedule {
-    private final WeeklyScheduleRecord mWeelyScheduleRecord;
+    private final WeeklyScheduleRecord mWeeklyScheduleRecord;
     private final ArrayList<WeeklyScheduleDayOfWeekTime> mWeeklyScheduleDayOfWeekTimes = new ArrayList<>();
 
     WeeklySchedule(WeeklyScheduleRecord weeklyScheduleRecord, RootTask rootTask) {
         super(rootTask);
 
         Assert.assertTrue(weeklyScheduleRecord != null);
-        mWeelyScheduleRecord = weeklyScheduleRecord;
+        mWeeklyScheduleRecord = weeklyScheduleRecord;
     }
 
     void addWeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime) {
@@ -32,19 +32,28 @@ public class WeeklySchedule extends Schedule {
         mWeeklyScheduleDayOfWeekTimes.add(weeklyScheduleDayOfWeekTime);
     }
 
+    ArrayList<WeeklyScheduleDayOfWeekTime> getWeeklyScheduleDayOfWeekTimes() {
+        Assert.assertTrue(!mWeeklyScheduleDayOfWeekTimes.isEmpty());
+        return mWeeklyScheduleDayOfWeekTimes;
+    }
+
     public int getRootTaskId() {
-        return mWeelyScheduleRecord.getRootTaskId();
+        return mWeeklyScheduleRecord.getRootTaskId();
     }
 
     private TimeStamp getStartTimeStamp() {
-        return new TimeStamp(mWeelyScheduleRecord.getStartTime());
+        return new TimeStamp(mWeeklyScheduleRecord.getStartTime());
     }
 
     public TimeStamp getEndTimeStamp() {
-        if (mWeelyScheduleRecord.getEndTime() == null)
+        if (mWeeklyScheduleRecord.getEndTime() == null)
             return null;
         else
-            return new TimeStamp(mWeelyScheduleRecord.getEndTime());
+            return new TimeStamp(mWeeklyScheduleRecord.getEndTime());
+    }
+
+    void setEndTimeStamp() {
+        mWeeklyScheduleRecord.setEndTime(TimeStamp.getNow().getLong());
     }
 
     public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
@@ -122,5 +131,18 @@ public class WeeklySchedule extends Schedule {
         for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
             ret.add(weeklyScheduleDayOfWeekTime.getDayOfWeek().toString() + ", " + weeklyScheduleDayOfWeekTime.getTime().toString());
         return TextUtils.join("; ", ret);
+    }
+
+    public boolean isMutable() {
+        return false;
+    }
+
+    Schedule copy(RootTask newRootTask) {
+        Assert.assertTrue(newRootTask != null);
+        return WeeklyScheduleFactory.getInstance().copy(this, newRootTask);
+    }
+
+    public boolean current() {
+        return (getEndTimeStamp() == null || getEndTimeStamp().compareTo(TimeStamp.getNow()) > 0);
     }
 }

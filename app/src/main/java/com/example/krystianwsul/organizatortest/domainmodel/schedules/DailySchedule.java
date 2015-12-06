@@ -34,6 +34,11 @@ public class DailySchedule extends Schedule {
         mDailyScheduleTimes.add(dailyScheduleTime);
     }
 
+    ArrayList<DailyScheduleTime> getDailyScheduleTimes() {
+        Assert.assertTrue(!mDailyScheduleTimes.isEmpty());
+        return mDailyScheduleTimes;
+    }
+
     public int getRootTaskId() {
         return mDailyScheduleRecord.getRootTaskId();
     }
@@ -47,6 +52,10 @@ public class DailySchedule extends Schedule {
             return null;
         else
             return new TimeStamp(mDailyScheduleRecord.getEndTime());
+    }
+
+    void setEndTimeStamp() {
+        mDailyScheduleRecord.setEndTime(TimeStamp.getNow().getLong());
     }
 
     public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
@@ -129,5 +138,18 @@ public class DailySchedule extends Schedule {
 
     public String getTaskText(Context context) {
         return context.getString(R.string.daily) + " " + TextUtils.join(", ", getTimes());
+    }
+
+    public boolean isMutable() {
+        return false;
+    }
+
+    Schedule copy(RootTask newRootTask) {
+        Assert.assertTrue(newRootTask != null);
+        return DailyScheduleFactory.getInstance().copy(this, newRootTask);
+    }
+
+    public boolean current() {
+        return (getEndTimeStamp() == null || getEndTimeStamp().compareTo(TimeStamp.getNow()) > 0);
     }
 }

@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -103,8 +104,13 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     @Override
     public RootTask createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(!mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries().isEmpty());
 
-        return TaskFactory.getInstance().createWeeklyScheduleTask(name, mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries());
+        ArrayList<Pair<DayOfWeek, Pair<CustomTime, HourMinute>>> dayOfWeekTimePairs = new ArrayList<>();
+        for (DayOfWeekTimeEntry dayOfWeekTimeEntry : mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
+            dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), new Pair<>(dayOfWeekTimeEntry.getCustomTime(), dayOfWeekTimeEntry.getHourMinute())));
+
+        return TaskFactory.getInstance().createWeeklyScheduleTask(name, dayOfWeekTimePairs);
     }
 
     private class DayOfWeekTimeEntryAdapter extends RecyclerView.Adapter<DayOfWeekTimeEntryAdapter.DayOfWeekTimeHolder> {

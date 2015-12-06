@@ -10,9 +10,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-/**
- * Created by Krystian on 10/17/2015.
- */
 public abstract class Schedule {
     protected final RootTask mRootTask;
 
@@ -29,4 +26,10 @@ public abstract class Schedule {
     }
 
     public abstract TimeStamp getEndTimeStamp();
+
+    public abstract boolean isMutable();
+
+    abstract Schedule copy(RootTask newRootTask);
+
+    public abstract boolean current();
 }

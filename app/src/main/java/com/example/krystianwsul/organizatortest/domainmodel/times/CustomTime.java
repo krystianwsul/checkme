@@ -1,15 +1,14 @@
 package com.example.krystianwsul.organizatortest.domainmodel.times;
 
-import com.example.krystianwsul.organizatortest.persistencemodel.CustomTimeRecord;
+import android.support.v4.util.Pair;
+
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
+import com.example.krystianwsul.organizatortest.persistencemodel.CustomTimeRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-/**
- * Created by Krystian on 10/12/2015.
- */
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
 
@@ -120,5 +119,9 @@ public class CustomTime implements Time {
 
         for (CustomTimeListener customTimeListener : mCustomTimeListeners)
             customTimeListener.onCustomTimeHourMinuteChange(this, dayOfWeek, oldHourMinute, newHourMinute);
+    }
+
+    public Pair<CustomTime, HourMinute> getPair() {
+        return new Pair<>(this, null);
     }
 }

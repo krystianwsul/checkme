@@ -6,7 +6,7 @@ public class WeeklyScheduleRecord {
     private final int mRootTaskId;
 
     private final long mStartTime;
-    private final Long mEndTime;
+    private Long mEndTime;
 
     WeeklyScheduleRecord(int taskId, long startTime, Long endTime) {
         Assert.assertTrue((endTime == null) || startTime < endTime);
@@ -26,5 +26,9 @@ public class WeeklyScheduleRecord {
 
     public Long getEndTime() {
         return mEndTime;
+    }
+
+    public void setEndTime(long endTime) {
+        mEndTime = endTime;
     }
 }

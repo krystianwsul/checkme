@@ -2,27 +2,24 @@ package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
+import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-/**
- * Created by Krystian on 10/17/2015.
- */
 public class SingleSchedule extends Schedule {
-    private final SingleScheduleRecord mSingleScheduleRecord;
+    final SingleScheduleRecord mSingleScheduleRecord;
 
     SingleSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
         super(rootTask);
@@ -81,5 +78,18 @@ public class SingleSchedule extends Schedule {
 
     public TimeStamp getEndTimeStamp() {
         return null;
+    }
+
+    public boolean isMutable() {
+        return true;
+    }
+
+    Schedule copy(RootTask newRootTask) {
+        Assert.assertTrue(newRootTask != null);
+        throw new UnsupportedOperationException("can't copy single schedule");
+    }
+
+    public boolean current() {
+        return true;
     }
 }

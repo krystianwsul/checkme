@@ -1,34 +1,42 @@
 package com.example.krystianwsul.organizatortest.domainmodel.times;
 
+import android.support.v4.util.Pair;
+
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 
-import java.security.Timestamp;
-
 public class NormalTime implements com.example.krystianwsul.organizatortest.domainmodel.times.Time {
-    private HourMinute mTime;
+    private final HourMinute mHourMinute;
 
     public static NormalTime getNow() {
         return new NormalTime(TimeStamp.getNow().getHourMinute());
     }
 
-    public NormalTime(HourMinute time) {
-        mTime = time;
+    public NormalTime(HourMinute hourMinute) {
+        mHourMinute = hourMinute;
     }
 
     public NormalTime(int hour, int minute) {
-        mTime = new HourMinute(hour, minute);
+        mHourMinute = new HourMinute(hour, minute);
     }
 
     public String getName() {
-        return mTime.getHour() + ":" + mTime.getMinute();
+        return mHourMinute.getHour() + ":" + mHourMinute.getMinute();
     }
 
     public HourMinute getHourMinute(DayOfWeek dayOfWeek) {
-        return mTime;
+        return mHourMinute;
+    }
+
+    public HourMinute getHourMinute() {
+        return mHourMinute;
     }
 
     public String toString() {
-        return mTime.toString();
+        return mHourMinute.toString();
+    }
+
+    public Pair<CustomTime, HourMinute> getPair() {
+        return new Pair<>(null, mHourMinute);
     }
 }

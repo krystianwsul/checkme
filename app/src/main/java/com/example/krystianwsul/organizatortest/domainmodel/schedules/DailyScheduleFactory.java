@@ -1,7 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.schedules;
 
-import com.example.krystianwsul.organizatortest.DailyScheduleFragment;
+import android.support.v4.util.Pair;
+
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
@@ -55,10 +58,10 @@ public class DailyScheduleFactory {
         return dailySchedule;
     }
 
-    public DailySchedule createDailySchedule(RootTask rootTask, ArrayList<DailyScheduleFragment.TimeEntry> timeEntries) {
+    public DailySchedule createDailySchedule(RootTask rootTask, ArrayList<Pair<CustomTime, HourMinute>> timePairs) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(timeEntries != null);
-        Assert.assertTrue(!timeEntries.isEmpty());
+        Assert.assertTrue(timePairs != null);
+        Assert.assertTrue(!timePairs.isEmpty());
 
         DailyScheduleRecord dailyScheduleRecord = PersistenceManger.getInstance().createDailyScheduleRecord(rootTask.getId());
         Assert.assertTrue(dailyScheduleRecord != null);
@@ -67,10 +70,31 @@ public class DailyScheduleFactory {
 
         DailyScheduleTimeFactory dailyScheduleTimeFactory = DailyScheduleTimeFactory.getInstance();
 
-        for (DailyScheduleFragment.TimeEntry timeEntry : timeEntries)
-            dailySchedule.addDailyScheduleTime(dailyScheduleTimeFactory.createDailyScheduleTime(dailySchedule, timeEntry.getCustomTime(), timeEntry.getHourMinute()));
+        for (Pair<CustomTime, HourMinute> time : timePairs) {
+            CustomTime customTime = time.first;
+            HourMinute hourMinute = time.second;
+            Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+            dailySchedule.addDailyScheduleTime(dailyScheduleTimeFactory.createDailyScheduleTime(dailySchedule, customTime, hourMinute));
+        }
 
         mDailySchedules.put(dailySchedule.getRootTaskId(), dailySchedule);
         return dailySchedule;
+    }
+
+    DailySchedule copy(DailySchedule oldDailySchedule, RootTask newRootTask) {
+        Assert.assertTrue(oldDailySchedule != null);
+        Assert.assertTrue(newRootTask != null);
+
+        oldDailySchedule.setEndTimeStamp();
+
+        ArrayList<Pair<CustomTime, HourMinute>> timePairs = new ArrayList<>();
+        Assert.assertTrue(!oldDailySchedule.getDailyScheduleTimes().isEmpty());
+        for (DailyScheduleTime dailyScheduleTime : oldDailySchedule.getDailyScheduleTimes()) {
+            Assert.assertTrue(dailyScheduleTime != null);
+            timePairs.add(dailyScheduleTime.getTime().getPair());
+        }
+
+        return createDailySchedule(newRootTask, timePairs);
     }
 }

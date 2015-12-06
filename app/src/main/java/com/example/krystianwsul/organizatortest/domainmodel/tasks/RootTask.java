@@ -12,7 +12,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class RootTask extends Task {
-    private Schedule mSchedule;
+    Schedule mSchedule;
 
     RootTask(TaskRecord taskRecord) {
         super(taskRecord);
@@ -29,11 +29,6 @@ public class RootTask extends Task {
         return mSchedule.getTaskText(context);
     }
 
-    private Schedule getSchedule() {
-        Assert.assertTrue(mSchedule != null);
-        return mSchedule;
-    }
-
     public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
         Assert.assertTrue(mSchedule != null);
         Assert.assertTrue(endTimeStamp != null);
@@ -45,11 +40,16 @@ public class RootTask extends Task {
         return this;
     }
 
-    public Task getParentTask() {
-        return null;
-    }
-
     public boolean isRootTask() {
         return true;
+    }
+
+    public boolean isMutable() {
+        return mSchedule.isMutable();
+    }
+
+    public boolean current() {
+        Assert.assertTrue(mSchedule != null);
+        return mSchedule.current();
     }
 }

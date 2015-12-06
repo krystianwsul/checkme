@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -101,7 +102,12 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     public RootTask createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        return TaskFactory.getInstance().createDailyScheduleTask(name, mTimeEntryAdapter.getTimeEntries());
+        ArrayList<Pair<CustomTime, HourMinute>> timePairs = new ArrayList<>();
+        Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
+        for (TimeEntry timeEntry : mTimeEntryAdapter.getTimeEntries())
+            timePairs.add(new Pair<>(timeEntry.getCustomTime(), timeEntry.getHourMinute()));
+
+        return TaskFactory.getInstance().createDailyScheduleTask(name, timePairs);
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {

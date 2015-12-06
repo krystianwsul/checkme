@@ -2,16 +2,10 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 
-import com.example.krystianwsul.organizatortest.domainmodel.schedules.Schedule;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
-/**
- * Created by Krystian on 10/12/2015.
- */
 public class ChildTask extends Task {
     private final Task mParentTask;
 
@@ -30,10 +24,6 @@ public class ChildTask extends Task {
 
     public RootTask getRootTask() {
         return mParentTask.getRootTask();
-    }
-
-    public Task getParentTask() {
-        return mParentTask;
     }
 
     public boolean isRootTask() {

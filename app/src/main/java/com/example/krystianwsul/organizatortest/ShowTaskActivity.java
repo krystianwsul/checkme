@@ -24,6 +24,7 @@ public class ShowTaskActivity extends AppCompatActivity {
     private Task mTask;
 
     private static final String INTENT_KEY = "taskId";
+    private static final int ADD_CHILD_KEY = 1;
 
     public static Intent getIntent(Task task, Context context) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
@@ -69,18 +70,34 @@ public class ShowTaskActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateChildTaskActivity.getIntent(activity, mTask));
+                startActivityForResult(CreateChildTaskActivity.getIntent(activity, mTask), ADD_CHILD_KEY);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Assert.assertTrue(requestCode == ADD_CHILD_KEY);
+
+        if (resultCode != RESULT_CANCELED) {
+            Assert.assertTrue(data.hasExtra(CreateChildTaskActivity.NEW_PARENT_TASK_ID_KEY));
+
+            int taskId = data.getIntExtra(CreateChildTaskActivity.NEW_PARENT_TASK_ID_KEY, -1);
+            Assert.assertTrue(taskId != -1);
+
+            mTask = TaskFactory.getInstance().getTask(taskId);
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        if (mTask.getChildTasks().isEmpty())
+        if (mTask.getChildTasks().isEmpty()) {
             mShowTaskList.setVisibility(View.GONE);
-        else
+        } else {
+            mShowTaskList.setVisibility(View.VISIBLE);
             mShowTaskList.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks())));
+        }
     }
 }

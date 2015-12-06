@@ -10,12 +10,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.krystianwsul.organizatortest.arrayadapters.TaskAdapter;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -56,15 +58,19 @@ public class TaskListFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        ArrayList<Task> rootTasks = new ArrayList<Task>(TaskFactory.getInstance().getRootTasks());
+        Collection<RootTask> allRootTasks = TaskFactory.getInstance().getRootTasks();
+        ArrayList<Task> currentRootTasks = new ArrayList<>();
+        for (RootTask rootTask : allRootTasks)
+            if (rootTask.current())
+                currentRootTasks.add(rootTask);
 
-        Collections.sort(rootTasks, new Comparator<Task>() {
+        Collections.sort(currentRootTasks, new Comparator<Task>() {
             @Override
             public int compare(Task lhs, Task rhs) {
                 return lhs.getName().compareTo(rhs.getName());
             }
         });
 
-        mTasksList.setAdapter(new TaskAdapter(getContext(), rootTasks));
+        mTasksList.setAdapter(new TaskAdapter(getContext(), currentRootTasks));
     }
 }

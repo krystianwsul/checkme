@@ -235,7 +235,7 @@ public class TaskFactory {
         return rootTask;
     }
 
-    public Task addChildTask(Task oldParentTask, String name) {
+    public ChildTask addChildTask(Task oldParentTask, String name) {
         Assert.assertTrue(oldParentTask != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -253,7 +253,7 @@ public class TaskFactory {
 
         newParentTask.addChildTask(newChildTask);
 
-        return newParentTask;
+        return newChildTask;
     }
 
     private Pair<RootTask, Task> copyRootTask(RootTask oldRootTask, Task oldHoldTask) {
@@ -263,7 +263,7 @@ public class TaskFactory {
         if (oldRootTask.isMutable())
             return new Pair<>(oldRootTask, oldHoldTask);
 
-        TaskRecord newRootTaskRecord = PersistenceManger.getInstance().createTaskRecord(null, oldRootTask.getName(), oldHoldTask.getOrdinal());
+        TaskRecord newRootTaskRecord = PersistenceManger.getInstance().createTaskRecord(null, oldRootTask.getName(), oldRootTask.getOrdinal());
         Assert.assertTrue(newRootTaskRecord != null);
 
         RootTask newRootTask = new RootTask(newRootTaskRecord);

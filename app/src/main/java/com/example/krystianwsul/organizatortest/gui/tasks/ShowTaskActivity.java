@@ -24,7 +24,11 @@ public class ShowTaskActivity extends AppCompatActivity {
     private Task mTask;
 
     private static final String INTENT_KEY = "taskId";
-    private static final int ADD_CHILD_KEY = 1;
+    private static final int ADD_CHILD_KEY = 2;
+    public static final int SHOW_CHILD = 3;
+
+    public static final int TASK_UPDATED = 2;
+    public static final String UPDATED_TASK_ID_KEY = "updatedTaskId";
 
     public static Intent getIntent(Task task, Context context) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
@@ -70,15 +74,32 @@ public class ShowTaskActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Assert.assertTrue(requestCode == ADD_CHILD_KEY);
+        if (requestCode == ADD_CHILD_KEY) {
+            if (resultCode == CreateChildTaskActivity.CHILD_TASK_CREATED) {
+                Assert.assertTrue(data.hasExtra(CreateChildTaskActivity.NEW_CHILD_TASK_ID_KEY));
 
-        if (resultCode != RESULT_CANCELED) {
-            Assert.assertTrue(data.hasExtra(CreateChildTaskActivity.NEW_PARENT_TASK_ID_KEY));
+                int newChildTaskId = data.getIntExtra(CreateChildTaskActivity.NEW_CHILD_TASK_ID_KEY, -1);
+                Assert.assertTrue(newChildTaskId != -1);
 
-            int taskId = data.getIntExtra(CreateChildTaskActivity.NEW_PARENT_TASK_ID_KEY, -1);
-            Assert.assertTrue(taskId != -1);
+                mTask = TaskFactory.getInstance().getTask(newChildTaskId).getParentTask();
 
-            mTask = TaskFactory.getInstance().getTask(taskId);
+                Intent result = new Intent();
+                result.putExtra(UPDATED_TASK_ID_KEY, mTask.getId());
+                setResult(TASK_UPDATED, result);
+            }
+        } else if (requestCode == SHOW_CHILD) {
+            if (resultCode == TASK_UPDATED) {
+                Assert.assertTrue(data.hasExtra(UPDATED_TASK_ID_KEY));
+
+                int newChildTaskId = data.getIntExtra(UPDATED_TASK_ID_KEY, -1);
+                Assert.assertTrue(newChildTaskId != -1);
+
+                mTask = TaskFactory.getInstance().getTask(newChildTaskId).getParentTask();
+
+                Intent result = new Intent();
+                result.putExtra(UPDATED_TASK_ID_KEY, mTask.getId());
+                setResult(TASK_UPDATED, result);
+            }
         }
     }
 

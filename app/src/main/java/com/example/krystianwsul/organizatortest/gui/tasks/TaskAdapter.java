@@ -96,7 +96,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             Task task = mTasks.get(getAdapterPosition());
             Assert.assertTrue(task != null);
 
-            mActivity.startActivity(ShowTaskActivity.getIntent(task, mActivity));
+            mActivity.startActivityForResult(ShowTaskActivity.getIntent(task, mActivity), ShowTaskActivity.SHOW_CHILD);
         }
 
         public void onDeleteClick() {

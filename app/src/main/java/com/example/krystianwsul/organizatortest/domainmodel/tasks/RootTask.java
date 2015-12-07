@@ -51,4 +51,8 @@ public class RootTask extends Task {
         Assert.assertTrue(mSchedule != null);
         return mSchedule.current();
     }
+
+    public Task getParentTask() {
+        throw new UnsupportedOperationException("can't get parent task of root task");
+    }
 }

@@ -235,7 +235,7 @@ public class TaskFactory {
         return rootTask;
     }
 
-    public Pair<ChildTask, Task> addChildTask(Task oldParentTask, String name) {
+    public Task addChildTask(Task oldParentTask, String name) {
         Assert.assertTrue(oldParentTask != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -253,7 +253,7 @@ public class TaskFactory {
 
         newParentTask.addChildTask(newChildTask);
 
-        return new Pair<>(newChildTask, newParentTask);
+        return newParentTask;
     }
 
     private Pair<RootTask, Task> copyRootTask(RootTask oldRootTask, Task oldHoldTask) {

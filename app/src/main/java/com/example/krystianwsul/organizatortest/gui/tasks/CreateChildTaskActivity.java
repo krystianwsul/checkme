@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizatortest.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.krystianwsul.organizatortest.R;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -53,10 +51,10 @@ public class CreateChildTaskActivity extends AppCompatActivity {
                     return;
                 }
 
-                Pair<ChildTask, Task> newPair = TaskFactory.getInstance().addChildTask(parentTask, name);
+                Task newParentTask = TaskFactory.getInstance().addChildTask(parentTask, name);
 
                 Intent result = new Intent();
-                result.putExtra(NEW_PARENT_TASK_ID_KEY, newPair.second.getId());
+                result.putExtra(NEW_PARENT_TASK_ID_KEY, newParentTask.getId());
                 setResult(RESULT_OK, result);
                 finish();
             }

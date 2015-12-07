@@ -116,7 +116,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             Task task = mTasks.get(position);
             Assert.assertTrue(task != null);
 
-            Toast.makeText(mActivity, "todo", Toast.LENGTH_SHORT).show()    ;
+            Toast.makeText(mActivity, "todo", Toast.LENGTH_SHORT).show();
         }
     }
 }

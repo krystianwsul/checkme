@@ -21,12 +21,13 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class TaskFactory {
     private static TaskFactory sInstance;
 
-    private final HashMap<Integer, RootTask> mRootTasks = new HashMap<>();
+    private final ArrayList<RootTask> mRootTasks = new ArrayList<>();
     private final HashMap<Integer, Task> mTasks = new HashMap<>();
 
     public static TaskFactory getInstance() {
@@ -54,7 +55,9 @@ public class TaskFactory {
 
             initializeChildren(rootTask);
 
-            mRootTasks.put(rootTask.getId(), rootTask);
+            mRootTasks.add(rootTask.getOrdinal(), rootTask);
+
+            Assert.assertTrue(!mTasks.containsKey(rootTask.getId()));
             mTasks.put(rootTask.getId(), rootTask);
         }
     }
@@ -147,13 +150,25 @@ public class TaskFactory {
 
         initializeChildren(childTask);
 
+        Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
         mTasks.put(childTask.getId(), childTask);
 
         return childTask;
     }
 
     public Collection<RootTask> getRootTasks() {
-        return mRootTasks.values();
+        return mRootTasks;
+    }
+
+    public int getNextRootOrdinal() {
+        if (mRootTasks.isEmpty()) {
+            return 0;
+        } else {
+            ArrayList<Integer> ordinals = new ArrayList<>();
+            for (RootTask rootTask : mRootTasks)
+                ordinals.add(rootTask.getOrdinal());
+            return Collections.max(ordinals) + 1;
+        }
     }
 
     public Task getTask(int taskId) {
@@ -207,12 +222,14 @@ public class TaskFactory {
     private RootTask createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(null, name);
+        TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(null, name, getNextRootOrdinal());
         Assert.assertTrue(taskRecord != null);
 
         RootTask rootTask = new RootTask(taskRecord);
 
-        mRootTasks.put(rootTask.getId(), rootTask);
+        mRootTasks.add(rootTask);
+
+        Assert.assertTrue(!mTasks.containsKey(rootTask.getId()));
         mTasks.put(rootTask.getId(), rootTask);
 
         return rootTask;
@@ -231,7 +248,7 @@ public class TaskFactory {
         Assert.assertTrue(newRootTask != null);
         Assert.assertTrue(newParentTask != null);
 
-        ChildTask newChildTask = createChildTask(newParentTask, name);
+        ChildTask newChildTask = createChildTask(newParentTask, name, newParentTask.getNextChildOrdinal());
         Assert.assertTrue(newChildTask != null);
 
         newParentTask.addChildTask(newChildTask);
@@ -246,11 +263,13 @@ public class TaskFactory {
         if (oldRootTask.isMutable())
             return new Pair<>(oldRootTask, oldHoldTask);
 
-        TaskRecord newRootTaskRecord = PersistenceManger.getInstance().createTaskRecord(null, oldRootTask.getName());
+        TaskRecord newRootTaskRecord = PersistenceManger.getInstance().createTaskRecord(null, oldRootTask.getName(), oldHoldTask.getOrdinal());
         Assert.assertTrue(newRootTaskRecord != null);
 
         RootTask newRootTask = new RootTask(newRootTaskRecord);
-        mRootTasks.put(newRootTask.getId(), newRootTask);
+
+        mRootTasks.add(newRootTask);
+        Assert.assertTrue(!mTasks.containsKey(newRootTask.getId()));
         mTasks.put(newRootTask.getId(), newRootTask);
 
         Task newHoldTask = null;
@@ -283,7 +302,7 @@ public class TaskFactory {
         Assert.assertTrue(oldChildTask != null);
         Assert.assertTrue(oldHoldTask != null);
 
-        ChildTask newChildTask = createChildTask(newParentTask, oldChildTask.getName());
+        ChildTask newChildTask = createChildTask(newParentTask, oldChildTask.getName(), oldChildTask.getOrdinal());
         Assert.assertTrue(newChildTask != null);
 
         Task newHoldTask = null;
@@ -307,14 +326,15 @@ public class TaskFactory {
         return new Pair<>(newChildTask, newHoldTask);
     }
 
-    private ChildTask createChildTask(Task parentTask, String name) {
+    private ChildTask createChildTask(Task parentTask, String name, int ordinal) {
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        TaskRecord childTaskRecord = PersistenceManger.getInstance().createTaskRecord(parentTask, name);
+        TaskRecord childTaskRecord = PersistenceManger.getInstance().createTaskRecord(parentTask, name, ordinal);
         Assert.assertTrue(childTaskRecord != null);
 
         ChildTask childTask = new ChildTask(childTaskRecord, parentTask);
+        Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
         mTasks.put(childTask.getId(), childTask);
         return childTask;
     }

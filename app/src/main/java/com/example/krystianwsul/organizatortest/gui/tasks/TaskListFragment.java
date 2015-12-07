@@ -18,8 +18,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.TreeMap;
 
 public class TaskListFragment extends Fragment {
     private RecyclerView mTasksRecycler;
@@ -52,18 +51,14 @@ public class TaskListFragment extends Fragment {
         super.onStart();
 
         Collection<RootTask> allRootTasks = TaskFactory.getInstance().getRootTasks();
-        ArrayList<Task> currentRootTasks = new ArrayList<>();
-        for (RootTask rootTask : allRootTasks)
-            if (rootTask.current())
-                currentRootTasks.add(rootTask);
-
-        Collections.sort(currentRootTasks, new Comparator<Task>() {
-            @Override
-            public int compare(Task lhs, Task rhs) {
-                return lhs.getName().compareTo(rhs.getName());
+        TreeMap<Integer, Task> currentRootTasks = new TreeMap<>();
+        for (RootTask rootTask : allRootTasks) {
+            if (rootTask.current()) {
+                Assert.assertTrue(!currentRootTasks.containsKey(rootTask.getOrdinal()));
+                currentRootTasks.put(rootTask.getOrdinal(), rootTask);
             }
-        });
+        }
 
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), currentRootTasks));
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), new ArrayList<>(currentRootTasks.values())));
     }
 }

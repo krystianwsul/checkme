@@ -67,33 +67,33 @@ public class PersistenceManger {
         CustomTimeRecord afterWork = new CustomTimeRecord(1, "po pracy", 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0);
         mCustomTimeRecords.put(afterWork.getId(), afterWork);
 
-        TaskRecord zakupy = new TaskRecord(0, null, "zakupy");
+        TaskRecord zakupy = new TaskRecord(0, null, "zakupy", 0);
         mTaskRecords.put(zakupy.getId(), zakupy);
-        TaskRecord halls = new TaskRecord(1, zakupy.getId(), "halls");
+        TaskRecord halls = new TaskRecord(1, zakupy.getId(), "halls", 0);
         mTaskRecords.put(halls.getId(), halls);
-        TaskRecord biedronka = new TaskRecord(2, zakupy.getId(), "biedronka");
+        TaskRecord biedronka = new TaskRecord(2, zakupy.getId(), "biedronka", 1);
         mTaskRecords.put(biedronka.getId(), biedronka);
-        TaskRecord czosnek = new TaskRecord(3, biedronka.getId(), "czosnek");
+        TaskRecord czosnek = new TaskRecord(3, biedronka.getId(), "czosnek", 1);
         mTaskRecords.put(czosnek.getId(), czosnek);
-        TaskRecord piersi = new TaskRecord(4, biedronka.getId(), "piersi");
+        TaskRecord piersi = new TaskRecord(4, biedronka.getId(), "piersi", 2);
         mTaskRecords.put(piersi.getId(), piersi);
 
         SingleScheduleRecord today15 = new SingleScheduleRecord(zakupy.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 15, 0);
         mSingleScheduleRecords.put(today15.getRootTaskId(), today15);
 
-        TaskRecord rachunek = new TaskRecord(5, null, "rachunek");
+        TaskRecord rachunek = new TaskRecord(5, null, "rachunek", 1);
         mTaskRecords.put(rachunek.getId(), rachunek);
 
         SingleScheduleRecord yesterday16 = new SingleScheduleRecord(rachunek.getId(), calendarYesterday.get(Calendar.YEAR), calendarYesterday.get(Calendar.MONTH) + 1, calendarYesterday.get(Calendar.DAY_OF_MONTH), null, 16, 0);
         mSingleScheduleRecords.put(yesterday16.getRootTaskId(), yesterday16);
 
-        TaskRecord banany = new TaskRecord(6, null, "banany");
+        TaskRecord banany = new TaskRecord(6, null, "banany", 2);
         mTaskRecords.put(banany.getId(), banany);
 
         SingleScheduleRecord today17 = new SingleScheduleRecord(banany.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), null, 17, 0);
         mSingleScheduleRecords.put(today17.getRootTaskId(), today17);
 
-        TaskRecord iliotibial = new TaskRecord(7, null, "iliotibial band stretch");
+        TaskRecord iliotibial = new TaskRecord(7, null, "iliotibial band stretch", 3);
         mTaskRecords.put(iliotibial.getId(), iliotibial);
 
         DailyScheduleRecord alwaysAfterWakingAfterWork = new DailyScheduleRecord(iliotibial.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
@@ -103,7 +103,7 @@ public class PersistenceManger {
         DailyScheduleTimeRecord alwaysAfterWakingAfterWork1 = new DailyScheduleTimeRecord(2, alwaysAfterWakingAfterWork.getRootTaskId(), afterWork.getId(), null, null);
         mDailyScheduleTimeRecords.put(alwaysAfterWakingAfterWork1.getId(), alwaysAfterWakingAfterWork1);
 
-        TaskRecord hamstring = new TaskRecord(8, null, "hamstring stretch");
+        TaskRecord hamstring = new TaskRecord(8, null, "hamstring stretch", 4);
         mTaskRecords.put(hamstring.getId(), hamstring);
 
         DailyScheduleRecord alwaysAfterWork = new DailyScheduleRecord(hamstring.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
@@ -111,13 +111,13 @@ public class PersistenceManger {
         DailyScheduleTimeRecord alwaysAfterWork0 = new DailyScheduleTimeRecord(0, alwaysAfterWork.getRootTaskId(), afterWork.getId(), null, null);
         mDailyScheduleTimeRecords.put(alwaysAfterWork0.getId(), alwaysAfterWork0);
 
-        TaskRecord piecyk = new TaskRecord(9, null, "piecyk");
+        TaskRecord piecyk = new TaskRecord(9, null, "piecyk", 5);
         mTaskRecords.put(piecyk.getId(), piecyk);
 
         SingleScheduleRecord todayAfterWaking = new SingleScheduleRecord(piecyk.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), afterWaking.getId(), null, null);
         mSingleScheduleRecords.put(todayAfterWaking.getRootTaskId(), todayAfterWaking);
 
-        TaskRecord paznokcie = new TaskRecord(10, null, "paznokcie");
+        TaskRecord paznokcie = new TaskRecord(10, null, "paznokcie", 6);
         mTaskRecords.put(paznokcie.getId(), paznokcie);
 
         WeeklyScheduleRecord crazyWeekend = new WeeklyScheduleRecord(paznokcie.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
@@ -129,7 +129,7 @@ public class PersistenceManger {
         WeeklyScheduleDayOfWeekTimeRecord crazyWeekend2 = new WeeklyScheduleDayOfWeekTimeRecord(2, crazyWeekend.getRootTaskId(), DayOfWeek.SUNDAY.ordinal(), null, 17, 0);
         mWeeklyScheduleDayOfWeekTimeRecords.put(crazyWeekend2.getId(), crazyWeekend2);
 
-        TaskRecord task6 = new TaskRecord(11, null, "task 6");
+        TaskRecord task6 = new TaskRecord(11, null, "task 6", 7);
         mTaskRecords.put(task6.getId(), task6);
 
         DailyScheduleRecord task6schedule = new DailyScheduleRecord(task6.getId(), calendarFewDaysAgo.getTimeInMillis(), null);
@@ -257,14 +257,14 @@ public class PersistenceManger {
         return instanceRecord;
     }
 
-    public TaskRecord createTaskRecord(Task parentTask, String name) {
+    public TaskRecord createTaskRecord(Task parentTask, String name, int ordinal) {
         Assert.assertTrue(name != null);
 
         int taskId = Collections.max(mTaskRecords.keySet()) + 1;
 
         Integer parentId = (parentTask != null ? parentTask.getId() : null);
 
-        TaskRecord taskRecord = new TaskRecord(taskId, parentId, name);
+        TaskRecord taskRecord = new TaskRecord(taskId, parentId, name, ordinal);
         mTaskRecords.put(taskRecord.getId(), taskRecord);
 
         return taskRecord;

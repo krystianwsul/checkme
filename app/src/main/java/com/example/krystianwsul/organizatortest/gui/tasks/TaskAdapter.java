@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.krystianwsul.organizatortest.R;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 
 import junit.framework.Assert;
@@ -60,7 +60,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         else
             taskHolder.mTaskRowDetails.setText(scheduleText);
 
-        if (task.getChildTasks().isEmpty())
+        if (task.getChildTasks(TimeStamp.getNow()).isEmpty())
             taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_label_outline_black_24dp));
         else
             taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_list_black_24dp));
@@ -115,7 +115,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             Task task = mTasks.get(position);
             Assert.assertTrue(task != null);
 
-            Toast.makeText(mActivity, "todo", Toast.LENGTH_SHORT).show();
+            task.setEndTimeStamp();
+
+            mTasks.remove(position);
+            notifyItemRemoved(position);
         }
     }
 }

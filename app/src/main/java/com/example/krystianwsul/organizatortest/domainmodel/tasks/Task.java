@@ -7,6 +7,7 @@ import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.TreeMap;
@@ -24,8 +25,12 @@ public abstract class Task {
         return mTaskRecord.getName();
     }
 
-    public Collection<ChildTask> getChildTasks() {
-        return mChildrenTasks.values();
+    public Collection<ChildTask> getChildTasks(TimeStamp timeStamp) {
+        ArrayList<ChildTask> ret = new ArrayList<>();
+        for (ChildTask childTask : mChildrenTasks.values())
+            if (childTask.current(timeStamp))
+                ret.add(childTask);
+        return ret;
     }
 
     public int getId() {
@@ -64,6 +69,10 @@ public abstract class Task {
             return new TimeStamp(mTaskRecord.getEndTime());
         else
             return null;
+    }
+
+    public void setEndTimeStamp() {
+        mTaskRecord.setEndTime(TimeStamp.getNow().getLong());
     }
 
     public boolean current(TimeStamp timeStamp) {

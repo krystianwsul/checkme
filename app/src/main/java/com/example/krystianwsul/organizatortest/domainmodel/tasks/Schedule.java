@@ -47,7 +47,7 @@ public abstract class Schedule {
             return new TimeStamp(mScheduleRecord.getEndTime());
     }
 
-    void setEndTimeStamp() {
+    public void setEndTimeStamp() {
         mScheduleRecord.setEndTime(TimeStamp.getNow().getLong());
     }
 

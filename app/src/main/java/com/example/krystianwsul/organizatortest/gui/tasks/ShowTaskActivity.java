@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -73,11 +72,6 @@ public class ShowTaskActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        ArrayList<Task> childTasks = new ArrayList<>();
-        for (ChildTask childTask : mTask.getChildTasks())
-            if (childTask.current(TimeStamp.getNow()))
-                childTasks.add(childTask);
-
-        mShowTaskRecycler.setAdapter(new TaskAdapter(this, childTasks));
+        mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks(TimeStamp.getNow()))));
     }
 }

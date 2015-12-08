@@ -56,10 +56,7 @@ public abstract class Instance {
 
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
-        for (ChildTask childTask : mTask.getChildTasks()) {
-            if (!childTask.current(getDateTime().getTimeStamp()))
-                continue;
-
+        for (ChildTask childTask : mTask.getChildTasks(getDateTime().getTimeStamp())) {
             Instance childInstance = getChildInstance(childTask);
             Assert.assertTrue(childInstance != null);
             childInstances.add(childInstance);

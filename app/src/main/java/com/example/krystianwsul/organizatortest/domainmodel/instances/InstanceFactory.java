@@ -11,9 +11,6 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-/**
- * Created by Krystian on 11/18/2015.
- */
 public class InstanceFactory {
     private static InstanceFactory sInstance;
 
@@ -68,7 +65,7 @@ public class InstanceFactory {
         Assert.assertTrue(task != null);
         Assert.assertTrue(singleRepetition != null);
 
-        InstanceRecord instanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task.getId());
+        InstanceRecord instanceRecord = PersistenceManger.getInstance().getSingleInstanceRecord(task);
         if (instanceRecord != null)
             return new SingleInstance(task, singleRepetition, instanceRecord);
         else
@@ -101,7 +98,7 @@ public class InstanceFactory {
         Assert.assertTrue(task != null);
         Assert.assertTrue(dailyRepetition != null);
 
-        InstanceRecord instanceRecord = PersistenceManger.getInstance().getDailyInstanceRecord(task.getId(), dailyRepetition.getId());
+        InstanceRecord instanceRecord = PersistenceManger.getInstance().getDailyInstanceRecord(task, dailyRepetition);
         if (instanceRecord != null)
             return new DailyInstance(task, dailyRepetition, instanceRecord);
         else
@@ -134,7 +131,7 @@ public class InstanceFactory {
         Assert.assertTrue(task != null);
         Assert.assertTrue(weeklyRepetition != null);
 
-        InstanceRecord instanceRecord = PersistenceManger.getInstance().getWeeklyInstanceRecord(task.getId(), weeklyRepetition.getId());
+        InstanceRecord instanceRecord = PersistenceManger.getInstance().getWeeklyInstanceRecord(task, weeklyRepetition);
         if (instanceRecord != null)
             return new WeeklyInstance(task, weeklyRepetition, instanceRecord);
         else

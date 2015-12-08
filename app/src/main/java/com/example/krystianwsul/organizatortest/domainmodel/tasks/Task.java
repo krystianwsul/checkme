@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 
 import junit.framework.Assert;
@@ -54,5 +55,21 @@ public abstract class Task {
 
     public abstract boolean isRootTask();
 
-    public abstract Task getParentTask();
+    private TimeStamp getStartTimeStamp() {
+        return new TimeStamp(mTaskRecord.getStartTime());
+    }
+
+    private TimeStamp getEndTimeStamp() {
+        if (mTaskRecord.getEndTime() != null)
+            return new TimeStamp(mTaskRecord.getEndTime());
+        else
+            return null;
+    }
+
+    public boolean current(TimeStamp timeStamp) {
+        TimeStamp startTimeStamp = getStartTimeStamp();
+        TimeStamp endTimeStamp = getEndTimeStamp();
+
+        return (startTimeStamp.compareTo(timeStamp) <= 0 && (endTimeStamp == null || endTimeStamp.compareTo(timeStamp) > 0));
+    }
 }

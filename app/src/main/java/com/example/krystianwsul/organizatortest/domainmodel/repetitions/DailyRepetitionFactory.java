@@ -24,7 +24,7 @@ public class DailyRepetitionFactory {
     private final HashMap<Integer, DailyRepetition> mDailyRepetitions = new HashMap<>();
 
     public void loadExistingDailyRepetitions(DailyScheduleTime dailyScheduleTime) {
-        ArrayList<DailyRepetitionRecord> dailyRepetitionRecords = PersistenceManger.getInstance().getDailyRepetitionRecords(dailyScheduleTime.getId());
+        ArrayList<DailyRepetitionRecord> dailyRepetitionRecords = PersistenceManger.getInstance().getDailyRepetitionRecords(dailyScheduleTime);
         for (DailyRepetitionRecord dailyRepetitionRecord : dailyRepetitionRecords) {
             DailyRepetition dailyRepetition = new DailyRepetition(dailyScheduleTime, dailyRepetitionRecord);
             mDailyRepetitions.put(dailyRepetition.getId(), dailyRepetition);

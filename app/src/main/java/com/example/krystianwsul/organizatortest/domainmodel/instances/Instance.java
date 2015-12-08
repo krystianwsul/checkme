@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
@@ -13,9 +12,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-/**
- * Created by Krystian on 11/2/2015.
- */
 public abstract class Instance {
     protected final Task mTask;
 
@@ -61,6 +57,9 @@ public abstract class Instance {
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (ChildTask childTask : mTask.getChildTasks()) {
+            if (!childTask.current(getDateTime().getTimeStamp()))
+                continue;
+
             Instance childInstance = getChildInstance(childTask);
             Assert.assertTrue(childInstance != null);
             childInstances.add(childInstance);
@@ -89,8 +88,6 @@ public abstract class Instance {
         if (mInstanceRecord == null) {
             if (done)
                 mInstanceRecord = createInstanceRecord();
-            else
-                return;
         } else {
             if (done)
                 mInstanceRecord.setDone(TimeStamp.getNow().getLong());

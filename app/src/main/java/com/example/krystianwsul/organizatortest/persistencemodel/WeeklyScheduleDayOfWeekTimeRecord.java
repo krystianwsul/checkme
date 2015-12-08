@@ -4,7 +4,8 @@ import junit.framework.Assert;
 
 public class WeeklyScheduleDayOfWeekTimeRecord {
     private final int mId;
-    private final int mWeeklyScheduleId;
+    private final int mScheduleId;
+
     private final int mDayOfWeek;
 
     private final Integer mCustomTimeId;
@@ -12,13 +13,14 @@ public class WeeklyScheduleDayOfWeekTimeRecord {
     private final Integer mHour;
     private final Integer mMinute;
 
-    WeeklyScheduleDayOfWeekTimeRecord(int id, int weeklyScheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
+    WeeklyScheduleDayOfWeekTimeRecord(int id, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
 
         mId = id;
-        mWeeklyScheduleId = weeklyScheduleId;
+        mScheduleId = scheduleId;
+
         mDayOfWeek = dayOfWeek;
 
         mCustomTimeId = customTimeId;
@@ -32,7 +34,7 @@ public class WeeklyScheduleDayOfWeekTimeRecord {
     }
 
     public int getWeeklyScheduleId() {
-        return mWeeklyScheduleId;
+        return mScheduleId;
     }
 
     public int getDayOfWeek() {

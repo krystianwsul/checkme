@@ -106,7 +106,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             Task task = mTasks.get(getAdapterPosition());
             Assert.assertTrue(task != null);
 
-            mActivity.startActivityForResult(ShowTaskActivity.getIntent(task, mActivity), ShowTaskActivity.SHOW_CHILD);
+            mActivity.startActivity(ShowTaskActivity.getIntent(task, mActivity));
         }
 
         public void onDeleteClick() {
@@ -117,9 +117,5 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
 
             Toast.makeText(mActivity, "todo", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public interface OnDeleteTaskListener {
-        void onDeleteTask(Task task);
     }
 }

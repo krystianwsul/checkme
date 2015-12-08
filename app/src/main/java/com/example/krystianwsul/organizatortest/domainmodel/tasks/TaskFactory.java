@@ -9,13 +9,12 @@ import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRep
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
-import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleTimeRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
-import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.ScheduleRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleDateTimeRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleDayOfWeekTimeRecord;
-import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
 
 import junit.framework.Assert;
 
@@ -48,10 +47,11 @@ public class TaskFactory {
 
             RootTask rootTask = new RootTask(parentTaskRecord);
 
-            Schedule schedule = loadSchedule(rootTask);
-            Assert.assertTrue(schedule != null);
+            ArrayList<Schedule> schedules = loadSchedules(rootTask);
+            Assert.assertTrue(schedules != null);
+            Assert.assertTrue(!schedules.isEmpty());
 
-            rootTask.setSchedule(schedule);
+            rootTask.setSchedules(schedules);
 
             initializeChildren(rootTask);
 
@@ -62,45 +62,69 @@ public class TaskFactory {
         }
     }
 
-    private Schedule loadSchedule(RootTask rootTask) {
+    private ArrayList<Schedule> loadSchedules(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        SingleScheduleRecord singleScheduleRecord = PersistenceManger.getInstance().getSingleScheduleRecord(rootTask.getId());
-        if (singleScheduleRecord != null)
-            return loadSingleSchedule(singleScheduleRecord, rootTask);
+        ArrayList<ScheduleRecord> scheduleRecords = PersistenceManger.getInstance().getScheduleRecords(rootTask);
+        Assert.assertTrue(scheduleRecords != null);
+        Assert.assertTrue(!scheduleRecords.isEmpty());
 
-        DailyScheduleRecord dailyScheduleRecord = persistenceManger.getDailyScheduleRecord(rootTask.getId());
-        if (dailyScheduleRecord != null)
-            return loadDailySchedule(dailyScheduleRecord, rootTask);
+        ArrayList<Schedule> schedules = new ArrayList<>();
 
-        WeeklyScheduleRecord weeklyScheduleRecord = persistenceManger.getWeeklyScheduleRecord(rootTask.getId());
-        if (weeklyScheduleRecord != null)
-            return loadWeeklySchedule(weeklyScheduleRecord, rootTask);
+        for (ScheduleRecord scheduleRecord : scheduleRecords) {
+            Assert.assertTrue(scheduleRecord.getType() >= 0);
+            Assert.assertTrue(scheduleRecord.getType() < Schedule.ScheduleType.values().length);
 
-        throw new IllegalArgumentException("no schedule for rootTask == " + rootTask);
+            Schedule.ScheduleType scheduleType = Schedule.ScheduleType.values()[scheduleRecord.getType()];
+
+            switch (scheduleType) {
+                case SINGLE:
+                    schedules.add(loadSingleSchedule(scheduleRecord, rootTask));
+                    break;
+                case DAILY:
+                    schedules.add(loadDailySchedule(scheduleRecord, rootTask));
+                    break;
+                case WEEKLY:
+                    schedules.add(loadWeeklySchedule(scheduleRecord, rootTask));
+                    break;
+                default:
+                    throw new IndexOutOfBoundsException("unknown schedule type");
+            }
+        }
+
+        Assert.assertTrue(!schedules.isEmpty());
+        return schedules;
     }
 
-    private SingleSchedule loadSingleSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
-        Assert.assertTrue(singleScheduleRecord != null);
+    private Schedule loadSingleSchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
-        SingleSchedule singleSchedule = new SingleSchedule(singleScheduleRecord, rootTask);
-        SingleRepetitionFactory.getInstance().loadExistingSingleRepetition(singleSchedule);
+        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
+
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = PersistenceManger.getInstance().getSingleScheduleDateTimeRecord(singleSchedule);
+        Assert.assertTrue(singleScheduleDateTimeRecord != null);
+
+        SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule);
+        SingleRepetitionFactory.getInstance().loadExistingSingleRepetition(singleScheduleDateTime);
+
+        singleSchedule.addSingleScheduleDateTime(singleScheduleDateTime);
 
         return singleSchedule;
     }
 
-    private DailySchedule loadDailySchedule(DailyScheduleRecord dailyScheduleRecord, RootTask rootTask) {
-        Assert.assertTrue(dailyScheduleRecord != null);
+    private Schedule loadDailySchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        DailySchedule dailySchedule = new DailySchedule(dailyScheduleRecord, rootTask);
+        DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
 
-        ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = persistenceManger.getDailyScheduleTimeRecords(rootTask.getId());
+        ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = persistenceManger.getDailyScheduleTimeRecords(dailySchedule);
+        Assert.assertTrue(dailyScheduleTimeRecords != null);
         Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
 
         for (DailyScheduleTimeRecord dailyScheduleTimeRecord : dailyScheduleTimeRecords) {
@@ -113,15 +137,16 @@ public class TaskFactory {
         return dailySchedule;
     }
 
-    private WeeklySchedule loadWeeklySchedule(WeeklyScheduleRecord weeklyScheduleRecord, RootTask rootTask) {
-        Assert.assertTrue(weeklyScheduleRecord != null);
+    private Schedule loadWeeklySchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleRecord, rootTask);
+        WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
 
-        ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = persistenceManger.getWeeklyScheduleDayOfWeekTimeRecords(rootTask.getId());
+        ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = persistenceManger.getWeeklyScheduleDayOfWeekTimeRecords(weeklySchedule);
+        Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecords != null);
         Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
 
         for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
@@ -135,7 +160,7 @@ public class TaskFactory {
     }
 
     private void initializeChildren(Task task) {
-        ArrayList<TaskRecord> childTaskRecords = PersistenceManger.getInstance().getTaskRecords(task.getId());
+        ArrayList<TaskRecord> childTaskRecords = PersistenceManger.getInstance().getTaskRecords(task);
         Assert.assertTrue(childTaskRecords != null);
 
         for (TaskRecord childTaskRecord : childTaskRecords)
@@ -185,7 +210,10 @@ public class TaskFactory {
         SingleSchedule singleSchedule = createSingleSchedule(rootTask, date, time);
         Assert.assertTrue(singleSchedule != null);
 
-        rootTask.setSchedule(singleSchedule);
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        schedules.add(singleSchedule);
+
+        rootTask.setSchedules(schedules);
 
         return rootTask;
     }
@@ -200,7 +228,10 @@ public class TaskFactory {
         DailySchedule dailySchedule = createDailySchedule(rootTask, times);
         Assert.assertTrue(dailySchedule != null);
 
-        rootTask.setSchedule(dailySchedule);
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        schedules.add(dailySchedule);
+
+        rootTask.setSchedules(schedules);
 
         return rootTask;
     }
@@ -214,7 +245,10 @@ public class TaskFactory {
         WeeklySchedule weeklySchedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs);
         Assert.assertTrue(weeklySchedule != null);
 
-        rootTask.setSchedule(weeklySchedule);
+        ArrayList<Schedule> schedules = new ArrayList<>();
+        schedules.add(weeklySchedule);
+
+        rootTask.setSchedules(schedules);
 
         return rootTask;
     }
@@ -235,108 +269,18 @@ public class TaskFactory {
         return rootTask;
     }
 
-    public ChildTask addChildTask(Task oldParentTask, String name) {
-        Assert.assertTrue(oldParentTask != null);
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        RootTask oldRootTask = oldParentTask.getRootTask();
-        Assert.assertTrue(oldRootTask != null);
-
-        Pair<RootTask, Task> newPair = copyRootTask(oldRootTask, oldParentTask);
-        RootTask newRootTask = newPair.first;
-        Task newParentTask = newPair.second;
-        Assert.assertTrue(newRootTask != null);
-        Assert.assertTrue(newParentTask != null);
-
-        ChildTask newChildTask = createChildTask(newParentTask, name, newParentTask.getNextChildOrdinal());
-        Assert.assertTrue(newChildTask != null);
-
-        newParentTask.addChildTask(newChildTask);
-
-        return newChildTask;
-    }
-
-    private Pair<RootTask, Task> copyRootTask(RootTask oldRootTask, Task oldHoldTask) {
-        Assert.assertTrue(oldRootTask != null);
-        Assert.assertTrue(oldHoldTask != null);
-
-        if (oldRootTask.isMutable())
-            return new Pair<>(oldRootTask, oldHoldTask);
-
-        TaskRecord newRootTaskRecord = PersistenceManger.getInstance().createTaskRecord(null, oldRootTask.getName(), oldRootTask.getOrdinal());
-        Assert.assertTrue(newRootTaskRecord != null);
-
-        RootTask newRootTask = new RootTask(newRootTaskRecord);
-
-        mRootTasks.add(newRootTask);
-        Assert.assertTrue(!mTasks.containsKey(newRootTask.getId()));
-        mTasks.put(newRootTask.getId(), newRootTask);
-
-        Task newHoldTask = null;
-        if (oldRootTask == oldHoldTask)
-            newHoldTask = newRootTask;
-
-        for (ChildTask oldChildTask : oldRootTask.getChildTasks()) {
-            Pair<ChildTask, Task> newPair = copyChildTask(newRootTask, oldChildTask, oldHoldTask);
-            ChildTask newChildTask = newPair.first;
-            Assert.assertTrue(newChildTask != null);
-
-            newRootTask.addChildTask(newChildTask);
-
-            Task childHoldTask = newPair.second;
-            if (childHoldTask != null) {
-                Assert.assertTrue(newHoldTask == null);
-                newHoldTask = childHoldTask;
-            }
-        }
-
-        Assert.assertTrue(newHoldTask != null);
-
-        newRootTask.setSchedule(oldRootTask.mSchedule.copy(newRootTask));
-
-        return new Pair<>(newRootTask, newHoldTask);
-    }
-
-    private Pair<ChildTask, Task> copyChildTask(Task newParentTask, ChildTask oldChildTask, Task oldHoldTask) {
-        Assert.assertTrue(newParentTask != null);
-        Assert.assertTrue(oldChildTask != null);
-        Assert.assertTrue(oldHoldTask != null);
-
-        ChildTask newChildTask = createChildTask(newParentTask, oldChildTask.getName(), oldChildTask.getOrdinal());
-        Assert.assertTrue(newChildTask != null);
-
-        Task newHoldTask = null;
-        if (oldChildTask == oldHoldTask)
-            newHoldTask = newChildTask;
-
-        for (ChildTask oldChildChildTask : oldChildTask.getChildTasks()) {
-            Pair<ChildTask, Task> newPair = copyChildTask(newChildTask, oldChildChildTask, oldHoldTask);
-            ChildTask newChildChildTask = newPair.first;
-            Assert.assertTrue(newChildChildTask != null);
-
-            newChildTask.addChildTask(newChildChildTask);
-
-            Task childHoldTask = newPair.second;
-            if (childHoldTask != null) {
-                Assert.assertTrue(newHoldTask == null);
-                newHoldTask = childHoldTask;
-            }
-        }
-
-        return new Pair<>(newChildTask, newHoldTask);
-    }
-
-    private ChildTask createChildTask(Task parentTask, String name, int ordinal) {
+    public void createChildTask(Task parentTask, String name) {
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        TaskRecord childTaskRecord = PersistenceManger.getInstance().createTaskRecord(parentTask, name, ordinal);
+        TaskRecord childTaskRecord = PersistenceManger.getInstance().createTaskRecord(parentTask, name, parentTask.getNextChildOrdinal());
         Assert.assertTrue(childTaskRecord != null);
 
         ChildTask childTask = new ChildTask(childTaskRecord, parentTask);
         Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
         mTasks.put(childTask.getId(), childTask);
-        return childTask;
+
+        parentTask.addChildTask(childTask);
     }
 
     private SingleSchedule createSingleSchedule(RootTask rootTask, Date date, Time time) {
@@ -344,26 +288,19 @@ public class TaskFactory {
         Assert.assertTrue(date != null);
         Assert.assertTrue(time != null);
 
-        SingleScheduleRecord singleScheduleRecord = PersistenceManger.getInstance().createSingleScheduleRecord(rootTask.getId(), date, time);
-        Assert.assertTrue(singleScheduleRecord != null);
+        PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        return new SingleSchedule(singleScheduleRecord, rootTask);
-    }
+        ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.SINGLE);
+        Assert.assertTrue(scheduleRecord != null);
 
-    DailySchedule copyDailySchedule(DailySchedule oldDailySchedule, RootTask newRootTask) {
-        Assert.assertTrue(oldDailySchedule != null);
-        Assert.assertTrue(newRootTask != null);
+        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
 
-        oldDailySchedule.setEndTimeStamp();
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = persistenceManger.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
+        Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-        ArrayList<Time> times = new ArrayList<>();
-        Assert.assertTrue(!oldDailySchedule.getDailyScheduleTimes().isEmpty());
-        for (DailyScheduleTime dailyScheduleTime : oldDailySchedule.getDailyScheduleTimes()) {
-            Assert.assertTrue(dailyScheduleTime != null);
-            times.add(dailyScheduleTime.getTime());
-        }
+        singleSchedule.addSingleScheduleDateTime(new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule));
 
-        return createDailySchedule(newRootTask, times);
+        return new SingleSchedule(scheduleRecord, rootTask);
     }
 
     private DailySchedule createDailySchedule(RootTask rootTask, ArrayList<Time> times) {
@@ -373,10 +310,10 @@ public class TaskFactory {
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        DailyScheduleRecord dailyScheduleRecord = persistenceManger.createDailyScheduleRecord(rootTask.getId());
-        Assert.assertTrue(dailyScheduleRecord != null);
+        ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.DAILY);
+        Assert.assertTrue(scheduleRecord != null);
 
-        DailySchedule dailySchedule = new DailySchedule(dailyScheduleRecord, rootTask);
+        DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
 
         for (Time time : times) {
             Assert.assertTrue(time != null);
@@ -390,22 +327,6 @@ public class TaskFactory {
         return dailySchedule;
     }
 
-    WeeklySchedule copyWeeklySchedule(WeeklySchedule oldWeeklySchedule, RootTask newRootTask) {
-        Assert.assertTrue(oldWeeklySchedule != null);
-        Assert.assertTrue(newRootTask != null);
-
-        oldWeeklySchedule.setEndTimeStamp();
-
-        ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = new ArrayList<>();
-        Assert.assertTrue(!oldWeeklySchedule.getWeeklyScheduleDayOfWeekTimes().isEmpty());
-        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : oldWeeklySchedule.getWeeklyScheduleDayOfWeekTimes()) {
-            Assert.assertTrue(weeklyScheduleDayOfWeekTime != null);
-            dayOfWeekTimePairs.add(new Pair<>(weeklyScheduleDayOfWeekTime.getDayOfWeek(), weeklyScheduleDayOfWeekTime.getTime()));
-        }
-
-        return createWeeklySchedule(newRootTask, dayOfWeekTimePairs);
-    }
-
     private WeeklySchedule createWeeklySchedule(RootTask rootTask, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(dayOfWeekTimePairs != null);
@@ -413,10 +334,10 @@ public class TaskFactory {
 
         PersistenceManger persistenceManger = PersistenceManger.getInstance();
 
-        WeeklyScheduleRecord weeklyScheduleRecord = persistenceManger.createWeeklyScheduleRecord(rootTask.getId());
-        Assert.assertTrue(weeklyScheduleRecord != null);
+        ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.WEEKLY);
+        Assert.assertTrue(scheduleRecord != null);
 
-        WeeklySchedule weeklySchedule = new WeeklySchedule(weeklyScheduleRecord, rootTask);
+        WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
 
         for (Pair<DayOfWeek, Time> dayOfWeekTimePair : dayOfWeekTimePairs) {
             Assert.assertTrue(dayOfWeekTimePair != null);

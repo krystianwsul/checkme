@@ -8,13 +8,18 @@ public class TaskRecord {
     private final String mName;
     private final int mOrdinal;
 
-    TaskRecord(int id, Integer parentId, String name, int ordinal) {
+    private final long mStartTime;
+    private Long mEndTime;
+
+    TaskRecord(int id, Integer parentId, String name, int ordinal, long startTime, Long endTime) {
         Assert.assertTrue(name != null);
 
         mId = id;
         mParentTaskId = parentId;
         mName = name;
         mOrdinal = ordinal;
+        mStartTime = startTime;
+        mEndTime = endTime;
     }
 
     public int getId() {
@@ -31,5 +36,17 @@ public class TaskRecord {
 
     public int getOrdinal() {
         return mOrdinal;
+    }
+
+    public long getStartTime() {
+        return mStartTime;
+    }
+
+    public Long getEndTime() {
+        return mEndTime;
+    }
+
+    public void setEndTime(long endTime) {
+        mEndTime = endTime;
     }
 }

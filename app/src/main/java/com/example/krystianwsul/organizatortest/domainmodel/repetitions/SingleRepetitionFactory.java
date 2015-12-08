@@ -1,6 +1,6 @@
 package com.example.krystianwsul.organizatortest.domainmodel.repetitions;
 
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.SingleScheduleDateTime;
 
 import junit.framework.Assert;
 
@@ -19,18 +19,18 @@ public class SingleRepetitionFactory {
 
     private final HashMap<Integer, SingleRepetition> mSingleRepetitions = new HashMap<>();
 
-    public void loadExistingSingleRepetition(SingleSchedule singleSchedule) {
-        SingleRepetition singleRepetition = new SingleRepetition(singleSchedule);
+    public void loadExistingSingleRepetition(SingleScheduleDateTime singleScheduleDateTime) {
+        SingleRepetition singleRepetition = new SingleRepetition(singleScheduleDateTime);
         mSingleRepetitions.put(singleRepetition.getRootTaskId(), singleRepetition);
     }
 
-    public SingleRepetition getSingleRepetition(SingleSchedule singleSchedule) {
-        Assert.assertTrue(singleSchedule != null);
+    public SingleRepetition getSingleRepetition(SingleScheduleDateTime singleScheduleDateTime) {
+        Assert.assertTrue(singleScheduleDateTime != null);
 
-        if (mSingleRepetitions.containsKey(singleSchedule.getRootTaskId())) {
-            return mSingleRepetitions.get(singleSchedule.getRootTaskId());
+        if (mSingleRepetitions.containsKey(singleScheduleDateTime.getRootTaskId())) {
+            return mSingleRepetitions.get(singleScheduleDateTime.getRootTaskId());
         } else {
-            SingleRepetition singleRepetition = new SingleRepetition(singleSchedule);
+            SingleRepetition singleRepetition = new SingleRepetition(singleScheduleDateTime);
             mSingleRepetitions.put(singleRepetition.getRootTaskId(), singleRepetition);
             return singleRepetition;
         }

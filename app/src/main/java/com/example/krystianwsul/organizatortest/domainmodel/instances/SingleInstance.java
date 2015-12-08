@@ -12,9 +12,6 @@ import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceMang
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 11/2/2015.
- */
 public class SingleInstance extends Instance {
     private final SingleRepetition mSingleRepetition;
 
@@ -55,6 +52,6 @@ public class SingleInstance extends Instance {
     }
 
     protected InstanceRecord createInstanceRecord() {
-        return PersistenceManger.getInstance().createSingleInstanceRecord(mId, mTask.getId(), mTask.getRootTask().getId(), TimeStamp.getNow().getLong());
+        return PersistenceManger.getInstance().createSingleInstanceRecord(mId, mTask, mTask.getRootTask(), TimeStamp.getNow().getLong());
     }
 }

@@ -24,7 +24,7 @@ public class WeeklyRepetitionFactory {
     private final HashMap<Integer, WeeklyRepetition> mWeeklyRepetitions = new HashMap<>();
 
     public void loadExistingWeeklyRepetitions(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime) {
-        ArrayList<WeeklyRepetitionRecord> weeklyRepetitionRecords = PersistenceManger.getInstance().getWeeklyRepetitionRecords(weeklyScheduleDayOfWeekTime.getId());
+        ArrayList<WeeklyRepetitionRecord> weeklyRepetitionRecords = PersistenceManger.getInstance().getWeeklyRepetitionRecords(weeklyScheduleDayOfWeekTime);
         for (WeeklyRepetitionRecord weeklyRepetitionRecord : weeklyRepetitionRecords) {
             WeeklyRepetition weeklyRepetition = new WeeklyRepetition(weeklyScheduleDayOfWeekTime, weeklyRepetitionRecord);
             mWeeklyRepetitions.put(weeklyRepetition.getId(), weeklyRepetition);

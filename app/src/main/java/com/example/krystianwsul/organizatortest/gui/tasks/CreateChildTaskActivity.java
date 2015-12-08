@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.krystianwsul.organizatortest.R;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -19,8 +18,6 @@ import junit.framework.Assert;
 
 public class CreateChildTaskActivity extends AppCompatActivity {
     private static String PARENT_TASK_ID_KEY = "parentTaskId";
-    public static int CHILD_TASK_CREATED = 10;
-    public static String NEW_CHILD_TASK_ID_KEY = "newChildTaskId";
 
     public static Intent getIntent(Context context, Task parentTask) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
@@ -53,11 +50,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
                     return;
                 }
 
-                ChildTask newChildTask = TaskFactory.getInstance().addChildTask(parentTask, name);
-
-                Intent result = new Intent();
-                result.putExtra(NEW_CHILD_TASK_ID_KEY, newChildTask.getId());
-                setResult(CHILD_TASK_CREATED, result);
+                TaskFactory.getInstance().createChildTask(parentTask, name);
                 finish();
             }
         });

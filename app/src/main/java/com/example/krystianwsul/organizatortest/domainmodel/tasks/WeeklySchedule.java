@@ -5,25 +5,19 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizatortest.persistencemodel.WeeklyScheduleRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.ScheduleRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class WeeklySchedule extends Schedule {
-    private final WeeklyScheduleRecord mWeeklyScheduleRecord;
     private final ArrayList<WeeklyScheduleDayOfWeekTime> mWeeklyScheduleDayOfWeekTimes = new ArrayList<>();
 
-    WeeklySchedule(WeeklyScheduleRecord weeklyScheduleRecord, RootTask rootTask) {
-        super(rootTask);
-
-        Assert.assertTrue(weeklyScheduleRecord != null);
-        mWeeklyScheduleRecord = weeklyScheduleRecord;
+    WeeklySchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+        super(scheduleRecord, rootTask);
     }
 
     void addWeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime) {
@@ -36,70 +30,14 @@ public class WeeklySchedule extends Schedule {
         return mWeeklyScheduleDayOfWeekTimes;
     }
 
-    public int getRootTaskId() {
-        return mWeeklyScheduleRecord.getRootTaskId();
+    public String getTaskText(Context context) {
+        ArrayList<String> dayOfWeekTimes = new ArrayList<>();
+        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
+            dayOfWeekTimes.add(weeklyScheduleDayOfWeekTime.getDayOfWeek().toString() + ", " + weeklyScheduleDayOfWeekTime.getTime().toString());
+        return TextUtils.join("; ", dayOfWeekTimes);
     }
 
-    private TimeStamp getStartTimeStamp() {
-        return new TimeStamp(mWeeklyScheduleRecord.getStartTime());
-    }
-
-    public TimeStamp getEndTimeStamp() {
-        if (mWeeklyScheduleRecord.getEndTime() == null)
-            return null;
-        else
-            return new TimeStamp(mWeeklyScheduleRecord.getEndTime());
-    }
-
-    void setEndTimeStamp() {
-        mWeeklyScheduleRecord.setEndTime(TimeStamp.getNow().getLong());
-    }
-
-    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
-        Assert.assertTrue(givenEndTimeStamp != null);
-
-        TimeStamp myStartTimeStamp = getStartTimeStamp();
-        TimeStamp myEndTimeStamp = getEndTimeStamp();
-
-        ArrayList<Instance> instances = new ArrayList<>();
-
-        TimeStamp startTimeStamp;
-        TimeStamp endTimeStamp;
-
-        if (givenStartTimeStamp == null || (givenStartTimeStamp.compareTo(myStartTimeStamp) < 0))
-            startTimeStamp = myStartTimeStamp;
-        else
-            startTimeStamp = givenStartTimeStamp;
-
-        if (myEndTimeStamp == null || (myEndTimeStamp.compareTo(givenEndTimeStamp) > 0))
-            endTimeStamp = givenEndTimeStamp;
-        else
-            endTimeStamp = myEndTimeStamp;
-
-        if (startTimeStamp.compareTo(endTimeStamp) >= 0)
-            return instances;
-
-        Assert.assertTrue(startTimeStamp.compareTo(endTimeStamp) < 0);
-
-        if (startTimeStamp.getDate().equals(endTimeStamp.getDate())) {
-            return getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), endTimeStamp.getHourMinute());
-        } else {
-            instances.addAll(getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));
-
-            Calendar loopStartCalendar = startTimeStamp.getDate().getCalendar();
-            loopStartCalendar.add(Calendar.DATE, 1);
-            Calendar loopEndCalendar = endTimeStamp.getDate().getCalendar();
-
-            for (; loopStartCalendar.before(loopEndCalendar); loopStartCalendar.add(Calendar.DATE, 1))
-                instances.addAll(getInstancesInDate(new Date(loopStartCalendar), null, null));
-
-            instances.addAll(getInstancesInDate(endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
-        }
-
-        return instances;
-    }
-
-    private ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
+    protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
@@ -123,25 +61,5 @@ public class WeeklySchedule extends Schedule {
         }
 
         return instances;
-    }
-
-    public String getTaskText(Context context) {
-        ArrayList<String> ret = new ArrayList<>();
-        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
-            ret.add(weeklyScheduleDayOfWeekTime.getDayOfWeek().toString() + ", " + weeklyScheduleDayOfWeekTime.getTime().toString());
-        return TextUtils.join("; ", ret);
-    }
-
-    public boolean isMutable() {
-        return false;
-    }
-
-    Schedule copy(RootTask newRootTask) {
-        Assert.assertTrue(newRootTask != null);
-        return TaskFactory.getInstance().copyWeeklySchedule(this, newRootTask);
-    }
-
-    public boolean current() {
-        return (getEndTimeStamp() == null || getEndTimeStamp().compareTo(TimeStamp.getNow()) > 0);
     }
 }

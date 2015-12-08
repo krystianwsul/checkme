@@ -3,92 +3,57 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
-import com.example.krystianwsul.organizatortest.persistencemodel.SingleScheduleRecord;
+import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.persistencemodel.ScheduleRecord;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
 public class SingleSchedule extends Schedule {
-    final SingleScheduleRecord mSingleScheduleRecord;
+    private SingleScheduleDateTime mSingleScheduleDateTime;
 
-    SingleSchedule(SingleScheduleRecord singleScheduleRecord, RootTask rootTask) {
-        super(rootTask);
-
-        Assert.assertTrue(singleScheduleRecord != null);
-
-        mSingleScheduleRecord = singleScheduleRecord;
+    SingleSchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+        super(scheduleRecord, rootTask);
     }
 
-    public DateTime getDateTime() {
-        return new DateTime(getDate(), getTime());
+    void addSingleScheduleDateTime(SingleScheduleDateTime singleScheduleDateTime) {
+        Assert.assertTrue(singleScheduleDateTime != null);
+        mSingleScheduleDateTime = singleScheduleDateTime;
     }
 
-    public Date getDate() {
-        return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
-    }
-
-    public Time getTime() {
-        Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
-        if (customTimeId != null) {
-            CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(mSingleScheduleRecord.getCustomTimeId());
-            Assert.assertTrue(customTime != null);
-            return customTime;
-        } else {
-            Integer hour = mSingleScheduleRecord.getHour();
-            Integer minute = mSingleScheduleRecord.getMinute();
-            Assert.assertTrue(hour != null);
-            Assert.assertTrue(minute != null);
-            return new NormalTime(hour, minute);
-        }
-    }
-
-    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
-        Assert.assertTrue(givenEndTimeStamp != null);
-
-        ArrayList<Instance> instances = new ArrayList<>();
-
-        DateTime dateTime = getDateTime();
-
-        TimeStamp timeStamp = new TimeStamp(dateTime.getDate(), dateTime.getTime().getHourMinute(dateTime.getDate().getDayOfWeek()));
-
-        if (givenStartTimeStamp != null && (givenStartTimeStamp.compareTo(timeStamp) >= 0))
-            return instances;
-
-        if (givenEndTimeStamp.compareTo(timeStamp) < 0)
-            return instances;
-
-        instances.add(SingleRepetitionFactory.getInstance().getSingleRepetition(this).getInstance(mRootTask));
-
-        return instances;
+    SingleScheduleDateTime getSingleScheduleDateTime() {
+        Assert.assertTrue(mSingleScheduleDateTime != null);
+        return mSingleScheduleDateTime;
     }
 
     public String getTaskText(Context context) {
-        return getDateTime().getDisplayText(context);
+        return mSingleScheduleDateTime.getDateTime().getDisplayText(context);
     }
 
-    public TimeStamp getEndTimeStamp() {
-        return null;
-    }
+    protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
+        Assert.assertTrue(date != null);
 
-    public boolean isMutable() {
-        return true;
-    }
+        ArrayList<Instance> instances = new ArrayList<>();
 
-    Schedule copy(RootTask newRootTask) {
-        Assert.assertTrue(newRootTask != null);
-        throw new UnsupportedOperationException("can't copy single schedule");
-    }
+        if (date.compareTo(mSingleScheduleDateTime.getDate()) != 0)
+            return instances;
 
-    public boolean current() {
-        return true;
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+        HourMinute hourMinute = mSingleScheduleDateTime.getTime().getHourMinute(dayOfWeek);
+        Assert.assertTrue(hourMinute != null);
+
+        if (startHourMinute != null && startHourMinute.compareTo(hourMinute) > 0)
+            return instances;
+
+        if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
+            return instances;
+
+        instances.add(mSingleScheduleDateTime.getInstance(mRootTask, date));
+
+        return instances;
     }
 }

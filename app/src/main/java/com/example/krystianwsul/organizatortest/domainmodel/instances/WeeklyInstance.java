@@ -12,9 +12,6 @@ import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceMang
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 11/9/2015.
- */
 public class WeeklyInstance extends Instance {
     private final WeeklyRepetition mWeeklyRepetition;
 
@@ -55,6 +52,6 @@ public class WeeklyInstance extends Instance {
     }
 
     protected InstanceRecord createInstanceRecord() {
-        return PersistenceManger.getInstance().createWeeklyInstanceRecord(mId, mTask.getId(), mInstanceRecord.getId(), TimeStamp.getNow().getLong());
+        return PersistenceManger.getInstance().createWeeklyInstanceRecord(mId, mTask, mWeeklyRepetition, TimeStamp.getNow().getLong());
     }
 }

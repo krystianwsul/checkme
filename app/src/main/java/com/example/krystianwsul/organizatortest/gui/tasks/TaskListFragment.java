@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizatortest.R;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
@@ -53,7 +54,7 @@ public class TaskListFragment extends Fragment {
         Collection<RootTask> allRootTasks = TaskFactory.getInstance().getRootTasks();
         TreeMap<Integer, Task> currentRootTasks = new TreeMap<>();
         for (RootTask rootTask : allRootTasks) {
-            if (rootTask.current()) {
+            if (rootTask.current(TimeStamp.getNow())) {
                 Assert.assertTrue(!currentRootTasks.containsKey(rootTask.getOrdinal()));
                 currentRootTasks.put(rootTask.getOrdinal(), rootTask);
             }

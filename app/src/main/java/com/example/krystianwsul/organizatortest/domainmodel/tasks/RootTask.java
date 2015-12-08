@@ -11,7 +11,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class RootTask extends Task {
-    Schedule mSchedule;
+    ArrayList<Schedule> mSchedules = new ArrayList<>();
 
     RootTask(TaskRecord taskRecord) {
         super(taskRecord);
@@ -19,20 +19,45 @@ public class RootTask extends Task {
         Assert.assertTrue(mTaskRecord.getParentTaskId() == null);
     }
 
-    public void setSchedule(Schedule schedule) {
-        Assert.assertTrue(schedule != null);
-        mSchedule = schedule;
+    public void setSchedules(ArrayList<Schedule> schedules) {
+        Assert.assertTrue(schedules != null);
+        Assert.assertTrue(!schedules.isEmpty());
+        mSchedules = schedules;
     }
 
     public String getScheduleText(Context context) {
-        return mSchedule.getTaskText(context);
+        return getNewestSchedule().getTaskText(context);
+    }
+
+    private Schedule getNewestSchedule() {
+        Assert.assertTrue(mSchedules != null);
+        Assert.assertTrue(!mSchedules.isEmpty());
+
+        Schedule newestSchedule = mSchedules.get(0);
+        if (newestSchedule.getEndTimeStamp() == null)
+            return newestSchedule;
+
+        for (Schedule schedule: mSchedules) {
+            TimeStamp endTimeStamp = schedule.getEndTimeStamp();
+            if (schedule.getEndTimeStamp() == null)
+                return schedule;
+            Assert.assertTrue(newestSchedule.getEndTimeStamp() != null);
+            if (newestSchedule.getEndTimeStamp().compareTo(schedule.getEndTimeStamp()) < 0)
+                newestSchedule = schedule;
+        }
+
+        return newestSchedule;
     }
 
     public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
-        Assert.assertTrue(mSchedule != null);
+        Assert.assertTrue(mSchedules != null);
         Assert.assertTrue(endTimeStamp != null);
 
-        return mSchedule.getInstances(startTimeStamp, endTimeStamp);
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (Schedule schedule : mSchedules)
+            instances.addAll(schedule.getInstances(startTimeStamp, endTimeStamp));
+
+        return instances;
     }
 
     public RootTask getRootTask() {
@@ -41,15 +66,6 @@ public class RootTask extends Task {
 
     public boolean isRootTask() {
         return true;
-    }
-
-    public boolean isMutable() {
-        return mSchedule.isMutable();
-    }
-
-    public boolean current() {
-        Assert.assertTrue(mSchedule != null);
-        return mSchedule.current();
     }
 
     public Task getParentTask() {

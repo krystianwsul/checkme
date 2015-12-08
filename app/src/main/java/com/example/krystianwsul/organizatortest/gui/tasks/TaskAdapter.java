@@ -25,7 +25,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     public TaskAdapter(Activity activity, ArrayList<Task> tasks) {
         Assert.assertTrue(activity != null);
         Assert.assertTrue(tasks != null);
-        Assert.assertTrue(!tasks.isEmpty());
 
         mActivity = activity;
         mTasks = tasks;
@@ -44,8 +43,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
         TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
         ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
+        ImageView taskRowDelete = (ImageView) showTaskRow.findViewById(R.id.task_row_delete);
 
-        return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage);
+        return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage, taskRowDelete);
     }
 
     @Override
@@ -71,6 +71,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
                 taskHolder.onRowClick();
             }
         });
+
+        taskHolder.mTaskRowDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                taskHolder.onDeleteClick();
+            }
+        });
     }
 
     public class TaskHolder extends RecyclerView.ViewHolder {
@@ -78,18 +85,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         public final TextView mTaskRowName;
         public final TextView mTaskRowDetails;
         public final ImageView mTaskRowImg;
+        public final ImageView mTaskRowDelete;
 
-        public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg) {
+        public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg, ImageView taskRowDelete) {
             super(showTaskRow);
 
             Assert.assertTrue(taskRowName != null);
             Assert.assertTrue(taskRowDetails != null);
             Assert.assertTrue(taskRowImg != null);
+            Assert.assertTrue(taskRowDelete != null);
 
             mShowTaskRow = showTaskRow;
             mTaskRowName = taskRowName;
             mTaskRowDetails = taskRowDetails;
             mTaskRowImg = taskRowImg;
+            mTaskRowDelete = taskRowDelete;
         }
 
         public void onRowClick() {
@@ -107,5 +117,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
 
             Toast.makeText(mActivity, "todo", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public interface OnDeleteTaskListener {
+        void onDeleteTask(Task task);
     }
 }

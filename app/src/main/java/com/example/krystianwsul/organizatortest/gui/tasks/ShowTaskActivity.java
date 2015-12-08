@@ -107,11 +107,6 @@ public class ShowTaskActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        if (mTask.getChildTasks().isEmpty()) {
-            mShowTaskRecycler.setVisibility(View.GONE);
-        } else {
-            mShowTaskRecycler.setVisibility(View.VISIBLE);
-            mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks())));
-        }
+        mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks())));
     }
 }

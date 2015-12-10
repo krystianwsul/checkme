@@ -24,16 +24,11 @@
         android:layout_below="@id/create_root_task_save"
         android:singleLine="true" />
 
-    <Spinner
-        android:id="@+id/create_root_task_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/create_root_task_name" />
-    
-    <FrameLayout
+    <fragment
         android:id="@+id/create_root_task_frame"
+        android:name="com.example.krystianwsul.organizatortest.gui.tasks.SchedulePickerFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/create_root_task_spinner" />
+        android:layout_below="@id/create_root_task_name"/>
 
 </RelativeLayout>

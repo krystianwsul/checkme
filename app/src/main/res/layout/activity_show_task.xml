@@ -4,26 +4,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.tasks.ShowTaskActivity">
+    tools:context=".gui.tasks.ShowTaskActivity"
+    android:orientation="vertical">
 
-    <TextView
+    <TableLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:id="@+id/show_task_name"
-        android:text="test"/>
+        android:shrinkColumns="0"
+        android:stretchColumns="0"
+        android:id="@+id/show_task_table">
 
-    <TextView
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:id="@+id/show_task_schedule"
-        android:text="test"
-        android:layout_below="@id/show_task_name"/>
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/show_task_name"
+                    android:text="test"
+                    android:singleLine="true"/>
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/show_task_schedule"
+                    android:text="test"
+                    android:singleLine="true"/>
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/show_task_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_mode_edit_black_24dp" />
+
+        </TableRow>
+
+    </TableLayout>
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/show_task_recycler"
-        android:layout_below="@id/show_task_schedule"/>
+        android:layout_below="@id/show_task_table"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/show_task_fab"

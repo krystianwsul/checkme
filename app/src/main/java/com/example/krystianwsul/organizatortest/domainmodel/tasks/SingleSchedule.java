@@ -30,10 +30,12 @@ public class SingleSchedule extends Schedule {
     }
 
     public String getTaskText(Context context) {
+        Assert.assertTrue(mSingleScheduleDateTime != null);
         return mSingleScheduleDateTime.getDateTime().getDisplayText(context);
     }
 
     protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
+        Assert.assertTrue(mSingleScheduleDateTime != null);
         Assert.assertTrue(date != null);
 
         ArrayList<Instance> instances = new ArrayList<>();

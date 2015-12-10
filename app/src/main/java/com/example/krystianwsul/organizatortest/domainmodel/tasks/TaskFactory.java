@@ -300,7 +300,7 @@ public class TaskFactory {
 
         singleSchedule.addSingleScheduleDateTime(new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule));
 
-        return new SingleSchedule(scheduleRecord, rootTask);
+        return singleSchedule;
     }
 
     private DailySchedule createDailySchedule(RootTask rootTask, ArrayList<Time> times) {

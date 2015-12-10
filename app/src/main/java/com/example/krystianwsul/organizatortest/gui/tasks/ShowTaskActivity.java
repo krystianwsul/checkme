@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
@@ -22,6 +23,9 @@ import java.util.ArrayList;
 
 public class ShowTaskActivity extends AppCompatActivity {
     private RecyclerView mShowTaskRecycler;
+    private TextView mTasksHeadingLabel;
+    private TextView mTasksRowSchedule;
+
     private Task mTask;
 
     private static final String INTENT_KEY = "taskId";
@@ -44,26 +48,26 @@ public class ShowTaskActivity extends AppCompatActivity {
         mTask = TaskFactory.getInstance().getTask(taskId);
         Assert.assertTrue(mTask != null);
 
-        TextView tasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
-        tasksHeadingLabel.setText(mTask.getName());
+        mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
 
-        TextView tasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
-        String scheduleText = mTask.getScheduleText(this);
-        if (TextUtils.isEmpty(scheduleText))
-            tasksRowSchedule.setVisibility(View.GONE);
-        else
-            tasksRowSchedule.setText(scheduleText);
+        mTasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
 
         mShowTaskRecycler = (RecyclerView) findViewById(R.id.show_task_recycler);
         mShowTaskRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-        final AppCompatActivity activity = this;
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.show_task_fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateChildTaskActivity.getIntent(activity, mTask));
+                startActivity(CreateChildTaskActivity.getIntent(ShowTaskActivity.this, mTask));
+            }
+        });
+
+        ImageView showTaskEdit = (ImageView) findViewById(R.id.show_task_edit);
+        showTaskEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                throw new UnsupportedOperationException();
             }
         });
     }
@@ -73,5 +77,12 @@ public class ShowTaskActivity extends AppCompatActivity {
         super.onStart();
 
         mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks(TimeStamp.getNow()))));
+
+        mTasksHeadingLabel.setText(mTask.getName());
+        String scheduleText = mTask.getScheduleText(this);
+        if (TextUtils.isEmpty(scheduleText))
+            mTasksRowSchedule.setVisibility(View.GONE);
+        else
+            mTasksRowSchedule.setText(scheduleText);
     }
 }

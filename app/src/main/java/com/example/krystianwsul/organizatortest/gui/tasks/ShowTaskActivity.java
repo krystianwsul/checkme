@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -67,7 +68,10 @@ public class ShowTaskActivity extends AppCompatActivity {
         showTaskEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                throw new UnsupportedOperationException();
+                if (mTask.isRootTask())
+                    startActivity(EditRootTaskActivity.getIntent(ShowTaskActivity.this, (RootTask) mTask));
+                else
+                    throw new UnsupportedOperationException();
             }
         });
     }

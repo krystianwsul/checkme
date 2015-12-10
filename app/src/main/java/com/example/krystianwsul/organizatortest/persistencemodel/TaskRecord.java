@@ -1,11 +1,13 @@
 package com.example.krystianwsul.organizatortest.persistencemodel;
 
+import android.text.TextUtils;
+
 import junit.framework.Assert;
 
 public class TaskRecord {
     private final int mId;
     private final Integer mParentTaskId;
-    private final String mName;
+    private String mName;
     private final int mOrdinal;
 
     private final long mStartTime;
@@ -32,6 +34,11 @@ public class TaskRecord {
 
     public String getName() {
         return mName;
+    }
+
+    public void setName(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        mName = name;
     }
 
     public int getOrdinal() {

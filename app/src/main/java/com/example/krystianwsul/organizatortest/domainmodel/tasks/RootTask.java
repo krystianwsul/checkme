@@ -54,6 +54,16 @@ public class RootTask extends Task {
         return newestSchedule;
     }
 
+    public void setNewestScheduleEndTimeStamp() {
+        Assert.assertTrue(!mSchedules.isEmpty());
+
+        Schedule schedule = getNewestSchedule();
+        Assert.assertTrue(schedule != null);
+        Assert.assertTrue(schedule.current(TimeStamp.getNow()));
+
+        schedule.setEndTimeStamp();
+    }
+
     public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
         Assert.assertTrue(!mSchedules.isEmpty());
         Assert.assertTrue(endTimeStamp != null);

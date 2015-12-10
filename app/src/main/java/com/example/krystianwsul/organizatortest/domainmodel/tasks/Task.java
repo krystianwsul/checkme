@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.persistencemodel.TaskRecord;
@@ -23,6 +24,11 @@ public abstract class Task {
 
     public String getName() {
         return mTaskRecord.getName();
+    }
+
+    public void setName(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        mTaskRecord.setName(name);
     }
 
     public Collection<ChildTask> getChildTasks(TimeStamp timeStamp) {

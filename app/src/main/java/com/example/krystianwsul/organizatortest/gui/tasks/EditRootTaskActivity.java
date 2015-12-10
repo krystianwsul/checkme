@@ -16,6 +16,7 @@ import android.widget.EditText;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
@@ -23,9 +24,17 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
-public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
-    public static Intent getIntent(Context context) {
-        return new Intent(context, CreateRootTaskActivity.class);
+public class EditRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
+    private static String ROOT_TASK_ID_KEY = "rootTaskId";
+
+    private RootTask mRootTask;
+
+    public static Intent getIntent(Context context, RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
+
+        Intent intent = new Intent(context, EditRootTaskActivity.class);
+        intent.putExtra(ROOT_TASK_ID_KEY, rootTask.getId());
+        return intent;
     }
 
     @Override
@@ -33,7 +42,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_root_task);
 
+        Intent intent = getIntent();
+        Assert.assertTrue(intent.hasExtra(ROOT_TASK_ID_KEY));
+        final int rootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
+        Assert.assertTrue(rootTaskId != -1);
+        mRootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+        Assert.assertTrue(mRootTask != null);
+
         final EditText createRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
+        createRootTaskName.setText(mRootTask.getName());
 
         Button createRootTaskSave = (Button) findViewById(R.id.create_root_task_save);
         createRootTaskSave.setOnClickListener(new View.OnClickListener() {
@@ -56,13 +73,14 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                     return;
                 }
 
-                RootTask rootTask = TaskFactory.getInstance().createRootTask(name);
-                Assert.assertTrue(rootTask != null);
+                mRootTask.setName(name);
 
-                Schedule schedule = schedulePickerFragment.createSchedule(rootTask);
+                Schedule schedule = schedulePickerFragment.createSchedule(mRootTask);
                 Assert.assertTrue(schedule != null);
 
-                rootTask.addSchedule(schedule);
+                Assert.assertTrue(mRootTask.current(TimeStamp.getNow()));
+                mRootTask.setNewestScheduleEndTimeStamp();
+                mRootTask.addSchedule(schedule);
 
                 finish();
             }

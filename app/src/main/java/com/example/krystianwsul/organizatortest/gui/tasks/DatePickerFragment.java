@@ -13,6 +13,10 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import junit.framework.Assert;
 
 public class DatePickerFragment extends DialogFragment {
+    private static String YEAR_KEY = "year";
+    private static String MONTH_KEY = "month";
+    private static String DAY_KEY = "day";
+
     public static DatePickerFragment newInstance(Activity activity, Date date) {
         Assert.assertTrue(activity != null);
         Assert.assertTrue(activity instanceof DatePickerFragmentListener);
@@ -21,9 +25,9 @@ public class DatePickerFragment extends DialogFragment {
         DatePickerFragment timePickerFragment = new DatePickerFragment();
 
         Bundle args = new Bundle();
-        args.putInt("year", date.getYear());
-        args.putInt("month", date.getMonth());
-        args.putInt("day", date.getDay());
+        args.putInt(YEAR_KEY, date.getYear());
+        args.putInt(MONTH_KEY, date.getMonth());
+        args.putInt(DAY_KEY, date.getDay());
         timePickerFragment.setArguments(args);
 
         return timePickerFragment;
@@ -40,11 +44,9 @@ public class DatePickerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
 
-        int year = args.getInt("year");
-        int month = args.getInt("month");
-        int day = args.getInt("day");
-
-        Date date = new Date(year, month, day);
+        int year = args.getInt(YEAR_KEY);
+        int month = args.getInt(MONTH_KEY);
+        int day = args.getInt(DAY_KEY);
 
         return new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
             private boolean mFirst = true;

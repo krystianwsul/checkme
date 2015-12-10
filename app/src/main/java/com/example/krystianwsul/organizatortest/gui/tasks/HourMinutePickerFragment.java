@@ -14,6 +14,9 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import junit.framework.Assert;
 
 public class HourMinutePickerFragment extends DialogFragment {
+    private static String HOUR_KEY = "hour";
+    private static String MINUTE_KEY = "minute";
+
     public static HourMinutePickerFragment newInstance(Activity activity, HourMinute hourMinute) {
         Assert.assertTrue(activity != null);
         Assert.assertTrue(activity instanceof HourMinutePickerFragmentListener);
@@ -22,8 +25,8 @@ public class HourMinutePickerFragment extends DialogFragment {
         HourMinutePickerFragment hourMinutePickerFragment = new HourMinutePickerFragment();
 
         Bundle args = new Bundle();
-        args.putInt("hour", hourMinute.getHour());
-        args.putInt("minute", hourMinute.getMinute());
+        args.putInt(HOUR_KEY, hourMinute.getHour());
+        args.putInt(MINUTE_KEY, hourMinute.getMinute());
         hourMinutePickerFragment.setArguments(args);
 
         return hourMinutePickerFragment;
@@ -40,10 +43,8 @@ public class HourMinutePickerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
 
-        int hour = args.getInt("hour");
-        int minute = args.getInt("minute");
-
-        HourMinute hourMinute = new HourMinute(hour, minute);
+        int hour = args.getInt(HOUR_KEY);
+        int minute = args.getInt(MINUTE_KEY);
 
         return new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
             private boolean mFirst = true;
@@ -59,7 +60,7 @@ public class HourMinutePickerFragment extends DialogFragment {
                 HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragmentListener) getActivity();
                 hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(newHourMinute);
             }
-        }, hourMinute.getHour(), hourMinute.getMinute(), DateFormat.is24HourFormat(getActivity()));
+        }, hour, minute, DateFormat.is24HourFormat(getActivity()));
     }
 
     public interface HourMinutePickerFragmentListener {

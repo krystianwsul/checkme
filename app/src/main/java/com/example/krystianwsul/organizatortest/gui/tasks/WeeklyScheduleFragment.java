@@ -112,6 +112,11 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     }
 
     @Override
+    public boolean isValidTime() {
+        return true;
+    }
+
+    @Override
     public Schedule createSchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(!mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries().isEmpty());

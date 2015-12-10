@@ -117,6 +117,13 @@ public class SchedulePickerFragment extends Fragment implements HourMinutePicker
         outState.putInt(POSITION_KEY, mSchedulePickerSpinner.getSelectedItemPosition());
     }
 
+    public boolean isValidTime() {
+        ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
+        Assert.assertTrue(scheduleFragment != null);
+
+        return scheduleFragment.isValidTime();
+    }
+
     public Schedule createSchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
 

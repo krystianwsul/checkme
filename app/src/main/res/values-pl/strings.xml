@@ -12,4 +12,5 @@
     <string name="other">Inny</string>
     <string name="save">Zapisz</string>
     <string name="task_name_toast">Proszę podać imię.</string>
+    <string name="invalid_time_message">Czas musi być w przyszłości.</string>
 </resources>

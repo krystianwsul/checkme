@@ -13,6 +13,7 @@
     <string name="other">Other</string>
     <string name="save">Save</string>
     <string name="task_name_toast">Please enter a name.</string>
+    <string name="invalid_time_message">Time must be in the future.</string>
 
     <!-- Strings related to Settings -->
 

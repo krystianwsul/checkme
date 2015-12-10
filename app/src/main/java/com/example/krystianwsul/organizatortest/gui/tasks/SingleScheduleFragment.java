@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
@@ -137,8 +138,17 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     @Override
+    public boolean isValidTime() {
+        return (new TimeStamp(mDate, mTimePickerView.getTime().getHourMinute(mDate.getDayOfWeek())).compareTo(TimeStamp.getNow()) > 0);
+    }
+
+    @Override
     public Schedule createSchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
         return TaskFactory.getInstance().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime());
+    }
+
+    public static class PastTimeException extends Exception {
+
     }
 }

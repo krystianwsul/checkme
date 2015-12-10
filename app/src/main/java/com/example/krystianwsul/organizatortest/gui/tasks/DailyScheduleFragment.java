@@ -108,6 +108,11 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     }
 
     @Override
+    public boolean isValidTime() {
+        return true;
+    }
+
+    @Override
     public Schedule createSchedule(RootTask rootTask) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());

@@ -1,9 +1,9 @@
 package com.example.krystianwsul.organizatortest.gui.tasks;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -30,6 +31,14 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
     public static SingleScheduleFragment newInstance() {
         return new SingleScheduleFragment();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Assert.assertTrue(context instanceof DatePickerFragment.DatePickerFragmentListener);
+        Assert.assertTrue(context instanceof HourMinutePickerFragment.HourMinutePickerFragmentListener);
     }
 
     @Override
@@ -128,9 +137,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     @Override
-    public RootTask createRootTask(String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        return TaskFactory.getInstance().createSingleScheduleTask(name, mDate, mTimePickerView.getTime());
+    public Schedule createSchedule(RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
+        return TaskFactory.getInstance().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime());
     }
 }

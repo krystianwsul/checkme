@@ -19,18 +19,23 @@ public class RootTask extends Task {
         Assert.assertTrue(mTaskRecord.getParentTaskId() == null);
     }
 
-    public void setSchedules(ArrayList<Schedule> schedules) {
+    public void addSchedules(ArrayList<Schedule> schedules) {
         Assert.assertTrue(schedules != null);
         Assert.assertTrue(!schedules.isEmpty());
-        mSchedules = schedules;
+        mSchedules.addAll(schedules);
+    }
+
+    public void addSchedule(Schedule schedule) {
+        Assert.assertTrue(schedule != null);
+        mSchedules.add(schedule);
     }
 
     public String getScheduleText(Context context) {
+        Assert.assertTrue(!mSchedules.isEmpty());
         return getNewestSchedule().getTaskText(context);
     }
 
     private Schedule getNewestSchedule() {
-        Assert.assertTrue(mSchedules != null);
         Assert.assertTrue(!mSchedules.isEmpty());
 
         Schedule newestSchedule = mSchedules.get(0);
@@ -50,7 +55,7 @@ public class RootTask extends Task {
     }
 
     public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
-        Assert.assertTrue(mSchedules != null);
+        Assert.assertTrue(!mSchedules.isEmpty());
         Assert.assertTrue(endTimeStamp != null);
 
         ArrayList<Instance> instances = new ArrayList<>();

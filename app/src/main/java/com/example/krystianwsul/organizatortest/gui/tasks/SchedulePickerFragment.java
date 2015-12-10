@@ -1,8 +1,8 @@
 package com.example.krystianwsul.organizatortest.gui.tasks;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,8 @@ import android.widget.Spinner;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
@@ -20,6 +22,14 @@ public class SchedulePickerFragment extends Fragment implements HourMinutePicker
     private Spinner mSchedulePickerSpinner;
 
     private static final String POSITION_KEY = "position";
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Assert.assertTrue(context instanceof DatePickerFragment.DatePickerFragmentListener);
+        Assert.assertTrue(context instanceof HourMinutePickerFragment.HourMinutePickerFragmentListener);
+    }
 
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle savedInstanceState) {
@@ -107,13 +117,13 @@ public class SchedulePickerFragment extends Fragment implements HourMinutePicker
         outState.putInt(POSITION_KEY, mSchedulePickerSpinner.getSelectedItemPosition());
     }
 
-    public void createRootTask(String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
+    public Schedule createSchedule(RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
 
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
         Assert.assertTrue(scheduleFragment != null);
 
-        scheduleFragment.createRootTask(name);
+        return scheduleFragment.createSchedule(rootTask);
     }
 
     @Override

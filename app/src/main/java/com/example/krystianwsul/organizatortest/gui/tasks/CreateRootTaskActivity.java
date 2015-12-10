@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
@@ -43,7 +46,13 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                 SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
                 Assert.assertTrue(schedulePickerFragment != null);
 
-                schedulePickerFragment.createRootTask(name);
+                RootTask rootTask = TaskFactory.getInstance().createRootTask(name);
+                Assert.assertTrue(rootTask != null);
+
+                Schedule schedule = schedulePickerFragment.createSchedule(rootTask);
+                Assert.assertTrue(schedule != null);
+
+                rootTask.addSchedule(schedule);
 
                 finish();
             }

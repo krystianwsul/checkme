@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +22,7 @@ import android.widget.Spinner;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
@@ -45,6 +45,13 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
     public static WeeklyScheduleFragment newInstance() {
         return new WeeklyScheduleFragment();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Assert.assertTrue(context instanceof HourMinutePickerFragment.HourMinutePickerFragmentListener);
     }
 
     @Override
@@ -105,15 +112,16 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     }
 
     @Override
-    public RootTask createRootTask(String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
+    public Schedule createSchedule(RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
         Assert.assertTrue(!mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries().isEmpty());
 
         ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = new ArrayList<>();
         for (DayOfWeekTimeEntry dayOfWeekTimeEntry : mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
             dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getTime()));
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        return TaskFactory.getInstance().createWeeklyScheduleTask(name, dayOfWeekTimePairs);
+        return TaskFactory.getInstance().createWeeklySchedule(rootTask, dayOfWeekTimePairs);
     }
 
     private class DayOfWeekTimeEntryAdapter extends RecyclerView.Adapter<DayOfWeekTimeEntryAdapter.DayOfWeekTimeHolder> {

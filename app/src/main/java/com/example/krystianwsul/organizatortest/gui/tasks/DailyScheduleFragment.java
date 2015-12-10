@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import android.widget.RelativeLayout;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
@@ -40,6 +40,13 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Assert.assertTrue(context instanceof HourMinutePickerFragment.HourMinutePickerFragmentListener);
     }
 
     @Override
@@ -101,15 +108,16 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     }
 
     @Override
-    public RootTask createRootTask(String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
+    public Schedule createSchedule(RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
 
         ArrayList<Time> times = new ArrayList<>();
-        Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
         for (TimeEntry timeEntry : mTimeEntryAdapter.getTimeEntries())
             times.add(timeEntry.getTime());
+        Assert.assertTrue(!times.isEmpty());
 
-        return TaskFactory.getInstance().createDailyScheduleTask(name, times);
+        return TaskFactory.getInstance().createDailySchedule(rootTask, times);
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {

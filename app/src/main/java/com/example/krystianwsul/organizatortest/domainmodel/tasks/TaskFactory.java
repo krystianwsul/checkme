@@ -51,7 +51,7 @@ public class TaskFactory {
             Assert.assertTrue(schedules != null);
             Assert.assertTrue(!schedules.isEmpty());
 
-            rootTask.setSchedules(schedules);
+            rootTask.addSchedules(schedules);
 
             initializeChildren(rootTask);
 
@@ -200,60 +200,7 @@ public class TaskFactory {
         return mTasks.get(taskId);
     }
 
-    public RootTask createSingleScheduleTask(String name, Date date, Time time) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(time != null);
-
-        RootTask rootTask = createRootTask(name);
-
-        SingleSchedule singleSchedule = createSingleSchedule(rootTask, date, time);
-        Assert.assertTrue(singleSchedule != null);
-
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        schedules.add(singleSchedule);
-
-        rootTask.setSchedules(schedules);
-
-        return rootTask;
-    }
-
-    public RootTask createDailyScheduleTask(String name, ArrayList<Time> times) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(times != null);
-        Assert.assertTrue(!times.isEmpty());
-
-        RootTask rootTask = createRootTask(name);
-
-        DailySchedule dailySchedule = createDailySchedule(rootTask, times);
-        Assert.assertTrue(dailySchedule != null);
-
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        schedules.add(dailySchedule);
-
-        rootTask.setSchedules(schedules);
-
-        return rootTask;
-    }
-
-    public RootTask createWeeklyScheduleTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
-        Assert.assertTrue(dayOfWeekTimePairs != null);
-        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-
-        RootTask rootTask = createRootTask(name);
-
-        WeeklySchedule weeklySchedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs);
-        Assert.assertTrue(weeklySchedule != null);
-
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        schedules.add(weeklySchedule);
-
-        rootTask.setSchedules(schedules);
-
-        return rootTask;
-    }
-
-    private RootTask createRootTask(String name) {
+    public RootTask createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(null, name, getNextRootOrdinal());
@@ -283,7 +230,7 @@ public class TaskFactory {
         parentTask.addChildTask(childTask);
     }
 
-    private SingleSchedule createSingleSchedule(RootTask rootTask, Date date, Time time) {
+    public SingleSchedule createSingleSchedule(RootTask rootTask, Date date, Time time) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(date != null);
         Assert.assertTrue(time != null);
@@ -303,7 +250,7 @@ public class TaskFactory {
         return singleSchedule;
     }
 
-    private DailySchedule createDailySchedule(RootTask rootTask, ArrayList<Time> times) {
+    public DailySchedule createDailySchedule(RootTask rootTask, ArrayList<Time> times) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(times != null);
         Assert.assertTrue(!times.isEmpty());
@@ -327,7 +274,7 @@ public class TaskFactory {
         return dailySchedule;
     }
 
-    private WeeklySchedule createWeeklySchedule(RootTask rootTask, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
+    public WeeklySchedule createWeeklySchedule(RootTask rootTask, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());

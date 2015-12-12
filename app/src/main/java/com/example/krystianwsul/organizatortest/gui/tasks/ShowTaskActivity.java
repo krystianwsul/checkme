@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
@@ -60,7 +61,7 @@ public class ShowTaskActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateChildTaskActivity.getIntent(ShowTaskActivity.this, mTask));
+                startActivity(CreateChildTaskActivity.getCreateIntent(ShowTaskActivity.this, mTask));
             }
         });
 
@@ -71,7 +72,7 @@ public class ShowTaskActivity extends AppCompatActivity {
                 if (mTask.isRootTask())
                     startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, (RootTask) mTask));
                 else
-                    throw new UnsupportedOperationException();
+                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, (ChildTask) mTask));
             }
         });
     }

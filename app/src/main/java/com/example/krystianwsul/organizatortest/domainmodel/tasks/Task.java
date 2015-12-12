@@ -77,8 +77,9 @@ public abstract class Task {
             return null;
     }
 
-    public void setEndTimeStamp() {
-        mTaskRecord.setEndTime(TimeStamp.getNow().getLong());
+    public void setEndTimeStamp(TimeStamp endTimeStamp) {
+        Assert.assertTrue(endTimeStamp != null);
+        mTaskRecord.setEndTime(endTimeStamp.getLong());
     }
 
     public boolean current(TimeStamp timeStamp) {

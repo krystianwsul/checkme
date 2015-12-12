@@ -121,8 +121,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                 if (mRootTask != null) {
                     mRootTask.setName(name);
 
-                    Assert.assertTrue(mRootTask.current(TimeStamp.getNow()));
-                    mRootTask.setNewestScheduleEndTimeStamp();
+                    TimeStamp timeStamp = TimeStamp.getNow();
+                    Assert.assertTrue(mRootTask.current(timeStamp));
+                    mRootTask.setNewestScheduleEndTimeStamp(timeStamp);
 
                     rootTask = mRootTask;
                 } else {

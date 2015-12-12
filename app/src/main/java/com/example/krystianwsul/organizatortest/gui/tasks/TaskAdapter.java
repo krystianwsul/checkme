@@ -115,7 +115,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             Task task = mTasks.get(position);
             Assert.assertTrue(task != null);
 
-            task.setEndTimeStamp();
+            task.setEndTimeStamp(TimeStamp.getNow());
 
             mTasks.remove(position);
             notifyItemRemoved(position);

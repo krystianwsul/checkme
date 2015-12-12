@@ -14,8 +14,6 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -69,10 +67,10 @@ public class ShowTaskActivity extends AppCompatActivity {
         showTaskEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mTask.isRootTask())
-                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, (RootTask) mTask));
+                if (mTask.isRootTask(TimeStamp.getNow()))
+                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, mTask));
                 else
-                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, (ChildTask) mTask));
+                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, mTask));
             }
         });
     }
@@ -81,10 +79,10 @@ public class ShowTaskActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<Task>(mTask.getChildTasks(TimeStamp.getNow()))));
+        mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<>(mTask.getChildTasks(TimeStamp.getNow()))));
 
         mTasksHeadingLabel.setText(mTask.getName());
-        String scheduleText = mTask.getScheduleText(this);
+        String scheduleText = mTask.getScheduleText(this, TimeStamp.getNow());
         if (TextUtils.isEmpty(scheduleText))
             mTasksRowSchedule.setVisibility(View.GONE);
         else

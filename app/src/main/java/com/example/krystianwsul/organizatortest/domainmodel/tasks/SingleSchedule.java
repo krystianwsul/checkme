@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class SingleSchedule extends Schedule {
     private SingleScheduleDateTime mSingleScheduleDateTime;
 
-    SingleSchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
         super(scheduleRecord, rootTask);
     }
 

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
 
@@ -56,7 +55,7 @@ public abstract class Instance {
 
     public ArrayList<Instance> getChildInstances() {
         ArrayList<Instance> childInstances = new ArrayList<>();
-        for (ChildTask childTask : mTask.getChildTasks(getDateTime().getTimeStamp())) {
+        for (Task childTask : mTask.getChildTasks(getDateTime().getTimeStamp())) {
             Instance childInstance = getChildInstance(childTask);
             Assert.assertTrue(childInstance != null);
             childInstances.add(childInstance);
@@ -64,9 +63,7 @@ public abstract class Instance {
         return childInstances;
     }
 
-    public boolean isRootInstance() {
-        return (mTask.isRootTask());
-    }
+    public abstract boolean isRootInstance();
 
     public abstract DateTime getDateTime();
 
@@ -84,7 +81,7 @@ public abstract class Instance {
     public void setDone(boolean done) {
         if (mInstanceRecord == null) {
             if (done)
-                mInstanceRecord = createInstanceRecord();
+                mInstanceRecord = createInstanceRecord(TimeStamp.getNow());
         } else {
             if (done)
                 mInstanceRecord.setDone(TimeStamp.getNow().getLong());
@@ -93,7 +90,7 @@ public abstract class Instance {
         }
     }
 
-    protected abstract InstanceRecord createInstanceRecord();
+    protected abstract InstanceRecord createInstanceRecord(TimeStamp timeStamp);
 
-    protected abstract Instance getChildInstance(ChildTask childTask);
+    protected abstract Instance getChildInstance(Task childTask);
 }

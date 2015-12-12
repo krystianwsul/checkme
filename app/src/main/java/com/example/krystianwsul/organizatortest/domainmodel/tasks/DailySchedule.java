@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class DailySchedule extends Schedule {
     private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
 
-    DailySchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+    DailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
         super(scheduleRecord, rootTask);
     }
 

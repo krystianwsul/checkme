@@ -15,11 +15,11 @@ import java.util.Calendar;
 
 public abstract class Schedule {
     protected final ScheduleRecord mScheduleRecord;
-    protected final RootTask mRootTask;
+    protected final Task mRootTask;
 
     public abstract String getTaskText(Context context);
 
-    protected Schedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+    protected Schedule(ScheduleRecord scheduleRecord, Task rootTask) {
         Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 

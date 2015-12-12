@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class WeeklySchedule extends Schedule {
     private final ArrayList<WeeklyScheduleDayOfWeekTime> mWeeklyScheduleDayOfWeekTimes = new ArrayList<>();
 
-    WeeklySchedule(ScheduleRecord scheduleRecord, RootTask rootTask) {
+    WeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
         super(scheduleRecord, rootTask);
     }
 

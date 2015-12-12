@@ -18,8 +18,8 @@ import android.widget.RelativeLayout;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailySchedule;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
@@ -46,11 +46,10 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         return new DailyScheduleFragment();
     }
 
-    public static DailyScheduleFragment newInstance(RootTask rootTask) {
+    public static DailyScheduleFragment newInstance(Task rootTask) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.getNewestSchedule() != null);
-        Assert.assertTrue(rootTask.getNewestSchedule().current(TimeStamp.getNow()));
-        Assert.assertTrue(rootTask.getNewestSchedule() instanceof DailySchedule);
+        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) != null);
+        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) instanceof DailySchedule);
 
         DailyScheduleFragment dailyScheduleFragment = new DailyScheduleFragment();
 
@@ -95,10 +94,10 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            RootTask rootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+            Task rootTask = TaskFactory.getInstance().getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
-            DailySchedule dailySchedule = (DailySchedule) rootTask.getNewestSchedule();
+            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
             Assert.assertTrue(dailySchedule != null);
             Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
 
@@ -153,8 +152,10 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     }
 
     @Override
-    public Schedule createSchedule(RootTask rootTask) {
+    public Schedule createSchedule(Task rootTask, TimeStamp startTimeStamp) {
         Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(rootTask.current(startTimeStamp));
         Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
 
         ArrayList<Time> times = new ArrayList<>();
@@ -162,7 +163,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             times.add(timeEntry.getTime());
         Assert.assertTrue(!times.isEmpty());
 
-        return TaskFactory.getInstance().createDailySchedule(rootTask, times);
+        return TaskFactory.getInstance().createDailySchedule(rootTask, times, startTimeStamp);
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {

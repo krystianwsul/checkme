@@ -5,7 +5,6 @@ import android.content.Context;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetition;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -33,7 +32,7 @@ public class SingleInstance extends Instance {
         return mSingleRepetition.getRootTaskId();
     }
 
-    public Instance getChildInstance(ChildTask childTask) {
+    public Instance getChildInstance(Task childTask) {
         Assert.assertTrue(childTask != null);
         return InstanceFactory.getInstance().getSingleInstance(childTask, mSingleRepetition);
     }
@@ -51,7 +50,11 @@ public class SingleInstance extends Instance {
         return mSingleRepetition.getRepetitionDateTime();
     }
 
-    protected InstanceRecord createInstanceRecord() {
-        return PersistenceManger.getInstance().createSingleInstanceRecord(mId, mTask, mTask.getRootTask(), TimeStamp.getNow().getLong());
+    protected InstanceRecord createInstanceRecord(TimeStamp timeStamp) {
+        return PersistenceManger.getInstance().createSingleInstanceRecord(mId, mTask, mTask.getRootTask(timeStamp), timeStamp.getLong());
+    }
+
+    public boolean isRootInstance() {
+        return mTask.isRootTask(mSingleRepetition.getRepetitionDateTime().getTimeStamp());
     }
 }

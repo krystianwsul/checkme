@@ -13,9 +13,9 @@ import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -39,11 +39,10 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         return new SingleScheduleFragment();
     }
 
-    public static SingleScheduleFragment newInstance(RootTask rootTask) {
+    public static SingleScheduleFragment newInstance(Task rootTask) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.getNewestSchedule() != null);
-        Assert.assertTrue(rootTask.getNewestSchedule().current(TimeStamp.getNow()));
-        Assert.assertTrue(rootTask.getNewestSchedule() instanceof SingleSchedule);
+        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) != null);
+        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) instanceof SingleSchedule);
 
         SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
 
@@ -90,10 +89,10 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            RootTask rootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+            Task rootTask = TaskFactory.getInstance().getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
-            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getNewestSchedule();
+            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
             Assert.assertTrue(singleSchedule != null);
             Assert.assertTrue(singleSchedule.current(TimeStamp.getNow()));
 
@@ -183,12 +182,11 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     @Override
-    public Schedule createSchedule(RootTask rootTask) {
+    public Schedule createSchedule(Task rootTask, TimeStamp startTimeStamp) {
         Assert.assertTrue(rootTask != null);
-        return TaskFactory.getInstance().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime());
-    }
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(rootTask.current(startTimeStamp));
 
-    public static class PastTimeException extends Exception {
-
+        return TaskFactory.getInstance().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime(), startTimeStamp);
     }
 }

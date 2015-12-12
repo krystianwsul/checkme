@@ -22,8 +22,8 @@ import android.widget.Spinner;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
@@ -51,11 +51,10 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         return new WeeklyScheduleFragment();
     }
 
-    public static WeeklyScheduleFragment newInstance(RootTask rootTask) {
+    public static WeeklyScheduleFragment newInstance(Task rootTask) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.getNewestSchedule() != null);
-        Assert.assertTrue(rootTask.getNewestSchedule().current(TimeStamp.getNow()));
-        Assert.assertTrue(rootTask.getNewestSchedule() instanceof WeeklySchedule);
+        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) != null);
+        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) instanceof WeeklySchedule);
 
         WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
 
@@ -100,10 +99,10 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            RootTask rootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+            Task rootTask = TaskFactory.getInstance().getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
-            WeeklySchedule weeklySchedule = (WeeklySchedule) rootTask.getNewestSchedule();
+            WeeklySchedule weeklySchedule = (WeeklySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
             Assert.assertTrue(weeklySchedule != null);
             Assert.assertTrue(weeklySchedule.current(TimeStamp.getNow()));
 
@@ -157,8 +156,10 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     }
 
     @Override
-    public Schedule createSchedule(RootTask rootTask) {
+    public Schedule createSchedule(Task rootTask, TimeStamp startTimeStamp) {
         Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(rootTask.current(startTimeStamp));
         Assert.assertTrue(!mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries().isEmpty());
 
         ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = new ArrayList<>();
@@ -166,7 +167,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getTime()));
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        return TaskFactory.getInstance().createWeeklySchedule(rootTask, dayOfWeekTimePairs);
+        return TaskFactory.getInstance().createWeeklySchedule(rootTask, dayOfWeekTimePairs, startTimeStamp);
     }
 
     private class DayOfWeekTimeEntryAdapter extends RecyclerView.Adapter<DayOfWeekTimeEntryAdapter.DayOfWeekTimeHolder> {

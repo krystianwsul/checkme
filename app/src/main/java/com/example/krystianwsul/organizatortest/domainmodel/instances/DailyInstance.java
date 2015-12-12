@@ -5,7 +5,6 @@ import android.content.Context;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -42,7 +41,7 @@ public class DailyInstance extends Instance {
             return null;
     }
 
-    public Instance getChildInstance(ChildTask childTask) {
+    public Instance getChildInstance(Task childTask) {
         Assert.assertTrue(childTask != null);
         return InstanceFactory.getInstance().getDailyInstance(childTask, mDailyRepetition);
     }
@@ -51,7 +50,11 @@ public class DailyInstance extends Instance {
         return mDailyRepetition.getRepetitionDateTime();
     }
 
-    protected InstanceRecord createInstanceRecord() {
-        return PersistenceManger.getInstance().createDailyInstanceRecord(mId, mTask, mDailyRepetition, TimeStamp.getNow().getLong());
+    protected InstanceRecord createInstanceRecord(TimeStamp timeStamp) {
+        return PersistenceManger.getInstance().createDailyInstanceRecord(mId, mTask, mDailyRepetition, timeStamp.getLong());
+    }
+
+    public boolean isRootInstance() {
+        return mTask.isRootTask(mDailyRepetition.getScheduleDateTime().getTimeStamp());
     }
 }

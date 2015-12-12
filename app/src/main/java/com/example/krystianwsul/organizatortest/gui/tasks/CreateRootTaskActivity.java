@@ -17,9 +17,9 @@ import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailySchedule;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.SingleSchedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -32,14 +32,14 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
     private Spinner mCreateRootTaskSpinner;
 
-    private RootTask mRootTask;
+    private Task mRootTask;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
         return new Intent(context, CreateRootTaskActivity.class);
     }
 
-    public static Intent getEditIntent(Context context, RootTask rootTask) {
+    public static Intent getEditIntent(Context context, Task rootTask) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(rootTask != null);
 
@@ -60,7 +60,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             int rootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            mRootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+            mRootTask = TaskFactory.getInstance().getTask(rootTaskId);
             Assert.assertTrue(mRootTask != null);
 
         }
@@ -74,9 +74,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         } else if (mRootTask != null) {
             createRootTaskName.setText(mRootTask.getName());
 
-            Schedule schedule = mRootTask.getNewestSchedule();
+            Schedule schedule = mRootTask.getCurrentSchedule(TimeStamp.getNow());
             Assert.assertTrue(schedule != null);
-            Assert.assertTrue(schedule.current(TimeStamp.getNow()));
 
             Fragment fragment;
             if (schedule instanceof SingleSchedule) {
@@ -117,21 +116,21 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                     return;
                 }
 
-                RootTask rootTask;
+                Task rootTask;
+                TimeStamp timeStamp = TimeStamp.getNow();
                 if (mRootTask != null) {
                     mRootTask.setName(name);
 
-                    TimeStamp timeStamp = TimeStamp.getNow();
                     Assert.assertTrue(mRootTask.current(timeStamp));
-                    mRootTask.setNewestScheduleEndTimeStamp(timeStamp);
+                    mRootTask.setScheduleEndTimeStamp(timeStamp);
 
                     rootTask = mRootTask;
                 } else {
-                    rootTask = TaskFactory.getInstance().createRootTask(name);
+                    rootTask = TaskFactory.getInstance().createRootTask(name, timeStamp);
                     Assert.assertTrue(rootTask != null);
                 }
 
-                Schedule schedule = scheduleFragment.createSchedule(rootTask);
+                Schedule schedule = scheduleFragment.createSchedule(rootTask, timeStamp);
                 Assert.assertTrue(schedule != null);
 
                 rootTask.addSchedule(schedule);

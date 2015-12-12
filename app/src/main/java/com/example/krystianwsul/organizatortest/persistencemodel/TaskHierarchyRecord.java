@@ -2,33 +2,36 @@ package com.example.krystianwsul.organizatortest.persistencemodel;
 
 import junit.framework.Assert;
 
-public class ScheduleRecord {
+public class TaskHierarchyRecord {
     private final int mId;
-    private final int mRootTaskId;
+
+    private final int mParentTaskId;
+    private final int mChildTaskId;
 
     private final long mStartTime;
     private Long mEndTime;
 
-    private int mType;
-
-    public ScheduleRecord(int id, int rootTaskId, long startTime, Long endTime, int type) {
-        Assert.assertTrue((endTime == null) || startTime < endTime);
+    public TaskHierarchyRecord(int id, int parentTaskId, int childTaskId, long startTime, Long endTime) {
+        Assert.assertTrue(parentTaskId != childTaskId);
+        Assert.assertTrue(endTime == null || startTime <= endTime);
 
         mId = id;
-        mRootTaskId = rootTaskId;
-
+        mParentTaskId = parentTaskId;
+        mChildTaskId = childTaskId;
         mStartTime = startTime;
         mEndTime = endTime;
-
-        mType = type;
     }
 
     public int getId() {
         return mId;
     }
 
-    public int getRootTaskId() {
-        return mRootTaskId;
+    public int getParentTaskId() {
+        return mParentTaskId;
+    }
+
+    public int getChildTaskId() {
+        return mChildTaskId;
     }
 
     public long getStartTime() {
@@ -44,9 +47,5 @@ public class ScheduleRecord {
         Assert.assertTrue(mStartTime <= endTime);
 
         mEndTime = endTime;
-    }
-
-    public int getType() {
-        return mType;
     }
 }

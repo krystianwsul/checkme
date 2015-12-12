@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.krystianwsul.organizatortest.R;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.ChildTask;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
@@ -26,7 +26,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
         return intent;
     }
 
-    public static Intent getEditIntent(Context context, ChildTask childTask) {
+    public static Intent getEditIntent(Context context, Task childTask) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
         intent.putExtra(CHILD_TASK_ID_KEY, childTask.getId());
         return intent;
@@ -39,7 +39,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Task parentTask = null;
-        ChildTask childTask = null;
+        Task childTask = null;
         if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
             int parentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
             Assert.assertTrue(parentTaskId != -1);
@@ -52,12 +52,12 @@ public class CreateChildTaskActivity extends AppCompatActivity {
             int childTaskId = intent.getIntExtra(CHILD_TASK_ID_KEY, -1);
             Assert.assertTrue(childTaskId != -1);
 
-            childTask = (ChildTask) TaskFactory.getInstance().getTask(childTaskId);
+            childTask = TaskFactory.getInstance().getTask(childTaskId);
             Assert.assertTrue(childTask != null);
         }
 
         final Task finalParentTask = parentTask;
-        final ChildTask finalChildTask = childTask;
+        final Task finalChildTask = childTask;
 
         final EditText createChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
         if (savedInstanceState == null && finalChildTask != null)
@@ -76,7 +76,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
                 }
 
                 if (finalParentTask != null) {
-                    TaskFactory.getInstance().createChildTask(finalParentTask, name);
+                    TaskFactory.getInstance().createChildTask(finalParentTask, name, TimeStamp.getNow());
                 } else {
                     finalChildTask.setName(name);
                 }

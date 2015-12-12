@@ -54,7 +54,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
 
         taskHolder.mTaskRowName.setText(task.getName());
 
-        String scheduleText = task.getScheduleText(mActivity);
+        String scheduleText = task.getScheduleText(mActivity, TimeStamp.getNow());
         if (TextUtils.isEmpty(scheduleText))
             taskHolder.mTaskRowDetails.setVisibility(View.GONE);
         else

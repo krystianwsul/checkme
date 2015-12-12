@@ -20,7 +20,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 
@@ -75,14 +75,14 @@ public class GroupListFragment extends Fragment {
 
             mContext = context;
 
-            Collection<RootTask> rootTasks = TaskFactory.getInstance().getRootTasks();
+            Collection<Task> rootTasks = TaskFactory.getInstance().getRootTasks(TimeStamp.getNow());
 
             Calendar tomorrowCalendar = Calendar.getInstance();
             tomorrowCalendar.add(Calendar.DATE, 2);
             Date tomorrowDate = new Date(tomorrowCalendar);
 
             ArrayList<Instance> instances = new ArrayList<>();
-            for (RootTask rootTask : rootTasks)
+            for (Task rootTask : rootTasks)
                 instances.addAll(rootTask.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
 
             ArrayList<Instance> doneInstances = new ArrayList<>();

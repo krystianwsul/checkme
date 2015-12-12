@@ -11,12 +11,15 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
@@ -26,12 +29,29 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
     private Date mDate;
 
-    private static String YEAR_KEY = "year";
-    private static String MONTH_KEY = "month";
-    private static String DAY_KEY = "day";
+    private static final String YEAR_KEY = "year";
+    private static final String MONTH_KEY = "month";
+    private static final String DAY_KEY = "day";
+
+    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
     public static SingleScheduleFragment newInstance() {
         return new SingleScheduleFragment();
+    }
+
+    public static SingleScheduleFragment newInstance(RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(rootTask.getNewestSchedule() != null);
+        Assert.assertTrue(rootTask.getNewestSchedule().current(TimeStamp.getNow()));
+        Assert.assertTrue(rootTask.getNewestSchedule() instanceof SingleSchedule);
+
+        SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
+
+        Bundle args = new Bundle();
+        args.putInt(ROOT_TASK_ID_KEY, rootTask.getId());
+
+        singleScheduleFragment.setArguments(args);
+        return singleScheduleFragment;
     }
 
     @Override
@@ -51,6 +71,9 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        Bundle args = getArguments();
+
+        Time time = null;
         if (savedInstanceState != null) {
 
             int year = savedInstanceState.getInt(YEAR_KEY, -1);
@@ -62,6 +85,21 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             Assert.assertTrue(day != -1);
 
             mDate = new Date(year, month, day);
+        } else if (args != null) {
+            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
+            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+            Assert.assertTrue(rootTaskId != -1);
+
+            RootTask rootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getNewestSchedule();
+            Assert.assertTrue(singleSchedule != null);
+            Assert.assertTrue(singleSchedule.current(TimeStamp.getNow()));
+
+            DateTime dateTime = singleSchedule.getDateTime();
+            mDate = dateTime.getDate();
+            time = dateTime.getTime();
         } else {
             mDate = Date.today();
         }
@@ -84,6 +122,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         updateDateText();
 
         mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
+        if (time != null)
+            mTimePickerView.setTime(time);
 
         mTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override

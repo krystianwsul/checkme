@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 import android.content.Context;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -57,5 +58,10 @@ public class SingleSchedule extends Schedule {
         instances.add(mSingleScheduleDateTime.getInstance(mRootTask, date));
 
         return instances;
+    }
+
+    public DateTime getDateTime() {
+        Assert.assertTrue(mSingleScheduleDateTime != null);
+        return mSingleScheduleDateTime.getDateTime();
     }
 }

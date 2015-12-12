@@ -69,7 +69,7 @@ public class ShowTaskActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (mTask.isRootTask())
-                    startActivity(EditRootTaskActivity.getIntent(ShowTaskActivity.this, (RootTask) mTask));
+                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, (RootTask) mTask));
                 else
                     throw new UnsupportedOperationException();
             }

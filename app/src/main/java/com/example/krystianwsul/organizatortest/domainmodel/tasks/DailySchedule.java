@@ -8,6 +8,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.ScheduleRecord;
 
 import junit.framework.Assert;
@@ -59,5 +60,15 @@ public class DailySchedule extends Schedule {
         }
 
         return instances;
+    }
+
+    public ArrayList<Time> getTimes() {
+        Assert.assertTrue(!mDailyScheduleTimes.isEmpty());
+
+        ArrayList<Time> times = new ArrayList<>();
+        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes)
+            times.add(dailyScheduleTime.getTime());
+
+        return times;
     }
 }

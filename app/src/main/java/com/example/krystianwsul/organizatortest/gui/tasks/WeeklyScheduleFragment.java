@@ -21,9 +21,11 @@ import android.widget.Spinner;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -43,8 +45,25 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     private static final String DATE_TIME_ENTRY_KEY = "dateTimeEntries";
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
 
+    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
     public static WeeklyScheduleFragment newInstance() {
         return new WeeklyScheduleFragment();
+    }
+
+    public static WeeklyScheduleFragment newInstance(RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(rootTask.getNewestSchedule() != null);
+        Assert.assertTrue(rootTask.getNewestSchedule().current(TimeStamp.getNow()));
+        Assert.assertTrue(rootTask.getNewestSchedule() instanceof WeeklySchedule);
+
+        WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
+
+        Bundle args = new Bundle();
+        args.putInt(ROOT_TASK_ID_KEY, rootTask.getId());
+
+        weeklyScheduleFragment.setArguments(args);
+        return weeklyScheduleFragment;
     }
 
     @Override
@@ -68,12 +87,33 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         RecyclerView dailyScheduleTimes = (RecyclerView) view.findViewById(R.id.weekly_schedule_datetimes);
         dailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        Bundle args = getArguments();
+
         if (savedInstanceState != null) {
             List<DayOfWeekTimeEntry> dateTimeEntries = savedInstanceState.getParcelableArrayList(DATE_TIME_ENTRY_KEY);
             mDayOfWeekTimeEntryAdapter = new DayOfWeekTimeEntryAdapter(getContext(), dateTimeEntries);
 
             mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
+        } else if (args != null) {
+            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
+            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+            Assert.assertTrue(rootTaskId != -1);
+
+            RootTask rootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            WeeklySchedule weeklySchedule = (WeeklySchedule) rootTask.getNewestSchedule();
+            Assert.assertTrue(weeklySchedule != null);
+            Assert.assertTrue(weeklySchedule.current(TimeStamp.getNow()));
+
+            ArrayList<DayOfWeekTimeEntry> dayOfWeekTimeEntries = new ArrayList<>();
+            boolean showDelete = (dayOfWeekTimeEntries.size() > 1);
+            for (Pair<DayOfWeek, Time> dayOfWeekTime : weeklySchedule.getDayOfWeekTimes())
+                dayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(dayOfWeekTime.first, dayOfWeekTime.second, showDelete));
+            mDayOfWeekTimeEntryAdapter = new DayOfWeekTimeEntryAdapter(getContext(), dayOfWeekTimeEntries);
+
+            mHourMinutePickerPosition = -1;
         } else {
             mDayOfWeekTimeEntryAdapter = new DayOfWeekTimeEntryAdapter(getContext());
             mHourMinutePickerPosition = -1;
@@ -335,6 +375,23 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             mDayOfWeek = dayOfWeek;
             setHourMinute(hourMinute);
             mShowDelete = showDelete;
+        }
+
+        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, Time time, boolean showDelete) {
+            Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(time != null);
+
+            mDayOfWeek = dayOfWeek;
+
+            if (time instanceof CustomTime) {
+                setCustomTime((CustomTime) time);
+            } else {
+                Assert.assertTrue(time instanceof NormalTime);
+                setHourMinute(((NormalTime) time).getHourMinute());
+            }
+
+            mShowDelete = showDelete;
+
         }
 
         public DayOfWeek getDayOfWeek() {

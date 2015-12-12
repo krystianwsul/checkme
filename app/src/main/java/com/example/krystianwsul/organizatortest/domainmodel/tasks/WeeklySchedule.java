@@ -1,12 +1,14 @@
 package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import android.content.Context;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.ScheduleRecord;
 
 import junit.framework.Assert;
@@ -61,5 +63,15 @@ public class WeeklySchedule extends Schedule {
         }
 
         return instances;
+    }
+
+    public ArrayList<Pair<DayOfWeek, Time>> getDayOfWeekTimes() {
+        Assert.assertTrue(!mWeeklyScheduleDayOfWeekTimes.isEmpty());
+
+        ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimes = new ArrayList<>();
+        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
+            dayOfWeekTimes.add(new Pair<>(weeklyScheduleDayOfWeekTime.getDayOfWeek(), weeklyScheduleDayOfWeekTime.getTime()));
+
+        return dayOfWeekTimes;
     }
 }

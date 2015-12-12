@@ -36,8 +36,6 @@
         </activity>
         <activity android:name=".gui.tasks.CreateChildTaskActivity" >
         </activity>
-        <activity android:name=".gui.tasks.EditRootTaskActivity" >
-        </activity>
     </application>
 
 </manifest>

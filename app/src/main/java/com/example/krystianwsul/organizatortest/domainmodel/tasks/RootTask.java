@@ -35,7 +35,7 @@ public class RootTask extends Task {
         return getNewestSchedule().getTaskText(context);
     }
 
-    private Schedule getNewestSchedule() {
+    public Schedule getNewestSchedule() {
         Assert.assertTrue(!mSchedules.isEmpty());
 
         Schedule newestSchedule = mSchedules.get(0);

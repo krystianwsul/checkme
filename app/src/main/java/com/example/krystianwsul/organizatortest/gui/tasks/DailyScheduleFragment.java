@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.krystianwsul.organizatortest.R;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.RootTask;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
@@ -38,8 +40,25 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     private static final String TIME_ENTRY_KEY = "timeEntries";
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
 
+    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
+    }
+
+    public static DailyScheduleFragment newInstance(RootTask rootTask) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(rootTask.getNewestSchedule() != null);
+        Assert.assertTrue(rootTask.getNewestSchedule().current(TimeStamp.getNow()));
+        Assert.assertTrue(rootTask.getNewestSchedule() instanceof DailySchedule);
+
+        DailyScheduleFragment dailyScheduleFragment = new DailyScheduleFragment();
+
+        Bundle args = new Bundle();
+        args.putInt(ROOT_TASK_ID_KEY, rootTask.getId());
+
+        dailyScheduleFragment.setArguments(args);
+        return dailyScheduleFragment;
     }
 
     @Override
@@ -63,12 +82,33 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         RecyclerView dailyScheduleTimes = (RecyclerView) view.findViewById(R.id.daily_schedule_times);
         dailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        Bundle args = getArguments();
+
         if (savedInstanceState != null) {
             List<TimeEntry> timeEntries = savedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
 
             mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
+        } else if (args != null) {
+            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
+            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+            Assert.assertTrue(rootTaskId != -1);
+
+            RootTask rootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            DailySchedule dailySchedule = (DailySchedule) rootTask.getNewestSchedule();
+            Assert.assertTrue(dailySchedule != null);
+            Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
+
+            ArrayList<TimeEntry> timeEntries = new ArrayList<>();
+            boolean showDelete = (timeEntries.size() > 1);
+            for (Time time : dailySchedule.getTimes())
+                timeEntries.add(new TimeEntry(time, showDelete));
+            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
+
+            mHourMinutePickerPosition = -1;
         } else {
             mTimeEntryAdapter = new TimeEntryAdapter(getContext());
             mHourMinutePickerPosition = -1;
@@ -289,6 +329,19 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             Assert.assertTrue(hourMinute != null);
 
             setHourMinute(hourMinute);
+            mShowDelete = showDelete;
+        }
+
+        public TimeEntry(Time time, boolean showDelete) {
+            Assert.assertTrue(time != null);
+
+            if (time instanceof CustomTime) {
+                setCustomTime((CustomTime) time);
+            } else {
+                Assert.assertTrue(time instanceof NormalTime);
+                setHourMinute(((NormalTime) time).getHourMinute());
+            }
+
             mShowDelete = showDelete;
         }
 

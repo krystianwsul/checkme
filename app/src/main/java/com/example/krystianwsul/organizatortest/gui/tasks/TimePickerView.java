@@ -182,6 +182,17 @@ public class TimePickerView extends LinearLayout {
         setSpinnerPosition(getCustomTimePosition(customTime));
     }
 
+    public void setTime(Time time) {
+        Assert.assertTrue(time != null);
+
+        if (time instanceof CustomTime) {
+            setCustomTime((CustomTime) time);
+        } else {
+            Assert.assertTrue(time instanceof NormalTime);
+            setHourMinute(((NormalTime) time).getHourMinute());
+        }
+    }
+
     public HourMinute getHourMinute() {
         return mHourMinute;
     }

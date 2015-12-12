@@ -63,7 +63,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             mRootTask = (RootTask) TaskFactory.getInstance().getTask(rootTaskId);
             Assert.assertTrue(mRootTask != null);
 
-            createRootTaskName.setText(mRootTask.getName());
         }
 
         int count = 1;
@@ -73,6 +72,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             if (position > 0)
                 count = 2;
         } else if (mRootTask != null) {
+            createRootTaskName.setText(mRootTask.getName());
+
             Schedule schedule = mRootTask.getNewestSchedule();
             Assert.assertTrue(schedule != null);
             Assert.assertTrue(schedule.current(TimeStamp.getNow()));

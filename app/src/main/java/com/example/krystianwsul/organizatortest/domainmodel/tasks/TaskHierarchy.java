@@ -51,4 +51,11 @@ public class TaskHierarchy {
 
         return (startTimeStamp.compareTo(timeStamp) <= 0 && (endTimeStamp == null || endTimeStamp.compareTo(timeStamp) > 0));
     }
+
+    void setEndTimeStamp(TimeStamp endTimeStamp) {
+        Assert.assertTrue(endTimeStamp != null);
+        Assert.assertTrue(current(endTimeStamp));
+
+        mTaskHierarchyRecord.setEndTime(endTimeStamp.getLong());
+    }
 }

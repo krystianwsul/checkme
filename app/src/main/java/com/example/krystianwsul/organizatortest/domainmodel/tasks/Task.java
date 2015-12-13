@@ -78,7 +78,10 @@ public class Task {
 
     Task getParentTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
-        return TaskFactory.getInstance().getParentTask(this, timeStamp);
+
+        Task parentTask = TaskFactory.getInstance().getParentTask(this, timeStamp);
+        Assert.assertTrue((parentTask == null) != (getCurrentSchedule(timeStamp) == null));
+        return parentTask;
     }
 
     public int getId() {
@@ -87,19 +90,27 @@ public class Task {
 
     public Task getRootTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
+        Assert.assertTrue(current(timeStamp));
 
         Task parentTask = getParentTask(timeStamp);
-        if (parentTask == null)
+        if (parentTask == null) {
+            Assert.assertTrue(getCurrentSchedule(timeStamp) != null);
             return this;
-        else
+        } else {
+            Assert.assertTrue(getCurrentSchedule(timeStamp) == null);
             return parentTask.getRootTask(timeStamp);
+        }
     }
 
     public boolean isRootTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        return (getParentTask(timeStamp) == null);
+        boolean isRoot = (getParentTask(timeStamp) == null);
+
+        Assert.assertTrue((getCurrentSchedule(timeStamp) != null) == isRoot);
+
+        return (isRoot);
     }
 
     private TimeStamp getStartTimeStamp() {
@@ -117,9 +128,19 @@ public class Task {
         Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(current(endTimeStamp));
 
-        mTaskRecord.setEndTime(endTimeStamp.getLong());
+        if (isRootTask(endTimeStamp))
+            setScheduleEndTimeStamp(endTimeStamp);
+        else
+            Assert.assertTrue(getCurrentSchedule(endTimeStamp) == null);
 
-        setScheduleEndTimeStamp(endTimeStamp);
+        for (Task childTask : getChildTasks(endTimeStamp)) {
+            Assert.assertTrue(childTask != null);
+            childTask.setEndTimeStamp(endTimeStamp);
+        }
+
+        TaskFactory.getInstance().setParentHierarchyEndTimeStamp(this, endTimeStamp);
+
+        mTaskRecord.setEndTime(endTimeStamp.getLong());
     }
 
     public void setScheduleEndTimeStamp(TimeStamp endTimeStamp) {

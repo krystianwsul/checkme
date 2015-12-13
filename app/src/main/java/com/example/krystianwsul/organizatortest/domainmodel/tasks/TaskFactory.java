@@ -174,7 +174,7 @@ public class TaskFactory {
 
         ArrayList<Task> rootTasks = new ArrayList<>();
         for (Task task : mTasks.values())
-            if (task.isRootTask(timeStamp))
+            if (task.current(timeStamp) && task.isRootTask(timeStamp))
                 rootTasks.add(task);
 
         return rootTasks;
@@ -327,16 +327,52 @@ public class TaskFactory {
         Assert.assertTrue(childTask != null);
         Assert.assertTrue(childTask.current(timeStamp));
 
-        ArrayList<Task> parentTasks = new ArrayList<>();
-        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values())
-            if (taskHierarchy.current(timeStamp) && taskHierarchy.getParentTask().current(timeStamp) && taskHierarchy.getChildTask() == childTask)
-                parentTasks.add(taskHierarchy.getParentTask());
-
-        if (parentTasks.isEmpty()) {
+        TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, timeStamp);
+        if (parentTaskHierarchy == null) {
             return null;
         } else {
-            Assert.assertTrue(parentTasks.size() == 1);
-            return parentTasks.get(0);
+            Assert.assertTrue(parentTaskHierarchy.current(timeStamp));
+            Task parentTask = parentTaskHierarchy.getParentTask();
+            Assert.assertTrue(parentTask.current(timeStamp));
+            return parentTask;
         }
+    }
+
+    private TaskHierarchy getParentTaskHierarchy(Task childTask, TimeStamp timeStamp) {
+        Assert.assertTrue(childTask != null);
+        Assert.assertTrue(timeStamp != null);
+        Assert.assertTrue(childTask.current(timeStamp));
+
+        ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
+        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values()) {
+            Assert.assertTrue(taskHierarchy != null);
+
+            if (!taskHierarchy.current(timeStamp))
+                continue;
+
+            if (taskHierarchy.getChildTask() != childTask)
+                continue;
+
+            taskHierarchies.add(taskHierarchy);
+        }
+
+        if (taskHierarchies.isEmpty()) {
+            return null;
+        } else {
+            Assert.assertTrue(taskHierarchies.size() == 1);
+            return taskHierarchies.get(0);
+        }
+    }
+
+    void setParentHierarchyEndTimeStamp(Task childTask, TimeStamp endTimeStamp) {
+        Assert.assertTrue(childTask != null);
+        Assert.assertTrue(endTimeStamp != null);
+        Assert.assertTrue(childTask.current(endTimeStamp));
+
+        TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, endTimeStamp);
+        Assert.assertTrue(parentTaskHierarchy != null);
+        Assert.assertTrue(parentTaskHierarchy.current(endTimeStamp));
+
+        parentTaskHierarchy.setEndTimeStamp(endTimeStamp);
     }
 }

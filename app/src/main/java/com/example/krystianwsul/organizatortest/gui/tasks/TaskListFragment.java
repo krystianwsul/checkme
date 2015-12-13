@@ -13,6 +13,7 @@ import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
+import com.example.krystianwsul.organizatortest.gui.MainActivity;
 
 import junit.framework.Assert;
 
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeMap;
 
-public class TaskListFragment extends Fragment {
+public class TaskListFragment extends Fragment implements MainActivity.RefreshFragment {
     private RecyclerView mTasksRecycler;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,7 +50,11 @@ public class TaskListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        refresh();
+    }
 
+    @Override
+    public void refresh() {
         Collection<Task> allRootTasks = TaskFactory.getInstance().getRootTasks(TimeStamp.getNow());
         TreeMap<Integer, Task> currentRootTasks = new TreeMap<>();
         for (Task rootTask : allRootTasks) {

@@ -38,6 +38,7 @@ public class Task {
         Schedule currentSchedule = getCurrentSchedule(timeStamp);
         if (isRootTask(timeStamp)) {
             Assert.assertTrue(currentSchedule != null);
+            Assert.assertTrue(currentSchedule.current(timeStamp));
             return currentSchedule.getTaskText(context);
         } else {
             Assert.assertTrue(currentSchedule == null);
@@ -55,9 +56,11 @@ public class Task {
                 currentSchedules.add(schedule);
 
         if (currentSchedules.isEmpty()) {
+            Assert.assertTrue(!isRootTask(timeStamp));
             return null;
         } else {
             Assert.assertTrue(currentSchedules.size() == 1);
+            Assert.assertTrue(isRootTask(timeStamp));
             return currentSchedules.get(0);
         }
     }
@@ -73,15 +76,16 @@ public class Task {
 
     public ArrayList<Task> getChildTasks(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
+        Assert.assertTrue(current(timeStamp));
+
         return TaskFactory.getInstance().getChildTasks(this, timeStamp);
     }
 
     Task getParentTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
+        Assert.assertTrue(current(timeStamp));
 
-        Task parentTask = TaskFactory.getInstance().getParentTask(this, timeStamp);
-        Assert.assertTrue((parentTask == null) != (getCurrentSchedule(timeStamp) == null));
-        return parentTask;
+        return TaskFactory.getInstance().getParentTask(this, timeStamp);
     }
 
     public int getId() {
@@ -98,6 +102,7 @@ public class Task {
             return this;
         } else {
             Assert.assertTrue(getCurrentSchedule(timeStamp) == null);
+            Assert.assertTrue(parentTask.current(timeStamp));
             return parentTask.getRootTask(timeStamp);
         }
     }
@@ -106,11 +111,7 @@ public class Task {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        boolean isRoot = (getParentTask(timeStamp) == null);
-
-        Assert.assertTrue((getCurrentSchedule(timeStamp) != null) == isRoot);
-
-        return (isRoot);
+        return (getParentTask(timeStamp) == null);
     }
 
     private TimeStamp getStartTimeStamp() {
@@ -145,9 +146,11 @@ public class Task {
 
     public void setScheduleEndTimeStamp(TimeStamp endTimeStamp) {
         Assert.assertTrue(endTimeStamp != null);
+        Assert.assertTrue(current(endTimeStamp));
 
         Schedule currentSchedule = getCurrentSchedule(endTimeStamp);
         Assert.assertTrue(currentSchedule != null);
+        Assert.assertTrue(currentSchedule.current(endTimeStamp));
 
         currentSchedule.setEndTimeStamp(endTimeStamp);
     }

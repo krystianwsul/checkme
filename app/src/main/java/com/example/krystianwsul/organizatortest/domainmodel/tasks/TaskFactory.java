@@ -370,9 +370,9 @@ public class TaskFactory {
         Assert.assertTrue(childTask.current(endTimeStamp));
 
         TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, endTimeStamp);
-        Assert.assertTrue(parentTaskHierarchy != null);
-        Assert.assertTrue(parentTaskHierarchy.current(endTimeStamp));
-
-        parentTaskHierarchy.setEndTimeStamp(endTimeStamp);
+        if (parentTaskHierarchy != null) {
+            Assert.assertTrue(parentTaskHierarchy.current(endTimeStamp));
+            parentTaskHierarchy.setEndTimeStamp(endTimeStamp);
+        }
     }
 }

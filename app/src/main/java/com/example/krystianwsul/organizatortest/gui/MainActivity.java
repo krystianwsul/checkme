@@ -1,16 +1,17 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizatortest.gui;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.gui.customtimes.ShowCustomTimesActivity;
 import com.example.krystianwsul.organizatortest.gui.instances.GroupListFragment;
 import com.example.krystianwsul.organizatortest.gui.tasks.TaskListFragment;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
-        viewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+        final FragmentStatePagerAdapter fragmentStatePagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
                 Assert.assertTrue(position >= 0);
@@ -52,9 +53,33 @@ public class MainActivity extends AppCompatActivity {
             public int getCount() {
                 return 2;
             }
-        });
+
+            @Override
+            public int getItemPosition(Object object) {
+                ((RefreshFragment) object).refresh();
+                return super.getItemPosition(object);
+            }
+        };
+        viewPager.setAdapter(fragmentStatePagerAdapter);
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                fragmentStatePagerAdapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
@@ -89,5 +114,9 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public interface RefreshFragment {
+        void refresh();
     }
 }

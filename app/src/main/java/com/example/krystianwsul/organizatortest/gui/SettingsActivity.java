@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizatortest.gui;
 
 
 import android.annotation.TargetApi;
@@ -13,12 +13,14 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
+
+import com.example.krystianwsul.organizatortest.R;
 
 import java.util.List;
 

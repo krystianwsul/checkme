@@ -23,6 +23,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.gui.MainActivity;
 
 import junit.framework.Assert;
 
@@ -33,7 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeMap;
 
-public class GroupListFragment extends Fragment {
+public class GroupListFragment extends Fragment implements MainActivity.RefreshFragment {
     private RecyclerView mGroupList;
 
     @Override
@@ -54,6 +55,11 @@ public class GroupListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        refresh();
+    }
+
+    @Override
+    public void refresh() {
         mGroupList.setAdapter(new GroupAdapter(getContext()));
     }
 

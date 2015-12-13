@@ -11,15 +11,10 @@ import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.gui.MainActivity;
 
 import junit.framework.Assert;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.TreeMap;
 
 public class TaskListFragment extends Fragment implements MainActivity.RefreshFragment {
     private RecyclerView mTasksRecycler;
@@ -55,14 +50,6 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
 
     @Override
     public void refresh() {
-        Collection<Task> allRootTasks = TaskFactory.getInstance().getRootTasks(TimeStamp.getNow());
-        TreeMap<Integer, Task> currentRootTasks = new TreeMap<>();
-        for (Task rootTask : allRootTasks) {
-            if (rootTask.current(TimeStamp.getNow())) {
-                currentRootTasks.put(rootTask.getId(), rootTask);
-            }
-        }
-
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), new ArrayList<>(currentRootTasks.values())));
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), TaskFactory.getInstance().getRootTasks(TimeStamp.getNow())));
     }
 }

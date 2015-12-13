@@ -19,8 +19,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 public class ShowTaskActivity extends AppCompatActivity {
     private RecyclerView mShowTaskRecycler;
     private TextView mTasksHeadingLabel;
@@ -79,7 +77,7 @@ public class ShowTaskActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        mShowTaskRecycler.setAdapter(new TaskAdapter(this, new ArrayList<>(mTask.getChildTasks(TimeStamp.getNow()))));
+        mShowTaskRecycler.setAdapter(new TaskAdapter(this, mTask.getChildTasks(TimeStamp.getNow())));
 
         mTasksHeadingLabel.setText(mTask.getName());
         String scheduleText = mTask.getScheduleText(this, TimeStamp.getNow());

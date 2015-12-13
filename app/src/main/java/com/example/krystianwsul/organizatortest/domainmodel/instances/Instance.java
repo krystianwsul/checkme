@@ -2,39 +2,48 @@ package com.example.krystianwsul.organizatortest.domainmodel.instances;
 
 import android.content.Context;
 
+import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
+import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.InstanceRecord;
+import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public abstract class Instance {
-    protected final Task mTask;
+public class Instance {
+    private final Task mTask;
 
-    protected InstanceRecord mInstanceRecord;
+    private InstanceRecord mInstanceRecord;
+    private DateTime mScheduleDateTime;
 
-    protected final int mId;
+    private final int mId;
 
-    protected Instance(Task task, InstanceRecord instanceRecord) {
+    Instance(Task task, InstanceRecord instanceRecord) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(instanceRecord != null);
 
         mTask = task;
 
         mInstanceRecord = instanceRecord;
+        mScheduleDateTime = null;
 
         mId = mInstanceRecord.getId();
     }
 
-    protected Instance(Task task, int id) {
+    Instance(Task task, int id, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
+        Assert.assertTrue(scheduleDateTime != null);
 
         mTask = task;
 
         mInstanceRecord = null;
+        mScheduleDateTime = scheduleDateTime;
 
         mId = id;
     }
@@ -51,21 +60,101 @@ public abstract class Instance {
         return mTask.getName();
     }
 
-    public abstract String getScheduleText(Context context);
+    public Date getScheduleDate() {
+        Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
+
+        if (mInstanceRecord != null)
+            return new Date(mInstanceRecord.getScheduleYear(), mInstanceRecord.getScheduleMonth(), mInstanceRecord.getScheduleDay());
+        else
+            return mScheduleDateTime.getDate();
+    }
+
+    public Time getScheduleTime() {
+        Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
+
+        if (mInstanceRecord != null) {
+            Integer customTimeId = mInstanceRecord.getScheduleCustomTimeId();
+            Integer hour = mInstanceRecord.getScheduleHour();
+            Integer minute = mInstanceRecord.getScheduleMinute();
+
+            Assert.assertTrue((hour == null) == (minute == null));
+            Assert.assertTrue((customTimeId == null) != (hour == null));
+
+            if (customTimeId != null)
+                return CustomTimeFactory.getInstance().getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
+            else
+                return new NormalTime(hour, minute);
+        } else {
+            return mScheduleDateTime.getTime();
+        }
+    }
+
+    public DateTime getScheduleDateTime() {
+        return new DateTime(getScheduleDate(), getScheduleTime());
+    }
+
+    public Date getInstanceDate() {
+        Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
+
+        if (mInstanceRecord != null) {
+            Assert.assertTrue((mInstanceRecord.getInstanceYear() == null) == (mInstanceRecord.getInstanceMonth() == null) == (mInstanceRecord.getInstanceDay() == null));
+            if (mInstanceRecord.getInstanceYear() != null)
+                return new Date(mInstanceRecord.getInstanceYear(), mInstanceRecord.getInstanceMonth(), mInstanceRecord.getInstanceDay());
+            else
+                return getScheduleDate();
+        } else {
+            return mScheduleDateTime.getDate();
+        }
+    }
+
+    public Time getInstanceTime() {
+        Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
+
+        if (mInstanceRecord != null) {
+            Assert.assertTrue((mInstanceRecord.getInstanceHour() == null) == (mInstanceRecord.getInstanceMinute() == null));
+            Assert.assertTrue((mInstanceRecord.getInstanceHour() == null) || (mInstanceRecord.getInstanceCustomTimeId() == null));
+
+            if (mInstanceRecord.getInstanceCustomTimeId() != null)
+                return CustomTimeFactory.getInstance().getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
+            else if (mInstanceRecord.getInstanceHour() != null)
+                return new NormalTime(mInstanceRecord.getInstanceHour(), mInstanceRecord.getInstanceMinute());
+            else
+                return getScheduleTime();
+        } else {
+            return mScheduleDateTime.getTime();
+        }
+    }
+
+    public DateTime getInstanceDateTime() {
+        return new DateTime(getInstanceDate(), getInstanceTime());
+    }
+
+    public String getScheduleText(Context context) {
+        if (isRootInstance()) {
+            return getInstanceDateTime().getDisplayText(context);
+        } else {
+            return null;
+        }
+    }
 
     public ArrayList<Instance> getChildInstances() {
+        TimeStamp scheduleTimeStamp = getScheduleDateTime().getTimeStamp();
+
         ArrayList<Instance> childInstances = new ArrayList<>();
-        for (Task childTask : mTask.getChildTasks(getDateTime().getTimeStamp())) {
+        for (Task childTask : mTask.getChildTasks(scheduleTimeStamp)) {
+            Assert.assertTrue(childTask.current(scheduleTimeStamp));
+
             Instance childInstance = getChildInstance(childTask);
             Assert.assertTrue(childInstance != null);
+
             childInstances.add(childInstance);
         }
         return childInstances;
     }
 
-    public abstract boolean isRootInstance();
-
-    public abstract DateTime getDateTime();
+    public boolean isRootInstance() {
+        return mTask.isRootTask(getScheduleDateTime().getTimeStamp());
+    }
 
     public TimeStamp getDone() {
         if (mInstanceRecord == null)
@@ -90,7 +179,15 @@ public abstract class Instance {
         }
     }
 
-    protected abstract InstanceRecord createInstanceRecord(TimeStamp timeStamp);
+    InstanceRecord createInstanceRecord(TimeStamp done) {
+        return PersistenceManger.getInstance().createInstanceRecord(mId, mTask, done, getScheduleDateTime(), getInstanceDateTime());
+    }
 
-    protected abstract Instance getChildInstance(Task childTask);
+    private Instance getChildInstance(Task childTask) {
+        Assert.assertTrue(childTask != null);
+        DateTime scheduleDateTime = getScheduleDateTime();
+        Assert.assertTrue(childTask.current(scheduleDateTime.getTimeStamp()));
+
+        return InstanceFactory.getInstance().getInstance(childTask, scheduleDateTime);
+    }
 }

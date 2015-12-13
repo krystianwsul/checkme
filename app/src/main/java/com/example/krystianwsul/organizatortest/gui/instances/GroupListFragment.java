@@ -341,7 +341,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
                 Assert.assertTrue(instance != null);
                 Assert.assertTrue(instance.getDone() == null);
 
-                TimeStamp timeStamp = instance.getDateTime().getTimeStamp();
+                TimeStamp timeStamp = instance.getInstanceDateTime().getTimeStamp();
 
                 if (mGroupTree.containsKey(timeStamp)) {
                     Group group = mGroupTree.get(timeStamp);

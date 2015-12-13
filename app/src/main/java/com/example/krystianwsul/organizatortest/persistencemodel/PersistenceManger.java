@@ -4,10 +4,9 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetition;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetition;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailySchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
@@ -17,6 +16,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklySchedule
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklyScheduleDayOfWeekTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 
 import junit.framework.Assert;
@@ -194,26 +194,6 @@ public class PersistenceManger {
         return mSingleScheduleDateTimeRecords.get(singleSchedule.getId());
     }
 
-    public InstanceRecord getSingleInstanceRecord(Task task) {
-        Assert.assertTrue(task != null);
-
-        for (InstanceRecord instanceRecord : mInstanceRecords.values())
-            if (instanceRecord.getRootTaskId() != null && instanceRecord.getRootTaskId().equals(task.getId()))
-                return instanceRecord;
-        return null;
-    }
-
-    public InstanceRecord createSingleInstanceRecord(int id, Task task, Task rootTask, Long done) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(rootTask != null);
-
-        Assert.assertTrue(!mInstanceRecords.containsKey(task.getId()));
-
-        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), done, rootTask.getId(), null, null);
-        mInstanceRecords.put(instanceRecord.getTaskId(), instanceRecord);
-        return instanceRecord;
-    }
-
     public ArrayList<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(DailySchedule dailySchedule) {
         Assert.assertTrue(dailySchedule != null);
 
@@ -238,27 +218,6 @@ public class PersistenceManger {
 
     public int getMaxDailyRepetitionId() {
         return mMaxDailyRepetitionId;
-    }
-
-    public InstanceRecord getDailyInstanceRecord(Task task, DailyRepetition dailyRepetition) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(dailyRepetition != null);
-
-        for (InstanceRecord instanceRecord : mInstanceRecords.values())
-            if (instanceRecord.getTaskId() == task.getId() && instanceRecord.getDailyRepetitionId() != null && instanceRecord.getDailyRepetitionId().equals(dailyRepetition.getId()))
-                return instanceRecord;
-        return null;
-    }
-
-    public InstanceRecord createDailyInstanceRecord(int id, Task task, DailyRepetition dailyRepetition, Long done) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(dailyRepetition != null);
-
-        Assert.assertTrue(!mInstanceRecords.containsKey(id));
-
-        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), done, null, dailyRepetition.getId(), null);
-        mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
-        return instanceRecord;
     }
 
     public int getMaxInstanceId() {
@@ -289,27 +248,6 @@ public class PersistenceManger {
 
     public int getMaxWeeklyRepetitionId() {
         return mMaxWeeklyRepetitionId;
-    }
-
-    public InstanceRecord getWeeklyInstanceRecord(Task task, WeeklyRepetition weeklyRepetition) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(weeklyRepetition != null);
-
-        for (InstanceRecord instanceRecord : mInstanceRecords.values())
-            if (instanceRecord.getTaskId() == task.getId() && instanceRecord.getWeeklyRepetitionId() != null && instanceRecord.getWeeklyRepetitionId().equals(weeklyRepetition.getId()))
-                return instanceRecord;
-        return null;
-    }
-
-    public InstanceRecord createWeeklyInstanceRecord(int id, Task task, WeeklyRepetition weeklyRepetition, Long done) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(weeklyRepetition != null);
-
-        Assert.assertTrue(!mInstanceRecords.containsKey(id));
-
-        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), done, null, null, weeklyRepetition.getId());
-        mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
-        return instanceRecord;
     }
 
     public TaskRecord createTaskRecord(String name, TimeStamp startTimeStamp) {
@@ -420,5 +358,51 @@ public class PersistenceManger {
         WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = new WeeklyScheduleDayOfWeekTimeRecord(weeklyScheduleDayOfWeekTimeRecordId, weeklySchedule.getRootTaskId(), dayOfWeek.ordinal(), customTimeId, hour, minute);
         mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
         return weeklyScheduleDayOfWeekTimeRecord;
+    }
+
+    public Collection<InstanceRecord> getInstanceRecords() {
+        return mInstanceRecords.values();
+    }
+
+    public InstanceRecord createInstanceRecord(int id, Task task, TimeStamp done, DateTime scheduleDateTime, DateTime instanceDateTime) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
+        Assert.assertTrue(!mInstanceRecords.containsKey(id));
+
+        Date scheduleDate = scheduleDateTime.getDate();
+        Time scheduleTime = scheduleDateTime.getTime();
+
+        Integer scheduleCustomTimeId = null;
+        Integer scheduleHour = null;
+        Integer scheduleMinute = null;
+        if (scheduleDateTime.getTime() instanceof CustomTime) {
+            scheduleCustomTimeId = ((CustomTime) scheduleTime).getId();
+        } else {
+            Assert.assertTrue(scheduleTime instanceof NormalTime);
+
+            HourMinute hourMinute = ((NormalTime) scheduleTime).getHourMinute();
+            scheduleHour = hourMinute.getHour();
+            scheduleMinute = hourMinute.getMinute();
+        }
+
+        Date instanceDate = instanceDateTime.getDate();
+        Time instanceTime = instanceDateTime.getTime();
+
+        Integer instanceCustomTimeId = null;
+        Integer instanceHour = null;
+        Integer instanceMinute = null;
+        if (instanceDateTime.getTime() instanceof CustomTime) {
+            instanceCustomTimeId = ((CustomTime) instanceTime).getId();
+        } else {
+            Assert.assertTrue(instanceTime instanceof NormalTime);
+
+            HourMinute hourMinute = ((NormalTime) instanceTime).getHourMinute();
+            instanceHour = hourMinute.getHour();
+            instanceMinute = hourMinute.getMinute();
+        }
+
+        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), done.getLong(), scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceCustomTimeId, instanceHour, instanceMinute);
+        mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
+        return instanceRecord;
     }
 }

@@ -93,6 +93,10 @@ public class WeeklyRepetition {
     }
 
     public Instance getInstance(Task task) {
-        return InstanceFactory.getInstance().getWeeklyInstance(task, this);
+        Assert.assertTrue(task != null);
+        DateTime scheduleDateTime = getScheduleDateTime();
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
+
+        return InstanceFactory.getInstance().getInstance(task, scheduleDateTime);
     }
 }

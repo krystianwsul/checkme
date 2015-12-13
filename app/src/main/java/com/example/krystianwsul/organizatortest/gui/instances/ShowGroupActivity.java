@@ -76,9 +76,9 @@ public class ShowGroupActivity extends AppCompatActivity {
     private String getDisplayText(Instance instance) {
         Assert.assertTrue(instance != null);
 
-        Time time = getTime(instance.getDateTime());
+        Time time = getTime(instance.getInstanceDateTime());
         Assert.assertTrue(time != null);
-        return new DateTime(instance.getDateTime().getDate(), time).getDisplayText(this);
+        return new DateTime(instance.getScheduleDate(), time).getDisplayText(this);
     }
 
     private Time getTime(DateTime dateTime) {

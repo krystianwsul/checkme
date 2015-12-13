@@ -30,6 +30,10 @@ public class SingleRepetition {
         return mSingleScheduleDateTime.getTime();
     }
 
+    public DateTime getScheduleDateTime() {
+        return new DateTime(getScheduleDate(), getScheduleTime());
+    }
+
     public Date getRepetitionDate() {
         return getScheduleDate();
     }
@@ -43,6 +47,10 @@ public class SingleRepetition {
     }
 
     public Instance getInstance(Task task) {
-        return InstanceFactory.getInstance().getSingleInstance(task, this);
+        Assert.assertTrue(task != null);
+        DateTime scheduleDateTime = getScheduleDateTime();
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
+
+        return InstanceFactory.getInstance().getInstance(task, scheduleDateTime);
     }
 }

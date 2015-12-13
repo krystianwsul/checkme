@@ -10,7 +10,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 
 public class InstanceFactory {
     private static InstanceFactory sInstance;
@@ -21,7 +20,7 @@ public class InstanceFactory {
         return sInstance;
     }
 
-    private final HashMap<Integer, Instance> mInstances = new HashMap<>();
+    private final ArrayList<Instance> mInstances = new ArrayList<>();
 
     private InstanceFactory() {
         Collection<InstanceRecord> instanceRecords = PersistenceManger.getInstance().getInstanceRecords();
@@ -35,18 +34,12 @@ public class InstanceFactory {
             Assert.assertTrue(task != null);
 
             Instance instance = new Instance(task, instanceRecord);
-            mInstances.put(instance.getId(), instance);
+            mInstances.add(instance);
         }
     }
 
-    private static int mVirtualInstanceCount = 0;
-
-    private int getNextInstanceId() {
-        return PersistenceManger.getInstance().getMaxInstanceId() + ++mVirtualInstanceCount;
-    }
-
     public Instance getInstance(int instanceId) {
-        Assert.assertTrue(mInstances.containsKey(instanceId));
+        Assert.assertTrue(instanceId < mInstances.size());
         return mInstances.get(instanceId);
     }
 
@@ -56,7 +49,7 @@ public class InstanceFactory {
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
 
         ArrayList<Instance> instances = new ArrayList<>();
-        for (Instance instance : mInstances.values()) {
+        for (Instance instance : mInstances) {
             Assert.assertTrue(instance != null);
             if (instance.getTaskId() == task.getId() && instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
                 instances.add(instance);
@@ -66,10 +59,13 @@ public class InstanceFactory {
             Assert.assertTrue(instances.size() == 1);
             return instances.get(0);
         } else {
-            Instance instance = new Instance(task, getNextInstanceId(), scheduleDateTime);
-            Assert.assertTrue(!mInstances.containsKey(instance.getId()));
-            mInstances.put(instance.getId(), instance);
+            Instance instance = new Instance(task, scheduleDateTime);
+            mInstances.add(instance);
             return instance;
         }
+    }
+
+    int getFactoryIndex(Instance instance) {
+        return mInstances.indexOf(instance);
     }
 }

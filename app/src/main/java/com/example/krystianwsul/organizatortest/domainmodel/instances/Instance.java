@@ -22,8 +22,6 @@ public class Instance {
     private InstanceRecord mInstanceRecord;
     private DateTime mScheduleDateTime;
 
-    private final int mId;
-
     Instance(Task task, InstanceRecord instanceRecord) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(instanceRecord != null);
@@ -32,11 +30,9 @@ public class Instance {
 
         mInstanceRecord = instanceRecord;
         mScheduleDateTime = null;
-
-        mId = mInstanceRecord.getId();
     }
 
-    Instance(Task task, int id, DateTime scheduleDateTime) {
+    Instance(Task task, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);
 
@@ -44,12 +40,10 @@ public class Instance {
 
         mInstanceRecord = null;
         mScheduleDateTime = scheduleDateTime;
-
-        mId = id;
     }
 
-    public int getId() {
-        return mId;
+    public int getFactoryIndex() {
+        return InstanceFactory.getInstance().getFactoryIndex(this);
     }
 
     public int getTaskId() {
@@ -180,7 +174,7 @@ public class Instance {
     }
 
     InstanceRecord createInstanceRecord(TimeStamp done) {
-        return PersistenceManger.getInstance().createInstanceRecord(mId, mTask, done, getScheduleDateTime(), getInstanceDateTime());
+        return PersistenceManger.getInstance().createInstanceRecord(mTask, done, getScheduleDateTime(), getInstanceDateTime());
     }
 
     private Instance getChildInstance(Task childTask) {

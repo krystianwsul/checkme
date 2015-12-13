@@ -50,8 +50,6 @@ public class PersistenceManger {
     private final int mMaxDailyRepetitionId = 0;
     private final int mMaxWeeklyRepetitionId = 0;
 
-    private final int mMaxInstanceId = 0;
-
     public static PersistenceManger getInstance() {
         if (mInstance == null)
             mInstance = new PersistenceManger();
@@ -220,10 +218,6 @@ public class PersistenceManger {
         return mMaxDailyRepetitionId;
     }
 
-    public int getMaxInstanceId() {
-        return mMaxInstanceId;
-    }
-
     public ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(WeeklySchedule weeklySchedule) {
         Assert.assertTrue(weeklySchedule != null);
 
@@ -364,10 +358,9 @@ public class PersistenceManger {
         return mInstanceRecords.values();
     }
 
-    public InstanceRecord createInstanceRecord(int id, Task task, TimeStamp done, DateTime scheduleDateTime, DateTime instanceDateTime) {
+    public InstanceRecord createInstanceRecord(Task task, TimeStamp done, DateTime scheduleDateTime, DateTime instanceDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
-        Assert.assertTrue(!mInstanceRecords.containsKey(id));
 
         Date scheduleDate = scheduleDateTime.getDate();
         Time scheduleTime = scheduleDateTime.getTime();
@@ -401,8 +394,17 @@ public class PersistenceManger {
             instanceMinute = hourMinute.getMinute();
         }
 
+        int id = getNextInstanceId();
+
         InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), done.getLong(), scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceCustomTimeId, instanceHour, instanceMinute);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
+    }
+
+    private int getNextInstanceId() {
+        if (mInstanceRecords.isEmpty())
+            return 0;
+        else
+            return Collections.max(mInstanceRecords.keySet()) + 1;
     }
 }

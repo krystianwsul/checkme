@@ -27,16 +27,16 @@ public class ShowGroupActivity extends AppCompatActivity {
     private RecyclerView mShowGroupList;
     private ArrayList<Instance> mInstances;
 
-    private static final String INTENT_KEY = "instanceIds";
+    private static final String INTENT_KEY = "instanceFactoryIds";
 
     public static Intent getIntent(Group group, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
 
-        ArrayList<Integer> instanceIds = new ArrayList<>();
+        ArrayList<Integer> instanceFactoryIds = new ArrayList<>();
         for (Instance instance : group.getInstances())
-            instanceIds.add(instance.getId());
+            instanceFactoryIds.add(instance.getFactoryIndex());
 
-        intent.putIntegerArrayListExtra(ShowGroupActivity.INTENT_KEY, instanceIds);
+        intent.putIntegerArrayListExtra(ShowGroupActivity.INTENT_KEY, instanceFactoryIds);
         return intent;
     }
 

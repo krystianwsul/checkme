@@ -27,7 +27,7 @@ public class ShowInstanceActivity extends AppCompatActivity {
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, instance.getId());
+        intent.putExtra(INTENT_KEY, instance.getFactoryIndex());
         return intent;
     }
 

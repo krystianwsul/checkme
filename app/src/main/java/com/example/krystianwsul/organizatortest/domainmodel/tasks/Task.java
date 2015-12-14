@@ -81,7 +81,7 @@ public class Task {
         return TaskFactory.getInstance().getChildTasks(this, timeStamp);
     }
 
-    Task getParentTask(TimeStamp timeStamp) {
+    public Task getParentTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 

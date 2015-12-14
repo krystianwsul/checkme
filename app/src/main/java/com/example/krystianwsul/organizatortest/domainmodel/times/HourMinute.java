@@ -1,9 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.times;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
-import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 
 import junit.framework.Assert;
@@ -11,7 +12,7 @@ import junit.framework.Assert;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class HourMinute implements Comparable<HourMinute> {
+public class HourMinute implements Comparable<HourMinute>, Parcelable {
     private Integer mHour;
     private Integer mMinute;
 
@@ -57,4 +58,30 @@ public class HourMinute implements Comparable<HourMinute> {
         java.util.Date javaDate = new java.util.Date(date.getYear(), date.getMonth(), date.getDay(), mHour, mMinute);
         return SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(javaDate);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mHour);
+        out.writeInt(mMinute);
+    }
+
+    public static final Parcelable.Creator<HourMinute> CREATOR = new Creator<HourMinute>() {
+        @Override
+        public HourMinute createFromParcel(Parcel source) {
+            int hour = source.readInt();
+            int minute = source.readInt();
+
+            return new HourMinute(hour, minute);
+        }
+
+        @Override
+        public HourMinute[] newArray(int size) {
+            return new HourMinute[size];
+        }
+    };
 }

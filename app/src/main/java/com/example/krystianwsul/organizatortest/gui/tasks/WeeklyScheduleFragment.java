@@ -463,7 +463,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             out.writeInt(mShowDelete ? 1 : 0);
         }
 
-        public static final Parcelable.Creator<DayOfWeekTimeEntry> CREATOR = new Parcelable.Creator<DayOfWeekTimeEntry>() {
+        public static final Parcelable.Creator<DayOfWeekTimeEntry> CREATOR = new Creator<DayOfWeekTimeEntry>() {
             public DayOfWeekTimeEntry createFromParcel(Parcel in) {
                 DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
                 int customTimeId = in.readInt();

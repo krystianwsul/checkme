@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizatortest.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +16,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -22,21 +25,23 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ShowGroupActivity extends AppCompatActivity {
     private RecyclerView mShowGroupList;
     private ArrayList<Instance> mInstances;
 
-    private static final String INTENT_KEY = "instanceFactoryIds";
+    private static final String INTENT_KEY = "instanceData";
 
     public static Intent getIntent(Group group, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
 
-        ArrayList<Integer> instanceFactoryIds = new ArrayList<>();
+        ArrayList<Instance> instances = group.getInstances();
+        ArrayList<Bundle> instanceData = new ArrayList<>();
         for (Instance instance : group.getInstances())
-            instanceFactoryIds.add(instance.getFactoryIndex());
+            instanceData.add(InstanceData.getBundle(instance.getTask(), instance.getScheduleDateTime()));
 
-        intent.putIntegerArrayListExtra(ShowGroupActivity.INTENT_KEY, instanceFactoryIds);
+        intent.putExtra(INTENT_KEY, instanceData);
         return intent;
     }
 
@@ -47,13 +52,14 @@ public class ShowGroupActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        ArrayList<Integer> instanceIds = intent.getIntegerArrayListExtra(INTENT_KEY);
-        Assert.assertTrue(instanceIds != null);
-        Assert.assertTrue(instanceIds.size() > 1);
+        List<Bundle> instanceData = intent.getParcelableArrayListExtra(INTENT_KEY);
 
         mInstances = new ArrayList<>();
-        for (Integer instanceId : instanceIds) {
-            Instance instance = InstanceFactory.getInstance().getInstance(instanceId);
+        for (Parcelable parcelable : instanceData) {
+            Bundle bundle = (Bundle) parcelable;
+            Pair<Task, DateTime> pair = InstanceData.getData(bundle);
+
+            Instance instance = InstanceFactory.getInstance().getInstance(pair.first, pair.second);
             Assert.assertTrue(instance != null);
             mInstances.add(instance);
         }
@@ -91,4 +97,5 @@ public class ShowGroupActivity extends AppCompatActivity {
             time = new NormalTime(hourMinute);
         return time;
     }
+
 }

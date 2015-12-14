@@ -1,6 +1,8 @@
 package com.example.krystianwsul.organizatortest.domainmodel.dates;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.example.krystianwsul.organizatortest.R;
@@ -11,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class Date implements Comparable<Date> {
+public class Date implements Comparable<Date>, Parcelable {
     private final Integer mYear;
     private final Integer mMonth;
     private final Integer mDay;
@@ -98,4 +100,32 @@ public class Date implements Comparable<Date> {
     public Calendar getCalendar() {
         return new GregorianCalendar(mYear, mMonth - 1, mDay);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mYear);
+        out.writeInt(mMonth);
+        out.writeInt(mDay);
+    }
+
+    public static final Parcelable.Creator<Date> CREATOR = new Creator<Date>() {
+        @Override
+        public Date createFromParcel(Parcel in) {
+            int year = in.readInt();
+            int month = in.readInt();
+            int day = in.readInt();
+
+            return new Date(year, month, day);
+        }
+
+        @Override
+        public Date[] newArray(int size) {
+            return new Date[size];
+        }
+    };
 }

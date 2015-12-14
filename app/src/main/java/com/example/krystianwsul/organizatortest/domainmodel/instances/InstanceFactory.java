@@ -38,11 +38,6 @@ public class InstanceFactory {
         }
     }
 
-    public Instance getInstance(int instanceId) {
-        Assert.assertTrue(instanceId < mInstances.size());
-        return mInstances.get(instanceId);
-    }
-
     public Instance getInstance(Task task, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);
@@ -63,9 +58,5 @@ public class InstanceFactory {
             mInstances.add(instance);
             return instance;
         }
-    }
-
-    int getFactoryIndex(Instance instance) {
-        return mInstances.indexOf(instance);
     }
 }

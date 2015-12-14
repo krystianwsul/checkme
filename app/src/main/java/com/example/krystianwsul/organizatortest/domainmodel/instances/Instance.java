@@ -42,8 +42,8 @@ public class Instance {
         mScheduleDateTime = scheduleDateTime;
     }
 
-    public int getFactoryIndex() {
-        return InstanceFactory.getInstance().getFactoryIndex(this);
+    public Task getTask() {
+        return mTask;
     }
 
     public int getTaskId() {
@@ -132,18 +132,32 @@ public class Instance {
     }
 
     public ArrayList<Instance> getChildInstances() {
-        TimeStamp scheduleTimeStamp = getScheduleDateTime().getTimeStamp();
+        DateTime scheduleDateTime = getScheduleDateTime();
+        TimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp();
 
         ArrayList<Instance> childInstances = new ArrayList<>();
         for (Task childTask : mTask.getChildTasks(scheduleTimeStamp)) {
             Assert.assertTrue(childTask.current(scheduleTimeStamp));
 
-            Instance childInstance = getChildInstance(childTask);
+            Instance childInstance = InstanceFactory.getInstance().getInstance(childTask, scheduleDateTime);
             Assert.assertTrue(childInstance != null);
 
             childInstances.add(childInstance);
         }
         return childInstances;
+    }
+
+    public Instance getParentInstance() {
+        DateTime scheduleDateTime = getScheduleDateTime();
+        TimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp();
+
+        Task parentTask = mTask.getParentTask(scheduleTimeStamp);
+        Assert.assertTrue(parentTask.current(scheduleTimeStamp));
+
+        Instance parentInstance = InstanceFactory.getInstance().getInstance(parentTask, scheduleDateTime);
+        Assert.assertTrue(parentInstance != null);
+
+        return parentInstance;
     }
 
     public boolean isRootInstance() {
@@ -175,13 +189,5 @@ public class Instance {
 
     InstanceRecord createInstanceRecord(TimeStamp done) {
         return PersistenceManger.getInstance().createInstanceRecord(mTask, done, getScheduleDateTime(), getInstanceDateTime());
-    }
-
-    private Instance getChildInstance(Task childTask) {
-        Assert.assertTrue(childTask != null);
-        DateTime scheduleDateTime = getScheduleDateTime();
-        Assert.assertTrue(childTask.current(scheduleDateTime.getTimeStamp()));
-
-        return InstanceFactory.getInstance().getInstance(childTask, scheduleDateTime);
     }
 }

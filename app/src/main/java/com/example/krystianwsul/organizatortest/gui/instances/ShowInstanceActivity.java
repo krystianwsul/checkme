@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizatortest.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,8 +13,10 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizatortest.R;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 
 import junit.framework.Assert;
 
@@ -27,7 +30,7 @@ public class ShowInstanceActivity extends AppCompatActivity {
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, instance.getFactoryIndex());
+        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance.getTask(), instance.getScheduleDateTime()));
         return intent;
     }
 
@@ -38,9 +41,9 @@ public class ShowInstanceActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        int instanceId = intent.getIntExtra(INTENT_KEY, -1);
-        Assert.assertTrue(instanceId != -1);
-        mInstance = InstanceFactory.getInstance().getInstance(instanceId);
+        Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
+        Pair<Task, DateTime> pair = InstanceData.getData(bundle);
+        mInstance = InstanceFactory.getInstance().getInstance(pair.first, pair.second);
         Assert.assertTrue(mInstance != null);
 
         TextView showInstanceName = (TextView) findViewById(R.id.show_instance_name);

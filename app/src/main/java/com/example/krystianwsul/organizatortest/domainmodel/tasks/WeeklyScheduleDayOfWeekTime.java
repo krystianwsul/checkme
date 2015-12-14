@@ -1,9 +1,10 @@
 package com.example.krystianwsul.organizatortest.domainmodel.tasks;
 
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetitionFactory;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -48,6 +49,12 @@ public class WeeklyScheduleDayOfWeekTime {
     }
 
     public Instance getInstance(Task task, Date scheduleDate) {
-        return WeeklyRepetitionFactory.getInstance().getWeeklyRepetition(this, scheduleDate).getInstance(task);
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(scheduleDate != null);
+
+        DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
+
+        return InstanceFactory.getInstance().getInstance(task, scheduleDateTime);
     }
 }

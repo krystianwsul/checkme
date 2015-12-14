@@ -20,14 +20,11 @@ public class SingleSchedule extends Schedule {
         super(scheduleRecord, rootTask);
     }
 
-    void addSingleScheduleDateTime(SingleScheduleDateTime singleScheduleDateTime) {
+    void setSingleScheduleDateTime(SingleScheduleDateTime singleScheduleDateTime) {
         Assert.assertTrue(singleScheduleDateTime != null);
-        mSingleScheduleDateTime = singleScheduleDateTime;
-    }
+        Assert.assertTrue(mSingleScheduleDateTime == null);
 
-    SingleScheduleDateTime getSingleScheduleDateTime() {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
-        return mSingleScheduleDateTime;
+        mSingleScheduleDateTime = singleScheduleDateTime;
     }
 
     public String getTaskText(Context context) {

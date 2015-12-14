@@ -27,11 +27,6 @@ public class DailySchedule extends Schedule {
         mDailyScheduleTimes.add(dailyScheduleTime);
     }
 
-    ArrayList<DailyScheduleTime> getDailyScheduleTimes() {
-        Assert.assertTrue(!mDailyScheduleTimes.isEmpty());
-        return mDailyScheduleTimes;
-    }
-
     public String getTaskText(Context context) {
         ArrayList<String> times = new ArrayList<>();
         for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes)

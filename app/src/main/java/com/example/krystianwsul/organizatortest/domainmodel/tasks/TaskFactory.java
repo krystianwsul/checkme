@@ -7,9 +7,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.DailyRepetitionFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.SingleRepetitionFactory;
-import com.example.krystianwsul.organizatortest.domainmodel.repetitions.WeeklyRepetitionFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import com.example.krystianwsul.organizatortest.persistencemodel.DailyScheduleTimeRecord;
 import com.example.krystianwsul.organizatortest.persistencemodel.PersistenceManger;
@@ -118,9 +115,7 @@ public class TaskFactory {
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
         SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule);
-        SingleRepetitionFactory.getInstance().loadExistingSingleRepetition(singleScheduleDateTime);
-
-        singleSchedule.addSingleScheduleDateTime(singleScheduleDateTime);
+        singleSchedule.setSingleScheduleDateTime(singleScheduleDateTime);
 
         return singleSchedule;
     }
@@ -139,8 +134,6 @@ public class TaskFactory {
 
         for (DailyScheduleTimeRecord dailyScheduleTimeRecord : dailyScheduleTimeRecords) {
             DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(dailyScheduleTimeRecord, dailySchedule);
-            DailyRepetitionFactory.getInstance().loadExistingDailyRepetitions(dailyScheduleTime);
-
             dailySchedule.addDailyScheduleTime(dailyScheduleTime);
         }
 
@@ -161,8 +154,6 @@ public class TaskFactory {
 
         for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
             WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeRecord, weeklySchedule);
-            WeeklyRepetitionFactory.getInstance().loadExistingWeeklyRepetitions(weeklyScheduleDayOfWeekTime);
-
             weeklySchedule.addWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
         }
 
@@ -247,7 +238,7 @@ public class TaskFactory {
         SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = persistenceManger.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-        singleSchedule.addSingleScheduleDateTime(new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule));
+        singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule));
 
         return singleSchedule;
     }

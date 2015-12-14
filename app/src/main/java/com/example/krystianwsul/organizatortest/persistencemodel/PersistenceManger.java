@@ -8,12 +8,10 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailySchedule;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.DailyScheduleTime;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Schedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.SingleSchedule;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklySchedule;
-import com.example.krystianwsul.organizatortest.domainmodel.tasks.WeeklyScheduleDayOfWeekTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -41,9 +39,6 @@ public class PersistenceManger {
     private final HashMap<Integer, SingleScheduleDateTimeRecord> mSingleScheduleDateTimeRecords = new HashMap<>();
     private final HashMap<Integer, DailyScheduleTimeRecord> mDailyScheduleTimeRecords = new HashMap<>();
     private final HashMap<Integer, WeeklyScheduleDayOfWeekTimeRecord> mWeeklyScheduleDayOfWeekTimeRecords = new HashMap<>();
-
-    private final HashMap<Integer, DailyRepetitionRecord> mDailyRepetitionRecords = new HashMap<>();
-    private final HashMap<Integer, WeeklyRepetitionRecord> mWeeklyRepetitionRecords = new HashMap<>();
 
     private final HashMap<Integer, InstanceRecord> mInstanceRecords = new HashMap<>();
 
@@ -202,18 +197,6 @@ public class PersistenceManger {
         return dailyScheduleTimeRecords;
     }
 
-    public ArrayList<DailyRepetitionRecord> getDailyRepetitionRecords(DailyScheduleTime dailyScheduleTime) {
-        Assert.assertTrue(dailyScheduleTime != null);
-
-        ArrayList<DailyRepetitionRecord> dailyRepetitionRecords = new ArrayList<>();
-        for (DailyRepetitionRecord dailyRepetitionRecord : mDailyRepetitionRecords.values()) {
-            if (dailyRepetitionRecord.getDailyScheduleTimeId() == dailyScheduleTime.getId()) {
-                dailyRepetitionRecords.add(dailyRepetitionRecord);
-            }
-        }
-        return dailyRepetitionRecords;
-    }
-
     public int getMaxDailyRepetitionId() {
         return mMaxDailyRepetitionId;
     }
@@ -226,18 +209,6 @@ public class PersistenceManger {
             if (weeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleId() == weeklySchedule.getId())
                 weeklyScheduleDayOfWeekTimeRecords.add(weeklyScheduleDayOfWeekTimeRecord);
         return weeklyScheduleDayOfWeekTimeRecords;
-    }
-
-    public ArrayList<WeeklyRepetitionRecord> getWeeklyRepetitionRecords(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime) {
-        Assert.assertTrue(weeklyScheduleDayOfWeekTime != null);
-
-        ArrayList<WeeklyRepetitionRecord> weeklyRepetitionRecords = new ArrayList<>();
-        for (WeeklyRepetitionRecord weeklyRepetitionRecord : mWeeklyRepetitionRecords.values()) {
-            if (weeklyRepetitionRecord.getWeeklyScheduleTimeId() == weeklyScheduleDayOfWeekTime.getId()) {
-                weeklyRepetitionRecords.add(weeklyRepetitionRecord);
-            }
-        }
-        return weeklyRepetitionRecords;
     }
 
     public int getMaxWeeklyRepetitionId() {

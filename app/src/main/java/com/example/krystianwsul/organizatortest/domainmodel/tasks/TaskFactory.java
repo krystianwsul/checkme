@@ -160,6 +160,10 @@ public class TaskFactory {
         return weeklySchedule;
     }
 
+    public Collection<Task> getTasks() {
+        return mTasks.values();
+    }
+
     public ArrayList<Task> getRootTasks(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
 

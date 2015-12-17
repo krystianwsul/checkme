@@ -165,7 +165,6 @@ public class Task {
     }
 
     public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
-        Assert.assertTrue(!mSchedules.isEmpty());
         Assert.assertTrue(endTimeStamp != null);
 
         ArrayList<Instance> instances = new ArrayList<>();

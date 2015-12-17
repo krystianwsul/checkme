@@ -26,7 +26,9 @@ public class InstanceRecord {
     private final Integer mInstanceHour;
     private final Integer mInstanceMinute;
 
-    public InstanceRecord(int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute) {
+    private final long mHierarchyTime;
+
+    public InstanceRecord(int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime) {
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
@@ -60,6 +62,8 @@ public class InstanceRecord {
 
         mInstanceHour = instanceHour;
         mInstanceMinute = instanceMinute;
+
+        mHierarchyTime = hierarchyTime;
     }
 
     public int getId() {
@@ -124,5 +128,9 @@ public class InstanceRecord {
 
     public void setDone(Long done) {
         mDone = done;
+    }
+
+    public long getHierarchyTime() {
+        return mHierarchyTime;
     }
 }

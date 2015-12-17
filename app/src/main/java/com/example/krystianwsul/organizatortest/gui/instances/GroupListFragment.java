@@ -18,8 +18,8 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
@@ -32,6 +32,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.TreeMap;
 
 public class GroupListFragment extends Fragment implements MainActivity.RefreshFragment {
@@ -76,24 +77,37 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
             }
         };
 
-        public GroupAdapter(Context context) {
-            Assert.assertTrue(context != null);
+        private ArrayList<Instance> getRootInstances() {
+            HashSet<Instance> allInstances = new HashSet<>();
+            allInstances.addAll(InstanceFactory.getInstance().getExistingInstances());
 
-            mContext = context;
-
-            Collection<Task> rootTasks = TaskFactory.getInstance().getRootTasks(TimeStamp.getNow());
+            Collection<Task> tasks = TaskFactory.getInstance().getTasks();
 
             Calendar tomorrowCalendar = Calendar.getInstance();
             tomorrowCalendar.add(Calendar.DATE, 2);
             Date tomorrowDate = new Date(tomorrowCalendar);
 
-            ArrayList<Instance> instances = new ArrayList<>();
-            for (Task rootTask : rootTasks)
-                instances.addAll(rootTask.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
+            for (Task task : tasks)
+                allInstances.addAll(task.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
+
+            ArrayList<Instance> rootInstances = new ArrayList<>();
+            for (Instance instance : allInstances)
+                if (instance.isRootInstance())
+                    rootInstances.add(instance);
+
+            return rootInstances;
+        }
+
+        public GroupAdapter(Context context) {
+            Assert.assertTrue(context != null);
+
+            mContext = context;
+
+            ArrayList<Instance> rootInstances = getRootInstances();
 
             ArrayList<Instance> doneInstances = new ArrayList<>();
             ArrayList<Instance> notDoneInstances = new ArrayList<>();
-            for (Instance instance : instances) {
+            for (Instance instance : rootInstances) {
                 if (instance.getDone() != null)
                     doneInstances.add(instance);
                 else

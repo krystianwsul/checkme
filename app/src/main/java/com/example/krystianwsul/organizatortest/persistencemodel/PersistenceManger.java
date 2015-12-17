@@ -329,7 +329,7 @@ public class PersistenceManger {
         return mInstanceRecords.values();
     }
 
-    public InstanceRecord createInstanceRecord(Task task, TimeStamp done, DateTime scheduleDateTime, DateTime instanceDateTime) {
+    public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
 
@@ -349,25 +349,9 @@ public class PersistenceManger {
             scheduleMinute = hourMinute.getMinute();
         }
 
-        Date instanceDate = instanceDateTime.getDate();
-        Time instanceTime = instanceDateTime.getTime();
-
-        Integer instanceCustomTimeId = null;
-        Integer instanceHour = null;
-        Integer instanceMinute = null;
-        if (instanceDateTime.getTime() instanceof CustomTime) {
-            instanceCustomTimeId = ((CustomTime) instanceTime).getId();
-        } else {
-            Assert.assertTrue(instanceTime instanceof NormalTime);
-
-            HourMinute hourMinute = ((NormalTime) instanceTime).getHourMinute();
-            instanceHour = hourMinute.getHour();
-            instanceMinute = hourMinute.getMinute();
-        }
-
         int id = getNextInstanceId();
 
-        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), done.getLong(), scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceCustomTimeId, instanceHour, instanceMinute);
+        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, TimeStamp.getNow().getLong());
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
     }

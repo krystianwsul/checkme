@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizatortest.domainmodel.groups.Group;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;

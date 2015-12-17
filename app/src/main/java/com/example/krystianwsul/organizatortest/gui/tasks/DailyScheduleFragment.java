@@ -102,7 +102,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
 
             ArrayList<TimeEntry> timeEntries = new ArrayList<>();
-            boolean showDelete = (timeEntries.size() > 1);
+            boolean showDelete = (dailySchedule.getTimes().size() > 1);
             for (Time time : dailySchedule.getTimes())
                 timeEntries.add(new TimeEntry(time, showDelete));
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);

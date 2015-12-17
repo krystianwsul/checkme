@@ -20,7 +20,7 @@ public class InstanceFactory {
         return sInstance;
     }
 
-    private final ArrayList<Instance> mInstances = new ArrayList<>();
+    private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
     private InstanceFactory() {
         Collection<InstanceRecord> instanceRecords = PersistenceManger.getInstance().getInstanceRecords();
@@ -34,17 +34,25 @@ public class InstanceFactory {
             Assert.assertTrue(task != null);
 
             Instance instance = new Instance(task, instanceRecord);
-            mInstances.add(instance);
+            mExistingInstances.add(instance);
         }
+    }
+
+    void addExistingInstance(Instance instance) {
+        Assert.assertTrue(instance != null);
+        mExistingInstances.add(instance);
+    }
+
+    public ArrayList<Instance> getExistingInstances() {
+        return mExistingInstances;
     }
 
     public Instance getInstance(Task task, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);
-        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
 
         ArrayList<Instance> instances = new ArrayList<>();
-        for (Instance instance : mInstances) {
+        for (Instance instance : mExistingInstances) {
             Assert.assertTrue(instance != null);
             if (instance.getTaskId() == task.getId() && instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
                 instances.add(instance);
@@ -54,9 +62,7 @@ public class InstanceFactory {
             Assert.assertTrue(instances.size() == 1);
             return instances.get(0);
         } else {
-            Instance instance = new Instance(task, scheduleDateTime);
-            mInstances.add(instance);
-            return instance;
+            return new Instance(task, scheduleDateTime);
         }
     }
 }

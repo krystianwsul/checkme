@@ -107,7 +107,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             Assert.assertTrue(weeklySchedule.current(TimeStamp.getNow()));
 
             ArrayList<DayOfWeekTimeEntry> dayOfWeekTimeEntries = new ArrayList<>();
-            boolean showDelete = (dayOfWeekTimeEntries.size() > 1);
+            boolean showDelete = (weeklySchedule.getDayOfWeekTimes().size() > 1);
             for (Pair<DayOfWeek, Time> dayOfWeekTime : weeklySchedule.getDayOfWeekTimes())
                 dayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(dayOfWeekTime.first, dayOfWeekTime.second, showDelete));
             mDayOfWeekTimeEntryAdapter = new DayOfWeekTimeEntryAdapter(getContext(), dayOfWeekTimeEntries);

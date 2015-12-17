@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest.domainmodel.groups;
+package com.example.krystianwsul.organizatortest.gui.instances;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -7,7 +7,6 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -17,10 +16,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-/**
- * Created by Krystian on 11/9/2015.
- */
-public class Group {
+class Group {
     private final TimeStamp mTimeStamp;
 
     private final ArrayList<Instance> mInstances = new ArrayList<>();

@@ -65,6 +65,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
         }
 
+        int spinnerPosition = 0;
         int count = 1;
         if (savedInstanceState != null) {
             int position = savedInstanceState.getInt(POSITION_KEY, -1);
@@ -81,11 +82,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             if (schedule instanceof SingleSchedule) {
                 fragment = SingleScheduleFragment.newInstance(mRootTask);
             } else if (schedule instanceof DailySchedule) {
-                count = 2;
                 fragment = DailyScheduleFragment.newInstance(mRootTask);
+                spinnerPosition = 1;
             } else if (schedule instanceof WeeklySchedule) {
-                count = 2;
                 fragment = WeeklyScheduleFragment.newInstance(mRootTask);
+                spinnerPosition = 2;
             } else {
                 throw new IndexOutOfBoundsException("unknown schedule type");
             }
@@ -142,6 +143,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCreateRootTaskSpinner.setAdapter(adapter);
+
+        mCreateRootTaskSpinner.setSelection(spinnerPosition);
 
         mCreateRootTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             private int mCount = finalCount;

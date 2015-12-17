@@ -132,14 +132,13 @@ public class Instance {
     }
 
     public ArrayList<Instance> getChildInstances() {
-        DateTime scheduleDateTime = getScheduleDateTime();
-        TimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp();
+        TimeStamp hierarchyTimeStamp = getHierarchyTimeStamp();
 
         ArrayList<Instance> childInstances = new ArrayList<>();
-        for (Task childTask : mTask.getChildTasks(scheduleTimeStamp)) {
-            Assert.assertTrue(childTask.current(scheduleTimeStamp));
+        for (Task childTask : mTask.getChildTasks(hierarchyTimeStamp)) {
+            Assert.assertTrue(childTask.current(hierarchyTimeStamp));
 
-            Instance childInstance = InstanceFactory.getInstance().getInstance(childTask, scheduleDateTime);
+            Instance childInstance = InstanceFactory.getInstance().getInstance(childTask, getScheduleDateTime());
             Assert.assertTrue(childInstance != null);
 
             childInstances.add(childInstance);
@@ -148,20 +147,22 @@ public class Instance {
     }
 
     public Instance getParentInstance() {
-        DateTime scheduleDateTime = getScheduleDateTime();
-        TimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp();
+        TimeStamp hierarchyTimeStamp = getHierarchyTimeStamp();
 
-        Task parentTask = mTask.getParentTask(scheduleTimeStamp);
-        Assert.assertTrue(parentTask.current(scheduleTimeStamp));
+        Task parentTask = mTask.getParentTask(hierarchyTimeStamp);
+        if (parentTask == null)
+            return null;
 
-        Instance parentInstance = InstanceFactory.getInstance().getInstance(parentTask, scheduleDateTime);
+        Assert.assertTrue(parentTask.current(hierarchyTimeStamp));
+
+        Instance parentInstance = InstanceFactory.getInstance().getInstance(parentTask, getScheduleDateTime());
         Assert.assertTrue(parentInstance != null);
 
         return parentInstance;
     }
 
     public boolean isRootInstance() {
-        return mTask.isRootTask(getScheduleDateTime().getTimeStamp());
+        return mTask.isRootTask(getHierarchyTimeStamp());
     }
 
     public TimeStamp getDone() {
@@ -177,8 +178,11 @@ public class Instance {
 
     public void setDone(boolean done) {
         if (mInstanceRecord == null) {
-            if (done)
-                mInstanceRecord = createInstanceRecord(TimeStamp.getNow());
+            if (done) {
+                createInstanceRecord();
+                getRootInstance().createInstanceHierarchy();
+                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
+            }
         } else {
             if (done)
                 mInstanceRecord.setDone(TimeStamp.getNow().getLong());
@@ -187,7 +191,38 @@ public class Instance {
         }
     }
 
-    InstanceRecord createInstanceRecord(TimeStamp done) {
-        return PersistenceManger.getInstance().createInstanceRecord(mTask, done, getScheduleDateTime(), getInstanceDateTime());
+    private Instance getRootInstance() {
+        Instance parentInstance = getParentInstance();
+
+        if (parentInstance != null)
+            return parentInstance.getRootInstance();
+        else
+            return this;
+    }
+
+    private void createInstanceHierarchy() {
+        createInstanceRecord();
+
+        for (Instance childInstance : getChildInstances())
+            childInstance.createInstanceHierarchy();
+    }
+
+    private void createInstanceRecord() {
+        if (mInstanceRecord != null)
+            return;
+
+        InstanceFactory.getInstance().addExistingInstance(this);
+
+        DateTime scheduleDateTime = getScheduleDateTime();
+
+        mScheduleDateTime = null;
+        mInstanceRecord = PersistenceManger.getInstance().createInstanceRecord(mTask, scheduleDateTime);
+    }
+
+    private TimeStamp getHierarchyTimeStamp() {
+        if (mInstanceRecord != null)
+            return new TimeStamp(mInstanceRecord.getHierarchyTime());
+        else
+            return getScheduleDateTime().getTimeStamp();
     }
 }

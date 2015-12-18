@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.krystianwsul.organizatortest.gui.instances.EditInstanceActivity">
+
+    <Button
+        android:id="@+id/edit_instance_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="@string/save"/>
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/edit_instance_name"
+        android:text="test"
+        android:layout_below="@id/edit_instance_save"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/edit_instance_name">
+
+        <TextView
+            android:id="@+id/edit_instance_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="date" />
+
+        <com.example.krystianwsul.organizatortest.gui.tasks.TimePickerView
+            android:id="@+id/edit_instance_timepickerview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

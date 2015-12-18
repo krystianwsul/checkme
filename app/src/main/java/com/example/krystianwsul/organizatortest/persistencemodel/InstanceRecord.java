@@ -17,14 +17,14 @@ public class InstanceRecord {
     private final Integer mScheduleHour;
     private final Integer mScheduleMinute;
 
-    private final Integer mInstanceYear;
-    private final Integer mInstanceMonth;
-    private final Integer mInstanceDay;
+    private Integer mInstanceYear;
+    private Integer mInstanceMonth;
+    private Integer mInstanceDay;
 
-    private final Integer mInstanceCustomTimeId;
+    private Integer mInstanceCustomTimeId;
 
-    private final Integer mInstanceHour;
-    private final Integer mInstanceMinute;
+    private Integer mInstanceHour;
+    private Integer mInstanceMinute;
 
     private final long mHierarchyTime;
 
@@ -32,7 +32,8 @@ public class InstanceRecord {
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
-        Assert.assertTrue((instanceYear == null) == (instanceMonth == null) == (instanceDay == null));
+        Assert.assertTrue((instanceYear == null) == (instanceMonth == null));
+        Assert.assertTrue((instanceYear == null) == (instanceDay == null));
         boolean hasInstanceDate = (instanceYear != null);
 
         Assert.assertTrue((instanceHour == null) == (instanceMinute == null));
@@ -106,24 +107,48 @@ public class InstanceRecord {
         return mInstanceYear;
     }
 
+    public void setInstanceYear(int instanceYear) {
+        mInstanceYear = instanceYear;
+    }
+
     public Integer getInstanceMonth() {
         return mInstanceMonth;
+    }
+
+    public void setInstanceMonth(int instanceMonth) {
+        mInstanceMonth = instanceMonth;
     }
 
     public Integer getInstanceDay() {
         return mInstanceDay;
     }
 
+    public void setInstanceDay(int instanceDay) {
+        mInstanceDay = instanceDay;
+    }
+
     public Integer getInstanceCustomTimeId() {
         return mInstanceCustomTimeId;
+    }
+
+    public void setInstanceCustomTimeId(int instanceCustomTimeId) {
+        mInstanceCustomTimeId = instanceCustomTimeId;
     }
 
     public Integer getInstanceHour() {
         return mInstanceHour;
     }
 
+    public void setInstanceHour(int instanceHour) {
+        mInstanceHour = instanceHour;
+    }
+
     public Integer getInstanceMinute() {
         return mInstanceMinute;
+    }
+
+    public void setInstanceMinute(int instanceMinute) {
+        mInstanceMinute = instanceMinute;
     }
 
     public void setDone(Long done) {

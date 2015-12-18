@@ -62,7 +62,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
             mRootTask = TaskFactory.getInstance().getTask(rootTaskId);
             Assert.assertTrue(mRootTask != null);
-
         }
 
         int spinnerPosition = 0;

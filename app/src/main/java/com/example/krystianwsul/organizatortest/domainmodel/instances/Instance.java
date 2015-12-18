@@ -6,6 +6,7 @@ import com.example.krystianwsul.organizatortest.domainmodel.dates.Date;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
 import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
@@ -91,7 +92,8 @@ public class Instance {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
 
         if (mInstanceRecord != null) {
-            Assert.assertTrue((mInstanceRecord.getInstanceYear() == null) == (mInstanceRecord.getInstanceMonth() == null) == (mInstanceRecord.getInstanceDay() == null));
+            Assert.assertTrue((mInstanceRecord.getInstanceYear() == null) == (mInstanceRecord.getInstanceMonth() == null));
+            Assert.assertTrue((mInstanceRecord.getInstanceYear() == null) == (mInstanceRecord.getInstanceDay() == null));
             if (mInstanceRecord.getInstanceYear() != null)
                 return new Date(mInstanceRecord.getInstanceYear(), mInstanceRecord.getInstanceMonth(), mInstanceRecord.getInstanceDay());
             else
@@ -123,7 +125,29 @@ public class Instance {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
-    public String getScheduleText(Context context) {
+    public void setInstanceDateTime(DateTime dateTime) {
+        Assert.assertTrue(dateTime != null);
+        Assert.assertTrue(isRootInstance());
+
+        if (mInstanceRecord == null)
+            createInstanceHierarchy();
+
+        mInstanceRecord.setInstanceYear(dateTime.getDate().getYear());
+        mInstanceRecord.setInstanceMonth(dateTime.getDate().getMonth());
+        mInstanceRecord.setInstanceDay(dateTime.getDate().getDay());
+
+        Time time = dateTime.getTime();
+        if (time instanceof CustomTime) {
+            mInstanceRecord.setInstanceCustomTimeId(((CustomTime) time).getId());
+        } else {
+            NormalTime normalTime = (NormalTime) time;
+
+            mInstanceRecord.setInstanceHour(normalTime.getHourMinute().getHour());
+            mInstanceRecord.setInstanceMinute(normalTime.getHourMinute().getMinute());
+        }
+    }
+
+    public String getDisplayText(Context context) {
         if (isRootInstance()) {
             return getInstanceDateTime().getDisplayText(context);
         } else {

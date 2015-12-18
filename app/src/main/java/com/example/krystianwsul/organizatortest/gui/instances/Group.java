@@ -34,7 +34,7 @@ class Group {
     public String getNameText(Context context) {
         Assert.assertTrue(!mInstances.isEmpty());
         if (singleInstance()) {
-            return getSingleSinstance().getScheduleText(context);
+            return getSingleSinstance().getDisplayText(context);
         } else {
             Date date = mTimeStamp.getDate();
             HourMinute hourMinute = mTimeStamp.getHourMinute();

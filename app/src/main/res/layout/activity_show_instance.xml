@@ -13,8 +13,8 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:shrinkColumns="1"
-        android:stretchColumns="1">
+        android:shrinkColumns="0"
+        android:stretchColumns="0">
 
         <TableRow
             android:layout_width="match_parent"
@@ -38,6 +38,12 @@
                     android:text="test"/>
 
             </LinearLayout>
+
+            <ImageView
+                android:id="@+id/show_instance_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_mode_edit_black_24dp" />
 
             <CheckBox
                 android:id="@+id/show_instance_checkbox"

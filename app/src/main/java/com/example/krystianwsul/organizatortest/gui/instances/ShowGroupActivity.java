@@ -30,7 +30,8 @@ import java.util.HashSet;
 
 public class ShowGroupActivity extends AppCompatActivity {
     private RecyclerView mShowGroupList;
-    private ArrayList<Instance> mInstances;
+    private TimeStamp mTimeStamp;
+    private TextView mShowGroupName;
 
     private static final String TIME_KEY = "time";
 
@@ -49,17 +50,13 @@ public class ShowGroupActivity extends AppCompatActivity {
         Assert.assertTrue(intent.hasExtra(TIME_KEY));
         long time = intent.getLongExtra(TIME_KEY, -1);
         Assert.assertTrue(time != -1);
-        TimeStamp timeStamp = new TimeStamp(time);
+        mTimeStamp = new TimeStamp(time);
 
-        mInstances = getInstances(timeStamp);
-
-        Assert.assertTrue(mInstances.size() > 1);
-
-        TextView showGroupName = (TextView) findViewById(R.id.show_group_name);
-        showGroupName.setText(getDisplayText(mInstances.get(0)));
+        mShowGroupName = (TextView) findViewById(R.id.show_group_name);
 
         mShowGroupList = (RecyclerView) findViewById(R.id.show_group_list);
         mShowGroupList.setLayoutManager(new LinearLayoutManager(this));
+
     }
 
     private ArrayList<Instance> getInstances(TimeStamp timeStamp) {
@@ -93,7 +90,15 @@ public class ShowGroupActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mShowGroupList.setAdapter(new InstanceAdapter(this, mInstances));
+
+        ArrayList<Instance> instances = getInstances(mTimeStamp);
+        Assert.assertTrue(!instances.isEmpty());
+        if (instances.size() == 1)
+            finish();
+
+        mShowGroupName.setText(getDisplayText(instances.get(0)));
+
+        mShowGroupList.setAdapter(new InstanceAdapter(this, instances));
     }
 
     private String getDisplayText(Instance instance) {
@@ -114,5 +119,4 @@ public class ShowGroupActivity extends AppCompatActivity {
             time = new NormalTime(hourMinute);
         return time;
     }
-
 }

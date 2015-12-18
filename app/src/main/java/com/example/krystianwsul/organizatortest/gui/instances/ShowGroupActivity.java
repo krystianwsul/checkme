@@ -3,8 +3,6 @@ package com.example.krystianwsul.organizatortest.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,9 +11,11 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizatortest.R;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizatortest.domainmodel.dates.DayOfWeek;
+import com.example.krystianwsul.organizatortest.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizatortest.domainmodel.instances.InstanceFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizatortest.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizatortest.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizatortest.domainmodel.times.NormalTime;
@@ -24,23 +24,19 @@ import com.example.krystianwsul.organizatortest.domainmodel.times.Time;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class ShowGroupActivity extends AppCompatActivity {
     private RecyclerView mShowGroupList;
     private ArrayList<Instance> mInstances;
 
-    private static final String INTENT_KEY = "instanceData";
+    private static final String TIME_KEY = "time";
 
     public static Intent getIntent(Group group, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
-
-        ArrayList<Instance> instances = group.getInstances();
-        ArrayList<Bundle> instanceData = new ArrayList<>();
-        for (Instance instance : group.getInstances())
-            instanceData.add(InstanceData.getBundle(instance.getTask(), instance.getScheduleDateTime()));
-
-        intent.putExtra(INTENT_KEY, instanceData);
+        intent.putExtra(TIME_KEY, group.getTimeStamp().getLong());
         return intent;
     }
 
@@ -50,18 +46,12 @@ public class ShowGroupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_group);
 
         Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        List<Bundle> instanceData = intent.getParcelableArrayListExtra(INTENT_KEY);
+        Assert.assertTrue(intent.hasExtra(TIME_KEY));
+        long time = intent.getLongExtra(TIME_KEY, -1);
+        Assert.assertTrue(time != -1);
+        TimeStamp timeStamp = new TimeStamp(time);
 
-        mInstances = new ArrayList<>();
-        for (Parcelable parcelable : instanceData) {
-            Bundle bundle = (Bundle) parcelable;
-            Pair<Task, DateTime> pair = InstanceData.getData(bundle);
-
-            Instance instance = InstanceFactory.getInstance().getInstance(pair.first, pair.second);
-            Assert.assertTrue(instance != null);
-            mInstances.add(instance);
-        }
+        mInstances = getInstances(timeStamp);
 
         Assert.assertTrue(mInstances.size() > 1);
 
@@ -70,6 +60,34 @@ public class ShowGroupActivity extends AppCompatActivity {
 
         mShowGroupList = (RecyclerView) findViewById(R.id.show_group_list);
         mShowGroupList.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private ArrayList<Instance> getInstances(TimeStamp timeStamp) {
+        Assert.assertTrue(timeStamp != null);
+
+        HashSet<Instance> allInstances = new HashSet<>();
+        allInstances.addAll(InstanceFactory.getInstance().getExistingInstances());
+
+        Collection<Task> tasks = TaskFactory.getInstance().getTasks();
+
+        Calendar endCalendar = timeStamp.getCalendar();
+        endCalendar.add(Calendar.MINUTE, 1);
+        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
+
+        for (Task task : tasks)
+            allInstances.addAll(task.getInstances(timeStamp, endTimeStamp));
+
+        ArrayList<Instance> rootInstances = new ArrayList<>();
+        for (Instance instance : allInstances)
+            if (instance.isRootInstance())
+                rootInstances.add(instance);
+
+        ArrayList<Instance> currentInstances = new ArrayList<>();
+        for (Instance instance : rootInstances)
+            if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
+                currentInstances.add(instance);
+
+        return currentInstances;
     }
 
     @Override

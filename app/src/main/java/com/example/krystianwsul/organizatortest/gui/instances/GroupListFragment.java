@@ -83,12 +83,12 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
             Collection<Task> tasks = TaskFactory.getInstance().getTasks();
 
-            Calendar tomorrowCalendar = Calendar.getInstance();
-            tomorrowCalendar.add(Calendar.DATE, 2);
-            Date tomorrowDate = new Date(tomorrowCalendar);
+            Calendar endCalendar = Calendar.getInstance();
+            endCalendar.add(Calendar.DATE, 2);
+            Date endDate = new Date(endCalendar);
 
             for (Task task : tasks)
-                allInstances.addAll(task.getInstances(null, new TimeStamp(tomorrowDate, new HourMinute(0, 0))));
+                allInstances.addAll(task.getInstances(null, new TimeStamp(endDate, new HourMinute(0, 0))));
 
             ArrayList<Instance> rootInstances = new ArrayList<>();
             for (Instance instance : allInstances)

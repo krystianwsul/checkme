@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="date" />
 
-    <com.example.krystianwsul.organizatortest.gui.tasks.TimePickerView
+    <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
         android:id="@+id/single_schedule_timepickerview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

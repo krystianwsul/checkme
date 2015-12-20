@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.krystianwsul.organizatortest">
+    package="com.example.krystianwsul.organizator">
 
     <application
         android:allowBackup="true"
@@ -9,7 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".gui.MainActivity"
+            android:name="com.example.krystianwsul.organizator.gui.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -18,17 +18,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".gui.tasks.ShowTaskActivity"></activity>
-        <activity android:name=".gui.instances.ShowGroupActivity"></activity>
-        <activity android:name=".gui.instances.ShowInstanceActivity"></activity>
-        <activity android:name=".gui.customtimes.ShowCustomTimesActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.tasks.ShowTaskActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.instances.ShowGroupActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity"></activity>
         <activity
-            android:name=".gui.SettingsActivity"
+            android:name="com.example.krystianwsul.organizator.gui.SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
-        <activity android:name=".gui.customtimes.ShowCustomTimeActivity"></activity>
-        <activity android:name=".gui.tasks.CreateRootTaskActivity"></activity>
-        <activity android:name=".gui.tasks.CreateChildTaskActivity"></activity>
-        <activity android:name=".gui.instances.EditInstanceActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimeActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity"></activity>
+        <activity android:name="com.example.krystianwsul.organizator.gui.instances.EditInstanceActivity"></activity>
     </application>
 
 </manifest>

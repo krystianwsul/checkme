@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizatortest;
+package com.example.krystianwsul.organizator;
 
 import org.junit.Test;
 

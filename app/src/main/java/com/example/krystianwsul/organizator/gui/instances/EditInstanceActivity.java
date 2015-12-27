@@ -39,7 +39,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance.getTask(), instance.getScheduleDateTime()));
+        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
         return intent;
     }
 
@@ -52,8 +52,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        Pair<Task, DateTime> pair = InstanceData.getData(bundle);
-        mInstance = InstanceFactory.getInstance().getInstance(pair.first, pair.second);
+        mInstance = InstanceData.getInstance(bundle);
         Assert.assertTrue(mInstance != null);
 
         if (savedInstanceState != null) {

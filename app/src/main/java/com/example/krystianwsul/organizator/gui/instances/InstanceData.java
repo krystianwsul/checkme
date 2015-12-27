@@ -5,6 +5,8 @@ import android.support.v4.util.Pair;
 
 import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
+import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
 import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
@@ -15,21 +17,20 @@ import com.example.krystianwsul.organizator.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
-class InstanceData {
+public class InstanceData {
     private static final String TASK_ID_KEY = "taskId";
     private static final String DATE_KEY = "date";
     private static final String CUSTOM_TIME_ID_KEY = "customTimeId";
     private static final String HOUR_MINUTE_KEY = "hourMinute";
 
-    public static Bundle getBundle(Task task, DateTime dateTime) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(dateTime != null);
+    public static Bundle getBundle(Instance instance) {
+        Assert.assertTrue(instance != null);
 
         Bundle bundle = new Bundle();
-        bundle.putInt(TASK_ID_KEY, task.getId());
-        bundle.putParcelable(DATE_KEY, dateTime.getDate());
+        bundle.putInt(TASK_ID_KEY, instance.getTaskId());
+        bundle.putParcelable(DATE_KEY, instance.getScheduleDate());
 
-        Time time = dateTime.getTime();
+        Time time = instance.getScheduleTime();
         if (time instanceof CustomTime) {
             bundle.putInt(CUSTOM_TIME_ID_KEY, ((CustomTime) time).getId());
         } else {
@@ -40,7 +41,7 @@ class InstanceData {
         return bundle;
     }
 
-    public static Pair<Task, DateTime> getData(Bundle bundle) {
+    public static Instance getInstance(Bundle bundle) {
         Assert.assertTrue(bundle != null);
 
         int taskId = bundle.getInt(TASK_ID_KEY, -1);
@@ -65,6 +66,6 @@ class InstanceData {
 
         DateTime dateTime = new DateTime(date, time);
 
-        return new Pair<>(task, dateTime);
+        return InstanceFactory.getInstance().getInstance(task, dateTime);
     }
 }

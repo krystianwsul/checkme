@@ -59,39 +59,11 @@ public class ShowGroupActivity extends AppCompatActivity {
 
     }
 
-    private ArrayList<Instance> getInstances(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
-
-        HashSet<Instance> allInstances = new HashSet<>();
-        allInstances.addAll(InstanceFactory.getInstance().getExistingInstances());
-
-        Collection<Task> tasks = TaskFactory.getInstance().getTasks();
-
-        Calendar endCalendar = timeStamp.getCalendar();
-        endCalendar.add(Calendar.MINUTE, 1);
-        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
-
-        for (Task task : tasks)
-            allInstances.addAll(task.getInstances(timeStamp, endTimeStamp));
-
-        ArrayList<Instance> rootInstances = new ArrayList<>();
-        for (Instance instance : allInstances)
-            if (instance.isRootInstance())
-                rootInstances.add(instance);
-
-        ArrayList<Instance> currentInstances = new ArrayList<>();
-        for (Instance instance : rootInstances)
-            if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
-                currentInstances.add(instance);
-
-        return currentInstances;
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
 
-        ArrayList<Instance> instances = getInstances(mTimeStamp);
+        ArrayList<Instance> instances = InstanceFactory.getInstance().getCurrentInstances(mTimeStamp);
         Assert.assertTrue(!instances.isEmpty());
         if (instances.size() == 1)
             finish();

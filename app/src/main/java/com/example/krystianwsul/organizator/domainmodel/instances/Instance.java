@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.domainmodel.instances;
 
+import android.app.NotificationManager;
 import android.content.Context;
 
 import com.example.krystianwsul.organizator.domainmodel.dates.Date;
@@ -203,7 +204,6 @@ public class Instance {
     public void setDone(boolean done) {
         if (mInstanceRecord == null) {
             if (done) {
-                createInstanceRecord();
                 getRootInstance().createInstanceHierarchy();
                 mInstanceRecord.setDone(TimeStamp.getNow().getLong());
             }
@@ -225,15 +225,16 @@ public class Instance {
     }
 
     private void createInstanceHierarchy() {
-        createInstanceRecord();
+        if (mInstanceRecord == null)
+            createInstanceRecord();
 
         for (Instance childInstance : getChildInstances())
             childInstance.createInstanceHierarchy();
     }
 
     private void createInstanceRecord() {
-        if (mInstanceRecord != null)
-            return;
+        Assert.assertTrue(mInstanceRecord == null);
+        Assert.assertTrue(mScheduleDateTime != null);
 
         InstanceFactory.getInstance().addExistingInstance(this);
 
@@ -248,5 +249,45 @@ public class Instance {
             return new TimeStamp(mInstanceRecord.getHierarchyTime());
         else
             return getScheduleDateTime().getTimeStamp();
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " " + getInstanceDateTime();
+    }
+
+    public boolean getNotified() {
+        if (mInstanceRecord != null)
+            return mInstanceRecord.getNotified();
+        else
+            return false;
+    }
+
+    public void setNotified() {
+        if (mInstanceRecord == null)
+            createInstanceHierarchy();
+
+        Assert.assertTrue(mInstanceRecord != null);
+        mInstanceRecord.setNotified(true);
+    }
+
+    public int getNotificationId() {
+        Assert.assertTrue(mInstanceRecord != null);
+        return mInstanceRecord.getId();
+    }
+
+    public boolean getNotificationShown() {
+        if (mInstanceRecord != null)
+            return mInstanceRecord.getNotificationShown();
+        else
+            return false;
+    }
+
+    public void setNotificationShown(boolean notificationShown) {
+        if (mInstanceRecord == null)
+            createInstanceHierarchy();
+
+        Assert.assertTrue(mInstanceRecord != null);
+        mInstanceRecord.setNotificationShown(notificationShown);
     }
 }

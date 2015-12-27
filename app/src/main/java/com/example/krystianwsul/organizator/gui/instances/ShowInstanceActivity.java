@@ -35,7 +35,7 @@ public class ShowInstanceActivity extends AppCompatActivity {
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance.getTask(), instance.getScheduleDateTime()));
+        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
         return intent;
     }
 
@@ -77,8 +77,7 @@ public class ShowInstanceActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        Pair<Task, DateTime> pair = InstanceData.getData(bundle);
-        mInstance = InstanceFactory.getInstance().getInstance(pair.first, pair.second);
+        mInstance = InstanceData.getInstance(bundle);
         Assert.assertTrue(mInstance != null);
 
         mShowInstanceName.setText(mInstance.getName());

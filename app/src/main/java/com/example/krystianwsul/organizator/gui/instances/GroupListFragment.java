@@ -77,33 +77,12 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
             }
         };
 
-        private ArrayList<Instance> getRootInstances() {
-            HashSet<Instance> allInstances = new HashSet<>();
-            allInstances.addAll(InstanceFactory.getInstance().getExistingInstances());
-
-            Collection<Task> tasks = TaskFactory.getInstance().getTasks();
-
-            Calendar endCalendar = Calendar.getInstance();
-            endCalendar.add(Calendar.DATE, 2);
-            Date endDate = new Date(endCalendar);
-
-            for (Task task : tasks)
-                allInstances.addAll(task.getInstances(null, new TimeStamp(endDate, new HourMinute(0, 0))));
-
-            ArrayList<Instance> rootInstances = new ArrayList<>();
-            for (Instance instance : allInstances)
-                if (instance.isRootInstance())
-                    rootInstances.add(instance);
-
-            return rootInstances;
-        }
-
         public GroupAdapter(Context context) {
             Assert.assertTrue(context != null);
 
             mContext = context;
 
-            ArrayList<Instance> rootInstances = getRootInstances();
+            ArrayList<Instance> rootInstances = InstanceFactory.getInstance().getCurrentInstances();
 
             ArrayList<Instance> doneInstances = new ArrayList<>();
             ArrayList<Instance> notDoneInstances = new ArrayList<>();

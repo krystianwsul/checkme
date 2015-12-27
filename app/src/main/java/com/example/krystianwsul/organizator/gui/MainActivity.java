@@ -11,7 +11,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.krystianwsul.organizator.BootReceiver;
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.TickReceiver;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
 import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        TickReceiver.register(this);
     }
 
     @Override

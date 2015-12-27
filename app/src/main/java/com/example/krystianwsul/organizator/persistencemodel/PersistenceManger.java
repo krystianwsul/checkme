@@ -351,14 +351,14 @@ public class PersistenceManger {
 
         int id = getNextInstanceId();
 
-        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, TimeStamp.getNow().getLong());
+        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, TimeStamp.getNow().getLong(), false, false);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
     }
 
     private int getNextInstanceId() {
         if (mInstanceRecords.isEmpty())
-            return 0;
+            return 1;
         else
             return Collections.max(mInstanceRecords.keySet()) + 1;
     }

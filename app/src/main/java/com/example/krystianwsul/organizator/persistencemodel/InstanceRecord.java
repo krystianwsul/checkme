@@ -28,7 +28,10 @@ public class InstanceRecord {
 
     private final long mHierarchyTime;
 
-    public InstanceRecord(int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime) {
+    private boolean mNotified;
+    private boolean mNotificationShown;
+
+    public InstanceRecord(int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
@@ -65,6 +68,10 @@ public class InstanceRecord {
         mInstanceMinute = instanceMinute;
 
         mHierarchyTime = hierarchyTime;
+
+        mNotified = notified;
+
+        mNotificationShown = notificationShown;
     }
 
     public int getId() {
@@ -157,5 +164,21 @@ public class InstanceRecord {
 
     public long getHierarchyTime() {
         return mHierarchyTime;
+    }
+
+    public boolean getNotified() {
+        return mNotified;
+    }
+
+    public void setNotified(boolean notified) {
+        mNotified = notified;
+    }
+
+    public boolean getNotificationShown() {
+        return mNotificationShown;
+    }
+
+    public void setNotificationShown(boolean notificationShown) {
+        mNotificationShown = notificationShown;
     }
 }

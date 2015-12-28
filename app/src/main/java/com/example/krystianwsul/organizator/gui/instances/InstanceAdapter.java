@@ -26,6 +26,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
     private final ArrayList<Instance> mDoneInstances = new ArrayList<>();
     private final ArrayList<Instance> mNotDoneInstances = new ArrayList<>();
+    private final boolean mShowDetails;
 
     private static Comparator<Instance> sComparator = new Comparator<Instance>() {
         @Override
@@ -37,12 +38,13 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         }
     };
 
-    public InstanceAdapter(Context context, ArrayList<Instance> instances) {
+    public InstanceAdapter(Context context, ArrayList<Instance> instances, boolean showDetails) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instances != null);
         Assert.assertTrue(!instances.isEmpty());
 
         mContext = context;
+        mShowDetails = showDetails;
 
         for (Instance instance : instances) {
             if (instance.getDone() != null)
@@ -73,10 +75,11 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         TableLayout instanceRow = (TableLayout) LayoutInflater.from(mContext).inflate(R.layout.show_instance_row, parent, false);
 
         TextView instanceRowName = (TextView) instanceRow.findViewById(R.id.instance_row_name);
+        TextView instanceRowDetails = (TextView) instanceRow.findViewById(R.id.instance_row_details);
         ImageView instanceRowImg = (ImageView) instanceRow.findViewById(R.id.instance_row_img);
         CheckBox instanceRowCheckBox = (CheckBox) instanceRow.findViewById(R.id.instance_row_checkbox);
 
-        return new InstanceHolder(instanceRow, instanceRowName, instanceRowImg, instanceRowCheckBox);
+        return new InstanceHolder(instanceRow, instanceRowName, instanceRowDetails, instanceRowImg, instanceRowCheckBox);
     }
 
     @Override
@@ -84,6 +87,10 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         Instance instance = getInstance(position);
 
         instanceHolder.mInstanceRowName.setText(instance.getName());
+        if (mShowDetails)
+            instanceHolder.mInstanceRowDetails.setText(instance.getDisplayText(mContext));
+        else
+            instanceHolder.mInstanceRowDetails.setVisibility(View.GONE);
 
         Resources resources = mContext.getResources();
 
@@ -128,18 +135,21 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     public class InstanceHolder extends RecyclerView.ViewHolder {
         public final TableLayout mInstanceRow;
         public final TextView mInstanceRowName;
+        public final TextView mInstanceRowDetails;
         public final ImageView mInstanceRowImg;
         public final CheckBox mInstanceRowCheckBox;
 
-        public InstanceHolder(TableLayout instanceRow, TextView instanceRowName, ImageView instanceRowImg, CheckBox instanceRowCheckBox) {
+        public InstanceHolder(TableLayout instanceRow, TextView instanceRowName, TextView instanceRowDetails, ImageView instanceRowImg, CheckBox instanceRowCheckBox) {
             super(instanceRow);
 
             Assert.assertTrue(instanceRowName != null);
+            Assert.assertTrue(instanceRowDetails != null);
             Assert.assertTrue(instanceRowImg != null);
             Assert.assertTrue(instanceRowCheckBox != null);
 
             mInstanceRow = instanceRow;
             mInstanceRowName = instanceRowName;
+            mInstanceRowDetails = instanceRowDetails;
             mInstanceRowImg = instanceRowImg;
             mInstanceRowCheckBox = instanceRowCheckBox;
         }
@@ -152,7 +162,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             Assert.assertTrue(instance != null);
 
             boolean isChecked = checkBox.isChecked();
-            instance.setDone(isChecked);
+            instance.setDone(isChecked, mContext);
 
             if (isChecked) {
                 Assert.assertTrue(mNotDoneInstances.contains(instance));

@@ -1,7 +1,5 @@
 package com.example.krystianwsul.organizator.domainmodel.instances;
 
-import android.util.Log;
-
 import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
@@ -13,7 +11,6 @@ import com.example.krystianwsul.organizator.persistencemodel.PersistenceManger;
 
 import junit.framework.Assert;
 
-import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -111,9 +108,10 @@ public class InstanceFactory {
         ArrayList<Instance> rootInstances = getRootInstances(null, endTimeStamp);
 
         ArrayList<Instance> notificationInstances = new ArrayList<>();
-        for (Instance instance : rootInstances)
-            if (instance.getDone() == null && !instance.getNotified())
+        for (Instance instance : rootInstances) {
+            if (instance.getDone() == null && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
                 notificationInstances.add(instance);
+        }
         return notificationInstances;
     }
 

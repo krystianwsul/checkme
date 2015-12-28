@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizator.domainmodel.instances;
 import android.app.NotificationManager;
 import android.content.Context;
 
+import com.example.krystianwsul.organizator.TickReceiver;
 import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
@@ -126,7 +127,8 @@ public class Instance {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
-    public void setInstanceDateTime(DateTime dateTime) {
+    public void setInstanceDateTime(Context context, DateTime dateTime) {
+        Assert.assertTrue(context != null);
         Assert.assertTrue(dateTime != null);
         Assert.assertTrue(isRootInstance());
 
@@ -146,6 +148,8 @@ public class Instance {
             mInstanceRecord.setInstanceHour(normalTime.getHourMinute().getHour());
             mInstanceRecord.setInstanceMinute(normalTime.getHourMinute().getMinute());
         }
+
+        resetNotification(context);
     }
 
     public String getDisplayText(Context context) {
@@ -201,7 +205,9 @@ public class Instance {
             return null;
     }
 
-    public void setDone(boolean done) {
+    public void setDone(boolean done, Context context) {
+        Assert.assertTrue(context != null);
+
         if (mInstanceRecord == null) {
             if (done) {
                 getRootInstance().createInstanceHierarchy();
@@ -213,6 +219,8 @@ public class Instance {
             else
                 mInstanceRecord.setDone(null);
         }
+
+        TickReceiver.refresh(context);
     }
 
     private Instance getRootInstance() {
@@ -257,10 +265,7 @@ public class Instance {
     }
 
     public boolean getNotified() {
-        if (mInstanceRecord != null)
-            return mInstanceRecord.getNotified();
-        else
-            return false;
+        return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }
 
     public void setNotified() {
@@ -272,15 +277,14 @@ public class Instance {
     }
 
     public int getNotificationId() {
-        Assert.assertTrue(mInstanceRecord != null);
+        if (mInstanceRecord == null)
+            createInstanceHierarchy();
+
         return mInstanceRecord.getId();
     }
 
     public boolean getNotificationShown() {
-        if (mInstanceRecord != null)
-            return mInstanceRecord.getNotificationShown();
-        else
-            return false;
+        return (mInstanceRecord != null && mInstanceRecord.getNotificationShown());
     }
 
     public void setNotificationShown(boolean notificationShown) {
@@ -289,5 +293,18 @@ public class Instance {
 
         Assert.assertTrue(mInstanceRecord != null);
         mInstanceRecord.setNotificationShown(notificationShown);
+    }
+
+    private void resetNotification(Context context) {
+        Assert.assertTrue(mInstanceRecord != null);
+        Assert.assertTrue(isRootInstance());
+        Assert.assertTrue(context != null);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(getNotificationId());
+        mInstanceRecord.setNotificationShown(false);
+        mInstanceRecord.setNotified(false);
+
+        TickReceiver.refresh(context);
     }
 }

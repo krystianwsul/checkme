@@ -14,8 +14,6 @@ import com.example.krystianwsul.organizator.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
 import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
@@ -24,9 +22,6 @@ import com.example.krystianwsul.organizator.domainmodel.times.Time;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashSet;
 
 public class ShowGroupActivity extends AppCompatActivity {
     private RecyclerView mShowGroupList;
@@ -70,7 +65,7 @@ public class ShowGroupActivity extends AppCompatActivity {
 
         mShowGroupName.setText(getDisplayText(instances.get(0)));
 
-        mShowGroupList.setAdapter(new InstanceAdapter(this, instances));
+        mShowGroupList.setAdapter(new InstanceAdapter(this, instances, false));
     }
 
     private String getDisplayText(Instance instance) {

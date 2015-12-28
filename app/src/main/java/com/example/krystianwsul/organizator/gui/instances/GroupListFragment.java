@@ -16,23 +16,17 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizator.gui.MainActivity;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.TreeMap;
 
 public class GroupListFragment extends Fragment implements MainActivity.RefreshFragment {
@@ -202,7 +196,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
                 Assert.assertTrue(group.singleInstance());
 
                 boolean isChecked = checkBox.isChecked();
-                group.getSingleSinstance().setDone(isChecked);
+                group.getSingleSinstance().setDone(isChecked, mContext);
 
                 if (isChecked) {
                     Assert.assertTrue(mNotDoneGroupContainer.contains(group));

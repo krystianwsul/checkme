@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizator.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,10 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
 
 import junit.framework.Assert;
 
@@ -39,6 +35,13 @@ public class ShowInstanceActivity extends AppCompatActivity {
         return intent;
     }
 
+    public static Intent getNotificationIntent(Instance instance, Context context) {
+        Intent intent = new Intent(context, ShowInstanceActivity.class);
+        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +59,7 @@ public class ShowInstanceActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean isChecked = mCheckBox.isChecked();
-                mInstance.setDone(isChecked);
+                mInstance.setDone(isChecked, ShowInstanceActivity.this);
             }
         });
 
@@ -91,6 +94,6 @@ public class ShowInstanceActivity extends AppCompatActivity {
             mShowInstanceDetails.setText(scheduleText);
 
         if (!mInstance.getChildInstances().isEmpty())
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(mInstance.getChildInstances())));
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(mInstance.getChildInstances()), false));
     }
 }

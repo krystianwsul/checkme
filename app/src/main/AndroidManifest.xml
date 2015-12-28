@@ -22,6 +22,7 @@
         </activity>
         <activity android:name=".gui.tasks.ShowTaskActivity" />
         <activity android:name=".gui.instances.ShowGroupActivity" />
+        <activity android:name=".gui.instances.ShowNotificationGroupActivity" />
         <activity android:name=".gui.instances.ShowInstanceActivity" />
         <activity android:name=".gui.customtimes.ShowCustomTimesActivity" />
         <activity
@@ -51,7 +52,15 @@
         <receiver
             android:name=".InstanceNotificationDeleteReceiver"
             android:enabled="true"
-            android:exported="true"></receiver>
+            android:exported="true" />
+        <receiver
+            android:name=".GroupNotificationContentReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".InstanceNotificationContentReceiver"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

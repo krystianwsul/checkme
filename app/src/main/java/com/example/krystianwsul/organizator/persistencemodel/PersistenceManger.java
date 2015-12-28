@@ -123,6 +123,7 @@ public class PersistenceManger {
         DailyScheduleTimeRecord alwaysAfterWakingAfterWork1 = new DailyScheduleTimeRecord(2, alwaysAfterWakingAfterWork.getId(), afterWork.getId(), null, null);
         mDailyScheduleTimeRecords.put(alwaysAfterWakingAfterWork1.getId(), alwaysAfterWakingAfterWork1);
 
+        /*
         TaskRecord hamstring = new TaskRecord(8, "hamstring stretch", calendarFewDaysAgo.getTimeInMillis(), null);
         mTaskRecords.put(hamstring.getId(), hamstring);
 
@@ -130,7 +131,9 @@ public class PersistenceManger {
         mScheduleRecords.put(alwaysAfterWork.getId(), alwaysAfterWork);
         DailyScheduleTimeRecord alwaysAfterWork0 = new DailyScheduleTimeRecord(0, alwaysAfterWork.getId(), afterWork.getId(), null, null);
         mDailyScheduleTimeRecords.put(alwaysAfterWork0.getId(), alwaysAfterWork0);
+        */
 
+        /*
         TaskRecord piecyk = new TaskRecord(9, "piecyk", calendarFewDaysAgo.getTimeInMillis(), null);
         mTaskRecords.put(piecyk.getId(), piecyk);
 
@@ -138,7 +141,9 @@ public class PersistenceManger {
         mScheduleRecords.put(todayAfterWaking.getId(), todayAfterWaking);
         SingleScheduleDateTimeRecord todayAfterWaking0 = new SingleScheduleDateTimeRecord(todayAfterWaking.getId(), calendarToday.get(Calendar.YEAR), calendarToday.get(Calendar.MONTH) + 1, calendarToday.get(Calendar.DAY_OF_MONTH), afterWaking.getId(), null, null);
         mSingleScheduleDateTimeRecords.put(todayAfterWaking0.getScheduleId(), todayAfterWaking0);
+        */
 
+        /*
         TaskRecord paznokcie = new TaskRecord(10, "paznokcie", calendarFewDaysAgo.getTimeInMillis(), null);
         mTaskRecords.put(paznokcie.getId(), paznokcie);
 
@@ -150,7 +155,9 @@ public class PersistenceManger {
         mWeeklyScheduleDayOfWeekTimeRecords.put(crazyWeekend1.getId(), crazyWeekend1);
         WeeklyScheduleDayOfWeekTimeRecord crazyWeekend2 = new WeeklyScheduleDayOfWeekTimeRecord(2, crazyWeekend.getId(), DayOfWeek.SUNDAY.ordinal(), null, 17, 0);
         mWeeklyScheduleDayOfWeekTimeRecords.put(crazyWeekend2.getId(), crazyWeekend2);
+*/
 
+        /*
         TaskRecord task6 = new TaskRecord(11, "task 6", calendarFewDaysAgo.getTimeInMillis(), null);
         mTaskRecords.put(task6.getId(), task6);
 
@@ -158,6 +165,7 @@ public class PersistenceManger {
         mScheduleRecords.put(task6schedule.getId(), task6schedule);
         DailyScheduleTimeRecord task6schedule0 = new DailyScheduleTimeRecord(3, task6schedule.getId(), null, 6, 0);
         mDailyScheduleTimeRecords.put(task6schedule0.getId(), task6schedule0);
+        */
     }
 
     public Collection<CustomTimeRecord> getCustomTimeRecords() {
@@ -351,7 +359,11 @@ public class PersistenceManger {
 
         int id = getNextInstanceId();
 
-        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, TimeStamp.getNow().getLong(), false, false);
+        TimeStamp now = TimeStamp.getNow();
+        TimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp();
+        TimeStamp hierarchy = (now.compareTo(scheduleTimeStamp) < 0 ? now : scheduleTimeStamp);
+
+        InstanceRecord instanceRecord = new InstanceRecord(id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, hierarchy.getLong(), false, false);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
     }

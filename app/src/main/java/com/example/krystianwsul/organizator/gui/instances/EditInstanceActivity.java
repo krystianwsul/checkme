@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -15,8 +14,6 @@ import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
 import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizator.domainmodel.times.Time;
@@ -118,7 +115,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
                     return;
                 }
 
-                mInstance.setInstanceDateTime(new DateTime(mDate, time));
+                mInstance.setInstanceDateTime(EditInstanceActivity.this, new DateTime(mDate, time));
 
                 finish();
             }

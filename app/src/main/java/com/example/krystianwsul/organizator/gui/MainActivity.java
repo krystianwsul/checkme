@@ -11,7 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.krystianwsul.organizator.BootReceiver;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.TickReceiver;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
@@ -21,6 +20,7 @@ import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
 import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity {
+    ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tasks));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
+        mViewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
         final FragmentStatePagerAdapter fragmentStatePagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
@@ -62,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
                 return super.getItemPosition(object);
             }
         };
-        viewPager.setAdapter(fragmentStatePagerAdapter);
+        mViewPager.setAdapter(fragmentStatePagerAdapter);
 
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 fragmentStatePagerAdapter.notifyDataSetChanged();
+                invalidateOptionsMenu();
             }
 
             @Override
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
+                mViewPager.setCurrentItem(tab.getPosition());
             }
 
             public void onTabUnselected(TabLayout.Tab tab) {
@@ -102,6 +103,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_show_tasks, menu);
+
+        if (mViewPager.getCurrentItem() == 1) {
+            MenuItem menuItem = menu.findItem(R.id.action_task_edit);
+            menuItem.setVisible(true);
+        }
+
         return true;
     }
 

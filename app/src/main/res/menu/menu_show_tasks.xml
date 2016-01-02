@@ -2,6 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".gui.MainActivity">
     <item
+        android:id="@+id/action_task_edit"
+        android:title="Edit"
+        android:orderInCategory="50"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_mode_edit_white_24dp"
+        android:visible="false"/>
+    <item
         android:id="@+id/action_times"
         android:title="@string/action_times"
         android:orderInCategory="100"

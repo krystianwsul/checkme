@@ -52,4 +52,11 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
     public void refresh() {
         mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), TaskFactory.getInstance().getRootTasks(TimeStamp.getNow())));
     }
+
+    public void setEditing(boolean editing) {
+        TaskAdapter taskAdapter = (TaskAdapter) mTasksRecycler.getAdapter();
+        Assert.assertTrue(taskAdapter != null);
+
+        taskAdapter.setEditing(editing);
+    }
 }

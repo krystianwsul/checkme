@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     private final Activity mActivity;
     private final ArrayList<Task> mTasks;
+
+    private boolean mEditing = false;
 
     public TaskAdapter(Activity activity, ArrayList<Task> tasks) {
         Assert.assertTrue(activity != null);
@@ -43,9 +46,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
         TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
         ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
+        CheckBox taskRowCheckBox = (CheckBox) showTaskRow.findViewById(R.id.task_row_checkbox);
         ImageView taskRowDelete = (ImageView) showTaskRow.findViewById(R.id.task_row_delete);
 
-        return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage, taskRowDelete);
+        return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage, taskRowCheckBox, taskRowDelete);
     }
 
     @Override
@@ -72,6 +76,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             }
         });
 
+        if (mEditing)
+            taskHolder.mTaskRowCheckBox.setVisibility(View.VISIBLE);
+        else
+            taskHolder.mTaskRowCheckBox.setVisibility(View.GONE);
+
         taskHolder.mTaskRowDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,25 +89,33 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         });
     }
 
+    public void setEditing(boolean editing) {
+        mEditing = editing;
+        notifyItemRangeChanged(0, getItemCount());
+    }
+
     public class TaskHolder extends RecyclerView.ViewHolder {
         public final View mShowTaskRow;
         public final TextView mTaskRowName;
         public final TextView mTaskRowDetails;
         public final ImageView mTaskRowImg;
+        public final CheckBox mTaskRowCheckBox;
         public final ImageView mTaskRowDelete;
 
-        public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg, ImageView taskRowDelete) {
+        public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg, CheckBox taskRowCheckBox, ImageView taskRowDelete) {
             super(showTaskRow);
 
             Assert.assertTrue(taskRowName != null);
             Assert.assertTrue(taskRowDetails != null);
             Assert.assertTrue(taskRowImg != null);
+            Assert.assertTrue(taskRowCheckBox != null);
             Assert.assertTrue(taskRowDelete != null);
 
             mShowTaskRow = showTaskRow;
             mTaskRowName = taskRowName;
             mTaskRowDetails = taskRowDetails;
             mTaskRowImg = taskRowImg;
+            mTaskRowCheckBox = taskRowCheckBox;
             mTaskRowDelete = taskRowDelete;
         }
 

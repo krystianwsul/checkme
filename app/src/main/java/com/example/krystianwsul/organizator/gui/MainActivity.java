@@ -7,9 +7,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.TickReceiver;
@@ -21,6 +23,7 @@ import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity {
     ViewPager mViewPager;
+    MyFragmentStatePagerAdapter mMyFragmentStatePagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,34 +38,8 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         mViewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
-        final FragmentStatePagerAdapter fragmentStatePagerAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int position) {
-                Assert.assertTrue(position >= 0);
-                Assert.assertTrue(position <= 1);
-
-                switch (position) {
-                    case 0:
-                        return new GroupListFragment();
-                    case 1:
-                        return new TaskListFragment();
-                    default:
-                        return null;
-                }
-            }
-
-            @Override
-            public int getCount() {
-                return 2;
-            }
-
-            @Override
-            public int getItemPosition(Object object) {
-                ((RefreshFragment) object).refresh();
-                return super.getItemPosition(object);
-            }
-        };
-        mViewPager.setAdapter(fragmentStatePagerAdapter);
+        mMyFragmentStatePagerAdapter = new MyFragmentStatePagerAdapter();
+        mViewPager.setAdapter(mMyFragmentStatePagerAdapter);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -72,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                fragmentStatePagerAdapter.notifyDataSetChanged();
+                mMyFragmentStatePagerAdapter.notifyDataSetChanged();
                 invalidateOptionsMenu();
             }
 
@@ -121,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
+            case R.id.action_task_edit:
+                startSupportActionMode(new TaskEditCallback());
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -128,5 +107,83 @@ public class MainActivity extends AppCompatActivity {
 
     public interface RefreshFragment {
         void refresh();
+    }
+
+    private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+        private Fragment mFragment;
+
+        public MyFragmentStatePagerAdapter() {
+            super(MainActivity.this.getSupportFragmentManager());
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            Assert.assertTrue(position >= 0);
+            Assert.assertTrue(position <= 1);
+
+            switch (position) {
+                case 0:
+                    return new GroupListFragment();
+                case 1:
+                    return new TaskListFragment();
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            ((RefreshFragment) object).refresh();
+            return super.getItemPosition(object);
+        }
+
+        @Override
+        public void setPrimaryItem(ViewGroup viewGroup, int position, Object object) {
+            mFragment = (Fragment) object;
+            super.setPrimaryItem(viewGroup, position, object);
+        }
+
+        public Fragment getFragment() {
+            Assert.assertTrue(mFragment != null);
+            return mFragment;
+        }
+    }
+
+    private class TaskEditCallback implements ActionMode.Callback {
+        private TaskListFragment mTaskListFragment;
+
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
+
+            mTaskListFragment = (TaskListFragment) mMyFragmentStatePagerAdapter.getFragment();
+            Assert.assertTrue(mTaskListFragment != null);
+
+            mTaskListFragment.setEditing(true);
+
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            return false;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            actionMode.setTitle(getString(R.string.join));
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            Assert.assertTrue(mTaskListFragment != null);
+            mTaskListFragment.setEditing(false);
+        }
     }
 }

@@ -16,6 +16,7 @@
     <string name="invalid_time_message">Time must be in the future.</string>
     <string name="one_reminder">One reminder</string>
     <string name="multiple_reminders">reminders</string>
+    <string name="join">Join</string>
 
     <!-- Strings related to Settings -->
 

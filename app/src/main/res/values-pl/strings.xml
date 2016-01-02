@@ -15,4 +15,5 @@
     <string name="invalid_time_message">Czas musi być w przyszłości.</string>
     <string name="one_reminder">Jedno przypomnienie</string>
     <string name="multiple_reminders">przypomnienia</string>
+    <string name="join">Połącz</string>
 </resources>

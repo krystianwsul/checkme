@@ -15,11 +15,16 @@ import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.TickReceiver;
+import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
 import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
+import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
+import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
 
 import junit.framework.Assert;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     ViewPager mViewPager;
@@ -155,10 +160,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class TaskEditCallback implements ActionMode.Callback {
+        private ActionMode mActionMode;
+
         private TaskListFragment mTaskListFragment;
 
         @Override
         public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            mActionMode = actionMode;
+
             actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
 
             mTaskListFragment = (TaskListFragment) mMyFragmentStatePagerAdapter.getFragment();
@@ -171,7 +180,23 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            return false;
+            switch (menuItem.getItemId()) {
+                case R.id.action_task_join:
+                    ArrayList<Task> tasks = mTaskListFragment.getSelected();
+                    Assert.assertTrue(tasks != null);
+
+                    if (tasks.size() < 2) {
+                        MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.two_tasks_message));
+                        messageDialogFragment.show(getSupportFragmentManager(), "two_tasks");
+                    } else {
+                        startActivity(CreateRootTaskActivity.getJoinIntent(MainActivity.this, tasks));
+                        mActionMode.finish();
+                    }
+
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         @Override

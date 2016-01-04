@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     private final Activity mActivity;
-    private final ArrayList<Task> mTasks;
+    private final ArrayList<TaskWrapper> mTaskWrappers;
 
     private boolean mEditing = false;
 
@@ -30,12 +31,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         Assert.assertTrue(tasks != null);
 
         mActivity = activity;
-        mTasks = tasks;
+
+        mTaskWrappers = new ArrayList<>();
+        for (Task task : tasks)
+            mTaskWrappers.add(new TaskWrapper(task));
     }
 
     @Override
     public int getItemCount() {
-        return mTasks.size();
+        return mTaskWrappers.size();
     }
 
     @Override
@@ -54,17 +58,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
 
     @Override
     public void onBindViewHolder(final TaskHolder taskHolder, int position) {
-        Task task = mTasks.get(position);
+        TaskWrapper taskWrapper = mTaskWrappers.get(position);
 
-        taskHolder.mTaskRowName.setText(task.getName());
+        taskHolder.mTaskRowName.setText(taskWrapper.mTask.getName());
 
-        String scheduleText = task.getScheduleText(mActivity, TimeStamp.getNow());
+        String scheduleText = taskWrapper.mTask.getScheduleText(mActivity, TimeStamp.getNow());
         if (TextUtils.isEmpty(scheduleText))
             taskHolder.mTaskRowDetails.setVisibility(View.GONE);
         else
             taskHolder.mTaskRowDetails.setText(scheduleText);
 
-        if (task.getChildTasks(TimeStamp.getNow()).isEmpty())
+        if (taskWrapper.mTask.getChildTasks(TimeStamp.getNow()).isEmpty())
             taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_label_outline_black_24dp));
         else
             taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_list_black_24dp));
@@ -76,10 +80,19 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             }
         });
 
-        if (mEditing)
+        if (mEditing) {
             taskHolder.mTaskRowCheckBox.setVisibility(View.VISIBLE);
-        else
+            taskHolder.mTaskRowCheckBox.setChecked(taskWrapper.mSelected);
+        } else {
             taskHolder.mTaskRowCheckBox.setVisibility(View.GONE);
+        }
+
+        taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                taskHolder.onCheckedChanged(isChecked);
+            }
+        });
 
         taskHolder.mTaskRowDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,7 +104,30 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
 
     public void setEditing(boolean editing) {
         mEditing = editing;
+
+        if (!mEditing)
+            for (TaskWrapper taskWrapper : mTaskWrappers)
+                taskWrapper.mSelected = false;
+
         notifyItemRangeChanged(0, getItemCount());
+    }
+
+    public ArrayList<Task> getSelected() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        for (TaskWrapper taskWrapper : mTaskWrappers)
+            if (taskWrapper.mSelected)
+                tasks.add(taskWrapper.mTask);
+        return tasks;
+    }
+
+    private static class TaskWrapper {
+        public final Task mTask;
+        public boolean mSelected;
+
+        public TaskWrapper(Task task) {
+            Assert.assertTrue(task != null);
+            mTask = task;
+        }
     }
 
     public class TaskHolder extends RecyclerView.ViewHolder {
@@ -120,22 +156,31 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         }
 
         public void onRowClick() {
-            Task task = mTasks.get(getAdapterPosition());
-            Assert.assertTrue(task != null);
+            TaskWrapper taskWrapper = mTaskWrappers.get(getAdapterPosition());
+            Assert.assertTrue(taskWrapper != null);
 
-            mActivity.startActivity(ShowTaskActivity.getIntent(task, mActivity));
+            mActivity.startActivity(ShowTaskActivity.getIntent(taskWrapper.mTask, mActivity));
         }
 
         public void onDeleteClick() {
             int position = getAdapterPosition();
 
-            Task task = mTasks.get(position);
-            Assert.assertTrue(task != null);
+            TaskWrapper taskWrapper = mTaskWrappers.get(position);
+            Assert.assertTrue(taskWrapper != null);
 
-            task.setEndTimeStamp(TimeStamp.getNow());
+            taskWrapper.mTask.setEndTimeStamp(TimeStamp.getNow());
 
-            mTasks.remove(position);
+            mTaskWrappers.remove(position);
             notifyItemRemoved(position);
+        }
+
+        public void onCheckedChanged(boolean checked) {
+            int position = getAdapterPosition();
+
+            TaskWrapper taskWrapper = mTaskWrappers.get(position);
+            Assert.assertTrue(taskWrapper != null);
+
+            taskWrapper.mSelected = checked;
         }
     }
 }

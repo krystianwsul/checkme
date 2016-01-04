@@ -210,6 +210,24 @@ public class TaskFactory {
         createTaskHierarchy(parentTask, childTask, startTimeStamp);
     }
 
+    public void joinTasks(Task rootTask, ArrayList<Task> childTasks, TimeStamp timeStamp) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(rootTask.current(timeStamp));
+        Assert.assertTrue(rootTask.isRootTask(timeStamp));
+        Assert.assertTrue(childTasks != null);
+        Assert.assertTrue(childTasks.size() > 1);
+
+        for (Task childTask : childTasks) {
+            Assert.assertTrue(childTask != null);
+            Assert.assertTrue(childTask.current(timeStamp));
+            Assert.assertTrue(childTask.isRootTask(timeStamp));
+
+            childTask.setScheduleEndTimeStamp(timeStamp);
+
+            createTaskHierarchy(rootTask, childTask, timeStamp);
+        }
+    }
+
     private void createTaskHierarchy(Task parentTask, Task childTask, TimeStamp startTimeStamp) {
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(parentTask != null);

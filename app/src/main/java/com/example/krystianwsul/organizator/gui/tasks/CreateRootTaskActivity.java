@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.TickReceiver;
 import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizator.domainmodel.tasks.DailySchedule;
@@ -26,17 +27,37 @@ import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
+
 public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+    private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
 
     private Spinner mCreateRootTaskSpinner;
 
     private Task mRootTask;
 
+    private ArrayList<Task> mJoinTasks;
+
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
         return new Intent(context, CreateRootTaskActivity.class);
+    }
+
+    public static Intent getJoinIntent(Context context, ArrayList<Task> joinTasks) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(joinTasks != null);
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        Intent intent = new Intent(context, CreateRootTaskActivity.class);
+
+        ArrayList<Integer> taskIds = new ArrayList<>();
+        for (Task task : joinTasks)
+            taskIds.add(task.getId());
+
+        intent.putIntegerArrayListExtra(TASK_IDS_KEY, taskIds);
+        return intent;
     }
 
     public static Intent getEditIntent(Context context, Task rootTask) {
@@ -62,6 +83,19 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
             mRootTask = TaskFactory.getInstance().getTask(rootTaskId);
             Assert.assertTrue(mRootTask != null);
+        } else if (intent.hasExtra(TASK_IDS_KEY)) {
+            ArrayList<Integer> taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
+            Assert.assertTrue(taskIds != null);
+            Assert.assertTrue(taskIds.size() > 1);
+
+            mJoinTasks = new ArrayList<>();
+            for (Integer taskId : taskIds) {
+                Task task = TaskFactory.getInstance().getTask(taskId);
+                Assert.assertTrue(task != null);
+                Assert.assertTrue(task.isRootTask(TimeStamp.getNow()));
+
+                mJoinTasks.add(task);
+            }
         }
 
         int spinnerPosition = 0;
@@ -134,6 +168,13 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                 Assert.assertTrue(schedule != null);
 
                 rootTask.addSchedule(schedule);
+
+                if (mJoinTasks != null) {
+                    Assert.assertTrue(mJoinTasks.size() > 1);
+                    TaskFactory.getInstance().joinTasks(rootTask, mJoinTasks, timeStamp);
+                }
+
+                TickReceiver.refresh(CreateRootTaskActivity.this);
 
                 finish();
             }

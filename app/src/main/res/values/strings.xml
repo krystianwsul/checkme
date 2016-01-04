@@ -17,6 +17,7 @@
     <string name="one_reminder">One reminder</string>
     <string name="multiple_reminders">reminders</string>
     <string name="join">Join</string>
+    <string name="two_tasks_message">Please select at least two tasks.</string>
 
     <!-- Strings related to Settings -->
 

@@ -11,10 +11,13 @@ import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
+import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
 import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
 import com.example.krystianwsul.organizator.gui.MainActivity;
 
 import junit.framework.Assert;
+
+import java.util.ArrayList;
 
 public class TaskListFragment extends Fragment implements MainActivity.RefreshFragment {
     private RecyclerView mTasksRecycler;
@@ -58,5 +61,12 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
         Assert.assertTrue(taskAdapter != null);
 
         taskAdapter.setEditing(editing);
+    }
+
+    public ArrayList<Task> getSelected() {
+        TaskAdapter taskAdapter = (TaskAdapter) mTasksRecycler.getAdapter();
+        Assert.assertTrue(taskAdapter != null);
+
+        return taskAdapter.getSelected();
     }
 }

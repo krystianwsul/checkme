@@ -21,7 +21,6 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:id="@+id/edit_instance_name"
-        android:text="test"
         android:layout_below="@id/edit_instance_save"/>
 
     <LinearLayout
@@ -32,8 +31,7 @@
         <TextView
             android:id="@+id/edit_instance_date"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="date" />
+            android:layout_height="wrap_content" />
 
         <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
             android:id="@+id/edit_instance_timepickerview"

@@ -48,10 +48,6 @@ public class InstanceFactory {
         mExistingInstances.add(instance);
     }
 
-    public ArrayList<Instance> getExistingInstances() {
-        return mExistingInstances;
-    }
-
     public Instance getInstance(Task task, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);

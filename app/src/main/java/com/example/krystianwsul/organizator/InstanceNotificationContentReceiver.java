@@ -12,9 +12,6 @@ import com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity;
 import junit.framework.Assert;
 
 public class InstanceNotificationContentReceiver extends BroadcastReceiver {
-    public InstanceNotificationContentReceiver() {
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
 

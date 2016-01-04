@@ -27,11 +27,6 @@ public class WeeklySchedule extends Schedule {
         mWeeklyScheduleDayOfWeekTimes.add(weeklyScheduleDayOfWeekTime);
     }
 
-    ArrayList<WeeklyScheduleDayOfWeekTime> getWeeklyScheduleDayOfWeekTimes() {
-        Assert.assertTrue(!mWeeklyScheduleDayOfWeekTimes.isEmpty());
-        return mWeeklyScheduleDayOfWeekTimes;
-    }
-
     public String getTaskText(Context context) {
         ArrayList<String> dayOfWeekTimes = new ArrayList<>();
         for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)

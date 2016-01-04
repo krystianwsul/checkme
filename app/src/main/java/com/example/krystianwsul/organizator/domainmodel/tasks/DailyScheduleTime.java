@@ -12,16 +12,12 @@ import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRe
 
 import junit.framework.Assert;
 
-public class DailyScheduleTime {
+class DailyScheduleTime {
     private final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
-    private final DailySchedule mDailySchedule;
 
-    DailyScheduleTime(DailyScheduleTimeRecord dailyScheduleTimeRecord, DailySchedule dailySchedule) {
+    DailyScheduleTime(DailyScheduleTimeRecord dailyScheduleTimeRecord) {
         Assert.assertTrue(dailyScheduleTimeRecord != null);
-        Assert.assertTrue(dailySchedule != null);
-
         mDailyScheduleTimeRecord = dailyScheduleTimeRecord;
-        mDailySchedule = dailySchedule;
     }
 
     public Time getTime() {

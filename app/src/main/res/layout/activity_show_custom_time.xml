@@ -12,7 +12,6 @@
         android:id="@+id/custom_time_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="test"
         android:singleLine="true"/>
 
     <GridLayout
@@ -29,8 +28,7 @@
             android:layout_columnSpan="1"
             android:layout_column="0"
             android:layout_row="0"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_sunday_time"
@@ -38,8 +36,7 @@
             android:layout_columnSpan="1"
             android:layout_column="1"
             android:layout_row="0"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_monday_name"
@@ -47,8 +44,7 @@
             android:layout_columnSpan="1"
             android:layout_column="0"
             android:layout_row="1"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_monday_time"
@@ -56,8 +52,7 @@
             android:layout_columnSpan="1"
             android:layout_column="1"
             android:layout_row="1"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_tuesday_name"
@@ -65,8 +60,7 @@
             android:layout_columnSpan="1"
             android:layout_column="0"
             android:layout_row="2"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_tuesday_time"
@@ -74,8 +68,7 @@
             android:layout_columnSpan="1"
             android:layout_column="1"
             android:layout_row="2"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_wednesday_name"
@@ -83,8 +76,7 @@
             android:layout_columnSpan="1"
             android:layout_column="0"
             android:layout_row="3"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_wednesday_time"
@@ -92,8 +84,7 @@
             android:layout_columnSpan="1"
             android:layout_column="1"
             android:layout_row="3"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_thursday_name"
@@ -101,8 +92,7 @@
             android:layout_columnSpan="1"
             android:layout_column="0"
             android:layout_row="4"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1"/>
 
         <TextView
             android:id="@+id/time_thursday_time"
@@ -110,8 +100,7 @@
             android:layout_columnSpan="1"
             android:layout_column="1"
             android:layout_row="4"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_friday_name"
@@ -119,8 +108,7 @@
             android:layout_columnSpan="1"
             android:layout_column="0"
             android:layout_row="5"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_friday_time"
@@ -128,8 +116,7 @@
             android:layout_columnSpan="1"
             android:layout_column="1"
             android:layout_row="5"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_saturday_name"
@@ -137,8 +124,7 @@
             android:layout_columnSpan="1"
             android:layout_column="0"
             android:layout_row="6"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
         <TextView
             android:id="@+id/time_saturday_time"
@@ -146,8 +132,7 @@
             android:layout_columnSpan="1"
             android:layout_column="1"
             android:layout_row="6"
-            android:layout_rowSpan="1"
-            android:text="test" />
+            android:layout_rowSpan="1" />
 
     </GridLayout>
 </LinearLayout>

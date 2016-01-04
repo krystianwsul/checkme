@@ -7,12 +7,8 @@ import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
-
-    private final ArrayList<CustomTimeListener> mCustomTimeListeners = new ArrayList<>();
 
     CustomTime(CustomTimeRecord customTimeRecord) {
         Assert.assertTrue(customTimeRecord != null);
@@ -50,8 +46,6 @@ public class CustomTime implements Time {
         Assert.assertTrue(dayOfWeek != null);
         Assert.assertTrue(newHourMinute != null);
 
-        HourMinute oldHourMinute = getHourMinute(dayOfWeek);
-
         switch (dayOfWeek) {
             case SUNDAY:
                 mCustomTimeRecord.setSundayHour(newHourMinute.getHour());
@@ -84,8 +78,6 @@ public class CustomTime implements Time {
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }
-
-        notifyCustomTimeHourMinuteChange(dayOfWeek, oldHourMinute, newHourMinute);
     }
 
     public String toString() {
@@ -94,31 +86,6 @@ public class CustomTime implements Time {
 
     public int getId() {
         return mCustomTimeRecord.getId();
-    }
-
-    public interface CustomTimeListener {
-        void onCustomTimeHourMinuteChange(CustomTime customTime, DayOfWeek dayOfWeek, HourMinute oldHourMinute, HourMinute newHourMinute);
-    }
-
-    public void addCustomTimeListener(CustomTimeListener customTimeListener) {
-        Assert.assertTrue(customTimeListener != null);
-        if (!mCustomTimeListeners.contains(customTimeListener))
-            mCustomTimeListeners.add(customTimeListener);
-    }
-
-    public void removeCustomTimeListener(CustomTimeListener customTimeListener) {
-        Assert.assertTrue(customTimeListener != null);
-        Assert.assertTrue(mCustomTimeListeners.contains(customTimeListener));
-        mCustomTimeListeners.remove(customTimeListener);
-    }
-
-    private void notifyCustomTimeHourMinuteChange(DayOfWeek dayOfWeek, HourMinute oldHourMinute, HourMinute newHourMinute) {
-        Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(oldHourMinute != null);
-        Assert.assertTrue(newHourMinute != null);
-
-        for (CustomTimeListener customTimeListener : mCustomTimeListeners)
-            customTimeListener.onCustomTimeHourMinuteChange(this, dayOfWeek, oldHourMinute, newHourMinute);
     }
 
     public Pair<CustomTime, HourMinute> getPair() {

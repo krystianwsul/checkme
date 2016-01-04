@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizator.gui.instances;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,7 +27,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     private final ArrayList<Instance> mNotDoneInstances = new ArrayList<>();
     private final boolean mShowDetails;
 
-    private static Comparator<Instance> sComparator = new Comparator<Instance>() {
+    private final static Comparator<Instance> sComparator = new Comparator<Instance>() {
         @Override
         public int compare(Instance lhs, Instance rhs) {
             Assert.assertTrue(lhs.getDone() != null);
@@ -91,8 +90,6 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             instanceHolder.mInstanceRowDetails.setText(instance.getDisplayText(mContext));
         else
             instanceHolder.mInstanceRowDetails.setVisibility(View.GONE);
-
-        Resources resources = mContext.getResources();
 
         if (instance.getChildInstances().isEmpty())
             instanceHolder.mInstanceRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));

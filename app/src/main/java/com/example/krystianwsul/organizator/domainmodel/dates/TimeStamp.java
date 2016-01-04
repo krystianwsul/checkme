@@ -1,5 +1,7 @@
 package com.example.krystianwsul.organizator.domainmodel.dates;
 
+import android.support.annotation.NonNull;
+
 import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
 
 import junit.framework.Assert;
@@ -7,9 +9,6 @@ import junit.framework.Assert;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-/**
- * Created by Krystian on 10/24/2015.
- */
 public class TimeStamp implements Comparable<TimeStamp> {
     private final Long mLong;
 
@@ -46,8 +45,7 @@ public class TimeStamp implements Comparable<TimeStamp> {
         return new HourMinute(getCalendar());
     }
 
-    public int compareTo(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
+    public int compareTo(@NonNull TimeStamp timeStamp) {
         return mLong.compareTo(timeStamp.getLong());
     }
 

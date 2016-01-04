@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizator.gui.instances;
 
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 
 import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;

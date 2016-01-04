@@ -2,9 +2,6 @@ package com.example.krystianwsul.organizator.persistencemodel;
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 10/27/2015.
- */
 public class CustomTimeRecord {
     private final int mId;
     private final String mName;

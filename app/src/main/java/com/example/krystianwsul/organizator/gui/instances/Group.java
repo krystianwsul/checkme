@@ -46,7 +46,7 @@ class Group {
         }
     }
 
-    public String getDetailsText(Context context) {
+    public String getDetailsText() {
         Assert.assertTrue(!mInstances.isEmpty());
         if (singleInstance()) {
             return getSingleSinstance().getName();
@@ -60,10 +60,6 @@ class Group {
 
     public TimeStamp getTimeStamp() {
         return mTimeStamp;
-    }
-
-    public ArrayList<Instance> getInstances() {
-        return mInstances;
     }
 
     public boolean singleInstance() {

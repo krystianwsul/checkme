@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public abstract class Schedule {
-    protected final ScheduleRecord mScheduleRecord;
-    protected final Task mRootTask;
+    private final ScheduleRecord mScheduleRecord;
+    final Task mRootTask;
 
     public abstract String getTaskText(Context context);
 
-    protected Schedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    Schedule(ScheduleRecord scheduleRecord, Task rootTask) {
         Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
@@ -35,11 +35,11 @@ public abstract class Schedule {
         return mRootTask.getId();
     }
 
-    public TimeStamp getStartTimeStamp() {
+    private TimeStamp getStartTimeStamp() {
         return new TimeStamp(mScheduleRecord.getStartTime());
     }
 
-    public TimeStamp getEndTimeStamp()
+    private TimeStamp getEndTimeStamp()
     {
         if (mScheduleRecord.getEndTime() == null)
             return null;

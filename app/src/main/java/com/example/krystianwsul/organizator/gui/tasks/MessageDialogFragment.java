@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import junit.framework.Assert;
 
 public class MessageDialogFragment extends DialogFragment {
-    private static String MESSAGE_KEY = "message";
+    private final static String MESSAGE_KEY = "message";
 
     public static MessageDialogFragment newInstance(String message) {
         Assert.assertTrue(!TextUtils.isEmpty(message));

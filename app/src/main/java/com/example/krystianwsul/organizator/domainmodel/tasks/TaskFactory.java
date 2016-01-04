@@ -114,7 +114,7 @@ public class TaskFactory {
         SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = PersistenceManger.getInstance().getSingleScheduleDateTimeRecord(singleSchedule);
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-        SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule);
+        SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(singleScheduleDateTimeRecord);
         singleSchedule.setSingleScheduleDateTime(singleScheduleDateTime);
 
         return singleSchedule;
@@ -133,7 +133,7 @@ public class TaskFactory {
         Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
 
         for (DailyScheduleTimeRecord dailyScheduleTimeRecord : dailyScheduleTimeRecords) {
-            DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(dailyScheduleTimeRecord, dailySchedule);
+            DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(dailyScheduleTimeRecord);
             dailySchedule.addDailyScheduleTime(dailyScheduleTime);
         }
 
@@ -153,7 +153,7 @@ public class TaskFactory {
         Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
 
         for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
-            WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeRecord, weeklySchedule);
+            WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeRecord);
             weeklySchedule.addWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
         }
 
@@ -260,7 +260,7 @@ public class TaskFactory {
         SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = persistenceManger.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-        singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(singleScheduleDateTimeRecord, singleSchedule));
+        singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(singleScheduleDateTimeRecord));
 
         return singleSchedule;
     }
@@ -285,7 +285,7 @@ public class TaskFactory {
             DailyScheduleTimeRecord dailyScheduleTimeRecord = persistenceManger.createDailyScheduleTimeRecord(dailySchedule, time);
             Assert.assertTrue(dailyScheduleTimeRecord != null);
 
-            dailySchedule.addDailyScheduleTime(new DailyScheduleTime(dailyScheduleTimeRecord, dailySchedule));
+            dailySchedule.addDailyScheduleTime(new DailyScheduleTime(dailyScheduleTimeRecord));
         }
 
         return dailySchedule;
@@ -317,7 +317,7 @@ public class TaskFactory {
             WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = persistenceManger.createWeeklyScheduleDayOfWeekTimeRecord(weeklySchedule, dayOfWeek, time);
             Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
 
-            weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeRecord, weeklySchedule));
+            weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeRecord));
         }
 
         return weeklySchedule;

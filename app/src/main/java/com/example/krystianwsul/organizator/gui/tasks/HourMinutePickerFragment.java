@@ -14,8 +14,8 @@ import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
 import junit.framework.Assert;
 
 public class HourMinutePickerFragment extends DialogFragment {
-    private static String HOUR_KEY = "hour";
-    private static String MINUTE_KEY = "minute";
+    private final static String HOUR_KEY = "hour";
+    private final static String MINUTE_KEY = "minute";
 
     public static HourMinutePickerFragment newInstance(Activity activity, HourMinute hourMinute) {
         Assert.assertTrue(activity != null);

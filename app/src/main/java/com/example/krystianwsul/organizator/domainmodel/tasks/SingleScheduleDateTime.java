@@ -12,16 +12,12 @@ import com.example.krystianwsul.organizator.persistencemodel.SingleScheduleDateT
 
 import junit.framework.Assert;
 
-public class SingleScheduleDateTime {
+class SingleScheduleDateTime {
     private final SingleScheduleDateTimeRecord mSingleScheduleDateTimeRecord;
-    private final SingleSchedule mSingleSchedule;
 
-    SingleScheduleDateTime(SingleScheduleDateTimeRecord singleScheduleDateTimeRecord, SingleSchedule singleSchedule) {
+    SingleScheduleDateTime(SingleScheduleDateTimeRecord singleScheduleDateTimeRecord) {
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
-        Assert.assertTrue(singleSchedule != null);
-
         mSingleScheduleDateTimeRecord = singleScheduleDateTimeRecord;
-        mSingleSchedule = singleSchedule;
     }
 
     public Time getTime() {

@@ -9,8 +9,7 @@
     <TextView
         android:id="@+id/single_schedule_date"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="date" />
+        android:layout_height="wrap_content" />
 
     <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
         android:id="@+id/single_schedule_timepickerview"

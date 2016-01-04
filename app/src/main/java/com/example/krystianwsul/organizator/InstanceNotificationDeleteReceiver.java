@@ -11,9 +11,6 @@ import com.example.krystianwsul.organizator.gui.instances.InstanceData;
 import junit.framework.Assert;
 
 public class InstanceNotificationDeleteReceiver extends BroadcastReceiver {
-    public InstanceNotificationDeleteReceiver() {
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle bundle = intent.getBundleExtra(TickReceiver.INSTANCE_KEY);

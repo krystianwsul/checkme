@@ -172,7 +172,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
     private class DayOfWeekTimeEntryAdapter extends RecyclerView.Adapter<DayOfWeekTimeEntryAdapter.DayOfWeekTimeHolder> {
         private final ArrayList<DayOfWeekTimeEntry> mDateTimeEntries;
-        private Context mContext;
+        private final Context mContext;
 
         public DayOfWeekTimeEntryAdapter(Context context) {
             Assert.assertTrue(context != null);
@@ -297,19 +297,11 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             notifyItemInserted(position);
         }
 
-        public int indexOf(DayOfWeekTimeEntry dayOfWeekTimeEntry) {
-            Assert.assertTrue(dayOfWeekTimeEntry != null);
-            Assert.assertTrue(mDateTimeEntries.contains(dayOfWeekTimeEntry));
-
-            return mDateTimeEntries.indexOf(dayOfWeekTimeEntry);
-        }
-
         public ArrayList<DayOfWeekTimeEntry> getDayOfWeekTimeEntries() {
             return mDateTimeEntries;
         }
 
         public class DayOfWeekTimeHolder extends RecyclerView.ViewHolder {
-            public final RelativeLayout mWeeklyScheduleRow;
             public final Spinner mWeeklyScheduleDay;
             public final TimePickerView mWeeklyScheduleTime;
             public final ImageView mWeeklyScheduleImage;
@@ -322,7 +314,6 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
                 Assert.assertTrue(weeklyScheduleImage != null);
 
                 mWeeklyScheduleDay = weeklyScheduleDay;
-                mWeeklyScheduleRow = weeklyScheduleRow;
                 mWeeklyScheduleTime = weeklyScheduleTime;
                 mWeeklyScheduleImage = weeklyScheduleImage;
             }

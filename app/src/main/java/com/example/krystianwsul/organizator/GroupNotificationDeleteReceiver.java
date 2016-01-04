@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
@@ -14,9 +13,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class GroupNotificationDeleteReceiver extends BroadcastReceiver {
-    public GroupNotificationDeleteReceiver() {
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         ArrayList<Bundle> bundles = intent.getParcelableArrayListExtra(TickReceiver.INSTANCES_KEY);

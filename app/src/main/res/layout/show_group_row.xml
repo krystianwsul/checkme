@@ -26,15 +26,13 @@
                 android:id="@+id/group_row_name"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="test" />
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/group_row_details"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="test" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 

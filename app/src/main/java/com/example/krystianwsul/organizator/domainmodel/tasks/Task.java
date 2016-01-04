@@ -92,21 +92,6 @@ public class Task {
         return mTaskRecord.getId();
     }
 
-    public Task getRootTask(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
-        Assert.assertTrue(current(timeStamp));
-
-        Task parentTask = getParentTask(timeStamp);
-        if (parentTask == null) {
-            Assert.assertTrue(getCurrentSchedule(timeStamp) != null);
-            return this;
-        } else {
-            Assert.assertTrue(getCurrentSchedule(timeStamp) == null);
-            Assert.assertTrue(parentTask.current(timeStamp));
-            return parentTask.getRootTask(timeStamp);
-        }
-    }
-
     public boolean isRootTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));

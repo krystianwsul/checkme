@@ -13,9 +13,9 @@ import com.example.krystianwsul.organizator.domainmodel.dates.Date;
 import junit.framework.Assert;
 
 public class DatePickerFragment extends DialogFragment {
-    private static String YEAR_KEY = "year";
-    private static String MONTH_KEY = "month";
-    private static String DAY_KEY = "day";
+    private final static String YEAR_KEY = "year";
+    private final static String MONTH_KEY = "month";
+    private final static String DAY_KEY = "day";
 
     public static DatePickerFragment newInstance(Activity activity, Date date) {
         Assert.assertTrue(activity != null);

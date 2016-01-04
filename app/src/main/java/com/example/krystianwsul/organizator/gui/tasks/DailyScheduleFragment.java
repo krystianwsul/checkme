@@ -168,7 +168,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {
         private final ArrayList<TimeEntry> mTimeEntries;
-        private Context mContext;
+        private final Context mContext;
 
         public TimeEntryAdapter(Context context) {
             Assert.assertTrue(context != null);
@@ -269,19 +269,11 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             notifyItemInserted(position);
         }
 
-        public int indexOf(TimeEntry timeEntry) {
-            Assert.assertTrue(timeEntry != null);
-            Assert.assertTrue(mTimeEntries.contains(timeEntry));
-
-            return mTimeEntries.indexOf(timeEntry);
-        }
-
         public ArrayList<TimeEntry> getTimeEntries() {
             return mTimeEntries;
         }
 
         public class TimeHolder extends RecyclerView.ViewHolder {
-            public final RelativeLayout mDailyScheduleRow;
             public final TimePickerView mDailyScheduleTime;
             public final ImageView mDailyScheduleImage;
 
@@ -291,7 +283,6 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
                 Assert.assertTrue(dailyScheduleTime != null);
                 Assert.assertTrue(dailyScheduleImage != null);
 
-                mDailyScheduleRow = dailyScheduleRow;
                 mDailyScheduleTime = dailyScheduleTime;
                 mDailyScheduleImage = dailyScheduleImage;
             }

@@ -9,7 +9,7 @@ public class ScheduleRecord {
     private final long mStartTime;
     private Long mEndTime;
 
-    private int mType;
+    private final int mType;
 
     public ScheduleRecord(int id, int rootTaskId, long startTime, Long endTime, int type) {
         Assert.assertTrue((endTime == null) || startTime < endTime);

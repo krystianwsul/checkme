@@ -61,10 +61,10 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
     public static class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder> {
         private final Context mContext;
 
-        private DoneGroupContainer mDoneGroupContainer = new DoneGroupContainer();
-        private NotDoneGroupContainer mNotDoneGroupContainer = new NotDoneGroupContainer();
+        private final DoneGroupContainer mDoneGroupContainer = new DoneGroupContainer();
+        private final NotDoneGroupContainer mNotDoneGroupContainer = new NotDoneGroupContainer();
 
-        private static Comparator<Group> sComparator = new Comparator<Group>() {
+        private final static Comparator<Group> sComparator = new Comparator<Group>() {
             @Override
             public int compare(Group lhs, Group rhs) {
                 return lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
@@ -130,7 +130,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
             groupHolder.mGroupRowName.setText(group.getNameText(mContext));
 
-            groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
+            groupHolder.mGroupRowDetails.setText(group.getDetailsText());
 
             if (group.singleInstance() && group.getSingleSinstance().getChildInstances().isEmpty())
                 groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
@@ -250,7 +250,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
         }
 
         private static class DoneGroupContainer {
-            private ArrayList<Group> mGroups = new ArrayList<>();
+            private final ArrayList<Group> mGroups = new ArrayList<>();
 
             public Group addInstance(Instance instance) {
                 Assert.assertTrue(instance != null);
@@ -304,7 +304,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
         private static class NotDoneGroupContainer {
             private ArrayList<Group> mGroupArray = new ArrayList<>();
-            private TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
+            private final TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
 
             public Group addInstance(Instance instance) {
                 Assert.assertTrue(instance != null);

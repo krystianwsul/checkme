@@ -45,10 +45,6 @@ public class Instance {
         mScheduleDateTime = scheduleDateTime;
     }
 
-    public Task getTask() {
-        return mTask;
-    }
-
     public int getTaskId() {
         return mTask.getId();
     }
@@ -175,7 +171,7 @@ public class Instance {
         return childInstances;
     }
 
-    public Instance getParentInstance() {
+    private Instance getParentInstance() {
         TimeStamp hierarchyTimeStamp = getHierarchyTimeStamp();
 
         Task parentTask = mTask.getParentTask(hierarchyTimeStamp);

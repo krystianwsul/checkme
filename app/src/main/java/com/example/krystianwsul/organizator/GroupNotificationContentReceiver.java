@@ -14,9 +14,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class GroupNotificationContentReceiver extends BroadcastReceiver {
-    public GroupNotificationContentReceiver() {
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         ArrayList<Bundle> bundles = intent.getParcelableArrayListExtra(TickReceiver.INSTANCES_KEY);

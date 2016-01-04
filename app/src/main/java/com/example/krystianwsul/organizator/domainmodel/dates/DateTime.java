@@ -1,18 +1,16 @@
 package com.example.krystianwsul.organizator.domainmodel.dates;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
 import com.example.krystianwsul.organizator.domainmodel.times.Time;
 
 import junit.framework.Assert;
 
-/**
- * Created by Krystian on 10/18/2015.
- */
 public class DateTime implements Comparable<DateTime> {
-    private Date mDate;
-    private Time mTime;
+    private final Date mDate;
+    private final Time mTime;
 
     public DateTime(Date date, Time time) {
         Assert.assertTrue(date != null);
@@ -31,9 +29,7 @@ public class DateTime implements Comparable<DateTime> {
         return mTime;
     }
 
-    public int compareTo(DateTime dateTime) {
-        Assert.assertTrue(dateTime != null);
-
+    public int compareTo(@NonNull DateTime dateTime) {
         int dateComparison = mDate.compareTo(dateTime.getDate());
         if (dateComparison != 0)
             return dateComparison;

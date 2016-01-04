@@ -13,16 +13,12 @@ import com.example.krystianwsul.organizator.persistencemodel.WeeklyScheduleDayOf
 
 import junit.framework.Assert;
 
-public class WeeklyScheduleDayOfWeekTime {
+class WeeklyScheduleDayOfWeekTime {
     private final WeeklyScheduleDayOfWeekTimeRecord mWeeklyScheduleDayOfWeekTimeRecord;
-    private final WeeklySchedule mWeeklySchedule;
 
-    WeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord, WeeklySchedule weeklySchedule) {
+    WeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord) {
         Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
-        Assert.assertTrue(weeklySchedule != null);
-
         mWeeklyScheduleDayOfWeekTimeRecord = weeklyScheduleDayOfWeekTimeRecord;
-        mWeeklySchedule = weeklySchedule;
     }
 
     public Time getTime() {

@@ -27,8 +27,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    ViewPager mViewPager;
-    MyFragmentStatePagerAdapter mMyFragmentStatePagerAdapter;
+    private ViewPager mViewPager;
+    private MyFragmentStatePagerAdapter mMyFragmentStatePagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

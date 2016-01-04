@@ -13,8 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class HourMinute implements Comparable<HourMinute>, Parcelable {
-    private Integer mHour;
-    private Integer mMinute;
+    private final Integer mHour;
+    private final Integer mMinute;
 
     public static HourMinute getNow() {
         return TimeStamp.getNow().getHourMinute();

@@ -18,7 +18,7 @@ public class CustomTimeFactory {
         return sInstance;
     }
 
-    private HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
+    private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
 
     private CustomTimeFactory() {
         Collection<CustomTimeRecord> customTimeRecords = PersistenceManger.getInstance().getCustomTimeRecords();

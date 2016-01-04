@@ -9,12 +9,10 @@
     <string name="instances">Instances</string>
     <string name="action_times">Times</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="none">None</string>
     <string name="other">Other</string>
     <string name="save">Save</string>
     <string name="task_name_toast">Please enter a name.</string>
     <string name="invalid_time_message">Time must be in the future.</string>
-    <string name="one_reminder">One reminder</string>
     <string name="multiple_reminders">reminders</string>
     <string name="join">Join</string>
     <string name="two_tasks_message">Please select at least two tasks.</string>

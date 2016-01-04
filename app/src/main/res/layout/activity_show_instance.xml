@@ -28,14 +28,12 @@
                 <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:id="@+id/show_instance_name"
-                    android:text="test"/>
+                    android:id="@+id/show_instance_name" />
 
                 <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:id="@+id/show_instance_details"
-                    android:text="test"/>
+                    android:id="@+id/show_instance_details" />
 
             </LinearLayout>
 

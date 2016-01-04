@@ -5,7 +5,7 @@ import com.example.krystianwsul.organizator.persistencemodel.TaskHierarchyRecord
 
 import junit.framework.Assert;
 
-public class TaskHierarchy {
+class TaskHierarchy {
     private final TaskHierarchyRecord mTaskHierarchyRecord;
 
     private final Task mParentTask;

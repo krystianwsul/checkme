@@ -42,9 +42,6 @@ public class PersistenceManger {
 
     private final HashMap<Integer, InstanceRecord> mInstanceRecords = new HashMap<>();
 
-    private final int mMaxDailyRepetitionId = 0;
-    private final int mMaxWeeklyRepetitionId = 0;
-
     public static PersistenceManger getInstance() {
         if (mInstance == null)
             mInstance = new PersistenceManger();
@@ -205,10 +202,6 @@ public class PersistenceManger {
         return dailyScheduleTimeRecords;
     }
 
-    public int getMaxDailyRepetitionId() {
-        return mMaxDailyRepetitionId;
-    }
-
     public ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(WeeklySchedule weeklySchedule) {
         Assert.assertTrue(weeklySchedule != null);
 
@@ -217,10 +210,6 @@ public class PersistenceManger {
             if (weeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleId() == weeklySchedule.getId())
                 weeklyScheduleDayOfWeekTimeRecords.add(weeklyScheduleDayOfWeekTimeRecord);
         return weeklyScheduleDayOfWeekTimeRecords;
-    }
-
-    public int getMaxWeeklyRepetitionId() {
-        return mMaxWeeklyRepetitionId;
     }
 
     public TaskRecord createTaskRecord(String name, TimeStamp startTimeStamp) {

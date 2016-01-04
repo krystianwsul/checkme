@@ -17,9 +17,6 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class ShowNotificationGroupActivity extends AppCompatActivity {
-    private RecyclerView mShowNotificationGroupList;
-    private ArrayList<Instance> mInstances;
-
     private static final String INSTANCES_KEY = "instances";
 
     public static Intent getIntent(Context context, ArrayList<Instance> instances) {
@@ -45,19 +42,19 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
         ArrayList<Bundle> bundles = intent.getParcelableArrayListExtra(INSTANCES_KEY);
         Assert.assertTrue(bundles != null);
         Assert.assertTrue(!bundles.isEmpty());
-        mInstances = new ArrayList<>();
+        ArrayList<Instance> instances = new ArrayList<>();
         for (Bundle bundle : bundles)
-            mInstances.add(InstanceData.getInstance(bundle));
+            instances.add(InstanceData.getInstance(bundle));
 
-        Collections.sort(mInstances, new Comparator<Instance>() {
+        Collections.sort(instances, new Comparator<Instance>() {
             @Override
             public int compare(Instance lhs, Instance rhs) {
                 return lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime());
             }
         });
 
-        mShowNotificationGroupList = (RecyclerView) findViewById(R.id.show_notification_group_list);
-        mShowNotificationGroupList.setLayoutManager(new LinearLayoutManager(this));
-        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, mInstances, true));
+        RecyclerView showNotificationGroupList = (RecyclerView) findViewById(R.id.show_notification_group_list);
+        showNotificationGroupList.setLayoutManager(new LinearLayoutManager(this));
+        showNotificationGroupList.setAdapter(new InstanceAdapter(this, instances, true));
     }
 }

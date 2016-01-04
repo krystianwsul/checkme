@@ -29,7 +29,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
     }
 
     private CustomTime mCustomTime;
-    private HashMap<DayOfWeek, TextView> mTimes = new HashMap<>();
+    private final HashMap<DayOfWeek, TextView> mTimes = new HashMap<>();
 
     private DayOfWeek editedDayOfWeek = null;
 

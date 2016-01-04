@@ -27,14 +27,12 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:id="@+id/show_task_name"
-                    android:text="test"
                     android:singleLine="true"/>
 
                 <TextView
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:id="@+id/show_task_schedule"
-                    android:text="test"
                     android:singleLine="true"/>
 
             </LinearLayout>

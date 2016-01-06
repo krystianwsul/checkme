@@ -532,7 +532,6 @@ public class DomainFactory {
         CustomTimeFactory() {
             Collection<CustomTimeRecord> customTimeRecords = PersistenceManger.getInstance().getCustomTimeRecords();
             Assert.assertTrue(customTimeRecords != null);
-            Assert.assertTrue(!customTimeRecords.isEmpty());
 
             for (CustomTimeRecord customTimeRecord : customTimeRecords) {
                 Assert.assertTrue(customTimeRecord != null);

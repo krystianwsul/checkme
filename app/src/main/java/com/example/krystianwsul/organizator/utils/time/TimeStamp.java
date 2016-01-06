@@ -18,7 +18,11 @@ public class TimeStamp implements Comparable<TimeStamp> {
 
     public TimeStamp(Calendar calendar) {
         Assert.assertTrue(calendar != null);
-        mLong = calendar.getTimeInMillis();
+
+        Date date = new Date(calendar);
+        HourMinute hourMinute = new HourMinute(calendar);
+
+        mLong = new GregorianCalendar(date.getYear(), date.getMonth() - 1, date.getDay(), hourMinute.getHour(), hourMinute.getMinute()).getTimeInMillis();
     }
 
     public static TimeStamp getNow() {

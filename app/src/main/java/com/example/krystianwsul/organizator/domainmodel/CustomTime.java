@@ -10,8 +10,13 @@ import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
+
+    private final ArrayList<WeakReference<CustomTimeObserver>> mCustomTimeObservers = new ArrayList<>();
 
     CustomTime(CustomTimeRecord customTimeRecord) {
         Assert.assertTrue(customTimeRecord != null);
@@ -50,42 +55,54 @@ public class CustomTime implements Time {
         }
     }
 
-    public void setHourMinute(DayOfWeek dayOfWeek, HourMinute newHourMinute) {
+    public void setHourMinute(DayOfWeek dayOfWeek, HourMinute hourMinute) {
         Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(newHourMinute != null);
+        Assert.assertTrue(hourMinute != null);
 
         switch (dayOfWeek) {
             case SUNDAY:
-                mCustomTimeRecord.setSundayHour(newHourMinute.getHour());
-                mCustomTimeRecord.setSundayMinute(newHourMinute.getMinute());
+                mCustomTimeRecord.setSundayHour(hourMinute.getHour());
+                mCustomTimeRecord.setSundayMinute(hourMinute.getMinute());
                 break;
             case MONDAY:
-                mCustomTimeRecord.setMondayHour(newHourMinute.getHour());
-                mCustomTimeRecord.setMondayMinute(newHourMinute.getMinute());
+                mCustomTimeRecord.setMondayHour(hourMinute.getHour());
+                mCustomTimeRecord.setMondayMinute(hourMinute.getMinute());
                 break;
             case TUESDAY:
-                mCustomTimeRecord.setTuesdayHour(newHourMinute.getHour());
-                mCustomTimeRecord.setTuesdayMinute(newHourMinute.getMinute());
+                mCustomTimeRecord.setTuesdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setTuesdayMinute(hourMinute.getMinute());
                 break;
             case WEDNESDAY:
-                mCustomTimeRecord.setWednesdayHour(newHourMinute.getHour());
-                mCustomTimeRecord.setWednesdayMinute(newHourMinute.getMinute());
+                mCustomTimeRecord.setWednesdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setWednesdayMinute(hourMinute.getMinute());
                 break;
             case THURSDAY:
-                mCustomTimeRecord.setThursdayHour(newHourMinute.getHour());
-                mCustomTimeRecord.setThursdayMinute(newHourMinute.getMinute());
+                mCustomTimeRecord.setThursdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setThursdayMinute(hourMinute.getMinute());
                 break;
             case FRIDAY:
-                mCustomTimeRecord.setFridayHour(newHourMinute.getHour());
-                mCustomTimeRecord.setFridayMinute(newHourMinute.getMinute());
+                mCustomTimeRecord.setFridayHour(hourMinute.getHour());
+                mCustomTimeRecord.setFridayMinute(hourMinute.getMinute());
                 break;
             case SATURDAY:
-                mCustomTimeRecord.setSaturdayHour(newHourMinute.getHour());
-                mCustomTimeRecord.setSaturdayMinute(newHourMinute.getMinute());
+                mCustomTimeRecord.setSaturdayHour(hourMinute.getHour());
+                mCustomTimeRecord.setSaturdayMinute(hourMinute.getMinute());
                 break;
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }
+
+        ArrayList<WeakReference<CustomTimeObserver>> remove = new ArrayList<>();
+
+        for (WeakReference<CustomTimeObserver> weakReference : mCustomTimeObservers) {
+            CustomTimeObserver customTimeObserver = weakReference.get();
+            if (customTimeObserver != null)
+                customTimeObserver.updateDayOfWeek(dayOfWeek, hourMinute);
+            else
+                remove.add(weakReference);
+        }
+
+        mCustomTimeObservers.removeAll(remove);
     }
 
     public String toString() {
@@ -98,5 +115,14 @@ public class CustomTime implements Time {
 
     public Pair<CustomTime, HourMinute> getPair() {
         return new Pair<>(this, null);
+    }
+
+    public interface CustomTimeObserver {
+        void updateDayOfWeek(DayOfWeek dayOfWeek, HourMinute hourMinute);
+    }
+
+    public void addCustomTimeObserver(CustomTimeObserver customTimeObserver) {
+        Assert.assertTrue(customTimeObserver != null);
+        mCustomTimeObservers.add(new WeakReference<>(customTimeObserver));
     }
 }

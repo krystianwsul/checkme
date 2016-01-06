@@ -1,10 +1,12 @@
 package com.example.krystianwsul.organizator.persistencemodel;
 
+import android.text.TextUtils;
+
 import junit.framework.Assert;
 
 public class CustomTimeRecord {
     private final int mId;
-    private final String mName;
+    private String mName;
 
     private int mSundayHour;
     private int mSundayMinute;
@@ -61,6 +63,11 @@ public class CustomTimeRecord {
 
     public String getName() {
         return mName;
+    }
+
+    public void setName(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        mName = name;
     }
 
     public int getSundayHour() {

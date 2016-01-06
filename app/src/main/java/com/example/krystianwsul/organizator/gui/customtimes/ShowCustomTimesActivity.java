@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizator.gui.customtimes;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowCustomTimesActivity extends AppCompatActivity {
+    private ListView mShowTimesList;
+
     public static Intent getIntent(Context context) {
         return new Intent(context, ShowCustomTimesActivity.class);
     }
@@ -30,16 +33,29 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_custom_times);
 
-        ListView showTimesList = (ListView) findViewById(R.id.show_times_list);
-        showTimesList.setAdapter(new CustomTimesAdapter(this));
-
-        showTimesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mShowTimesList = (ListView) findViewById(R.id.show_times_list);
+        mShowTimesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 CustomTime customTime = (CustomTime) parent.getItemAtPosition(position);
                 startActivity(ShowCustomTimeActivity.getIntent(customTime, view.getContext()));
             }
         });
+
+        FloatingActionButton showTimesFab = (FloatingActionButton) findViewById(R.id.show_times_fab);
+        showTimesFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                throw new UnsupportedOperationException();
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        mShowTimesList.setAdapter(new CustomTimesAdapter(this));
     }
 
     public static class CustomTimesAdapter extends ArrayAdapter<CustomTime> {

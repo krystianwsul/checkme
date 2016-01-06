@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizator.domainmodel;
 
 import android.support.v4.util.Pair;
+import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
@@ -19,6 +20,11 @@ public class CustomTime implements Time {
 
     public String getName() {
         return mCustomTimeRecord.getName();
+    }
+
+    public void setName(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        mCustomTimeRecord.setName(name);
     }
 
     public HourMinute getHourMinute(DayOfWeek dayOfWeek) {

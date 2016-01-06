@@ -5,13 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
+import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
@@ -20,16 +24,25 @@ import junit.framework.Assert;
 import java.util.HashMap;
 
 public class ShowCustomTimeActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener {
-    private static final String INTENT_KEY = "customTimeId";
+    private static final String CUSTOM_TIME_ID_KEY = "customTimeId";
+
+    private static final String HOUR_MINUTE_SUNDAY_KEY = "hourMinuteSunday";
+    private static final String HOUR_MINUTE_MONDAY_KEY = "hourMinuteMonday";
+    private static final String HOUR_MINUTE_TUESDAY_KEY = "hourMinuteTuesday";
+    private static final String HOUR_MINUTE_WEDNESDAY_KEY = "hourMinuteWednesday";
+    private static final String HOUR_MINUTE_THURSDAY_KEY = "hourMinuteThursday";
+    private static final String HOUR_MINUTE_FRIDAY_KEY = "hourMinuteFriday";
+    private static final String HOUR_MINUTE_SATURDAY_KEY = "hourMinuteSaturday";
 
     public static Intent getIntent(CustomTime customTime, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
-        intent.putExtra(INTENT_KEY, customTime.getId());
+        intent.putExtra(CUSTOM_TIME_ID_KEY, customTime.getId());
         return intent;
     }
 
     private CustomTime mCustomTime;
-    private final HashMap<DayOfWeek, TextView> mTimes = new HashMap<>();
+    private final HashMap<DayOfWeek, TextView> mTimeViews = new HashMap<>();
+    private final HashMap<DayOfWeek, HourMinute> mHourMinutes = new HashMap<>();
 
     private DayOfWeek editedDayOfWeek = null;
 
@@ -39,13 +52,13 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         setContentView(R.layout.activity_show_custom_time);
 
         Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        int customTimeId = intent.getIntExtra(INTENT_KEY, -1);
+        Assert.assertTrue(intent.hasExtra(CUSTOM_TIME_ID_KEY));
+        int customTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1);
         Assert.assertTrue(customTimeId != -1);
         mCustomTime = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(customTimeId);
         Assert.assertTrue(mCustomTime != null);
 
-        TextView customTimeName = (TextView) findViewById(R.id.custom_time_name);
+        final EditText customTimeName = (EditText) findViewById(R.id.custom_time_name);
         customTimeName.setText(mCustomTime.getName());
 
         initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
@@ -55,6 +68,82 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         initializeDay(DayOfWeek.THURSDAY, R.id.time_thursday_name, R.id.time_thursday_time);
         initializeDay(DayOfWeek.FRIDAY, R.id.time_friday_name, R.id.time_friday_time);
         initializeDay(DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time);
+
+        if (savedInstanceState != null) {
+            extractKey(savedInstanceState, HOUR_MINUTE_SUNDAY_KEY, DayOfWeek.SUNDAY);
+            extractKey(savedInstanceState, HOUR_MINUTE_MONDAY_KEY, DayOfWeek.MONDAY);
+            extractKey(savedInstanceState, HOUR_MINUTE_TUESDAY_KEY, DayOfWeek.TUESDAY);
+            extractKey(savedInstanceState, HOUR_MINUTE_WEDNESDAY_KEY, DayOfWeek.WEDNESDAY);
+            extractKey(savedInstanceState, HOUR_MINUTE_THURSDAY_KEY, DayOfWeek.THURSDAY);
+            extractKey(savedInstanceState, HOUR_MINUTE_FRIDAY_KEY, DayOfWeek.FRIDAY);
+            extractKey(savedInstanceState, HOUR_MINUTE_SATURDAY_KEY, DayOfWeek.SATURDAY);
+        } else {
+            for (DayOfWeek dayOfWeek : DayOfWeek.values())
+                mHourMinutes.put(dayOfWeek, mCustomTime.getHourMinute(dayOfWeek));
+        }
+
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            TextView timeView = mTimeViews.get(dayOfWeek);
+            Assert.assertTrue(timeView != null);
+
+            HourMinute hourMinute = mHourMinutes.get(dayOfWeek);
+            Assert.assertTrue(hourMinute != null);
+
+            timeView.setText(hourMinute.toString());
+
+            final DayOfWeek finalDayOfWeek = dayOfWeek;
+            timeView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editedDayOfWeek = finalDayOfWeek;
+
+                    HourMinute hourMinute = mHourMinutes.get(finalDayOfWeek);
+
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(ShowCustomTimeActivity.this, hourMinute);
+                    hourMinutePickerFragment.show(fragmentManager, "tag");
+                }
+            });
+        }
+
+        Button customTimeSave = (Button) findViewById(R.id.custom_time_save);
+        customTimeSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = customTimeName.getText().toString().trim();
+
+                if (TextUtils.isEmpty(name)) {
+                    MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.task_name_toast));
+                    messageDialogFragment.show(getSupportFragmentManager(), "empty_name");
+                    return;
+                }
+
+                mCustomTime.setName(name);
+
+                for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+                    HourMinute hourMinute = mHourMinutes.get(dayOfWeek);
+                    Assert.assertTrue(hourMinute != null);
+
+                    if (hourMinute.compareTo(mCustomTime.getHourMinute(dayOfWeek)) != 0)
+                        mCustomTime.setHourMinute(dayOfWeek, hourMinute);
+                }
+
+                finish();
+            }
+        });
+    }
+
+    private void extractKey(Bundle bundle, String key, DayOfWeek dayOfWeek) {
+        Assert.assertTrue(bundle != null);
+        Assert.assertTrue(!TextUtils.isEmpty(key));
+        Assert.assertTrue(dayOfWeek != null);
+
+        Assert.assertTrue(bundle.containsKey(key));
+
+        HourMinute hourMinute = bundle.getParcelable(key);
+        Assert.assertTrue(hourMinute != null);
+
+        mHourMinutes.put(dayOfWeek, hourMinute);
     }
 
     private void initializeDay(final DayOfWeek dayOfWeek, int nameId, int timeId) {
@@ -63,27 +152,32 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         TextView timeName = (TextView) findViewById(nameId);
         timeName.setText(dayOfWeek.toString());
 
-        TextView timeTime = (TextView) findViewById(timeId);
-        timeTime.setText(mCustomTime.getHourMinute(dayOfWeek).toString());
-        final ShowCustomTimeActivity showCustomTimeActivity = this;
-        timeTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editedDayOfWeek = dayOfWeek;
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(showCustomTimeActivity, mCustomTime.getHourMinute(dayOfWeek));
-                hourMinutePickerFragment.show(fragmentManager, "tag");
-            }
-        });
-        mTimes.put(dayOfWeek, timeTime);
+        TextView timeView = (TextView) findViewById(timeId);
+        mTimeViews.put(dayOfWeek, timeView);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(HOUR_MINUTE_SUNDAY_KEY, mHourMinutes.get(DayOfWeek.SUNDAY));
+        outState.putParcelable(HOUR_MINUTE_MONDAY_KEY, mHourMinutes.get(DayOfWeek.MONDAY));
+        outState.putParcelable(HOUR_MINUTE_TUESDAY_KEY, mHourMinutes.get(DayOfWeek.TUESDAY));
+        outState.putParcelable(HOUR_MINUTE_WEDNESDAY_KEY, mHourMinutes.get(DayOfWeek.WEDNESDAY));
+        outState.putParcelable(HOUR_MINUTE_THURSDAY_KEY, mHourMinutes.get(DayOfWeek.THURSDAY));
+        outState.putParcelable(HOUR_MINUTE_FRIDAY_KEY, mHourMinutes.get(DayOfWeek.FRIDAY));
+        outState.putParcelable(HOUR_MINUTE_SATURDAY_KEY, mHourMinutes.get(DayOfWeek.SATURDAY));
     }
 
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
         Assert.assertTrue(editedDayOfWeek != null);
-        Assert.assertTrue(mTimes.containsKey(editedDayOfWeek));
+        Assert.assertTrue(mTimeViews.containsKey(editedDayOfWeek));
+        Assert.assertTrue(mHourMinutes.containsKey(editedDayOfWeek));
 
-        mCustomTime.setHourMinute(editedDayOfWeek, hourMinute);
-        mTimes.get(editedDayOfWeek).setText(mCustomTime.getHourMinute(editedDayOfWeek).toString());
+        //mCustomTime.setHourMinute(editedDayOfWeek, hourMinute);
+
+        mHourMinutes.put(editedDayOfWeek, hourMinute);
+        mTimeViews.get(editedDayOfWeek).setText(hourMinute.toString());
     }
 }

@@ -3,19 +3,19 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.DailySchedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Schedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.SingleSchedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.WeeklySchedule;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
+import com.example.krystianwsul.organizator.domainmodel.Schedule;
+import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 

@@ -10,10 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.gui.MainActivity;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -53,7 +53,7 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
 
     @Override
     public void refresh() {
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), TaskFactory.getInstance().getRootTasks(TimeStamp.getNow())));
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), DomainFactory.getInstance().getTaskFactory().getRootTasks(TimeStamp.getNow())));
     }
 
     public void setEditing(boolean editing) {

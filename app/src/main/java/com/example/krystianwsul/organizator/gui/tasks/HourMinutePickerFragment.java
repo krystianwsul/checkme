@@ -9,7 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
 import android.widget.TimePicker;
 
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
 import junit.framework.Assert;
 

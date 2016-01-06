@@ -15,15 +15,15 @@ import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.TickReceiver;
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.DailySchedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Schedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.SingleSchedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
-import com.example.krystianwsul.organizator.domainmodel.tasks.WeeklySchedule;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Schedule;
+import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -81,7 +81,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             int rootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            mRootTask = TaskFactory.getInstance().getTask(rootTaskId);
+            mRootTask = DomainFactory.getInstance().getTaskFactory().getTask(rootTaskId);
             Assert.assertTrue(mRootTask != null);
         } else if (intent.hasExtra(TASK_IDS_KEY)) {
             ArrayList<Integer> taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
@@ -90,7 +90,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
             mJoinTasks = new ArrayList<>();
             for (Integer taskId : taskIds) {
-                Task task = TaskFactory.getInstance().getTask(taskId);
+                Task task = DomainFactory.getInstance().getTaskFactory().getTask(taskId);
                 Assert.assertTrue(task != null);
                 Assert.assertTrue(task.isRootTask(TimeStamp.getNow()));
 
@@ -160,7 +160,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
                     rootTask = mRootTask;
                 } else {
-                    rootTask = TaskFactory.getInstance().createRootTask(name, timeStamp);
+                    rootTask = DomainFactory.getInstance().getTaskFactory().createRootTask(name, timeStamp);
                     Assert.assertTrue(rootTask != null);
                 }
 
@@ -171,7 +171,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
                 if (mJoinTasks != null) {
                     Assert.assertTrue(mJoinTasks.size() > 1);
-                    TaskFactory.getInstance().joinTasks(rootTask, mJoinTasks, timeStamp);
+                    DomainFactory.getInstance().getTaskFactory().joinTasks(rootTask, mJoinTasks, timeStamp);
                 }
 
                 TickReceiver.refresh(CreateRootTaskActivity.this);

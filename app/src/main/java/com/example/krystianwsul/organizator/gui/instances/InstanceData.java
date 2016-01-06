@@ -2,17 +2,15 @@ package com.example.krystianwsul.organizator.gui.instances;
 
 import android.os.Bundle;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
@@ -45,7 +43,7 @@ public class InstanceData {
 
         int taskId = bundle.getInt(TASK_ID_KEY, -1);
         Assert.assertTrue(taskId != -1);
-        Task task = TaskFactory.getInstance().getTask(taskId);
+        Task task = DomainFactory.getInstance().getTaskFactory().getTask(taskId);
         Assert.assertTrue(task != null);
 
         Date date = bundle.getParcelable(DATE_KEY);
@@ -54,7 +52,7 @@ public class InstanceData {
         int customTimeId = bundle.getInt(CUSTOM_TIME_ID_KEY, -1);
         Time time;
         if (customTimeId != -1) {
-            time = CustomTimeFactory.getInstance().getCustomTime(customTimeId);
+            time = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(customTimeId);
             Assert.assertTrue(time != null);
         } else {
             HourMinute hourMinute = bundle.getParcelable(HOUR_MINUTE_KEY);
@@ -65,6 +63,6 @@ public class InstanceData {
 
         DateTime dateTime = new DateTime(date, time);
 
-        return InstanceFactory.getInstance().getInstance(task, dateTime);
+        return DomainFactory.getInstance().getInstanceFactory().getInstance(task, dateTime);
     }
 }

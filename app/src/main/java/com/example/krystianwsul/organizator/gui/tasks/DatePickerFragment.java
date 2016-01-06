@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.widget.DatePicker;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
+import com.example.krystianwsul.organizator.utils.time.Date;
 
 import junit.framework.Assert;
 

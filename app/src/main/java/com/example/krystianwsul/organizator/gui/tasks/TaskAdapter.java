@@ -13,8 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 

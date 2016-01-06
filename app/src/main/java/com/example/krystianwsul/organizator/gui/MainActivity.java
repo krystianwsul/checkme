@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.TickReceiver;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
 import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
 import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;

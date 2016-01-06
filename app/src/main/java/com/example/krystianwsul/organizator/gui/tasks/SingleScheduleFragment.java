@@ -10,16 +10,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Schedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.SingleSchedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Schedule;
+import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -89,7 +89,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            Task rootTask = TaskFactory.getInstance().getTask(rootTaskId);
+            Task rootTask = DomainFactory.getInstance().getTaskFactory().getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
             SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
@@ -187,6 +187,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(rootTask.current(startTimeStamp));
 
-        return TaskFactory.getInstance().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime(), startTimeStamp);
+        return DomainFactory.getInstance().getTaskFactory().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime(), startTimeStamp);
     }
 }

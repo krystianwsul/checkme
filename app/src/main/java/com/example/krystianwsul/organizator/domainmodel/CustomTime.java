@@ -1,9 +1,11 @@
-package com.example.krystianwsul.organizator.domainmodel.times;
+package com.example.krystianwsul.organizator.domainmodel;
 
 import android.support.v4.util.Pair;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.DayOfWeek;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
+import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 

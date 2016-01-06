@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.instances.InstanceData;
 import com.example.krystianwsul.organizator.gui.instances.ShowNotificationGroupActivity;
 

@@ -8,7 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
 
 import junit.framework.Assert;
 
@@ -20,11 +20,15 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
     private static final String INSTANCES_KEY = "instances";
 
     public static Intent getIntent(Context context, ArrayList<Instance> instances) {
-        Intent intent = new Intent(context, ShowNotificationGroupActivity.class);
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(instances != null);
+        Assert.assertTrue(!instances.isEmpty());
 
         ArrayList<Bundle> bundles = new ArrayList<>();
         for (Instance instance : instances)
             bundles.add(InstanceData.getBundle(instance));
+
+        Intent intent = new Intent(context, ShowNotificationGroupActivity.class);
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putParcelableArrayListExtra(INSTANCES_KEY, bundles);

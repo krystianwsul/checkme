@@ -12,8 +12,8 @@ import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.instances.InstanceData;
 
 import junit.framework.Assert;
@@ -54,11 +54,14 @@ public class TickReceiver extends BroadcastReceiver {
     public static void refresh(Context context) {
         Assert.assertTrue(context != null);
 
-        ArrayList<Instance> instances = InstanceFactory.getInstance().getNotificationInstances();
+        DomainFactory.InstanceFactory instanceFactory = DomainFactory.getInstance().getInstanceFactory();
+        Assert.assertTrue(instanceFactory != null);
+
+        ArrayList<Instance> instances = instanceFactory.getNotificationInstances();
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        ArrayList<Instance> shownInstances = InstanceFactory.getInstance().getShownInstances();
+        ArrayList<Instance> shownInstances = instanceFactory.getShownInstances();
 
         if (instances.size() > MAX_NOTIFICATIONS) {
             for (Instance instance : shownInstances) {

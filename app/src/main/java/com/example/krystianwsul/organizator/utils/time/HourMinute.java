@@ -1,11 +1,8 @@
-package com.example.krystianwsul.organizator.domainmodel.times;
+package com.example.krystianwsul.organizator.utils.time;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
 
 import junit.framework.Assert;
 

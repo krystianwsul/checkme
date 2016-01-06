@@ -14,11 +14,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
@@ -80,7 +80,7 @@ public class TimePickerView extends LinearLayout {
         //adapter
 
         ArrayList<SpinnerItem> spinnerTimes = new ArrayList<>();
-        for (CustomTime customTime : CustomTimeFactory.getInstance().getCustomTimes())
+        for (CustomTime customTime : DomainFactory.getInstance().getCustomTimeFactory().getCustomTimes())
             spinnerTimes.add(new TimeSpinnerItem(customTime));
         mOtherSpinnerItem = new OtherSpinnerItem(getContext());
         spinnerTimes.add(mOtherSpinnerItem);
@@ -250,7 +250,7 @@ public class TimePickerView extends LinearLayout {
         Assert.assertTrue((customTimeId == -1) != (hour == -1));
 
         if (customTimeId != -1) {
-            mCustomTime = CustomTimeFactory.getInstance().getCustomTime(customTimeId);
+            mCustomTime = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(customTimeId);
             int position = getCustomTimePosition(mCustomTime);
 
             setSpinnerPosition(position);

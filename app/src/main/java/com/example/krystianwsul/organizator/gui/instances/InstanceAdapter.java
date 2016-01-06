@@ -12,7 +12,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
 
 import junit.framework.Assert;
 

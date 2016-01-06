@@ -1,8 +1,8 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Schedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
+import com.example.krystianwsul.organizator.domainmodel.Schedule;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 interface ScheduleFragment {
     boolean isValidTime();

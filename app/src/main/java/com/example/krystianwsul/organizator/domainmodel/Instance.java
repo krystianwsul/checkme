@@ -1,19 +1,16 @@
-package com.example.krystianwsul.organizator.domainmodel.instances;
+package com.example.krystianwsul.organizator.domainmodel;
 
 import android.app.NotificationManager;
 import android.content.Context;
 
 import com.example.krystianwsul.organizator.TickReceiver;
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.persistencemodel.PersistenceManger;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -74,7 +71,7 @@ public class Instance {
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
             if (customTimeId != null)
-                return CustomTimeFactory.getInstance().getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
+                return DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
             else
                 return new NormalTime(hour, minute);
         } else {
@@ -109,7 +106,7 @@ public class Instance {
             Assert.assertTrue((mInstanceRecord.getInstanceHour() == null) || (mInstanceRecord.getInstanceCustomTimeId() == null));
 
             if (mInstanceRecord.getInstanceCustomTimeId() != null)
-                return CustomTimeFactory.getInstance().getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
+                return DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
             else if (mInstanceRecord.getInstanceHour() != null)
                 return new NormalTime(mInstanceRecord.getInstanceHour(), mInstanceRecord.getInstanceMinute());
             else
@@ -163,7 +160,7 @@ public class Instance {
         for (Task childTask : mTask.getChildTasks(hierarchyTimeStamp)) {
             Assert.assertTrue(childTask.current(hierarchyTimeStamp));
 
-            Instance childInstance = InstanceFactory.getInstance().getInstance(childTask, getScheduleDateTime());
+            Instance childInstance = DomainFactory.getInstance().getInstanceFactory().getInstance(childTask, getScheduleDateTime());
             Assert.assertTrue(childInstance != null);
 
             childInstances.add(childInstance);
@@ -180,7 +177,7 @@ public class Instance {
 
         Assert.assertTrue(parentTask.current(hierarchyTimeStamp));
 
-        Instance parentInstance = InstanceFactory.getInstance().getInstance(parentTask, getScheduleDateTime());
+        Instance parentInstance = DomainFactory.getInstance().getInstanceFactory().getInstance(parentTask, getScheduleDateTime());
         Assert.assertTrue(parentInstance != null);
 
         return parentInstance;
@@ -240,7 +237,7 @@ public class Instance {
         Assert.assertTrue(mInstanceRecord == null);
         Assert.assertTrue(mScheduleDateTime != null);
 
-        InstanceFactory.getInstance().addExistingInstance(this);
+        DomainFactory.getInstance().getInstanceFactory().addExistingInstance(this);
 
         DateTime scheduleDateTime = getScheduleDateTime();
 

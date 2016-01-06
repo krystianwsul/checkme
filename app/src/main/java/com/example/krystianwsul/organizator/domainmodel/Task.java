@@ -1,11 +1,10 @@
-package com.example.krystianwsul.organizator.domainmodel.tasks;
+package com.example.krystianwsul.organizator.domainmodel;
 
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
 import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -78,14 +77,14 @@ public class Task {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        return TaskFactory.getInstance().getChildTasks(this, timeStamp);
+        return DomainFactory.getInstance().getTaskFactory().getChildTasks(this, timeStamp);
     }
 
     public Task getParentTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        return TaskFactory.getInstance().getParentTask(this, timeStamp);
+        return DomainFactory.getInstance().getTaskFactory().getParentTask(this, timeStamp);
     }
 
     public int getId() {
@@ -124,7 +123,7 @@ public class Task {
             childTask.setEndTimeStamp(endTimeStamp);
         }
 
-        TaskFactory.getInstance().setParentHierarchyEndTimeStamp(this, endTimeStamp);
+        DomainFactory.getInstance().getTaskFactory().setParentHierarchyEndTimeStamp(this, endTimeStamp);
 
         mTaskRecord.setEndTime(endTimeStamp.getLong());
     }

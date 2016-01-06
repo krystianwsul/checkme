@@ -10,17 +10,17 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.tasks.DatePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TimePickerView;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 

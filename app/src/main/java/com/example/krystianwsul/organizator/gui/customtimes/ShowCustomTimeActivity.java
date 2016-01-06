@@ -9,11 +9,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
+import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
@@ -42,7 +42,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int customTimeId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(customTimeId != -1);
-        mCustomTime = CustomTimeFactory.getInstance().getCustomTime(customTimeId);
+        mCustomTime = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(customTimeId);
         Assert.assertTrue(mCustomTime != null);
 
         TextView customTimeName = (TextView) findViewById(R.id.custom_time_name);

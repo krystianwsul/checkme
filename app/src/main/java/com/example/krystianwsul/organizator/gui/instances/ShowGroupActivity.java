@@ -9,15 +9,14 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -58,7 +57,7 @@ public class ShowGroupActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        ArrayList<Instance> instances = InstanceFactory.getInstance().getCurrentInstances(mTimeStamp);
+        ArrayList<Instance> instances = DomainFactory.getInstance().getInstanceFactory().getCurrentInstances(mTimeStamp);
         Assert.assertTrue(!instances.isEmpty());
         if (instances.size() == 1)
             finish();
@@ -81,7 +80,7 @@ public class ShowGroupActivity extends AppCompatActivity {
 
         DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
         HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
-        Time time = CustomTimeFactory.getInstance().getCustomTime(dayOfWeek, hourMinute);
+        Time time = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(dayOfWeek, hourMinute);
         if (time == null)
             time = new NormalTime(hourMinute);
         return time;

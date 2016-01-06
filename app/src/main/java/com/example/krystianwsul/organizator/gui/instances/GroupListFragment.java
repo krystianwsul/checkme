@@ -16,10 +16,10 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.MainActivity;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -76,7 +76,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
             mContext = context;
 
-            ArrayList<Instance> rootInstances = InstanceFactory.getInstance().getCurrentInstances();
+            ArrayList<Instance> rootInstances = DomainFactory.getInstance().getInstanceFactory().getCurrentInstances();
 
             ArrayList<Instance> doneInstances = new ArrayList<>();
             ArrayList<Instance> notDoneInstances = new ArrayList<>();

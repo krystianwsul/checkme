@@ -1,14 +1,10 @@
-package com.example.krystianwsul.organizator.domainmodel.tasks;
+package com.example.krystianwsul.organizator.domainmodel;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.instances.InstanceFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
 import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRecord;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
@@ -23,7 +19,7 @@ class DailyScheduleTime {
     public Time getTime() {
         Integer customTimeId = mDailyScheduleTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = CustomTimeFactory.getInstance().getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
+            CustomTime customTime = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {
@@ -46,6 +42,6 @@ class DailyScheduleTime {
         DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
 
-        return InstanceFactory.getInstance().getInstance(task, scheduleDateTime);
+        return DomainFactory.getInstance().getInstanceFactory().getInstance(task, scheduleDateTime);
     }
 }

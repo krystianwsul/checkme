@@ -13,8 +13,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
@@ -47,12 +47,12 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
         private final ArrayList<CustomTime> mCustomTimes;
 
         public CustomTimesAdapter(Context context) {
-            super(context, -1, new ArrayList<>(CustomTimeFactory.getInstance().getCustomTimes()));
+            super(context, -1, new ArrayList<>(DomainFactory.getInstance().getCustomTimeFactory().getCustomTimes()));
 
             Assert.assertTrue(context != null);
 
             mContext = context;
-            mCustomTimes = new ArrayList<>(CustomTimeFactory.getInstance().getCustomTimes());
+            mCustomTimes = new ArrayList<>(DomainFactory.getInstance().getCustomTimeFactory().getCustomTimes());
         }
 
         @Override

@@ -1,7 +1,7 @@
-package com.example.krystianwsul.organizator.domainmodel.tasks;
+package com.example.krystianwsul.organizator.domainmodel;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
 import com.example.krystianwsul.organizator.persistencemodel.TaskHierarchyRecord;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 

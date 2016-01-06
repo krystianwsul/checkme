@@ -16,16 +16,15 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.DailySchedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Schedule;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Schedule;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -94,7 +93,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            Task rootTask = TaskFactory.getInstance().getTask(rootTaskId);
+            Task rootTask = DomainFactory.getInstance().getTaskFactory().getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
             DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
@@ -163,7 +162,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             times.add(timeEntry.getTime());
         Assert.assertTrue(!times.isEmpty());
 
-        return TaskFactory.getInstance().createDailySchedule(rootTask, times, startTimeStamp);
+        return DomainFactory.getInstance().getTaskFactory().createDailySchedule(rootTask, times, startTimeStamp);
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {
@@ -407,7 +406,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
                 Assert.assertTrue((hour == -1) != (customTimeId == -1));
 
                 if (customTimeId != -1)
-                    return new TimeEntry(CustomTimeFactory.getInstance().getCustomTime(customTimeId), showDelete);
+                    return new TimeEntry(DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(customTimeId), showDelete);
                 else
                     return new TimeEntry(new HourMinute(hour, minute), showDelete);
             }

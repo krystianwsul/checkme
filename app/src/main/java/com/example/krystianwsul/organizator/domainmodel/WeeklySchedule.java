@@ -1,15 +1,14 @@
-package com.example.krystianwsul.organizator.domainmodel.tasks;
+package com.example.krystianwsul.organizator.domainmodel;
 
 import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DayOfWeek;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 

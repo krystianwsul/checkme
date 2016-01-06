@@ -1,10 +1,7 @@
-package com.example.krystianwsul.organizator.domainmodel.dates;
+package com.example.krystianwsul.organizator.utils.time;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
 
 import junit.framework.Assert;
 

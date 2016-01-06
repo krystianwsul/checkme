@@ -13,9 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.tasks.Task;
-import com.example.krystianwsul.organizator.domainmodel.tasks.TaskFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -43,7 +43,7 @@ public class ShowTaskActivity extends AppCompatActivity {
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int taskId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(taskId != -1);
-        mTask = TaskFactory.getInstance().getTask(taskId);
+        mTask = DomainFactory.getInstance().getTaskFactory().getTask(taskId);
         Assert.assertTrue(mTask != null);
 
         mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);

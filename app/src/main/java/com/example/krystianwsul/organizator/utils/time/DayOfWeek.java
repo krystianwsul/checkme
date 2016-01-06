@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizator.domainmodel.dates;
+package com.example.krystianwsul.organizator.utils.time;
 
 import junit.framework.Assert;
 

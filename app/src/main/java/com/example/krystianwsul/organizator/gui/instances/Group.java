@@ -3,14 +3,14 @@ package com.example.krystianwsul.organizator.gui.instances;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.example.krystianwsul.organizator.domainmodel.dates.Date;
-import com.example.krystianwsul.organizator.domainmodel.dates.DateTime;
-import com.example.krystianwsul.organizator.domainmodel.dates.TimeStamp;
-import com.example.krystianwsul.organizator.domainmodel.instances.Instance;
-import com.example.krystianwsul.organizator.domainmodel.times.CustomTimeFactory;
-import com.example.krystianwsul.organizator.domainmodel.times.HourMinute;
-import com.example.krystianwsul.organizator.domainmodel.times.NormalTime;
-import com.example.krystianwsul.organizator.domainmodel.times.Time;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.Instance;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
+import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -38,7 +38,7 @@ class Group {
         } else {
             Date date = mTimeStamp.getDate();
             HourMinute hourMinute = mTimeStamp.getHourMinute();
-            Time time = CustomTimeFactory.getInstance().getCustomTime(date.getDayOfWeek(), hourMinute);
+            Time time = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(date.getDayOfWeek(), hourMinute);
             if (time == null)
                 time = new NormalTime(hourMinute);
             DateTime dateTime = new DateTime(date, time);

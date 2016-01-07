@@ -365,4 +365,31 @@ public class PersistenceManger {
         else
             return Collections.max(hashMap.keySet()) + 1;
     }
+
+    public CustomTimeRecord createCustomTimeRecord(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(hourMinutes != null);
+
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.SUNDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.MONDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.TUESDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.WEDNESDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.THURSDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
+
+        int id = getNextId(mCustomTimeRecords);
+
+        HourMinute sunday = hourMinutes.get(DayOfWeek.SUNDAY);
+        HourMinute monday = hourMinutes.get(DayOfWeek.MONDAY);
+        HourMinute tuesday = hourMinutes.get(DayOfWeek.TUESDAY);
+        HourMinute wednesday = hourMinutes.get(DayOfWeek.WEDNESDAY);
+        HourMinute thursday = hourMinutes.get(DayOfWeek.THURSDAY);
+        HourMinute friday = hourMinutes.get(DayOfWeek.FRIDAY);
+        HourMinute saturday = hourMinutes.get(DayOfWeek.SATURDAY);
+
+        CustomTimeRecord customTimeRecord = new CustomTimeRecord(id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute());
+        mCustomTimeRecords.put(customTimeRecord.getId(), customTimeRecord);
+        return customTimeRecord;
+    }
 }

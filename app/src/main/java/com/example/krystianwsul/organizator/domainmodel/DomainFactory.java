@@ -556,5 +556,24 @@ public class DomainFactory {
         public Collection<CustomTime> getCustomTimes() {
             return mCustomTimes.values();
         }
+
+        public void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(hourMinutes != null);
+
+            Assert.assertTrue(hourMinutes.get(DayOfWeek.SUNDAY) != null);
+            Assert.assertTrue(hourMinutes.get(DayOfWeek.MONDAY) != null);
+            Assert.assertTrue(hourMinutes.get(DayOfWeek.TUESDAY) != null);
+            Assert.assertTrue(hourMinutes.get(DayOfWeek.WEDNESDAY) != null);
+            Assert.assertTrue(hourMinutes.get(DayOfWeek.THURSDAY) != null);
+            Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
+            Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
+
+            CustomTimeRecord customTimeRecord = PersistenceManger.getInstance().createCustomTimeRecord(name, hourMinutes);
+            Assert.assertTrue(customTimeRecord != null);
+
+            CustomTime customTime = new CustomTime(customTimeRecord);
+            mCustomTimes.put(customTime.getId(), customTime);
+        }
     }
 }

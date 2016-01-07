@@ -38,7 +38,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 CustomTime customTime = (CustomTime) parent.getItemAtPosition(position);
-                startActivity(ShowCustomTimeActivity.getIntent(customTime, view.getContext()));
+                startActivity(ShowCustomTimeActivity.getEditIntent(customTime, ShowCustomTimesActivity.this));
             }
         });
 
@@ -46,7 +46,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
         showTimesFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                throw new UnsupportedOperationException();
+                startActivity(ShowCustomTimeActivity.getCreateIntent(ShowCustomTimesActivity.this));
             }
         });
     }

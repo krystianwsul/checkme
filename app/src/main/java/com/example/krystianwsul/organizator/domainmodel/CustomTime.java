@@ -10,13 +10,10 @@ import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
 
-    private final ArrayList<WeakReference<CustomTimeObserver>> mCustomTimeObservers = new ArrayList<>();
+//    private final ArrayList<WeakReference<CustomTimeObserver>> mCustomTimeObservers = new ArrayList<>();
 
     CustomTime(CustomTimeRecord customTimeRecord) {
         Assert.assertTrue(customTimeRecord != null);
@@ -92,6 +89,7 @@ public class CustomTime implements Time {
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }
 
+        /*
         ArrayList<WeakReference<CustomTimeObserver>> remove = new ArrayList<>();
 
         for (WeakReference<CustomTimeObserver> weakReference : mCustomTimeObservers) {
@@ -103,6 +101,7 @@ public class CustomTime implements Time {
         }
 
         mCustomTimeObservers.removeAll(remove);
+        */
     }
 
     public String toString() {
@@ -117,6 +116,7 @@ public class CustomTime implements Time {
         return new Pair<>(this, null);
     }
 
+    /*
     public interface CustomTimeObserver {
         void updateDayOfWeek(DayOfWeek dayOfWeek, HourMinute hourMinute);
     }
@@ -125,4 +125,5 @@ public class CustomTime implements Time {
         Assert.assertTrue(customTimeObserver != null);
         mCustomTimeObservers.add(new WeakReference<>(customTimeObserver));
     }
+    */
 }

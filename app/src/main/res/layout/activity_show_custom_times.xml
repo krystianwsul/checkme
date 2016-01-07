@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".gui.customtimes.ShowCustomTimesActivity">
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/show_times_list" />

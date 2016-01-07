@@ -126,4 +126,12 @@ public class CustomTime implements Time {
         mCustomTimeObservers.add(new WeakReference<>(customTimeObserver));
     }
     */
+
+    public boolean getCurrent() {
+        return mCustomTimeRecord.getCurrent();
+    }
+
+    public void setCurrent() {
+        mCustomTimeRecord.setCurrent(false);
+    }
 }

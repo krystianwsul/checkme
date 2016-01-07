@@ -80,7 +80,7 @@ public class TimePickerView extends LinearLayout {
         //adapter
 
         ArrayList<SpinnerItem> spinnerTimes = new ArrayList<>();
-        for (CustomTime customTime : DomainFactory.getInstance().getCustomTimeFactory().getCustomTimes())
+        for (CustomTime customTime : DomainFactory.getInstance().getCustomTimeFactory().getCurrentCustomTimes())
             spinnerTimes.add(new TimeSpinnerItem(customTime));
         mOtherSpinnerItem = new OtherSpinnerItem(getContext());
         spinnerTimes.add(mOtherSpinnerItem);

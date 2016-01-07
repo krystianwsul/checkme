@@ -553,8 +553,12 @@ public class DomainFactory {
             return null;
         }
 
-        public Collection<CustomTime> getCustomTimes() {
-            return mCustomTimes.values();
+        public Collection<CustomTime> getCurrentCustomTimes() {
+            ArrayList<CustomTime> customTimes = new ArrayList<>();
+            for (CustomTime customTime : mCustomTimes.values())
+                if (customTime.getCurrent())
+                    customTimes.add(customTime);
+            return customTimes;
         }
 
         public void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {

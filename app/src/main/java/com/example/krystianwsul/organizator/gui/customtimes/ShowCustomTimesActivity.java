@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
@@ -60,7 +61,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
             Assert.assertTrue(activity != null);
 
             mActivity = activity;
-            mCustomTimes = new ArrayList<>(DomainFactory.getInstance().getCustomTimeFactory().getCustomTimes());
+            mCustomTimes = new ArrayList<>(DomainFactory.getInstance().getCustomTimeFactory().getCurrentCustomTimes());
         }
 
         @Override
@@ -74,8 +75,9 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
             View showCustomTimesRow = layoutInflater.inflate(R.layout.show_custom_times_row, parent, false);
 
             TextView timesRowName = (TextView) showCustomTimesRow.findViewById(R.id.times_row_name);
+            ImageView timesRowDelete = (ImageView) showCustomTimesRow.findViewById(R.id.times_row_delete);
 
-            return new CustomTimeHolder(showCustomTimesRow, timesRowName);
+            return new CustomTimeHolder(showCustomTimesRow, timesRowName, timesRowDelete);
         }
 
         @Override
@@ -88,7 +90,14 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
             customTimeHolder.mShowCustomTimeRow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    customTimeHolder.onClick();
+                    customTimeHolder.onRowClick();
+                }
+            });
+
+            customTimeHolder.mTimesRowDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    customTimeHolder.onDeleteClick();
                 }
             });
         }
@@ -96,19 +105,31 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
         public class CustomTimeHolder extends RecyclerView.ViewHolder {
             public final View mShowCustomTimeRow;
             public final TextView mTimesRowName;
+            public final ImageView mTimesRowDelete;
 
-            public CustomTimeHolder(View showCustomTimesRow, TextView timesRowName) {
+            public CustomTimeHolder(View showCustomTimesRow, TextView timesRowName, ImageView timesRowDelete) {
                 super(showCustomTimesRow);
 
                 Assert.assertTrue(timesRowName != null);
+                Assert.assertTrue(timesRowDelete != null);
 
                 mShowCustomTimeRow = showCustomTimesRow;
                 mTimesRowName = timesRowName;
+                mTimesRowDelete = timesRowDelete;
             }
 
-            public void onClick() {
+            public void onRowClick() {
                 CustomTime customTime = mCustomTimes.get(getAdapterPosition());
                 mActivity.startActivity(ShowCustomTimeActivity.getEditIntent(customTime, mActivity));
+            }
+
+            public void onDeleteClick() {
+                int position = getAdapterPosition();
+                CustomTime customTime = mCustomTimes.get(position);
+                customTime.setCurrent();
+
+                mCustomTimes.remove(customTime);
+                notifyItemRemoved(position);
             }
         }
     }

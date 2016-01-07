@@ -29,7 +29,9 @@ public class CustomTimeRecord {
     private int mSaturdayHour;
     private int mSaturdayMinute;
 
-    CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
+    private boolean mCurrent;
+
+    CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
         Assert.assertTrue(name != null);
 
         mId = id;
@@ -55,6 +57,8 @@ public class CustomTimeRecord {
 
         mSaturdayHour = saturdayHour;
         mSaturdayMinute = saturdayMinute;
+
+        mCurrent = current;
     }
 
     public int getId() {
@@ -180,5 +184,13 @@ public class CustomTimeRecord {
 
     public void setSaturdayMinute(int minute) {
         mSaturdayMinute = minute;
+    }
+
+    public boolean getCurrent() {
+        return mCurrent;
+    }
+
+    public void setCurrent(boolean current) {
+        mCurrent = current;
     }
 }

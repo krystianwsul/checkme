@@ -60,9 +60,9 @@ public class PersistenceManger {
         Calendar calendarNextYear = Calendar.getInstance();
         calendarNextYear.add(Calendar.DATE, 365);
 
-        CustomTimeRecord afterWaking = new CustomTimeRecord(0, "po wstaniu", 9, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 9, 0);
+        CustomTimeRecord afterWaking = new CustomTimeRecord(0, "po wstaniu", 9, 0, 6, 0, 6, 0, 6, 0, 6, 0, 6, 0, 9, 0, true);
         mCustomTimeRecords.put(afterWaking.getId(), afterWaking);
-        CustomTimeRecord afterWork = new CustomTimeRecord(1, "po pracy", 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0);
+        CustomTimeRecord afterWork = new CustomTimeRecord(1, "po pracy", 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, 17, 0, true);
         mCustomTimeRecords.put(afterWork.getId(), afterWork);
 
         TaskRecord zakupy = new TaskRecord(0, "zakupy", calendarFewDaysAgo.getTimeInMillis(), null);
@@ -388,7 +388,7 @@ public class PersistenceManger {
         HourMinute friday = hourMinutes.get(DayOfWeek.FRIDAY);
         HourMinute saturday = hourMinutes.get(DayOfWeek.SATURDAY);
 
-        CustomTimeRecord customTimeRecord = new CustomTimeRecord(id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute());
+        CustomTimeRecord customTimeRecord = new CustomTimeRecord(id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute(), true);
         mCustomTimeRecords.put(customTimeRecord.getId(), customTimeRecord);
         return customTimeRecord;
     }

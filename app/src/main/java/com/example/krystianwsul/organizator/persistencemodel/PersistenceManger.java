@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.persistencemodel;
 
+import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -9,6 +10,7 @@ import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
+import com.example.krystianwsul.organizator.sql.MySQLiteHelper;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
@@ -26,7 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 public class PersistenceManger {
-    private static PersistenceManger mInstance;
+    private final MySQLiteHelper mMySQLiteHelper;
 
     private final HashMap<Integer, CustomTimeRecord> mCustomTimeRecords = new HashMap<>();
 
@@ -42,13 +44,12 @@ public class PersistenceManger {
 
     private final HashMap<Integer, InstanceRecord> mInstanceRecords = new HashMap<>();
 
-    public static PersistenceManger getInstance() {
-        if (mInstance == null)
-            mInstance = new PersistenceManger();
-        return mInstance;
-    }
+    public PersistenceManger(Context context) {
+        Assert.assertTrue(context != null);
 
-    private PersistenceManger() {
+        mMySQLiteHelper = new MySQLiteHelper(context);
+
+
         Calendar calendarToday = Calendar.getInstance();
 
         Calendar calendarFewDaysAgo = Calendar.getInstance();

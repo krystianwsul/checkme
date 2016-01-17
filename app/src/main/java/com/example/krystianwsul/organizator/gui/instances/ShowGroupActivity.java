@@ -23,6 +23,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowGroupActivity extends AppCompatActivity {
+    private DomainFactory mDomainFactory;
+
     private RecyclerView mShowGroupList;
     private TimeStamp mTimeStamp;
     private TextView mShowGroupName;
@@ -57,7 +59,10 @@ public class ShowGroupActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        ArrayList<Instance> instances = DomainFactory.getInstance().getInstanceFactory().getCurrentInstances(mTimeStamp);
+        mDomainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(mDomainFactory != null);
+
+        ArrayList<Instance> instances = mDomainFactory.getInstanceFactory().getCurrentInstances(mTimeStamp);
         Assert.assertTrue(!instances.isEmpty());
         if (instances.size() == 1)
             finish();
@@ -78,9 +83,11 @@ public class ShowGroupActivity extends AppCompatActivity {
     private Time getTime(DateTime dateTime) {
         Assert.assertTrue(dateTime != null);
 
+        Assert.assertTrue(mDomainFactory != null);
+
         DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
         HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
-        Time time = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(dayOfWeek, hourMinute);
+        Time time = mDomainFactory.getCustomTimeFactory().getCustomTime(dayOfWeek, hourMinute);
         if (time == null)
             time = new NormalTime(hourMinute);
         return time;

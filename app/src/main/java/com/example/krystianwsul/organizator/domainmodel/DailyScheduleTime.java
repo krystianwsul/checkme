@@ -9,17 +9,22 @@ import com.example.krystianwsul.organizator.utils.time.Time;
 import junit.framework.Assert;
 
 class DailyScheduleTime {
+    private final DomainFactory mDomainFactory;
+
     private final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
 
-    DailyScheduleTime(DailyScheduleTimeRecord dailyScheduleTimeRecord) {
+    DailyScheduleTime(DomainFactory domainFactory, DailyScheduleTimeRecord dailyScheduleTimeRecord) {
+        Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(dailyScheduleTimeRecord != null);
+
+        mDomainFactory = domainFactory;
         mDailyScheduleTimeRecord = dailyScheduleTimeRecord;
     }
 
     public Time getTime() {
         Integer customTimeId = mDailyScheduleTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
+            CustomTime customTime = mDomainFactory.getCustomTimeFactory().getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {
@@ -42,6 +47,6 @@ class DailyScheduleTime {
         DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
 
-        return DomainFactory.getInstance().getInstanceFactory().getInstance(task, scheduleDateTime);
+        return mDomainFactory.getInstanceFactory().getInstance(task, scheduleDateTime);
     }
 }

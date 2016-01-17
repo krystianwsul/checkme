@@ -11,11 +11,16 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class Task {
+    private final DomainFactory mDomainFactory;
+
     private final TaskRecord mTaskRecord;
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
 
-    Task(TaskRecord taskRecord) {
+    Task(DomainFactory domainFactory, TaskRecord taskRecord) {
+        Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(taskRecord != null);
+
+        mDomainFactory = domainFactory;
         mTaskRecord = taskRecord;
     }
 
@@ -77,14 +82,14 @@ public class Task {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        return DomainFactory.getInstance().getTaskFactory().getChildTasks(this, timeStamp);
+        return mDomainFactory.getTaskFactory().getChildTasks(this, timeStamp);
     }
 
     public Task getParentTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        return DomainFactory.getInstance().getTaskFactory().getParentTask(this, timeStamp);
+        return mDomainFactory.getTaskFactory().getParentTask(this, timeStamp);
     }
 
     public int getId() {
@@ -123,7 +128,7 @@ public class Task {
             childTask.setEndTimeStamp(endTimeStamp);
         }
 
-        DomainFactory.getInstance().getTaskFactory().setParentHierarchyEndTimeStamp(this, endTimeStamp);
+        mDomainFactory.getTaskFactory().setParentHierarchyEndTimeStamp(this, endTimeStamp);
 
         mTaskRecord.setEndTime(endTimeStamp.getLong());
     }

@@ -24,6 +24,8 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment {
+    private DomainFactory mDomainFactory;
+
     private TextView mDateView;
     private TimePickerView mTimePickerView;
 
@@ -72,6 +74,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Bundle args = getArguments();
 
+        mDomainFactory = DomainFactory.getDomainFactory(getContext());
+
         Time time = null;
         if (savedInstanceState != null) {
 
@@ -89,7 +93,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            Task rootTask = DomainFactory.getInstance().getTaskFactory().getTask(rootTaskId);
+            Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
             SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
@@ -121,6 +125,10 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         updateDateText();
 
         mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
+        Assert.assertTrue(mTimePickerView != null);
+
+        mTimePickerView.setDomainFactory(mDomainFactory);
+
         if (time != null)
             mTimePickerView.setTime(time);
 
@@ -187,6 +195,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(rootTask.current(startTimeStamp));
 
-        return DomainFactory.getInstance().getTaskFactory().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime(), startTimeStamp);
+        Assert.assertTrue(mDomainFactory != null);
+        return mDomainFactory.getTaskFactory().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime(), startTimeStamp);
     }
 }

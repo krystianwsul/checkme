@@ -55,10 +55,15 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
     @Override
     public void refresh() {
-        mGroupList.setAdapter(new GroupAdapter(getContext()));
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
+        Assert.assertTrue(domainFactory != null);
+
+        mGroupList.setAdapter(new GroupAdapter(domainFactory, getContext()));
     }
 
     public static class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder> {
+        private final DomainFactory mDomainFactory;
+
         private final Context mContext;
 
         private final DoneGroupContainer mDoneGroupContainer = new DoneGroupContainer();
@@ -71,12 +76,14 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
             }
         };
 
-        public GroupAdapter(Context context) {
+        public GroupAdapter(DomainFactory domainFactory, Context context) {
+            Assert.assertTrue(domainFactory != null);
             Assert.assertTrue(context != null);
 
+            mDomainFactory = domainFactory;
             mContext = context;
 
-            ArrayList<Instance> rootInstances = DomainFactory.getInstance().getInstanceFactory().getCurrentInstances();
+            ArrayList<Instance> rootInstances = domainFactory.getInstanceFactory().getCurrentInstances();
 
             ArrayList<Instance> doneInstances = new ArrayList<>();
             ArrayList<Instance> notDoneInstances = new ArrayList<>();
@@ -249,14 +256,14 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
             }
         }
 
-        private static class DoneGroupContainer {
+        private class DoneGroupContainer {
             private final ArrayList<Group> mGroups = new ArrayList<>();
 
             public Group addInstance(Instance instance) {
                 Assert.assertTrue(instance != null);
                 Assert.assertTrue(instance.getDone() != null);
 
-                Group group = new Group(instance.getDone());
+                Group group = new Group(mDomainFactory, instance.getDone());
                 group.addInstance(instance);
                 mGroups.add(group);
 
@@ -271,7 +278,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
                 for (Instance instance : instances) {
                     Assert.assertTrue(instance.getDone() != null);
 
-                    Group group = new Group(instance.getDone());
+                    Group group = new Group(mDomainFactory, instance.getDone());
                     group.addInstance(instance);
                     mGroups.add(group);
                 }
@@ -302,7 +309,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
             }
         }
 
-        private static class NotDoneGroupContainer {
+        private class NotDoneGroupContainer {
             private ArrayList<Group> mGroupArray = new ArrayList<>();
             private final TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
 
@@ -335,7 +342,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
                     group.addInstance(instance);
                     return group;
                 } else {
-                    Group group = new Group(timeStamp);
+                    Group group = new Group(mDomainFactory, timeStamp);
                     group.addInstance(instance);
                     mGroupTree.put(timeStamp, group);
                     return group;

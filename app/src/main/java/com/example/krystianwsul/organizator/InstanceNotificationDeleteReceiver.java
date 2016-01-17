@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.instances.InstanceData;
 
@@ -16,7 +17,10 @@ public class InstanceNotificationDeleteReceiver extends BroadcastReceiver {
         Bundle bundle = intent.getBundleExtra(TickReceiver.INSTANCE_KEY);
         Assert.assertTrue(bundle != null);
 
-        Instance instance = InstanceData.getInstance(bundle);
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(context);
+        Assert.assertTrue(domainFactory != null);
+
+        Instance instance = InstanceData.getInstance(domainFactory, bundle);
         Assert.assertTrue(instance != null);
 
         instance.setNotified();

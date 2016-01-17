@@ -10,17 +10,22 @@ import com.example.krystianwsul.organizator.utils.time.Time;
 import junit.framework.Assert;
 
 class WeeklyScheduleDayOfWeekTime {
+    private final DomainFactory mDomainFactory;
+
     private final WeeklyScheduleDayOfWeekTimeRecord mWeeklyScheduleDayOfWeekTimeRecord;
 
-    WeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord) {
+    WeeklyScheduleDayOfWeekTime(DomainFactory domainFactory, WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord) {
+        Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
+
+        mDomainFactory = domainFactory;
         mWeeklyScheduleDayOfWeekTimeRecord = weeklyScheduleDayOfWeekTimeRecord;
     }
 
     public Time getTime() {
         Integer customTimeId = mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId());
+            CustomTime customTime = mDomainFactory.getCustomTimeFactory().getCustomTime(mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {
@@ -47,6 +52,6 @@ class WeeklyScheduleDayOfWeekTime {
         DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
 
-        return DomainFactory.getInstance().getInstanceFactory().getInstance(task, scheduleDateTime);
+        return mDomainFactory.getInstanceFactory().getInstance(task, scheduleDateTime);
     }
 }

@@ -39,11 +39,13 @@ public class ShowTaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
 
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int taskId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(taskId != -1);
-        mTask = DomainFactory.getInstance().getTaskFactory().getTask(taskId);
+        mTask = domainFactory.getTaskFactory().getTask(taskId);
         Assert.assertTrue(mTask != null);
 
         mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);

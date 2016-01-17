@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 
 import junit.framework.Assert;
@@ -41,6 +42,9 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_group);
 
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(domainFactory != null);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INSTANCES_KEY));
         ArrayList<Bundle> bundles = intent.getParcelableArrayListExtra(INSTANCES_KEY);
@@ -48,7 +52,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
         Assert.assertTrue(!bundles.isEmpty());
         ArrayList<Instance> instances = new ArrayList<>();
         for (Bundle bundle : bundles)
-            instances.add(InstanceData.getInstance(bundle));
+            instances.add(InstanceData.getInstance(domainFactory, bundle));
 
         Collections.sort(instances, new Comparator<Instance>() {
             @Override

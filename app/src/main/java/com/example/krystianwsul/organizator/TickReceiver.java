@@ -54,7 +54,10 @@ public class TickReceiver extends BroadcastReceiver {
     public static void refresh(Context context) {
         Assert.assertTrue(context != null);
 
-        DomainFactory.InstanceFactory instanceFactory = DomainFactory.getInstance().getInstanceFactory();
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(context);
+        Assert.assertTrue(domainFactory != null);
+
+        DomainFactory.InstanceFactory instanceFactory = domainFactory.getInstanceFactory();
         Assert.assertTrue(instanceFactory != null);
 
         ArrayList<Instance> instances = instanceFactory.getNotificationInstances();

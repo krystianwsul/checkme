@@ -50,18 +50,22 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        mShowTimesList.setAdapter(new CustomTimesAdapter(this));
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(domainFactory != null);
+
+        mShowTimesList.setAdapter(new CustomTimesAdapter(domainFactory, this));
     }
 
     public static class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
         private final Activity mActivity;
         private final ArrayList<CustomTime> mCustomTimes;
 
-        public CustomTimesAdapter(Activity activity) {
+        public CustomTimesAdapter(DomainFactory domainFactory, Activity activity) {
+            Assert.assertTrue(domainFactory != null);
             Assert.assertTrue(activity != null);
 
             mActivity = activity;
-            mCustomTimes = new ArrayList<>(DomainFactory.getInstance().getCustomTimeFactory().getCurrentCustomTimes());
+            mCustomTimes = new ArrayList<>(domainFactory.getCustomTimeFactory().getCurrentCustomTimes());
         }
 
         @Override

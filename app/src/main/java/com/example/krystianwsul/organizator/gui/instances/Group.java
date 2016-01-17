@@ -17,12 +17,17 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 class Group {
+    private final DomainFactory mDomainFactory;
+
     private final TimeStamp mTimeStamp;
 
     private final ArrayList<Instance> mInstances = new ArrayList<>();
 
-    public Group(TimeStamp timeStamp) {
+    public Group(DomainFactory domainFactory, TimeStamp timeStamp) {
+        Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(timeStamp != null);
+
+        mDomainFactory = domainFactory;
         mTimeStamp = timeStamp;
     }
 
@@ -38,7 +43,7 @@ class Group {
         } else {
             Date date = mTimeStamp.getDate();
             HourMinute hourMinute = mTimeStamp.getHourMinute();
-            Time time = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(date.getDayOfWeek(), hourMinute);
+            Time time = mDomainFactory.getCustomTimeFactory().getCustomTime(date.getDayOfWeek(), hourMinute);
             if (time == null)
                 time = new NormalTime(hourMinute);
             DateTime dateTime = new DateTime(date, time);

@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.tasks.DatePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
@@ -46,10 +47,12 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
         setContentView(R.layout.activity_edit_instance);
 
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        mInstance = InstanceData.getInstance(bundle);
+        mInstance = InstanceData.getInstance(domainFactory, bundle);
         Assert.assertTrue(mInstance != null);
 
         if (savedInstanceState != null) {
@@ -78,6 +81,9 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
         });
 
         mEditInstanceTimePickerView = (TimePickerView) findViewById(R.id.edit_instance_timepickerview);
+        Assert.assertTrue(mEditInstanceTimePickerView != null);
+
+        mEditInstanceTimePickerView.setDomainFactory(domainFactory);
         mEditInstanceTimePickerView.setTime(mInstance.getInstanceTime());
         mEditInstanceTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override

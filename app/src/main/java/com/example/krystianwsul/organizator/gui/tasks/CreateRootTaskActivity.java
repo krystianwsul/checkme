@@ -76,12 +76,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
         final EditText createRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
 
+        final DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(domainFactory != null);
+
         Intent intent = getIntent();
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
             int rootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            mRootTask = DomainFactory.getInstance().getTaskFactory().getTask(rootTaskId);
+            mRootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
             Assert.assertTrue(mRootTask != null);
         } else if (intent.hasExtra(TASK_IDS_KEY)) {
             ArrayList<Integer> taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
@@ -90,7 +93,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
             mJoinTasks = new ArrayList<>();
             for (Integer taskId : taskIds) {
-                Task task = DomainFactory.getInstance().getTaskFactory().getTask(taskId);
+                Task task = domainFactory.getTaskFactory().getTask(taskId);
                 Assert.assertTrue(task != null);
                 Assert.assertTrue(task.isRootTask(TimeStamp.getNow()));
 
@@ -160,7 +163,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
                     rootTask = mRootTask;
                 } else {
-                    rootTask = DomainFactory.getInstance().getTaskFactory().createRootTask(name, timeStamp);
+                    rootTask = domainFactory.getTaskFactory().createRootTask(name, timeStamp);
                     Assert.assertTrue(rootTask != null);
                 }
 
@@ -171,7 +174,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
                 if (mJoinTasks != null) {
                     Assert.assertTrue(mJoinTasks.size() > 1);
-                    DomainFactory.getInstance().getTaskFactory().joinTasks(rootTask, mJoinTasks, timeStamp);
+                    domainFactory.getTaskFactory().joinTasks(rootTask, mJoinTasks, timeStamp);
                 }
 
                 TickReceiver.refresh(CreateRootTaskActivity.this);

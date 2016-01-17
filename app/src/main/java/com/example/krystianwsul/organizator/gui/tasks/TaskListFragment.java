@@ -53,7 +53,10 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
 
     @Override
     public void refresh() {
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), DomainFactory.getInstance().getTaskFactory().getRootTasks(TimeStamp.getNow())));
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
+        Assert.assertTrue(domainFactory != null);
+
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory.getTaskFactory().getRootTasks(TimeStamp.getNow())));
     }
 
     public void setEditing(boolean editing) {

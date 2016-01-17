@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.domainmodel;
 
+import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -28,20 +29,33 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class DomainFactory {
-    private static DomainFactory mInstance;
+    private final Context mContext;
 
-    private final CustomTimeFactory mCustomTimeFactory = new CustomTimeFactory();
-    private final TaskFactory mTaskFactory = new TaskFactory();
-    private final InstanceFactory mInstanceFactory = new InstanceFactory();
+    private PersistenceManger mPersistenceManager;
 
-    public static DomainFactory getInstance() {
-        if (mInstance == null)
-            mInstance = new DomainFactory();
-        return mInstance;
+    private CustomTimeFactory mCustomTimeFactory;
+    private TaskFactory mTaskFactory;
+    private InstanceFactory mInstanceFactory;
+
+    public static DomainFactory getDomainFactory(Context context) {
+        Assert.assertTrue(context != null);
+
+        DomainFactory domainFactory = new DomainFactory(context);
+        domainFactory.initialize();
+        return domainFactory;
     }
 
-    private DomainFactory() {
+    private DomainFactory(Context context) {
+        Assert.assertTrue(context != null);
+        mContext = context;
+    }
 
+    private void initialize() {
+        mPersistenceManager = new PersistenceManger(mContext);
+
+        mCustomTimeFactory = new CustomTimeFactory();
+        mTaskFactory = new TaskFactory(this);
+        mInstanceFactory = new InstanceFactory();
     }
 
     public CustomTimeFactory getCustomTimeFactory() {
@@ -56,18 +70,22 @@ public class DomainFactory {
         return mInstanceFactory;
     }
 
+    public PersistenceManger getPersistenceManager() {
+        return mPersistenceManager;
+    }
+
     public class InstanceFactory {
         private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
         InstanceFactory() {
-            Collection<InstanceRecord> instanceRecords = PersistenceManger.getInstance().getInstanceRecords();
+            Collection<InstanceRecord> instanceRecords = mPersistenceManager.getInstanceRecords();
             Assert.assertTrue(instanceRecords != null);
 
             for (InstanceRecord instanceRecord : instanceRecords) {
                 Task task = mTaskFactory.getTask(instanceRecord.getTaskId());
                 Assert.assertTrue(task != null);
 
-                Instance instance = new Instance(task, instanceRecord);
+                Instance instance = new Instance(DomainFactory.this, task, instanceRecord);
                 mExistingInstances.add(instance);
             }
         }
@@ -92,7 +110,7 @@ public class DomainFactory {
                 Assert.assertTrue(instances.size() == 1);
                 return instances.get(0);
             } else {
-                return new Instance(task, scheduleDateTime);
+                return new Instance(DomainFactory.this, task, scheduleDateTime);
             }
         }
 
@@ -167,11 +185,17 @@ public class DomainFactory {
     }
 
     public class TaskFactory {
+        private final DomainFactory mDomainFactory;
+
         private final HashMap<Integer, Task> mTasks = new HashMap<>();
         private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
 
-        TaskFactory() {
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
+        TaskFactory(DomainFactory domainFactory) {
+            Assert.assertTrue(domainFactory != null);
+            mDomainFactory = domainFactory;
+
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
 
             Collection<TaskRecord> taskRecords = persistenceManger.getTaskRecords();
             Assert.assertTrue(taskRecords != null);
@@ -179,7 +203,7 @@ public class DomainFactory {
             for (TaskRecord taskRecord : taskRecords) {
                 Assert.assertTrue(taskRecord != null);
 
-                Task task = new Task(taskRecord);
+                Task task = new Task(mDomainFactory, taskRecord);
 
                 ArrayList<Schedule> schedules = loadSchedules(task);
                 Assert.assertTrue(schedules != null);
@@ -212,7 +236,7 @@ public class DomainFactory {
         private ArrayList<Schedule> loadSchedules(Task task) {
             Assert.assertTrue(task != null);
 
-            ArrayList<ScheduleRecord> scheduleRecords = PersistenceManger.getInstance().getScheduleRecords(task);
+            ArrayList<ScheduleRecord> scheduleRecords = getPersistenceManager().getScheduleRecords(task);
             Assert.assertTrue(scheduleRecords != null);
 
             ArrayList<Schedule> schedules = new ArrayList<>();
@@ -247,10 +271,13 @@ public class DomainFactory {
 
             SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
 
-            SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = PersistenceManger.getInstance().getSingleScheduleDateTimeRecord(singleSchedule);
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
+
+            SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = persistenceManger.getSingleScheduleDateTimeRecord(singleSchedule);
             Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-            SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(singleScheduleDateTimeRecord);
+            SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(mDomainFactory, singleScheduleDateTimeRecord);
             singleSchedule.setSingleScheduleDateTime(singleScheduleDateTime);
 
             return singleSchedule;
@@ -260,7 +287,8 @@ public class DomainFactory {
             Assert.assertTrue(scheduleRecord != null);
             Assert.assertTrue(rootTask != null);
 
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
 
             DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
 
@@ -269,7 +297,7 @@ public class DomainFactory {
             Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
 
             for (DailyScheduleTimeRecord dailyScheduleTimeRecord : dailyScheduleTimeRecords) {
-                DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(dailyScheduleTimeRecord);
+                DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(mDomainFactory, dailyScheduleTimeRecord);
                 dailySchedule.addDailyScheduleTime(dailyScheduleTime);
             }
 
@@ -280,7 +308,8 @@ public class DomainFactory {
             Assert.assertTrue(scheduleRecord != null);
             Assert.assertTrue(rootTask != null);
 
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
 
             WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
 
@@ -289,7 +318,7 @@ public class DomainFactory {
             Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
 
             for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
-                WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeRecord);
+                WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(mDomainFactory, weeklyScheduleDayOfWeekTimeRecord);
                 weeklySchedule.addWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
             }
 
@@ -319,10 +348,13 @@ public class DomainFactory {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(startTimeStamp != null);
 
-            TaskRecord taskRecord = PersistenceManger.getInstance().createTaskRecord(name, startTimeStamp);
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
+
+            TaskRecord taskRecord = persistenceManger.createTaskRecord(name, startTimeStamp);
             Assert.assertTrue(taskRecord != null);
 
-            Task rootTask = new Task(taskRecord);
+            Task rootTask = new Task(mDomainFactory, taskRecord);
 
             Assert.assertTrue(!mTasks.containsKey(rootTask.getId()));
             mTasks.put(rootTask.getId(), rootTask);
@@ -336,10 +368,13 @@ public class DomainFactory {
             Assert.assertTrue(startTimeStamp != null);
             Assert.assertTrue(parentTask.current(startTimeStamp));
 
-            TaskRecord childTaskRecord = PersistenceManger.getInstance().createTaskRecord(name, startTimeStamp);
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
+
+            TaskRecord childTaskRecord = persistenceManger.createTaskRecord(name, startTimeStamp);
             Assert.assertTrue(childTaskRecord != null);
 
-            Task childTask = new Task(childTaskRecord);
+            Task childTask = new Task(mDomainFactory, childTaskRecord);
             Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
             mTasks.put(childTask.getId(), childTask);
 
@@ -371,7 +406,10 @@ public class DomainFactory {
             Assert.assertTrue(childTask != null);
             Assert.assertTrue(childTask.current(startTimeStamp));
 
-            TaskHierarchyRecord taskHierarchyRecord = PersistenceManger.getInstance().createTaskHierarchyRecord(parentTask, childTask, startTimeStamp);
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
+
+            TaskHierarchyRecord taskHierarchyRecord = persistenceManger.createTaskHierarchyRecord(parentTask, childTask, startTimeStamp);
             Assert.assertTrue(taskHierarchyRecord != null);
 
             TaskHierarchy taskHierarchy = new TaskHierarchy(taskHierarchyRecord, parentTask, childTask);
@@ -386,7 +424,8 @@ public class DomainFactory {
             Assert.assertTrue(startTimeStamp != null);
             Assert.assertTrue(new DateTime(date, time).getTimeStamp().compareTo(startTimeStamp) >= 0);
 
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
 
             ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.SINGLE, startTimeStamp);
             Assert.assertTrue(scheduleRecord != null);
@@ -396,7 +435,7 @@ public class DomainFactory {
             SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = persistenceManger.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
             Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-            singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(singleScheduleDateTimeRecord));
+            singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(mDomainFactory, singleScheduleDateTimeRecord));
 
             return singleSchedule;
         }
@@ -408,7 +447,8 @@ public class DomainFactory {
             Assert.assertTrue(startTimeStamp != null);
             Assert.assertTrue(rootTask.current(startTimeStamp));
 
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
 
             ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.DAILY, startTimeStamp);
             Assert.assertTrue(scheduleRecord != null);
@@ -421,7 +461,7 @@ public class DomainFactory {
                 DailyScheduleTimeRecord dailyScheduleTimeRecord = persistenceManger.createDailyScheduleTimeRecord(dailySchedule, time);
                 Assert.assertTrue(dailyScheduleTimeRecord != null);
 
-                dailySchedule.addDailyScheduleTime(new DailyScheduleTime(dailyScheduleTimeRecord));
+                dailySchedule.addDailyScheduleTime(new DailyScheduleTime(mDomainFactory, dailyScheduleTimeRecord));
             }
 
             return dailySchedule;
@@ -434,7 +474,8 @@ public class DomainFactory {
             Assert.assertTrue(startTimeStamp != null);
             Assert.assertTrue(rootTask.current(startTimeStamp));
 
-            PersistenceManger persistenceManger = PersistenceManger.getInstance();
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
 
             ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.WEEKLY, startTimeStamp);
             Assert.assertTrue(scheduleRecord != null);
@@ -453,7 +494,7 @@ public class DomainFactory {
                 WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = persistenceManger.createWeeklyScheduleDayOfWeekTimeRecord(weeklySchedule, dayOfWeek, time);
                 Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
 
-                weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTimeRecord));
+                weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(mDomainFactory, weeklyScheduleDayOfWeekTimeRecord));
             }
 
             return weeklySchedule;
@@ -530,7 +571,10 @@ public class DomainFactory {
         private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
 
         CustomTimeFactory() {
-            Collection<CustomTimeRecord> customTimeRecords = PersistenceManger.getInstance().getCustomTimeRecords();
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
+
+            Collection<CustomTimeRecord> customTimeRecords = persistenceManger.getCustomTimeRecords();
             Assert.assertTrue(customTimeRecords != null);
 
             for (CustomTimeRecord customTimeRecord : customTimeRecords) {
@@ -573,7 +617,10 @@ public class DomainFactory {
             Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
             Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-            CustomTimeRecord customTimeRecord = PersistenceManger.getInstance().createCustomTimeRecord(name, hourMinutes);
+            PersistenceManger persistenceManger = getPersistenceManager();
+            Assert.assertTrue(persistenceManger != null);
+
+            CustomTimeRecord customTimeRecord = persistenceManger.createCustomTimeRecord(name, hourMinutes);
             Assert.assertTrue(customTimeRecord != null);
 
             CustomTime customTime = new CustomTime(customTimeRecord);

@@ -37,6 +37,9 @@ public class CreateChildTaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_child_task);
 
+        final DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(domainFactory != null);
+
         Intent intent = getIntent();
         Task parentTask = null;
         Task childTask = null;
@@ -44,7 +47,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
             int parentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
             Assert.assertTrue(parentTaskId != -1);
 
-            parentTask = DomainFactory.getInstance().getTaskFactory().getTask(parentTaskId);
+            parentTask = domainFactory.getTaskFactory().getTask(parentTaskId);
             Assert.assertTrue(parentTask != null);
         } else {
             Assert.assertTrue(intent.hasExtra(CHILD_TASK_ID_KEY));
@@ -52,7 +55,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
             int childTaskId = intent.getIntExtra(CHILD_TASK_ID_KEY, -1);
             Assert.assertTrue(childTaskId != -1);
 
-            childTask = DomainFactory.getInstance().getTaskFactory().getTask(childTaskId);
+            childTask = domainFactory.getTaskFactory().getTask(childTaskId);
             Assert.assertTrue(childTask != null);
         }
 
@@ -76,7 +79,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
                 }
 
                 if (finalParentTask != null) {
-                    DomainFactory.getInstance().getTaskFactory().createChildTask(finalParentTask, name, TimeStamp.getNow());
+                    domainFactory.getTaskFactory().createChildTask(finalParentTask, name, TimeStamp.getNow());
                 } else {
                     finalChildTask.setName(name);
                 }

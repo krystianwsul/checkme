@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 
 import junit.framework.Assert;
@@ -77,10 +78,13 @@ public class ShowInstanceActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(domainFactory != null);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        mInstance = InstanceData.getInstance(bundle);
+        mInstance = InstanceData.getInstance(domainFactory, bundle);
         Assert.assertTrue(mInstance != null);
 
         mShowInstanceName.setText(mInstance.getName());

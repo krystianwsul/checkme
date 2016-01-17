@@ -25,6 +25,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class TimePickerView extends LinearLayout {
+    private DomainFactory mDomainFactory;
+
     private Spinner mCustomTimeView;
     private TextView mHourMinuteView;
 
@@ -38,7 +40,9 @@ public class TimePickerView extends LinearLayout {
     private static final String HOUR_KEY = "hour";
     private static final String MINUTE_KEY = "minute";
 
-    private CustomTime mCustomTime;
+    private final static int EMPTY_CUSTOM_TIME = -1;
+
+    private int mCustomTimeId = EMPTY_CUSTOM_TIME;
     private HourMinute mHourMinute;
 
     private Integer mInternalSelection = null;
@@ -77,22 +81,7 @@ public class TimePickerView extends LinearLayout {
         mHourMinuteView = (TextView) findViewById(R.id.time_picker_hourminute);
         Assert.assertTrue(mHourMinuteView != null);
 
-        //adapter
-
-        ArrayList<SpinnerItem> spinnerTimes = new ArrayList<>();
-        for (CustomTime customTime : DomainFactory.getInstance().getCustomTimeFactory().getCurrentCustomTimes())
-            spinnerTimes.add(new TimeSpinnerItem(customTime));
-        mOtherSpinnerItem = new OtherSpinnerItem(getContext());
-        spinnerTimes.add(mOtherSpinnerItem);
-
-        mSpinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, spinnerTimes);
-        mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        mCustomTimeView.setAdapter(mSpinnerAdapter);
-
         //initial values
-
-        setSpinnerPosition(mSpinnerAdapter.getPosition(mOtherSpinnerItem));
 
         mHourMinute = HourMinute.getNow();
         mHourMinuteView.setVisibility(View.VISIBLE);
@@ -118,7 +107,7 @@ public class TimePickerView extends LinearLayout {
 
                 if (spinnerItem == mOtherSpinnerItem) {
                     mHourMinute = HourMinute.getNow();
-                    mCustomTime = null;
+                    mCustomTimeId = EMPTY_CUSTOM_TIME;
 
                     mHourMinuteView.setVisibility(View.VISIBLE);
                     mHourMinuteView.setText(mHourMinute.toString());
@@ -127,15 +116,15 @@ public class TimePickerView extends LinearLayout {
                 } else {
                     TimeSpinnerItem timeSpinnerItem = (TimeSpinnerItem) spinnerItem;
 
-                    mCustomTime = timeSpinnerItem.getCustomTime();
-                    Assert.assertTrue(mCustomTime != null);
+                    mCustomTimeId = timeSpinnerItem.getCustomTime().getId();
+                    Assert.assertTrue(mCustomTimeId != EMPTY_CUSTOM_TIME);
 
                     mHourMinute = null;
 
-                    TimePickerView.this.mCustomTime = mCustomTime;
                     mHourMinuteView.setVisibility(View.INVISIBLE);
 
-                    mOnTimeSelectedListener.onCustomTimeSelected(mCustomTime);
+                    Assert.assertTrue(mDomainFactory != null);
+                    mOnTimeSelectedListener.onCustomTimeSelected(mDomainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId));
                 }
             }
 
@@ -154,6 +143,40 @@ public class TimePickerView extends LinearLayout {
         });
     }
 
+    public void setDomainFactory(DomainFactory domainFactory) {
+        Assert.assertTrue(domainFactory != null);
+        mDomainFactory = domainFactory;
+
+        ArrayList<SpinnerItem> spinnerTimes = new ArrayList<>();
+        for (CustomTime customTime : mDomainFactory.getCustomTimeFactory().getCurrentCustomTimes())
+            spinnerTimes.add(new TimeSpinnerItem(customTime));
+        mOtherSpinnerItem = new OtherSpinnerItem(getContext());
+        spinnerTimes.add(mOtherSpinnerItem);
+
+        mSpinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, spinnerTimes);
+        mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        mCustomTimeView.setAdapter(mSpinnerAdapter);
+
+        setSpinnerPosition(mSpinnerAdapter.getPosition(mOtherSpinnerItem));
+
+        if (mCustomTimeId != EMPTY_CUSTOM_TIME) {
+            CustomTime customTime = domainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
+            int position = getCustomTimePosition(customTime);
+
+            setSpinnerPosition(position);
+
+            mHourMinuteView.setVisibility(View.INVISIBLE);
+        } else {
+            int position = mSpinnerAdapter.getPosition(mOtherSpinnerItem);
+
+            setSpinnerPosition(position);
+
+            mHourMinuteView.setVisibility(View.VISIBLE);
+            mHourMinuteView.setText(mHourMinute.toString());
+        }
+    }
+
     public void setOnTimeSelectedListener(OnTimeSelectedListener onTimeSelectedListener) {
         Assert.assertTrue(onTimeSelectedListener != null);
         mOnTimeSelectedListener = onTimeSelectedListener;
@@ -163,7 +186,7 @@ public class TimePickerView extends LinearLayout {
         Assert.assertTrue(hourMinute != null);
 
         mHourMinute = hourMinute;
-        mCustomTime = null;
+        mCustomTimeId = EMPTY_CUSTOM_TIME;
 
         mHourMinuteView.setVisibility(View.VISIBLE);
         mHourMinuteView.setText(hourMinute.toString());
@@ -174,7 +197,7 @@ public class TimePickerView extends LinearLayout {
     public void setCustomTime(CustomTime customTime) {
         Assert.assertTrue(customTime != null);
 
-        mCustomTime = customTime;
+        mCustomTimeId = customTime.getId();
         mHourMinute = null;
 
         mHourMinuteView.setVisibility(View.INVISIBLE);
@@ -198,13 +221,18 @@ public class TimePickerView extends LinearLayout {
     }
 
     public CustomTime getCustomTime() {
-        return mCustomTime;
+        Assert.assertTrue(mDomainFactory != null);
+
+        if (mCustomTimeId == EMPTY_CUSTOM_TIME)
+            return null;
+        else
+            return mDomainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
     }
 
     public Time getTime() {
-        if (mCustomTime != null) {
+        if (mCustomTimeId != EMPTY_CUSTOM_TIME) {
             Assert.assertTrue(mHourMinute == null);
-            return mCustomTime;
+            return getCustomTime();
         } else {
             Assert.assertTrue(mHourMinute != null);
             return new NormalTime(mHourMinute);
@@ -222,9 +250,9 @@ public class TimePickerView extends LinearLayout {
 
         bundle.putParcelable(PARENT_KEY, super.onSaveInstanceState());
 
-        if (mCustomTime != null) {
+        if (mCustomTimeId != EMPTY_CUSTOM_TIME) {
             Assert.assertTrue(mHourMinute == null);
-            bundle.putInt(CUSTOM_TIME_ID_KEY, mCustomTime.getId());
+            bundle.putInt(CUSTOM_TIME_ID_KEY, mCustomTimeId);
         } else {
             Assert.assertTrue(mHourMinute != null);
             bundle.putInt(HOUR_KEY, mHourMinute.getHour());
@@ -249,22 +277,12 @@ public class TimePickerView extends LinearLayout {
         Assert.assertTrue((hour == -1) == (minute == -1));
         Assert.assertTrue((customTimeId == -1) != (hour == -1));
 
-        if (customTimeId != -1) {
-            mCustomTime = DomainFactory.getInstance().getCustomTimeFactory().getCustomTime(customTimeId);
-            int position = getCustomTimePosition(mCustomTime);
-
-            setSpinnerPosition(position);
-
+        if (customTimeId != EMPTY_CUSTOM_TIME) {
+            mCustomTimeId = customTimeId;
             mHourMinute = null;
-            mHourMinuteView.setVisibility(View.INVISIBLE);
         } else {
-            int position = mSpinnerAdapter.getPosition(mOtherSpinnerItem);
-
-            setSpinnerPosition(position);
-
+            mCustomTimeId = EMPTY_CUSTOM_TIME;
             mHourMinute = new HourMinute(hour, minute);
-            mHourMinuteView.setVisibility(View.VISIBLE);
-            mHourMinuteView.setText(mHourMinute.toString());
         }
     }
 

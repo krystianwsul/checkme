@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizator.persistencemodel;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -48,7 +49,7 @@ public class PersistenceManger {
         Assert.assertTrue(context != null);
 
         mMySQLiteHelper = new MySQLiteHelper(context);
-
+        SQLiteDatabase sqLiteDatabase = mMySQLiteHelper.getWritableDatabase();
 
         Calendar calendarToday = Calendar.getInstance();
 

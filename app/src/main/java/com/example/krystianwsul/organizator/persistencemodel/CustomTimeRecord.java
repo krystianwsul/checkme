@@ -1,10 +1,35 @@
 package com.example.krystianwsul.organizator.persistencemodel;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
+
 public class CustomTimeRecord {
+    private static final String TABLE_CUSTOM_TIMES = "customTimes";
+
+    private static final String COLUMN_ID = "_id";
+    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_SUNDAY_HOUR = "sundayHour";
+    private static final String COLUMN_SUNDAY_MINUTE = "sundayMinute";
+    private static final String COLUMN_MONDAY_HOUR = "mondayHour";
+    private static final String COLUMN_MONDAY_MINUTE = "mondayMinute";
+    private static final String COLUMN_TUESDAY_HOUR = "tuesdayHour";
+    private static final String COLUMN_TUESDAY_MINUTE = "tuesdayMinute";
+    private static final String COLUMN_WEDNESDAY_HOUR = "wednesdayHour";
+    private static final String COLUMN_WEDNESDAY_MINUTE = "wednesdayMinute";
+    private static final String COLUMN_THURSDAY_HOUR = "thursdayHour";
+    private static final String COLUMN_THURSDAY_MINUTE = "thursdayMinute";
+    private static final String COLUMN_FRIDAY_HOUR = "fridayHour";
+    private static final String COLUMN_FRIDAY_MINUTE = "fridayMinute";
+    private static final String COLUMN_SATURDAY_HOUR = "saturdayHour";
+    private static final String COLUMN_SATURDAY_MINUTE = "saturdayMinute";
+    private static final String COLUMN_CURRENT = "current";
+
     private final int mId;
     private String mName;
 
@@ -31,8 +56,105 @@ public class CustomTimeRecord {
 
     private boolean mCurrent;
 
+    public static void onCreate(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_CUSTOM_TIMES
+                + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + COLUMN_NAME + " TEXT NOT NULL, "
+                + COLUMN_SUNDAY_HOUR + " INTEGER NOT NULL, "
+                + COLUMN_SUNDAY_MINUTE + " INTEGER NOT NULL, "
+                + COLUMN_MONDAY_HOUR + " INTEGER NOT NULL, "
+                + COLUMN_MONDAY_MINUTE + " INTEGER NOT NULL, "
+                + COLUMN_TUESDAY_HOUR + " INTEGER NOT NULL, "
+                + COLUMN_TUESDAY_MINUTE + " INTEGER NOT NULL, "
+                + COLUMN_WEDNESDAY_HOUR + " INTEGER NOT NULL, "
+                + COLUMN_WEDNESDAY_MINUTE + " INTEGER NOT NULL, "
+                + COLUMN_THURSDAY_HOUR + " INTEGER NOT NULL, "
+                + COLUMN_THURSDAY_MINUTE + " INTEGER NOT NULL, "
+                + COLUMN_FRIDAY_HOUR + " INTEGER NOT NULL, "
+                + COLUMN_FRIDAY_MINUTE + " INTEGER NOT NULL, "
+                + COLUMN_SATURDAY_HOUR + " INTEGER NOT NULL, "
+                + COLUMN_SATURDAY_MINUTE + " INTEGER NOT NULL, "
+                + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);");
+    }
+
+    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CUSTOM_TIMES);
+        onCreate(sqLiteDatabase);
+    }
+
+    public static CustomTimeRecord createCustomTimeRecord(SQLiteDatabase sqLiteDatabase, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_NAME, name);
+        contentValues.put(COLUMN_SUNDAY_HOUR, sundayHour);
+        contentValues.put(COLUMN_SUNDAY_MINUTE, sundayMinute);
+        contentValues.put(COLUMN_MONDAY_HOUR, mondayHour);
+        contentValues.put(COLUMN_MONDAY_MINUTE, mondayMinute);
+        contentValues.put(COLUMN_TUESDAY_HOUR, tuesdayHour);
+        contentValues.put(COLUMN_TUESDAY_MINUTE, tuesdayMinute);
+        contentValues.put(COLUMN_WEDNESDAY_HOUR, wednesdayHour);
+        contentValues.put(COLUMN_WEDNESDAY_MINUTE, wednesdayMinute);
+        contentValues.put(COLUMN_THURSDAY_HOUR, thursdayHour);
+        contentValues.put(COLUMN_THURSDAY_MINUTE, thursdayMinute);
+        contentValues.put(COLUMN_FRIDAY_HOUR, fridayHour);
+        contentValues.put(COLUMN_FRIDAY_MINUTE, fridayMinute);
+        contentValues.put(COLUMN_SATURDAY_HOUR, saturdayHour);
+        contentValues.put(COLUMN_SATURDAY_MINUTE, saturdayMinute);
+
+        long insertId = sqLiteDatabase.insert(TABLE_CUSTOM_TIMES, null, contentValues);
+        Assert.assertTrue(insertId != -1);
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, COLUMN_ID + " " + insertId, null, null, null, null);
+        cursor.moveToFirst();
+
+        CustomTimeRecord customTimeRecord = cursorToCustomTimeRecord(cursor);
+        cursor.close();
+        return customTimeRecord;
+    }
+
+    public static ArrayList<CustomTimeRecord> getCustomTimeRecords(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        ArrayList<CustomTimeRecord> customTimeRecords = new ArrayList<>();
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            customTimeRecords.add(cursorToCustomTimeRecord(cursor));
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        return customTimeRecords;
+    }
+
+    private static CustomTimeRecord cursorToCustomTimeRecord(Cursor cursor) {
+        Assert.assertTrue(cursor != null);
+
+        int id = cursor.getInt(0);
+        String name = cursor.getString(1);
+        int sundayHour = cursor.getInt(2);
+        int sundayMinute = cursor.getInt(3);
+        int mondayHour = cursor.getInt(4);
+        int mondayMinute = cursor.getInt(5);
+        int tuesdayHour = cursor.getInt(6);
+        int tuesdayMinute = cursor.getInt(7);
+        int wednesdayHour = cursor.getInt(8);
+        int wednesdayMinute = cursor.getInt(9);
+        int thursdayHour = cursor.getInt(10);
+        int thursdayMinute = cursor.getInt(11);
+        int fridayHour = cursor.getInt(12);
+        int fridayMinute = cursor.getInt(13);
+        int saturdayHour = cursor.getInt(14);
+        int saturdayMinute = cursor.getInt(15);
+        boolean current = (cursor.getInt(16) == 1);
+
+        return new CustomTimeRecord(id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
+    }
+
     CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
-        Assert.assertTrue(name != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mId = id;
         mName = name;

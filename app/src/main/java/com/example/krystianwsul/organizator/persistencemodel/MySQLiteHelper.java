@@ -1,17 +1,8 @@
-package com.example.krystianwsul.organizator.sql;
+package com.example.krystianwsul.organizator.persistencemodel;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
-import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRecord;
-import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
-import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
-import com.example.krystianwsul.organizator.persistencemodel.SingleScheduleDateTimeRecord;
-import com.example.krystianwsul.organizator.persistencemodel.TaskHierarchyRecord;
-import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
-import com.example.krystianwsul.organizator.persistencemodel.WeeklyScheduleDayOfWeekTimeRecord;
 
 import junit.framework.Assert;
 
@@ -23,7 +14,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     private static SQLiteDatabase sSQLiteDatabase;
 
-    public static SQLiteDatabase getDatabase(Context context) {
+    public synchronized static SQLiteDatabase getDatabase(Context context) {
         Assert.assertTrue(context != null);
         if (sSQLiteDatabase == null)
             sSQLiteDatabase = new MySQLiteHelper(context).getWritableDatabase();

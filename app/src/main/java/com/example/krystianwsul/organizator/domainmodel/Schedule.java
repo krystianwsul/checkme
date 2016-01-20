@@ -30,10 +30,6 @@ public abstract class Schedule {
         return mScheduleRecord.getId();
     }
 
-    public int getRootTaskId() {
-        return mRootTask.getId();
-    }
-
     private TimeStamp getStartTimeStamp() {
         return new TimeStamp(mScheduleRecord.getStartTime());
     }

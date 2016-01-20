@@ -1,8 +1,12 @@
 package com.example.krystianwsul.organizator.persistencemodel;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import junit.framework.Assert;
+
+import java.util.ArrayList;
 
 public class WeeklyScheduleDayOfWeekTimeRecord {
     private static final String TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES = "weeklyScheduleDayOfWeekTimes";
@@ -27,9 +31,9 @@ public class WeeklyScheduleDayOfWeekTimeRecord {
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL, "
+                + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
                 + COLUMN_DAY_OF_WEEK + " INTEGER NOT NULL, "
-                + COLUMN_CUSTOM_TIME_ID + " INTEGER, "
+                + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
                 + COLUMN_HOUR + " INTEGER, "
                 + COLUMN_MINUTE + " INTEGER);");
     }
@@ -39,7 +43,66 @@ public class WeeklyScheduleDayOfWeekTimeRecord {
         onCreate(sqLiteDatabase);
     }
 
-    WeeklyScheduleDayOfWeekTimeRecord(int id, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
+    public static WeeklyScheduleDayOfWeekTimeRecord createWeeklyScheduleDayOfWeekTimeRecord(SQLiteDatabase sqLiteDatabase, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue((hour == null) == (minute == null));
+        Assert.assertTrue((hour == null) || (customTimeId == null));
+        Assert.assertTrue((hour != null) || (customTimeId != null));
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_SCHEDULE_ID, scheduleId);
+        contentValues.put(COLUMN_DAY_OF_WEEK, dayOfWeek);
+        contentValues.put(COLUMN_CUSTOM_TIME_ID, customTimeId);
+        contentValues.put(COLUMN_HOUR, hour);
+        contentValues.put(COLUMN_MINUTE, minute);
+
+        long insertId = sqLiteDatabase.insert(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, null, contentValues);
+        Assert.assertTrue(insertId != -1);
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
+        cursor.moveToFirst();
+
+        WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = cursorToWeeklyScheduleDayOfWeekTimeRecord(cursor);
+        Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
+
+        cursor.close();
+        return weeklyScheduleDayOfWeekTimeRecord;
+    }
+
+    public static ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
+
+        Cursor cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, null, null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            weeklyScheduleDayOfWeekTimeRecords.add(cursorToWeeklyScheduleDayOfWeekTimeRecord(cursor));
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        return weeklyScheduleDayOfWeekTimeRecords;
+    }
+
+    private static WeeklyScheduleDayOfWeekTimeRecord cursorToWeeklyScheduleDayOfWeekTimeRecord(Cursor cursor) {
+        Assert.assertTrue(cursor != null);
+
+        int id = cursor.getInt(0);
+        int scheduleId = cursor.getInt(1);
+        int dayOfWeek = cursor.getInt(2);
+        Integer customTimeId = (cursor.isNull(3) ? null : cursor.getInt(3));
+        Integer hour = (cursor.isNull(4) ? null : cursor.getInt(4));
+        Integer minute = (cursor.isNull(5) ? null : cursor.getInt(5));
+
+        Assert.assertTrue((hour == null) == (minute == null));
+        Assert.assertTrue((hour == null) || (customTimeId == null));
+        Assert.assertTrue((hour != null) || (customTimeId != null));
+
+        return new WeeklyScheduleDayOfWeekTimeRecord(id, scheduleId, dayOfWeek, customTimeId, hour, minute);
+    }
+
+    private WeeklyScheduleDayOfWeekTimeRecord(int id, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));

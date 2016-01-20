@@ -10,9 +10,9 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class CustomTimeRecord {
-    private static final String TABLE_CUSTOM_TIMES = "customTimes";
+    static final String TABLE_CUSTOM_TIMES = "customTimes";
 
-    private static final String COLUMN_ID = "_id";
+    static final String COLUMN_ID = "_id";
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_SUNDAY_HOUR = "sundayHour";
     private static final String COLUMN_SUNDAY_MINUTE = "sundayMinute";
@@ -57,6 +57,8 @@ public class CustomTimeRecord {
     private boolean mCurrent;
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_CUSTOM_TIMES
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_NAME + " TEXT NOT NULL, "
@@ -78,11 +80,14 @@ public class CustomTimeRecord {
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CUSTOM_TIMES);
         onCreate(sqLiteDatabase);
     }
 
     public static CustomTimeRecord createCustomTimeRecord(SQLiteDatabase sqLiteDatabase, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
+        Assert.assertTrue(sqLiteDatabase != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ContentValues contentValues = new ContentValues();
@@ -105,10 +110,12 @@ public class CustomTimeRecord {
         long insertId = sqLiteDatabase.insert(TABLE_CUSTOM_TIMES, null, contentValues);
         Assert.assertTrue(insertId != -1);
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, COLUMN_ID + " " + insertId, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
         cursor.moveToFirst();
 
         CustomTimeRecord customTimeRecord = cursorToCustomTimeRecord(cursor);
+        Assert.assertTrue(customTimeRecord != null);
+
         cursor.close();
         return customTimeRecord;
     }
@@ -153,7 +160,7 @@ public class CustomTimeRecord {
         return new CustomTimeRecord(id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
     }
 
-    CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
+    private CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mId = id;

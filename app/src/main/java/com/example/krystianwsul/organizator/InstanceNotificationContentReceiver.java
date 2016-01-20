@@ -28,6 +28,8 @@ public class InstanceNotificationContentReceiver extends BroadcastReceiver {
         instance.setNotified();
         instance.setNotificationShown(false);
 
+        domainFactory.getPersistenceManager().save();
+
         context.startActivity(ShowInstanceActivity.getNotificationIntent(instance, context));
     }
 }

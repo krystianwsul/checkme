@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 public class ShowCustomTimesActivity extends AppCompatActivity {
     private RecyclerView mShowTimesList;
+    private DomainFactory mDomainFactory;
 
     public static Intent getIntent(Context context) {
         return new Intent(context, ShowCustomTimesActivity.class);
@@ -50,13 +51,13 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(domainFactory != null);
+        mDomainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(mDomainFactory != null);
 
-        mShowTimesList.setAdapter(new CustomTimesAdapter(domainFactory, this));
+        mShowTimesList.setAdapter(new CustomTimesAdapter(mDomainFactory, this));
     }
 
-    public static class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
+    public class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
         private final Activity mActivity;
         private final ArrayList<CustomTime> mCustomTimes;
 
@@ -131,6 +132,9 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
                 int position = getAdapterPosition();
                 CustomTime customTime = mCustomTimes.get(position);
                 customTime.setCurrent();
+
+                Assert.assertTrue(mDomainFactory != null);
+                mDomainFactory.getPersistenceManager().save();
 
                 mCustomTimes.remove(customTime);
                 notifyItemRemoved(position);

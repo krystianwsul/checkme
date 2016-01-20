@@ -219,6 +219,7 @@ public class Instance {
             else
                 mInstanceRecord.setDone(null);
         }
+        mDomainFactory.getPersistenceManager().save();
 
         TickReceiver.refresh(context);
     }

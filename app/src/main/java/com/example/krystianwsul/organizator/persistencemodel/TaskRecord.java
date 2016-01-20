@@ -9,7 +9,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class TaskRecord {
+public class TaskRecord extends Record {
     static final String TABLE_TASKS = "tasks";
 
     static final String COLUMN_ID = "_id";
@@ -107,11 +107,6 @@ public class TaskRecord {
         return mName;
     }
 
-    public void setName(String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        mName = name;
-    }
-
     public long getStartTime() {
         return mStartTime;
     }
@@ -120,10 +115,33 @@ public class TaskRecord {
         return mEndTime;
     }
 
+    public void setName(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        mName = name;
+        mChanged = true;
+    }
+
     public void setEndTime(long endTime) {
         Assert.assertTrue(mEndTime == null);
         Assert.assertTrue(mStartTime <= endTime);
 
         mEndTime = endTime;
+        mChanged = true;
+    }
+
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_NAME, mName);
+        contentValues.put(COLUMN_START_TIME, mStartTime);
+        contentValues.put(COLUMN_END_TIME, mEndTime);
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        update(sqLiteDatabase, TABLE_TASKS, COLUMN_ID, mId);
     }
 }

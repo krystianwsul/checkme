@@ -8,7 +8,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class TaskHierarchyRecord {
+public class TaskHierarchyRecord extends Record {
     private static final String TABLE_TASK_HIERARCHIES = "taskHierarchies";
 
     private static final String COLUMN_ID = "_id";
@@ -130,5 +130,22 @@ public class TaskHierarchyRecord {
         Assert.assertTrue(mStartTime <= endTime);
 
         mEndTime = endTime;
+        mChanged = true;
+    }
+
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_PARENT_TASK_ID, mParentTaskId);
+        contentValues.put(COLUMN_CHILD_TASK_ID, mChildTaskId);
+        contentValues.put(COLUMN_START_TIME, mStartTime);
+        contentValues.put(COLUMN_END_TIME, mEndTime);
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        update(sqLiteDatabase, TABLE_TASK_HIERARCHIES, COLUMN_ID, mId);
     }
 }

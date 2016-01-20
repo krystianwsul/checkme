@@ -8,7 +8,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class InstanceRecord {
+public class InstanceRecord extends Record {
     private static final String TABLE_INSTANCES = "instances";
 
     private static final String COLUMN_ID = "_id";
@@ -268,71 +268,109 @@ public class InstanceRecord {
         return mInstanceYear;
     }
 
-    public void setInstanceYear(int instanceYear) {
-        mInstanceYear = instanceYear;
-    }
-
     public Integer getInstanceMonth() {
         return mInstanceMonth;
-    }
-
-    public void setInstanceMonth(int instanceMonth) {
-        mInstanceMonth = instanceMonth;
     }
 
     public Integer getInstanceDay() {
         return mInstanceDay;
     }
 
-    public void setInstanceDay(int instanceDay) {
-        mInstanceDay = instanceDay;
-    }
-
     public Integer getInstanceCustomTimeId() {
         return mInstanceCustomTimeId;
-    }
-
-    public void setInstanceCustomTimeId(int instanceCustomTimeId) {
-        mInstanceCustomTimeId = instanceCustomTimeId;
     }
 
     public Integer getInstanceHour() {
         return mInstanceHour;
     }
 
-    public void setInstanceHour(int instanceHour) {
-        mInstanceHour = instanceHour;
-    }
-
     public Integer getInstanceMinute() {
         return mInstanceMinute;
-    }
-
-    public void setInstanceMinute(int instanceMinute) {
-        mInstanceMinute = instanceMinute;
-    }
-
-    public void setDone(Long done) {
-        mDone = done;
-    }
-
-    public long getHierarchyTime() {
-        return mHierarchyTime;
     }
 
     public boolean getNotified() {
         return mNotified;
     }
 
-    public void setNotified(boolean notified) {
-        mNotified = notified;
-    }
-
     public boolean getNotificationShown() {
         return mNotificationShown;
     }
 
+    public long getHierarchyTime() {
+        return mHierarchyTime;
+    }
+
+    public void setDone(Long done) {
+        mDone = done;
+        mChanged = true;
+    }
+
+    public void setInstanceYear(int instanceYear) {
+        mInstanceYear = instanceYear;
+        mChanged = true;
+    }
+
+    public void setInstanceMonth(int instanceMonth) {
+        mInstanceMonth = instanceMonth;
+        mChanged = true;
+    }
+
+    public void setInstanceDay(int instanceDay) {
+        mInstanceDay = instanceDay;
+        mChanged = true;
+    }
+
+    public void setInstanceCustomTimeId(int instanceCustomTimeId) {
+        mInstanceCustomTimeId = instanceCustomTimeId;
+        mChanged = true;
+    }
+
+    public void setInstanceHour(int instanceHour) {
+        mInstanceHour = instanceHour;
+        mChanged = true;
+    }
+
+    public void setInstanceMinute(int instanceMinute) {
+        mInstanceMinute = instanceMinute;
+        mChanged = true;
+    }
+
+    public void setNotified(boolean notified) {
+        mNotified = notified;
+        mChanged = true;
+    }
+
     public void setNotificationShown(boolean notificationShown) {
         mNotificationShown = notificationShown;
+        mChanged = true;
+    }
+
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_TASK_ID, mTaskId);
+        contentValues.put(COLUMN_DONE, mDone);
+        contentValues.put(COLUMN_SCHEDULE_YEAR, mScheduleYear);
+        contentValues.put(COLUMN_SCHEDULE_MONTH, mScheduleMonth);
+        contentValues.put(COLUMN_SCHEDULE_DAY, mScheduleDay);
+        contentValues.put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, mScheduleCustomTimeId);
+        contentValues.put(COLUMN_SCHEDULE_HOUR, mScheduleHour);
+        contentValues.put(COLUMN_SCHEDULE_MINUTE, mScheduleMinute);
+        contentValues.put(COLUMN_INSTANCE_YEAR, mInstanceYear);
+        contentValues.put(COLUMN_INSTANCE_MONTH, mInstanceMonth);
+        contentValues.put(COLUMN_INSTANCE_DAY, mInstanceDay);
+        contentValues.put(COLUMN_INSTANCE_CUSTOM_TIME_ID, mInstanceCustomTimeId);
+        contentValues.put(COLUMN_INSTANCE_HOUR, mInstanceHour);
+        contentValues.put(COLUMN_INSTANCE_MINUTE, mInstanceMinute);
+        contentValues.put(COLUMN_HIERARCHY_TIME, mHierarchyTime);
+        contentValues.put(COLUMN_NOTIFIED, mNotified);
+        contentValues.put(COLUMN_NOTIFICATION_SHOWN, mNotificationShown);
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        update(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID, mId);
     }
 }

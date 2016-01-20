@@ -28,5 +28,7 @@ public class GroupNotificationDeleteReceiver extends BroadcastReceiver {
 
             instance.setNotified();
         }
+
+        domainFactory.getPersistenceManager().save();
     }
 }

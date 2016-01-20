@@ -32,6 +32,8 @@ public class GroupNotificationContentReceiver extends BroadcastReceiver {
             instances.add(instance);
         }
 
+        domainFactory.getPersistenceManager().save();
+
         context.startActivity(ShowNotificationGroupActivity.getIntent(context, instances));
     }
 }

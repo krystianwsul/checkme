@@ -8,7 +8,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class SingleScheduleDateTimeRecord {
+public class SingleScheduleDateTimeRecord extends Record {
     private static final String TABLE_SINGLE_SCHEDULE_DATE_TIMES = "singleScheduleDateTimes";
 
     private static final String COLUMN_SCHEDULE_ID = "scheduleId";
@@ -150,5 +150,22 @@ public class SingleScheduleDateTimeRecord {
 
     public Integer getMinute() {
         return mMinute;
+    }
+
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_YEAR, mYear);
+        contentValues.put(COLUMN_MONTH, mMinute);
+        contentValues.put(COLUMN_DAY, mDay);
+        contentValues.put(COLUMN_CUSTOM_TIME_ID, mCustomTimeId);
+        contentValues.put(COLUMN_HOUR, mHour);
+        contentValues.put(COLUMN_MINUTE, mMinute);
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        update(sqLiteDatabase, TABLE_SINGLE_SCHEDULE_DATE_TIMES, COLUMN_SCHEDULE_ID, mScheduleId);
     }
 }

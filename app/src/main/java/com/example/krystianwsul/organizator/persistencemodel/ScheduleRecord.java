@@ -8,7 +8,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ScheduleRecord {
+public class ScheduleRecord extends Record {
     static final String TABLE_SCHEDULES = "schedules";
 
     static final String COLUMN_ID = "_id";
@@ -120,14 +120,30 @@ public class ScheduleRecord {
         return mEndTime;
     }
 
+    public int getType() {
+        return mType;
+    }
+
     public void setEndTime(long endTime) {
         Assert.assertTrue(mEndTime == null);
         Assert.assertTrue(mStartTime <= endTime);
 
         mEndTime = endTime;
+        mChanged = true;
     }
 
-    public int getType() {
-        return mType;
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_ROOT_TASK_ID, mRootTaskId);
+        contentValues.put(COLUMN_START_TIME, mStartTime);
+        contentValues.put(COLUMN_END_TIME, mEndTime);
+        contentValues.put(COLUMN_TYPE, mType);
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        update(sqLiteDatabase, TABLE_SCHEDULES, COLUMN_ID, mId);
     }
 }

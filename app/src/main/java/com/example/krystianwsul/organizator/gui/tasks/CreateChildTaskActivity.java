@@ -82,6 +82,7 @@ public class CreateChildTaskActivity extends AppCompatActivity {
                     domainFactory.getTaskFactory().createChildTask(finalParentTask, name, TimeStamp.getNow());
                 } else {
                     finalChildTask.setName(name);
+                    domainFactory.getPersistenceManager().save();
                 }
 
                 finish();

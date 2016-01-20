@@ -9,7 +9,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class CustomTimeRecord {
+public class CustomTimeRecord extends Record {
     static final String TABLE_CUSTOM_TIMES = "customTimes";
 
     static final String COLUMN_ID = "_id";
@@ -200,7 +200,9 @@ public class CustomTimeRecord {
 
     public void setName(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
         mName = name;
+        mChanged = true;
     }
 
     public int getSundayHour() {
@@ -259,67 +261,111 @@ public class CustomTimeRecord {
         return mSaturdayMinute;
     }
 
-    public void setSundayHour(int hour) {
-        mSundayHour = hour;
-    }
-
-    public void setSundayMinute(int minute) {
-        mSundayMinute = minute;
-    }
-
-    public void setMondayHour(int hour) {
-        mMondayHour = hour;
-    }
-
-    public void setMondayMinute(int minute) {
-        mMondayMinute = minute;
-    }
-
-    public void setTuesdayHour(int hour) {
-        mTuesdayHour = hour;
-    }
-
-    public void setTuesdayMinute(int minute) {
-        mTuesdayMinute = minute;
-    }
-
-    public void setWednesdayHour(int hour) {
-        mWednesdayHour = hour;
-    }
-
-    public void setWednesdayMinute(int minute) {
-        mWednesdayMinute = minute;
-    }
-
-    public void setThursdayHour(int hour) {
-        mThursdayHour = hour;
-    }
-
-    public void setThursdayMinute(int minute) {
-        mThursdayMinute = minute;
-    }
-
-    public void setFridayHour(int hour) {
-        mFridayHour = hour;
-    }
-
-    public void setFridayMinute(int minute) {
-        mFridayMinute = minute;
-    }
-
-    public void setSaturdayHour(int hour) {
-        mSaturdayHour = hour;
-    }
-
-    public void setSaturdayMinute(int minute) {
-        mSaturdayMinute = minute;
-    }
-
     public boolean getCurrent() {
         return mCurrent;
     }
 
+    public void setSundayHour(int hour) {
+        mSundayHour = hour;
+        mChanged = true;
+    }
+
+    public void setSundayMinute(int minute) {
+        mSundayMinute = minute;
+        mChanged = true;
+    }
+
+    public void setMondayHour(int hour) {
+        mMondayHour = hour;
+        mChanged = true;
+    }
+
+    public void setMondayMinute(int minute) {
+        mMondayMinute = minute;
+        mChanged = true;
+    }
+
+    public void setTuesdayHour(int hour) {
+        mTuesdayHour = hour;
+        mChanged = true;
+    }
+
+    public void setTuesdayMinute(int minute) {
+        mTuesdayMinute = minute;
+        mChanged = true;
+    }
+
+    public void setWednesdayHour(int hour) {
+        mWednesdayHour = hour;
+        mChanged = true;
+    }
+
+    public void setWednesdayMinute(int minute) {
+        mWednesdayMinute = minute;
+        mChanged = true;
+    }
+
+    public void setThursdayHour(int hour) {
+        mThursdayHour = hour;
+        mChanged = true;
+    }
+
+    public void setThursdayMinute(int minute) {
+        mThursdayMinute = minute;
+        mChanged = true;
+    }
+
+    public void setFridayHour(int hour) {
+        mFridayHour = hour;
+        mChanged = true;
+    }
+
+    public void setFridayMinute(int minute) {
+        mFridayMinute = minute;
+        mChanged = true;
+    }
+
+    public void setSaturdayHour(int hour) {
+        mSaturdayHour = hour;
+        mChanged = true;
+    }
+
+    public void setSaturdayMinute(int minute) {
+        mSaturdayMinute = minute;
+        mChanged = true;
+    }
+
     public void setCurrent(boolean current) {
         mCurrent = current;
+        mChanged = true;
+    }
+
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_NAME, mName);
+        contentValues.put(COLUMN_SUNDAY_HOUR, mSundayHour);
+        contentValues.put(COLUMN_SUNDAY_MINUTE, mSundayMinute);
+        contentValues.put(COLUMN_MONDAY_HOUR, mMondayHour);
+        contentValues.put(COLUMN_MONDAY_MINUTE, mMondayMinute);
+        contentValues.put(COLUMN_TUESDAY_HOUR, mTuesdayHour);
+        contentValues.put(COLUMN_TUESDAY_MINUTE, mTuesdayMinute);
+        contentValues.put(COLUMN_WEDNESDAY_HOUR, mWednesdayHour);
+        contentValues.put(COLUMN_WEDNESDAY_MINUTE, mWednesdayMinute);
+        contentValues.put(COLUMN_THURSDAY_HOUR, mThursdayHour);
+        contentValues.put(COLUMN_THURSDAY_MINUTE, mThursdayMinute);
+        contentValues.put(COLUMN_FRIDAY_HOUR, mFridayHour);
+        contentValues.put(COLUMN_FRIDAY_MINUTE, mFridayMinute);
+        contentValues.put(COLUMN_SATURDAY_HOUR, mSaturdayHour);
+        contentValues.put(COLUMN_SATURDAY_MINUTE, mSaturdayMinute);
+        contentValues.put(COLUMN_CURRENT, mCurrent);
+
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        update(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID, mId);
     }
 }

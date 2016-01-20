@@ -149,6 +149,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
                         if (hourMinute.compareTo(mCustomTime.getHourMinute(dayOfWeek)) != 0)
                             mCustomTime.setHourMinute(dayOfWeek, hourMinute);
                     }
+                    domainFactory.getPersistenceManager().save();
                 } else {
                     domainFactory.getCustomTimeFactory().createCustomTime(name, mHourMinutes);
                 }

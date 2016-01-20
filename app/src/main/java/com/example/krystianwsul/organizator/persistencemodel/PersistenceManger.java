@@ -282,4 +282,30 @@ public class PersistenceManger {
         mCustomTimeRecords.put(customTimeRecord.getId(), customTimeRecord);
         return customTimeRecord;
     }
+
+    public void save() {
+        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
+            customTimeRecord.update(mSQLiteDatabase);
+
+        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
+            dailyScheduleTimeRecord.update(mSQLiteDatabase);
+
+        for (InstanceRecord instanceRecord : mInstanceRecords.values())
+            instanceRecord.update(mSQLiteDatabase);
+
+        for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
+            scheduleRecord.update(mSQLiteDatabase);
+
+        for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
+            singleScheduleDateTimeRecord.update(mSQLiteDatabase);
+
+        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
+            taskHierarchyRecord.update(mSQLiteDatabase);
+
+        for (TaskRecord taskRecord : mTaskRecords.values())
+            taskRecord.update(mSQLiteDatabase);
+
+        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
+            weeklyScheduleDayOfWeekTimeRecord.update(mSQLiteDatabase);
+    }
 }

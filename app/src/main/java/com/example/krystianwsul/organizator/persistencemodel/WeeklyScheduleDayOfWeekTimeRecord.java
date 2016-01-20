@@ -8,7 +8,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class WeeklyScheduleDayOfWeekTimeRecord {
+public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
     private static final String TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES = "weeklyScheduleDayOfWeekTimes";
 
     private static final String COLUMN_ID = "_id";
@@ -140,5 +140,21 @@ public class WeeklyScheduleDayOfWeekTimeRecord {
 
     public Integer getMinute() {
         return mMinute;
+    }
+
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_SCHEDULE_ID, mScheduleId);
+        contentValues.put(COLUMN_DAY_OF_WEEK, mDayOfWeek);
+        contentValues.put(COLUMN_CUSTOM_TIME_ID, mCustomTimeId);
+        contentValues.put(COLUMN_HOUR, mHour);
+        contentValues.put(COLUMN_MINUTE, mMinute);
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        update(sqLiteDatabase, TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, COLUMN_ID, mId);
     }
 }

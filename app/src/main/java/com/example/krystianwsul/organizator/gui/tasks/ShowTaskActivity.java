@@ -20,6 +20,8 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 public class ShowTaskActivity extends AppCompatActivity {
+    private DomainFactory mDomainFactory;
+
     private RecyclerView mShowTaskRecycler;
     private TextView mTasksHeadingLabel;
     private TextView mTasksRowSchedule;
@@ -39,13 +41,13 @@ public class ShowTaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
 
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+        mDomainFactory = DomainFactory.getDomainFactory(this);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int taskId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(taskId != -1);
-        mTask = domainFactory.getTaskFactory().getTask(taskId);
+        mTask = mDomainFactory.getTaskFactory().getTask(taskId);
         Assert.assertTrue(mTask != null);
 
         mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
@@ -79,7 +81,7 @@ public class ShowTaskActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        mShowTaskRecycler.setAdapter(new TaskAdapter(this, mTask.getChildTasks(TimeStamp.getNow())));
+        mShowTaskRecycler.setAdapter(new TaskAdapter(this, mDomainFactory, mTask.getChildTasks(TimeStamp.getNow())));
 
         mTasksHeadingLabel.setText(mTask.getName());
         String scheduleText = mTask.getScheduleText(this, TimeStamp.getNow());

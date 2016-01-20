@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
@@ -22,15 +23,18 @@ import java.util.ArrayList;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     private final Activity mActivity;
+    private final DomainFactory mDomainFactory;
     private final ArrayList<TaskWrapper> mTaskWrappers;
 
     private boolean mEditing = false;
 
-    public TaskAdapter(Activity activity, ArrayList<Task> tasks) {
+    public TaskAdapter(Activity activity, DomainFactory domainFactory, ArrayList<Task> tasks) {
         Assert.assertTrue(activity != null);
+        Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(tasks != null);
 
         mActivity = activity;
+        mDomainFactory = domainFactory;
 
         mTaskWrappers = new ArrayList<>();
         for (Task task : tasks)
@@ -169,6 +173,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             Assert.assertTrue(taskWrapper != null);
 
             taskWrapper.mTask.setEndTimeStamp(TimeStamp.getNow());
+
+            mDomainFactory.getPersistenceManager().save();
 
             mTaskWrappers.remove(position);
             notifyItemRemoved(position);

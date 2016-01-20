@@ -47,7 +47,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
         setContentView(R.layout.activity_edit_instance);
 
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+        final DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
@@ -122,6 +122,8 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
                 }
 
                 mInstance.setInstanceDateTime(EditInstanceActivity.this, new DateTime(mDate, time));
+
+                domainFactory.getPersistenceManager().save();
 
                 finish();
             }

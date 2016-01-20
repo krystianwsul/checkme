@@ -13,8 +13,6 @@ import junit.framework.Assert;
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
 
-//    private final ArrayList<WeakReference<CustomTimeObserver>> mCustomTimeObservers = new ArrayList<>();
-
     CustomTime(CustomTimeRecord customTimeRecord) {
         Assert.assertTrue(customTimeRecord != null);
         mCustomTimeRecord = customTimeRecord;
@@ -88,20 +86,6 @@ public class CustomTime implements Time {
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }
-
-        /*
-        ArrayList<WeakReference<CustomTimeObserver>> remove = new ArrayList<>();
-
-        for (WeakReference<CustomTimeObserver> weakReference : mCustomTimeObservers) {
-            CustomTimeObserver customTimeObserver = weakReference.get();
-            if (customTimeObserver != null)
-                customTimeObserver.updateDayOfWeek(dayOfWeek, hourMinute);
-            else
-                remove.add(weakReference);
-        }
-
-        mCustomTimeObservers.removeAll(remove);
-        */
     }
 
     public String toString() {
@@ -115,17 +99,6 @@ public class CustomTime implements Time {
     public Pair<CustomTime, HourMinute> getPair() {
         return new Pair<>(this, null);
     }
-
-    /*
-    public interface CustomTimeObserver {
-        void updateDayOfWeek(DayOfWeek dayOfWeek, HourMinute hourMinute);
-    }
-
-    public void addCustomTimeObserver(CustomTimeObserver customTimeObserver) {
-        Assert.assertTrue(customTimeObserver != null);
-        mCustomTimeObservers.add(new WeakReference<>(customTimeObserver));
-    }
-    */
 
     public boolean getCurrent() {
         return mCustomTimeRecord.getCurrent();

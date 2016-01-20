@@ -72,6 +72,8 @@ public class TickReceiver extends BroadcastReceiver {
                 instance.setNotificationShown(false);
             }
 
+            domainFactory.getPersistenceManager().save();
+
             notify(context, instances);
         } else {
             notificationManager.cancel(0);
@@ -85,6 +87,8 @@ public class TickReceiver extends BroadcastReceiver {
 
             for (Instance instance : instances)
                 notify(context, instance);
+
+            domainFactory.getPersistenceManager().save();
         }
     }
 

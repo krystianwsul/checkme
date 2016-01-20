@@ -8,7 +8,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class DailyScheduleTimeRecord {
+public class DailyScheduleTimeRecord extends Record {
     private static final String TABLE_DAILY_SCHEDULE_TIMES = "dailyScheduleTimes";
 
     private static final String COLUMN_ID = "_id";
@@ -16,6 +16,8 @@ public class DailyScheduleTimeRecord {
     private static final String COLUMN_CUSTOM_TIME_ID = "customTimeId";
     private static final String COLUMN_HOUR = "hour";
     private static final String COLUMN_MINUTE = "minute";
+
+    private boolean mChanged = false;
 
     private final int mId;
     private final int mScheduleId;
@@ -128,5 +130,20 @@ public class DailyScheduleTimeRecord {
 
     public Integer getMinute() {
         return mMinute;
+    }
+
+    @Override
+    ContentValues getContentValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_SCHEDULE_ID, mScheduleId);
+        contentValues.put(COLUMN_CUSTOM_TIME_ID, mCustomTimeId);
+        contentValues.put(COLUMN_HOUR, mHour);
+        contentValues.put(COLUMN_MINUTE, mMinute);
+        return contentValues;
+    }
+
+    @Override
+    void update(SQLiteDatabase sqLiteDatabase) {
+        update(sqLiteDatabase, TABLE_DAILY_SCHEDULE_TIMES, COLUMN_ID, mId);
     }
 }

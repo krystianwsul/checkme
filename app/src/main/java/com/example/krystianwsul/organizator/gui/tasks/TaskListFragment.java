@@ -56,7 +56,7 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
         DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
         Assert.assertTrue(domainFactory != null);
 
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory.getTaskFactory().getRootTasks(TimeStamp.getNow())));
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory, domainFactory.getTaskFactory().getRootTasks(TimeStamp.getNow())));
     }
 
     public void setEditing(boolean editing) {

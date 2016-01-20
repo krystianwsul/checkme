@@ -25,5 +25,7 @@ public class InstanceNotificationDeleteReceiver extends BroadcastReceiver {
 
         instance.setNotified();
         instance.setNotificationShown(false);
+
+        domainFactory.getPersistenceManager().save();
     }
 }

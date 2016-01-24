@@ -84,7 +84,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         Bundle args = getArguments();
 
-        mDomainFactory = DomainFactory.getDomainFactory(getContext());
+        mDomainFactory = DomainFactory.getDomainFactory(getActivity());
         Assert.assertTrue(mDomainFactory != null);
 
         if (savedInstanceState != null) {

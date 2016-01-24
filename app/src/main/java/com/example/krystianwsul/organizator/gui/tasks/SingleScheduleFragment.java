@@ -74,7 +74,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Bundle args = getArguments();
 
-        mDomainFactory = DomainFactory.getDomainFactory(getContext());
+        mDomainFactory = DomainFactory.getDomainFactory(getActivity());
 
         Time time = null;
         if (savedInstanceState != null) {

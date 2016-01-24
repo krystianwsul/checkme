@@ -14,7 +14,7 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.TickReceiver;
+import com.example.krystianwsul.organizator.TickService;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
 import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        TickReceiver.register(this);
+        TickService.register(this);
     }
 
     @Override

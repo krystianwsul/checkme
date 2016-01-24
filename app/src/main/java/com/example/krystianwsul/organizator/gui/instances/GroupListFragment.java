@@ -55,7 +55,7 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
     @Override
     public void refresh() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
         Assert.assertTrue(domainFactory != null);
 
         mGroupList.setAdapter(new GroupAdapter(domainFactory, getContext()));

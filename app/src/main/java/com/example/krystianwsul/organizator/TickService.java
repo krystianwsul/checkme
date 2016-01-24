@@ -1,10 +1,10 @@
 package com.example.krystianwsul.organizator;
 
 import android.app.AlarmManager;
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +20,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class TickReceiver extends BroadcastReceiver {
+public class TickService extends IntentService {
     private static boolean mRegistered = false;
 
     private static final int MAX_NOTIFICATIONS = 4;
@@ -28,13 +28,13 @@ public class TickReceiver extends BroadcastReceiver {
     public static final String INSTANCE_KEY = "instance";
     public static final String INSTANCES_KEY = "instances";
 
-    public static void register(Context context) {
+    public static synchronized void register(Context context) {
         if (mRegistered)
             return;
 
-        Intent intent = new Intent(context.getApplicationContext(), TickReceiver.class);
+        Intent intent = new Intent(context, TickService.class);
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
@@ -43,18 +43,19 @@ public class TickReceiver extends BroadcastReceiver {
         mRegistered = true;
     }
 
-    public TickReceiver() {
+    public static void startService(Context context) {
+        Assert.assertTrue(context != null);
+
+        context.startService(new Intent(context, TickService.class));
+    }
+
+    public TickService() {
+        super("TickService");
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        refresh(context);
-    }
-
-    public static void refresh(Context context) {
-        Assert.assertTrue(context != null);
-
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(context);
+    protected void onHandleIntent(Intent intent) {
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
         Assert.assertTrue(domainFactory != null);
 
         DomainFactory.InstanceFactory instanceFactory = domainFactory.getInstanceFactory();
@@ -62,7 +63,7 @@ public class TickReceiver extends BroadcastReceiver {
 
         ArrayList<Instance> instances = instanceFactory.getNotificationInstances();
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         ArrayList<Instance> shownInstances = instanceFactory.getShownInstances();
 
@@ -74,7 +75,7 @@ public class TickReceiver extends BroadcastReceiver {
 
             domainFactory.getPersistenceManager().save();
 
-            notify(context, instances);
+            notify(instances);
         } else {
             notificationManager.cancel(0);
 
@@ -86,31 +87,29 @@ public class TickReceiver extends BroadcastReceiver {
             }
 
             for (Instance instance : instances)
-                notify(context, instance);
+                notify(instance);
 
             domainFactory.getPersistenceManager().save();
         }
     }
 
-    private static void notify(Context context, Instance instance) {
-        Assert.assertTrue(context != null);
+    private void notify(Instance instance) {
         Assert.assertTrue(instance != null);
 
         instance.setNotificationShown(true);
 
-        Intent deleteIntent = new Intent(context, InstanceNotificationDeleteReceiver.class);
+        Intent deleteIntent = new Intent(this, InstanceNotificationDeleteReceiver.class);
         deleteIntent.putExtra(INSTANCE_KEY, InstanceData.getBundle(instance));
-        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(context, instance.getNotificationId(), deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(this, instance.getNotificationId(), deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = new Intent(context, InstanceNotificationContentReceiver.class);
+        Intent contentIntent = new Intent(this, InstanceNotificationContentReceiver.class);
         contentIntent.putExtra(INSTANCE_KEY, InstanceData.getBundle(instance));
-        PendingIntent pendingContentIntent = PendingIntent.getBroadcast(context, instance.getNotificationId(), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingContentIntent = PendingIntent.getBroadcast(this, instance.getNotificationId(), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notify(context, instance.getName(), instance.getDisplayText(context), instance.getNotificationId(), pendingDeleteIntent, pendingContentIntent);
+        notify(instance.getName(), instance.getDisplayText(this), instance.getNotificationId(), pendingDeleteIntent, pendingContentIntent);
     }
 
-    private static void notify(Context context, ArrayList<Instance> instances) {
-        Assert.assertTrue(context != null);
+    private void notify(ArrayList<Instance> instances) {
         Assert.assertTrue(instances != null);
         Assert.assertTrue(instances.size() > MAX_NOTIFICATIONS);
 
@@ -121,27 +120,26 @@ public class TickReceiver extends BroadcastReceiver {
             bundles.add(InstanceData.getBundle(instance));
         }
 
-        Intent deleteIntent = new Intent(context, GroupNotificationDeleteReceiver.class);
+        Intent deleteIntent = new Intent(this, GroupNotificationDeleteReceiver.class);
         deleteIntent.putParcelableArrayListExtra(INSTANCES_KEY, bundles);
-        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(this, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = new Intent(context, GroupNotificationContentReceiver.class);
+        Intent contentIntent = new Intent(this, GroupNotificationContentReceiver.class);
         contentIntent.putParcelableArrayListExtra(INSTANCES_KEY, bundles);
-        PendingIntent pendingContentIntent = PendingIntent.getBroadcast(context, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingContentIntent = PendingIntent.getBroadcast(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notify(context, instances.size() + " " + context.getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent);
+        notify(instances.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent);
     }
 
-    private static void notify(Context context, String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent) {
-        Assert.assertTrue(context != null);
+    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent) {
         Assert.assertTrue(!TextUtils.isEmpty(title));
         Assert.assertTrue(!TextUtils.isEmpty(text));
         Assert.assertTrue(deleteIntent != null);
         Assert.assertTrue(contentIntent != null);
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Notification notification = (new NotificationCompat.Builder(context)).setContentTitle(title).setContentText(text).setSmallIcon(R.drawable.ic_label_outline_white_24dp).setSound(Settings.System.DEFAULT_NOTIFICATION_URI).setDeleteIntent(deleteIntent).setContentIntent(contentIntent).setAutoCancel(true).build();
+        Notification notification = (new NotificationCompat.Builder(this)).setContentTitle(title).setContentText(text).setSmallIcon(R.drawable.ic_label_outline_white_24dp).setSound(Settings.System.DEFAULT_NOTIFICATION_URI).setDeleteIntent(deleteIntent).setContentIntent(contentIntent).setAutoCancel(true).build();
         notificationManager.notify(notificationId, notification);
     }
 }

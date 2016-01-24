@@ -87,7 +87,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         RecyclerView dailyScheduleTimes = (RecyclerView) view.findViewById(R.id.weekly_schedule_datetimes);
         dailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mDomainFactory = DomainFactory.getDomainFactory(getContext());
+        mDomainFactory = DomainFactory.getDomainFactory(getActivity());
 
         Bundle args = getArguments();
 

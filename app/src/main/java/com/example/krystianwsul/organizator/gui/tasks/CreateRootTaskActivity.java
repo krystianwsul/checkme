@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.TickReceiver;
+import com.example.krystianwsul.organizator.TickService;
 import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Schedule;
@@ -179,7 +179,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
                 domainFactory.getPersistenceManager().save();
 
-                TickReceiver.refresh(CreateRootTaskActivity.this);
+                TickService.startService(CreateRootTaskActivity.this);
 
                 finish();
             }

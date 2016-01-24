@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class GroupNotificationContentReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        ArrayList<Bundle> bundles = intent.getParcelableArrayListExtra(TickReceiver.INSTANCES_KEY);
+        ArrayList<Bundle> bundles = intent.getParcelableArrayListExtra(TickService.INSTANCES_KEY);
         Assert.assertTrue(bundles != null);
 
         DomainFactory domainFactory = DomainFactory.getDomainFactory(context);

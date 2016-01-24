@@ -3,7 +3,7 @@ package com.example.krystianwsul.organizator.domainmodel;
 import android.app.NotificationManager;
 import android.content.Context;
 
-import com.example.krystianwsul.organizator.TickReceiver;
+import com.example.krystianwsul.organizator.TickService;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
@@ -221,7 +221,7 @@ public class Instance {
         }
         mDomainFactory.getPersistenceManager().save();
 
-        TickReceiver.refresh(context);
+        TickService.startService(context);
     }
 
     private Instance getRootInstance() {
@@ -306,6 +306,6 @@ public class Instance {
         mInstanceRecord.setNotificationShown(false);
         mInstanceRecord.setNotified(false);
 
-        TickReceiver.refresh(context);
+        TickService.startService(context);
     }
 }

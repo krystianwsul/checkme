@@ -8,10 +8,11 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class Task {
-    private final DomainFactory mDomainFactory;
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
 
     private final TaskRecord mTaskRecord;
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
@@ -20,7 +21,7 @@ public class Task {
         Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(taskRecord != null);
 
-        mDomainFactory = domainFactory;
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
         mTaskRecord = taskRecord;
     }
 
@@ -82,14 +83,20 @@ public class Task {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        return mDomainFactory.getTaskFactory().getChildTasks(this, timeStamp);
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory.getTaskFactory().getChildTasks(this, timeStamp);
     }
 
     public Task getParentTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
-        return mDomainFactory.getTaskFactory().getParentTask(this, timeStamp);
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory.getTaskFactory().getParentTask(this, timeStamp);
     }
 
     public int getId() {
@@ -128,7 +135,10 @@ public class Task {
             childTask.setEndTimeStamp(endTimeStamp);
         }
 
-        mDomainFactory.getTaskFactory().setParentHierarchyEndTimeStamp(this, endTimeStamp);
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        domainFactory.getTaskFactory().setParentHierarchyEndTimeStamp(this, endTimeStamp);
 
         mTaskRecord.setEndTime(endTimeStamp.getLong());
     }

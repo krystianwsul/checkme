@@ -8,8 +8,10 @@ import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
+
 class DailyScheduleTime {
-    private final DomainFactory mDomainFactory;
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
 
     private final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
 
@@ -17,15 +19,19 @@ class DailyScheduleTime {
         Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(dailyScheduleTimeRecord != null);
 
-        mDomainFactory = domainFactory;
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
         mDailyScheduleTimeRecord = dailyScheduleTimeRecord;
     }
 
     public Time getTime() {
         Integer customTimeId = mDailyScheduleTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = mDomainFactory.getCustomTimeFactory().getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
+            DomainFactory domainFactory = mDomainFactoryReference.get();
+            Assert.assertTrue(domainFactory != null);
+
+            CustomTime customTime = domainFactory.getCustomTimeFactory().getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
+
             return customTime;
         } else {
             Integer hour = mDailyScheduleTimeRecord.getHour();
@@ -47,6 +53,9 @@ class DailyScheduleTime {
         DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
 
-        return mDomainFactory.getInstanceFactory().getInstance(task, scheduleDateTime);
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory.getInstanceFactory().getInstance(task, scheduleDateTime);
     }
 }

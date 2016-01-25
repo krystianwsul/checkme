@@ -9,12 +9,13 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 
 public abstract class Schedule {
     private final ScheduleRecord mScheduleRecord;
-    final Task mRootTask;
+    final WeakReference<Task> mRootTaskReference;
 
     public abstract String getTaskText(Context context);
 
@@ -23,7 +24,7 @@ public abstract class Schedule {
         Assert.assertTrue(rootTask != null);
 
         mScheduleRecord = scheduleRecord;
-        mRootTask = rootTask;
+        mRootTaskReference = new WeakReference<>(rootTask);
     }
 
     public int getId() {

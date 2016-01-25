@@ -13,12 +13,13 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class Instance {
-    private final DomainFactory mDomainFactory;
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
 
-    private final Task mTask;
+    private final WeakReference<Task> mTaskReference;
 
     private InstanceRecord mInstanceRecord;
     private DateTime mScheduleDateTime;
@@ -28,9 +29,9 @@ public class Instance {
         Assert.assertTrue(task != null);
         Assert.assertTrue(instanceRecord != null);
 
-        mDomainFactory = domainFactory;
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
 
-        mTask = task;
+        mTaskReference = new WeakReference<>(task);
 
         mInstanceRecord = instanceRecord;
         mScheduleDateTime = null;
@@ -41,20 +42,26 @@ public class Instance {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);
 
-        mDomainFactory = domainFactory;
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
 
-        mTask = task;
+        mTaskReference = new WeakReference<>(task);
 
         mInstanceRecord = null;
         mScheduleDateTime = scheduleDateTime;
     }
 
     public int getTaskId() {
-        return mTask.getId();
+        Task task = mTaskReference.get();
+        Assert.assertTrue(task != null);
+
+        return task.getId();
     }
 
     public String getName() {
-        return mTask.getName();
+        Task task = mTaskReference.get();
+        Assert.assertTrue(task != null);
+
+        return task.getName();
     }
 
     public Date getScheduleDate() {
@@ -77,10 +84,14 @@ public class Instance {
             Assert.assertTrue((hour == null) == (minute == null));
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
-            if (customTimeId != null)
-                return mDomainFactory.getCustomTimeFactory().getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
-            else
+            if (customTimeId != null) {
+                DomainFactory domainFactory = mDomainFactoryReference.get();
+                Assert.assertTrue(domainFactory != null);
+
+                return domainFactory.getCustomTimeFactory().getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
+            } else {
                 return new NormalTime(hour, minute);
+            }
         } else {
             return mScheduleDateTime.getTime();
         }
@@ -112,12 +123,16 @@ public class Instance {
             Assert.assertTrue((mInstanceRecord.getInstanceHour() == null) == (mInstanceRecord.getInstanceMinute() == null));
             Assert.assertTrue((mInstanceRecord.getInstanceHour() == null) || (mInstanceRecord.getInstanceCustomTimeId() == null));
 
-            if (mInstanceRecord.getInstanceCustomTimeId() != null)
-                return mDomainFactory.getCustomTimeFactory().getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
-            else if (mInstanceRecord.getInstanceHour() != null)
+            if (mInstanceRecord.getInstanceCustomTimeId() != null) {
+                DomainFactory domainFactory = mDomainFactoryReference.get();
+                Assert.assertTrue(domainFactory != null);
+
+                return domainFactory.getCustomTimeFactory().getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
+            } else if (mInstanceRecord.getInstanceHour() != null) {
                 return new NormalTime(mInstanceRecord.getInstanceHour(), mInstanceRecord.getInstanceMinute());
-            else
+            } else {
                 return getScheduleTime();
+            }
         } else {
             return mScheduleDateTime.getTime();
         }
@@ -163,11 +178,17 @@ public class Instance {
     public ArrayList<Instance> getChildInstances() {
         TimeStamp hierarchyTimeStamp = getHierarchyTimeStamp();
 
+        Task task = mTaskReference.get();
+        Assert.assertTrue(task != null);
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
         ArrayList<Instance> childInstances = new ArrayList<>();
-        for (Task childTask : mTask.getChildTasks(hierarchyTimeStamp)) {
+        for (Task childTask : task.getChildTasks(hierarchyTimeStamp)) {
             Assert.assertTrue(childTask.current(hierarchyTimeStamp));
 
-            Instance childInstance = mDomainFactory.getInstanceFactory().getInstance(childTask, getScheduleDateTime());
+            Instance childInstance = domainFactory.getInstanceFactory().getInstance(childTask, getScheduleDateTime());
             Assert.assertTrue(childInstance != null);
 
             childInstances.add(childInstance);
@@ -178,20 +199,29 @@ public class Instance {
     private Instance getParentInstance() {
         TimeStamp hierarchyTimeStamp = getHierarchyTimeStamp();
 
-        Task parentTask = mTask.getParentTask(hierarchyTimeStamp);
+        Task task = mTaskReference.get();
+        Assert.assertTrue(task != null);
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        Task parentTask = task.getParentTask(hierarchyTimeStamp);
         if (parentTask == null)
             return null;
 
         Assert.assertTrue(parentTask.current(hierarchyTimeStamp));
 
-        Instance parentInstance = mDomainFactory.getInstanceFactory().getInstance(parentTask, getScheduleDateTime());
+        Instance parentInstance = domainFactory.getInstanceFactory().getInstance(parentTask, getScheduleDateTime());
         Assert.assertTrue(parentInstance != null);
 
         return parentInstance;
     }
 
     public boolean isRootInstance() {
-        return mTask.isRootTask(getHierarchyTimeStamp());
+        Task task = mTaskReference.get();
+        Assert.assertTrue(task != null);
+
+        return task.isRootTask(getHierarchyTimeStamp());
     }
 
     public TimeStamp getDone() {
@@ -219,7 +249,11 @@ public class Instance {
             else
                 mInstanceRecord.setDone(null);
         }
-        mDomainFactory.getPersistenceManager().save();
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        domainFactory.getPersistenceManager().save();
 
         TickService.startService(context);
     }
@@ -245,12 +279,18 @@ public class Instance {
         Assert.assertTrue(mInstanceRecord == null);
         Assert.assertTrue(mScheduleDateTime != null);
 
-        mDomainFactory.getInstanceFactory().addExistingInstance(this);
+        Task task = mTaskReference.get();
+        Assert.assertTrue(task != null);
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        domainFactory.getInstanceFactory().addExistingInstance(this);
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
         mScheduleDateTime = null;
-        mInstanceRecord = mDomainFactory.getPersistenceManager().createInstanceRecord(mTask, scheduleDateTime);
+        mInstanceRecord = domainFactory.getPersistenceManager().createInstanceRecord(task, scheduleDateTime);
     }
 
     private TimeStamp getHierarchyTimeStamp() {

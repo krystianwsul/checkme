@@ -51,7 +51,10 @@ public class SingleSchedule extends Schedule {
         if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
             return instances;
 
-        instances.add(mSingleScheduleDateTime.getInstance(mRootTask, date));
+        Task rootTask = mRootTaskReference.get();
+        Assert.assertTrue(rootTask != null);
+
+        instances.add(mSingleScheduleDateTime.getInstance(rootTask, date));
 
         return instances;
     }

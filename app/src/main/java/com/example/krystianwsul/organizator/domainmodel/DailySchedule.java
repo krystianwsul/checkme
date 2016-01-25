@@ -40,6 +40,9 @@ public class DailySchedule extends Schedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
+        Task rootTask = mRootTaskReference.get();
+        Assert.assertTrue(rootTask != null);
+
         for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
             HourMinute hourMinute = dailyScheduleTime.getTime().getHourMinute(day);
             Assert.assertTrue(hourMinute != null);
@@ -50,7 +53,7 @@ public class DailySchedule extends Schedule {
             if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
                 continue;
 
-            instances.add(dailyScheduleTime.getInstance(mRootTask, date));
+            instances.add(dailyScheduleTime.getInstance(rootTask, date));
         }
 
         return instances;

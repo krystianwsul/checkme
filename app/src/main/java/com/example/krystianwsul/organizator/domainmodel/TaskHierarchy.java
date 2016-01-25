@@ -5,11 +5,13 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
+
 class TaskHierarchy {
     private final TaskHierarchyRecord mTaskHierarchyRecord;
 
-    private final Task mParentTask;
-    private final Task mChildTask;
+    private final WeakReference<Task> mParentTaskReference;
+    private final WeakReference<Task> mChildTaskReference;
 
     public TaskHierarchy(TaskHierarchyRecord taskHierarchyRecord, Task parentTask, Task childTask) {
         Assert.assertTrue(taskHierarchyRecord != null);
@@ -18,8 +20,8 @@ class TaskHierarchy {
 
         mTaskHierarchyRecord = taskHierarchyRecord;
 
-        mParentTask = parentTask;
-        mChildTask = childTask;
+        mParentTaskReference = new WeakReference<>(parentTask);
+        mChildTaskReference = new WeakReference<>(childTask);
     }
 
     public int getId() {
@@ -27,11 +29,17 @@ class TaskHierarchy {
     }
 
     public Task getParentTask() {
-        return mParentTask;
+        Task parentTask = mParentTaskReference.get();
+        Assert.assertTrue(parentTask != null);
+
+        return parentTask;
     }
 
     public Task getChildTask() {
-        return mChildTask;
+        Task childTask = mChildTaskReference.get();
+        Assert.assertTrue(childTask != null);
+
+        return childTask;
     }
 
     private TimeStamp getStartTimeStamp() {

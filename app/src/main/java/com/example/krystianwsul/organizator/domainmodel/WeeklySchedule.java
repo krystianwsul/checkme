@@ -40,6 +40,9 @@ public class WeeklySchedule extends Schedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
+        Task rootTask = mRootTaskReference.get();
+        Assert.assertTrue(rootTask != null);
+
         for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes) {
             if (weeklyScheduleDayOfWeekTime.getDayOfWeek() != day)
                 continue;
@@ -53,7 +56,7 @@ public class WeeklySchedule extends Schedule {
             if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
                 continue;
 
-            instances.add(weeklyScheduleDayOfWeekTime.getInstance(mRootTask, date));
+            instances.add(weeklyScheduleDayOfWeekTime.getInstance(rootTask, date));
         }
 
         return instances;

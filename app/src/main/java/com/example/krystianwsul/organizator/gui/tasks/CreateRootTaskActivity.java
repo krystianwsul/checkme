@@ -14,13 +14,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.TickService;
 import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;

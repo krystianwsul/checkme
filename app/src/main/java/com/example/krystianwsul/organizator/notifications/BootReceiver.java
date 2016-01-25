@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizator;
+package com.example.krystianwsul.organizator.notifications;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

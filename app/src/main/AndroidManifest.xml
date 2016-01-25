@@ -34,32 +34,22 @@
         <activity android:name=".gui.instances.EditInstanceActivity" />
 
         <receiver
-            android:name=".BootReceiver"
+            android:name=".notifications.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".GroupNotificationDeleteReceiver"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
-            android:name=".InstanceNotificationDeleteReceiver"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
-            android:name=".GroupNotificationContentReceiver"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
-            android:name=".InstanceNotificationContentReceiver"
-            android:enabled="true"
-            android:exported="true" />
 
         <service
-            android:name=".TickService"
+            android:name=".notifications.TickService"
+            android:exported="false" />
+        <service
+            android:name=".notifications.GroupNotificationDeleteService"
+            android:exported="false" />
+        <service
+            android:name=".notifications.InstanceNotificationDeleteService"
             android:exported="false"></service>
     </application>
 

@@ -3,7 +3,7 @@ package com.example.krystianwsul.organizator.domainmodel;
 import android.app.NotificationManager;
 import android.content.Context;
 
-import com.example.krystianwsul.organizator.TickService;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;

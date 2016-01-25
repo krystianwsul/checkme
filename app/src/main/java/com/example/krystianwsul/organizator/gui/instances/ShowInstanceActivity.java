@@ -21,14 +21,15 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowInstanceActivity extends AppCompatActivity {
+    private static final String INTENT_KEY = "instanceId";
+    private static final String SET_NOTIFIED_KEY = "setNotified";
+
     private TextView mShowInstanceName;
     private RecyclerView mShowInstanceList;
     private TextView mShowInstanceDetails;
     private CheckBox mCheckBox;
 
     private Instance mInstance;
-
-    private static final String INTENT_KEY = "instanceId";
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
@@ -39,14 +40,20 @@ public class ShowInstanceActivity extends AppCompatActivity {
     public static Intent getNotificationIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
         intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
+        intent.putExtra(SET_NOTIFIED_KEY, true);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
     }
+
+    private boolean mFirst = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_instance);
+
+        if (savedInstanceState == null)
+            mFirst = true;
 
         mShowInstanceName = (TextView) findViewById(R.id.show_instance_name);
 
@@ -86,6 +93,13 @@ public class ShowInstanceActivity extends AppCompatActivity {
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
         mInstance = InstanceData.getInstance(domainFactory, bundle);
         Assert.assertTrue(mInstance != null);
+
+        if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
+            mInstance.setNotified();
+            mInstance.setNotificationShown(false);
+
+            domainFactory.getPersistenceManager().save();
+        }
 
         mShowInstanceName.setText(mInstance.getName());
 

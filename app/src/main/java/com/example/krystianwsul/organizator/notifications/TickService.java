@@ -1,4 +1,4 @@
-package com.example.krystianwsul.organizator;
+package com.example.krystianwsul.organizator.notifications;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
@@ -12,9 +12,12 @@ import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.instances.InstanceData;
+import com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity;
+import com.example.krystianwsul.organizator.gui.instances.ShowNotificationGroupActivity;
 
 import junit.framework.Assert;
 
@@ -98,13 +101,11 @@ public class TickService extends IntentService {
 
         instance.setNotificationShown(true);
 
-        Intent deleteIntent = new Intent(this, InstanceNotificationDeleteReceiver.class);
-        deleteIntent.putExtra(INSTANCE_KEY, InstanceData.getBundle(instance));
-        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(this, instance.getNotificationId(), deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent deleteIntent = InstanceNotificationDeleteService.getIntent(this, instance);
+        PendingIntent pendingDeleteIntent = PendingIntent.getService(this, instance.getNotificationId(), deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = new Intent(this, InstanceNotificationContentReceiver.class);
-        contentIntent.putExtra(INSTANCE_KEY, InstanceData.getBundle(instance));
-        PendingIntent pendingContentIntent = PendingIntent.getBroadcast(this, instance.getNotificationId(), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent contentIntent = ShowInstanceActivity.getNotificationIntent(instance, this);
+        PendingIntent pendingContentIntent = PendingIntent.getActivity(this, instance.getNotificationId(), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         notify(instance.getName(), instance.getDisplayText(this), instance.getNotificationId(), pendingDeleteIntent, pendingContentIntent);
     }
@@ -120,13 +121,11 @@ public class TickService extends IntentService {
             bundles.add(InstanceData.getBundle(instance));
         }
 
-        Intent deleteIntent = new Intent(this, GroupNotificationDeleteReceiver.class);
-        deleteIntent.putParcelableArrayListExtra(INSTANCES_KEY, bundles);
-        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(this, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent deleteIntent = GroupNotificationDeleteService.getIntent(this, bundles);
+        PendingIntent pendingDeleteIntent = PendingIntent.getService(this, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = new Intent(this, GroupNotificationContentReceiver.class);
-        contentIntent.putParcelableArrayListExtra(INSTANCES_KEY, bundles);
-        PendingIntent pendingContentIntent = PendingIntent.getBroadcast(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent contentIntent = ShowNotificationGroupActivity.getNotificationIntent(this, bundles);
+        PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         notify(instances.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent);
     }

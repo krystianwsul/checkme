@@ -1,5 +1,7 @@
 package com.example.krystianwsul.organizator.domainmodel;
 
+import android.app.Activity;
+import android.app.IntentService;
 import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
@@ -37,10 +39,18 @@ public class DomainFactory {
     private TaskFactory mTaskFactory;
     private InstanceFactory mInstanceFactory;
 
-    public static DomainFactory getDomainFactory(Context context) {
-        Assert.assertTrue(context != null);
+    public static DomainFactory getDomainFactory(Activity activity) {
+        Assert.assertTrue(activity != null);
 
-        DomainFactory domainFactory = new DomainFactory(context);
+        DomainFactory domainFactory = new DomainFactory(activity);
+        domainFactory.initialize();
+        return domainFactory;
+    }
+
+    public static DomainFactory getDomainFactory(IntentService intentService) {
+        Assert.assertTrue(intentService != null);
+
+        DomainFactory domainFactory = new DomainFactory(intentService);
         domainFactory.initialize();
         return domainFactory;
     }

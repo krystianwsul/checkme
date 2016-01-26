@@ -18,10 +18,8 @@ public class DomainLoader extends AsyncTaskLoader<DomainFactory> {
 
     @Override
     public void deliverResult(DomainFactory domainFactory) {
-        if (isReset()) {
-            //release resources
+        if (isReset())
             return;
-        }
 
         mDomainFactory = domainFactory;
 
@@ -52,20 +50,12 @@ public class DomainLoader extends AsyncTaskLoader<DomainFactory> {
     protected void onReset() {
         onStopLoading();
 
-        if (mDomainFactory != null) {
-            // release resources
+        if (mDomainFactory != null)
             mDomainFactory = null;
-        }
 
         if (mDomainObserver != null) {
             DomainFactory.removeDomainObserver(mDomainObserver);
             mDomainObserver = null;
         }
-    }
-
-    @Override
-    public void onCanceled(DomainFactory domainFactory) {
-        super.onCanceled(domainFactory);
-        // release resources
     }
 }

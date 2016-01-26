@@ -123,7 +123,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
                 mInstance.setInstanceDateTime(EditInstanceActivity.this, new DateTime(mDate, time));
 
-                domainFactory.getPersistenceManager().save();
+                domainFactory.save();
 
                 finish();
             }

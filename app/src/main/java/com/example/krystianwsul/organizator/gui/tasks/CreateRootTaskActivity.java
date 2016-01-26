@@ -177,7 +177,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                     domainFactory.getTaskFactory().joinTasks(rootTask, mJoinTasks, timeStamp);
                 }
 
-                domainFactory.getPersistenceManager().save();
+                domainFactory.save();
 
                 TickService.startService(CreateRootTaskActivity.this);
 

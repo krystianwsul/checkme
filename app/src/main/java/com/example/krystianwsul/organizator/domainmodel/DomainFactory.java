@@ -1,7 +1,5 @@
 package com.example.krystianwsul.organizator.domainmodel;
 
-import android.app.Activity;
-import android.app.IntentService;
 import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
@@ -40,18 +38,12 @@ public class DomainFactory {
     private TaskFactory mTaskFactory;
     private InstanceFactory mInstanceFactory;
 
-    public static DomainFactory getDomainFactory(Activity activity) {
-        Assert.assertTrue(activity != null);
+    private static ArrayList<DomainObserver> sDomainObservers = new ArrayList<>();
 
-        DomainFactory domainFactory = new DomainFactory(activity);
-        domainFactory.initialize();
-        return domainFactory;
-    }
+    public static DomainFactory getDomainFactory(Context context) {
+        Assert.assertTrue(context != null);
 
-    public static DomainFactory getDomainFactory(IntentService intentService) {
-        Assert.assertTrue(intentService != null);
-
-        DomainFactory domainFactory = new DomainFactory(intentService);
+        DomainFactory domainFactory = new DomainFactory(context);
         domainFactory.initialize();
         return domainFactory;
     }
@@ -69,6 +61,28 @@ public class DomainFactory {
         mInstanceFactory = new InstanceFactory(this);
     }
 
+    public void save() {
+        mPersistenceManager.save();
+        notifyDomainObservers();
+    }
+
+    public static synchronized void addDomainObserver(DomainObserver domainObserver) {
+        Assert.assertTrue(domainObserver != null);
+        sDomainObservers.add(domainObserver);
+    }
+
+    public static synchronized void removeDomainObserver(DomainObserver domainObserver) {
+        Assert.assertTrue(domainObserver != null);
+        Assert.assertTrue(sDomainObservers.contains(domainObserver));
+
+        sDomainObservers.remove(domainObserver);
+    }
+
+    private synchronized void notifyDomainObservers() {
+        for (DomainObserver domainObserver : sDomainObservers)
+            domainObserver.onDomainChanged(this);
+    }
+
     public CustomTimeFactory getCustomTimeFactory() {
         return mCustomTimeFactory;
     }
@@ -81,7 +95,7 @@ public class DomainFactory {
         return mInstanceFactory;
     }
 
-    public PersistenceManger getPersistenceManager() {
+    private PersistenceManger getPersistenceManager() {
         return mPersistenceManager;
     }
 
@@ -108,11 +122,6 @@ public class DomainFactory {
                 Instance instance = new Instance(domainFactory, task, instanceRecord);
                 mExistingInstances.add(instance);
             }
-        }
-
-        void addExistingInstance(Instance instance) {
-            Assert.assertTrue(instance != null);
-            mExistingInstances.add(instance);
         }
 
         public Instance getInstance(Task task, DateTime scheduleDateTime) {
@@ -210,6 +219,19 @@ public class DomainFactory {
                     shownInstances.add(instance);
 
             return shownInstances;
+        }
+
+        InstanceRecord createInstanceRecord(Task task, Instance instance, DateTime scheduleDateTime) {
+            Assert.assertTrue(task != null);
+            Assert.assertTrue(instance != null);
+            Assert.assertTrue(scheduleDateTime != null);
+
+            DomainFactory domainFactory = mDomainFactoryReference.get();
+            Assert.assertTrue(domainFactory != null);
+
+            mExistingInstances.add(instance);
+
+            return domainFactory.getPersistenceManager().createInstanceRecord(task, scheduleDateTime);
         }
     }
 

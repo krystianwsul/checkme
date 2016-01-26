@@ -250,11 +250,6 @@ public class Instance {
                 mInstanceRecord.setDone(null);
         }
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        domainFactory.getPersistenceManager().save();
-
         TickService.startService(context);
     }
 
@@ -285,12 +280,10 @@ public class Instance {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        domainFactory.getInstanceFactory().addExistingInstance(this);
-
         DateTime scheduleDateTime = getScheduleDateTime();
 
         mScheduleDateTime = null;
-        mInstanceRecord = domainFactory.getPersistenceManager().createInstanceRecord(task, scheduleDateTime);
+        mInstanceRecord = domainFactory.getInstanceFactory().createInstanceRecord(task, this, scheduleDateTime);
     }
 
     private TimeStamp getHierarchyTimeStamp() {

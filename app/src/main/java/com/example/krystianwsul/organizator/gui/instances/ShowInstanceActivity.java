@@ -31,6 +31,8 @@ public class ShowInstanceActivity extends AppCompatActivity {
 
     private Instance mInstance;
 
+    private DomainFactory mDomainFactory;
+
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
         intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
@@ -68,6 +70,9 @@ public class ShowInstanceActivity extends AppCompatActivity {
             public void onClick(View v) {
                 boolean isChecked = mCheckBox.isChecked();
                 mInstance.setDone(isChecked, ShowInstanceActivity.this);
+
+                Assert.assertTrue(mDomainFactory != null);
+                mDomainFactory.save();
             }
         });
 
@@ -85,20 +90,20 @@ public class ShowInstanceActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(domainFactory != null);
+        mDomainFactory = DomainFactory.getDomainFactory(this);
+        Assert.assertTrue(mDomainFactory != null);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        mInstance = InstanceData.getInstance(domainFactory, bundle);
+        mInstance = InstanceData.getInstance(mDomainFactory, bundle);
         Assert.assertTrue(mInstance != null);
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mInstance.setNotified();
             mInstance.setNotificationShown(false);
 
-            domainFactory.getPersistenceManager().save();
+            mDomainFactory.save();
         }
 
         mShowInstanceName.setText(mInstance.getName());
@@ -112,6 +117,6 @@ public class ShowInstanceActivity extends AppCompatActivity {
             mShowInstanceDetails.setText(scheduleText);
 
         if (!mInstance.getChildInstances().isEmpty())
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(mInstance.getChildInstances()), false));
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(mInstance.getChildInstances()), false, mDomainFactory));
     }
 }

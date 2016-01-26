@@ -134,7 +134,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
                 customTime.setCurrent();
 
                 Assert.assertTrue(mDomainFactory != null);
-                mDomainFactory.getPersistenceManager().save();
+                mDomainFactory.save();
 
                 mCustomTimes.remove(customTime);
                 notifyItemRemoved(position);

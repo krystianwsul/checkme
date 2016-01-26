@@ -12,6 +12,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 
 import junit.framework.Assert;
@@ -27,6 +28,8 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     private final ArrayList<Instance> mNotDoneInstances = new ArrayList<>();
     private final boolean mShowDetails;
 
+    private final DomainFactory mDomainFactory;
+
     private final static Comparator<Instance> sComparator = new Comparator<Instance>() {
         @Override
         public int compare(Instance lhs, Instance rhs) {
@@ -37,13 +40,16 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         }
     };
 
-    public InstanceAdapter(Context context, ArrayList<Instance> instances, boolean showDetails) {
+    public InstanceAdapter(Context context, ArrayList<Instance> instances, boolean showDetails, DomainFactory domainFactory) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instances != null);
         Assert.assertTrue(!instances.isEmpty());
+        Assert.assertTrue(domainFactory != null);
 
         mContext = context;
         mShowDetails = showDetails;
+
+        mDomainFactory = domainFactory;
 
         for (Instance instance : instances) {
             if (instance.getDone() != null)
@@ -160,6 +166,8 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
             boolean isChecked = checkBox.isChecked();
             instance.setDone(isChecked, mContext);
+
+            mDomainFactory.save();
 
             if (isChecked) {
                 Assert.assertTrue(mNotDoneInstances.contains(instance));

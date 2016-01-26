@@ -125,6 +125,10 @@ public class PersistenceManger {
         return weeklyScheduleDayOfWeekTimeRecords;
     }
 
+    public Collection<InstanceRecord> getInstanceRecords() {
+        return mInstanceRecords.values();
+    }
+
     public TaskRecord createTaskRecord(String name, TimeStamp startTimeStamp) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(startTimeStamp != null);
@@ -223,10 +227,6 @@ public class PersistenceManger {
         WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = WeeklyScheduleDayOfWeekTimeRecord.createWeeklyScheduleDayOfWeekTimeRecord(mSQLiteDatabase, weeklySchedule.getId(), dayOfWeek.ordinal(), customTimeId, hour, minute);
         mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
         return weeklyScheduleDayOfWeekTimeRecord;
-    }
-
-    public Collection<InstanceRecord> getInstanceRecords() {
-        return mInstanceRecords.values();
     }
 
     public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime) {

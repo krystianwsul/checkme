@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.MainActivity;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
@@ -29,7 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeMap;
 
-public class GroupListFragment extends Fragment implements MainActivity.RefreshFragment {
+public class GroupListFragment extends Fragment implements MainActivity.RefreshFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
     private RecyclerView mGroupList;
 
     @Override
@@ -45,6 +48,8 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
         Assert.assertTrue(view != null);
         mGroupList = (RecyclerView) view.findViewById(R.id.groups_list);
         mGroupList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -55,10 +60,21 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
     @Override
     public void refresh() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
-        Assert.assertTrue(domainFactory != null);
+    }
 
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
         mGroupList.setAdapter(new GroupAdapter(domainFactory, getContext()));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mGroupList.setAdapter(null);
     }
 
     public static class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder> {
@@ -204,6 +220,8 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
 
                 boolean isChecked = checkBox.isChecked();
                 group.getSingleSinstance().setDone(isChecked, mContext);
+
+                mDomainFactory.save();
 
                 if (isChecked) {
                     Assert.assertTrue(mNotDoneGroupContainer.contains(group));

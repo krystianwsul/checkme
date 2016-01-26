@@ -69,7 +69,7 @@ public class ShowGroupActivity extends AppCompatActivity {
 
         mShowGroupName.setText(getDisplayText(instances.get(0)));
 
-        mShowGroupList.setAdapter(new InstanceAdapter(this, instances, false));
+        mShowGroupList.setAdapter(new InstanceAdapter(this, instances, false, mDomainFactory));
     }
 
     private String getDisplayText(Instance instance) {

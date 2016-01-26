@@ -174,7 +174,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
 
             taskWrapper.mTask.setEndTimeStamp(TimeStamp.getNow());
 
-            mDomainFactory.getPersistenceManager().save();
+            mDomainFactory.save();
 
             mTaskWrappers.remove(position);
             notifyItemRemoved(position);

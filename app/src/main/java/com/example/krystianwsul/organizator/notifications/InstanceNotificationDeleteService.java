@@ -41,6 +41,6 @@ public class InstanceNotificationDeleteService extends IntentService {
         instance.setNotified();
         instance.setNotificationShown(false);
 
-        domainFactory.getPersistenceManager().save();
+        domainFactory.save();
     }
 }

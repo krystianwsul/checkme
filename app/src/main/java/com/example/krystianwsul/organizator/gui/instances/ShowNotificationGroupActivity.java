@@ -85,7 +85,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
         }
 
         if (savedInstanceState == null && setNotified)
-            domainFactory.getPersistenceManager().save();
+            domainFactory.save();
 
         Collections.sort(instances, new Comparator<Instance>() {
             @Override
@@ -96,6 +96,6 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
 
         RecyclerView showNotificationGroupList = (RecyclerView) findViewById(R.id.show_notification_group_list);
         showNotificationGroupList.setLayoutManager(new LinearLayoutManager(this));
-        showNotificationGroupList.setAdapter(new InstanceAdapter(this, instances, true));
+        showNotificationGroupList.setAdapter(new InstanceAdapter(this, instances, true, domainFactory));
     }
 }

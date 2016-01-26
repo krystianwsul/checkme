@@ -41,7 +41,7 @@ public class ScheduleRecord extends Record {
 
     public static ScheduleRecord createScheduleRecord(SQLiteDatabase sqLiteDatabase, int rootTaskId, long startTime, Long endTime, int type) {
         Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue((endTime == null) || startTime < endTime);
+        Assert.assertTrue((endTime == null) || startTime <= endTime);
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_ROOT_TASK_ID, rootTaskId);
@@ -87,13 +87,13 @@ public class ScheduleRecord extends Record {
         Long endTime = (cursor.isNull(3) ? null : cursor.getLong(3));
         int type = cursor.getInt(4);
 
-        Assert.assertTrue((endTime == null) || startTime < endTime);
+        Assert.assertTrue((endTime == null) || startTime <= endTime);
 
         return new ScheduleRecord(id, taskId, startTime, endTime, type);
     }
 
     private ScheduleRecord(int id, int rootTaskId, long startTime, Long endTime, int type) {
-        Assert.assertTrue((endTime == null) || startTime < endTime);
+        Assert.assertTrue((endTime == null) || startTime <= endTime);
 
         mId = id;
         mRootTaskId = rootTaskId;

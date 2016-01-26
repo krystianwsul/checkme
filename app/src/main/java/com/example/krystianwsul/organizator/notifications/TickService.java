@@ -76,7 +76,7 @@ public class TickService extends IntentService {
                 instance.setNotificationShown(false);
             }
 
-            domainFactory.getPersistenceManager().save();
+            domainFactory.save();
 
             notify(instances);
         } else {
@@ -92,7 +92,7 @@ public class TickService extends IntentService {
             for (Instance instance : instances)
                 notify(instance);
 
-            domainFactory.getPersistenceManager().save();
+            domainFactory.save();
         }
     }
 

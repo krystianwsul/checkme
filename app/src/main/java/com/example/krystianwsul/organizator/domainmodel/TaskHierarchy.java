@@ -11,7 +11,7 @@ class TaskHierarchy {
     private final TaskHierarchyRecord mTaskHierarchyRecord;
 
     private final WeakReference<Task> mParentTaskReference;
-    private final WeakReference<Task> mChildTaskReference;
+    private final Task mChildTask;
 
     public TaskHierarchy(TaskHierarchyRecord taskHierarchyRecord, Task parentTask, Task childTask) {
         Assert.assertTrue(taskHierarchyRecord != null);
@@ -21,7 +21,7 @@ class TaskHierarchy {
         mTaskHierarchyRecord = taskHierarchyRecord;
 
         mParentTaskReference = new WeakReference<>(parentTask);
-        mChildTaskReference = new WeakReference<>(childTask);
+        mChildTask = childTask;
     }
 
     public int getId() {
@@ -36,10 +36,7 @@ class TaskHierarchy {
     }
 
     public Task getChildTask() {
-        Task childTask = mChildTaskReference.get();
-        Assert.assertTrue(childTask != null);
-
-        return childTask;
+        return mChildTask;
     }
 
     private TimeStamp getStartTimeStamp() {

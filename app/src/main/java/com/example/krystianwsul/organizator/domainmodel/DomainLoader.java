@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
 public class DomainLoader extends AsyncTaskLoader<DomainFactory> {
-    private DomainFactory mDomainFactory;
+    DomainFactory mDomainFactory;
     private DomainObserver mDomainObserver;
 
     public DomainLoader(Context context) {

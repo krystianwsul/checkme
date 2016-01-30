@@ -12,6 +12,7 @@ public class DomainObserver {
     }
 
     public void onDomainChanged(DomainFactory domainFactory) {
-        mDomainLoader.onContentChanged();
+        if (domainFactory != mDomainLoader.mDomainFactory)
+            mDomainLoader.onContentChanged();
     }
 }

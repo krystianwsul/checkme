@@ -47,32 +47,19 @@ public class MainActivity extends AppCompatActivity {
         mViewPager.setAdapter(mMyFragmentStatePagerAdapter);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                mMyFragmentStatePagerAdapter.notifyDataSetChanged();
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
             }
 
+            @Override
             public void onTabUnselected(TabLayout.Tab tab) {
 
             }
 
+            @Override
             public void onTabReselected(TabLayout.Tab tab) {
 
             }
@@ -110,10 +97,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public interface RefreshFragment {
-        void refresh();
-    }
-
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
         private Fragment mFragment;
 
@@ -132,19 +115,13 @@ public class MainActivity extends AppCompatActivity {
                 case 1:
                     return new TaskListFragment();
                 default:
-                    return null;
+                    throw new IndexOutOfBoundsException();
             }
         }
 
         @Override
         public int getCount() {
             return 2;
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            ((RefreshFragment) object).refresh();
-            return super.getItemPosition(object);
         }
 
         @Override

@@ -21,7 +21,6 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
-import com.example.krystianwsul.organizator.gui.MainActivity;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -32,7 +31,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeMap;
 
-public class GroupListFragment extends Fragment implements MainActivity.RefreshFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
+public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<DomainFactory> {
     private RecyclerView mGroupList;
 
     @Override
@@ -44,22 +43,12 @@ public class GroupListFragment extends Fragment implements MainActivity.RefreshF
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        getLoaderManager().initLoader(0, null, this);
+
         View view = getView();
         Assert.assertTrue(view != null);
         mGroupList = (RecyclerView) view.findViewById(R.id.groups_list);
         mGroupList.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        refresh();
-    }
-
-    @Override
-    public void refresh() {
     }
 
     @Override

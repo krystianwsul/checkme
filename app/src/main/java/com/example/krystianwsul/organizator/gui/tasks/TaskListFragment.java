@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizator.gui.tasks;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,15 +13,15 @@ import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Task;
-import com.example.krystianwsul.organizator.gui.MainActivity;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class TaskListFragment extends Fragment implements MainActivity.RefreshFragment {
+public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<DomainFactory> {
     private RecyclerView mTasksRecycler;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,6 +31,8 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        getLoaderManager().initLoader(0, null, this);
 
         View view = getView();
         Assert.assertTrue(view != null);
@@ -45,20 +49,6 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
         });
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        refresh();
-    }
-
-    @Override
-    public void refresh() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
-        Assert.assertTrue(domainFactory != null);
-
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory, domainFactory.getTaskFactory().getRootTasks(TimeStamp.getNow())));
-    }
-
     public void setEditing(boolean editing) {
         TaskAdapter taskAdapter = (TaskAdapter) mTasksRecycler.getAdapter();
         Assert.assertTrue(taskAdapter != null);
@@ -71,5 +61,20 @@ public class TaskListFragment extends Fragment implements MainActivity.RefreshFr
         Assert.assertTrue(taskAdapter != null);
 
         return taskAdapter.getSelected();
+    }
+
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory, domainFactory.getTaskFactory().getRootTasks(TimeStamp.getNow())));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mTasksRecycler.setAdapter(null);
     }
 }

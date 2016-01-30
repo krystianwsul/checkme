@@ -89,10 +89,10 @@ public class TickService extends IntentService {
                 }
             }
 
+            domainFactory.save();
+
             for (Instance instance : instances)
                 notify(instance);
-
-            domainFactory.save();
         }
     }
 

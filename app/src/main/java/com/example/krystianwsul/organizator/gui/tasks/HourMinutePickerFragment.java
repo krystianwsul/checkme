@@ -47,13 +47,10 @@ public class HourMinutePickerFragment extends DialogFragment {
         int minute = args.getInt(MINUTE_KEY);
 
         return new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-            private boolean mFirst = true;
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                if (mFirst) {
-                    mFirst = false;
+                if (!view.isShown())
                     return;
-                }
 
                 HourMinute newHourMinute = new HourMinute(hourOfDay, minute);
 

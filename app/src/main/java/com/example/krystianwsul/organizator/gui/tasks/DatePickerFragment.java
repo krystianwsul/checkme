@@ -49,14 +49,10 @@ public class DatePickerFragment extends DialogFragment {
         int day = args.getInt(DAY_KEY);
 
         return new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
-            private boolean mFirst = true;
-
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                if (mFirst) {
-                    mFirst = false;
+                if (!view.isShown())
                     return;
-                }
 
                 Date newDate = new Date(year, monthOfYear + 1, dayOfMonth);
 

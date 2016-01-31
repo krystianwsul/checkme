@@ -26,8 +26,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
-    //private DomainFactory mDomainFactory;
-
     private RecyclerView mShowGroupList;
     private TimeStamp mTimeStamp;
     private TextView mShowGroupName;

@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizator.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,13 +16,14 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowInstanceActivity extends AppCompatActivity {
+public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
     private static final String INTENT_KEY = "instanceId";
     private static final String SET_NOTIFIED_KEY = "setNotified";
 
@@ -29,9 +32,7 @@ public class ShowInstanceActivity extends AppCompatActivity {
     private TextView mShowInstanceDetails;
     private CheckBox mCheckBox;
 
-    private Instance mInstance;
-
-    private DomainFactory mDomainFactory;
+    private ImageView mShowInstanceEdit;
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
@@ -65,58 +66,70 @@ public class ShowInstanceActivity extends AppCompatActivity {
         mShowInstanceList.setLayoutManager(new LinearLayoutManager(this));
 
         mCheckBox = (CheckBox) findViewById(R.id.show_instance_checkbox);
+
+        mShowInstanceEdit = (ImageView) findViewById(R.id.show_instance_edit);
+
+        getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
+        Intent intent = getIntent();
+        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
+        Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
+        final Instance instance = InstanceData.getInstance(domainFactory, bundle);
+        Assert.assertTrue(instance != null);
+
+        if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
+            mFirst = false;
+
+            instance.setNotified();
+            instance.setNotificationShown(false);
+
+            domainFactory.save();
+        }
+
+        mShowInstanceName.setText(instance.getName());
+
+        mCheckBox.setChecked(instance.getDone() != null);
+
+        String scheduleText = instance.getDisplayText(this);
+        if (TextUtils.isEmpty(scheduleText))
+            mShowInstanceDetails.setVisibility(View.GONE);
+        else
+            mShowInstanceDetails.setText(scheduleText);
+
+        if (!instance.getChildInstances().isEmpty())
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(instance.getChildInstances()), false, domainFactory));
+
         mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean isChecked = mCheckBox.isChecked();
-                mInstance.setDone(isChecked, ShowInstanceActivity.this);
+                instance.setDone(isChecked, ShowInstanceActivity.this);
 
-                Assert.assertTrue(mDomainFactory != null);
-                mDomainFactory.save();
+                domainFactory.save();
             }
         });
 
-        ImageView showInstanceEdit = (ImageView) findViewById(R.id.show_instance_edit);
-        showInstanceEdit.setOnClickListener(new View.OnClickListener() {
+        mShowInstanceEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = EditInstanceActivity.getIntent(mInstance, ShowInstanceActivity.this);
+                Intent intent = EditInstanceActivity.getIntent(instance, ShowInstanceActivity.this);
                 startActivity(intent);
             }
         });
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        mDomainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(mDomainFactory != null);
-
-        Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        mInstance = InstanceData.getInstance(mDomainFactory, bundle);
-        Assert.assertTrue(mInstance != null);
-
-        if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
-            mInstance.setNotified();
-            mInstance.setNotificationShown(false);
-
-            mDomainFactory.save();
-        }
-
-        mShowInstanceName.setText(mInstance.getName());
-
-        mCheckBox.setChecked(mInstance.getDone() != null);
-
-        String scheduleText = mInstance.getDisplayText(this);
-        if (TextUtils.isEmpty(scheduleText))
-            mShowInstanceDetails.setVisibility(View.GONE);
-        else
-            mShowInstanceDetails.setText(scheduleText);
-
-        if (!mInstance.getChildInstances().isEmpty())
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(mInstance.getChildInstances()), false, mDomainFactory));
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mCheckBox.setOnClickListener(null);
+        mShowInstanceList.setAdapter(null);
+        mShowInstanceEdit.setOnClickListener(null);
     }
 }

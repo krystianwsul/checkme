@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,14 +19,14 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowCustomTimesActivity extends AppCompatActivity {
+public class ShowCustomTimesActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
     private RecyclerView mShowTimesList;
-    private DomainFactory mDomainFactory;
 
     public static Intent getIntent(Context context) {
         return new Intent(context, ShowCustomTimesActivity.class);
@@ -45,19 +47,27 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
                 startActivity(ShowCustomTimeActivity.getCreateIntent(ShowCustomTimesActivity.this));
             }
         });
+
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        mDomainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(mDomainFactory != null);
-
-        mShowTimesList.setAdapter(new CustomTimesAdapter(mDomainFactory, this));
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(this);
     }
 
-    public class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
+        mShowTimesList.setAdapter(new CustomTimesAdapter(domainFactory, this));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mShowTimesList.setAdapter(null);
+    }
+
+    public static class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
+        private final DomainFactory mDomainFactory;
         private final Activity mActivity;
         private final ArrayList<CustomTime> mCustomTimes;
 
@@ -65,6 +75,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
             Assert.assertTrue(domainFactory != null);
             Assert.assertTrue(activity != null);
 
+            mDomainFactory = domainFactory;
             mActivity = activity;
             mCustomTimes = new ArrayList<>(domainFactory.getCustomTimeFactory().getCurrentCustomTimes());
         }
@@ -133,7 +144,6 @@ public class ShowCustomTimesActivity extends AppCompatActivity {
                 CustomTime customTime = mCustomTimes.get(position);
                 customTime.setCurrent();
 
-                Assert.assertTrue(mDomainFactory != null);
                 mDomainFactory.save();
 
                 mCustomTimes.remove(customTime);

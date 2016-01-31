@@ -20,6 +20,7 @@ import com.example.krystianwsul.organizator.gui.tasks.DatePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TimePickerView;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -170,6 +171,8 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
                 mInstance.setInstanceDateTime(EditInstanceActivity.this, new DateTime(mDate, time));
 
                 domainFactory.save();
+
+                TickService.startService(EditInstanceActivity.this);
 
                 finish();
             }

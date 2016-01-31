@@ -21,6 +21,7 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -211,6 +212,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 group.getSingleSinstance().setDone(isChecked, mContext);
 
                 mDomainFactory.save();
+
+                TickService.startService(mContext);
 
                 if (isChecked) {
                     Assert.assertTrue(mNotDoneGroupContainer.contains(group));

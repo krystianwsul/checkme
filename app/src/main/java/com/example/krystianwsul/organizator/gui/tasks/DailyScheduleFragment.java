@@ -7,6 +7,8 @@ import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -31,17 +34,19 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DailyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment {
+public class DailyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
+    private static final String TIME_ENTRY_KEY = "timeEntries";
+    private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
+    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
     private DomainFactory mDomainFactory;
 
     private int mHourMinutePickerPosition = -1;
 
     private TimeEntryAdapter mTimeEntryAdapter;
+    private RecyclerView mDailyScheduleTimes;
 
-    private static final String TIME_ENTRY_KEY = "timeEntries";
-    private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
-
-    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+    private Bundle mSavedInstanceState;
 
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
@@ -79,44 +84,10 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         View view = getView();
         Assert.assertTrue(view != null);
-        RecyclerView dailyScheduleTimes = (RecyclerView) view.findViewById(R.id.daily_schedule_times);
-        dailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
+        mDailyScheduleTimes = (RecyclerView) view.findViewById(R.id.daily_schedule_times);
+        mDailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        Bundle args = getArguments();
-
-        mDomainFactory = DomainFactory.getDomainFactory(getActivity());
-        Assert.assertTrue(mDomainFactory != null);
-
-        if (savedInstanceState != null) {
-            List<TimeEntry> timeEntries = savedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
-            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
-
-            mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
-            Assert.assertTrue(mHourMinutePickerPosition != -2);
-        } else if (args != null) {
-            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
-            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
-            Assert.assertTrue(rootTaskId != -1);
-
-            Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
-            Assert.assertTrue(rootTask != null);
-
-            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
-            Assert.assertTrue(dailySchedule != null);
-            Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
-
-            ArrayList<TimeEntry> timeEntries = new ArrayList<>();
-            boolean showDelete = (dailySchedule.getTimes().size() > 1);
-            for (Time time : dailySchedule.getTimes())
-                timeEntries.add(new TimeEntry(time, showDelete));
-            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
-
-            mHourMinutePickerPosition = -1;
-        } else {
-            mTimeEntryAdapter = new TimeEntryAdapter(getContext());
-            mHourMinutePickerPosition = -1;
-        }
-        dailyScheduleTimes.setAdapter(mTimeEntryAdapter);
+        mSavedInstanceState = savedInstanceState;
 
         FloatingActionButton dailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
         Assert.assertTrue(dailyScheduleFab != null);
@@ -124,9 +95,12 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         dailyScheduleFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Assert.assertTrue(mTimeEntryAdapter != null);
                 mTimeEntryAdapter.addTimeEntry();
             }
         });
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
@@ -160,6 +134,8 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(rootTask.current(startTimeStamp));
+
+        Assert.assertTrue(mTimeEntryAdapter != null);
         Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
 
         Assert.assertTrue(mDomainFactory != null);
@@ -170,6 +146,56 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         Assert.assertTrue(!times.isEmpty());
 
         return mDomainFactory.getTaskFactory().createDailySchedule(rootTask, times, startTimeStamp);
+    }
+
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
+        mDomainFactory = domainFactory;
+
+        Bundle args = getArguments();
+
+        if (mSavedInstanceState != null) {
+            List<TimeEntry> timeEntries = mSavedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
+            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
+
+            mHourMinutePickerPosition = mSavedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
+            Assert.assertTrue(mHourMinutePickerPosition != -2);
+        } else if (args != null) {
+            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
+            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+            Assert.assertTrue(rootTaskId != -1);
+
+            Task rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
+            Assert.assertTrue(dailySchedule != null);
+            Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
+
+            ArrayList<TimeEntry> timeEntries = new ArrayList<>();
+            boolean showDelete = (dailySchedule.getTimes().size() > 1);
+            for (Time time : dailySchedule.getTimes())
+                timeEntries.add(new TimeEntry(time, showDelete));
+            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
+
+            mHourMinutePickerPosition = -1;
+        } else {
+            mTimeEntryAdapter = new TimeEntryAdapter(getContext());
+            mHourMinutePickerPosition = -1;
+        }
+        mDailyScheduleTimes.setAdapter(mTimeEntryAdapter);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mDomainFactory = null;
+        mTimeEntryAdapter = null;
+        mDailyScheduleTimes.setAdapter(null);
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {

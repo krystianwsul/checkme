@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
@@ -23,19 +26,20 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment {
-    private DomainFactory mDomainFactory;
-
-    private TextView mDateView;
-    private TimePickerView mTimePickerView;
-
-    private Date mDate;
-
+public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
     private static final String YEAR_KEY = "year";
     private static final String MONTH_KEY = "month";
     private static final String DAY_KEY = "day";
 
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
+    private DomainFactory mDomainFactory;
+    private Bundle mSavedInstanceState;
+
+    private TextView mDateView;
+    private TimePickerView mTimePickerView;
+
+    private Date mDate;
 
     public static SingleScheduleFragment newInstance() {
         return new SingleScheduleFragment();
@@ -72,75 +76,19 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Bundle args = getArguments();
-
-        mDomainFactory = DomainFactory.getDomainFactory(getActivity());
-
-        Time time = null;
-        if (savedInstanceState != null) {
-
-            int year = savedInstanceState.getInt(YEAR_KEY, -1);
-            int month = savedInstanceState.getInt(MONTH_KEY, -1);
-            int day = savedInstanceState.getInt(DAY_KEY, -1);
-
-            Assert.assertTrue(year != -1);
-            Assert.assertTrue(month != -1);
-            Assert.assertTrue(day != -1);
-
-            mDate = new Date(year, month, day);
-        } else if (args != null) {
-            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
-            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
-            Assert.assertTrue(rootTaskId != -1);
-
-            Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
-            Assert.assertTrue(rootTask != null);
-
-            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
-            Assert.assertTrue(singleSchedule != null);
-            Assert.assertTrue(singleSchedule.current(TimeStamp.getNow()));
-
-            DateTime dateTime = singleSchedule.getDateTime();
-            mDate = dateTime.getDate();
-            time = dateTime.getTime();
-        } else {
-            mDate = Date.today();
-        }
+        mSavedInstanceState = savedInstanceState;
 
         View view = getView();
         Assert.assertTrue(view != null);
 
-        mDateView = (TextView) view.findViewById(R.id.single_schedule_date);
-        Assert.assertTrue(mDateView != null);
-
-        mDateView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getChildFragmentManager();
-                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(getActivity(), mDate);
-                datePickerFragment.show(fragmentManager, "date");
-            }
-        });
-
-        updateDateText();
-
         mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
-        Assert.assertTrue(mTimePickerView != null);
-
-        mTimePickerView.setDomainFactory(mDomainFactory);
-
-        if (time != null)
-            mTimePickerView.setTime(time);
-
         mTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
             public void onCustomTimeSelected(CustomTime customTime) {
-
             }
 
             @Override
             public void onHourMinuteSelected(HourMinute hourMinute) {
-
             }
 
             @Override
@@ -150,6 +98,18 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
                 hourMinutePickerFragment.show(fragmentManager, "time");
             }
         });
+
+        mDateView = (TextView) view.findViewById(R.id.single_schedule_date);
+        mDateView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getChildFragmentManager();
+                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(getActivity(), mDate);
+                datePickerFragment.show(fragmentManager, "date");
+            }
+        });
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -197,5 +157,59 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Assert.assertTrue(mDomainFactory != null);
         return mDomainFactory.getTaskFactory().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime(), startTimeStamp);
+    }
+
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
+        mDomainFactory = domainFactory;
+
+        Bundle args = getArguments();
+
+        Time time = null;
+        if (mSavedInstanceState != null) {
+            int year = mSavedInstanceState.getInt(YEAR_KEY, -1);
+            int month = mSavedInstanceState.getInt(MONTH_KEY, -1);
+            int day = mSavedInstanceState.getInt(DAY_KEY, -1);
+
+            Assert.assertTrue(year != -1);
+            Assert.assertTrue(month != -1);
+            Assert.assertTrue(day != -1);
+
+            mDate = new Date(year, month, day);
+        } else if (args != null) {
+            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
+            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+            Assert.assertTrue(rootTaskId != -1);
+
+            Task rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
+            Assert.assertTrue(singleSchedule != null);
+            Assert.assertTrue(singleSchedule.current(TimeStamp.getNow()));
+
+            DateTime dateTime = singleSchedule.getDateTime();
+            mDate = dateTime.getDate();
+            time = dateTime.getTime();
+        } else {
+            mDate = Date.today();
+        }
+
+        updateDateText();
+
+        mTimePickerView.setDomainFactory(domainFactory);
+
+        if (time != null)
+            mTimePickerView.setTime(time);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mDomainFactory = null;
     }
 }

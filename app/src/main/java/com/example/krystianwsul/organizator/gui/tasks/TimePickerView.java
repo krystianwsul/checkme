@@ -95,8 +95,6 @@ public class TimePickerView extends LinearLayout {
                 Assert.assertTrue(position >= 0);
                 Assert.assertTrue(position < mSpinnerAdapter.getCount());
 
-                Assert.assertTrue(mOnTimeSelectedListener != null);
-
                 SpinnerItem spinnerItem = mSpinnerAdapter.getItem(position);
                 Assert.assertTrue(spinnerItem != null);
 
@@ -112,7 +110,8 @@ public class TimePickerView extends LinearLayout {
                     mHourMinuteView.setVisibility(View.VISIBLE);
                     mHourMinuteView.setText(mHourMinute.toString());
 
-                    mOnTimeSelectedListener.onHourMinuteSelected(mHourMinute);
+                    if (mOnTimeSelectedListener != null)
+                        mOnTimeSelectedListener.onHourMinuteSelected(mHourMinute);
                 } else {
                     TimeSpinnerItem timeSpinnerItem = (TimeSpinnerItem) spinnerItem;
 
@@ -124,6 +123,8 @@ public class TimePickerView extends LinearLayout {
                     mHourMinuteView.setVisibility(View.INVISIBLE);
 
                     Assert.assertTrue(mDomainFactory != null);
+
+                    if (mOnTimeSelectedListener != null)
                     mOnTimeSelectedListener.onCustomTimeSelected(mDomainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId));
                 }
             }
@@ -137,8 +138,8 @@ public class TimePickerView extends LinearLayout {
         mHourMinuteView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Assert.assertTrue(mOnTimeSelectedListener != null);
-                mOnTimeSelectedListener.onHourMinuteClick();
+                if (mOnTimeSelectedListener != null)
+                    mOnTimeSelectedListener.onHourMinuteClick();
             }
         });
     }
@@ -178,7 +179,6 @@ public class TimePickerView extends LinearLayout {
     }
 
     public void setOnTimeSelectedListener(OnTimeSelectedListener onTimeSelectedListener) {
-        Assert.assertTrue(onTimeSelectedListener != null);
         mOnTimeSelectedListener = onTimeSelectedListener;
     }
 

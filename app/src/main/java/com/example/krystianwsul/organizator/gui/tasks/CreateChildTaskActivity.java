@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizator.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -11,14 +13,20 @@ import android.widget.EditText;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-public class CreateChildTaskActivity extends AppCompatActivity {
+public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
     private static final String PARENT_TASK_ID_KEY = "parentTaskId";
     private static final String CHILD_TASK_ID_KEY = "childTaskId";
+
+    private boolean mFirstLoad;
+
+    private EditText mCreateChildTaskName;
+    private Button mCreateChildTaskSave;
 
     public static Intent getCreateIntent(Context context, Task parentTask) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
@@ -37,9 +45,21 @@ public class CreateChildTaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_child_task);
 
-        final DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(domainFactory != null);
+        mFirstLoad = (savedInstanceState == null);
 
+        mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
+        mCreateChildTaskSave = (Button) findViewById(R.id.create_child_task_save);
+
+        getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
         Intent intent = getIntent();
         Task parentTask = null;
         Task childTask = null;
@@ -62,15 +82,13 @@ public class CreateChildTaskActivity extends AppCompatActivity {
         final Task finalParentTask = parentTask;
         final Task finalChildTask = childTask;
 
-        final EditText createChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
-        if (savedInstanceState == null && finalChildTask != null)
-            createChildTaskName.setText(finalChildTask.getName());
+        if (mFirstLoad && finalChildTask != null)
+            mCreateChildTaskName.setText(finalChildTask.getName());
 
-        Button createChildTaskSave = (Button) findViewById(R.id.create_child_task_save);
-        createChildTaskSave.setOnClickListener(new View.OnClickListener() {
+        mCreateChildTaskSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = createChildTaskName.getText().toString().trim();
+                String name = mCreateChildTaskName.getText().toString().trim();
 
                 if (TextUtils.isEmpty(name)) {
                     MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.task_name_toast));
@@ -88,5 +106,10 @@ public class CreateChildTaskActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mCreateChildTaskSave.setOnClickListener(null);
     }
 }

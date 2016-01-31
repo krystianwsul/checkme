@@ -32,8 +32,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        getLoaderManager().initLoader(0, null, this);
-
         View view = getView();
         Assert.assertTrue(view != null);
 
@@ -47,6 +45,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
             }
         });
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     public void setEditing(boolean editing) {

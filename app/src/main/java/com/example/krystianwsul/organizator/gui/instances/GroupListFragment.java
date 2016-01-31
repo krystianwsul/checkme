@@ -43,12 +43,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        getLoaderManager().initLoader(0, null, this);
-
         View view = getView();
         Assert.assertTrue(view != null);
         mGroupList = (RecyclerView) view.findViewById(R.id.groups_list);
         mGroupList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override

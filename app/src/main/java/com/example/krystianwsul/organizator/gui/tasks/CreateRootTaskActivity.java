@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.widget.Spinner;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
@@ -29,16 +32,15 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener {
+public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener, LoaderManager.LoaderCallbacks<DomainFactory> {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
 
     private Spinner mCreateRootTaskSpinner;
-
-    private Task mRootTask;
-
-    private ArrayList<Task> mJoinTasks;
+    private EditText mCreateRootTaskName;
+    private Button mCreateRootTaskSave;
+    private Bundle mSavedInstanceState;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -74,69 +76,138 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_root_task);
 
-        final EditText createRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
+        mSavedInstanceState = savedInstanceState;
 
-        final DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(domainFactory != null);
+        mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
+        mCreateRootTaskSave = (Button) findViewById(R.id.create_root_task_save);
+        mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
+
+        getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public void onDatePickerFragmentResult(Date date) {
+        Assert.assertTrue(date != null);
+
+        DatePickerFragment.DatePickerFragmentListener datePickerFragmentListener = (DatePickerFragment.DatePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
+        Assert.assertTrue(datePickerFragmentListener != null);
+
+        datePickerFragmentListener.onDatePickerFragmentResult(date);
+    }
+
+    @Override
+    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
+        Assert.assertTrue(hourMinute != null);
+
+        HourMinutePickerFragment.HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragment.HourMinutePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
+        Assert.assertTrue(hourMinutePickerFragmentListener != null);
+
+        hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(hourMinute);
+    }
+
+    private void loadFragment(int position) {
+        Assert.assertTrue(position >= 0);
+        Assert.assertTrue(position < 3);
+
+        Fragment fragment = createFragment(position);
+        Assert.assertTrue(fragment != null);
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commitAllowingStateLoss();
+    }
+
+    private Fragment createFragment(int position) {
+        Assert.assertTrue(position >= 0);
+        Assert.assertTrue(position < 3);
+
+        switch (position) {
+            case 0:
+                return SingleScheduleFragment.newInstance();
+            case 1:
+                return DailyScheduleFragment.newInstance();
+            case 2:
+                return WeeklyScheduleFragment.newInstance();
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
+    }
+
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
+        Task rootTask = null;
+        ArrayList<Task> joinTasks = null;
 
         Intent intent = getIntent();
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
             int rootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            mRootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
-            Assert.assertTrue(mRootTask != null);
+            rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
+            Assert.assertTrue(rootTask != null);
         } else if (intent.hasExtra(TASK_IDS_KEY)) {
             ArrayList<Integer> taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
             Assert.assertTrue(taskIds != null);
             Assert.assertTrue(taskIds.size() > 1);
 
-            mJoinTasks = new ArrayList<>();
+            joinTasks = new ArrayList<>();
             for (Integer taskId : taskIds) {
                 Task task = domainFactory.getTaskFactory().getTask(taskId);
                 Assert.assertTrue(task != null);
                 Assert.assertTrue(task.isRootTask(TimeStamp.getNow()));
 
-                mJoinTasks.add(task);
+                joinTasks.add(task);
             }
         }
 
+        final ArrayList<Task> finalJoinTasks = joinTasks;
+        final Task finalRootTask = rootTask;
+
         int spinnerPosition = 0;
         int count = 1;
-        if (savedInstanceState != null) {
-            int position = savedInstanceState.getInt(POSITION_KEY, -1);
+        if (mSavedInstanceState != null) {
+            int position = mSavedInstanceState.getInt(POSITION_KEY, -1);
             Assert.assertTrue(position != -1);
             if (position > 0)
                 count = 2;
-        } else if (mRootTask != null) {
-            createRootTaskName.setText(mRootTask.getName());
+        } else if (rootTask != null) {
+            mCreateRootTaskName.setText(rootTask.getName());
 
-            Schedule schedule = mRootTask.getCurrentSchedule(TimeStamp.getNow());
+            Schedule schedule = rootTask.getCurrentSchedule(TimeStamp.getNow());
             Assert.assertTrue(schedule != null);
 
             Fragment fragment;
             if (schedule instanceof SingleSchedule) {
-                fragment = SingleScheduleFragment.newInstance(mRootTask);
+                fragment = SingleScheduleFragment.newInstance(rootTask);
             } else if (schedule instanceof DailySchedule) {
-                fragment = DailyScheduleFragment.newInstance(mRootTask);
+                fragment = DailyScheduleFragment.newInstance(rootTask);
                 spinnerPosition = 1;
             } else if (schedule instanceof WeeklySchedule) {
-                fragment = WeeklyScheduleFragment.newInstance(mRootTask);
+                fragment = WeeklyScheduleFragment.newInstance(rootTask);
                 spinnerPosition = 2;
             } else {
                 throw new IndexOutOfBoundsException("unknown schedule type");
             }
-            getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commitAllowingStateLoss();
         } else {
             loadFragment(0);
         }
         final int finalCount = count;
 
-        Button createRootTaskSave = (Button) findViewById(R.id.create_root_task_save);
-        createRootTaskSave.setOnClickListener(new View.OnClickListener() {
+        mCreateRootTaskSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = createRootTaskName.getText().toString().trim();
+                String name = mCreateRootTaskName.getText().toString().trim();
 
                 if (TextUtils.isEmpty(name)) {
                     MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.task_name_toast));
@@ -154,14 +225,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                 }
 
                 Task rootTask;
+
                 TimeStamp timeStamp = TimeStamp.getNow();
-                if (mRootTask != null) {
-                    mRootTask.setName(name);
+                if (finalRootTask != null) {
+                    finalRootTask.setName(name);
 
-                    Assert.assertTrue(mRootTask.current(timeStamp));
-                    mRootTask.setScheduleEndTimeStamp(timeStamp);
+                    Assert.assertTrue(finalRootTask.current(timeStamp));
+                    finalRootTask.setScheduleEndTimeStamp(timeStamp);
 
-                    rootTask = mRootTask;
+                    rootTask = finalRootTask;
                 } else {
                     rootTask = domainFactory.getTaskFactory().createRootTask(name, timeStamp);
                     Assert.assertTrue(rootTask != null);
@@ -172,9 +244,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
                 rootTask.addSchedule(schedule);
 
-                if (mJoinTasks != null) {
-                    Assert.assertTrue(mJoinTasks.size() > 1);
-                    domainFactory.getTaskFactory().joinTasks(rootTask, mJoinTasks, timeStamp);
+                if (finalJoinTasks != null) {
+                    Assert.assertTrue(finalJoinTasks.size() > 1);
+                    domainFactory.getTaskFactory().joinTasks(rootTask, finalJoinTasks, timeStamp);
                 }
 
                 domainFactory.save();
@@ -184,7 +256,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                 finish();
             }
         });
-        mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
+
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCreateRootTaskSpinner.setAdapter(adapter);
@@ -215,55 +287,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
     }
 
     @Override
-    public void onDatePickerFragmentResult(Date date) {
-        Assert.assertTrue(date != null);
-
-        DatePickerFragment.DatePickerFragmentListener datePickerFragmentListener = (DatePickerFragment.DatePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-        Assert.assertTrue(datePickerFragmentListener != null);
-
-        datePickerFragmentListener.onDatePickerFragmentResult(date);
-    }
-
-    @Override
-    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-
-        HourMinutePickerFragment.HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragment.HourMinutePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-        Assert.assertTrue(hourMinutePickerFragmentListener != null);
-
-        hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(hourMinute);
-    }
-
-    private void loadFragment(int position) {
-        Assert.assertTrue(position >= 0);
-        Assert.assertTrue(position < 3);
-
-        Fragment fragment = createFragment(position);
-        Assert.assertTrue(fragment != null);
-
-        getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commit();
-    }
-
-    private Fragment createFragment(int position) {
-        Assert.assertTrue(position >= 0);
-        Assert.assertTrue(position < 3);
-
-        switch (position) {
-            case 0:
-                return SingleScheduleFragment.newInstance();
-            case 1:
-                return DailyScheduleFragment.newInstance();
-            case 2:
-                return WeeklyScheduleFragment.newInstance();
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mCreateRootTaskSave.setOnClickListener(null);
+        if (!isDestroyed())
+            getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame)).commitAllowingStateLoss();
     }
 }

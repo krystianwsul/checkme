@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizator.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
@@ -22,8 +25,8 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowGroupActivity extends AppCompatActivity {
-    private DomainFactory mDomainFactory;
+public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
+    //private DomainFactory mDomainFactory;
 
     private RecyclerView mShowGroupList;
     private TimeStamp mTimeStamp;
@@ -53,43 +56,49 @@ public class ShowGroupActivity extends AppCompatActivity {
         mShowGroupList = (RecyclerView) findViewById(R.id.show_group_list);
         mShowGroupList.setLayoutManager(new LinearLayoutManager(this));
 
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        mDomainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(mDomainFactory != null);
-
-        ArrayList<Instance> instances = mDomainFactory.getInstanceFactory().getCurrentInstances(mTimeStamp);
-        Assert.assertTrue(!instances.isEmpty());
-        if (instances.size() == 1)
-            finish();
-
-        mShowGroupName.setText(getDisplayText(instances.get(0)));
-
-        mShowGroupList.setAdapter(new InstanceAdapter(this, instances, false, mDomainFactory));
-    }
-
-    private String getDisplayText(Instance instance) {
+    private String getDisplayText(DomainFactory domainFactory, Instance instance) {
+        Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(instance != null);
 
-        Time time = getTime(instance.getInstanceDateTime());
+        Time time = getTime(domainFactory, instance.getInstanceDateTime());
         Assert.assertTrue(time != null);
         return new DateTime(instance.getScheduleDate(), time).getDisplayText(this);
     }
 
-    private Time getTime(DateTime dateTime) {
+    private Time getTime(DomainFactory domainFactory, DateTime dateTime) {
+        Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(dateTime != null);
-
-        Assert.assertTrue(mDomainFactory != null);
 
         DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
         HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
-        Time time = mDomainFactory.getCustomTimeFactory().getCustomTime(dayOfWeek, hourMinute);
+        Time time = domainFactory.getCustomTimeFactory().getCustomTime(dayOfWeek, hourMinute);
         if (time == null)
             time = new NormalTime(hourMinute);
         return time;
+    }
+
+    @Override
+    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
+        return new DomainLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
+        ArrayList<Instance> instances = domainFactory.getInstanceFactory().getCurrentInstances(mTimeStamp);
+        Assert.assertTrue(!instances.isEmpty());
+        if (instances.size() == 1)
+            finish();
+
+        mShowGroupName.setText(getDisplayText(domainFactory, instances.get(0)));
+
+        mShowGroupList.setAdapter(new InstanceAdapter(this, instances, false, domainFactory));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DomainFactory> loader) {
+        mShowGroupList.setAdapter(null);
     }
 }

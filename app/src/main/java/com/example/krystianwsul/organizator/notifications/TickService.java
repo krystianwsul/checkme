@@ -71,35 +71,43 @@ public class TickService extends IntentService {
         ArrayList<Instance> shownInstances = instanceFactory.getShownInstances();
 
         if (instances.size() > MAX_NOTIFICATIONS) {
-            for (Instance instance : shownInstances) {
+            for (Instance instance : shownInstances)
                 notificationManager.cancel(instance.getNotificationId());
-                instance.setNotificationShown(false);
-            }
 
-            domainFactory.save();
+            if (!shownInstances.isEmpty()) {
+                domainFactory.getInstanceFactory().setInstancesNotShown(shownInstances);
+                domainFactory.save();
+            }
 
             notify(instances);
         } else {
             notificationManager.cancel(0);
 
+            ArrayList<Instance> setNotificationShownInstances = new ArrayList<>();
             for (Instance instance : shownInstances) {
                 if (!instances.contains(instance)) {
                     notificationManager.cancel(instance.getNotificationId());
-                    instance.setNotificationShown(false);
+                    setNotificationShownInstances.add(instance);
                 }
             }
 
-            domainFactory.save();
+            if (!setNotificationShownInstances.isEmpty()) {
+                domainFactory.getInstanceFactory().setInstancesNotShown(instances);
+                domainFactory.save();
+            }
 
             for (Instance instance : instances)
                 notify(instance);
+
+            if (!instances.isEmpty()) {
+                domainFactory.getInstanceFactory().setInstancesShown(instances);
+                domainFactory.save();
+            }
         }
     }
 
     private void notify(Instance instance) {
         Assert.assertTrue(instance != null);
-
-        instance.setNotificationShown(true);
 
         Intent deleteIntent = InstanceNotificationDeleteService.getIntent(this, instance);
         PendingIntent pendingDeleteIntent = PendingIntent.getService(this, instance.getNotificationId(), deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);

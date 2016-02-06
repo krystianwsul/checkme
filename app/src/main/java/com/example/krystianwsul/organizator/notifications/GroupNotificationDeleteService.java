@@ -38,14 +38,16 @@ public class GroupNotificationDeleteService extends IntentService {
         DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
         Assert.assertTrue(domainFactory != null);
 
+        ArrayList<Instance> instances = new ArrayList<>();
         for (Bundle bundle : bundles) {
             Instance instance = InstanceData.getInstance(domainFactory, bundle);
             Assert.assertTrue(instance != null);
 
-            instance.setNotified();
+            instances.add(instance);
         }
 
-        domainFactory.save();
+        domainFactory.getInstanceFactory().setInstancesNotified(instances);
 
+        domainFactory.save();
     }
 }

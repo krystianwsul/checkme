@@ -233,6 +233,54 @@ public class DomainFactory {
 
             return domainFactory.getPersistenceManager().createInstanceRecord(task, scheduleDateTime);
         }
+
+        public void setInstanceDateTime(Context context, Instance instance, DateTime dateTime) {
+            Assert.assertTrue(context != null);
+            Assert.assertTrue(instance != null);
+            Assert.assertTrue(dateTime != null);
+
+            instance.setInstanceDateTime(context, dateTime);
+        }
+
+        public void setInstanceDone(Context context, Instance instance, boolean done) {
+            Assert.assertTrue(context != null);
+            Assert.assertTrue(instance != null);
+
+            instance.setDone(done, context);
+        }
+
+        public void setInstancesNotified(ArrayList<Instance> instances) {
+            Assert.assertTrue(instances != null);
+            Assert.assertTrue(!instances.isEmpty());
+
+            for (Instance instance : instances) {
+                Assert.assertTrue(instance != null);
+                instance.setNotified();
+            }
+        }
+
+        public void setInstanceNotifiedNotShown(Instance instance) {
+            Assert.assertTrue(instance != null);
+
+            instance.setNotified();
+            instance.setNotificationShown(false);
+        }
+
+        public void setInstancesNotShown(ArrayList<Instance> instances) {
+            Assert.assertTrue(instances != null);
+            Assert.assertTrue(!instances.isEmpty());
+
+            for (Instance instance : instances)
+                instance.setNotificationShown(false);
+        }
+
+        public void setInstancesShown(ArrayList<Instance> instances) {
+            Assert.assertTrue(instances != null);
+            Assert.assertTrue(!instances.isEmpty());
+
+            for (Instance instance : instances)
+                instance.setNotificationShown(true);
+        }
     }
 
     public static class TaskFactory {

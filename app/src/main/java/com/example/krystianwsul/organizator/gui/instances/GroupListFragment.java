@@ -209,7 +209,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(group.singleInstance());
 
                 boolean isChecked = checkBox.isChecked();
-                group.getSingleSinstance().setDone(isChecked, mContext);
+
+                mDomainFactory.getInstanceFactory().setInstanceDone(mContext, group.getSingleSinstance(), isChecked);
 
                 mDomainFactory.save();
 

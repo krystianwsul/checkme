@@ -141,7 +141,7 @@ public class Instance {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
-    public void setInstanceDateTime(Context context, DateTime dateTime) {
+    void setInstanceDateTime(Context context, DateTime dateTime) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(dateTime != null);
         Assert.assertTrue(isRootInstance());
@@ -234,7 +234,7 @@ public class Instance {
             return null;
     }
 
-    public void setDone(boolean done, Context context) {
+    void setDone(boolean done, Context context) {
         Assert.assertTrue(context != null);
 
         if (mInstanceRecord == null) {
@@ -299,7 +299,7 @@ public class Instance {
         return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }
 
-    public void setNotified() {
+    void setNotified() {
         if (mInstanceRecord == null)
             createInstanceHierarchy();
 
@@ -318,7 +318,7 @@ public class Instance {
         return (mInstanceRecord != null && mInstanceRecord.getNotificationShown());
     }
 
-    public void setNotificationShown(boolean notificationShown) {
+    void setNotificationShown(boolean notificationShown) {
         if (mInstanceRecord == null)
             createInstanceHierarchy();
 

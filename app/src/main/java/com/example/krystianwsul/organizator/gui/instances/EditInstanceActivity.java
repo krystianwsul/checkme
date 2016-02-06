@@ -168,7 +168,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
                     return;
                 }
 
-                mInstance.setInstanceDateTime(EditInstanceActivity.this, new DateTime(mDate, time));
+                domainFactory.getInstanceFactory().setInstanceDateTime(EditInstanceActivity.this, mInstance, new DateTime(mDate, time));
 
                 domainFactory.save();
 

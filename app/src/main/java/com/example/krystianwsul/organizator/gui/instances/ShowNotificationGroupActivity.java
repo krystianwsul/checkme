@@ -73,14 +73,13 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
             Instance instance = InstanceData.getInstance(domainFactory, bundle);
             Assert.assertTrue(instance != null);
 
-            if (mSavedInstanceState == null && setNotified)
-                instance.setNotified();
-
             instances.add(instance);
         }
 
-        if (mSavedInstanceState == null && setNotified)
+        if (mSavedInstanceState == null && setNotified) {
+            domainFactory.getInstanceFactory().setInstancesNotified(instances);
             domainFactory.save();
+        }
 
         Collections.sort(instances, new Comparator<Instance>() {
             @Override

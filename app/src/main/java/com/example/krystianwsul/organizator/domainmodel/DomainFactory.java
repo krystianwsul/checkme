@@ -30,8 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class DomainFactory {
-    private final Context mContext;
-
     private PersistenceManger mPersistenceManager;
 
     private CustomTimeFactory mCustomTimeFactory;
@@ -43,18 +41,16 @@ public class DomainFactory {
     public static DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
 
-        DomainFactory domainFactory = new DomainFactory(context);
-        domainFactory.initialize();
+        DomainFactory domainFactory = new DomainFactory();
+        domainFactory.initialize(context);
         return domainFactory;
     }
 
-    private DomainFactory(Context context) {
-        Assert.assertTrue(context != null);
-        mContext = context;
+    private DomainFactory() {
     }
 
-    private void initialize() {
-        mPersistenceManager = new PersistenceManger(mContext);
+    private void initialize(Context context) {
+        mPersistenceManager = new PersistenceManger(context);
 
         mCustomTimeFactory = new CustomTimeFactory(this);
         mTaskFactory = new TaskFactory(this);

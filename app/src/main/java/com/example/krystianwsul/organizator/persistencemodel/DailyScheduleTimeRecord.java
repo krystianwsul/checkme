@@ -17,8 +17,6 @@ public class DailyScheduleTimeRecord extends Record {
     private static final String COLUMN_HOUR = "hour";
     private static final String COLUMN_MINUTE = "minute";
 
-    private boolean mChanged = false;
-
     private final int mId;
     private final int mScheduleId;
 
@@ -39,31 +37,6 @@ public class DailyScheduleTimeRecord extends Record {
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_DAILY_SCHEDULE_TIMES);
         onCreate(sqLiteDatabase);
-    }
-
-    public static DailyScheduleTimeRecord createDailyScheduleTimeRecord(SQLiteDatabase sqLiteDatabase, int scheduleId, Integer customTimeId, Integer hour, Integer minute) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (customTimeId == null));
-        Assert.assertTrue((hour != null) || (customTimeId != null));
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_SCHEDULE_ID, scheduleId);
-        contentValues.put(COLUMN_CUSTOM_TIME_ID, customTimeId);
-        contentValues.put(COLUMN_HOUR, hour);
-        contentValues.put(COLUMN_MINUTE, minute);
-
-        long insertId = sqLiteDatabase.insert(TABLE_DAILY_SCHEDULE_TIMES, null, contentValues);
-        Assert.assertTrue(insertId != -1);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_DAILY_SCHEDULE_TIMES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        DailyScheduleTimeRecord dailyScheduleTimeRecord = cursorToDailyScheduleTimeRecord(cursor);
-        Assert.assertTrue(dailyScheduleTimeRecord != null);
-
-        cursor.close();
-        return dailyScheduleTimeRecord;
     }
 
     public static ArrayList<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(SQLiteDatabase sqLiteDatabase) {
@@ -95,10 +68,12 @@ public class DailyScheduleTimeRecord extends Record {
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
 
-        return new DailyScheduleTimeRecord(id, scheduleId, customTimeId, hour, minute);
+        return new DailyScheduleTimeRecord(true, id, scheduleId, customTimeId, hour, minute);
     }
 
-    private DailyScheduleTimeRecord(int id, int scheduleId, Integer customTimeId, Integer hour, Integer minute) {
+    DailyScheduleTimeRecord(boolean created, int id, int scheduleId, Integer customTimeId, Integer hour, Integer minute) {
+        super(created);
+
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
@@ -145,5 +120,16 @@ public class DailyScheduleTimeRecord extends Record {
     @Override
     void update(SQLiteDatabase sqLiteDatabase) {
         update(sqLiteDatabase, TABLE_DAILY_SCHEDULE_TIMES, COLUMN_ID, mId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        long insertId = create(sqLiteDatabase, TABLE_DAILY_SCHEDULE_TIMES);
+        Assert.assertTrue(insertId == mId);
     }
 }

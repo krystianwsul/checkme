@@ -46,33 +46,6 @@ public class SingleScheduleDateTimeRecord extends Record {
         onCreate(sqLiteDatabase);
     }
 
-    public static SingleScheduleDateTimeRecord createSingleScheduleDateTimeRecord(SQLiteDatabase sqLiteDatabase, int scheduleId, int year, int month, int day, Integer customTimeId, Integer hour, Integer minute) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (customTimeId == null));
-        Assert.assertTrue((hour != null) || (customTimeId != null));
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_SCHEDULE_ID, scheduleId);
-        contentValues.put(COLUMN_YEAR, year);
-        contentValues.put(COLUMN_MONTH, month);
-        contentValues.put(COLUMN_DAY, day);
-        contentValues.put(COLUMN_CUSTOM_TIME_ID, customTimeId);
-        contentValues.put(COLUMN_HOUR, hour);
-        contentValues.put(COLUMN_MINUTE, minute);
-
-        sqLiteDatabase.insert(TABLE_SINGLE_SCHEDULE_DATE_TIMES, null, contentValues);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_SINGLE_SCHEDULE_DATE_TIMES, null, COLUMN_SCHEDULE_ID + " = " + scheduleId, null, null, null, null);
-        cursor.moveToFirst();
-
-        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = cursorToSingleScheduleDateTimeRecord(cursor);
-        Assert.assertTrue(singleScheduleDateTimeRecord != null);
-
-        cursor.close();
-        return singleScheduleDateTimeRecord;
-    }
-
     public static ArrayList<SingleScheduleDateTimeRecord> getSingleScheduleDateTimeRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -104,10 +77,12 @@ public class SingleScheduleDateTimeRecord extends Record {
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
 
-        return new SingleScheduleDateTimeRecord(scheduleId, year, month, day, customTimeId, hour, minute);
+        return new SingleScheduleDateTimeRecord(true, scheduleId, year, month, day, customTimeId, hour, minute);
     }
 
-    private SingleScheduleDateTimeRecord(int scheduleId, int year, int month, int day, Integer customTimeId, Integer hour, Integer minute) {
+    SingleScheduleDateTimeRecord(boolean created, int scheduleId, int year, int month, int day, Integer customTimeId, Integer hour, Integer minute) {
+        super(created);
+
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
@@ -155,6 +130,7 @@ public class SingleScheduleDateTimeRecord extends Record {
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_SCHEDULE_ID, mScheduleId);
         contentValues.put(COLUMN_YEAR, mYear);
         contentValues.put(COLUMN_MONTH, mMinute);
         contentValues.put(COLUMN_DAY, mDay);
@@ -167,5 +143,15 @@ public class SingleScheduleDateTimeRecord extends Record {
     @Override
     void update(SQLiteDatabase sqLiteDatabase) {
         update(sqLiteDatabase, TABLE_SINGLE_SCHEDULE_DATE_TIMES, COLUMN_SCHEDULE_ID, mScheduleId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        create(sqLiteDatabase, TABLE_SINGLE_SCHEDULE_DATE_TIMES);
     }
 }

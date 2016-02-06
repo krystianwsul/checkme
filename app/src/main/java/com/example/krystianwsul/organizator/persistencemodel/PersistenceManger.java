@@ -23,6 +23,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class PersistenceManger {
@@ -129,6 +130,13 @@ public class PersistenceManger {
         return mInstanceRecords.values();
     }
 
+    private int getNextId(HashMap<Integer, ?> hashMap) {
+        if (hashMap.isEmpty())
+            return 1;
+        else
+            return Collections.max(hashMap.keySet()) + 1;
+    }
+
     public CustomTimeRecord createCustomTimeRecord(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
@@ -149,7 +157,9 @@ public class PersistenceManger {
         HourMinute friday = hourMinutes.get(DayOfWeek.FRIDAY);
         HourMinute saturday = hourMinutes.get(DayOfWeek.SATURDAY);
 
-        CustomTimeRecord customTimeRecord = CustomTimeRecord.createCustomTimeRecord(mSQLiteDatabase, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute());
+        int id = getNextId(mCustomTimeRecords);
+
+        CustomTimeRecord customTimeRecord = new CustomTimeRecord(false, id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute(), true);
         mCustomTimeRecords.put(customTimeRecord.getId(), customTimeRecord);
         return customTimeRecord;
     }
@@ -158,7 +168,9 @@ public class PersistenceManger {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(startTimeStamp != null);
 
-        TaskRecord taskRecord = TaskRecord.createTaskRecord(mSQLiteDatabase, name, startTimeStamp.getLong(), null);
+        int id = getNextId(mTaskRecords);
+
+        TaskRecord taskRecord = new TaskRecord(false, id, name, startTimeStamp.getLong(), null);
         mTaskRecords.put(taskRecord.getId(), taskRecord);
 
         return taskRecord;
@@ -171,7 +183,9 @@ public class PersistenceManger {
         Assert.assertTrue(childTask != null);
         Assert.assertTrue(childTask.current(startTimeStamp));
 
-        TaskHierarchyRecord taskHierarchyRecord = TaskHierarchyRecord.createTaskHierarchyRecord(mSQLiteDatabase, parentTask.getId(), childTask.getId(), startTimeStamp.getLong(), null);
+        int id = getNextId(mTaskHierarchyRecords);
+
+        TaskHierarchyRecord taskHierarchyRecord = new TaskHierarchyRecord(false, id, parentTask.getId(), childTask.getId(), startTimeStamp.getLong(), null);
         mTaskHierarchyRecords.put(taskHierarchyRecord.getId(), taskHierarchyRecord);
         return taskHierarchyRecord;
     }
@@ -182,7 +196,9 @@ public class PersistenceManger {
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(rootTask.current(startTimeStamp));
 
-        ScheduleRecord scheduleRecord = ScheduleRecord.createScheduleRecord(mSQLiteDatabase, rootTask.getId(), startTimeStamp.getLong(), null, scheduleType.ordinal());
+        int id = getNextId(mScheduleRecords);
+
+        ScheduleRecord scheduleRecord = new ScheduleRecord(false, id, rootTask.getId(), startTimeStamp.getLong(), null, scheduleType.ordinal());
         mScheduleRecords.put(scheduleRecord.getId(), scheduleRecord);
 
         return scheduleRecord;
@@ -205,7 +221,7 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = SingleScheduleDateTimeRecord.createSingleScheduleDateTimeRecord(mSQLiteDatabase, singleSchedule.getId(), date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = new SingleScheduleDateTimeRecord(false, singleSchedule.getId(), date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
         mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
 
         return singleScheduleDateTimeRecord;
@@ -227,7 +243,9 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        DailyScheduleTimeRecord dailyScheduleTimeRecord = DailyScheduleTimeRecord.createDailyScheduleTimeRecord(mSQLiteDatabase, dailySchedule.getId(), customTimeId, hour, minute);
+        int id = getNextId(mDailyScheduleTimeRecords);
+
+        DailyScheduleTimeRecord dailyScheduleTimeRecord = new DailyScheduleTimeRecord(false, id, dailySchedule.getId(), customTimeId, hour, minute);
         mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
         return dailyScheduleTimeRecord;
     }
@@ -249,7 +267,9 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = WeeklyScheduleDayOfWeekTimeRecord.createWeeklyScheduleDayOfWeekTimeRecord(mSQLiteDatabase, weeklySchedule.getId(), dayOfWeek.ordinal(), customTimeId, hour, minute);
+        int id = getNextId(mWeeklyScheduleDayOfWeekTimeRecords);
+
+        WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = new WeeklyScheduleDayOfWeekTimeRecord(false, id, weeklySchedule.getId(), dayOfWeek.ordinal(), customTimeId, hour, minute);
         mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
         return weeklyScheduleDayOfWeekTimeRecord;
     }
@@ -278,34 +298,73 @@ public class PersistenceManger {
         TimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp();
         TimeStamp hierarchy = (now.compareTo(scheduleTimeStamp) < 0 ? now : scheduleTimeStamp);
 
-        InstanceRecord instanceRecord = InstanceRecord.createInstanceRecord(mSQLiteDatabase, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, hierarchy.getLong(), false, false);
+        int id = getNextId(mInstanceRecords);
+
+        InstanceRecord instanceRecord = new InstanceRecord(false, id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, hierarchy.getLong(), false, false);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
     }
 
     public void save() {
-        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
-            customTimeRecord.update(mSQLiteDatabase);
+        mSQLiteDatabase.beginTransaction();
 
-        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
-            dailyScheduleTimeRecord.update(mSQLiteDatabase);
+        try
+        {
+            // create
 
-        for (InstanceRecord instanceRecord : mInstanceRecords.values())
-            instanceRecord.update(mSQLiteDatabase);
+            for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
+                customTimeRecord.create(mSQLiteDatabase);
 
-        for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
-            scheduleRecord.update(mSQLiteDatabase);
+            for (TaskRecord taskRecord : mTaskRecords.values())
+                taskRecord.create(mSQLiteDatabase);
 
-        for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
-            singleScheduleDateTimeRecord.update(mSQLiteDatabase);
+            for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
+                taskHierarchyRecord.create(mSQLiteDatabase);
 
-        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
-            taskHierarchyRecord.update(mSQLiteDatabase);
+            for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
+                scheduleRecord.create(mSQLiteDatabase);
 
-        for (TaskRecord taskRecord : mTaskRecords.values())
-            taskRecord.update(mSQLiteDatabase);
+            for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
+                singleScheduleDateTimeRecord.create(mSQLiteDatabase);
 
-        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
-            weeklyScheduleDayOfWeekTimeRecord.update(mSQLiteDatabase);
-    }
+            for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
+                dailyScheduleTimeRecord.create(mSQLiteDatabase);
+
+            for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
+                weeklyScheduleDayOfWeekTimeRecord.create(mSQLiteDatabase);
+
+            for (InstanceRecord instanceRecord : mInstanceRecords.values())
+                instanceRecord.create(mSQLiteDatabase);
+
+            // update
+
+            for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
+                customTimeRecord.update(mSQLiteDatabase);
+
+            for (TaskRecord taskRecord : mTaskRecords.values())
+                taskRecord.update(mSQLiteDatabase);
+
+            for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
+                taskHierarchyRecord.update(mSQLiteDatabase);
+
+            for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
+                scheduleRecord.update(mSQLiteDatabase);
+
+            for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
+                singleScheduleDateTimeRecord.update(mSQLiteDatabase);
+
+            for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
+                dailyScheduleTimeRecord.update(mSQLiteDatabase);
+
+            for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
+                weeklyScheduleDayOfWeekTimeRecord.update(mSQLiteDatabase);
+
+            for (InstanceRecord instanceRecord : mInstanceRecords.values())
+                instanceRecord.update(mSQLiteDatabase);
+
+            mSQLiteDatabase.setTransactionSuccessful();
+        } finally {
+            mSQLiteDatabase.endTransaction();
+        }
+   }
 }

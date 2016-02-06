@@ -43,32 +43,6 @@ public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
         onCreate(sqLiteDatabase);
     }
 
-    public static WeeklyScheduleDayOfWeekTimeRecord createWeeklyScheduleDayOfWeekTimeRecord(SQLiteDatabase sqLiteDatabase, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (customTimeId == null));
-        Assert.assertTrue((hour != null) || (customTimeId != null));
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_SCHEDULE_ID, scheduleId);
-        contentValues.put(COLUMN_DAY_OF_WEEK, dayOfWeek);
-        contentValues.put(COLUMN_CUSTOM_TIME_ID, customTimeId);
-        contentValues.put(COLUMN_HOUR, hour);
-        contentValues.put(COLUMN_MINUTE, minute);
-
-        long insertId = sqLiteDatabase.insert(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, null, contentValues);
-        Assert.assertTrue(insertId != -1);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = cursorToWeeklyScheduleDayOfWeekTimeRecord(cursor);
-        Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
-
-        cursor.close();
-        return weeklyScheduleDayOfWeekTimeRecord;
-    }
-
     public static ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -99,10 +73,12 @@ public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
 
-        return new WeeklyScheduleDayOfWeekTimeRecord(id, scheduleId, dayOfWeek, customTimeId, hour, minute);
+        return new WeeklyScheduleDayOfWeekTimeRecord(true, id, scheduleId, dayOfWeek, customTimeId, hour, minute);
     }
 
-    private WeeklyScheduleDayOfWeekTimeRecord(int id, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
+    WeeklyScheduleDayOfWeekTimeRecord(boolean created, int id, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
+        super(created);
+
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
@@ -156,5 +132,16 @@ public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
     @Override
     void update(SQLiteDatabase sqLiteDatabase) {
         update(sqLiteDatabase, TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, COLUMN_ID, mId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        long insertId = create(sqLiteDatabase, TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES);
+        Assert.assertTrue(insertId == mId);
     }
 }

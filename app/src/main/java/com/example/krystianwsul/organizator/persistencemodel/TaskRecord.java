@@ -36,29 +36,6 @@ public class TaskRecord extends Record {
         onCreate(sqLiteDatabase);
     }
 
-    public static TaskRecord createTaskRecord(SQLiteDatabase sqLiteDatabase, String name, long startTime, Long endTime) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue(name != null);
-        Assert.assertTrue(endTime == null || startTime <= endTime);
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_NAME, name);
-        contentValues.put(COLUMN_START_TIME, startTime);
-        contentValues.put(COLUMN_END_TIME, endTime);
-
-        long insertId = sqLiteDatabase.insert(TABLE_TASKS, null, contentValues);
-        Assert.assertTrue(insertId != -1);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_TASKS, null, COLUMN_ID + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        TaskRecord taskRecord = cursorToTaskRecord(cursor);
-        Assert.assertTrue(taskRecord != null);
-
-        cursor.close();
-        return taskRecord;
-    }
-
     public static ArrayList<TaskRecord> getTaskRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -86,10 +63,12 @@ public class TaskRecord extends Record {
         Assert.assertTrue(name != null);
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
-        return new TaskRecord(id, name, startTime, endTime);
+        return new TaskRecord(true, id, name, startTime, endTime);
     }
 
-    private TaskRecord(int id, String name, long startTime, Long endTime) {
+    TaskRecord(boolean created, int id, String name, long startTime, Long endTime) {
+        super(created);
+
         Assert.assertTrue(name != null);
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
@@ -143,5 +122,16 @@ public class TaskRecord extends Record {
     void update(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
         update(sqLiteDatabase, TABLE_TASKS, COLUMN_ID, mId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        long insertId = create(sqLiteDatabase, TABLE_TASKS);
+        Assert.assertTrue(insertId == mId);
     }
 }

@@ -85,53 +85,6 @@ public class InstanceRecord extends Record {
         onCreate(sqLiteDatabase);
     }
 
-    public static InstanceRecord createInstanceRecord(SQLiteDatabase sqLiteDatabase, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
-        Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
-
-        Assert.assertTrue((instanceYear == null) == (instanceMonth == null));
-        Assert.assertTrue((instanceYear == null) == (instanceDay == null));
-        boolean hasInstanceDate = (instanceYear != null);
-
-        Assert.assertTrue((instanceHour == null) == (instanceMinute == null));
-        Assert.assertTrue((instanceHour == null) || (instanceCustomTimeId == null));
-        boolean hasInstanceTime = ((instanceHour != null) || (instanceCustomTimeId != null));
-        Assert.assertTrue(hasInstanceDate == hasInstanceTime);
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_TASK_ID, taskId);
-        contentValues.put(COLUMN_DONE, done);
-        contentValues.put(COLUMN_SCHEDULE_YEAR, scheduleYear);
-        contentValues.put(COLUMN_SCHEDULE_MONTH, scheduleMonth);
-        contentValues.put(COLUMN_SCHEDULE_DAY, scheduleDay);
-        contentValues.put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, scheduleCustomTimeId);
-        contentValues.put(COLUMN_SCHEDULE_HOUR, scheduleHour);
-        contentValues.put(COLUMN_SCHEDULE_MINUTE, scheduleMinute);
-        contentValues.put(COLUMN_INSTANCE_YEAR, instanceYear);
-        contentValues.put(COLUMN_INSTANCE_MONTH, instanceMonth);
-        contentValues.put(COLUMN_INSTANCE_DAY, instanceDay);
-        contentValues.put(COLUMN_INSTANCE_CUSTOM_TIME_ID, instanceCustomTimeId);
-        contentValues.put(COLUMN_INSTANCE_HOUR, instanceHour);
-        contentValues.put(COLUMN_INSTANCE_MINUTE, instanceMinute);
-        contentValues.put(COLUMN_HIERARCHY_TIME, hierarchyTime);
-        contentValues.put(COLUMN_NOTIFIED, notified);
-        contentValues.put(COLUMN_NOTIFICATION_SHOWN, notificationShown);
-
-        long insertId = sqLiteDatabase.insert(TABLE_INSTANCES, null, contentValues);
-        Assert.assertTrue(insertId != -1);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        InstanceRecord instanceRecord = cursorToInstanceRecord(cursor);
-        Assert.assertTrue(instanceRecord != null);
-
-        cursor.close();
-        return instanceRecord;
-    }
-
     public static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -182,10 +135,12 @@ public class InstanceRecord extends Record {
         boolean hasInstanceTime = ((instanceHour != null) || (instanceCustomTimeId != null));
         Assert.assertTrue(hasInstanceDate == hasInstanceTime);
 
-        return new InstanceRecord(id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown);
+        return new InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown);
     }
 
-    private InstanceRecord(int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
+    InstanceRecord(boolean created, int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
+        super(created);
+
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
@@ -372,5 +327,16 @@ public class InstanceRecord extends Record {
     void update(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
         update(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID, mId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        long insertId = create(sqLiteDatabase, TABLE_INSTANCES);
+        Assert.assertTrue(insertId == mId);
     }
 }

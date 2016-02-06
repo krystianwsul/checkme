@@ -86,40 +86,6 @@ public class CustomTimeRecord extends Record {
         onCreate(sqLiteDatabase);
     }
 
-    public static CustomTimeRecord createCustomTimeRecord(SQLiteDatabase sqLiteDatabase, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_NAME, name);
-        contentValues.put(COLUMN_SUNDAY_HOUR, sundayHour);
-        contentValues.put(COLUMN_SUNDAY_MINUTE, sundayMinute);
-        contentValues.put(COLUMN_MONDAY_HOUR, mondayHour);
-        contentValues.put(COLUMN_MONDAY_MINUTE, mondayMinute);
-        contentValues.put(COLUMN_TUESDAY_HOUR, tuesdayHour);
-        contentValues.put(COLUMN_TUESDAY_MINUTE, tuesdayMinute);
-        contentValues.put(COLUMN_WEDNESDAY_HOUR, wednesdayHour);
-        contentValues.put(COLUMN_WEDNESDAY_MINUTE, wednesdayMinute);
-        contentValues.put(COLUMN_THURSDAY_HOUR, thursdayHour);
-        contentValues.put(COLUMN_THURSDAY_MINUTE, thursdayMinute);
-        contentValues.put(COLUMN_FRIDAY_HOUR, fridayHour);
-        contentValues.put(COLUMN_FRIDAY_MINUTE, fridayMinute);
-        contentValues.put(COLUMN_SATURDAY_HOUR, saturdayHour);
-        contentValues.put(COLUMN_SATURDAY_MINUTE, saturdayMinute);
-
-        long insertId = sqLiteDatabase.insert(TABLE_CUSTOM_TIMES, null, contentValues);
-        Assert.assertTrue(insertId != -1);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        CustomTimeRecord customTimeRecord = cursorToCustomTimeRecord(cursor);
-        Assert.assertTrue(customTimeRecord != null);
-
-        cursor.close();
-        return customTimeRecord;
-    }
-
     public static ArrayList<CustomTimeRecord> getCustomTimeRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -157,10 +123,12 @@ public class CustomTimeRecord extends Record {
         int saturdayMinute = cursor.getInt(15);
         boolean current = (cursor.getInt(16) == 1);
 
-        return new CustomTimeRecord(id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
+        return new CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
     }
 
-    private CustomTimeRecord(int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
+    CustomTimeRecord(boolean created, int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
+        super(created);
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mId = id;
@@ -367,5 +335,16 @@ public class CustomTimeRecord extends Record {
     void update(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
         update(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID, mId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        long insertId = create(sqLiteDatabase, TABLE_CUSTOM_TIMES);
+        Assert.assertTrue(insertId == mId);
     }
 }

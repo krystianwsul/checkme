@@ -39,30 +39,6 @@ public class TaskHierarchyRecord extends Record {
         onCreate(sqLiteDatabase);
     }
 
-    public static TaskHierarchyRecord createTaskHierarchyRecord(SQLiteDatabase sqLiteDatabase, int parentTaskId, int childTaskId, long startTime, Long endTime) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue(parentTaskId != childTaskId);
-        Assert.assertTrue(endTime == null || startTime <= endTime);
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_PARENT_TASK_ID, parentTaskId);
-        contentValues.put(COLUMN_CHILD_TASK_ID, childTaskId);
-        contentValues.put(COLUMN_START_TIME, startTime);
-        contentValues.put(COLUMN_END_TIME, endTime);
-
-        long insertId = sqLiteDatabase.insert(TABLE_TASK_HIERARCHIES, null, contentValues);
-        Assert.assertTrue(insertId != -1);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_TASK_HIERARCHIES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        TaskHierarchyRecord taskHierarchyRecord = cursorToTaskHierarchyRecord(cursor);
-        Assert.assertTrue(taskHierarchyRecord != null);
-
-        cursor.close();
-        return taskHierarchyRecord;
-    }
-
     public static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -91,10 +67,12 @@ public class TaskHierarchyRecord extends Record {
         Assert.assertTrue(parentTaskId != childTaskId);
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
-        return new TaskHierarchyRecord(id, parentTaskId, childTaskId, startTime, endTime);
+        return new TaskHierarchyRecord(true, id, parentTaskId, childTaskId, startTime, endTime);
     }
 
-    private TaskHierarchyRecord(int id, int parentTaskId, int childTaskId, long startTime, Long endTime) {
+    TaskHierarchyRecord(boolean created, int id, int parentTaskId, int childTaskId, long startTime, Long endTime) {
+        super(created);
+
         Assert.assertTrue(parentTaskId != childTaskId);
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
@@ -147,5 +125,16 @@ public class TaskHierarchyRecord extends Record {
     void update(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
         update(sqLiteDatabase, TABLE_TASK_HIERARCHIES, COLUMN_ID, mId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        long insertId = create(sqLiteDatabase, TABLE_TASK_HIERARCHIES);
+        Assert.assertTrue(insertId == mId);
     }
 }

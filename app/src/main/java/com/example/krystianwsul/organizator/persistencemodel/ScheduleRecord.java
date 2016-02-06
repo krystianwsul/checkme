@@ -39,29 +39,6 @@ public class ScheduleRecord extends Record {
         onCreate(sqLiteDatabase);
     }
 
-    public static ScheduleRecord createScheduleRecord(SQLiteDatabase sqLiteDatabase, int rootTaskId, long startTime, Long endTime, int type) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue((endTime == null) || startTime <= endTime);
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_ROOT_TASK_ID, rootTaskId);
-        contentValues.put(COLUMN_START_TIME, startTime);
-        contentValues.put(COLUMN_END_TIME, endTime);
-        contentValues.put(COLUMN_TYPE, type);
-
-        long insertId = sqLiteDatabase.insert(TABLE_SCHEDULES, null, contentValues);
-        Assert.assertTrue(insertId != -1);
-
-        Cursor cursor = sqLiteDatabase.query(TABLE_SCHEDULES, null, COLUMN_ID + " = " + insertId, null, null, null, null);
-        cursor.moveToFirst();
-
-        ScheduleRecord scheduleRecord = cursorToScheduleRecord(cursor);
-        Assert.assertTrue(scheduleRecord != null);
-
-        cursor.close();
-        return scheduleRecord;
-    }
-
     public static ArrayList<ScheduleRecord> getScheduleRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -89,10 +66,12 @@ public class ScheduleRecord extends Record {
 
         Assert.assertTrue((endTime == null) || startTime <= endTime);
 
-        return new ScheduleRecord(id, taskId, startTime, endTime, type);
+        return new ScheduleRecord(true, id, taskId, startTime, endTime, type);
     }
 
-    private ScheduleRecord(int id, int rootTaskId, long startTime, Long endTime, int type) {
+    ScheduleRecord(boolean current, int id, int rootTaskId, long startTime, Long endTime, int type) {
+        super(current);
+
         Assert.assertTrue((endTime == null) || startTime <= endTime);
 
         mId = id;
@@ -145,5 +124,16 @@ public class ScheduleRecord extends Record {
     @Override
     void update(SQLiteDatabase sqLiteDatabase) {
         update(sqLiteDatabase, TABLE_SCHEDULES, COLUMN_ID, mId);
+    }
+
+    @Override
+    void create(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
+        if (mCreated)
+            return;
+
+        long insertId = create(sqLiteDatabase, TABLE_SCHEDULES);
+        Assert.assertTrue(insertId == mId);
     }
 }

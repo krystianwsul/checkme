@@ -202,19 +202,10 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
                     return;
                 }
 
-                if (mCustomTime != null) {
-                    mCustomTime.setName(name);
-
-                    for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-                        HourMinute hourMinute = mHourMinutes.get(dayOfWeek);
-                        Assert.assertTrue(hourMinute != null);
-
-                        if (hourMinute.compareTo(mCustomTime.getHourMinute(dayOfWeek)) != 0)
-                            mCustomTime.setHourMinute(dayOfWeek, hourMinute);
-                    }
-                } else {
+                if (mCustomTime != null)
+                    domainFactory.getCustomTimeFactory().updateCustomTime(mCustomTime, name, mHourMinutes);
+                else
                     domainFactory.getCustomTimeFactory().createCustomTime(name, mHourMinutes);
-                }
 
                 domainFactory.save();
 

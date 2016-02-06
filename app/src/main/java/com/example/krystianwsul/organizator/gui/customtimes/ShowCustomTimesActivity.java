@@ -142,7 +142,8 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
             public void onDeleteClick() {
                 int position = getAdapterPosition();
                 CustomTime customTime = mCustomTimes.get(position);
-                customTime.setCurrent();
+
+                mDomainFactory.getCustomTimeFactory().setCustomTimeCurrent(customTime);
 
                 mDomainFactory.save();
 

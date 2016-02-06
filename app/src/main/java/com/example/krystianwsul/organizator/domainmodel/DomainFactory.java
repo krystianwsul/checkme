@@ -717,5 +717,26 @@ public class DomainFactory {
             CustomTime customTime = new CustomTime(customTimeRecord);
             mCustomTimes.put(customTime.getId(), customTime);
         }
+
+        public void updateCustomTime(CustomTime customTime, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+            Assert.assertTrue(customTime != null);
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(hourMinutes != null);
+
+            customTime.setName(name);
+
+            for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+                HourMinute hourMinute = hourMinutes.get(dayOfWeek);
+                Assert.assertTrue(hourMinute != null);
+
+                if (hourMinute.compareTo(customTime.getHourMinute(dayOfWeek)) != 0)
+                    customTime.setHourMinute(dayOfWeek, hourMinute);
+            }
+        }
+
+        public void setCustomTimeCurrent(CustomTime customTime) {
+            Assert.assertTrue(customTime != null);
+            customTime.setCurrent();
+        }
     }
 }

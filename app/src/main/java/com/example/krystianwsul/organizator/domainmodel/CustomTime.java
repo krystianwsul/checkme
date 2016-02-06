@@ -22,7 +22,7 @@ public class CustomTime implements Time {
         return mCustomTimeRecord.getName();
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         mCustomTimeRecord.setName(name);
     }
@@ -50,7 +50,7 @@ public class CustomTime implements Time {
         }
     }
 
-    public void setHourMinute(DayOfWeek dayOfWeek, HourMinute hourMinute) {
+    void setHourMinute(DayOfWeek dayOfWeek, HourMinute hourMinute) {
         Assert.assertTrue(dayOfWeek != null);
         Assert.assertTrue(hourMinute != null);
 
@@ -104,7 +104,7 @@ public class CustomTime implements Time {
         return mCustomTimeRecord.getCurrent();
     }
 
-    public void setCurrent() {
+    void setCurrent() {
         mCustomTimeRecord.setCurrent(false);
     }
 }

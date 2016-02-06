@@ -87,7 +87,7 @@ public class Instance {
                 DomainFactory domainFactory = mDomainFactoryReference.get();
                 Assert.assertTrue(domainFactory != null);
 
-                return domainFactory.getCustomTimeFactory().getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
+                return domainFactory.getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
             } else {
                 return new NormalTime(hour, minute);
             }
@@ -126,7 +126,7 @@ public class Instance {
                 DomainFactory domainFactory = mDomainFactoryReference.get();
                 Assert.assertTrue(domainFactory != null);
 
-                return domainFactory.getCustomTimeFactory().getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
+                return domainFactory.getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
             } else if (mInstanceRecord.getInstanceHour() != null) {
                 return new NormalTime(mInstanceRecord.getInstanceHour(), mInstanceRecord.getInstanceMinute());
             } else {
@@ -187,7 +187,7 @@ public class Instance {
         for (Task childTask : task.getChildTasks(hierarchyTimeStamp)) {
             Assert.assertTrue(childTask.current(hierarchyTimeStamp));
 
-            Instance childInstance = domainFactory.getInstanceFactory().getInstance(childTask, getScheduleDateTime());
+            Instance childInstance = domainFactory.getInstance(childTask, getScheduleDateTime());
             Assert.assertTrue(childInstance != null);
 
             childInstances.add(childInstance);
@@ -210,7 +210,7 @@ public class Instance {
 
         Assert.assertTrue(parentTask.current(hierarchyTimeStamp));
 
-        Instance parentInstance = domainFactory.getInstanceFactory().getInstance(parentTask, getScheduleDateTime());
+        Instance parentInstance = domainFactory.getInstance(parentTask, getScheduleDateTime());
         Assert.assertTrue(parentInstance != null);
 
         return parentInstance;
@@ -280,7 +280,7 @@ public class Instance {
         DateTime scheduleDateTime = getScheduleDateTime();
 
         mScheduleDateTime = null;
-        mInstanceRecord = domainFactory.getInstanceFactory().createInstanceRecord(task, this, scheduleDateTime);
+        mInstanceRecord = domainFactory.createInstanceRecord(task, this, scheduleDateTime);
     }
 
     private TimeStamp getHierarchyTimeStamp() {

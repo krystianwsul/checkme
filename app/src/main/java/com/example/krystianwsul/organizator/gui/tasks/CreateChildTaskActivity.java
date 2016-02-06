@@ -67,7 +67,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             int parentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
             Assert.assertTrue(parentTaskId != -1);
 
-            parentTask = domainFactory.getTaskFactory().getTask(parentTaskId);
+            parentTask = domainFactory.getTask(parentTaskId);
             Assert.assertTrue(parentTask != null);
         } else {
             Assert.assertTrue(intent.hasExtra(CHILD_TASK_ID_KEY));
@@ -75,7 +75,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             int childTaskId = intent.getIntExtra(CHILD_TASK_ID_KEY, -1);
             Assert.assertTrue(childTaskId != -1);
 
-            childTask = domainFactory.getTaskFactory().getTask(childTaskId);
+            childTask = domainFactory.getTask(childTaskId);
             Assert.assertTrue(childTask != null);
         }
 
@@ -97,9 +97,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                 }
 
                 if (finalParentTask != null)
-                    domainFactory.getTaskFactory().createChildTask(finalParentTask, name, TimeStamp.getNow());
+                    domainFactory.createChildTask(finalParentTask, name, TimeStamp.getNow());
                 else
-                    domainFactory.getTaskFactory().updateChildTask(finalChildTask, name);
+                    domainFactory.updateChildTask(finalChildTask, name);
 
                 domainFactory.save();
 

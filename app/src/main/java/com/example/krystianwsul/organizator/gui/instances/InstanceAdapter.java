@@ -167,7 +167,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
             boolean isChecked = checkBox.isChecked();
 
-            mDomainFactory.getInstanceFactory().setInstanceDone(mContext, instance, isChecked);
+            mDomainFactory.setInstanceDone(mContext, instance, isChecked);
 
             mDomainFactory.save();
 

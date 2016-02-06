@@ -29,7 +29,7 @@ class SingleScheduleDateTime {
             DomainFactory domainFactory = mDomainFactoryReference.get();
             Assert.assertTrue(domainFactory != null);
 
-            CustomTime customTime = domainFactory.getCustomTimeFactory().getCustomTime(mSingleScheduleDateTimeRecord.getCustomTimeId());
+            CustomTime customTime = domainFactory.getCustomTime(mSingleScheduleDateTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {
@@ -59,6 +59,6 @@ class SingleScheduleDateTime {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        return domainFactory.getInstanceFactory().getInstance(task, scheduleDateTime);
+        return domainFactory.getInstance(task, scheduleDateTime);
    }
 }

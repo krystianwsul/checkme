@@ -89,7 +89,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
 
-            domainFactory.getInstanceFactory().setInstanceNotifiedNotShown(instance);
+            domainFactory.setInstanceNotifiedNotShown(instance);
 
             domainFactory.save();
         }
@@ -112,7 +112,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
             public void onClick(View v) {
                 boolean isChecked = mCheckBox.isChecked();
 
-                domainFactory.getInstanceFactory().setInstanceDone(ShowInstanceActivity.this, instance, isChecked);
+                domainFactory.setInstanceDone(ShowInstanceActivity.this, instance, isChecked);
 
                 domainFactory.save();
 

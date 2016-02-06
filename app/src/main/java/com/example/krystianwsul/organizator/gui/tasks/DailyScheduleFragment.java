@@ -149,7 +149,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         ArrayList<Time> times = getTimes();
         Assert.assertTrue(!times.isEmpty());
 
-        mDomainFactory.getTaskFactory().createDailyScheduleRootTask(name, times);
+        mDomainFactory.createDailyScheduleRootTask(name, times);
 
         mDomainFactory.save();
 
@@ -160,13 +160,13 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
+        Task rootTask = mDomainFactory.getTask(rootTaskId);
         Assert.assertTrue(rootTask != null);
 
         ArrayList<Time> times = getTimes();
         Assert.assertTrue(!times.isEmpty());
 
-        mDomainFactory.getTaskFactory().updateDailyScheduleRootTask(rootTask, name, times);
+        mDomainFactory.updateDailyScheduleRootTask(rootTask, name, times);
 
         mDomainFactory.save();
 
@@ -184,13 +184,13 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         ArrayList<Task> joinTasks = new ArrayList<>();
         for (Integer joinTaskId : joinTaskIds) {
-            Task joinTask = mDomainFactory.getTaskFactory().getTask(joinTaskId);
+            Task joinTask = mDomainFactory.getTask(joinTaskId);
             Assert.assertTrue(joinTask != null);
 
             joinTasks.add(joinTask);
         }
 
-        mDomainFactory.getTaskFactory().createDailyScheduleJoinRootTask(name, times, joinTasks);
+        mDomainFactory.createDailyScheduleJoinRootTask(name, times, joinTasks);
 
         mDomainFactory.save();
 
@@ -219,7 +219,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            Task rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
+            Task rootTask = domainFactory.getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
             DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
@@ -438,7 +438,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             if (mCustomTimeId == EMPTY_CUSTOM_TIME)
                 return null;
             else
-                return domainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
+                return domainFactory.getCustomTime(mCustomTimeId);
         }
 
         public HourMinute getHourMinute() {
@@ -472,7 +472,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             if (mCustomTimeId != EMPTY_CUSTOM_TIME) {
                 Assert.assertTrue(mHourMinute == null);
 
-                CustomTime customTime = domainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
+                CustomTime customTime = domainFactory.getCustomTime(mCustomTimeId);
                 Assert.assertTrue(customTime != null);
 
                 return customTime;

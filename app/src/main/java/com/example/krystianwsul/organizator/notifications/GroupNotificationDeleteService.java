@@ -46,7 +46,7 @@ public class GroupNotificationDeleteService extends IntentService {
             instances.add(instance);
         }
 
-        domainFactory.getInstanceFactory().setInstancesNotified(instances);
+        domainFactory.setInstancesNotified(instances);
 
         domainFactory.save();
     }

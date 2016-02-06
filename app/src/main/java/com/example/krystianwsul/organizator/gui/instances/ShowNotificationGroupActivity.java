@@ -77,7 +77,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
         }
 
         if (mSavedInstanceState == null && setNotified) {
-            domainFactory.getInstanceFactory().setInstancesNotified(instances);
+            domainFactory.setInstancesNotified(instances);
             domainFactory.save();
         }
 

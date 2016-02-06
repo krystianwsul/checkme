@@ -152,7 +152,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             int rootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
+            rootTask = domainFactory.getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
         } else if (intent.hasExtra(TASK_IDS_KEY)) {
             taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);

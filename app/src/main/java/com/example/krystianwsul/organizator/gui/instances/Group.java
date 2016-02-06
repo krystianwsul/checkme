@@ -43,7 +43,7 @@ class Group {
         } else {
             Date date = mTimeStamp.getDate();
             HourMinute hourMinute = mTimeStamp.getHourMinute();
-            Time time = mDomainFactory.getCustomTimeFactory().getCustomTime(date.getDayOfWeek(), hourMinute);
+            Time time = mDomainFactory.getCustomTime(date.getDayOfWeek(), hourMinute);
             if (time == null)
                 time = new NormalTime(hourMinute);
             DateTime dateTime = new DateTime(date, time);

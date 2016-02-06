@@ -89,7 +89,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mDomainFactory = domainFactory;
             mContext = context;
 
-            ArrayList<Instance> rootInstances = domainFactory.getInstanceFactory().getCurrentInstances();
+            ArrayList<Instance> rootInstances = domainFactory.getCurrentInstances();
 
             ArrayList<Instance> doneInstances = new ArrayList<>();
             ArrayList<Instance> notDoneInstances = new ArrayList<>();
@@ -210,7 +210,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 boolean isChecked = checkBox.isChecked();
 
-                mDomainFactory.getInstanceFactory().setInstanceDone(mContext, group.getSingleSinstance(), isChecked);
+                mDomainFactory.setInstanceDone(mContext, group.getSingleSinstance(), isChecked);
 
                 mDomainFactory.save();
 

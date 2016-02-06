@@ -70,7 +70,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory, domainFactory.getTaskFactory().getRootTasks(TimeStamp.getNow())));
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory, domainFactory.getRootTasks(TimeStamp.getNow())));
     }
 
     @Override

@@ -15,7 +15,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public synchronized static SQLiteDatabase getDatabase(Context context) {
         Assert.assertTrue(context != null);
         if (sSQLiteDatabase == null)
-            sSQLiteDatabase = new MySQLiteHelper(context).getWritableDatabase();
+            sSQLiteDatabase = new MySQLiteHelper(context.getApplicationContext()).getWritableDatabase();
         return sSQLiteDatabase;
     }
 

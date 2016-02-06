@@ -77,7 +77,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
 
             mDomainFactory = domainFactory;
             mActivity = activity;
-            mCustomTimes = new ArrayList<>(domainFactory.getCustomTimeFactory().getCurrentCustomTimes());
+            mCustomTimes = new ArrayList<>(domainFactory.getCurrentCustomTimes());
         }
 
         @Override
@@ -143,7 +143,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
                 int position = getAdapterPosition();
                 CustomTime customTime = mCustomTimes.get(position);
 
-                mDomainFactory.getCustomTimeFactory().setCustomTimeCurrent(customTime);
+                mDomainFactory.setCustomTimeCurrent(customTime);
 
                 mDomainFactory.save();
 

@@ -30,7 +30,7 @@ class WeeklyScheduleDayOfWeekTime {
             DomainFactory domainFactory = mDomainFactoryReference.get();
             Assert.assertTrue(domainFactory != null);
 
-            CustomTime customTime = domainFactory.getCustomTimeFactory().getCustomTime(mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId());
+            CustomTime customTime = domainFactory.getCustomTime(mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {
@@ -56,6 +56,6 @@ class WeeklyScheduleDayOfWeekTime {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        return domainFactory.getInstanceFactory().getInstance(task, scheduleDateTime);
+        return domainFactory.getInstance(task, scheduleDateTime);
     }
 }

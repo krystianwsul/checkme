@@ -86,7 +86,7 @@ public class Task {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        return domainFactory.getTaskFactory().getChildTasks(this, timeStamp);
+        return domainFactory.getChildTasks(this, timeStamp);
     }
 
     Task getParentTask(TimeStamp timeStamp) {
@@ -96,7 +96,7 @@ public class Task {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        return domainFactory.getTaskFactory().getParentTask(this, timeStamp);
+        return domainFactory.getParentTask(this, timeStamp);
     }
 
     public int getId() {
@@ -138,7 +138,7 @@ public class Task {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        domainFactory.getTaskFactory().setParentHierarchyEndTimeStamp(this, endTimeStamp);
+        domainFactory.setParentHierarchyEndTimeStamp(this, endTimeStamp);
 
         mTaskRecord.setEndTime(endTimeStamp.getLong());
     }

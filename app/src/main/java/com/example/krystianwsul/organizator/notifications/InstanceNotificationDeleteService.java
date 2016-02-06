@@ -38,7 +38,7 @@ public class InstanceNotificationDeleteService extends IntentService {
         Instance instance = InstanceData.getInstance(domainFactory, bundle);
         Assert.assertTrue(instance != null);
 
-        domainFactory.getInstanceFactory().setInstanceNotifiedNotShown(instance);
+        domainFactory.setInstanceNotifiedNotShown(instance);
 
         domainFactory.save();
     }

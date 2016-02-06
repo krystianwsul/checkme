@@ -72,7 +72,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
         DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
         HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
-        Time time = domainFactory.getCustomTimeFactory().getCustomTime(dayOfWeek, hourMinute);
+        Time time = domainFactory.getCustomTime(dayOfWeek, hourMinute);
         if (time == null)
             time = new NormalTime(hourMinute);
         return time;
@@ -85,7 +85,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
-        ArrayList<Instance> instances = domainFactory.getInstanceFactory().getCurrentInstances(mTimeStamp);
+        ArrayList<Instance> instances = domainFactory.getCurrentInstances(mTimeStamp);
         Assert.assertTrue(!instances.isEmpty());
         if (instances.size() == 1)
             finish();

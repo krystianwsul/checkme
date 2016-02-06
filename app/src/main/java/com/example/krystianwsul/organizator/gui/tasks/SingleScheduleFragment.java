@@ -156,7 +156,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        mDomainFactory.getTaskFactory().createSingleScheduleRootTask(name, new DateTime(mDate, mTimePickerView.getTime()));
+        mDomainFactory.createSingleScheduleRootTask(name, new DateTime(mDate, mTimePickerView.getTime()));
 
         mDomainFactory.save();
 
@@ -167,10 +167,10 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
+        Task rootTask = mDomainFactory.getTask(rootTaskId);
         Assert.assertTrue(rootTask != null);
 
-        mDomainFactory.getTaskFactory().updateSingleScheduleRootTask(rootTask, name, new DateTime(mDate, mTimePickerView.getTime()));
+        mDomainFactory.updateSingleScheduleRootTask(rootTask, name, new DateTime(mDate, mTimePickerView.getTime()));
 
         mDomainFactory.save();
 
@@ -185,13 +185,13 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         ArrayList<Task> joinTasks = new ArrayList<>();
         for (Integer joinTaskId : joinTaskIds) {
-            Task joinTask = mDomainFactory.getTaskFactory().getTask(joinTaskId);
+            Task joinTask = mDomainFactory.getTask(joinTaskId);
             Assert.assertTrue(joinTask != null);
 
             joinTasks.add(joinTask);
         }
 
-        mDomainFactory.getTaskFactory().createSingleScheduleJoinRootTask(name, new DateTime(mDate, mTimePickerView.getTime()), joinTasks);
+        mDomainFactory.createSingleScheduleJoinRootTask(name, new DateTime(mDate, mTimePickerView.getTime()), joinTasks);
 
         mDomainFactory.save();
 
@@ -225,7 +225,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            Task rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
+            Task rootTask = domainFactory.getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
             SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());

@@ -125,7 +125,7 @@ public class TimePickerView extends LinearLayout {
                     Assert.assertTrue(mDomainFactory != null);
 
                     if (mOnTimeSelectedListener != null)
-                    mOnTimeSelectedListener.onCustomTimeSelected(mDomainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId));
+                    mOnTimeSelectedListener.onCustomTimeSelected(mDomainFactory.getCustomTime(mCustomTimeId));
                 }
             }
 
@@ -149,7 +149,7 @@ public class TimePickerView extends LinearLayout {
         mDomainFactory = domainFactory;
 
         ArrayList<SpinnerItem> spinnerTimes = new ArrayList<>();
-        for (CustomTime customTime : mDomainFactory.getCustomTimeFactory().getCurrentCustomTimes())
+        for (CustomTime customTime : mDomainFactory.getCurrentCustomTimes())
             spinnerTimes.add(new TimeSpinnerItem(customTime));
         mOtherSpinnerItem = new OtherSpinnerItem(getContext());
         spinnerTimes.add(mOtherSpinnerItem);
@@ -162,7 +162,7 @@ public class TimePickerView extends LinearLayout {
         setSpinnerPosition(mSpinnerAdapter.getPosition(mOtherSpinnerItem));
 
         if (mCustomTimeId != EMPTY_CUSTOM_TIME) {
-            CustomTime customTime = domainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
+            CustomTime customTime = domainFactory.getCustomTime(mCustomTimeId);
             int position = getCustomTimePosition(customTime);
 
             setSpinnerPosition(position);
@@ -226,7 +226,7 @@ public class TimePickerView extends LinearLayout {
         if (mCustomTimeId == EMPTY_CUSTOM_TIME)
             return null;
         else
-            return mDomainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
+            return mDomainFactory.getCustomTime(mCustomTimeId);
     }
 
     public Time getTime() {

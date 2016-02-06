@@ -22,7 +22,6 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -30,31 +29,83 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class DomainFactory {
-    private PersistenceManger mPersistenceManager;
+    private final PersistenceManger mPersistenceManager;
 
-    private CustomTimeFactory mCustomTimeFactory;
-    private TaskFactory mTaskFactory;
-    private InstanceFactory mInstanceFactory;
+    private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
+    private final HashMap<Integer, Task> mTasks = new HashMap<>();
+    private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
+    private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
     private static ArrayList<DomainObserver> sDomainObservers = new ArrayList<>();
 
     public static DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
 
-        DomainFactory domainFactory = new DomainFactory();
-        domainFactory.initialize(context);
+        DomainFactory domainFactory = new DomainFactory(context);
+        domainFactory.initialize();
         return domainFactory;
     }
 
-    private DomainFactory() {
+    private DomainFactory(Context context) {
+        mPersistenceManager = new PersistenceManger(context);
     }
 
-    private void initialize(Context context) {
-        mPersistenceManager = new PersistenceManger(context);
+    private void initialize() {
+        Collection<CustomTimeRecord> customTimeRecords = mPersistenceManager.getCustomTimeRecords();
+        Assert.assertTrue(customTimeRecords != null);
 
-        mCustomTimeFactory = new CustomTimeFactory(this);
-        mTaskFactory = new TaskFactory(this);
-        mInstanceFactory = new InstanceFactory(this);
+        for (CustomTimeRecord customTimeRecord : customTimeRecords) {
+            Assert.assertTrue(customTimeRecord != null);
+
+            CustomTime customTime = new CustomTime(customTimeRecord);
+            mCustomTimes.put(customTime.getId(), customTime);
+        }
+
+        Collection<TaskRecord> taskRecords = mPersistenceManager.getTaskRecords();
+        Assert.assertTrue(taskRecords != null);
+
+        for (TaskRecord taskRecord : taskRecords) {
+            Assert.assertTrue(taskRecord != null);
+
+            Task task = new Task(this, taskRecord);
+
+            ArrayList<Schedule> schedules = loadSchedules(task);
+            Assert.assertTrue(schedules != null);
+
+            task.addSchedules(schedules);
+
+            Assert.assertTrue(!mTasks.containsKey(task.getId()));
+            mTasks.put(task.getId(), task);
+        }
+
+        Collection<TaskHierarchyRecord> taskHierarchyRecords = mPersistenceManager.getTaskHierarchyRecords();
+        Assert.assertTrue(taskHierarchyRecords != null);
+
+        for (TaskHierarchyRecord taskHierarchyRecord : taskHierarchyRecords) {
+            Assert.assertTrue(taskHierarchyRecord != null);
+
+            Task parentTask = mTasks.get(taskHierarchyRecord.getParentTaskId());
+            Assert.assertTrue(parentTask != null);
+
+            Task childTask = mTasks.get(taskHierarchyRecord.getChildTaskId());
+            Assert.assertTrue(childTask != null);
+
+            TaskHierarchy taskHierarchy = new TaskHierarchy(taskHierarchyRecord, parentTask, childTask);
+
+            Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId()));
+            mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
+        }
+
+        Collection<InstanceRecord> instanceRecords = mPersistenceManager.getInstanceRecords();
+        Assert.assertTrue(instanceRecords != null);
+
+        for (InstanceRecord instanceRecord : instanceRecords) {
+            Task task = mTasks.get(instanceRecord.getTaskId());
+            Assert.assertTrue(task != null);
+
+            Instance instance = new Instance(this, task, instanceRecord);
+            mExistingInstances.add(instance);
+        }
     }
 
     public void save() {
@@ -79,886 +130,687 @@ public class DomainFactory {
             domainObserver.onDomainChanged(this);
     }
 
-    public CustomTimeFactory getCustomTimeFactory() {
-        return mCustomTimeFactory;
+    public Instance getInstance(Task task, DateTime scheduleDateTime) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(scheduleDateTime != null);
+
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (Instance instance : mExistingInstances) {
+            Assert.assertTrue(instance != null);
+            if (instance.getTaskId() == task.getId() && instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
+                instances.add(instance);
+        }
+
+        if (!instances.isEmpty()) {
+            Assert.assertTrue(instances.size() == 1);
+            return instances.get(0);
+        } else {
+            return new Instance(this, task, scheduleDateTime);
+        }
     }
 
-    public TaskFactory getTaskFactory() {
-        return mTaskFactory;
+    private ArrayList<Instance> getRootInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
+        Assert.assertTrue(endTimeStamp != null);
+        Assert.assertTrue(startTimeStamp == null || startTimeStamp.compareTo(endTimeStamp) < 0);
+
+        HashSet<Instance> allInstances = new HashSet<>();
+        allInstances.addAll(mExistingInstances);
+
+        for (Task task : mTasks.values())
+            allInstances.addAll(task.getInstances(startTimeStamp, endTimeStamp));
+
+        ArrayList<Instance> rootInstances = new ArrayList<>();
+        for (Instance instance : allInstances)
+            if (instance.isRootInstance())
+                rootInstances.add(instance);
+
+        return rootInstances;
     }
 
-    public InstanceFactory getInstanceFactory() {
-        return mInstanceFactory;
+    public ArrayList<Instance> getCurrentInstances() {
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.add(Calendar.DATE, 2);
+        Date endDate = new Date(endCalendar);
+
+        return getRootInstances(null, new TimeStamp(endDate, new HourMinute(0, 0)));
     }
 
-    private PersistenceManger getPersistenceManager() {
-        return mPersistenceManager;
+    public ArrayList<Instance> getNotificationInstances() {
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.add(Calendar.MINUTE, 1);
+
+        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
+
+        ArrayList<Instance> rootInstances = getRootInstances(null, endTimeStamp);
+
+        ArrayList<Instance> notificationInstances = new ArrayList<>();
+        for (Instance instance : rootInstances) {
+            if (instance.getDone() == null && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
+                notificationInstances.add(instance);
+        }
+        return notificationInstances;
     }
 
-    public static class InstanceFactory {
-        private final WeakReference<DomainFactory> mDomainFactoryReference;
+    public ArrayList<Instance> getCurrentInstances(TimeStamp timeStamp) {
+        Calendar endCalendar = timeStamp.getCalendar();
+        endCalendar.add(Calendar.MINUTE, 1);
+        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
 
-        private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
+        ArrayList<Instance> rootInstances = getRootInstances(timeStamp, endTimeStamp);
 
-        private InstanceFactory(DomainFactory domainFactory) {
-            Assert.assertTrue(domainFactory != null);
+        ArrayList<Instance> currentInstances = new ArrayList<>();
+        for (Instance instance : rootInstances)
+            if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
+                currentInstances.add(instance);
 
-            mDomainFactoryReference = new WeakReference<>(domainFactory);
+        return currentInstances;
+    }
 
-            Collection<InstanceRecord> instanceRecords = domainFactory.getPersistenceManager().getInstanceRecords();
-            Assert.assertTrue(instanceRecords != null);
+    public ArrayList<Instance> getShownInstances() {
+        ArrayList<Instance> shownInstances = new ArrayList<>();
 
-            TaskFactory taskFactory = domainFactory.getTaskFactory();
-            Assert.assertTrue(taskFactory != null);
+        for (Instance instance : mExistingInstances)
+            if (instance.getNotificationShown())
+                shownInstances.add(instance);
 
-            for (InstanceRecord instanceRecord : instanceRecords) {
-                Task task = taskFactory.getTask(instanceRecord.getTaskId());
-                Assert.assertTrue(task != null);
+        return shownInstances;
+    }
 
-                Instance instance = new Instance(domainFactory, task, instanceRecord);
-                mExistingInstances.add(instance);
-            }
-        }
+    InstanceRecord createInstanceRecord(Task task, Instance instance, DateTime scheduleDateTime) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(instance != null);
+        Assert.assertTrue(scheduleDateTime != null);
 
-        public Instance getInstance(Task task, DateTime scheduleDateTime) {
-            Assert.assertTrue(task != null);
-            Assert.assertTrue(scheduleDateTime != null);
+        mExistingInstances.add(instance);
 
-            ArrayList<Instance> instances = new ArrayList<>();
-            for (Instance instance : mExistingInstances) {
-                Assert.assertTrue(instance != null);
-                if (instance.getTaskId() == task.getId() && instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
-                    instances.add(instance);
-            }
+        return mPersistenceManager.createInstanceRecord(task, scheduleDateTime);
+    }
 
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
+    public void setInstanceDateTime(Context context, Instance instance, DateTime dateTime) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(instance != null);
+        Assert.assertTrue(dateTime != null);
 
-            if (!instances.isEmpty()) {
-                Assert.assertTrue(instances.size() == 1);
-                return instances.get(0);
-            } else {
-                return new Instance(domainFactory, task, scheduleDateTime);
-            }
-        }
+        instance.setInstanceDateTime(context, dateTime);
+    }
 
-        private ArrayList<Instance> getRootInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
-            Assert.assertTrue(endTimeStamp != null);
-            Assert.assertTrue(startTimeStamp == null || startTimeStamp.compareTo(endTimeStamp) < 0);
+    public void setInstanceDone(Context context, Instance instance, boolean done) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(instance != null);
 
-            HashSet<Instance> allInstances = new HashSet<>();
-            allInstances.addAll(mExistingInstances);
+        instance.setDone(done, context);
+    }
 
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
+    public void setInstancesNotified(ArrayList<Instance> instances) {
+        Assert.assertTrue(instances != null);
+        Assert.assertTrue(!instances.isEmpty());
 
-            TaskFactory taskFactory = domainFactory.getTaskFactory();
-            Assert.assertTrue(taskFactory != null);
-
-            Collection<Task> tasks = taskFactory.getTasks();
-
-            for (Task task : tasks)
-                allInstances.addAll(task.getInstances(startTimeStamp, endTimeStamp));
-
-            ArrayList<Instance> rootInstances = new ArrayList<>();
-            for (Instance instance : allInstances)
-                if (instance.isRootInstance())
-                    rootInstances.add(instance);
-
-            return rootInstances;
-        }
-
-        public ArrayList<Instance> getCurrentInstances() {
-            Calendar endCalendar = Calendar.getInstance();
-            endCalendar.add(Calendar.DATE, 2);
-            Date endDate = new Date(endCalendar);
-
-            return getRootInstances(null, new TimeStamp(endDate, new HourMinute(0, 0)));
-        }
-
-        public ArrayList<Instance> getNotificationInstances() {
-            Calendar endCalendar = Calendar.getInstance();
-            endCalendar.add(Calendar.MINUTE, 1);
-
-            TimeStamp endTimeStamp = new TimeStamp(endCalendar);
-
-            ArrayList<Instance> rootInstances = getRootInstances(null, endTimeStamp);
-
-            ArrayList<Instance> notificationInstances = new ArrayList<>();
-            for (Instance instance : rootInstances) {
-                if (instance.getDone() == null && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
-                    notificationInstances.add(instance);
-            }
-            return notificationInstances;
-        }
-
-        public ArrayList<Instance> getCurrentInstances(TimeStamp timeStamp) {
-            Calendar endCalendar = timeStamp.getCalendar();
-            endCalendar.add(Calendar.MINUTE, 1);
-            TimeStamp endTimeStamp = new TimeStamp(endCalendar);
-
-            ArrayList<Instance> rootInstances = getRootInstances(timeStamp, endTimeStamp);
-
-            ArrayList<Instance> currentInstances = new ArrayList<>();
-            for (Instance instance : rootInstances)
-                if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
-                    currentInstances.add(instance);
-
-            return currentInstances;
-        }
-
-        public ArrayList<Instance> getShownInstances() {
-            ArrayList<Instance> shownInstances = new ArrayList<>();
-
-            for (Instance instance : mExistingInstances)
-                if (instance.getNotificationShown())
-                    shownInstances.add(instance);
-
-            return shownInstances;
-        }
-
-        InstanceRecord createInstanceRecord(Task task, Instance instance, DateTime scheduleDateTime) {
-            Assert.assertTrue(task != null);
+        for (Instance instance : instances) {
             Assert.assertTrue(instance != null);
-            Assert.assertTrue(scheduleDateTime != null);
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            mExistingInstances.add(instance);
-
-            return domainFactory.getPersistenceManager().createInstanceRecord(task, scheduleDateTime);
-        }
-
-        public void setInstanceDateTime(Context context, Instance instance, DateTime dateTime) {
-            Assert.assertTrue(context != null);
-            Assert.assertTrue(instance != null);
-            Assert.assertTrue(dateTime != null);
-
-            instance.setInstanceDateTime(context, dateTime);
-        }
-
-        public void setInstanceDone(Context context, Instance instance, boolean done) {
-            Assert.assertTrue(context != null);
-            Assert.assertTrue(instance != null);
-
-            instance.setDone(done, context);
-        }
-
-        public void setInstancesNotified(ArrayList<Instance> instances) {
-            Assert.assertTrue(instances != null);
-            Assert.assertTrue(!instances.isEmpty());
-
-            for (Instance instance : instances) {
-                Assert.assertTrue(instance != null);
-                instance.setNotified();
-            }
-        }
-
-        public void setInstanceNotifiedNotShown(Instance instance) {
-            Assert.assertTrue(instance != null);
-
             instance.setNotified();
+        }
+    }
+
+    public void setInstanceNotifiedNotShown(Instance instance) {
+        Assert.assertTrue(instance != null);
+
+        instance.setNotified();
+        instance.setNotificationShown(false);
+    }
+
+    public void setInstancesNotShown(ArrayList<Instance> instances) {
+        Assert.assertTrue(instances != null);
+        Assert.assertTrue(!instances.isEmpty());
+
+        for (Instance instance : instances)
             instance.setNotificationShown(false);
+    }
+
+    public void setInstancesShown(ArrayList<Instance> instances) {
+        Assert.assertTrue(instances != null);
+        Assert.assertTrue(!instances.isEmpty());
+
+        for (Instance instance : instances)
+            instance.setNotificationShown(true);
+    }
+
+    private ArrayList<Schedule> loadSchedules(Task task) {
+        Assert.assertTrue(task != null);
+
+        ArrayList<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(task);
+        Assert.assertTrue(scheduleRecords != null);
+
+        ArrayList<Schedule> schedules = new ArrayList<>();
+
+        for (ScheduleRecord scheduleRecord : scheduleRecords) {
+            Assert.assertTrue(scheduleRecord.getType() >= 0);
+            Assert.assertTrue(scheduleRecord.getType() < Schedule.ScheduleType.values().length);
+
+            Schedule.ScheduleType scheduleType = Schedule.ScheduleType.values()[scheduleRecord.getType()];
+
+            switch (scheduleType) {
+                case SINGLE:
+                    schedules.add(loadSingleSchedule(scheduleRecord, task));
+                    break;
+                case DAILY:
+                    schedules.add(loadDailySchedule(scheduleRecord, task));
+                    break;
+                case WEEKLY:
+                    schedules.add(loadWeeklySchedule(scheduleRecord, task));
+                    break;
+                default:
+                    throw new IndexOutOfBoundsException("unknown schedule type");
+            }
         }
 
-        public void setInstancesNotShown(ArrayList<Instance> instances) {
-            Assert.assertTrue(instances != null);
-            Assert.assertTrue(!instances.isEmpty());
+        return schedules;
+    }
 
-            for (Instance instance : instances)
-                instance.setNotificationShown(false);
+    private Schedule loadSingleSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
+        Assert.assertTrue(rootTask != null);
+
+        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
+
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.getSingleScheduleDateTimeRecord(singleSchedule);
+        Assert.assertTrue(singleScheduleDateTimeRecord != null);
+
+        SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(this, singleScheduleDateTimeRecord);
+        singleSchedule.setSingleScheduleDateTime(singleScheduleDateTime);
+
+        return singleSchedule;
+    }
+
+    private Schedule loadDailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
+        Assert.assertTrue(rootTask != null);
+
+        DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
+
+        ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = mPersistenceManager.getDailyScheduleTimeRecords(dailySchedule);
+        Assert.assertTrue(dailyScheduleTimeRecords != null);
+        Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
+
+        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : dailyScheduleTimeRecords) {
+            DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(this, dailyScheduleTimeRecord);
+            dailySchedule.addDailyScheduleTime(dailyScheduleTime);
         }
 
-        public void setInstancesShown(ArrayList<Instance> instances) {
-            Assert.assertTrue(instances != null);
-            Assert.assertTrue(!instances.isEmpty());
+        return dailySchedule;
+    }
 
-            for (Instance instance : instances)
-                instance.setNotificationShown(true);
+    private Schedule loadWeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
+        Assert.assertTrue(rootTask != null);
+
+        WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
+
+        ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = mPersistenceManager.getWeeklyScheduleDayOfWeekTimeRecords(weeklySchedule);
+        Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecords != null);
+        Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
+
+        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
+            WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord);
+            weeklySchedule.addWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
+        }
+
+        return weeklySchedule;
+    }
+
+    public ArrayList<Task> getRootTasks(TimeStamp timeStamp) {
+        Assert.assertTrue(timeStamp != null);
+
+        ArrayList<Task> rootTasks = new ArrayList<>();
+        for (Task task : mTasks.values())
+            if (task.current(timeStamp) && task.isRootTask(timeStamp))
+                rootTasks.add(task);
+
+        return rootTasks;
+    }
+
+    public Task getTask(int taskId) {
+        return mTasks.get(taskId);
+    }
+
+    private Task createRootTask(String name, TimeStamp startTimeStamp) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(startTimeStamp != null);
+
+        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, startTimeStamp);
+        Assert.assertTrue(taskRecord != null);
+
+        Task rootTask = new Task(this, taskRecord);
+
+        Assert.assertTrue(!mTasks.containsKey(rootTask.getId()));
+        mTasks.put(rootTask.getId(), rootTask);
+
+        return rootTask;
+    }
+
+    public void createSingleScheduleRootTask(String name, DateTime dateTime) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(dateTime != null);
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        Task rootTask = createRootTask(name, timeStamp);
+        Assert.assertTrue(rootTask != null);
+
+        Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+    }
+
+    public void createDailyScheduleRootTask(String name, ArrayList<Time> times) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(times != null);
+        Assert.assertTrue(!times.isEmpty());
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        Task rootTask = createRootTask(name, timeStamp);
+        Assert.assertTrue(rootTask != null);
+
+        Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+    }
+
+    public void createWeeklyScheduleRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(dayOfWeekTimePairs != null);
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        Task rootTask = createRootTask(name, timeStamp);
+        Assert.assertTrue(rootTask != null);
+
+        Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+    }
+
+    public void updateSingleScheduleRootTask(Task rootTask, String name, DateTime dateTime) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(dateTime != null);
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+        Assert.assertTrue(rootTask.current(timeStamp));
+        Assert.assertTrue(rootTask.isRootTask(timeStamp));
+
+        rootTask.setName(name);
+        rootTask.setScheduleEndTimeStamp(timeStamp);
+
+        Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+    }
+
+    public void updateDailyScheduleRootTask(Task rootTask, String name, ArrayList<Time> times) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(times != null);
+        Assert.assertTrue(!times.isEmpty());
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+        Assert.assertTrue(rootTask.current(timeStamp));
+        Assert.assertTrue(rootTask.isRootTask(timeStamp));
+
+        rootTask.setName(name);
+        rootTask.setScheduleEndTimeStamp(timeStamp);
+
+        Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+    }
+
+    public void updateWeeklyScheduleRootTask(Task rootTask, String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(dayOfWeekTimePairs != null);
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+        Assert.assertTrue(rootTask.current(timeStamp));
+        Assert.assertTrue(rootTask.isRootTask(timeStamp));
+
+        rootTask.setName(name);
+        rootTask.setScheduleEndTimeStamp(timeStamp);
+
+        Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+    }
+
+    public void createSingleScheduleJoinRootTask(String name, DateTime dateTime, ArrayList<Task> joinTasks) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(dateTime != null);
+        Assert.assertTrue(joinTasks != null);
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        Task rootTask = createRootTask(name, timeStamp);
+        Assert.assertTrue(rootTask != null);
+
+        Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+
+        joinTasks(rootTask, joinTasks, timeStamp);
+    }
+
+    public void createDailyScheduleJoinRootTask(String name, ArrayList<Time> times, ArrayList<Task> joinTasks) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(times != null);
+        Assert.assertTrue(!times.isEmpty());
+        Assert.assertTrue(joinTasks != null);
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        Task rootTask = createRootTask(name, timeStamp);
+        Assert.assertTrue(rootTask != null);
+
+        Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+
+        joinTasks(rootTask, joinTasks, timeStamp);
+    }
+
+    public void createWeeklyScheduleJoinRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, ArrayList<Task> joinTasks) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(dayOfWeekTimePairs != null);
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+        Assert.assertTrue(joinTasks != null);
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        Task rootTask = createRootTask(name, timeStamp);
+        Assert.assertTrue(rootTask != null);
+
+        Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
+        Assert.assertTrue(schedule != null);
+
+        rootTask.addSchedule(schedule);
+
+        joinTasks(rootTask, joinTasks, timeStamp);
+    }
+
+    public void createChildTask(Task parentTask, String name, TimeStamp startTimeStamp) {
+        Assert.assertTrue(parentTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(parentTask.current(startTimeStamp));
+
+        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, startTimeStamp);
+        Assert.assertTrue(childTaskRecord != null);
+
+        Task childTask = new Task(this, childTaskRecord);
+        Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
+        mTasks.put(childTask.getId(), childTask);
+
+        createTaskHierarchy(parentTask, childTask, startTimeStamp);
+    }
+
+    public void updateChildTask(Task childTask, String name) {
+        Assert.assertTrue(childTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        childTask.setName(name);
+    }
+
+    private void joinTasks(Task rootTask, ArrayList<Task> childTasks, TimeStamp timeStamp) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(rootTask.current(timeStamp));
+        Assert.assertTrue(rootTask.isRootTask(timeStamp));
+        Assert.assertTrue(childTasks != null);
+        Assert.assertTrue(childTasks.size() > 1);
+
+        for (Task childTask : childTasks) {
+            Assert.assertTrue(childTask != null);
+            Assert.assertTrue(childTask.current(timeStamp));
+            Assert.assertTrue(childTask.isRootTask(timeStamp));
+
+            childTask.setScheduleEndTimeStamp(timeStamp);
+
+            createTaskHierarchy(rootTask, childTask, timeStamp);
         }
     }
 
-    public static class TaskFactory {
-        private final WeakReference<DomainFactory> mDomainFactoryReference;
+    private void createTaskHierarchy(Task parentTask, Task childTask, TimeStamp startTimeStamp) {
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(parentTask != null);
+        Assert.assertTrue(parentTask.current(startTimeStamp));
+        Assert.assertTrue(childTask != null);
+        Assert.assertTrue(childTask.current(startTimeStamp));
 
-        private final HashMap<Integer, Task> mTasks = new HashMap<>();
-        private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
+        TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentTask, childTask, startTimeStamp);
+        Assert.assertTrue(taskHierarchyRecord != null);
 
-        private TaskFactory(DomainFactory domainFactory) {
-            Assert.assertTrue(domainFactory != null);
+        TaskHierarchy taskHierarchy = new TaskHierarchy(taskHierarchyRecord, parentTask, childTask);
+        Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId()));
+        mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
+    }
 
-            mDomainFactoryReference = new WeakReference<>(domainFactory);
+    private SingleSchedule createSingleSchedule(Task rootTask, Date date, Time time, TimeStamp startTimeStamp) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(date != null);
+        Assert.assertTrue(time != null);
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(new DateTime(date, time).getTimeStamp().compareTo(startTimeStamp) >= 0);
 
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
+        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, Schedule.ScheduleType.SINGLE, startTimeStamp);
+        Assert.assertTrue(scheduleRecord != null);
 
-            Collection<TaskRecord> taskRecords = persistenceManger.getTaskRecords();
-            Assert.assertTrue(taskRecords != null);
+        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
 
-            for (TaskRecord taskRecord : taskRecords) {
-                Assert.assertTrue(taskRecord != null);
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
+        Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-                Task task = new Task(domainFactory, taskRecord);
+        singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(this, singleScheduleDateTimeRecord));
 
-                ArrayList<Schedule> schedules = loadSchedules(task);
-                Assert.assertTrue(schedules != null);
+        return singleSchedule;
+    }
 
-                task.addSchedules(schedules);
+    private DailySchedule createDailySchedule(Task rootTask, ArrayList<Time> times, TimeStamp startTimeStamp) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(times != null);
+        Assert.assertTrue(!times.isEmpty());
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(rootTask.current(startTimeStamp));
 
-                Assert.assertTrue(!mTasks.containsKey(task.getId()));
-                mTasks.put(task.getId(), task);
-            }
+        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, Schedule.ScheduleType.DAILY, startTimeStamp);
+        Assert.assertTrue(scheduleRecord != null);
 
-            Collection<TaskHierarchyRecord> taskHierarchyRecords = persistenceManger.getTaskHierarchyRecords();
-            Assert.assertTrue(taskHierarchyRecords != null);
+        DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
 
-            for (TaskHierarchyRecord taskHierarchyRecord : taskHierarchyRecords) {
-                Assert.assertTrue(taskHierarchyRecord != null);
-
-                Task parentTask = getTask(taskHierarchyRecord.getParentTaskId());
-                Assert.assertTrue(parentTask != null);
-
-                Task childTask = getTask(taskHierarchyRecord.getChildTaskId());
-                Assert.assertTrue(childTask != null);
-
-                TaskHierarchy taskHierarchy = new TaskHierarchy(taskHierarchyRecord, parentTask, childTask);
-
-                Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId()));
-                mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
-            }
-        }
-
-        private ArrayList<Schedule> loadSchedules(Task task) {
-            Assert.assertTrue(task != null);
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            ArrayList<ScheduleRecord> scheduleRecords = domainFactory.getPersistenceManager().getScheduleRecords(task);
-            Assert.assertTrue(scheduleRecords != null);
-
-            ArrayList<Schedule> schedules = new ArrayList<>();
-
-            for (ScheduleRecord scheduleRecord : scheduleRecords) {
-                Assert.assertTrue(scheduleRecord.getType() >= 0);
-                Assert.assertTrue(scheduleRecord.getType() < Schedule.ScheduleType.values().length);
-
-                Schedule.ScheduleType scheduleType = Schedule.ScheduleType.values()[scheduleRecord.getType()];
-
-                switch (scheduleType) {
-                    case SINGLE:
-                        schedules.add(loadSingleSchedule(scheduleRecord, task));
-                        break;
-                    case DAILY:
-                        schedules.add(loadDailySchedule(scheduleRecord, task));
-                        break;
-                    case WEEKLY:
-                        schedules.add(loadWeeklySchedule(scheduleRecord, task));
-                        break;
-                    default:
-                        throw new IndexOutOfBoundsException("unknown schedule type");
-                }
-            }
-
-            return schedules;
-        }
-
-        private Schedule loadSingleSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
-            Assert.assertTrue(scheduleRecord != null);
-            Assert.assertTrue(rootTask != null);
-
-            SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = persistenceManger.getSingleScheduleDateTimeRecord(singleSchedule);
-            Assert.assertTrue(singleScheduleDateTimeRecord != null);
-
-            SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(domainFactory, singleScheduleDateTimeRecord);
-            singleSchedule.setSingleScheduleDateTime(singleScheduleDateTime);
-
-            return singleSchedule;
-        }
-
-        private Schedule loadDailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
-            Assert.assertTrue(scheduleRecord != null);
-            Assert.assertTrue(rootTask != null);
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
-
-            ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = persistenceManger.getDailyScheduleTimeRecords(dailySchedule);
-            Assert.assertTrue(dailyScheduleTimeRecords != null);
-            Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
-
-            for (DailyScheduleTimeRecord dailyScheduleTimeRecord : dailyScheduleTimeRecords) {
-                DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(domainFactory, dailyScheduleTimeRecord);
-                dailySchedule.addDailyScheduleTime(dailyScheduleTime);
-            }
-
-            return dailySchedule;
-        }
-
-        private Schedule loadWeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
-            Assert.assertTrue(scheduleRecord != null);
-            Assert.assertTrue(rootTask != null);
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
-
-            ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = persistenceManger.getWeeklyScheduleDayOfWeekTimeRecords(weeklySchedule);
-            Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecords != null);
-            Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
-
-            for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
-                WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(domainFactory, weeklyScheduleDayOfWeekTimeRecord);
-                weeklySchedule.addWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
-            }
-
-            return weeklySchedule;
-        }
-
-        Collection<Task> getTasks() {
-            return mTasks.values();
-        }
-
-        public ArrayList<Task> getRootTasks(TimeStamp timeStamp) {
-            Assert.assertTrue(timeStamp != null);
-
-            ArrayList<Task> rootTasks = new ArrayList<>();
-            for (Task task : mTasks.values())
-                if (task.current(timeStamp) && task.isRootTask(timeStamp))
-                    rootTasks.add(task);
-
-            return rootTasks;
-        }
-
-        public Task getTask(int taskId) {
-            return mTasks.get(taskId);
-        }
-
-        private Task createRootTask(String name, TimeStamp startTimeStamp) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(startTimeStamp != null);
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            TaskRecord taskRecord = persistenceManger.createTaskRecord(name, startTimeStamp);
-            Assert.assertTrue(taskRecord != null);
-
-            Task rootTask = new Task(domainFactory, taskRecord);
-
-            Assert.assertTrue(!mTasks.containsKey(rootTask.getId()));
-            mTasks.put(rootTask.getId(), rootTask);
-
-            return rootTask;
-        }
-
-        public void createSingleScheduleRootTask(String name, DateTime dateTime) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(dateTime != null);
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-
-            Task rootTask = createRootTask(name, timeStamp);
-            Assert.assertTrue(rootTask != null);
-
-            Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-        }
-
-        public void createDailyScheduleRootTask(String name, ArrayList<Time> times) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(times != null);
-            Assert.assertTrue(!times.isEmpty());
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-
-            Task rootTask = createRootTask(name, timeStamp);
-            Assert.assertTrue(rootTask != null);
-
-            Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-        }
-
-        public void createWeeklyScheduleRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(dayOfWeekTimePairs != null);
-            Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-
-            Task rootTask = createRootTask(name, timeStamp);
-            Assert.assertTrue(rootTask != null);
-
-            Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-        }
-
-        public void updateSingleScheduleRootTask(Task rootTask, String name, DateTime dateTime) {
-            Assert.assertTrue(rootTask != null);
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(dateTime != null);
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-            Assert.assertTrue(rootTask.current(timeStamp));
-            Assert.assertTrue(rootTask.isRootTask(timeStamp));
-
-            rootTask.setName(name);
-            rootTask.setScheduleEndTimeStamp(timeStamp);
-
-            Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-        }
-
-        public void updateDailyScheduleRootTask(Task rootTask, String name, ArrayList<Time> times) {
-            Assert.assertTrue(rootTask != null);
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(times != null);
-            Assert.assertTrue(!times.isEmpty());
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-            Assert.assertTrue(rootTask.current(timeStamp));
-            Assert.assertTrue(rootTask.isRootTask(timeStamp));
-
-            rootTask.setName(name);
-            rootTask.setScheduleEndTimeStamp(timeStamp);
-
-            Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-        }
-
-        public void updateWeeklyScheduleRootTask(Task rootTask, String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
-            Assert.assertTrue(rootTask != null);
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(dayOfWeekTimePairs != null);
-            Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-            Assert.assertTrue(rootTask.current(timeStamp));
-            Assert.assertTrue(rootTask.isRootTask(timeStamp));
-
-            rootTask.setName(name);
-            rootTask.setScheduleEndTimeStamp(timeStamp);
-
-            Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-        }
-
-        public void createSingleScheduleJoinRootTask(String name, DateTime dateTime, ArrayList<Task> joinTasks) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(dateTime != null);
-            Assert.assertTrue(joinTasks != null);
-            Assert.assertTrue(joinTasks.size() > 1);
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-
-            Task rootTask = createRootTask(name, timeStamp);
-            Assert.assertTrue(rootTask != null);
-
-            Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-
-            joinTasks(rootTask, joinTasks, timeStamp);
-        }
-
-        public void createDailyScheduleJoinRootTask(String name, ArrayList<Time> times, ArrayList<Task> joinTasks) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(times != null);
-            Assert.assertTrue(!times.isEmpty());
-            Assert.assertTrue(joinTasks != null);
-            Assert.assertTrue(joinTasks.size() > 1);
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-
-            Task rootTask = createRootTask(name, timeStamp);
-            Assert.assertTrue(rootTask != null);
-
-            Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-
-            joinTasks(rootTask, joinTasks, timeStamp);
-        }
-
-        public void createWeeklyScheduleJoinRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, ArrayList<Task> joinTasks) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(dayOfWeekTimePairs != null);
-            Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-            Assert.assertTrue(joinTasks != null);
-            Assert.assertTrue(joinTasks.size() > 1);
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-
-            Task rootTask = createRootTask(name, timeStamp);
-            Assert.assertTrue(rootTask != null);
-
-            Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
-            Assert.assertTrue(schedule != null);
-
-            rootTask.addSchedule(schedule);
-
-            joinTasks(rootTask, joinTasks, timeStamp);
-        }
-
-        public void createChildTask(Task parentTask, String name, TimeStamp startTimeStamp) {
-            Assert.assertTrue(parentTask != null);
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(startTimeStamp != null);
-            Assert.assertTrue(parentTask.current(startTimeStamp));
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            TaskRecord childTaskRecord = persistenceManger.createTaskRecord(name, startTimeStamp);
-            Assert.assertTrue(childTaskRecord != null);
-
-            Task childTask = new Task(domainFactory, childTaskRecord);
-            Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
-            mTasks.put(childTask.getId(), childTask);
-
-            createTaskHierarchy(parentTask, childTask, startTimeStamp);
-        }
-
-        public void updateChildTask(Task childTask, String name) {
-            Assert.assertTrue(childTask != null);
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-
-            childTask.setName(name);
-        }
-
-        private void joinTasks(Task rootTask, ArrayList<Task> childTasks, TimeStamp timeStamp) {
-            Assert.assertTrue(rootTask != null);
-            Assert.assertTrue(rootTask.current(timeStamp));
-            Assert.assertTrue(rootTask.isRootTask(timeStamp));
-            Assert.assertTrue(childTasks != null);
-            Assert.assertTrue(childTasks.size() > 1);
-
-            for (Task childTask : childTasks) {
-                Assert.assertTrue(childTask != null);
-                Assert.assertTrue(childTask.current(timeStamp));
-                Assert.assertTrue(childTask.isRootTask(timeStamp));
-
-                childTask.setScheduleEndTimeStamp(timeStamp);
-
-                createTaskHierarchy(rootTask, childTask, timeStamp);
-            }
-        }
-
-        private void createTaskHierarchy(Task parentTask, Task childTask, TimeStamp startTimeStamp) {
-            Assert.assertTrue(startTimeStamp != null);
-            Assert.assertTrue(parentTask != null);
-            Assert.assertTrue(parentTask.current(startTimeStamp));
-            Assert.assertTrue(childTask != null);
-            Assert.assertTrue(childTask.current(startTimeStamp));
-
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            TaskHierarchyRecord taskHierarchyRecord = persistenceManger.createTaskHierarchyRecord(parentTask, childTask, startTimeStamp);
-            Assert.assertTrue(taskHierarchyRecord != null);
-
-            TaskHierarchy taskHierarchy = new TaskHierarchy(taskHierarchyRecord, parentTask, childTask);
-            Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId()));
-            mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
-        }
-
-        private SingleSchedule createSingleSchedule(Task rootTask, Date date, Time time, TimeStamp startTimeStamp) {
-            Assert.assertTrue(rootTask != null);
-            Assert.assertTrue(date != null);
+        for (Time time : times) {
             Assert.assertTrue(time != null);
-            Assert.assertTrue(startTimeStamp != null);
-            Assert.assertTrue(new DateTime(date, time).getTimeStamp().compareTo(startTimeStamp) >= 0);
 
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
+            DailyScheduleTimeRecord dailyScheduleTimeRecord = mPersistenceManager.createDailyScheduleTimeRecord(dailySchedule, time);
+            Assert.assertTrue(dailyScheduleTimeRecord != null);
 
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.SINGLE, startTimeStamp);
-            Assert.assertTrue(scheduleRecord != null);
-
-            SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
-
-            SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = persistenceManger.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
-            Assert.assertTrue(singleScheduleDateTimeRecord != null);
-
-            singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(domainFactory, singleScheduleDateTimeRecord));
-
-            return singleSchedule;
+            dailySchedule.addDailyScheduleTime(new DailyScheduleTime(this, dailyScheduleTimeRecord));
         }
 
-        private DailySchedule createDailySchedule(Task rootTask, ArrayList<Time> times, TimeStamp startTimeStamp) {
-            Assert.assertTrue(rootTask != null);
-            Assert.assertTrue(times != null);
-            Assert.assertTrue(!times.isEmpty());
-            Assert.assertTrue(startTimeStamp != null);
-            Assert.assertTrue(rootTask.current(startTimeStamp));
+        return dailySchedule;
+    }
 
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
+    private WeeklySchedule createWeeklySchedule(Task rootTask, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, TimeStamp startTimeStamp) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(dayOfWeekTimePairs != null);
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(rootTask.current(startTimeStamp));
 
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
+        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, Schedule.ScheduleType.WEEKLY, startTimeStamp);
+        Assert.assertTrue(scheduleRecord != null);
 
-            ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.DAILY, startTimeStamp);
-            Assert.assertTrue(scheduleRecord != null);
+        WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
 
-            DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
+        for (Pair<DayOfWeek, Time> dayOfWeekTimePair : dayOfWeekTimePairs) {
+            Assert.assertTrue(dayOfWeekTimePair != null);
 
-            for (Time time : times) {
-                Assert.assertTrue(time != null);
+            DayOfWeek dayOfWeek = dayOfWeekTimePair.first;
+            Time time = dayOfWeekTimePair.second;
 
-                DailyScheduleTimeRecord dailyScheduleTimeRecord = persistenceManger.createDailyScheduleTimeRecord(dailySchedule, time);
-                Assert.assertTrue(dailyScheduleTimeRecord != null);
+            Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(time != null);
 
-                dailySchedule.addDailyScheduleTime(new DailyScheduleTime(domainFactory, dailyScheduleTimeRecord));
-            }
+            WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = mPersistenceManager.createWeeklyScheduleDayOfWeekTimeRecord(weeklySchedule, dayOfWeek, time);
+            Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
 
-            return dailySchedule;
+            weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord));
         }
 
-        private WeeklySchedule createWeeklySchedule(Task rootTask, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, TimeStamp startTimeStamp) {
-            Assert.assertTrue(rootTask != null);
-            Assert.assertTrue(dayOfWeekTimePairs != null);
-            Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-            Assert.assertTrue(startTimeStamp != null);
-            Assert.assertTrue(rootTask.current(startTimeStamp));
+        return weeklySchedule;
+    }
 
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
+    ArrayList<Task> getChildTasks(Task parentTask, TimeStamp timeStamp) {
+        Assert.assertTrue(timeStamp != null);
+        Assert.assertTrue(parentTask != null);
+        Assert.assertTrue(parentTask.current(timeStamp));
 
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
+        ArrayList<Task> childTasks = new ArrayList<>();
+        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values())
+            if (taskHierarchy.current(timeStamp) && taskHierarchy.getChildTask().current(timeStamp) && taskHierarchy.getParentTask() == parentTask)
+                childTasks.add(taskHierarchy.getChildTask());
+        return childTasks;
+    }
 
-            ScheduleRecord scheduleRecord = persistenceManger.createScheduleRecord(rootTask, Schedule.ScheduleType.WEEKLY, startTimeStamp);
-            Assert.assertTrue(scheduleRecord != null);
+    Task getParentTask(Task childTask, TimeStamp timeStamp) {
+        Assert.assertTrue(timeStamp != null);
+        Assert.assertTrue(childTask != null);
+        Assert.assertTrue(childTask.current(timeStamp));
 
-            WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
-
-            for (Pair<DayOfWeek, Time> dayOfWeekTimePair : dayOfWeekTimePairs) {
-                Assert.assertTrue(dayOfWeekTimePair != null);
-
-                DayOfWeek dayOfWeek = dayOfWeekTimePair.first;
-                Time time = dayOfWeekTimePair.second;
-
-                Assert.assertTrue(dayOfWeek != null);
-                Assert.assertTrue(time != null);
-
-                WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = persistenceManger.createWeeklyScheduleDayOfWeekTimeRecord(weeklySchedule, dayOfWeek, time);
-                Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
-
-                weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(domainFactory, weeklyScheduleDayOfWeekTimeRecord));
-            }
-
-            return weeklySchedule;
-        }
-
-        ArrayList<Task> getChildTasks(Task parentTask, TimeStamp timeStamp) {
-            Assert.assertTrue(timeStamp != null);
-            Assert.assertTrue(parentTask != null);
+        TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, timeStamp);
+        if (parentTaskHierarchy == null) {
+            return null;
+        } else {
+            Assert.assertTrue(parentTaskHierarchy.current(timeStamp));
+            Task parentTask = parentTaskHierarchy.getParentTask();
             Assert.assertTrue(parentTask.current(timeStamp));
-
-            ArrayList<Task> childTasks = new ArrayList<>();
-            for (TaskHierarchy taskHierarchy : mTaskHierarchies.values())
-                if (taskHierarchy.current(timeStamp) && taskHierarchy.getChildTask().current(timeStamp) && taskHierarchy.getParentTask() == parentTask)
-                    childTasks.add(taskHierarchy.getChildTask());
-            return childTasks;
-        }
-
-        Task getParentTask(Task childTask, TimeStamp timeStamp) {
-            Assert.assertTrue(timeStamp != null);
-            Assert.assertTrue(childTask != null);
-            Assert.assertTrue(childTask.current(timeStamp));
-
-            TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, timeStamp);
-            if (parentTaskHierarchy == null) {
-                return null;
-            } else {
-                Assert.assertTrue(parentTaskHierarchy.current(timeStamp));
-                Task parentTask = parentTaskHierarchy.getParentTask();
-                Assert.assertTrue(parentTask.current(timeStamp));
-                return parentTask;
-            }
-        }
-
-        private TaskHierarchy getParentTaskHierarchy(Task childTask, TimeStamp timeStamp) {
-            Assert.assertTrue(childTask != null);
-            Assert.assertTrue(timeStamp != null);
-            Assert.assertTrue(childTask.current(timeStamp));
-
-            ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
-            for (TaskHierarchy taskHierarchy : mTaskHierarchies.values()) {
-                Assert.assertTrue(taskHierarchy != null);
-
-                if (!taskHierarchy.current(timeStamp))
-                    continue;
-
-                if (taskHierarchy.getChildTask() != childTask)
-                    continue;
-
-                taskHierarchies.add(taskHierarchy);
-            }
-
-            if (taskHierarchies.isEmpty()) {
-                return null;
-            } else {
-                Assert.assertTrue(taskHierarchies.size() == 1);
-                return taskHierarchies.get(0);
-            }
-        }
-
-        void setParentHierarchyEndTimeStamp(Task childTask, TimeStamp endTimeStamp) {
-            Assert.assertTrue(childTask != null);
-            Assert.assertTrue(endTimeStamp != null);
-            Assert.assertTrue(childTask.current(endTimeStamp));
-
-            TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, endTimeStamp);
-            if (parentTaskHierarchy != null) {
-                Assert.assertTrue(parentTaskHierarchy.current(endTimeStamp));
-                parentTaskHierarchy.setEndTimeStamp(endTimeStamp);
-            }
-        }
-
-        public void setTaskEndTimeStamp(Task task) {
-            Assert.assertTrue(task != null);
-
-            TimeStamp timeStamp = TimeStamp.getNow();
-            Assert.assertTrue(task.current(timeStamp));
-
-            task.setEndTimeStamp(timeStamp);
+            return parentTask;
         }
     }
 
-    public static class CustomTimeFactory {
-        private final WeakReference<DomainFactory> mDomainFactoryReference;
+    private TaskHierarchy getParentTaskHierarchy(Task childTask, TimeStamp timeStamp) {
+        Assert.assertTrue(childTask != null);
+        Assert.assertTrue(timeStamp != null);
+        Assert.assertTrue(childTask.current(timeStamp));
 
-        private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
+        ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
+        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values()) {
+            Assert.assertTrue(taskHierarchy != null);
 
-        private CustomTimeFactory(DomainFactory domainFactory) {
-            Assert.assertTrue(domainFactory != null);
+            if (!taskHierarchy.current(timeStamp))
+                continue;
 
-            mDomainFactoryReference = new WeakReference<>(domainFactory);
+            if (taskHierarchy.getChildTask() != childTask)
+                continue;
 
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
-
-            Collection<CustomTimeRecord> customTimeRecords = persistenceManger.getCustomTimeRecords();
-            Assert.assertTrue(customTimeRecords != null);
-
-            for (CustomTimeRecord customTimeRecord : customTimeRecords) {
-                Assert.assertTrue(customTimeRecord != null);
-
-                CustomTime customTime = new CustomTime(customTimeRecord);
-                mCustomTimes.put(customTime.getId(), customTime);
-            }
+            taskHierarchies.add(taskHierarchy);
         }
 
-        public CustomTime getCustomTime(int customTimeId) {
-            Assert.assertTrue(mCustomTimes.containsKey(customTimeId));
-            return mCustomTimes.get(customTimeId);
-        }
-
-        public CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
-            for (CustomTime customTime : mCustomTimes.values())
-                if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
-                    return customTime;
+        if (taskHierarchies.isEmpty()) {
             return null;
+        } else {
+            Assert.assertTrue(taskHierarchies.size() == 1);
+            return taskHierarchies.get(0);
         }
+    }
 
-        public Collection<CustomTime> getCurrentCustomTimes() {
-            ArrayList<CustomTime> customTimes = new ArrayList<>();
-            for (CustomTime customTime : mCustomTimes.values())
-                if (customTime.getCurrent())
-                    customTimes.add(customTime);
-            return customTimes;
+    void setParentHierarchyEndTimeStamp(Task childTask, TimeStamp endTimeStamp) {
+        Assert.assertTrue(childTask != null);
+        Assert.assertTrue(endTimeStamp != null);
+        Assert.assertTrue(childTask.current(endTimeStamp));
+
+        TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, endTimeStamp);
+        if (parentTaskHierarchy != null) {
+            Assert.assertTrue(parentTaskHierarchy.current(endTimeStamp));
+            parentTaskHierarchy.setEndTimeStamp(endTimeStamp);
         }
+    }
 
-        public void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
+    public void setTaskEndTimeStamp(Task task) {
+        Assert.assertTrue(task != null);
 
-            Assert.assertTrue(hourMinutes.get(DayOfWeek.SUNDAY) != null);
-            Assert.assertTrue(hourMinutes.get(DayOfWeek.MONDAY) != null);
-            Assert.assertTrue(hourMinutes.get(DayOfWeek.TUESDAY) != null);
-            Assert.assertTrue(hourMinutes.get(DayOfWeek.WEDNESDAY) != null);
-            Assert.assertTrue(hourMinutes.get(DayOfWeek.THURSDAY) != null);
-            Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
-            Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
+        TimeStamp timeStamp = TimeStamp.getNow();
+        Assert.assertTrue(task.current(timeStamp));
 
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
+        task.setEndTimeStamp(timeStamp);
+    }
 
-            PersistenceManger persistenceManger = domainFactory.getPersistenceManager();
-            Assert.assertTrue(persistenceManger != null);
+    public CustomTime getCustomTime(int customTimeId) {
+        Assert.assertTrue(mCustomTimes.containsKey(customTimeId));
+        return mCustomTimes.get(customTimeId);
+    }
 
-            CustomTimeRecord customTimeRecord = persistenceManger.createCustomTimeRecord(name, hourMinutes);
-            Assert.assertTrue(customTimeRecord != null);
+    public CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
+        for (CustomTime customTime : mCustomTimes.values())
+            if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
+                return customTime;
+        return null;
+    }
 
-            CustomTime customTime = new CustomTime(customTimeRecord);
-            mCustomTimes.put(customTime.getId(), customTime);
+    public Collection<CustomTime> getCurrentCustomTimes() {
+        ArrayList<CustomTime> customTimes = new ArrayList<>();
+        for (CustomTime customTime : mCustomTimes.values())
+            if (customTime.getCurrent())
+                customTimes.add(customTime);
+        return customTimes;
+    }
+
+    public void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(hourMinutes != null);
+
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.SUNDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.MONDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.TUESDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.WEDNESDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.THURSDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
+
+        CustomTimeRecord customTimeRecord = mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
+        Assert.assertTrue(customTimeRecord != null);
+
+        CustomTime customTime = new CustomTime(customTimeRecord);
+        mCustomTimes.put(customTime.getId(), customTime);
+    }
+
+    public void updateCustomTime(CustomTime customTime, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        Assert.assertTrue(customTime != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(hourMinutes != null);
+
+        customTime.setName(name);
+
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            HourMinute hourMinute = hourMinutes.get(dayOfWeek);
+            Assert.assertTrue(hourMinute != null);
+
+            if (hourMinute.compareTo(customTime.getHourMinute(dayOfWeek)) != 0)
+                customTime.setHourMinute(dayOfWeek, hourMinute);
         }
+    }
 
-        public void updateCustomTime(CustomTime customTime, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
-            Assert.assertTrue(customTime != null);
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
-
-            customTime.setName(name);
-
-            for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-                HourMinute hourMinute = hourMinutes.get(dayOfWeek);
-                Assert.assertTrue(hourMinute != null);
-
-                if (hourMinute.compareTo(customTime.getHourMinute(dayOfWeek)) != 0)
-                    customTime.setHourMinute(dayOfWeek, hourMinute);
-            }
-        }
-
-        public void setCustomTimeCurrent(CustomTime customTime) {
-            Assert.assertTrue(customTime != null);
-            customTime.setCurrent();
-        }
+    public void setCustomTimeCurrent(CustomTime customTime) {
+        Assert.assertTrue(customTime != null);
+        customTime.setCurrent();
     }
 }

@@ -44,7 +44,7 @@ public class InstanceData {
 
         int taskId = bundle.getInt(TASK_ID_KEY, -1);
         Assert.assertTrue(taskId != -1);
-        Task task = domainFactory.getTaskFactory().getTask(taskId);
+        Task task = domainFactory.getTask(taskId);
         Assert.assertTrue(task != null);
 
         Date date = bundle.getParcelable(DATE_KEY);
@@ -53,7 +53,7 @@ public class InstanceData {
         int customTimeId = bundle.getInt(CUSTOM_TIME_ID_KEY, -1);
         Time time;
         if (customTimeId != -1) {
-            time = domainFactory.getCustomTimeFactory().getCustomTime(customTimeId);
+            time = domainFactory.getCustomTime(customTimeId);
             Assert.assertTrue(time != null);
         } else {
             HourMinute hourMinute = bundle.getParcelable(HOUR_MINUTE_KEY);
@@ -64,6 +64,6 @@ public class InstanceData {
 
         DateTime dateTime = new DateTime(date, time);
 
-        return domainFactory.getInstanceFactory().getInstance(task, dateTime);
+        return domainFactory.getInstance(task, dateTime);
     }
 }

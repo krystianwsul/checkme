@@ -142,7 +142,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
             int customTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1);
             Assert.assertTrue(customTimeId != -1);
 
-            mCustomTime = domainFactory.getCustomTimeFactory().getCustomTime(customTimeId);
+            mCustomTime = domainFactory.getCustomTime(customTimeId);
             Assert.assertTrue(mCustomTime != null);
 
             mCustomTimeName.setText(mCustomTime.getName());
@@ -203,9 +203,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
                 }
 
                 if (mCustomTime != null)
-                    domainFactory.getCustomTimeFactory().updateCustomTime(mCustomTime, name, mHourMinutes);
+                    domainFactory.updateCustomTime(mCustomTime, name, mHourMinutes);
                 else
-                    domainFactory.getCustomTimeFactory().createCustomTime(name, mHourMinutes);
+                    domainFactory.createCustomTime(name, mHourMinutes);
 
                 domainFactory.save();
 

@@ -61,21 +61,18 @@ public class TickService extends IntentService {
         DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
         Assert.assertTrue(domainFactory != null);
 
-        DomainFactory.InstanceFactory instanceFactory = domainFactory.getInstanceFactory();
-        Assert.assertTrue(instanceFactory != null);
-
-        ArrayList<Instance> instances = instanceFactory.getNotificationInstances();
+        ArrayList<Instance> instances = domainFactory.getNotificationInstances();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        ArrayList<Instance> shownInstances = instanceFactory.getShownInstances();
+        ArrayList<Instance> shownInstances = domainFactory.getShownInstances();
 
         if (instances.size() > MAX_NOTIFICATIONS) {
             for (Instance instance : shownInstances)
                 notificationManager.cancel(instance.getNotificationId());
 
             if (!shownInstances.isEmpty()) {
-                domainFactory.getInstanceFactory().setInstancesNotShown(shownInstances);
+                domainFactory.setInstancesNotShown(shownInstances);
                 domainFactory.save();
             }
 
@@ -92,7 +89,7 @@ public class TickService extends IntentService {
             }
 
             if (!setNotificationShownInstances.isEmpty()) {
-                domainFactory.getInstanceFactory().setInstancesNotShown(instances);
+                domainFactory.setInstancesNotShown(instances);
                 domainFactory.save();
             }
 
@@ -100,7 +97,7 @@ public class TickService extends IntentService {
                 notify(instance);
 
             if (!instances.isEmpty()) {
-                domainFactory.getInstanceFactory().setInstancesShown(instances);
+                domainFactory.setInstancesShown(instances);
                 domainFactory.save();
             }
         }

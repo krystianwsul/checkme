@@ -152,7 +152,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        mDomainFactory.getTaskFactory().createWeeklyScheduleRootTask(name, dayOfWeekTimePairs);
+        mDomainFactory.createWeeklyScheduleRootTask(name, dayOfWeekTimePairs);
 
         mDomainFactory.save();
 
@@ -163,13 +163,13 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
+        Task rootTask = mDomainFactory.getTask(rootTaskId);
         Assert.assertTrue(rootTask != null);
 
         ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        mDomainFactory.getTaskFactory().updateWeeklyScheduleRootTask(rootTask, name, dayOfWeekTimePairs);
+        mDomainFactory.updateWeeklyScheduleRootTask(rootTask, name, dayOfWeekTimePairs);
 
         mDomainFactory.save();
 
@@ -187,13 +187,13 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         ArrayList<Task> joinTasks = new ArrayList<>();
         for (Integer joinTaskId : joinTaskIds) {
-            Task joinTask = mDomainFactory.getTaskFactory().getTask(joinTaskId);
+            Task joinTask = mDomainFactory.getTask(joinTaskId);
             Assert.assertTrue(joinTask != null);
 
             joinTasks.add(joinTask);
         }
 
-        mDomainFactory.getTaskFactory().createWeeklyScheduleJoinRootTask(name, dayOfWeekTimePairs, joinTasks);
+        mDomainFactory.createWeeklyScheduleJoinRootTask(name, dayOfWeekTimePairs, joinTasks);
 
         mDomainFactory.save();
 
@@ -222,7 +222,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
-            Task rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
+            Task rootTask = domainFactory.getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
             WeeklySchedule weeklySchedule = (WeeklySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
@@ -493,7 +493,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             if (mCustomTimeId == EMPTY_CUSTOM_TIME)
                 return null;
             else
-                return domainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
+                return domainFactory.getCustomTime(mCustomTimeId);
         }
 
         public HourMinute getHourMinute() {
@@ -531,7 +531,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
             if (mCustomTimeId != EMPTY_CUSTOM_TIME) {
                 Assert.assertTrue(mHourMinute == null);
-                return domainFactory.getCustomTimeFactory().getCustomTime(mCustomTimeId);
+                return domainFactory.getCustomTime(mCustomTimeId);
             } else {
                 Assert.assertTrue(mHourMinute != null);
                 return new NormalTime(mHourMinute);

@@ -67,7 +67,7 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         int taskId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(taskId != -1);
-        final Task task = domainFactory.getTaskFactory().getTask(taskId);
+        final Task task = domainFactory.getTask(taskId);
         Assert.assertTrue(task != null);
 
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {

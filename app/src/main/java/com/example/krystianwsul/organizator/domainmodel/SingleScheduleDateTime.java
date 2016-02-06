@@ -23,7 +23,7 @@ class SingleScheduleDateTime {
         mSingleScheduleDateTimeRecord = singleScheduleDateTimeRecord;
     }
 
-    public Time getTime() {
+    Time getTime() {
         Integer customTimeId = mSingleScheduleDateTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
             DomainFactory domainFactory = mDomainFactoryReference.get();
@@ -41,15 +41,15 @@ class SingleScheduleDateTime {
         }
     }
 
-    public Date getDate() {
+    Date getDate() {
         return new Date(mSingleScheduleDateTimeRecord.getYear(), mSingleScheduleDateTimeRecord.getMonth(), mSingleScheduleDateTimeRecord.getDay());
     }
 
-    public DateTime getDateTime() {
+    DateTime getDateTime() {
         return new DateTime(getDate(), getTime());
     }
 
-    public Instance getInstance(Task task, Date scheduleDate) {
+    Instance getInstance(Task task, Date scheduleDate) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDate != null);
 

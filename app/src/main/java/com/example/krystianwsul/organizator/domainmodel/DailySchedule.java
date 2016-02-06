@@ -26,13 +26,15 @@ public class DailySchedule extends Schedule {
         mDailyScheduleTimes.add(dailyScheduleTime);
     }
 
-    public String getTaskText(Context context) {
+    @Override
+    String getTaskText(Context context) {
         ArrayList<String> times = new ArrayList<>();
         for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes)
             times.add(dailyScheduleTime.getTime().toString());
         return context.getString(R.string.daily) + " " + TextUtils.join(", ", times);
     }
 
+    @Override
     protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
         Assert.assertTrue(date != null);
 

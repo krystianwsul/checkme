@@ -24,7 +24,7 @@ class WeeklyScheduleDayOfWeekTime {
         mWeeklyScheduleDayOfWeekTimeRecord = weeklyScheduleDayOfWeekTimeRecord;
     }
 
-    public Time getTime() {
+    Time getTime() {
         Integer customTimeId = mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
             DomainFactory domainFactory = mDomainFactoryReference.get();
@@ -42,15 +42,11 @@ class WeeklyScheduleDayOfWeekTime {
         }
     }
 
-    public int getId() {
-        return mWeeklyScheduleDayOfWeekTimeRecord.getId();
-    }
-
-    public DayOfWeek getDayOfWeek() {
+    DayOfWeek getDayOfWeek() {
         return DayOfWeek.values()[mWeeklyScheduleDayOfWeekTimeRecord.getDayOfWeek()];
     }
 
-    public Instance getInstance(Task task, Date scheduleDate) {
+    Instance getInstance(Task task, Date scheduleDate) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDate != null);
 

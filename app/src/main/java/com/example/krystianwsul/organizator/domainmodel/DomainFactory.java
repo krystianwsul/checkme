@@ -62,12 +62,12 @@ public class DomainFactory {
         notifyDomainObservers();
     }
 
-    public static synchronized void addDomainObserver(DomainObserver domainObserver) {
+    static synchronized void addDomainObserver(DomainObserver domainObserver) {
         Assert.assertTrue(domainObserver != null);
         sDomainObservers.add(domainObserver);
     }
 
-    public static synchronized void removeDomainObserver(DomainObserver domainObserver) {
+    static synchronized void removeDomainObserver(DomainObserver domainObserver) {
         Assert.assertTrue(domainObserver != null);
         Assert.assertTrue(sDomainObservers.contains(domainObserver));
 
@@ -100,7 +100,7 @@ public class DomainFactory {
 
         private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
-        InstanceFactory(DomainFactory domainFactory) {
+        private InstanceFactory(DomainFactory domainFactory) {
             Assert.assertTrue(domainFactory != null);
 
             mDomainFactoryReference = new WeakReference<>(domainFactory);
@@ -285,7 +285,7 @@ public class DomainFactory {
         private final HashMap<Integer, Task> mTasks = new HashMap<>();
         private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
 
-        TaskFactory(DomainFactory domainFactory) {
+        private TaskFactory(DomainFactory domainFactory) {
             Assert.assertTrue(domainFactory != null);
 
             mDomainFactoryReference = new WeakReference<>(domainFactory);
@@ -433,7 +433,7 @@ public class DomainFactory {
             return weeklySchedule;
         }
 
-        public Collection<Task> getTasks() {
+        Collection<Task> getTasks() {
             return mTasks.values();
         }
 
@@ -452,7 +452,7 @@ public class DomainFactory {
             return mTasks.get(taskId);
         }
 
-        public Task createRootTask(String name, TimeStamp startTimeStamp) {
+        private Task createRootTask(String name, TimeStamp startTimeStamp) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(startTimeStamp != null);
 
@@ -664,7 +664,7 @@ public class DomainFactory {
             childTask.setName(name);
         }
 
-        public void joinTasks(Task rootTask, ArrayList<Task> childTasks, TimeStamp timeStamp) {
+        private void joinTasks(Task rootTask, ArrayList<Task> childTasks, TimeStamp timeStamp) {
             Assert.assertTrue(rootTask != null);
             Assert.assertTrue(rootTask.current(timeStamp));
             Assert.assertTrue(rootTask.isRootTask(timeStamp));
@@ -703,7 +703,7 @@ public class DomainFactory {
             mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
         }
 
-        public SingleSchedule createSingleSchedule(Task rootTask, Date date, Time time, TimeStamp startTimeStamp) {
+        private SingleSchedule createSingleSchedule(Task rootTask, Date date, Time time, TimeStamp startTimeStamp) {
             Assert.assertTrue(rootTask != null);
             Assert.assertTrue(date != null);
             Assert.assertTrue(time != null);
@@ -729,7 +729,7 @@ public class DomainFactory {
             return singleSchedule;
         }
 
-        public DailySchedule createDailySchedule(Task rootTask, ArrayList<Time> times, TimeStamp startTimeStamp) {
+        private DailySchedule createDailySchedule(Task rootTask, ArrayList<Time> times, TimeStamp startTimeStamp) {
             Assert.assertTrue(rootTask != null);
             Assert.assertTrue(times != null);
             Assert.assertTrue(!times.isEmpty());
@@ -759,7 +759,7 @@ public class DomainFactory {
             return dailySchedule;
         }
 
-        public WeeklySchedule createWeeklySchedule(Task rootTask, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, TimeStamp startTimeStamp) {
+        private WeeklySchedule createWeeklySchedule(Task rootTask, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, TimeStamp startTimeStamp) {
             Assert.assertTrue(rootTask != null);
             Assert.assertTrue(dayOfWeekTimePairs != null);
             Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -876,7 +876,7 @@ public class DomainFactory {
 
         private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
 
-        CustomTimeFactory(DomainFactory domainFactory) {
+        private CustomTimeFactory(DomainFactory domainFactory) {
             Assert.assertTrue(domainFactory != null);
 
             mDomainFactoryReference = new WeakReference<>(domainFactory);

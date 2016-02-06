@@ -18,6 +18,7 @@ public class CustomTime implements Time {
         mCustomTimeRecord = customTimeRecord;
     }
 
+    @Override
     public String getName() {
         return mCustomTimeRecord.getName();
     }
@@ -27,6 +28,7 @@ public class CustomTime implements Time {
         mCustomTimeRecord.setName(name);
     }
 
+    @Override
     public HourMinute getHourMinute(DayOfWeek dayOfWeek) {
         Assert.assertTrue(dayOfWeek != null);
 
@@ -96,11 +98,12 @@ public class CustomTime implements Time {
         return mCustomTimeRecord.getId();
     }
 
+    @Override
     public Pair<CustomTime, HourMinute> getPair() {
         return new Pair<>(this, null);
     }
 
-    public boolean getCurrent() {
+    boolean getCurrent() {
         return mCustomTimeRecord.getCurrent();
     }
 

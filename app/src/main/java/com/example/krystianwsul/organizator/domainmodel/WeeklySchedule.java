@@ -26,13 +26,15 @@ public class WeeklySchedule extends Schedule {
         mWeeklyScheduleDayOfWeekTimes.add(weeklyScheduleDayOfWeekTime);
     }
 
-    public String getTaskText(Context context) {
+    @Override
+    String getTaskText(Context context) {
         ArrayList<String> dayOfWeekTimes = new ArrayList<>();
         for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
             dayOfWeekTimes.add(weeklyScheduleDayOfWeekTime.getDayOfWeek().toString() + ", " + weeklyScheduleDayOfWeekTime.getTime().toString());
         return TextUtils.join("; ", dayOfWeekTimes);
     }
 
+    @Override
     protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
         Assert.assertTrue(date != null);
 

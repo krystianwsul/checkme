@@ -216,7 +216,7 @@ public class Instance {
         return parentInstance;
     }
 
-    public boolean isRootInstance() {
+    boolean isRootInstance() {
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
 
@@ -295,7 +295,7 @@ public class Instance {
         return getName() + " " + getInstanceDateTime();
     }
 
-    public boolean getNotified() {
+    boolean getNotified() {
         return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }
 
@@ -314,7 +314,7 @@ public class Instance {
         return mInstanceRecord.getId();
     }
 
-    public boolean getNotificationShown() {
+    boolean getNotificationShown() {
         return (mInstanceRecord != null && mInstanceRecord.getNotificationShown());
     }
 

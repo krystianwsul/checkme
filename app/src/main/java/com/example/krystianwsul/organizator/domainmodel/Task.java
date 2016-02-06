@@ -89,7 +89,7 @@ public class Task {
         return domainFactory.getTaskFactory().getChildTasks(this, timeStamp);
     }
 
-    public Task getParentTask(TimeStamp timeStamp) {
+    Task getParentTask(TimeStamp timeStamp) {
         Assert.assertTrue(timeStamp != null);
         Assert.assertTrue(current(timeStamp));
 
@@ -163,7 +163,7 @@ public class Task {
         return (startTimeStamp.compareTo(timeStamp) <= 0 && (endTimeStamp == null || endTimeStamp.compareTo(timeStamp) > 0));
     }
 
-    public ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
+    ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
         Assert.assertTrue(endTimeStamp != null);
 
         ArrayList<Instance> instances = new ArrayList<>();

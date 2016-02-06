@@ -17,7 +17,7 @@ public abstract class Schedule {
     private final ScheduleRecord mScheduleRecord;
     final WeakReference<Task> mRootTaskReference;
 
-    public abstract String getTaskText(Context context);
+    abstract String getTaskText(Context context);
 
     Schedule(ScheduleRecord scheduleRecord, Task rootTask) {
         Assert.assertTrue(scheduleRecord != null);
@@ -60,7 +60,7 @@ public abstract class Schedule {
         WEEKLY
     }
 
-    public ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
+    ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);
 
         TimeStamp myStartTimeStamp = getStartTimeStamp();

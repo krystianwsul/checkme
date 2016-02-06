@@ -23,7 +23,7 @@ class DailyScheduleTime {
         mDailyScheduleTimeRecord = dailyScheduleTimeRecord;
     }
 
-    public Time getTime() {
+    Time getTime() {
         Integer customTimeId = mDailyScheduleTimeRecord.getCustomTimeId();
         if (customTimeId != null) {
             DomainFactory domainFactory = mDomainFactoryReference.get();
@@ -42,11 +42,7 @@ class DailyScheduleTime {
         }
     }
 
-    public int getId() {
-        return mDailyScheduleTimeRecord.getId();
-    }
-
-    public Instance getInstance(Task task, Date scheduleDate) {
+    Instance getInstance(Task task, Date scheduleDate) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDate != null);
 

@@ -13,7 +13,7 @@ class TaskHierarchy {
     private final WeakReference<Task> mParentTaskReference;
     private final Task mChildTask;
 
-    public TaskHierarchy(TaskHierarchyRecord taskHierarchyRecord, Task parentTask, Task childTask) {
+    TaskHierarchy(TaskHierarchyRecord taskHierarchyRecord, Task parentTask, Task childTask) {
         Assert.assertTrue(taskHierarchyRecord != null);
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(childTask != null);
@@ -24,18 +24,18 @@ class TaskHierarchy {
         mChildTask = childTask;
     }
 
-    public int getId() {
+    int getId() {
         return mTaskHierarchyRecord.getId();
     }
 
-    public Task getParentTask() {
+    Task getParentTask() {
         Task parentTask = mParentTaskReference.get();
         Assert.assertTrue(parentTask != null);
 
         return parentTask;
     }
 
-    public Task getChildTask() {
+    Task getChildTask() {
         return mChildTask;
     }
 
@@ -50,7 +50,7 @@ class TaskHierarchy {
             return null;
     }
 
-    public boolean current(TimeStamp timeStamp) {
+    boolean current(TimeStamp timeStamp) {
         TimeStamp startTimeStamp = getStartTimeStamp();
         TimeStamp endTimeStamp = getEndTimeStamp();
 

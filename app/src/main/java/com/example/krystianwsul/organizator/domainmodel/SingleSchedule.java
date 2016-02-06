@@ -26,11 +26,13 @@ public class SingleSchedule extends Schedule {
         mSingleScheduleDateTime = singleScheduleDateTime;
     }
 
-    public String getTaskText(Context context) {
+    @Override
+    String getTaskText(Context context) {
         Assert.assertTrue(mSingleScheduleDateTime != null);
         return mSingleScheduleDateTime.getDateTime().getDisplayText(context);
     }
 
+    @Override
     protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
         Assert.assertTrue(mSingleScheduleDateTime != null);
         Assert.assertTrue(date != null);

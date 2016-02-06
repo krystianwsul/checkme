@@ -526,12 +526,10 @@ public class DomainFactory {
             Assert.assertTrue(dateTime != null);
 
             TimeStamp timeStamp = TimeStamp.getNow();
-
             Assert.assertTrue(rootTask.current(timeStamp));
+            Assert.assertTrue(rootTask.isRootTask(timeStamp));
 
             rootTask.setName(name);
-
-            Assert.assertTrue(rootTask.current(timeStamp));
             rootTask.setScheduleEndTimeStamp(timeStamp);
 
             Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
@@ -548,10 +546,9 @@ public class DomainFactory {
 
             TimeStamp timeStamp = TimeStamp.getNow();
             Assert.assertTrue(rootTask.current(timeStamp));
+            Assert.assertTrue(rootTask.isRootTask(timeStamp));
 
             rootTask.setName(name);
-
-            Assert.assertTrue(rootTask.current(timeStamp));
             rootTask.setScheduleEndTimeStamp(timeStamp);
 
             Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
@@ -568,10 +565,9 @@ public class DomainFactory {
 
             TimeStamp timeStamp = TimeStamp.getNow();
             Assert.assertTrue(rootTask.current(timeStamp));
+            Assert.assertTrue(rootTask.isRootTask(timeStamp));
 
             rootTask.setName(name);
-
-            Assert.assertTrue(rootTask.current(timeStamp));
             rootTask.setScheduleEndTimeStamp(timeStamp);
 
             Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);

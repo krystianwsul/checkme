@@ -145,7 +145,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
     @Override
     public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
         Task rootTask = null;
-        ArrayList<Task> joinTasks = null;
+        ArrayList<Integer> taskIds = null;
 
         Intent intent = getIntent();
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
@@ -155,22 +155,13 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             rootTask = domainFactory.getTaskFactory().getTask(rootTaskId);
             Assert.assertTrue(rootTask != null);
         } else if (intent.hasExtra(TASK_IDS_KEY)) {
-            ArrayList<Integer> taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
+            taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
             Assert.assertTrue(taskIds != null);
             Assert.assertTrue(taskIds.size() > 1);
-
-            joinTasks = new ArrayList<>();
-            for (Integer taskId : taskIds) {
-                Task task = domainFactory.getTaskFactory().getTask(taskId);
-                Assert.assertTrue(task != null);
-                Assert.assertTrue(task.isRootTask(TimeStamp.getNow()));
-
-                joinTasks.add(task);
-            }
         }
 
-        final ArrayList<Task> finalJoinTasks = joinTasks;
         final Task finalRootTask = rootTask;
+        final ArrayList<Integer> finalTaskIds = taskIds;
 
         int spinnerPosition = 0;
         int count = 1;
@@ -224,9 +215,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                 }
 
                 if (finalRootTask != null)
-                    scheduleFragment.updateRootTask(finalRootTask, name);
-                else if (finalJoinTasks != null)
-                    scheduleFragment.createRootJoinTask(name, finalJoinTasks);
+                    scheduleFragment.updateRootTask(finalRootTask.getId(), name);
+                else if (finalTaskIds != null)
+                    scheduleFragment.createRootJoinTask(name, finalTaskIds);
                 else
                     scheduleFragment.createRootTask(name);
 

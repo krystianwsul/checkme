@@ -160,9 +160,11 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     }
 
     @Override
-    public void updateRootTask(Task rootTask, String name) {
-        Assert.assertTrue(rootTask != null);
+    public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
+        Assert.assertTrue(rootTask != null);
 
         ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -175,13 +177,21 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     }
 
     @Override
-    public void createRootJoinTask(String name, ArrayList<Task> joinTasks) {
+    public void createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(joinTasks != null);
-        Assert.assertTrue(joinTasks.size() > 1);
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
 
         ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+        ArrayList<Task> joinTasks = new ArrayList<>();
+        for (Integer joinTaskId : joinTaskIds) {
+            Task joinTask = mDomainFactory.getTaskFactory().getTask(joinTaskId);
+            Assert.assertTrue(joinTask != null);
+
+            joinTasks.add(joinTask);
+        }
 
         mDomainFactory.getTaskFactory().createWeeklyScheduleJoinRootTask(name, dayOfWeekTimePairs, joinTasks);
 

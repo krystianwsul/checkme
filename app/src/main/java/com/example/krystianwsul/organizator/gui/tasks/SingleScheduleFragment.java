@@ -164,9 +164,11 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     @Override
-    public void updateRootTask(Task rootTask, String name) {
-        Assert.assertTrue(rootTask != null);
+    public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Task rootTask = mDomainFactory.getTaskFactory().getTask(rootTaskId);
+        Assert.assertTrue(rootTask != null);
 
         mDomainFactory.getTaskFactory().updateSingleScheduleRootTask(rootTask, name, new DateTime(mDate, mTimePickerView.getTime()));
 
@@ -176,10 +178,18 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     @Override
-    public void createRootJoinTask(String name, ArrayList<Task> joinTasks) {
+    public void createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(joinTasks != null);
-        Assert.assertTrue(joinTasks.size() > 1);
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        ArrayList<Task> joinTasks = new ArrayList<>();
+        for (Integer joinTaskId : joinTaskIds) {
+            Task joinTask = mDomainFactory.getTaskFactory().getTask(joinTaskId);
+            Assert.assertTrue(joinTask != null);
+
+            joinTasks.add(joinTask);
+        }
 
         mDomainFactory.getTaskFactory().createSingleScheduleJoinRootTask(name, new DateTime(mDate, mTimePickerView.getTime()), joinTasks);
 

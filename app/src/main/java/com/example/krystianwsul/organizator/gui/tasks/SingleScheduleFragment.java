@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +16,9 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
-import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -25,6 +26,8 @@ import com.example.krystianwsul.organizator.utils.time.Time;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
+
+import java.util.ArrayList;
 
 public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
     private static final String YEAR_KEY = "year";
@@ -150,13 +153,39 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     @Override
-    public Schedule createSchedule(Task rootTask, TimeStamp startTimeStamp) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(startTimeStamp != null);
-        Assert.assertTrue(rootTask.current(startTimeStamp));
+    public void createRootTask(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Assert.assertTrue(mDomainFactory != null);
-        return mDomainFactory.getTaskFactory().createSingleSchedule(rootTask, mDate, mTimePickerView.getTime(), startTimeStamp);
+        mDomainFactory.getTaskFactory().createSingleScheduleRootTask(name, new DateTime(mDate, mTimePickerView.getTime()));
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
+    }
+
+    @Override
+    public void updateRootTask(Task rootTask, String name) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        mDomainFactory.getTaskFactory().updateSingleScheduleRootTask(rootTask, name, new DateTime(mDate, mTimePickerView.getTime()));
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
+    }
+
+    @Override
+    public void createRootJoinTask(String name, ArrayList<Task> joinTasks) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(joinTasks != null);
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        mDomainFactory.getTaskFactory().createSingleScheduleJoinRootTask(name, new DateTime(mDate, mTimePickerView.getTime()), joinTasks);
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
     }
 
     @Override

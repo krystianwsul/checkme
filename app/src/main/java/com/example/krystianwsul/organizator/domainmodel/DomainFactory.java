@@ -477,6 +477,172 @@ public class DomainFactory {
             return rootTask;
         }
 
+        public void createSingleScheduleRootTask(String name, DateTime dateTime) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(dateTime != null);
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+
+            Task rootTask = createRootTask(name, timeStamp);
+            Assert.assertTrue(rootTask != null);
+
+            Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+        }
+
+        public void createDailyScheduleRootTask(String name, ArrayList<Time> times) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(times != null);
+            Assert.assertTrue(!times.isEmpty());
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+
+            Task rootTask = createRootTask(name, timeStamp);
+            Assert.assertTrue(rootTask != null);
+
+            Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+        }
+
+        public void createWeeklyScheduleRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(dayOfWeekTimePairs != null);
+            Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+
+            Task rootTask = createRootTask(name, timeStamp);
+            Assert.assertTrue(rootTask != null);
+
+            Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+        }
+
+        public void updateSingleScheduleRootTask(Task rootTask, String name, DateTime dateTime) {
+            Assert.assertTrue(rootTask != null);
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(dateTime != null);
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+
+            Assert.assertTrue(rootTask.current(timeStamp));
+
+            rootTask.setName(name);
+
+            Assert.assertTrue(rootTask.current(timeStamp));
+            rootTask.setScheduleEndTimeStamp(timeStamp);
+
+            Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+        }
+
+        public void updateDailyScheduleRootTask(Task rootTask, String name, ArrayList<Time> times) {
+            Assert.assertTrue(rootTask != null);
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(times != null);
+            Assert.assertTrue(!times.isEmpty());
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+            Assert.assertTrue(rootTask.current(timeStamp));
+
+            rootTask.setName(name);
+
+            Assert.assertTrue(rootTask.current(timeStamp));
+            rootTask.setScheduleEndTimeStamp(timeStamp);
+
+            Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+        }
+
+        public void updateWeeklyScheduleRootTask(Task rootTask, String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
+            Assert.assertTrue(rootTask != null);
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(dayOfWeekTimePairs != null);
+            Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+            Assert.assertTrue(rootTask.current(timeStamp));
+
+            rootTask.setName(name);
+
+            Assert.assertTrue(rootTask.current(timeStamp));
+            rootTask.setScheduleEndTimeStamp(timeStamp);
+
+            Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+        }
+
+        public void createSingleScheduleJoinRootTask(String name, DateTime dateTime, ArrayList<Task> joinTasks) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(dateTime != null);
+            Assert.assertTrue(joinTasks != null);
+            Assert.assertTrue(joinTasks.size() > 1);
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+
+            Task rootTask = createRootTask(name, timeStamp);
+            Assert.assertTrue(rootTask != null);
+
+            Schedule schedule = createSingleSchedule(rootTask, dateTime.getDate(), dateTime.getTime(), timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+
+            joinTasks(rootTask, joinTasks, timeStamp);
+        }
+
+        public void createDailyScheduleJoinRootTask(String name, ArrayList<Time> times, ArrayList<Task> joinTasks) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(times != null);
+            Assert.assertTrue(!times.isEmpty());
+            Assert.assertTrue(joinTasks != null);
+            Assert.assertTrue(joinTasks.size() > 1);
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+
+            Task rootTask = createRootTask(name, timeStamp);
+            Assert.assertTrue(rootTask != null);
+
+            Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+
+            joinTasks(rootTask, joinTasks, timeStamp);
+        }
+
+        public void createWeeklyScheduleJoinRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, ArrayList<Task> joinTasks) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(dayOfWeekTimePairs != null);
+            Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+            Assert.assertTrue(joinTasks != null);
+            Assert.assertTrue(joinTasks.size() > 1);
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+
+            Task rootTask = createRootTask(name, timeStamp);
+            Assert.assertTrue(rootTask != null);
+
+            Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, timeStamp);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+
+            joinTasks(rootTask, joinTasks, timeStamp);
+        }
+
         public void createChildTask(Task parentTask, String name, TimeStamp startTimeStamp) {
             Assert.assertTrue(parentTask != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -497,6 +663,13 @@ public class DomainFactory {
             mTasks.put(childTask.getId(), childTask);
 
             createTaskHierarchy(parentTask, childTask, startTimeStamp);
+        }
+
+        public void updateChildTask(Task childTask, String name) {
+            Assert.assertTrue(childTask != null);
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+
+            childTask.setName(name);
         }
 
         public void joinTasks(Task rootTask, ArrayList<Task> childTasks, TimeStamp timeStamp) {
@@ -694,6 +867,15 @@ public class DomainFactory {
                 Assert.assertTrue(parentTaskHierarchy.current(endTimeStamp));
                 parentTaskHierarchy.setEndTimeStamp(endTimeStamp);
             }
+        }
+
+        public void setTaskEndTimeStamp(Task task) {
+            Assert.assertTrue(task != null);
+
+            TimeStamp timeStamp = TimeStamp.getNow();
+            Assert.assertTrue(task.current(timeStamp));
+
+            task.setEndTimeStamp(timeStamp);
         }
     }
 

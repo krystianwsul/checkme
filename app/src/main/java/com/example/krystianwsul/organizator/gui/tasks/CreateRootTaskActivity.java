@@ -23,7 +23,6 @@ import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
-import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
@@ -224,34 +223,12 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                     return;
                 }
 
-                Task rootTask;
-
-                TimeStamp timeStamp = TimeStamp.getNow();
-                if (finalRootTask != null) {
-                    finalRootTask.setName(name);
-
-                    Assert.assertTrue(finalRootTask.current(timeStamp));
-                    finalRootTask.setScheduleEndTimeStamp(timeStamp);
-
-                    rootTask = finalRootTask;
-                } else {
-                    rootTask = domainFactory.getTaskFactory().createRootTask(name, timeStamp);
-                    Assert.assertTrue(rootTask != null);
-                }
-
-                Schedule schedule = scheduleFragment.createSchedule(rootTask, timeStamp);
-                Assert.assertTrue(schedule != null);
-
-                rootTask.addSchedule(schedule);
-
-                if (finalJoinTasks != null) {
-                    Assert.assertTrue(finalJoinTasks.size() > 1);
-                    domainFactory.getTaskFactory().joinTasks(rootTask, finalJoinTasks, timeStamp);
-                }
-
-                domainFactory.save();
-
-                TickService.startService(CreateRootTaskActivity.this);
+                if (finalRootTask != null)
+                    scheduleFragment.updateRootTask(finalRootTask, name);
+                else if (finalJoinTasks != null)
+                    scheduleFragment.createRootJoinTask(name, finalJoinTasks);
+                else
+                    scheduleFragment.createRootTask(name);
 
                 finish();
             }

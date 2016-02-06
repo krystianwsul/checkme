@@ -11,6 +11,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +23,8 @@ import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
-import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
@@ -129,23 +130,61 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         return true;
     }
 
-    @Override
-    public Schedule createSchedule(Task rootTask, TimeStamp startTimeStamp) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(startTimeStamp != null);
-        Assert.assertTrue(rootTask.current(startTimeStamp));
-
-        Assert.assertTrue(mTimeEntryAdapter != null);
+    private ArrayList<Time> getTimes() {
         Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
 
-        Assert.assertTrue(mDomainFactory != null);
-
         ArrayList<Time> times = new ArrayList<>();
+
         for (TimeEntry timeEntry : mTimeEntryAdapter.getTimeEntries())
             times.add(timeEntry.getTime(mDomainFactory));
         Assert.assertTrue(!times.isEmpty());
 
-        return mDomainFactory.getTaskFactory().createDailySchedule(rootTask, times, startTimeStamp);
+        return times;
+    }
+
+    @Override
+    public void createRootTask(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        ArrayList<Time> times = getTimes();
+        Assert.assertTrue(!times.isEmpty());
+
+        mDomainFactory.getTaskFactory().createDailyScheduleRootTask(name, times);
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
+    }
+
+    @Override
+    public void updateRootTask(Task rootTask, String name) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        ArrayList<Time> times = getTimes();
+        Assert.assertTrue(!times.isEmpty());
+
+        mDomainFactory.getTaskFactory().updateDailyScheduleRootTask(rootTask, name, times);
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
+    }
+
+    @Override
+    public void createRootJoinTask(String name, ArrayList<Task> joinTasks) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(joinTasks != null);
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        ArrayList<Time> times = getTimes();
+        Assert.assertTrue(!times.isEmpty());
+
+        mDomainFactory.getTaskFactory().createDailyScheduleJoinRootTask(name, times, joinTasks);
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
     }
 
     @Override

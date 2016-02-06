@@ -25,12 +25,12 @@ public class Task {
         mTaskRecord = taskRecord;
     }
 
-    public void addSchedules(ArrayList<Schedule> schedules) {
+    void addSchedules(ArrayList<Schedule> schedules) {
         Assert.assertTrue(schedules != null);
         mSchedules.addAll(schedules);
     }
 
-    public void addSchedule(Schedule schedule) {
+    void addSchedule(Schedule schedule) {
         Assert.assertTrue(schedule != null);
         mSchedules.add(schedule);
     }
@@ -74,7 +74,7 @@ public class Task {
         return mTaskRecord.getName();
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         mTaskRecord.setName(name);
     }
@@ -121,7 +121,7 @@ public class Task {
             return null;
     }
 
-    public void setEndTimeStamp(TimeStamp endTimeStamp) {
+    void setEndTimeStamp(TimeStamp endTimeStamp) {
         Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(current(endTimeStamp));
 
@@ -143,7 +143,7 @@ public class Task {
         mTaskRecord.setEndTime(endTimeStamp.getLong());
     }
 
-    public void setScheduleEndTimeStamp(TimeStamp endTimeStamp) {
+    void setScheduleEndTimeStamp(TimeStamp endTimeStamp) {
         Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(current(endTimeStamp));
 

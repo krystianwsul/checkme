@@ -35,15 +35,14 @@ public abstract class Schedule {
         return new TimeStamp(mScheduleRecord.getStartTime());
     }
 
-    private TimeStamp getEndTimeStamp()
-    {
+    private TimeStamp getEndTimeStamp() {
         if (mScheduleRecord.getEndTime() == null)
             return null;
         else
             return new TimeStamp(mScheduleRecord.getEndTime());
     }
 
-    public void setEndTimeStamp(TimeStamp endTimeStamp) {
+    void setEndTimeStamp(TimeStamp endTimeStamp) {
         Assert.assertTrue(endTimeStamp != null);
         mScheduleRecord.setEndTime(endTimeStamp.getLong());
     }

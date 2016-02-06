@@ -99,7 +99,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                 if (finalParentTask != null)
                     domainFactory.getTaskFactory().createChildTask(finalParentTask, name, TimeStamp.getNow());
                 else
-                    finalChildTask.setName(name);
+                    domainFactory.getTaskFactory().updateChildTask(finalChildTask, name);
 
                 domainFactory.save();
 

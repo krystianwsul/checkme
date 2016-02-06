@@ -172,7 +172,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             TaskWrapper taskWrapper = mTaskWrappers.get(position);
             Assert.assertTrue(taskWrapper != null);
 
-            taskWrapper.mTask.setEndTimeStamp(TimeStamp.getNow());
+            mDomainFactory.getTaskFactory().setTaskEndTimeStamp(taskWrapper.mTask);
 
             mDomainFactory.save();
 

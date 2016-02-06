@@ -12,6 +12,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +26,9 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
-import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
@@ -133,22 +134,60 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         return true;
     }
 
-    @Override
-    public Schedule createSchedule(Task rootTask, TimeStamp startTimeStamp) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(startTimeStamp != null);
-        Assert.assertTrue(rootTask.current(startTimeStamp));
+    private ArrayList<Pair<DayOfWeek, Time>> getDayOfWeekTimePairs() {
         Assert.assertTrue(!mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries().isEmpty());
-
-        Assert.assertTrue(mDomainFactory != null);
 
         ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = new ArrayList<>();
         for (DayOfWeekTimeEntry dayOfWeekTimeEntry : mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
             dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), dayOfWeekTimeEntry.getTime(mDomainFactory)));
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        Assert.assertTrue(mDomainFactory != null);
-        return mDomainFactory.getTaskFactory().createWeeklySchedule(rootTask, dayOfWeekTimePairs, startTimeStamp);
+        return dayOfWeekTimePairs;
+    }
+
+    @Override
+    public void createRootTask(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+        mDomainFactory.getTaskFactory().createWeeklyScheduleRootTask(name, dayOfWeekTimePairs);
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
+    }
+
+    @Override
+    public void updateRootTask(Task rootTask, String name) {
+        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+        mDomainFactory.getTaskFactory().updateWeeklyScheduleRootTask(rootTask, name, dayOfWeekTimePairs);
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
+    }
+
+    @Override
+    public void createRootJoinTask(String name, ArrayList<Task> joinTasks) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(joinTasks != null);
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
+        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
+
+        mDomainFactory.getTaskFactory().createWeeklyScheduleJoinRootTask(name, dayOfWeekTimePairs, joinTasks);
+
+        mDomainFactory.save();
+
+        TickService.startService(getActivity());
     }
 
     @Override

@@ -14,7 +14,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
@@ -38,9 +37,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
     private static final String HOUR_MINUTE_FRIDAY_KEY = "hourMinuteFriday";
     private static final String HOUR_MINUTE_SATURDAY_KEY = "hourMinuteSaturday";
 
-    public static Intent getEditIntent(CustomTime customTime, Context context) {
+    public static Intent getEditIntent(int customTimeId, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
-        intent.putExtra(CUSTOM_TIME_ID_KEY, customTime.getId());
+        intent.putExtra(CUSTOM_TIME_ID_KEY, customTimeId);
         return intent;
     }
 

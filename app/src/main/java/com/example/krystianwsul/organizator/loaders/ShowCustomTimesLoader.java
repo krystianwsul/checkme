@@ -5,24 +5,18 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
-public class ShowCustomTimeLoader extends AsyncTaskLoader<ShowCustomTimeLoader.Data> {
+public class ShowCustomTimesLoader extends AsyncTaskLoader<ShowCustomTimesLoader.Data> {
     private Data mData;
 
     private Observer mObserver;
 
-    private final int mCustomTimeId;
-
-    public ShowCustomTimeLoader(Context context, int customTimeId) {
+    public ShowCustomTimesLoader(Context context) {
         super(context);
-
-        mCustomTimeId = customTimeId;
     }
 
     @Override
@@ -30,7 +24,7 @@ public class ShowCustomTimeLoader extends AsyncTaskLoader<ShowCustomTimeLoader.D
         DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
         Assert.assertTrue(domainFactory != null);
 
-        Data data = domainFactory.getShowCustomTimeData(mCustomTimeId);
+        Data data = domainFactory.getShowCustomTimesData();
         Assert.assertTrue(data != null);
 
         return data;
@@ -90,18 +84,23 @@ public class ShowCustomTimeLoader extends AsyncTaskLoader<ShowCustomTimeLoader.D
     }
 
     public static class Data extends LoaderData {
-        public final int Id;
-        public final String Name;
-        public final HashMap<DayOfWeek, HourMinute> HourMinutes;
+        public final ArrayList<Entry> Entries;
 
-        public Data(int id, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
-            Assert.assertTrue(!hourMinutes.isEmpty());
+        public Data(ArrayList<Entry> entries) {
+            Assert.assertTrue(entries != null);
+            Entries = entries;
+        }
 
-            Id = id;
-            Name = name;
-            HourMinutes = hourMinutes;
+        public static class Entry {
+            public final int Id;
+            public final String Name;
+
+            public Entry(int id, String name) {
+                Assert.assertTrue(!TextUtils.isEmpty(name));
+
+                Id = id;
+                Name = name;
+            }
         }
     }
 }

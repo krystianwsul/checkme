@@ -5,6 +5,7 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
+import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
@@ -776,7 +777,7 @@ public class DomainFactory {
             hourMinutes.put(dayOfWeek, hourMinute);
         }
 
-        return new ShowCustomTimeLoader.Data(this, customTime.getId(), customTime.getName(), hourMinutes);
+        return new ShowCustomTimeLoader.Data(customTime.getId(), customTime.getName(), hourMinutes);
     }
 
     public CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
@@ -786,12 +787,24 @@ public class DomainFactory {
         return null;
     }
 
-    public Collection<CustomTime> getCurrentCustomTimes() {
+    public ArrayList<CustomTime> getCurrentCustomTimes() {
         ArrayList<CustomTime> customTimes = new ArrayList<>();
         for (CustomTime customTime : mCustomTimes.values())
             if (customTime.getCurrent())
                 customTimes.add(customTime);
         return customTimes;
+    }
+
+    public ShowCustomTimesLoader.Data getShowCustomTimesData() {
+        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+
+        ArrayList<ShowCustomTimesLoader.Data.Entry> entries = new ArrayList<>();
+        for (CustomTime customTime : currentCustomTimes) {
+            Assert.assertTrue(customTime != null);
+            entries.add(new ShowCustomTimesLoader.Data.Entry(customTime.getId(), customTime.getName()));
+        }
+
+        return new ShowCustomTimesLoader.Data(entries);
     }
 
     public void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
@@ -835,9 +848,13 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void setCustomTimeCurrent(CustomTime customTime) {
+    public void setCustomTimeCurrent(int dataId, int customTimeId) {
+        CustomTime customTime = mCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
+
         customTime.setCurrent();
+
+        save(dataId);
     }
 
     public interface Observer {

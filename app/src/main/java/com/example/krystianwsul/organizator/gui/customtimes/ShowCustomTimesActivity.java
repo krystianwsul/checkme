@@ -17,15 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
-public class ShowCustomTimesActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
+public class ShowCustomTimesActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data> {
     private RecyclerView mShowTimesList;
 
     public static Intent getIntent(Context context) {
@@ -52,37 +49,34 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
+    public Loader<ShowCustomTimesLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ShowCustomTimesLoader(this);
     }
 
     @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
-        mShowTimesList.setAdapter(new CustomTimesAdapter(domainFactory, this));
+    public void onLoadFinished(Loader<ShowCustomTimesLoader.Data> loader, ShowCustomTimesLoader.Data data) {
+        mShowTimesList.setAdapter(new CustomTimesAdapter(data, this));
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mShowTimesList.setAdapter(null);
+    public void onLoaderReset(Loader<ShowCustomTimesLoader.Data> loader) {
     }
 
     public static class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
-        private final DomainFactory mDomainFactory;
+        private final ShowCustomTimesLoader.Data mData;
         private final Activity mActivity;
-        private final ArrayList<CustomTime> mCustomTimes;
 
-        public CustomTimesAdapter(DomainFactory domainFactory, Activity activity) {
-            Assert.assertTrue(domainFactory != null);
+        public CustomTimesAdapter(ShowCustomTimesLoader.Data data, Activity activity) {
+            Assert.assertTrue(data != null);
             Assert.assertTrue(activity != null);
 
-            mDomainFactory = domainFactory;
+            mData = data;
             mActivity = activity;
-            mCustomTimes = new ArrayList<>(domainFactory.getCurrentCustomTimes());
         }
 
         @Override
         public int getItemCount() {
-            return mCustomTimes.size();
+            return mData.Entries.size();
         }
 
         @Override
@@ -98,10 +92,10 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
 
         @Override
         public void onBindViewHolder(final CustomTimeHolder customTimeHolder, int position) {
-            CustomTime customTime = mCustomTimes.get(position);
-            Assert.assertTrue(customTime != null);
+            ShowCustomTimesLoader.Data.Entry entry = mData.Entries.get(position);
+            Assert.assertTrue(entry != null);
 
-            customTimeHolder.mTimesRowName.setText(customTime.getName());
+            customTimeHolder.mTimesRowName.setText(entry.Name);
 
             customTimeHolder.mShowCustomTimeRow.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -135,19 +129,17 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
             }
 
             public void onRowClick() {
-                CustomTime customTime = mCustomTimes.get(getAdapterPosition());
-                mActivity.startActivity(ShowCustomTimeActivity.getEditIntent(customTime, mActivity));
+                ShowCustomTimesLoader.Data.Entry entry = mData.Entries.get(getAdapterPosition());
+                mActivity.startActivity(ShowCustomTimeActivity.getEditIntent(entry.Id, mActivity));
             }
 
             public void onDeleteClick() {
                 int position = getAdapterPosition();
-                CustomTime customTime = mCustomTimes.get(position);
+                ShowCustomTimesLoader.Data.Entry entry = mData.Entries.get(position);
 
-                mDomainFactory.setCustomTimeCurrent(customTime);
+                DomainFactory.getDomainFactory(mActivity).setCustomTimeCurrent(mData.DataId, entry.Id);
 
-                mDomainFactory.save();
-
-                mCustomTimes.remove(customTime);
+                mData.Entries.remove(entry);
                 notifyItemRemoved(position);
             }
         }

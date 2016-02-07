@@ -1,11 +1,13 @@
-package com.example.krystianwsul.organizator.domainmodel;
+package com.example.krystianwsul.organizator.loaders;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+
 public class DomainLoader extends AsyncTaskLoader<DomainFactory> {
-    DomainFactory mDomainFactory;
-    private DomainObserver mDomainObserver;
+    private DomainFactory mDomainFactory;
+    private Observer mObserver;
 
     public DomainLoader(Context context) {
         super(context);
@@ -32,9 +34,9 @@ public class DomainLoader extends AsyncTaskLoader<DomainFactory> {
         if (mDomainFactory != null)
             deliverResult(mDomainFactory);
 
-        if (mDomainObserver == null) {
-            mDomainObserver = new DomainObserver(this);
-            DomainFactory.addDomainObserver(mDomainObserver);
+        if (mObserver == null) {
+            mObserver = new Observer();
+            DomainFactory.addDomainObserver(mObserver);
         }
 
         if (takeContentChanged() || mDomainFactory == null)
@@ -53,9 +55,17 @@ public class DomainLoader extends AsyncTaskLoader<DomainFactory> {
         if (mDomainFactory != null)
             mDomainFactory = null;
 
-        if (mDomainObserver != null) {
-            DomainFactory.removeDomainObserver(mDomainObserver);
-            mDomainObserver = null;
+        if (mObserver != null) {
+            DomainFactory.removeDomainObserver(mObserver);
+            mObserver = null;
+        }
+    }
+
+    private class Observer implements DomainFactory.Observer {
+        @Override
+        public void onDomainChanged(DomainFactory domainFactory, int dataId) {
+            if (domainFactory != mDomainFactory)
+                onContentChanged();
         }
     }
 }

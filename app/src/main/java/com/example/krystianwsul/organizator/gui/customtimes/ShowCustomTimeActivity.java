@@ -16,9 +16,9 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
+import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
@@ -26,7 +26,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowCustomTimeActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, LoaderManager.LoaderCallbacks<DomainFactory> {
+public class ShowCustomTimeActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.Data> {
     private static final String CUSTOM_TIME_ID_KEY = "customTimeId";
     private static final String NEW_KEY = "new";
 
@@ -50,7 +50,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         return intent;
     }
 
-    private CustomTime mCustomTime;
+    private Integer mCustomTimeId;
+    private ShowCustomTimeLoader.Data mData;
+
     private final HashMap<DayOfWeek, TextView> mTimeViews = new HashMap<>();
     private final HashMap<DayOfWeek, HourMinute> mHourMinutes = new HashMap<>();
 
@@ -79,7 +81,34 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         initializeDay(DayOfWeek.FRIDAY, R.id.time_friday_name, R.id.time_friday_time);
         initializeDay(DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time);
 
-        getSupportLoaderManager().initLoader(0, null, this);
+        if (mSavedInstanceState != null) {
+            extractKey(HOUR_MINUTE_SUNDAY_KEY, DayOfWeek.SUNDAY);
+            extractKey(HOUR_MINUTE_MONDAY_KEY, DayOfWeek.MONDAY);
+            extractKey(HOUR_MINUTE_TUESDAY_KEY, DayOfWeek.TUESDAY);
+            extractKey(HOUR_MINUTE_WEDNESDAY_KEY, DayOfWeek.WEDNESDAY);
+            extractKey(HOUR_MINUTE_THURSDAY_KEY, DayOfWeek.THURSDAY);
+            extractKey(HOUR_MINUTE_FRIDAY_KEY, DayOfWeek.FRIDAY);
+            extractKey(HOUR_MINUTE_SATURDAY_KEY, DayOfWeek.SATURDAY);
+
+            updateGui();
+        } else {
+            Intent intent = getIntent();
+            if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
+                Assert.assertTrue(!intent.hasExtra(NEW_KEY));
+
+                mCustomTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1);
+                Assert.assertTrue(mCustomTimeId != -1);
+
+                getSupportLoaderManager().initLoader(0, null, this);
+            } else {
+                Assert.assertTrue(intent.hasExtra(NEW_KEY));
+
+                for (DayOfWeek dayOfWeek : DayOfWeek.values())
+                    mHourMinutes.put(dayOfWeek, new HourMinute(9, 0));
+
+                updateGui();
+            }
+        }
     }
 
     private void extractKey(String key, DayOfWeek dayOfWeek) {
@@ -129,44 +158,11 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
+    public Loader<ShowCustomTimeLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ShowCustomTimeLoader(this, mCustomTimeId);
     }
 
-    @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
-        Intent intent = getIntent();
-        if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
-            Assert.assertTrue(!intent.hasExtra(NEW_KEY));
-
-            int customTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1);
-            Assert.assertTrue(customTimeId != -1);
-
-            mCustomTime = domainFactory.getCustomTime(customTimeId);
-            Assert.assertTrue(mCustomTime != null);
-
-            mCustomTimeName.setText(mCustomTime.getName());
-        } else {
-            Assert.assertTrue(intent.hasExtra(NEW_KEY));
-        }
-
-        if (mSavedInstanceState != null) {
-            extractKey(HOUR_MINUTE_SUNDAY_KEY, DayOfWeek.SUNDAY);
-            extractKey(HOUR_MINUTE_MONDAY_KEY, DayOfWeek.MONDAY);
-            extractKey(HOUR_MINUTE_TUESDAY_KEY, DayOfWeek.TUESDAY);
-            extractKey(HOUR_MINUTE_WEDNESDAY_KEY, DayOfWeek.WEDNESDAY);
-            extractKey(HOUR_MINUTE_THURSDAY_KEY, DayOfWeek.THURSDAY);
-            extractKey(HOUR_MINUTE_FRIDAY_KEY, DayOfWeek.FRIDAY);
-            extractKey(HOUR_MINUTE_SATURDAY_KEY, DayOfWeek.SATURDAY);
-        } else {
-            for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-                if (mCustomTime != null)
-                    mHourMinutes.put(dayOfWeek, mCustomTime.getHourMinute(dayOfWeek));
-                else
-                    mHourMinutes.put(dayOfWeek, new HourMinute(9, 0));
-            }
-        }
-
+    public void updateGui() {
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
             TextView timeView = mTimeViews.get(dayOfWeek);
             Assert.assertTrue(timeView != null);
@@ -202,12 +198,10 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
                     return;
                 }
 
-                if (mCustomTime != null)
-                    domainFactory.updateCustomTime(mCustomTime, name, mHourMinutes);
+                if (mData != null)
+                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
                 else
-                    domainFactory.createCustomTime(name, mHourMinutes);
-
-                domainFactory.save();
+                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(name, mHourMinutes);
 
                 finish();
             }
@@ -215,8 +209,18 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mCustomTime = null;
-        mCustomTimeSave.setOnClickListener(null);
+    public void onLoadFinished(Loader<ShowCustomTimeLoader.Data> loader, ShowCustomTimeLoader.Data data) {
+        mData = data;
+
+        mCustomTimeName.setText(mData.Name);
+
+        for (DayOfWeek dayOfWeek : DayOfWeek.values())
+            mHourMinutes.put(dayOfWeek, mData.HourMinutes.get(dayOfWeek));
+
+        updateGui();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ShowCustomTimeLoader.Data> data) {
     }
 }

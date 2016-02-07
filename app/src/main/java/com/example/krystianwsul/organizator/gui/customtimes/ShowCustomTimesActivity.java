@@ -19,7 +19,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.DomainLoader;
 
 import junit.framework.Assert;
 

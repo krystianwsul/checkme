@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
@@ -36,7 +37,7 @@ public class DomainFactory {
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
-    private static ArrayList<DomainObserver> sDomainObservers = new ArrayList<>();
+    private static ArrayList<Observer> sObservers = new ArrayList<>();
 
     public static DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -109,25 +110,29 @@ public class DomainFactory {
     }
 
     public void save() {
+        save(0);
+    }
+
+    private void save(int dataId) {
         mPersistenceManager.save();
-        notifyDomainObservers();
+        notifyDomainObservers(dataId);
     }
 
-    static synchronized void addDomainObserver(DomainObserver domainObserver) {
-        Assert.assertTrue(domainObserver != null);
-        sDomainObservers.add(domainObserver);
+    public static synchronized void addDomainObserver(Observer observer) {
+        Assert.assertTrue(observer != null);
+        sObservers.add(observer);
     }
 
-    static synchronized void removeDomainObserver(DomainObserver domainObserver) {
-        Assert.assertTrue(domainObserver != null);
-        Assert.assertTrue(sDomainObservers.contains(domainObserver));
+    public static synchronized void removeDomainObserver(Observer observer) {
+        Assert.assertTrue(observer != null);
+        Assert.assertTrue(sObservers.contains(observer));
 
-        sDomainObservers.remove(domainObserver);
+        sObservers.remove(observer);
     }
 
-    private synchronized void notifyDomainObservers() {
-        for (DomainObserver domainObserver : sDomainObservers)
-            domainObserver.onDomainChanged(this);
+    private synchronized void notifyDomainObservers(int dataId) {
+        for (Observer observer : sObservers)
+            observer.onDomainChanged(this, dataId);
     }
 
     public Instance getInstance(Task task, DateTime scheduleDateTime) {
@@ -759,6 +764,21 @@ public class DomainFactory {
         return mCustomTimes.get(customTimeId);
     }
 
+    public ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
+        CustomTime customTime = mCustomTimes.get(customTimeId);
+        Assert.assertTrue(customTime != null);
+
+        HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            HourMinute hourMinute = customTime.getHourMinute(dayOfWeek);
+            Assert.assertTrue(hourMinute != null);
+
+            hourMinutes.put(dayOfWeek, hourMinute);
+        }
+
+        return new ShowCustomTimeLoader.Data(this, customTime.getId(), customTime.getName(), hourMinutes);
+    }
+
     public CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
         for (CustomTime customTime : mCustomTimes.values())
             if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
@@ -791,12 +811,16 @@ public class DomainFactory {
 
         CustomTime customTime = new CustomTime(customTimeRecord);
         mCustomTimes.put(customTime.getId(), customTime);
+
+        save();
     }
 
-    public void updateCustomTime(CustomTime customTime, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
-        Assert.assertTrue(customTime != null);
+    public void updateCustomTime(int dataId, int customTimeId, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
+
+        CustomTime customTime = mCustomTimes.get(customTimeId);
+        Assert.assertTrue(customTime != null);
 
         customTime.setName(name);
 
@@ -807,10 +831,16 @@ public class DomainFactory {
             if (hourMinute.compareTo(customTime.getHourMinute(dayOfWeek)) != 0)
                 customTime.setHourMinute(dayOfWeek, hourMinute);
         }
+
+        save(dataId);
     }
 
     public void setCustomTimeCurrent(CustomTime customTime) {
         Assert.assertTrue(customTime != null);
         customTime.setCurrent();
+    }
+
+    public interface Observer {
+        void onDomainChanged(DomainFactory domainFactory, int dataId);
     }
 }

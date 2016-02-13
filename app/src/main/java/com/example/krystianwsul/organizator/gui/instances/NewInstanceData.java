@@ -2,12 +2,8 @@ package com.example.krystianwsul.organizator.gui.instances;
 
 import android.os.Bundle;
 
-import com.example.krystianwsul.organizator.domainmodel.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.NormalTime;
-import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
@@ -17,20 +13,18 @@ public class NewInstanceData {
     private static final String CUSTOM_TIME_ID_KEY = "customTimeId";
     private static final String HOUR_MINUTE_KEY = "hourMinute";
 
-    public static Bundle getBundle(Instance instance) {
-        Assert.assertTrue(instance != null);
+    public static Bundle getBundle(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
+        Assert.assertTrue(scheduleDate != null);
+        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
 
         Bundle bundle = new Bundle();
-        bundle.putInt(TASK_ID_KEY, instance.getTaskId());
-        bundle.putParcelable(DATE_KEY, instance.getScheduleDate());
+        bundle.putInt(TASK_ID_KEY, taskId);
+        bundle.putParcelable(DATE_KEY, scheduleDate);
 
-        Time time = instance.getScheduleTime();
-        if (time instanceof CustomTime) {
-            bundle.putInt(CUSTOM_TIME_ID_KEY, ((CustomTime) time).getId());
-        } else {
-            Assert.assertTrue(time instanceof NormalTime);
-            bundle.putParcelable(HOUR_MINUTE_KEY, ((NormalTime) time).getHourMinute());
-        }
+        if (scheduleCustomTimeId != null)
+            bundle.putInt(CUSTOM_TIME_ID_KEY, scheduleCustomTimeId);
+        else
+            bundle.putParcelable(HOUR_MINUTE_KEY, scheduleHourMinute);
 
         return bundle;
     }

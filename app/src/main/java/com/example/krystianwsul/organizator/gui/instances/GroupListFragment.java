@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +20,11 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -32,7 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeMap;
 
-public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<DomainFactory> {
+public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private RecyclerView mGroupList;
 
     @Override
@@ -53,22 +56,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(getActivity());
+    public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new GroupListLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
-        mGroupList.setAdapter(new GroupAdapter(domainFactory, getContext()));
+    public void onLoadFinished(Loader<GroupListLoader.Data> loader, GroupListLoader.Data data) {
+        mGroupList.setAdapter(new GroupAdapter(data, getActivity()));
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mGroupList.setAdapter(null);
+    public void onLoaderReset(Loader<GroupListLoader.Data> loader) {
     }
 
     public static class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder> {
-        private final DomainFactory mDomainFactory;
+        private final GroupListLoader.Data mData;
 
         private final Context mContext;
 
@@ -82,26 +84,24 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
         };
 
-        public GroupAdapter(DomainFactory domainFactory, Context context) {
-            Assert.assertTrue(domainFactory != null);
+        public GroupAdapter(GroupListLoader.Data data, Context context) {
+            Assert.assertTrue(data != null);
             Assert.assertTrue(context != null);
 
-            mDomainFactory = domainFactory;
+            mData = data;
             mContext = context;
 
-            ArrayList<Instance> rootInstances = domainFactory.getCurrentInstances();
-
-            ArrayList<Instance> doneInstances = new ArrayList<>();
-            ArrayList<Instance> notDoneInstances = new ArrayList<>();
-            for (Instance instance : rootInstances) {
-                if (instance.getDone() != null)
-                    doneInstances.add(instance);
+            ArrayList<GroupListLoader.InstanceData> doneInstanceDatas = new ArrayList<>();
+            ArrayList<GroupListLoader.InstanceData> notDoneInstanceDatas = new ArrayList<>();
+            for (GroupListLoader.InstanceData instanceData : data.InstanceDatas) {
+                if (instanceData.Done != null)
+                    doneInstanceDatas.add(instanceData);
                 else
-                    notDoneInstances.add(instance);
+                    notDoneInstanceDatas.add(instanceData);
             }
 
-            mDoneGroupContainer.addInstanceRange(doneInstances);
-            mNotDoneGroupContainer.addInstanceRange(notDoneInstances);
+            mDoneGroupContainer.addInstanceDataRange(doneInstanceDatas);
+            mNotDoneGroupContainer.addInstanceRange(notDoneInstanceDatas);
         }
 
         private Group getGroup(int position) {
@@ -145,7 +145,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             groupHolder.mGroupRowDetails.setText(group.getDetailsText());
 
-            if (group.singleInstance() && group.getSingleSinstance().getChildInstances().isEmpty())
+            if (group.singleInstance() && group.getSingleSinstanceData().HasChildren)
                 groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
             else
                 groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
@@ -160,7 +160,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     }
                 });
 
-                groupHolder.mGroupRowCheckBox.setChecked(group.getSingleSinstance().getDone() != null);
+                groupHolder.mGroupRowCheckBox.setChecked(group.getSingleSinstanceData().Done != null);
             } else {
                 groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
             }
@@ -210,9 +210,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 boolean isChecked = checkBox.isChecked();
 
-                mDomainFactory.setInstanceDone(mContext, group.getSingleSinstance(), isChecked);
-
-                mDomainFactory.save();
+                GroupListLoader.InstanceData instanceData = group.getSingleSinstanceData();
+                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mData.DataId, mContext, instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, isChecked);
 
                 TickService.startService(mContext);
 
@@ -222,7 +221,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     int oldPosition = indexOf(group);
 
                     mNotDoneGroupContainer.remove(group);
-                    Group newGroup = mDoneGroupContainer.addInstance(group.getSingleSinstance());
+                    Group newGroup = mDoneGroupContainer.addInstanceData(group.getSingleSinstanceData());
 
                     int newPosition = indexOf(newGroup);
 
@@ -233,7 +232,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     int oldPosition = indexOf(group);
 
                     mDoneGroupContainer.remove(group);
-                    Group newGroup = mNotDoneGroupContainer.addInstance(group.getSingleSinstance());
+                    Group newGroup = mNotDoneGroupContainer.addInstanceData(group.getSingleSinstanceData());
 
                     int newPosition = indexOf(newGroup);
 
@@ -259,8 +258,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(context != null);
 
                 if (group.singleInstance()) {
-                    Instance instance = group.getSingleSinstance();
-                    return ShowInstanceActivity.getIntent(instance, context);
+                    GroupListLoader.InstanceData instanceData = group.getSingleSinstanceData();
+                    return ShowInstanceActivity.getIntent(instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, context);
                 } else {
                     return ShowGroupActivity.getIntent(group, context);
                 }
@@ -270,12 +269,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         private class DoneGroupContainer {
             private final ArrayList<Group> mGroups = new ArrayList<>();
 
-            public Group addInstance(Instance instance) {
-                Assert.assertTrue(instance != null);
-                Assert.assertTrue(instance.getDone() != null);
+            public Group addInstanceData(GroupListLoader.InstanceData instanceData) {
+                Assert.assertTrue(instanceData != null);
+                Assert.assertTrue(instanceData.Done != null);
 
-                Group group = new Group(mDomainFactory, instance.getDone());
-                group.addInstance(instance);
+                Group group = new Group(mData.CustomTimeDatas, instanceData.Done);
+                group.addInstanceData(instanceData);
                 mGroups.add(group);
 
                 Collections.sort(mGroups, sComparator);
@@ -283,14 +282,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 return group;
             }
 
-            public void addInstanceRange(Collection<Instance> instances) {
-                Assert.assertTrue(instances != null);
+            public void addInstanceDataRange(Collection<GroupListLoader.InstanceData> instanceDatas) {
+                Assert.assertTrue(instanceDatas != null);
 
-                for (Instance instance : instances) {
-                    Assert.assertTrue(instance.getDone() != null);
+                for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+                    Assert.assertTrue(instanceData.Done != null);
 
-                    Group group = new Group(mDomainFactory, instance.getDone());
-                    group.addInstance(instance);
+                    Group group = new Group(mData.CustomTimeDatas, instanceData.Done);
+                    group.addInstanceData(instanceData);
                     mGroups.add(group);
                 }
 
@@ -324,37 +323,37 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             private ArrayList<Group> mGroupArray = new ArrayList<>();
             private final TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
 
-            public Group addInstance(Instance instance) {
-                Assert.assertTrue(instance != null);
-                Assert.assertTrue(instance.getDone() == null);
+            public Group addInstanceData(GroupListLoader.InstanceData instanceData) {
+                Assert.assertTrue(instanceData != null);
+                Assert.assertTrue(instanceData.Done == null);
 
-                Group group = addInstanceHelper(instance);
+                Group group = addInstanceHelper(instanceData);
                 makeArray();
 
                 return group;
             }
 
-            public void addInstanceRange(Collection<Instance> instances) {
-                Assert.assertTrue(instances != null);
+            public void addInstanceRange(Collection<GroupListLoader.InstanceData> instanceDatas) {
+                Assert.assertTrue(instanceDatas != null);
 
-                for (Instance instance : instances)
-                    addInstanceHelper(instance);
+                for (GroupListLoader.InstanceData instanceData : instanceDatas)
+                    addInstanceHelper(instanceData);
                 makeArray();
             }
 
-            private Group addInstanceHelper(Instance instance) {
-                Assert.assertTrue(instance != null);
-                Assert.assertTrue(instance.getDone() == null);
+            private Group addInstanceHelper(GroupListLoader.InstanceData instanceData) {
+                Assert.assertTrue(instanceData != null);
+                Assert.assertTrue(instanceData.Done == null);
 
-                TimeStamp timeStamp = instance.getInstanceDateTime().getTimeStamp();
+                TimeStamp timeStamp = instanceData.InstanceTimeStamp;
 
                 if (mGroupTree.containsKey(timeStamp)) {
                     Group group = mGroupTree.get(timeStamp);
-                    group.addInstance(instance);
+                    group.addInstanceData(instanceData);
                     return group;
                 } else {
-                    Group group = new Group(mDomainFactory, timeStamp);
-                    group.addInstance(instance);
+                    Group group = new Group(mData.CustomTimeDatas, timeStamp);
+                    group.addInstanceData(instanceData);
                     mGroupTree.put(timeStamp, group);
                     return group;
                 }
@@ -386,6 +385,84 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 mGroupTree.remove(group.getTimeStamp());
                 mGroupArray.remove(group);
             }
+        }
+    }
+
+    static class Group {
+        private final ArrayList<GroupListLoader.CustomTimeData> mCustomTimeDatas;
+
+        private final TimeStamp mTimeStamp;
+
+        private final ArrayList<GroupListLoader.InstanceData> mInstanceDatas = new ArrayList<>();
+
+        public Group(ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, TimeStamp timeStamp) {
+            Assert.assertTrue(customTimeDatas != null);
+            Assert.assertTrue(timeStamp != null);
+
+            mCustomTimeDatas = customTimeDatas;
+            mTimeStamp = timeStamp;
+        }
+
+        public void addInstanceData(GroupListLoader.InstanceData instanceData) {
+            Assert.assertTrue(instanceData != null);
+            mInstanceDatas.add(instanceData);
+        }
+
+        public String getNameText(Context context) {
+            Assert.assertTrue(!mInstanceDatas.isEmpty());
+            if (singleInstance()) {
+                return getSingleSinstanceData().DisplayText;
+            } else {
+                Date date = mTimeStamp.getDate();
+                HourMinute hourMinute = mTimeStamp.getHourMinute();
+
+                String timeText;
+
+                GroupListLoader.CustomTimeData customTimeData = getCustomTimeData(date.getDayOfWeek(), hourMinute);
+                if (customTimeData != null)
+                    timeText = customTimeData.Name;
+                else
+                    timeText = hourMinute.toString();
+
+                return date.getDisplayText(context) + ", " + timeText;
+            }
+        }
+
+        private GroupListLoader.CustomTimeData getCustomTimeData(DayOfWeek dayOfWeek, HourMinute hourMinute) {
+            Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(hourMinute != null);
+
+            for (GroupListLoader.CustomTimeData customTimeData : mCustomTimeDatas)
+                if (customTimeData.HourMinutes.get(dayOfWeek) == hourMinute)
+                    return customTimeData;
+
+            return null;
+        }
+
+        public String getDetailsText() {
+            Assert.assertTrue(!mInstanceDatas.isEmpty());
+            if (singleInstance()) {
+                return getSingleSinstanceData().Name;
+            } else {
+                ArrayList<String> names = new ArrayList<>();
+                for (GroupListLoader.InstanceData instanceData : mInstanceDatas)
+                    names.add(instanceData.Name);
+                return TextUtils.join(", ", names);
+            }
+        }
+
+        public TimeStamp getTimeStamp() {
+            return mTimeStamp;
+        }
+
+        public boolean singleInstance() {
+            Assert.assertTrue(!mInstanceDatas.isEmpty());
+            return (mInstanceDatas.size() == 1);
+        }
+
+        public GroupListLoader.InstanceData getSingleSinstanceData() {
+            Assert.assertTrue(mInstanceDatas.size() == 1);
+            return mInstanceDatas.get(0);
         }
     }
 }

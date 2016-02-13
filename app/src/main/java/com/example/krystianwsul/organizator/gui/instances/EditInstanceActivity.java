@@ -43,7 +43,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(instance));
+        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
         return intent;
     }
 

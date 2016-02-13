@@ -32,7 +32,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     private static final String TIME_KEY = "time";
 
-    public static Intent getIntent(Group group, Context context) {
+    public static Intent getIntent(GroupListFragment.Group group, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
         intent.putExtra(TIME_KEY, group.getTimeStamp().getLong());
         return intent;

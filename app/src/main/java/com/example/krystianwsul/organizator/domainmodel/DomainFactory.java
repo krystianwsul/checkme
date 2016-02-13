@@ -5,6 +5,7 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
+import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
@@ -312,6 +313,27 @@ public class DomainFactory {
         Assert.assertTrue(instance != null);
 
         instance.setDone(done, context);
+    }
+
+    public TimeStamp setInstanceDone(int dataId, Context context, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, boolean done) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(scheduleDate != null);
+        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        DateTime scheduleDateTime = getDateTime(scheduleDate, scheduleCustomTimeId, scheduleHourMinute);
+        Assert.assertTrue(scheduleDateTime != null);
+
+        Instance instance = getInstance(task, scheduleDateTime);
+        Assert.assertTrue(instance != null);
+
+        setInstanceDone(context, instance, done);
+
+        save(dataId);
+
+        return instance.getDone();
     }
 
     public void setInstancesNotified(ArrayList<Instance> instances) {
@@ -848,7 +870,7 @@ public class DomainFactory {
     }
 
     public CustomTime getCustomTime(DayOfWeek dayOfWeek, HourMinute hourMinute) {
-        for (CustomTime customTime : mCustomTimes.values())
+        for (CustomTime customTime : getCurrentCustomTimes())
             if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
                 return customTime;
         return null;
@@ -922,6 +944,18 @@ public class DomainFactory {
         customTime.setCurrent();
 
         save(dataId);
+    }
+
+    public GroupListLoader.Data getGroupListData(Context context) {
+        ArrayList<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>();
+        for (Instance instance : getCurrentInstances())
+            instanceDatas.add(new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances().isEmpty(), instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), instance.getDisplayText(context), instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
+
+        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
+        for (CustomTime customTime : getCurrentCustomTimes())
+            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
+
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
     }
 
     public interface Observer {

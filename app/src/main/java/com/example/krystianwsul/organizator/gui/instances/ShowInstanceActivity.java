@@ -19,6 +19,8 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
@@ -35,9 +37,12 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     private ImageView mShowInstanceEdit;
 
-    public static Intent getIntent(Instance instance, Context context) {
+    public static Intent getIntent(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, Context context) {
+        Assert.assertTrue(scheduleDate != null);
+        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
+        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
         return intent;
     }
 

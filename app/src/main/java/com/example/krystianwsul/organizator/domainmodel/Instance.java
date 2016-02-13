@@ -338,7 +338,7 @@ public class Instance {
         mInstanceRecord.setNotified(false);
     }
 
-    Integer getScheduleCustomTimeId() {
+    public Integer getScheduleCustomTimeId() {
         Time scheduleTime = getScheduleTime();
         if (scheduleTime instanceof CustomTime)
             return ((CustomTime) scheduleTime).getId();
@@ -346,7 +346,7 @@ public class Instance {
             return null;
     }
 
-    HourMinute getScheduleHourMinute() {
+    public  HourMinute getScheduleHourMinute() {
         Time scheduleTime = getScheduleTime();
         if (scheduleTime instanceof NormalTime)
             return ((NormalTime) scheduleTime).getHourMinute();

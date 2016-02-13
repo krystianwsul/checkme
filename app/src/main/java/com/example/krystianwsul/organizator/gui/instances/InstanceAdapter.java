@@ -203,7 +203,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             Instance instance = getInstance(getAdapterPosition());
             Assert.assertTrue(instance != null);
 
-            mContext.startActivity(ShowInstanceActivity.getIntent(instance, mContext));
+            mContext.startActivity(ShowInstanceActivity.getIntent(instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), mContext));
         }
     }
 }

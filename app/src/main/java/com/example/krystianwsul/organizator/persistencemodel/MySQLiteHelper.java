@@ -4,8 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import junit.framework.Assert;
-
 public class MySQLiteHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "tasks.db";
     public static final int DATABASE_VERSION = 19;
@@ -13,7 +11,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static SQLiteDatabase sSQLiteDatabase;
 
     public synchronized static SQLiteDatabase getDatabase(Context context) {
-        Assert.assertTrue(context != null);
         if (sSQLiteDatabase == null)
             sSQLiteDatabase = new MySQLiteHelper(context.getApplicationContext()).getWritableDatabase();
         return sSQLiteDatabase;

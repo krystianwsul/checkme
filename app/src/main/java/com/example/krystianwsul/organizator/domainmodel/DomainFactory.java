@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
@@ -19,6 +20,7 @@ import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
@@ -155,6 +157,41 @@ public class DomainFactory {
         }
     }
 
+    public EditInstanceLoader.Data getEditInstanceData(int taskId, Date date, int scheduleCustomTimeId) {
+        Assert.assertTrue(date != null);
+
+        CustomTime customTime = mCustomTimes.get(scheduleCustomTimeId);
+        Assert.assertTrue(customTime != null);
+
+        DateTime dateTime = new DateTime(date, customTime);
+
+        return getEditInstanceData(taskId, dateTime);
+    }
+
+    public EditInstanceLoader.Data getEditInstanceData(int taskId, Date date, HourMinute scheduleHourMinute) {
+        Assert.assertTrue(date != null);
+        Assert.assertTrue(scheduleHourMinute != null);
+
+        DateTime dateTime = new DateTime(date, new NormalTime(scheduleHourMinute));
+
+        return getEditInstanceData(taskId, dateTime);
+    }
+
+    private EditInstanceLoader.Data getEditInstanceData(int taskId, DateTime scheduleDateTime) {
+        Assert.assertTrue(scheduleDateTime != null);
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        Instance instance = getInstance(task, scheduleDateTime);
+
+        HashMap<Integer, EditInstanceLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        for (CustomTime customTime : getCurrentCustomTimes())
+            customTimeDatas.put(customTime.getId(), new EditInstanceLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+
+        return new EditInstanceLoader.Data(instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), instance.getInstanceDate(), instance.getInstanceCustomTimeId(), instance.getInstanceHourMinute(), instance.getName(), customTimeDatas);
+    }
+
     private ArrayList<Instance> getRootInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
         Assert.assertTrue(endTimeStamp != null);
         Assert.assertTrue(startTimeStamp == null || startTimeStamp.compareTo(endTimeStamp) < 0);
@@ -232,12 +269,42 @@ public class DomainFactory {
         return mPersistenceManager.createInstanceRecord(task, scheduleDateTime);
     }
 
-    public void setInstanceDateTime(Context context, Instance instance, DateTime dateTime) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(instance != null);
-        Assert.assertTrue(dateTime != null);
+    private DateTime getDateTime(Date date, Integer customTimeId, HourMinute hourMinute) {
+        Assert.assertTrue(date != null);
 
-        instance.setInstanceDateTime(context, dateTime);
+        if (customTimeId != null) {
+            Assert.assertTrue(hourMinute == null);
+
+            CustomTime customTime = mCustomTimes.get(customTimeId);
+            Assert.assertTrue(customTime != null);
+
+            return new DateTime(date, customTime);
+        } else {
+            Assert.assertTrue(hourMinute != null);
+            return new DateTime(date, new NormalTime(hourMinute));
+        }
+    }
+
+    public void setInstanceDateTime(int dataId, Context context, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, Date instanceDate, Integer instanceCustomTimeId, HourMinute instanceHourMinute) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(scheduleDate != null);
+        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+        Assert.assertTrue(instanceDate != null);
+        Assert.assertTrue((instanceCustomTimeId == null) != (instanceHourMinute == null));
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        DateTime scheduleDateTime = getDateTime(scheduleDate, scheduleCustomTimeId, scheduleHourMinute);
+        Assert.assertTrue(scheduleDateTime != null);
+
+        Instance instance = getInstance(task, scheduleDateTime);
+        Assert.assertTrue(instance != null);
+
+        DateTime instanceDateTime = getDateTime(instanceDate, instanceCustomTimeId, instanceHourMinute);
+        instance.setInstanceDateTime(context, instanceDateTime);
+
+        save(dataId);
     }
 
     public void setInstanceDone(Context context, Instance instance, boolean done) {

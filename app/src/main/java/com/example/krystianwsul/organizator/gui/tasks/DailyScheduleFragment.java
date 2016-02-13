@@ -33,6 +33,7 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DailyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
@@ -282,7 +283,10 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             TimePickerView dailyScheduleTime = (TimePickerView) dailyScheduleRow.findViewById(R.id.daily_schedule_time);
             Assert.assertTrue(dailyScheduleTime != null);
 
-            dailyScheduleTime.setDomainFactory(mDomainFactory);
+            HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
+            for (CustomTime customTime : mDomainFactory.getCurrentCustomTimes())
+                customTimeDatas.put(customTime.getId(), new TimePickerView.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            dailyScheduleTime.setCustomTimeDatas(customTimeDatas);
 
             ImageView dailyScheduleImage = (ImageView) dailyScheduleRow.findViewById(R.id.daily_schedule_image);
 
@@ -297,7 +301,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             CustomTime customTime = timeEntry.getCustomTime(mDomainFactory);
             if (customTime != null) {
                 Assert.assertTrue(timeEntry.getHourMinute() == null);
-                timeHolder.mDailyScheduleTime.setCustomTime(customTime);
+                timeHolder.mDailyScheduleTime.setCustomTimeId(customTime.getId());
             } else {
                 Assert.assertTrue(timeEntry.getHourMinute() != null);
                 timeHolder.mDailyScheduleTime.setHourMinute(timeEntry.getHourMinute());
@@ -305,8 +309,8 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
             timeHolder.mDailyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
                 @Override
-                public void onCustomTimeSelected(CustomTime customTime) {
-                    timeEntry.setCustomTime(customTime);
+                public void onCustomTimeSelected(int customTimeId) {
+                    timeEntry.setCustomTime(mDomainFactory.getCustomTime(customTimeId));
                 }
 
                 @Override
@@ -402,13 +406,6 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             Assert.assertTrue(mCustomTimeId != EMPTY_CUSTOM_TIME);
 
             setCustomTime(mCustomTimeId);
-            mShowDelete = showDelete;
-        }
-
-        public TimeEntry(CustomTime customTime, boolean showDelete) {
-            Assert.assertTrue(customTime != null);
-
-            setCustomTime(customTime);
             mShowDelete = showDelete;
         }
 

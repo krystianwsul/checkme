@@ -12,29 +12,28 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.tasks.DatePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TimePickerView;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.Time;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-public class EditInstanceActivity extends AppCompatActivity implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, LoaderManager.LoaderCallbacks<DomainFactory> {
-    private static final String INTENT_KEY = "instanceId";
+import java.util.HashMap;
+
+public class EditInstanceActivity extends AppCompatActivity implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, LoaderManager.LoaderCallbacks<EditInstanceLoader.Data> {
+    private static final String INTENT_KEY = "instanceData";
     private static final String DATE_KEY = "date";
 
     private Date mDate;
-    private Instance mInstance;
+    private EditInstanceLoader.Data mData;
 
     private TextView mEditInstanceDate;
     private TimePickerView mEditInstanceTimePickerView;
@@ -44,7 +43,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
     public static Intent getIntent(Instance instance, Context context) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
+        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(instance));
         return intent;
     }
 
@@ -108,17 +107,36 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
+    public Loader<EditInstanceLoader.Data> onCreateLoader(int id, Bundle args) {
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        mInstance = InstanceData.getInstance(domainFactory, bundle);
-        Assert.assertTrue(mInstance != null);
+
+        int taskId = NewInstanceData.getTaskId(bundle);
+
+        Date date = NewInstanceData.getDate(bundle);
+        Assert.assertTrue(date != null);
+
+        Integer customTimeId = NewInstanceData.getCustomTimeId(bundle);
+        HourMinute hourMinute = NewInstanceData.getHourMinute(bundle);
+
+        if (customTimeId != null) {
+            Assert.assertTrue(hourMinute == null);
+            return new EditInstanceLoader(this, taskId, date, customTimeId);
+        } else {
+            Assert.assertTrue(hourMinute != null);
+            return new EditInstanceLoader(this, taskId, date, hourMinute);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<EditInstanceLoader.Data> loader, final EditInstanceLoader.Data data) {
+        mData = data;
+
+        HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
+        for (EditInstanceLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
+            customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name, customTimeData.HourMinutes));
+        mEditInstanceTimePickerView.setCustomTimeDatas(customTimeDatas);
 
         if (mSavedInstanceState != null) {
             Assert.assertTrue(mSavedInstanceState.containsKey(DATE_KEY));
@@ -126,18 +144,24 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
             mDate = mSavedInstanceState.getParcelable(DATE_KEY);
             Assert.assertTrue(mDate != null);
         } else {
-            mDate = mInstance.getInstanceDate();
+            mDate = mData.InstanceDate;
+
+            if (mData.InstanceCustomTimeId != null) {
+                Assert.assertTrue(mData.InstanceHourMinute == null);
+                mEditInstanceTimePickerView.setCustomTimeId(mData.InstanceCustomTimeId);
+            } else {
+                Assert.assertTrue(mData.InstanceHourMinute != null);
+                mEditInstanceTimePickerView.setHourMinute(mData.InstanceHourMinute);
+            }
         }
 
-        mEditInstanceName.setText(mInstance.getName());
+        mEditInstanceName.setText(mData.Name);
 
         updateDateText();
 
-        mEditInstanceTimePickerView.setDomainFactory(domainFactory);
-        mEditInstanceTimePickerView.setTime(mInstance.getInstanceTime());
         mEditInstanceTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
-            public void onCustomTimeSelected(CustomTime customTime) {
+            public void onCustomTimeSelected(int customTimeId) {
             }
 
             @Override
@@ -157,20 +181,26 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
             public void onClick(View v) {
                 Assert.assertTrue(mDate != null);
                 Assert.assertTrue(mEditInstanceTimePickerView != null);
-                Assert.assertTrue(mInstance != null);
+                Assert.assertTrue(mData != null);
 
-                Time time = mEditInstanceTimePickerView.getTime();
-                Assert.assertTrue(time != null);
+                HourMinute hourMinute = mEditInstanceTimePickerView.getHourMinute();
+                Integer customTimeId = mEditInstanceTimePickerView.getCustomTimeId();
+                Assert.assertTrue((hourMinute == null) != (customTimeId == null));
+                if (hourMinute == null) {
+                    EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(customTimeId);
+                    Assert.assertTrue(customTimeData != null);
 
-                if ((new TimeStamp(mDate, time.getHourMinute(mDate.getDayOfWeek())).compareTo(TimeStamp.getNow()) <= 0)) {
+                    hourMinute = customTimeData.HourMinutes.get(mDate.getDayOfWeek());
+                    Assert.assertTrue(hourMinute != null);
+                }
+
+                if ((new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) <= 0)) {
                     MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
                     messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
                     return;
                 }
 
-                domainFactory.setInstanceDateTime(EditInstanceActivity.this, mInstance, new DateTime(mDate, time));
-
-                domainFactory.save();
+                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, EditInstanceActivity.this, mData.TaskId, mData.ScheduleDate, mData.ScheduleCustomTimeId, mData.ScheduleHourMinute, mDate, mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute());
 
                 TickService.startService(EditInstanceActivity.this);
 
@@ -180,9 +210,6 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mInstance = null;
-        mEditInstanceTimePickerView.setOnTimeSelectedListener(null);
-        mEditInstanceSave.setOnClickListener(null);
+    public void onLoaderReset(Loader<EditInstanceLoader.Data> loader) {
     }
 }

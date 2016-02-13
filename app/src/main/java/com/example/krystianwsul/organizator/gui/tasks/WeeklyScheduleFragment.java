@@ -38,6 +38,7 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class WeeklyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
@@ -287,7 +288,10 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             TimePickerView weeklyScheduleTime = (TimePickerView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_time);
             Assert.assertTrue(weeklyScheduleTime != null);
 
-            weeklyScheduleTime.setDomainFactory(mDomainFactory);
+            HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
+            for (CustomTime customTime : mDomainFactory.getCurrentCustomTimes())
+                customTimeDatas.put(customTime.getId(), new TimePickerView.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            weeklyScheduleTime.setCustomTimeDatas(customTimeDatas);
 
             ImageView weeklyScheduleImage = (ImageView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_image);
 
@@ -323,7 +327,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             CustomTime customTime = dayOfWeekTimeEntry.getCustomTime(mDomainFactory);
             if (customTime != null) {
                 Assert.assertTrue(dayOfWeekTimeEntry.getHourMinute() == null);
-                dayOfWeekTimeHolder.mWeeklyScheduleTime.setCustomTime(customTime);
+                dayOfWeekTimeHolder.mWeeklyScheduleTime.setCustomTimeId(customTime.getId());
             } else {
                 Assert.assertTrue(dayOfWeekTimeEntry.getHourMinute() != null);
                 dayOfWeekTimeHolder.mWeeklyScheduleTime.setHourMinute(dayOfWeekTimeEntry.getHourMinute());
@@ -331,8 +335,10 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
             dayOfWeekTimeHolder.mWeeklyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
                 @Override
-                public void onCustomTimeSelected(CustomTime customTime) {
+                public void onCustomTimeSelected(int customTimeId) {
+                    CustomTime customTime = mDomainFactory.getCustomTime(customTimeId);
                     Assert.assertTrue(customTime != null);
+
                     dayOfWeekTimeEntry.setCustomTime(customTime);
                 }
 
@@ -438,15 +444,6 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         private int mCustomTimeId = EMPTY_CUSTOM_TIME;
         private HourMinute mHourMinute;
         private boolean mShowDelete = false;
-
-        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, CustomTime customTime, boolean showDelete) {
-            Assert.assertTrue(dayOfWeek != null);
-            Assert.assertTrue(customTime != null);
-
-            mDayOfWeek = dayOfWeek;
-            setCustomTime(customTime);
-            mShowDelete = showDelete;
-        }
 
         public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, int customTimeId, boolean showDelete) {
             Assert.assertTrue(dayOfWeek != null);

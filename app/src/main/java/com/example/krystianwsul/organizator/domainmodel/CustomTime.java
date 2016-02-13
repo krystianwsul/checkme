@@ -10,6 +10,8 @@ import com.example.krystianwsul.organizator.utils.time.Time;
 
 import junit.framework.Assert;
 
+import java.util.HashMap;
+
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
 
@@ -50,6 +52,13 @@ public class CustomTime implements Time {
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
         }
+    }
+
+    public HashMap<DayOfWeek, HourMinute> getHourMinutes() {
+        HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
+        for (DayOfWeek dayOfWeek : DayOfWeek.values())
+            hourMinutes.put(dayOfWeek, getHourMinute(dayOfWeek));
+        return hourMinutes;
     }
 
     void setHourMinute(DayOfWeek dayOfWeek, HourMinute hourMinute) {

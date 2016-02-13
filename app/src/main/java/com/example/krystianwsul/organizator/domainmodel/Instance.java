@@ -6,6 +6,7 @@ import android.content.Context;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
@@ -335,5 +336,37 @@ public class Instance {
         notificationManager.cancel(getNotificationId());
         mInstanceRecord.setNotificationShown(false);
         mInstanceRecord.setNotified(false);
+    }
+
+    Integer getScheduleCustomTimeId() {
+        Time scheduleTime = getScheduleTime();
+        if (scheduleTime instanceof CustomTime)
+            return ((CustomTime) scheduleTime).getId();
+        else
+            return null;
+    }
+
+    HourMinute getScheduleHourMinute() {
+        Time scheduleTime = getScheduleTime();
+        if (scheduleTime instanceof NormalTime)
+            return ((NormalTime) scheduleTime).getHourMinute();
+        else
+            return null;
+    }
+
+    Integer getInstanceCustomTimeId() {
+        Time instanceTime = getInstanceTime();
+        if (instanceTime instanceof CustomTime)
+            return ((CustomTime) instanceTime).getId();
+        else
+            return null;
+    }
+
+    HourMinute getInstanceHourMinute() {
+        Time instanceTime = getInstanceTime();
+        if (instanceTime instanceof NormalTime)
+            return ((NormalTime) instanceTime).getHourMinute();
+        else
+            return null;
     }
 }

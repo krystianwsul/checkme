@@ -22,12 +22,14 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
     private static final String YEAR_KEY = "year";
@@ -87,7 +89,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
         mTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
-            public void onCustomTimeSelected(CustomTime customTime) {
+            public void onCustomTimeSelected(int customTimeId) {
             }
 
             @Override
@@ -149,14 +151,34 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
     @Override
     public boolean isValidTime() {
-        return (new TimeStamp(mDate, mTimePickerView.getTime().getHourMinute(mDate.getDayOfWeek())).compareTo(TimeStamp.getNow()) > 0);
+        HourMinute hourMinute = mTimePickerView.getHourMinute();
+        Integer customTimeId = mTimePickerView.getCustomTimeId();
+        Assert.assertTrue((hourMinute == null) != (customTimeId == null));
+
+        if (hourMinute == null)
+            hourMinute = mDomainFactory.getCustomTime(customTimeId).getHourMinute(mDate.getDayOfWeek());
+
+        return (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
     }
 
     @Override
     public void createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        mDomainFactory.createSingleScheduleRootTask(name, new DateTime(mDate, mTimePickerView.getTime()));
+        HourMinute hourMinute = mTimePickerView.getHourMinute();
+        Integer customTimeId = mTimePickerView.getCustomTimeId();
+
+        Time time;
+        if (hourMinute != null) {
+            Assert.assertTrue(customTimeId == null);
+            time = new NormalTime(hourMinute);
+        } else {
+            Assert.assertTrue(customTimeId != null);
+            time = mDomainFactory.getCustomTime(customTimeId);
+            Assert.assertTrue(time != null);
+        }
+
+        mDomainFactory.createSingleScheduleRootTask(name, new DateTime(mDate, time));
 
         mDomainFactory.save();
 
@@ -170,7 +192,20 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         Task rootTask = mDomainFactory.getTask(rootTaskId);
         Assert.assertTrue(rootTask != null);
 
-        mDomainFactory.updateSingleScheduleRootTask(rootTask, name, new DateTime(mDate, mTimePickerView.getTime()));
+        HourMinute hourMinute = mTimePickerView.getHourMinute();
+        Integer customTimeId = mTimePickerView.getCustomTimeId();
+
+        Time time;
+        if (hourMinute != null) {
+            Assert.assertTrue(customTimeId == null);
+            time = new NormalTime(hourMinute);
+        } else {
+            Assert.assertTrue(customTimeId != null);
+            time = mDomainFactory.getCustomTime(customTimeId);
+            Assert.assertTrue(time != null);
+        }
+
+        mDomainFactory.updateSingleScheduleRootTask(rootTask, name, new DateTime(mDate, time));
 
         mDomainFactory.save();
 
@@ -191,7 +226,20 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             joinTasks.add(joinTask);
         }
 
-        mDomainFactory.createSingleScheduleJoinRootTask(name, new DateTime(mDate, mTimePickerView.getTime()), joinTasks);
+        HourMinute hourMinute = mTimePickerView.getHourMinute();
+        Integer customTimeId = mTimePickerView.getCustomTimeId();
+
+        Time time;
+        if (hourMinute != null) {
+            Assert.assertTrue(customTimeId == null);
+            time = new NormalTime(hourMinute);
+        } else {
+            Assert.assertTrue(customTimeId != null);
+            time = mDomainFactory.getCustomTime(customTimeId);
+            Assert.assertTrue(time != null);
+        }
+
+        mDomainFactory.createSingleScheduleJoinRootTask(name, new DateTime(mDate, time), joinTasks);
 
         mDomainFactory.save();
 
@@ -209,7 +257,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Bundle args = getArguments();
 
-        Time time = null;
+        Integer customTimeId = null;
+        HourMinute hourMinute = null;
         if (mSavedInstanceState != null) {
             int year = mSavedInstanceState.getInt(YEAR_KEY, -1);
             int month = mSavedInstanceState.getInt(MONTH_KEY, -1);
@@ -234,17 +283,25 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
             DateTime dateTime = singleSchedule.getDateTime();
             mDate = dateTime.getDate();
-            time = dateTime.getTime();
+            if (dateTime.getTime() instanceof CustomTime)
+                customTimeId = ((CustomTime) dateTime.getTime()).getId();
+            else
+                hourMinute = ((NormalTime) dateTime.getTime()).getHourMinute();
         } else {
             mDate = Date.today();
         }
 
         updateDateText();
 
-        mTimePickerView.setDomainFactory(domainFactory);
+        HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
+        for (CustomTime customTime : mDomainFactory.getCurrentCustomTimes())
+            customTimeDatas.put(customTime.getId(), new TimePickerView.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+        mTimePickerView.setCustomTimeDatas(customTimeDatas);
 
-        if (time != null)
-            mTimePickerView.setTime(time);
+        if (customTimeId != null)
+            mTimePickerView.setCustomTimeId(customTimeId);
+        else if (hourMinute != null)
+            mTimePickerView.setHourMinute(hourMinute);
     }
 
     @Override

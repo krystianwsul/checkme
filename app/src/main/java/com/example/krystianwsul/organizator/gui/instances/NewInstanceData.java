@@ -38,7 +38,7 @@ public class NewInstanceData {
         return taskId;
     }
 
-    public static Date getDate(Bundle bundle) {
+    public static Date getScheduleDate(Bundle bundle) {
         Assert.assertTrue(bundle != null);
 
         Date date = bundle.getParcelable(DATE_KEY);
@@ -47,7 +47,7 @@ public class NewInstanceData {
         return date;
     }
 
-    public static Integer getCustomTimeId(Bundle bundle) {
+    public static Integer getScheduleCustomTimeId(Bundle bundle) {
         Assert.assertTrue(bundle != null);
 
         int customTimeId = bundle.getInt(CUSTOM_TIME_ID_KEY, -1);
@@ -55,7 +55,7 @@ public class NewInstanceData {
         return (customTimeId == -1 ? null : customTimeId);
     }
 
-    public static HourMinute getHourMinute(Bundle bundle) {
+    public static HourMinute getScheduleHourMinute(Bundle bundle) {
         Assert.assertTrue(bundle != null);
         return bundle.getParcelable(HOUR_MINUTE_KEY);
     }

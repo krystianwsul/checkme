@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -25,7 +25,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
+public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data> {
     private RecyclerView mShowGroupList;
     private TimeStamp mTimeStamp;
     private TextView mShowGroupName;
@@ -61,42 +61,34 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(instance != null);
 
-        Time time = getTime(domainFactory, instance.getInstanceDateTime());
-        Assert.assertTrue(time != null);
-        return new DateTime(instance.getScheduleDate(), time).getDisplayText(this);
-    }
-
-    private Time getTime(DomainFactory domainFactory, DateTime dateTime) {
-        Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(dateTime != null);
+        DateTime dateTime = instance.getInstanceDateTime();
 
         DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
         HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
         Time time = domainFactory.getCustomTime(dayOfWeek, hourMinute);
         if (time == null)
             time = new NormalTime(hourMinute);
-        return time;
+        return new DateTime(instance.getInstanceDate(), time).getDisplayText(this);
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
+    public Loader<ShowGroupLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ShowGroupLoader(this, mTimeStamp);
     }
 
     @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
-        ArrayList<Instance> instances = domainFactory.getCurrentInstances(mTimeStamp);
-        Assert.assertTrue(!instances.isEmpty());
-        if (instances.size() == 1)
-            finish();
+    public void onLoadFinished(Loader<ShowGroupLoader.Data> loader, ShowGroupLoader.Data data) {
+        mShowGroupName.setText(data.DisplayText);
 
-        mShowGroupName.setText(getDisplayText(domainFactory, instances.get(0)));
+        ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
+        for (ShowGroupLoader.InstanceData instanceData : data.InstanceDatas)
+            datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, null));
 
-        mShowGroupList.setAdapter(new InstanceAdapter(this, instances, false, domainFactory));
+        mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
+    public void onLoaderReset(Loader<ShowGroupLoader.Data> loader) {
         mShowGroupList.setAdapter(null);
     }
 }

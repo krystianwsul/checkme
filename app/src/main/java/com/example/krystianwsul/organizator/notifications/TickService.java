@@ -129,7 +129,7 @@ public class TickService extends IntentService {
         Intent deleteIntent = GroupNotificationDeleteService.getIntent(this, bundles);
         PendingIntent pendingDeleteIntent = PendingIntent.getService(this, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = ShowNotificationGroupActivity.getNotificationIntent(this, bundles);
+        Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, bundles);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         notify(instances.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent);

@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -26,7 +26,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
+public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data> {
     private static final String INTENT_KEY = "instanceId";
     private static final String SET_NOTIFIED_KEY = "setNotified";
 
@@ -79,47 +79,62 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
+    public Loader<ShowInstanceLoader.Data> onCreateLoader(int id, Bundle args) {
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
-        final Instance instance = InstanceData.getInstance(domainFactory, bundle);
-        Assert.assertTrue(instance != null);
+
+        int taskId = NewInstanceData.getTaskId(bundle);
+
+        Date date = NewInstanceData.getScheduleDate(bundle);
+        Assert.assertTrue(date != null);
+
+        Integer customTimeId = NewInstanceData.getScheduleCustomTimeId(bundle);
+        HourMinute hourMinute = NewInstanceData.getScheduleHourMinute(bundle);
+
+        if (customTimeId != null) {
+            Assert.assertTrue(hourMinute == null);
+            return new ShowInstanceLoader(this, taskId, date, customTimeId);
+        } else {
+            Assert.assertTrue(hourMinute != null);
+            return new ShowInstanceLoader(this, taskId, date, hourMinute);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ShowInstanceLoader.Data> loader, final ShowInstanceLoader.Data data) {
+        Intent intent = getIntent();
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-
-            domainFactory.setInstanceNotifiedNotShown(instance);
-
-            domainFactory.save();
+            DomainFactory.getDomainFactory(this).setInstanceNotifiedNotShown(data.DataId, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute);
         }
 
-        mShowInstanceName.setText(instance.getName());
+        mShowInstanceName.setText(data.Name);
 
-        mCheckBox.setChecked(instance.getDone() != null);
+        mCheckBox.setChecked(data.Done);
 
-        String scheduleText = instance.getDisplayText(this);
+        String scheduleText = data.DisplayText;
         if (TextUtils.isEmpty(scheduleText))
             mShowInstanceDetails.setVisibility(View.GONE);
         else
             mShowInstanceDetails.setText(scheduleText);
 
-        if (!instance.getChildInstances().isEmpty())
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, new ArrayList<>(instance.getChildInstances()), false, domainFactory));
+        if (data.HasChildren) {
+            ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
+            for (ShowInstanceLoader.InstanceData instanceData : data.InstanceDatas)
+                datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, null));
+
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
+        }
 
         mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean isChecked = mCheckBox.isChecked();
 
-                domainFactory.setInstanceDone(ShowInstanceActivity.this, instance, isChecked);
-
-                domainFactory.save();
+                DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, ShowInstanceActivity.this, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute, isChecked);
+                data.Done = isChecked;
 
                 TickService.startService(ShowInstanceActivity.this);
             }
@@ -128,16 +143,13 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         mShowInstanceEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = EditInstanceActivity.getIntent(instance, ShowInstanceActivity.this);
+                Intent intent = EditInstanceActivity.getIntent(ShowInstanceActivity.this, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute);
                 startActivity(intent);
             }
         });
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mCheckBox.setOnClickListener(null);
-        mShowInstanceList.setAdapter(null);
-        mShowInstanceEdit.setOnClickListener(null);
+    public void onLoaderReset(Loader<ShowInstanceLoader.Data> loader) {
     }
 }

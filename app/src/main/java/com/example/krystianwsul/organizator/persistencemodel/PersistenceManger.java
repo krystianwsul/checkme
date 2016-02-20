@@ -25,56 +25,57 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class PersistenceManger {
     private final SQLiteDatabase mSQLiteDatabase;
 
-    private final HashMap<Integer, CustomTimeRecord> mCustomTimeRecords;
+    private final TreeMap<Integer, CustomTimeRecord> mCustomTimeRecords;
 
-    private final HashMap<Integer, TaskRecord> mTaskRecords;
-    private final HashMap<Integer, TaskHierarchyRecord> mTaskHierarchyRecords;
+    private final TreeMap<Integer, TaskRecord> mTaskRecords;
+    private final TreeMap<Integer, TaskHierarchyRecord> mTaskHierarchyRecords;
 
-    private final HashMap<Integer, ScheduleRecord> mScheduleRecords;
-    private final HashMap<Integer, SingleScheduleDateTimeRecord> mSingleScheduleDateTimeRecords;
-    private final HashMap<Integer, DailyScheduleTimeRecord> mDailyScheduleTimeRecords;
-    private final HashMap<Integer, WeeklyScheduleDayOfWeekTimeRecord> mWeeklyScheduleDayOfWeekTimeRecords;
+    private final TreeMap<Integer, ScheduleRecord> mScheduleRecords;
+    private final TreeMap<Integer, SingleScheduleDateTimeRecord> mSingleScheduleDateTimeRecords;
+    private final TreeMap<Integer, DailyScheduleTimeRecord> mDailyScheduleTimeRecords;
+    private final TreeMap<Integer, WeeklyScheduleDayOfWeekTimeRecord> mWeeklyScheduleDayOfWeekTimeRecords;
 
-    private final HashMap<Integer, InstanceRecord> mInstanceRecords;
+    private final TreeMap<Integer, InstanceRecord> mInstanceRecords;
 
     public PersistenceManger(Context context) {
         Assert.assertTrue(context != null);
 
         mSQLiteDatabase = MySQLiteHelper.getDatabase(context);
 
-        mCustomTimeRecords = new HashMap<>();
+        mCustomTimeRecords = new TreeMap<>();
         for (CustomTimeRecord customTimeRecord : CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase))
             mCustomTimeRecords.put(customTimeRecord.getId(), customTimeRecord);
 
-        mTaskRecords = new HashMap<>();
+        mTaskRecords = new TreeMap<>();
         for (TaskRecord taskRecord : TaskRecord.getTaskRecords(mSQLiteDatabase))
             mTaskRecords.put(taskRecord.getId(), taskRecord);
 
-        mTaskHierarchyRecords = new HashMap<>();
+        mTaskHierarchyRecords = new TreeMap<>();
         for (TaskHierarchyRecord taskHierarchyRecord : TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase))
             mTaskHierarchyRecords.put(taskHierarchyRecord.getId(), taskHierarchyRecord);
 
-        mScheduleRecords = new HashMap<>();
+        mScheduleRecords = new TreeMap<>();
         for (ScheduleRecord scheduleRecord : ScheduleRecord.getScheduleRecords(mSQLiteDatabase))
             mScheduleRecords.put(scheduleRecord.getId(), scheduleRecord);
 
-        mSingleScheduleDateTimeRecords = new HashMap<>();
+        mSingleScheduleDateTimeRecords = new TreeMap<>();
         for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : SingleScheduleDateTimeRecord.getSingleScheduleDateTimeRecords(mSQLiteDatabase))
             mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
 
-        mDailyScheduleTimeRecords = new HashMap<>();
+        mDailyScheduleTimeRecords = new TreeMap<>();
         for (DailyScheduleTimeRecord dailyScheduleTimeRecord : DailyScheduleTimeRecord.getDailyScheduleTimeRecords(mSQLiteDatabase))
             mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
 
-        mWeeklyScheduleDayOfWeekTimeRecords = new HashMap<>();
+        mWeeklyScheduleDayOfWeekTimeRecords = new TreeMap<>();
         for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : WeeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleDayOfWeekTimeRecords(mSQLiteDatabase))
             mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
 
-        mInstanceRecords = new HashMap<>();
+        mInstanceRecords = new TreeMap<>();
         for (InstanceRecord instanceRecord : InstanceRecord.getInstanceRecords(mSQLiteDatabase))
             mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
     }
@@ -130,7 +131,7 @@ public class PersistenceManger {
         return mInstanceRecords.values();
     }
 
-    private int getNextId(HashMap<Integer, ?> hashMap) {
+    private int getNextId(TreeMap<Integer, ? extends Record> hashMap) {
         if (hashMap.isEmpty())
             return 1;
         else

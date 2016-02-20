@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizator.gui.instances;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +14,10 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.notifications.TickService;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -25,38 +28,34 @@ import java.util.Comparator;
 public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.InstanceHolder> {
     private final Context mContext;
 
-    private final ArrayList<Instance> mDoneInstances = new ArrayList<>();
-    private final ArrayList<Instance> mNotDoneInstances = new ArrayList<>();
-    private final boolean mShowDetails;
+    private final int mDataId;
 
-    private final DomainFactory mDomainFactory;
+    private final ArrayList<Data> mDoneInstances = new ArrayList<>();
+    private final ArrayList<Data> mNotDoneInstances = new ArrayList<>();
 
-    private final static Comparator<Instance> sComparator = new Comparator<Instance>() {
+    private final static Comparator<Data> sComparator = new Comparator<Data>() {
         @Override
-        public int compare(Instance lhs, Instance rhs) {
-            Assert.assertTrue(lhs.getDone() != null);
-            Assert.assertTrue(rhs.getDone() != null);
+        public int compare(Data lhs, Data rhs) {
+            Assert.assertTrue(lhs.Done != null);
+            Assert.assertTrue(rhs.Done != null);
 
-            return lhs.getDone().compareTo(rhs.getDone());
+            return lhs.Done.compareTo(rhs.Done);
         }
     };
 
-    public InstanceAdapter(Context context, ArrayList<Instance> instances, boolean showDetails, DomainFactory domainFactory) {
+    public InstanceAdapter(Context context, int dataId, ArrayList<Data> datas) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(instances != null);
-        Assert.assertTrue(!instances.isEmpty());
-        Assert.assertTrue(domainFactory != null);
+        Assert.assertTrue(datas != null);
+        Assert.assertTrue(!datas.isEmpty());
 
         mContext = context;
-        mShowDetails = showDetails;
+        mDataId = dataId;
 
-        mDomainFactory = domainFactory;
-
-        for (Instance instance : instances) {
-            if (instance.getDone() != null)
-                mDoneInstances.add(instance);
+        for (Data data : datas) {
+            if (data.Done != null)
+                mDoneInstances.add(data);
             else
-                mNotDoneInstances.add(instance);
+                mNotDoneInstances.add(data);
         }
 
         sort();
@@ -66,7 +65,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         Collections.sort(mDoneInstances, sComparator);
     }
 
-    private Instance getInstance(int position) {
+    private Data getData(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < mDoneInstances.size() + mNotDoneInstances.size());
 
@@ -90,15 +89,15 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
     @Override
     public void onBindViewHolder(final InstanceHolder instanceHolder, int position) {
-        Instance instance = getInstance(position);
+        Data data = getData(position);
 
-        instanceHolder.mInstanceRowName.setText(instance.getName());
-        if (mShowDetails)
-            instanceHolder.mInstanceRowDetails.setText(instance.getDisplayText(mContext));
+        instanceHolder.mInstanceRowName.setText(data.Name);
+        if (!TextUtils.isEmpty(data.DisplayText))
+            instanceHolder.mInstanceRowDetails.setText(data.DisplayText);
         else
             instanceHolder.mInstanceRowDetails.setVisibility(View.GONE);
 
-        if (instance.getChildInstances().isEmpty())
+        if (!data.HasChildren)
             instanceHolder.mInstanceRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
         else
             instanceHolder.mInstanceRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
@@ -110,7 +109,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             }
         });
 
-        instanceHolder.mInstanceRowCheckBox.setChecked(instance.getDone() != null);
+        instanceHolder.mInstanceRowCheckBox.setChecked(data.Done != null);
 
         instanceHolder.mInstanceRow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,14 +124,14 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         return mDoneInstances.size() + mNotDoneInstances.size();
     }
 
-    private int indexOf(Instance instance) {
-        Assert.assertTrue(instance != null);
+    private int indexOf(Data data) {
+        Assert.assertTrue(data != null);
 
-        if (mDoneInstances.contains(instance)) {
-            return mDoneInstances.indexOf(instance);
+        if (mDoneInstances.contains(data)) {
+            return mDoneInstances.indexOf(data);
         } else {
-            Assert.assertTrue(mNotDoneInstances.contains(instance));
-            return mDoneInstances.size() + mNotDoneInstances.indexOf(instance);
+            Assert.assertTrue(mNotDoneInstances.contains(data));
+            return mDoneInstances.size() + mNotDoneInstances.indexOf(data);
         }
     }
 
@@ -162,48 +161,72 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             Assert.assertTrue(checkBox != null);
 
             int position = getAdapterPosition();
-            Instance instance = getInstance(position);
-            Assert.assertTrue(instance != null);
+            Data data = getData(position);
+            Assert.assertTrue(data != null);
 
             boolean isChecked = checkBox.isChecked();
 
-            mDomainFactory.setInstanceDone(mContext, instance, isChecked);
-
-            mDomainFactory.save();
+            DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mContext, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute, isChecked);
 
             TickService.startService(mContext);
 
             if (isChecked) {
-                Assert.assertTrue(mNotDoneInstances.contains(instance));
+                Assert.assertTrue(mNotDoneInstances.contains(data));
 
-                int oldPosition = indexOf(instance);
+                int oldPosition = indexOf(data);
 
-                mNotDoneInstances.remove(instance);
-                mDoneInstances.add(instance);
+                mNotDoneInstances.remove(data);
+                mDoneInstances.add(data);
                 sort();
 
-                int newPosition = indexOf(instance);
+                int newPosition = indexOf(data);
 
                 notifyItemMoved(oldPosition, newPosition);
             } else {
-                Assert.assertTrue(mDoneInstances.contains(instance));
+                Assert.assertTrue(mDoneInstances.contains(data));
 
-                int oldPosition = indexOf(instance);
+                int oldPosition = indexOf(data);
 
-                mDoneInstances.remove(instance);
-                mNotDoneInstances.add(instance);
+                mDoneInstances.remove(data);
+                mNotDoneInstances.add(data);
 
-                int newPosition = indexOf(instance);
+                int newPosition = indexOf(data);
 
                 notifyItemMoved(oldPosition, newPosition);
             }
         }
 
         public void onRowClick() {
-            Instance instance = getInstance(getAdapterPosition());
-            Assert.assertTrue(instance != null);
+            Data data = getData(getAdapterPosition());
+            Assert.assertTrue(data != null);
 
-            mContext.startActivity(ShowInstanceActivity.getIntent(instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), mContext));
+            mContext.startActivity(ShowInstanceActivity.getIntent(data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute, mContext));
+        }
+    }
+
+    public static class Data {
+        public final TimeStamp Done;
+        public final String Name;
+        public final boolean HasChildren;
+        public final int TaskId;
+        public final Date ScheduleDate;
+        public final Integer ScheduleCustomTimeId;
+        public final HourMinute ScheduleHourMinute;
+        public final String DisplayText;
+
+        public Data(TimeStamp done, String name, boolean hasChildren, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, String displayText) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(scheduleDate != null);
+            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+
+            Done = done;
+            Name = name;
+            HasChildren = hasChildren;
+            TaskId = taskId;
+            ScheduleDate = scheduleDate;
+            ScheduleCustomTimeId = scheduleCustomTimeId;
+            ScheduleHourMinute = scheduleHourMinute;
+            DisplayText = displayText;
         }
     }
 }

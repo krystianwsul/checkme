@@ -82,7 +82,7 @@ public class ShowCustomTimeLoader extends AsyncTaskLoader<ShowCustomTimeLoader.D
     private class Observer implements DomainFactory.Observer {
         @Override
         public void onDomainChanged(DomainFactory domainFactory, int dataId) {
-            if (dataId == mData.DataId)
+            if (mData != null && dataId == mData.DataId)
                 return;
 
             onContentChanged();

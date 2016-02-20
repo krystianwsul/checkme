@@ -337,6 +337,6 @@ public class InstanceRecord extends Record {
             return;
 
         long insertId = create(sqLiteDatabase, TABLE_INSTANCES);
-        Assert.assertTrue(insertId == mId);
+        Assert.assertTrue(insertId + " " + mId, insertId == mId);
     }
 }

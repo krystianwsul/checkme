@@ -132,7 +132,7 @@ public class SingleScheduleDateTimeRecord extends Record {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_SCHEDULE_ID, mScheduleId);
         contentValues.put(COLUMN_YEAR, mYear);
-        contentValues.put(COLUMN_MONTH, mMinute);
+        contentValues.put(COLUMN_MONTH, mMonth);
         contentValues.put(COLUMN_DAY, mDay);
         contentValues.put(COLUMN_CUSTOM_TIME_ID, mCustomTimeId);
         contentValues.put(COLUMN_HOUR, mHour);

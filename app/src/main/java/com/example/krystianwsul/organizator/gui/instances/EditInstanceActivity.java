@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.tasks.DatePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
@@ -41,9 +40,9 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
     private TextView mEditInstanceName;
     private Button mEditInstanceSave;
 
-    public static Intent getIntent(Instance instance, Context context) {
+    public static Intent getIntent(Context context, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
+        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
         return intent;
     }
 
@@ -114,11 +113,11 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
         int taskId = NewInstanceData.getTaskId(bundle);
 
-        Date date = NewInstanceData.getDate(bundle);
+        Date date = NewInstanceData.getScheduleDate(bundle);
         Assert.assertTrue(date != null);
 
-        Integer customTimeId = NewInstanceData.getCustomTimeId(bundle);
-        HourMinute hourMinute = NewInstanceData.getHourMinute(bundle);
+        Integer customTimeId = NewInstanceData.getScheduleCustomTimeId(bundle);
+        HourMinute hourMinute = NewInstanceData.getScheduleHourMinute(bundle);
 
         if (customTimeId != null) {
             Assert.assertTrue(hourMinute == null);

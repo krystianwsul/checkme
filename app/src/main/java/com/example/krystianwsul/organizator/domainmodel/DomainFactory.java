@@ -8,6 +8,9 @@ import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
+import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
+import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
+import com.example.krystianwsul.organizator.loaders.ShowNotificationGroupLoader;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
@@ -30,6 +33,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -346,11 +351,42 @@ public class DomainFactory {
         }
     }
 
+    public void setInstanceKeysNotified(int dataId, ArrayList<ShowNotificationGroupLoader.InstanceKey> instanceKeys) {
+        Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(!instanceKeys.isEmpty());
+
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (ShowNotificationGroupLoader.InstanceKey instanceKey : instanceKeys)
+            instances.add(getInstance(instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId, instanceKey.ScheduleHourMinute));
+
+        setInstancesNotified(instances);
+
+        save(dataId);
+    }
+
     public void setInstanceNotifiedNotShown(Instance instance) {
         Assert.assertTrue(instance != null);
 
         instance.setNotified();
         instance.setNotificationShown(false);
+    }
+
+    public void setInstanceNotifiedNotShown(int dataId, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
+        Assert.assertTrue(scheduleDate != null);
+        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        DateTime scheduleDateTime = getDateTime(scheduleDate, scheduleCustomTimeId, scheduleHourMinute);
+        Assert.assertTrue(scheduleDateTime != null);
+
+        Instance instance = getInstance(task, scheduleDateTime);
+        Assert.assertTrue(instance != null);
+
+        setInstanceNotifiedNotShown(instance);
+
+        save(dataId);
     }
 
     public void setInstancesNotShown(ArrayList<Instance> instances) {
@@ -456,9 +492,10 @@ public class DomainFactory {
         Assert.assertTrue(timeStamp != null);
 
         ArrayList<Task> rootTasks = new ArrayList<>();
-        for (Task task : mTasks.values())
+        for (Task task : mTasks.values()) {
             if (task.current(timeStamp) && task.isRootTask(timeStamp))
                 rootTasks.add(task);
+        }
 
         return rootTasks;
     }
@@ -956,6 +993,108 @@ public class DomainFactory {
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
         return new GroupListLoader.Data(instanceDatas, customTimeDatas);
+    }
+
+    public ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(timeStamp != null);
+
+        ArrayList<Instance> instances = getCurrentInstances(timeStamp);
+        Assert.assertTrue(!instances.isEmpty());
+
+        DateTime dateTime = instances.get(0).getInstanceDateTime();
+
+        DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
+        HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
+        Time time = getCustomTime(dayOfWeek, hourMinute);
+        if (time == null)
+            time = new NormalTime(hourMinute);
+
+        String displayText = new DateTime(instances.get(0).getInstanceDate(), time).getDisplayText(context);
+
+        ArrayList<ShowGroupLoader.InstanceData> instanceDatas = new ArrayList<>();
+        for (Instance instance : instances)
+            instanceDatas.add(new ShowGroupLoader.InstanceData(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), null));
+
+        return new ShowGroupLoader.Data(displayText, instanceDatas);
+    }
+
+    private Instance getInstance(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
+        Assert.assertTrue(scheduleDate != null);
+        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        DateTime scheduleDateTime = getDateTime(scheduleDate, scheduleCustomTimeId, scheduleHourMinute);
+        Assert.assertTrue(scheduleDateTime != null);
+
+        Instance instance = getInstance(task, scheduleDateTime);
+        Assert.assertTrue(instance != null);
+
+        return instance;
+    }
+
+    public ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<ShowNotificationGroupLoader.InstanceKey> instanceKeys) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(!instanceKeys.isEmpty());
+
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (ShowNotificationGroupLoader.InstanceKey instanceKey : instanceKeys) {
+            Instance instance = getInstance(instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId, instanceKey.ScheduleHourMinute);
+            Assert.assertTrue(instance != null);
+
+            instances.add(instance);
+        }
+
+        Collections.sort(instances, new Comparator<Instance>() {
+            @Override
+            public int compare(Instance lhs, Instance rhs) {
+                return lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime());
+            }
+        });
+
+        ArrayList<ShowNotificationGroupLoader.InstanceData> instanceDatas = new ArrayList<>();
+        for (Instance instance : instances)
+            instanceDatas.add(new ShowNotificationGroupLoader.InstanceData(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), instance.getDisplayText(context)));
+
+        return new ShowNotificationGroupLoader.Data(instanceDatas);
+    }
+
+    public ShowInstanceLoader.Data getShowInstanceData(Context context, int taskId, Date date, int scheduleCustomTimeId) {
+        Assert.assertTrue(date != null);
+
+        CustomTime customTime = mCustomTimes.get(scheduleCustomTimeId);
+        Assert.assertTrue(customTime != null);
+
+        DateTime dateTime = new DateTime(date, customTime);
+
+        return getShowInstanceData(context, taskId, dateTime);
+    }
+
+    public ShowInstanceLoader.Data getShowInstanceData(Context context, int taskId, Date date, HourMinute scheduleHourMinute) {
+        Assert.assertTrue(date != null);
+        Assert.assertTrue(scheduleHourMinute != null);
+
+        DateTime dateTime = new DateTime(date, new NormalTime(scheduleHourMinute));
+
+        return getShowInstanceData(context, taskId, dateTime);
+    }
+
+    private ShowInstanceLoader.Data getShowInstanceData(Context context, int taskId, DateTime scheduleDateTime) {
+        Assert.assertTrue(scheduleDateTime != null);
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        Instance instance = getInstance(task, scheduleDateTime);
+
+        ArrayList<ShowInstanceLoader.InstanceData> instanceDatas = new ArrayList<>();
+        for (Instance childInstance : instance.getChildInstances())
+            instanceDatas.add(new ShowInstanceLoader.InstanceData(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances().isEmpty(), childInstance.getTaskId(), childInstance.getScheduleDate(), childInstance.getScheduleCustomTimeId(), childInstance.getScheduleHourMinute(), null));
+
+        return new ShowInstanceLoader.Data(instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), instance.getName(), instance.getDisplayText(context), instance.getDone() != null, !instance.getChildInstances().isEmpty(), instanceDatas);
     }
 
     public interface Observer {

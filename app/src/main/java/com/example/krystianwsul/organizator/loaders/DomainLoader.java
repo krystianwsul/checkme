@@ -64,7 +64,7 @@ public class DomainLoader extends AsyncTaskLoader<DomainFactory> {
     private class Observer implements DomainFactory.Observer {
         @Override
         public void onDomainChanged(DomainFactory domainFactory, int dataId) {
-            if (domainFactory != mDomainFactory)
+            if (mDomainFactory == null || domainFactory != mDomainFactory)
                 onContentChanged();
         }
     }

@@ -145,7 +145,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             groupHolder.mGroupRowDetails.setText(group.getDetailsText());
 
-            if (group.singleInstance() && group.getSingleSinstanceData().HasChildren)
+            if (group.singleInstance() && !group.getSingleSinstanceData().HasChildren)
                 groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
             else
                 groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));

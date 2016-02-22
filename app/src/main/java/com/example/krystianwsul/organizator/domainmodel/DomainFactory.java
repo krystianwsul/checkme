@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
@@ -697,11 +698,33 @@ public class DomainFactory {
         createTaskHierarchy(parentTask, childTask, startTimeStamp);
     }
 
+    public void createChildTask(int parentTaskId, String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Task parentTask = mTasks.get(parentTaskId);
+        Assert.assertTrue(parentTask != null);
+
+        createChildTask(parentTask, name, TimeStamp.getNow());
+
+        save();
+    }
+
     public void updateChildTask(Task childTask, String name) {
         Assert.assertTrue(childTask != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         childTask.setName(name);
+    }
+
+    public void updateChildTask(int dataId, int childTaskId, String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Task childTask = mTasks.get(childTaskId);
+        Assert.assertTrue(childTask != null);
+
+        updateChildTask(childTask, name);
+
+        save(dataId);
     }
 
     private void joinTasks(Task rootTask, ArrayList<Task> childTasks, TimeStamp timeStamp) {
@@ -1095,6 +1118,13 @@ public class DomainFactory {
             instanceDatas.add(new ShowInstanceLoader.InstanceData(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances().isEmpty(), childInstance.getTaskId(), childInstance.getScheduleDate(), childInstance.getScheduleCustomTimeId(), childInstance.getScheduleHourMinute(), null));
 
         return new ShowInstanceLoader.Data(instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), instance.getName(), instance.getDisplayText(context), instance.getDone() != null, !instance.getChildInstances().isEmpty(), instanceDatas);
+    }
+
+    public CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {
+        Task childTask = mTasks.get(childTaskId);
+        Assert.assertTrue(childTask != null);
+
+        return new CreateChildTaskLoader.Data(childTask.getName());
     }
 
     public interface Observer {

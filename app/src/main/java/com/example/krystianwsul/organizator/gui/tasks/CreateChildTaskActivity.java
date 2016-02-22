@@ -14,12 +14,11 @@ import android.widget.EditText;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Task;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
+import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 
 import junit.framework.Assert;
 
-public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
+public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
     private static final String PARENT_TASK_ID_KEY = "parentTaskId";
     private static final String CHILD_TASK_ID_KEY = "childTaskId";
 
@@ -27,6 +26,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     private EditText mCreateChildTaskName;
     private Button mCreateChildTaskSave;
+
+    private Integer mParentTaskId = null;
+    private Integer mChildTaskId = null;
 
     public static Intent getCreateIntent(Context context, Task parentTask) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
@@ -50,40 +52,35 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
         mCreateChildTaskSave = (Button) findViewById(R.id.create_child_task_save);
 
-        getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
         Intent intent = getIntent();
-        Task parentTask = null;
-        Task childTask = null;
         if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
-            int parentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
-            Assert.assertTrue(parentTaskId != -1);
+            mParentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
 
-            parentTask = domainFactory.getTask(parentTaskId);
-            Assert.assertTrue(parentTask != null);
+            updateGui(null);
         } else {
             Assert.assertTrue(intent.hasExtra(CHILD_TASK_ID_KEY));
 
-            int childTaskId = intent.getIntExtra(CHILD_TASK_ID_KEY, -1);
-            Assert.assertTrue(childTaskId != -1);
+            mChildTaskId = intent.getIntExtra(CHILD_TASK_ID_KEY, -1);
+            Assert.assertTrue(mChildTaskId != -1);
 
-            childTask = domainFactory.getTask(childTaskId);
-            Assert.assertTrue(childTask != null);
+            getSupportLoaderManager().initLoader(0, null, this);
         }
+    }
 
-        final Task finalParentTask = parentTask;
-        final Task finalChildTask = childTask;
+    @Override
+    public Loader<CreateChildTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new CreateChildTaskLoader(this, mChildTaskId);
+    }
 
-        if (mFirstLoad && finalChildTask != null)
-            mCreateChildTaskName.setText(finalChildTask.getName());
+    @Override
+    public void onLoadFinished(Loader<CreateChildTaskLoader.Data> loader, final CreateChildTaskLoader.Data data) {
+        updateGui(data);
+    }
+
+    private void updateGui(final CreateChildTaskLoader.Data data)
+    {
+        if (mFirstLoad && data != null)
+            mCreateChildTaskName.setText(data.Name);
 
         mCreateChildTaskSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,12 +93,15 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                     return;
                 }
 
-                if (finalParentTask != null)
-                    domainFactory.createChildTask(finalParentTask, name, TimeStamp.getNow());
-                else
-                    domainFactory.updateChildTask(finalChildTask, name);
-
-                domainFactory.save();
+                if (mParentTaskId != null) {
+                    Assert.assertTrue(mChildTaskId == null);
+                    Assert.assertTrue(data == null);
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mParentTaskId, name);
+                } else {
+                    Assert.assertTrue(mChildTaskId != null);
+                    Assert.assertTrue(data != null);
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(data.DataId, mChildTaskId, name);
+                }
 
                 finish();
             }
@@ -109,7 +109,6 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mCreateChildTaskSave.setOnClickListener(null);
+    public void onLoaderReset(Loader<CreateChildTaskLoader.Data> loader) {
     }
 }

@@ -234,11 +234,14 @@ public class TimePickerView extends LinearLayout {
         Assert.assertTrue((hour == -1) == (minute == -1));
         Assert.assertTrue((customTimeId == -1) != (hour == -1));
 
-        if (mCustomTimeDatas != null) {
-            if (customTimeId != -1)
+        if (customTimeId != -1) {
+            mCustomTimeId = customTimeId;
+            if (mCustomTimeDatas != null)
                 setCustomTimeId(customTimeId);
-            else
-                setHourMinute(new HourMinute(hour, minute));
+        } else {
+            mHourMinute = new HourMinute(hour, minute);
+            if (mCustomTimeDatas != null)
+                setHourMinute(mHourMinute);
         }
     }
 

@@ -65,4 +65,14 @@ public class SingleSchedule extends Schedule {
         Assert.assertTrue(mSingleScheduleDateTime != null);
         return mSingleScheduleDateTime.getDateTime();
     }
+
+    public Integer getCustomTimeId() {
+        Assert.assertTrue(mSingleScheduleDateTime != null);
+        return mSingleScheduleDateTime.getCustomTimeId();
+    }
+
+    public HourMinute getHourMinute() {
+        Assert.assertTrue(mSingleScheduleDateTime != null);
+        return mSingleScheduleDateTime.getHourMinute();
+    }
 }

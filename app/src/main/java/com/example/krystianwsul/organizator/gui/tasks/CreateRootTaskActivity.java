@@ -16,22 +16,17 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
-import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Schedule;
-import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
-import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener, LoaderManager.LoaderCallbacks<DomainFactory> {
+public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener, LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
@@ -40,6 +35,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
     private EditText mCreateRootTaskName;
     private Button mCreateRootTaskSave;
     private Bundle mSavedInstanceState;
+
+    private Integer mRootTaskId;
+    private ArrayList<Integer> mTaskIds;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -81,7 +79,22 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         mCreateRootTaskSave = (Button) findViewById(R.id.create_root_task_save);
         mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
 
-        getSupportLoaderManager().initLoader(0, null, this);
+        Intent intent = getIntent();
+        if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
+            Assert.assertTrue(!intent.hasCategory(TASK_IDS_KEY));
+
+            mRootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
+            Assert.assertTrue(mRootTaskId != -1);
+
+            getSupportLoaderManager().initLoader(0, null, this);
+        } else {
+            if (intent.hasExtra(TASK_IDS_KEY)) {
+                mTaskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
+                Assert.assertTrue(mTaskIds != null);
+                Assert.assertTrue(mTaskIds.size() > 1);
+            }
+            updateGui(null);
+        }
     }
 
     @Override
@@ -138,31 +151,16 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
+    public Loader<CreateRootTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new CreateRootTaskLoader(this, mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, final DomainFactory domainFactory) {
-        Task rootTask = null;
-        ArrayList<Integer> taskIds = null;
+    public void onLoadFinished(Loader<CreateRootTaskLoader.Data> loader, final CreateRootTaskLoader.Data data) {
+        updateGui(data);
+    }
 
-        Intent intent = getIntent();
-        if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
-            int rootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
-            Assert.assertTrue(rootTaskId != -1);
-
-            rootTask = domainFactory.getTask(rootTaskId);
-            Assert.assertTrue(rootTask != null);
-        } else if (intent.hasExtra(TASK_IDS_KEY)) {
-            taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
-            Assert.assertTrue(taskIds != null);
-            Assert.assertTrue(taskIds.size() > 1);
-        }
-
-        final Task finalRootTask = rootTask;
-        final ArrayList<Integer> finalTaskIds = taskIds;
-
+    private void updateGui(final CreateRootTaskLoader.Data data) {
         int spinnerPosition = 0;
         int count = 1;
         if (mSavedInstanceState != null) {
@@ -170,20 +168,20 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             Assert.assertTrue(position != -1);
             if (position > 0)
                 count = 2;
-        } else if (rootTask != null) {
-            mCreateRootTaskName.setText(rootTask.getName());
+        } else if (mRootTaskId != null) {
+            Assert.assertTrue(data != null);
+            mCreateRootTaskName.setText(data.Name);
 
-            Schedule schedule = rootTask.getCurrentSchedule(TimeStamp.getNow());
-            Assert.assertTrue(schedule != null);
+            Schedule.ScheduleType scheduleType = data.ScheduleType;
 
             Fragment fragment;
-            if (schedule instanceof SingleSchedule) {
-                fragment = SingleScheduleFragment.newInstance(rootTask);
-            } else if (schedule instanceof DailySchedule) {
-                fragment = DailyScheduleFragment.newInstance(rootTask);
+            if (scheduleType == Schedule.ScheduleType.SINGLE) {
+                fragment = SingleScheduleFragment.newInstance(mRootTaskId);
+            } else if (scheduleType == Schedule.ScheduleType.DAILY) {
+                fragment = DailyScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 1;
-            } else if (schedule instanceof WeeklySchedule) {
-                fragment = WeeklyScheduleFragment.newInstance(rootTask);
+            } else if (scheduleType == Schedule.ScheduleType.WEEKLY) {
+                fragment = WeeklyScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 2;
             } else {
                 throw new IndexOutOfBoundsException("unknown schedule type");
@@ -214,12 +212,13 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                     return;
                 }
 
-                if (finalRootTask != null)
-                    scheduleFragment.updateRootTask(finalRootTask.getId(), name);
-                else if (finalTaskIds != null)
-                    scheduleFragment.createRootJoinTask(name, finalTaskIds);
-                else
+                if (mRootTaskId != null) {
+                    scheduleFragment.updateRootTask(mRootTaskId, name);
+                } else if (mTaskIds != null) {
+                    scheduleFragment.createRootJoinTask(name, mTaskIds);
+                } else {
                     scheduleFragment.createRootTask(name);
+                }
 
                 finish();
             }
@@ -255,9 +254,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mCreateRootTaskSave.setOnClickListener(null);
-        if (!isDestroyed())
-            getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame)).commitAllowingStateLoss();
+    public void onLoaderReset(Loader<CreateRootTaskLoader.Data> loader) {
     }
 }

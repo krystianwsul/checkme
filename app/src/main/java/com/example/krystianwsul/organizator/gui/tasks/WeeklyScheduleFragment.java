@@ -58,15 +58,11 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         return new WeeklyScheduleFragment();
     }
 
-    public static WeeklyScheduleFragment newInstance(Task rootTask) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) != null);
-        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) instanceof WeeklySchedule);
-
+    public static WeeklyScheduleFragment newInstance(int rootTaskId) {
         WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
 
         Bundle args = new Bundle();
-        args.putInt(ROOT_TASK_ID_KEY, rootTask.getId());
+        args.putInt(ROOT_TASK_ID_KEY, rootTaskId);
 
         weeklyScheduleFragment.setArguments(args);
         return weeklyScheduleFragment;

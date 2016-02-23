@@ -50,15 +50,11 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         return new SingleScheduleFragment();
     }
 
-    public static SingleScheduleFragment newInstance(Task rootTask) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) != null);
-        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) instanceof SingleSchedule);
-
+    public static SingleScheduleFragment newInstance(int rootTaskId) {
         SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
 
         Bundle args = new Bundle();
-        args.putInt(ROOT_TASK_ID_KEY, rootTask.getId());
+        args.putInt(ROOT_TASK_ID_KEY, rootTaskId);
 
         singleScheduleFragment.setArguments(args);
         return singleScheduleFragment;

@@ -60,6 +60,10 @@ public abstract class Schedule {
         WEEKLY
     }
 
+    public ScheduleType getType() {
+        return ScheduleType.values()[mScheduleRecord.getType()];
+    }
+
     ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
         Assert.assertTrue(givenEndTimeStamp != null);
 

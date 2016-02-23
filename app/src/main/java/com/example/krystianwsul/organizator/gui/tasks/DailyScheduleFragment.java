@@ -54,15 +54,11 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         return new DailyScheduleFragment();
     }
 
-    public static DailyScheduleFragment newInstance(Task rootTask) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) != null);
-        Assert.assertTrue(rootTask.getCurrentSchedule(TimeStamp.getNow()) instanceof DailySchedule);
-
+    public static DailyScheduleFragment newInstance(int rootTaskId) {
         DailyScheduleFragment dailyScheduleFragment = new DailyScheduleFragment();
 
         Bundle args = new Bundle();
-        args.putInt(ROOT_TASK_ID_KEY, rootTask.getId());
+        args.putInt(ROOT_TASK_ID_KEY, rootTaskId);
 
         dailyScheduleFragment.setArguments(args);
         return dailyScheduleFragment;

@@ -5,6 +5,7 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
+import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
@@ -1125,6 +1126,13 @@ public class DomainFactory {
         Assert.assertTrue(childTask != null);
 
         return new CreateChildTaskLoader.Data(childTask.getName());
+    }
+
+    public CreateRootTaskLoader.Data getCreateRootTaskData(int rootTaskId) {
+        Task rootTask = mTasks.get(rootTaskId);
+        Assert.assertTrue(rootTask != null);
+
+        return new CreateRootTaskLoader.Data(rootTask.getName(), rootTask.getCurrentSchedule(TimeStamp.getNow()).getType());
     }
 
     public interface Observer {

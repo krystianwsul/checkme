@@ -16,8 +16,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
+import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
@@ -166,15 +166,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             Assert.assertTrue(data != null);
             mCreateRootTaskName.setText(data.Name);
 
-            Schedule.ScheduleType scheduleType = data.ScheduleType;
+            ScheduleType scheduleType = data.ScheduleType;
 
             Fragment fragment;
-            if (scheduleType == Schedule.ScheduleType.SINGLE) {
+            if (scheduleType == ScheduleType.SINGLE) {
                 fragment = SingleScheduleFragment.newInstance(mRootTaskId);
-            } else if (scheduleType == Schedule.ScheduleType.DAILY) {
+            } else if (scheduleType == ScheduleType.DAILY) {
                 fragment = DailyScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 1;
-            } else if (scheduleType == Schedule.ScheduleType.WEEKLY) {
+            } else if (scheduleType == ScheduleType.WEEKLY) {
                 fragment = WeeklyScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 2;
             } else {

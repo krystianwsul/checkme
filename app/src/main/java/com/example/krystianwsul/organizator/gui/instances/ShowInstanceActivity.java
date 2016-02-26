@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
@@ -46,9 +45,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         return intent;
     }
 
-    public static Intent getNotificationIntent(Instance instance, Context context) {
+    public static Intent getNotificationIntent(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, Context context) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, InstanceData.getBundle(instance));
+        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
         intent.putExtra(SET_NOTIFIED_KEY, true);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;

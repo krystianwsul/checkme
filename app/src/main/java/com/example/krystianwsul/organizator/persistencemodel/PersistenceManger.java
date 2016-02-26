@@ -7,10 +7,10 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
-import com.example.krystianwsul.organizator.domainmodel.Schedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
 import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.domainmodel.WeeklySchedule;
+import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
@@ -191,7 +191,7 @@ public class PersistenceManger {
         return taskHierarchyRecord;
     }
 
-    public ScheduleRecord createScheduleRecord(Task rootTask, Schedule.ScheduleType scheduleType, TimeStamp startTimeStamp) {
+    public ScheduleRecord createScheduleRecord(Task rootTask, ScheduleType scheduleType, TimeStamp startTimeStamp) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(scheduleType != null);
         Assert.assertTrue(startTimeStamp != null);

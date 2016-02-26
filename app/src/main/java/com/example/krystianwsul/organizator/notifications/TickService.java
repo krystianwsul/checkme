@@ -109,7 +109,7 @@ public class TickService extends IntentService {
         Intent deleteIntent = InstanceNotificationDeleteService.getIntent(this, instance);
         PendingIntent pendingDeleteIntent = PendingIntent.getService(this, instance.getNotificationId(), deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = ShowInstanceActivity.getNotificationIntent(instance, this);
+        Intent contentIntent = ShowInstanceActivity.getNotificationIntent(instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), this);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, instance.getNotificationId(), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         notify(instance.getName(), instance.getDisplayText(this), instance.getNotificationId(), pendingDeleteIntent, pendingContentIntent);

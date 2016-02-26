@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizator.domainmodel;
 import android.content.Context;
 
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
+import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
@@ -52,12 +53,6 @@ public abstract class Schedule {
         TimeStamp endTimeStamp = getEndTimeStamp();
 
         return (startTimeStamp.compareTo(timeStamp) <= 0 && (endTimeStamp == null || endTimeStamp.compareTo(timeStamp) > 0));
-    }
-
-    public enum ScheduleType {
-        SINGLE,
-        DAILY,
-        WEEKLY
     }
 
     public ScheduleType getType() {

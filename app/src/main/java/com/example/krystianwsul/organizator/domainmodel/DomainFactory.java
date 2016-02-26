@@ -27,6 +27,7 @@ import com.example.krystianwsul.organizator.persistencemodel.SingleScheduleDateT
 import com.example.krystianwsul.organizator.persistencemodel.TaskHierarchyRecord;
 import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
 import com.example.krystianwsul.organizator.persistencemodel.WeeklyScheduleDayOfWeekTimeRecord;
+import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
@@ -429,9 +430,9 @@ public class DomainFactory {
 
         for (ScheduleRecord scheduleRecord : scheduleRecords) {
             Assert.assertTrue(scheduleRecord.getType() >= 0);
-            Assert.assertTrue(scheduleRecord.getType() < Schedule.ScheduleType.values().length);
+            Assert.assertTrue(scheduleRecord.getType() < ScheduleType.values().length);
 
-            Schedule.ScheduleType scheduleType = Schedule.ScheduleType.values()[scheduleRecord.getType()];
+            ScheduleType scheduleType = ScheduleType.values()[scheduleRecord.getType()];
 
             switch (scheduleType) {
                 case SINGLE:
@@ -879,7 +880,7 @@ public class DomainFactory {
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(new DateTime(date, time).getTimeStamp().compareTo(startTimeStamp) >= 0);
 
-        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, Schedule.ScheduleType.SINGLE, startTimeStamp);
+        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startTimeStamp);
         Assert.assertTrue(scheduleRecord != null);
 
         SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
@@ -899,7 +900,7 @@ public class DomainFactory {
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(rootTask.current(startTimeStamp));
 
-        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, Schedule.ScheduleType.DAILY, startTimeStamp);
+        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.DAILY, startTimeStamp);
         Assert.assertTrue(scheduleRecord != null);
 
         DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
@@ -923,7 +924,7 @@ public class DomainFactory {
         Assert.assertTrue(startTimeStamp != null);
         Assert.assertTrue(rootTask.current(startTimeStamp));
 
-        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, Schedule.ScheduleType.WEEKLY, startTimeStamp);
+        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.WEEKLY, startTimeStamp);
         Assert.assertTrue(scheduleRecord != null);
 
         WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);

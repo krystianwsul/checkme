@@ -5,7 +5,6 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Schedule;
 
 import junit.framework.Assert;
 
@@ -88,9 +87,9 @@ public class CreateRootTaskLoader extends AsyncTaskLoader<CreateRootTaskLoader.D
 
     public static class Data extends LoaderData {
         public final String Name;
-        public final Schedule.ScheduleType ScheduleType;
+        public final com.example.krystianwsul.organizator.utils.ScheduleType ScheduleType;
 
-        public Data(String name, Schedule.ScheduleType scheduleType) {
+        public Data(String name, com.example.krystianwsul.organizator.utils.ScheduleType scheduleType) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;

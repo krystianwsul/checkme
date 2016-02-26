@@ -11,14 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
-import com.example.krystianwsul.organizator.utils.time.DateTime;
-import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.NormalTime;
-import com.example.krystianwsul.organizator.utils.time.Time;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -55,20 +48,6 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         mShowGroupList.setLayoutManager(new LinearLayoutManager(this));
 
         getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    private String getDisplayText(DomainFactory domainFactory, Instance instance) {
-        Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(instance != null);
-
-        DateTime dateTime = instance.getInstanceDateTime();
-
-        DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
-        HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
-        Time time = domainFactory.getCustomTime(dayOfWeek, hourMinute);
-        if (time == null)
-            time = new NormalTime(hourMinute);
-        return new DateTime(instance.getInstanceDate(), time).getDisplayText(this);
     }
 
     @Override

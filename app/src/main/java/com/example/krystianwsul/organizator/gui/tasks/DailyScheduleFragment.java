@@ -76,12 +76,13 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        mSavedInstanceState = savedInstanceState;
+
         View view = getView();
         Assert.assertTrue(view != null);
+
         mDailyScheduleTimes = (RecyclerView) view.findViewById(R.id.daily_schedule_times);
         mDailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        mSavedInstanceState = savedInstanceState;
 
         Bundle args = getArguments();
         if (args != null)
@@ -103,6 +104,48 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         });
 
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<DailyScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new DailyScheduleLoader(getActivity(), mRootTaskId);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DailyScheduleLoader.Data> loader, DailyScheduleLoader.Data data) {
+        mData = data;
+
+        Bundle args = getArguments();
+        if (mSavedInstanceState != null) {
+            List<TimeEntry> timeEntries = mSavedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
+            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
+
+            mHourMinutePickerPosition = mSavedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
+            Assert.assertTrue(mHourMinutePickerPosition != -2);
+        } else if (args != null) {
+            Assert.assertTrue(mData.ScheduleDatas != null);
+            Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
+
+            ArrayList<TimeEntry> timeEntries = new ArrayList<>();
+            boolean showDelete = (mData.ScheduleDatas.size() > 1);
+            for (DailyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas) {
+                if (scheduleData.CustomTimeId != null)
+                    timeEntries.add(new TimeEntry(scheduleData.CustomTimeId, showDelete));
+                else
+                    timeEntries.add(new TimeEntry(scheduleData.HourMinute, showDelete));
+            }
+            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
+
+            mHourMinutePickerPosition = -1;
+        } else {
+            mTimeEntryAdapter = new TimeEntryAdapter(getContext());
+            mHourMinutePickerPosition = -1;
+        }
+        mDailyScheduleTimes.setAdapter(mTimeEntryAdapter);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DailyScheduleLoader.Data> loader) {
     }
 
     public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
@@ -185,48 +228,6 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         DomainFactory.getDomainFactory(getActivity()).createDailyScheduleJoinRootTask(mData.DataId, name, timePairs, joinTaskIds);
 
         TickService.startService(getActivity());
-    }
-
-    @Override
-    public Loader<DailyScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new DailyScheduleLoader(getActivity(), mRootTaskId);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<DailyScheduleLoader.Data> loader, DailyScheduleLoader.Data data) {
-        mData = data;
-
-        Bundle args = getArguments();
-        if (mSavedInstanceState != null) {
-            List<TimeEntry> timeEntries = mSavedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
-            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
-
-            mHourMinutePickerPosition = mSavedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
-            Assert.assertTrue(mHourMinutePickerPosition != -2);
-        } else if (args != null) {
-            Assert.assertTrue(mData.ScheduleDatas != null);
-            Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
-
-            ArrayList<TimeEntry> timeEntries = new ArrayList<>();
-            boolean showDelete = (mData.ScheduleDatas.size() > 1);
-            for (DailyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas) {
-                if (scheduleData.CustomTimeId != null)
-                    timeEntries.add(new TimeEntry(scheduleData.CustomTimeId, showDelete));
-                else
-                    timeEntries.add(new TimeEntry(scheduleData.HourMinute, showDelete));
-            }
-            mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
-
-            mHourMinutePickerPosition = -1;
-        } else {
-            mTimeEntryAdapter = new TimeEntryAdapter(getContext());
-            mHourMinutePickerPosition = -1;
-        }
-        mDailyScheduleTimes.setAdapter(mTimeEntryAdapter);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<DailyScheduleLoader.Data> loader) {
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {

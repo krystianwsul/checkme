@@ -164,6 +164,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
+        Assert.assertTrue(mRootTaskId == null);
+
         HourMinute hourMinute = mTimePickerView.getHourMinute();
         Integer customTimeId = mTimePickerView.getCustomTimeId();
         Assert.assertTrue((hourMinute == null) != (customTimeId == null));
@@ -176,6 +178,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     @Override
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Assert.assertTrue(mRootTaskId != null);
 
         HourMinute hourMinute = mTimePickerView.getHourMinute();
         Integer customTimeId = mTimePickerView.getCustomTimeId();
@@ -191,6 +195,8 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
+
+        Assert.assertTrue(mRootTaskId == null);
 
         HourMinute hourMinute = mTimePickerView.getHourMinute();
         Integer customTimeId = mTimePickerView.getCustomTimeId();
@@ -224,12 +230,12 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
             mDate = new Date(year, month, day);
         } else if (args != null) {
-            Assert.assertTrue(mData.TaskData != null);
+            Assert.assertTrue(mData.ScheduleData != null);
 
-            mDate = mData.TaskData.Date;
+            mDate = mData.ScheduleData.Date;
 
-            customTimeId = mData.TaskData.CustomTimeId;
-            hourMinute = mData.TaskData.HourMinute;
+            customTimeId = mData.ScheduleData.CustomTimeId;
+            hourMinute = mData.ScheduleData.HourMinute;
             Assert.assertTrue((customTimeId == null) != (hourMinute == null));
         } else {
             mDate = Date.today();

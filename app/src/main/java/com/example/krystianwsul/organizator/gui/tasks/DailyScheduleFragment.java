@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -19,16 +20,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.CustomTime;
-import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Task;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.NormalTime;
-import com.example.krystianwsul.organizator.utils.time.Time;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -36,12 +31,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DailyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DomainFactory> {
+public class DailyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DailyScheduleLoader.Data> {
     private static final String TIME_ENTRY_KEY = "timeEntries";
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
-
-    private DomainFactory mDomainFactory;
 
     private int mHourMinutePickerPosition = -1;
 
@@ -49,6 +42,9 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     private RecyclerView mDailyScheduleTimes;
 
     private Bundle mSavedInstanceState;
+
+    private Integer mRootTaskId;
+    private DailyScheduleLoader.Data mData;
 
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
@@ -86,6 +82,14 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         mDailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mSavedInstanceState = savedInstanceState;
+
+        Bundle args = getArguments();
+        if (args != null)
+        {
+            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
+            mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+            Assert.assertTrue(mRootTaskId != -1);
+        }
 
         FloatingActionButton dailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
         Assert.assertTrue(dailyScheduleFab != null);
@@ -127,28 +131,28 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         return true;
     }
 
-    private ArrayList<Time> getTimes() {
+    private ArrayList<Pair<Integer, HourMinute>> getTimePairs() {
         Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
 
-        ArrayList<Time> times = new ArrayList<>();
+        ArrayList<Pair<Integer, HourMinute>> timePairs = new ArrayList<>();
 
         for (TimeEntry timeEntry : mTimeEntryAdapter.getTimeEntries())
-            times.add(timeEntry.getTime(mDomainFactory));
-        Assert.assertTrue(!times.isEmpty());
+            timePairs.add(new Pair<>(timeEntry.getCustomTimeId(), timeEntry.getHourMinute()));
+        Assert.assertTrue(!timePairs.isEmpty());
 
-        return times;
+        return timePairs;
     }
 
     @Override
     public void createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        ArrayList<Time> times = getTimes();
-        Assert.assertTrue(!times.isEmpty());
+        Assert.assertTrue(mRootTaskId == null);
 
-        mDomainFactory.createDailyScheduleRootTask(name, times);
+        ArrayList<Pair<Integer, HourMinute>> timePairs = getTimePairs();
+        Assert.assertTrue(!timePairs.isEmpty());
 
-        mDomainFactory.save();
+        DomainFactory.getDomainFactory(getActivity()).createDailyScheduleRootTask(mData.DataId, name, timePairs);
 
         TickService.startService(getActivity());
     }
@@ -157,15 +161,12 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Task rootTask = mDomainFactory.getTask(rootTaskId);
-        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(mRootTaskId != null);
 
-        ArrayList<Time> times = getTimes();
-        Assert.assertTrue(!times.isEmpty());
+        ArrayList<Pair<Integer, HourMinute>> timePairs = getTimePairs();
+        Assert.assertTrue(!timePairs.isEmpty());
 
-        mDomainFactory.updateDailyScheduleRootTask(rootTask, name, times);
-
-        mDomainFactory.save();
+        DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleRootTask(mData.DataId, mRootTaskId, name, timePairs);
 
         TickService.startService(getActivity());
     }
@@ -176,35 +177,26 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
-        ArrayList<Time> times = getTimes();
-        Assert.assertTrue(!times.isEmpty());
+        Assert.assertTrue(mRootTaskId == null);
 
-        ArrayList<Task> joinTasks = new ArrayList<>();
-        for (Integer joinTaskId : joinTaskIds) {
-            Task joinTask = mDomainFactory.getTask(joinTaskId);
-            Assert.assertTrue(joinTask != null);
+        ArrayList<Pair<Integer, HourMinute>> timePairs = getTimePairs();
+        Assert.assertTrue(!timePairs.isEmpty());
 
-            joinTasks.add(joinTask);
-        }
-
-        mDomainFactory.createDailyScheduleJoinRootTask(name, times, joinTasks);
-
-        mDomainFactory.save();
+        DomainFactory.getDomainFactory(getActivity()).createDailyScheduleJoinRootTask(mData.DataId, name, timePairs, joinTaskIds);
 
         TickService.startService(getActivity());
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(getActivity());
+    public Loader<DailyScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new DailyScheduleLoader(getActivity(), mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
-        mDomainFactory = domainFactory;
+    public void onLoadFinished(Loader<DailyScheduleLoader.Data> loader, DailyScheduleLoader.Data data) {
+        mData = data;
 
         Bundle args = getArguments();
-
         if (mSavedInstanceState != null) {
             List<TimeEntry> timeEntries = mSavedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
@@ -212,21 +204,17 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             mHourMinutePickerPosition = mSavedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
         } else if (args != null) {
-            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
-            int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
-            Assert.assertTrue(rootTaskId != -1);
-
-            Task rootTask = domainFactory.getTask(rootTaskId);
-            Assert.assertTrue(rootTask != null);
-
-            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
-            Assert.assertTrue(dailySchedule != null);
-            Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
+            Assert.assertTrue(mData.ScheduleDatas != null);
+            Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
 
             ArrayList<TimeEntry> timeEntries = new ArrayList<>();
-            boolean showDelete = (dailySchedule.getTimes().size() > 1);
-            for (Time time : dailySchedule.getTimes())
-                timeEntries.add(new TimeEntry(time, showDelete));
+            boolean showDelete = (mData.ScheduleDatas.size() > 1);
+            for (DailyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas) {
+                if (scheduleData.CustomTimeId != null)
+                    timeEntries.add(new TimeEntry(scheduleData.CustomTimeId, showDelete));
+                else
+                    timeEntries.add(new TimeEntry(scheduleData.HourMinute, showDelete));
+            }
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
 
             mHourMinutePickerPosition = -1;
@@ -238,10 +226,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mDomainFactory = null;
-        mTimeEntryAdapter = null;
-        mDailyScheduleTimes.setAdapter(null);
+    public void onLoaderReset(Loader<DailyScheduleLoader.Data> loader) {
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {
@@ -280,8 +265,8 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             Assert.assertTrue(dailyScheduleTime != null);
 
             HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
-            for (CustomTime customTime : mDomainFactory.getCurrentCustomTimes())
-                customTimeDatas.put(customTime.getId(), new TimePickerView.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            for (DailyScheduleLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
+                customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name, customTimeData.HourMinutes));
             dailyScheduleTime.setCustomTimeDatas(customTimeDatas);
 
             ImageView dailyScheduleImage = (ImageView) dailyScheduleRow.findViewById(R.id.daily_schedule_image);
@@ -294,10 +279,9 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             final TimeEntry timeEntry = mTimeEntries.get(position);
             Assert.assertTrue(timeEntry != null);
 
-            CustomTime customTime = timeEntry.getCustomTime(mDomainFactory);
-            if (customTime != null) {
+            if (timeEntry.getCustomTimeId() != null) {
                 Assert.assertTrue(timeEntry.getHourMinute() == null);
-                timeHolder.mDailyScheduleTime.setCustomTimeId(customTime.getId());
+                timeHolder.mDailyScheduleTime.setCustomTimeId(timeEntry.getCustomTimeId());
             } else {
                 Assert.assertTrue(timeEntry.getHourMinute() != null);
                 timeHolder.mDailyScheduleTime.setHourMinute(timeEntry.getHourMinute());
@@ -306,7 +290,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             timeHolder.mDailyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
                 @Override
                 public void onCustomTimeSelected(int customTimeId) {
-                    timeEntry.setCustomTime(mDomainFactory.getCustomTime(customTimeId));
+                    timeEntry.setCustomTimeId(customTimeId);
                 }
 
                 @Override
@@ -392,16 +376,12 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     }
 
     public static class TimeEntry implements Parcelable {
-        private int EMPTY_CUSTOM_TIME = -1;
-
-        private int mCustomTimeId = EMPTY_CUSTOM_TIME;
+        private Integer mCustomTimeId;
         private HourMinute mHourMinute;
         private boolean mShowDelete;
 
-        public TimeEntry(int mCustomTimeId, boolean showDelete) {
-            Assert.assertTrue(mCustomTimeId != EMPTY_CUSTOM_TIME);
-
-            setCustomTime(mCustomTimeId);
+        public TimeEntry(int customTimeId, boolean showDelete) {
+            setCustomTimeId(customTimeId);
             mShowDelete = showDelete;
         }
 
@@ -412,43 +392,16 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             mShowDelete = showDelete;
         }
 
-        public TimeEntry(Time time, boolean showDelete) {
-            Assert.assertTrue(time != null);
-
-            if (time instanceof CustomTime) {
-                setCustomTime((CustomTime) time);
-            } else {
-                Assert.assertTrue(time instanceof NormalTime);
-                setHourMinute(((NormalTime) time).getHourMinute());
-            }
-
-            mShowDelete = showDelete;
-        }
-
-        public CustomTime getCustomTime(DomainFactory domainFactory) {
-            Assert.assertTrue(domainFactory != null);
-
-            if (mCustomTimeId == EMPTY_CUSTOM_TIME)
-                return null;
-            else
-                return domainFactory.getCustomTime(mCustomTimeId);
+        public Integer getCustomTimeId() {
+            return mCustomTimeId;
         }
 
         public HourMinute getHourMinute() {
             return mHourMinute;
         }
 
-        public void setCustomTime(int customTimeId) {
-            Assert.assertTrue(customTimeId != EMPTY_CUSTOM_TIME);
-
+        public void setCustomTimeId(int customTimeId) {
             mCustomTimeId = customTimeId;
-            mHourMinute = null;
-        }
-
-        public void setCustomTime(CustomTime customTime) {
-            Assert.assertTrue(customTime != null);
-
-            mCustomTimeId = customTime.getId();
             mHourMinute = null;
         }
 
@@ -456,23 +409,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             Assert.assertTrue(hourMinute != null);
 
             mHourMinute = hourMinute;
-            mCustomTimeId = EMPTY_CUSTOM_TIME;
-        }
-
-        public Time getTime(DomainFactory domainFactory) {
-            Assert.assertTrue(domainFactory != null);
-
-            if (mCustomTimeId != EMPTY_CUSTOM_TIME) {
-                Assert.assertTrue(mHourMinute == null);
-
-                CustomTime customTime = domainFactory.getCustomTime(mCustomTimeId);
-                Assert.assertTrue(customTime != null);
-
-                return customTime;
-            } else {
-                Assert.assertTrue(mHourMinute != null);
-                return new NormalTime(mHourMinute);
-            }
+            mCustomTimeId = null;
         }
 
         @Override
@@ -482,9 +419,12 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
-            Assert.assertTrue((mCustomTimeId == EMPTY_CUSTOM_TIME) != (mHourMinute == null));
+            Assert.assertTrue((mCustomTimeId == null) != (mHourMinute == null));
 
-            out.writeInt(mCustomTimeId);
+            if (mCustomTimeId != null)
+                out.writeInt(mCustomTimeId);
+            else
+                out.writeInt(-1);
 
             if (mHourMinute != null) {
                 out.writeInt(mHourMinute.getHour());

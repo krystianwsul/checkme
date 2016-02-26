@@ -5,22 +5,22 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class SingleScheduleLoader extends AsyncTaskLoader<SingleScheduleLoader.Data> {
+public class DailyScheduleLoader extends AsyncTaskLoader<DailyScheduleLoader.Data> {
     private Data mData;
 
     private Observer mObserver;
 
     private final Integer mRootTaskId; // possibly null
 
-    public SingleScheduleLoader(Context context, Integer rootTaskId) {
+    public DailyScheduleLoader(Context context, Integer rootTaskId) {
         super(context);
 
         mRootTaskId = rootTaskId;
@@ -31,7 +31,7 @@ public class SingleScheduleLoader extends AsyncTaskLoader<SingleScheduleLoader.D
         DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
         Assert.assertTrue(domainFactory != null);
 
-        Data data = domainFactory.getSingleScheduleData(mRootTaskId);
+        Data data = domainFactory.getDailyScheduleData(mRootTaskId);
         Assert.assertTrue(data != null);
 
         return data;
@@ -91,27 +91,24 @@ public class SingleScheduleLoader extends AsyncTaskLoader<SingleScheduleLoader.D
     }
 
     public static class Data extends LoaderData {
-        public final ScheduleData ScheduleData;
+        public final ArrayList<ScheduleData> ScheduleDatas;
         public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(ScheduleData scheduleData, HashMap<Integer, CustomTimeData> customTimeDatas) {
+        public Data(ArrayList<ScheduleData> scheduleDatas, HashMap<Integer, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(customTimeDatas != null);
 
-            ScheduleData = scheduleData;
+            ScheduleDatas = scheduleDatas;
             CustomTimeDatas = customTimeDatas;
         }
     }
 
     public static class ScheduleData {
-        public final Date Date;
         public final Integer CustomTimeId;
         public final HourMinute HourMinute;
 
-        public ScheduleData(Date date, Integer customTimeId, HourMinute hourMinute) {
-            Assert.assertTrue(date != null);
+        public ScheduleData(Integer customTimeId, HourMinute hourMinute) {
             Assert.assertTrue((customTimeId == null) != (hourMinute == null));
 
-            Date = date;
             CustomTimeId = customTimeId;
             HourMinute = hourMinute;
         }

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
+import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
@@ -555,20 +556,46 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createDailyScheduleRootTask(String name, ArrayList<Time> times) {
+    private ArrayList<Time> pairsToTimes(ArrayList<Pair<Integer, HourMinute>> timePairs) {
+        Assert.assertTrue(timePairs != null);
+        Assert.assertTrue(!timePairs.isEmpty());
+
+        ArrayList<Time> times = new ArrayList<>();
+        for (Pair<Integer, HourMinute> pair : timePairs) {
+            if (pair.first != null) {
+                Assert.assertTrue(pair.second == null);
+
+                CustomTime customTime = mCustomTimes.get(pair.first);
+                Assert.assertTrue(customTime != null);
+
+                times.add(customTime);
+            } else {
+                Assert.assertTrue(pair.second != null);
+                times.add(new NormalTime(pair.second));
+            }
+        }
+
+        return times;
+    }
+
+    public void createDailyScheduleRootTask(int dataId, String name, ArrayList<Pair<Integer, HourMinute>> timePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(times != null);
-        Assert.assertTrue(!times.isEmpty());
+        Assert.assertTrue(timePairs != null);
+        Assert.assertTrue(!timePairs.isEmpty());
 
         TimeStamp timeStamp = TimeStamp.getNow();
 
         Task rootTask = createRootTask(name, timeStamp);
         Assert.assertTrue(rootTask != null);
 
+        ArrayList<Time> times = pairsToTimes(timePairs);
+
         Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
         Assert.assertTrue(schedule != null);
 
         rootTask.addSchedule(schedule);
+
+        save(dataId);
     }
 
     public void createWeeklyScheduleRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
@@ -610,11 +637,13 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void updateDailyScheduleRootTask(Task rootTask, String name, ArrayList<Time> times) {
-        Assert.assertTrue(rootTask != null);
+    public void updateDailyScheduleRootTask(int dataId, int rootTaskId, String name, ArrayList<Pair<Integer, HourMinute>> timePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(times != null);
-        Assert.assertTrue(!times.isEmpty());
+        Assert.assertTrue(timePairs != null);
+        Assert.assertTrue(!timePairs.isEmpty());
+
+        Task rootTask = mTasks.get(rootTaskId);
+        Assert.assertTrue(rootTask != null);
 
         TimeStamp timeStamp = TimeStamp.getNow();
         Assert.assertTrue(rootTask.current(timeStamp));
@@ -623,10 +652,14 @@ public class DomainFactory {
         rootTask.setName(name);
         rootTask.setScheduleEndTimeStamp(timeStamp);
 
+        ArrayList<Time> times = pairsToTimes(timePairs);
+
         Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
         Assert.assertTrue(schedule != null);
 
         rootTask.addSchedule(schedule);
+
+        save(dataId);
     }
 
     public void updateWeeklyScheduleRootTask(Task rootTask, String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs) {
@@ -683,24 +716,36 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createDailyScheduleJoinRootTask(String name, ArrayList<Time> times, ArrayList<Task> joinTasks) {
+    public void createDailyScheduleJoinRootTask(int dataId, String name, ArrayList<Pair<Integer, HourMinute>> timePairs, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(times != null);
-        Assert.assertTrue(!times.isEmpty());
-        Assert.assertTrue(joinTasks != null);
-        Assert.assertTrue(joinTasks.size() > 1);
+        Assert.assertTrue(timePairs != null);
+        Assert.assertTrue(!timePairs.isEmpty());
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
 
         TimeStamp timeStamp = TimeStamp.getNow();
 
         Task rootTask = createRootTask(name, timeStamp);
         Assert.assertTrue(rootTask != null);
 
+        ArrayList<Time> times = pairsToTimes(timePairs);
+
         Schedule schedule = createDailySchedule(rootTask, times, timeStamp);
         Assert.assertTrue(schedule != null);
 
         rootTask.addSchedule(schedule);
 
+        ArrayList<Task> joinTasks = new ArrayList<>();
+        for (int joinTaskId : joinTaskIds) {
+            Task joinTask = mTasks.get(joinTaskId);
+            Assert.assertTrue(joinTask != null);
+            Assert.assertTrue(joinTask.isRootTask(timeStamp));
+            Assert.assertTrue(joinTask.current(timeStamp));
+        }
+
         joinTasks(rootTask, joinTasks, timeStamp);
+
+        save(dataId);
     }
 
     public void createWeeklyScheduleJoinRootTask(String name, ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimePairs, ArrayList<Task> joinTasks) {
@@ -1176,7 +1221,7 @@ public class DomainFactory {
     }
 
     public SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
-        SingleScheduleLoader.TaskData taskData = null;
+        SingleScheduleLoader.ScheduleData scheduleData = null;
 
         if (rootTaskId != null) {
             Task rootTask = mTasks.get(rootTaskId);
@@ -1186,7 +1231,7 @@ public class DomainFactory {
             Assert.assertTrue(singleSchedule != null);
             Assert.assertTrue(singleSchedule.current(TimeStamp.getNow()));
 
-            taskData = new SingleScheduleLoader.TaskData(singleSchedule.getDateTime().getDate(), singleSchedule.getCustomTimeId(), singleSchedule.getHourMinute());
+            scheduleData = new SingleScheduleLoader.ScheduleData(singleSchedule.getDateTime().getDate(), singleSchedule.getCustomTimeId(), singleSchedule.getHourMinute());
         }
 
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
@@ -1194,7 +1239,35 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes)
             customTimeDatas.put(customTime.getId(), new SingleScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new SingleScheduleLoader.Data(taskData, customTimeDatas);
+        return new SingleScheduleLoader.Data(scheduleData, customTimeDatas);
+    }
+
+    public DailyScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
+        ArrayList<DailyScheduleLoader.ScheduleData> scheduleDatas = null;
+
+        if (rootTaskId != null) {
+            Task rootTask = mTasks.get(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(TimeStamp.getNow());
+            Assert.assertTrue(dailySchedule != null);
+            Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
+
+            scheduleDatas = new ArrayList<>();
+            for (Time time : dailySchedule.getTimes()) {
+                if (time instanceof CustomTime)
+                    scheduleDatas.add(new DailyScheduleLoader.ScheduleData(((CustomTime)time).getId(), null));
+                else
+                    scheduleDatas.add(new DailyScheduleLoader.ScheduleData(null, ((NormalTime)time).getHourMinute()));
+            }
+        }
+
+        ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
+        HashMap<Integer, DailyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        for (CustomTime customTime : customTimes)
+            customTimeDatas.put(customTime.getId(), new DailyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+
+        return new DailyScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
 
     public interface Observer {

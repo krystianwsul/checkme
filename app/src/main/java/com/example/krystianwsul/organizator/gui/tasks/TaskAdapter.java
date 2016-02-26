@@ -14,8 +14,6 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Task;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -23,22 +21,22 @@ import java.util.ArrayList;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     private final Activity mActivity;
-    private final DomainFactory mDomainFactory;
     private final ArrayList<TaskWrapper> mTaskWrappers;
 
     private boolean mEditing = false;
 
-    public TaskAdapter(Activity activity, DomainFactory domainFactory, ArrayList<Task> tasks) {
+    private final int mDataId;
+
+    public TaskAdapter(Activity activity, ArrayList<Data> datas, int dataId) {
         Assert.assertTrue(activity != null);
-        Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(tasks != null);
+        Assert.assertTrue(datas != null);
 
         mActivity = activity;
-        mDomainFactory = domainFactory;
+        mDataId = dataId;
 
         mTaskWrappers = new ArrayList<>();
-        for (Task task : tasks)
-            mTaskWrappers.add(new TaskWrapper(task));
+        for (Data data : datas)
+            mTaskWrappers.add(new TaskWrapper(data));
     }
 
     @Override
@@ -64,15 +62,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     public void onBindViewHolder(final TaskHolder taskHolder, int position) {
         TaskWrapper taskWrapper = mTaskWrappers.get(position);
 
-        taskHolder.mTaskRowName.setText(taskWrapper.mTask.getName());
+        taskHolder.mTaskRowName.setText(taskWrapper.mData.Name);
 
-        String scheduleText = taskWrapper.mTask.getScheduleText(mActivity, TimeStamp.getNow());
+        String scheduleText = taskWrapper.mData.ScheduleText;
         if (TextUtils.isEmpty(scheduleText))
             taskHolder.mTaskRowDetails.setVisibility(View.GONE);
         else
             taskHolder.mTaskRowDetails.setText(scheduleText);
 
-        if (taskWrapper.mTask.getChildTasks(TimeStamp.getNow()).isEmpty())
+        if (!taskWrapper.mData.HasChildTasks)
             taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_label_outline_black_24dp));
         else
             taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_list_black_24dp));
@@ -116,21 +114,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         notifyItemRangeChanged(0, getItemCount());
     }
 
-    public ArrayList<Task> getSelected() {
-        ArrayList<Task> tasks = new ArrayList<>();
+    public ArrayList<Integer> getSelected() {
+        ArrayList<Integer> taskIds = new ArrayList<>();
         for (TaskWrapper taskWrapper : mTaskWrappers)
             if (taskWrapper.mSelected)
-                tasks.add(taskWrapper.mTask);
-        return tasks;
+                taskIds.add(taskWrapper.mData.TaskId);
+        return taskIds;
     }
 
     private static class TaskWrapper {
-        public final Task mTask;
+        public final Data mData;
         public boolean mSelected;
 
-        public TaskWrapper(Task task) {
-            Assert.assertTrue(task != null);
-            mTask = task;
+        public TaskWrapper(Data data) {
+            Assert.assertTrue(data != null);
+            mData = data;
         }
     }
 
@@ -163,7 +161,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             TaskWrapper taskWrapper = mTaskWrappers.get(getAdapterPosition());
             Assert.assertTrue(taskWrapper != null);
 
-            mActivity.startActivity(ShowTaskActivity.getIntent(taskWrapper.mTask, mActivity));
+            mActivity.startActivity(ShowTaskActivity.getIntent(taskWrapper.mData.TaskId, mActivity));
         }
 
         public void onDeleteClick() {
@@ -172,9 +170,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             TaskWrapper taskWrapper = mTaskWrappers.get(position);
             Assert.assertTrue(taskWrapper != null);
 
-            mDomainFactory.setTaskEndTimeStamp(taskWrapper.mTask);
-
-            mDomainFactory.save();
+            DomainFactory.getDomainFactory(mActivity).setTaskEndTimeStamp(mDataId, taskWrapper.mData.TaskId);
 
             mTaskWrappers.remove(position);
             notifyItemRemoved(position);
@@ -187,6 +183,22 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             Assert.assertTrue(taskWrapper != null);
 
             taskWrapper.mSelected = checked;
+        }
+    }
+
+    public static class Data {
+        public final int TaskId;
+        public final String Name;
+        public final String ScheduleText;
+        public final boolean HasChildTasks;
+
+        public Data(int taskId, String name, String scheduleText, boolean hasChildTasks) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+
+            TaskId = taskId;
+            Name = name;
+            ScheduleText = scheduleText;
+            HasChildTasks = hasChildTasks;
         }
     }
 }

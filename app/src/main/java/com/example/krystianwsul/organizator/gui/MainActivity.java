@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
 import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
 import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
@@ -174,14 +173,14 @@ public class MainActivity extends AppCompatActivity {
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.action_task_join:
-                    ArrayList<Task> tasks = mTaskListFragment.getSelected();
-                    Assert.assertTrue(tasks != null);
+                    ArrayList<Integer> taskIds = mTaskListFragment.getSelected();
+                    Assert.assertTrue(taskIds != null);
 
-                    if (tasks.size() < 2) {
+                    if (taskIds.size() < 2) {
                         MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.two_tasks_message));
                         messageDialogFragment.show(getSupportFragmentManager(), "two_tasks");
                     } else {
-                        startActivity(CreateRootTaskActivity.getJoinIntent(MainActivity.this, tasks));
+                        startActivity(CreateRootTaskActivity.getJoinIntent(MainActivity.this, taskIds));
                         mActionMode.finish();
                     }
 

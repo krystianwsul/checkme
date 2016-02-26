@@ -14,7 +14,9 @@ import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.ShowNotificationGroupLoader;
+import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 import com.example.krystianwsul.organizator.loaders.SingleScheduleLoader;
+import com.example.krystianwsul.organizator.loaders.TaskListLoader;
 import com.example.krystianwsul.organizator.loaders.WeeklyScheduleLoader;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRecord;
@@ -1010,13 +1012,16 @@ public class DomainFactory {
         }
     }
 
-    public void setTaskEndTimeStamp(Task task) {
+    public void setTaskEndTimeStamp(int dataId, int taskId) {
+        Task task = mTasks.get(taskId);
         Assert.assertTrue(task != null);
 
         TimeStamp timeStamp = TimeStamp.getNow();
         Assert.assertTrue(task.current(timeStamp));
 
         task.setEndTimeStamp(timeStamp);
+
+        save(dataId);
     }
 
     public CustomTime getCustomTime(int customTimeId) {
@@ -1320,6 +1325,33 @@ public class DomainFactory {
             customTimeDatas.put(customTime.getId(), new WeeklyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
         return new WeeklyScheduleLoader.Data(scheduleDatas, customTimeDatas);
+    }
+
+    public ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {
+        Assert.assertTrue(context != null);
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        ArrayList<ShowTaskLoader.ChildTaskData> childTaskDatas = new ArrayList<>();
+        for (Task childTask : task.getChildTasks(timeStamp))
+            childTaskDatas.add(new ShowTaskLoader.ChildTaskData(childTask.getId(), childTask.getName(), !childTask.getChildTasks(timeStamp).isEmpty()));
+
+        return new ShowTaskLoader.Data(task.isRootTask(timeStamp), task.getName(), task.getScheduleText(context, timeStamp), task.getId(), childTaskDatas);
+    }
+
+    public TaskListLoader.Data getTaskListData(Context context) {
+        Assert.assertTrue(context != null);
+
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        ArrayList<TaskListLoader.RootTaskData> rootTaskDatas = new ArrayList<>();
+        for (Task rootTask : getRootTasks(timeStamp))
+            rootTaskDatas.add(new TaskListLoader.RootTaskData(rootTask.getId(), rootTask.getName(), rootTask.getScheduleText(context, timeStamp), !rootTask.getChildTasks(timeStamp).isEmpty()));
+
+        return new TaskListLoader.Data(rootTaskDatas);
     }
 
     public interface Observer {

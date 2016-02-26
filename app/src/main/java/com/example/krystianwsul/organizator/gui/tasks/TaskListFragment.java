@@ -12,16 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Task;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
+import com.example.krystianwsul.organizator.loaders.TaskListLoader;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<DomainFactory> {
+public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
     private RecyclerView mTasksRecycler;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,7 +54,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         taskAdapter.setEditing(editing);
     }
 
-    public ArrayList<Task> getSelected() {
+    public ArrayList<Integer> getSelected() {
         TaskAdapter taskAdapter = (TaskAdapter) mTasksRecycler.getAdapter();
         Assert.assertTrue(taskAdapter != null);
 
@@ -64,17 +62,22 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(getActivity());
+    public Loader<TaskListLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new TaskListLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), domainFactory, domainFactory.getRootTasks(TimeStamp.getNow())));
+    public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
+        ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
+        TimeStamp timeStamp = TimeStamp.getNow();
+
+        for (TaskListLoader.RootTaskData rootTaskData : data.RootTaskDatas)
+            taskDatas.add(new TaskAdapter.Data(rootTaskData.TaskId, rootTaskData.Name, rootTaskData.ScheduleText, rootTaskData.HasChildTasks));
+
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId));
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mTasksRecycler.setAdapter(null);
+    public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
     }
 }

@@ -17,7 +17,6 @@ import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.Schedule;
-import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -44,27 +43,22 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         return new Intent(context, CreateRootTaskActivity.class);
     }
 
-    public static Intent getJoinIntent(Context context, ArrayList<Task> joinTasks) {
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(joinTasks != null);
-        Assert.assertTrue(joinTasks.size() > 1);
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
 
-        ArrayList<Integer> taskIds = new ArrayList<>();
-        for (Task task : joinTasks)
-            taskIds.add(task.getId());
-
-        intent.putIntegerArrayListExtra(TASK_IDS_KEY, taskIds);
+        intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
         return intent;
     }
 
-    public static Intent getEditIntent(Context context, Task rootTask) {
+    public static Intent getEditIntent(Context context, int rootTaskId) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(rootTask != null);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
-        intent.putExtra(ROOT_TASK_ID_KEY, rootTask.getId());
+        intent.putExtra(ROOT_TASK_ID_KEY, rootTaskId);
         return intent;
     }
 

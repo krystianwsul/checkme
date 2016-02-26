@@ -13,7 +13,6 @@ import android.widget.EditText;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Task;
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 
 import junit.framework.Assert;
@@ -30,15 +29,15 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private Integer mParentTaskId = null;
     private Integer mChildTaskId = null;
 
-    public static Intent getCreateIntent(Context context, Task parentTask) {
+    public static Intent getCreateIntent(Context context, int parentTaskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
-        intent.putExtra(PARENT_TASK_ID_KEY, parentTask.getId());
+        intent.putExtra(PARENT_TASK_ID_KEY, parentTaskId);
         return intent;
     }
 
-    public static Intent getEditIntent(Context context, Task childTask) {
+    public static Intent getEditIntent(Context context, int childTaskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
-        intent.putExtra(CHILD_TASK_ID_KEY, childTask.getId());
+        intent.putExtra(CHILD_TASK_ID_KEY, childTaskId);
         return intent;
     }
 

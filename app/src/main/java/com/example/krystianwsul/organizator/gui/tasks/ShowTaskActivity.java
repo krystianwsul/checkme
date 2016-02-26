@@ -15,14 +15,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Task;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
+import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 
 import junit.framework.Assert;
 
-public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<DomainFactory> {
+import java.util.ArrayList;
+
+public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data> {
     private RecyclerView mShowTaskRecycler;
     private TextView mTasksHeadingLabel;
     private TextView mTasksRowSchedule;
@@ -31,9 +30,11 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
     private static final String INTENT_KEY = "taskId";
 
-    public static Intent getIntent(Task task, Context context) {
+    private int mTaskId;
+
+    public static Intent getIntent(int taskId, Context context) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
-        intent.putExtra(INTENT_KEY, task.getId());
+        intent.putExtra(INTENT_KEY, taskId);
         return intent;
     }
 
@@ -53,44 +54,46 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
         mFloatingActionButton = (FloatingActionButton) findViewById(R.id.show_task_fab);
 
+        Intent intent = getIntent();
+        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
+        mTaskId = intent.getIntExtra(INTENT_KEY, -1);
+        Assert.assertTrue(mTaskId != -1);
+
         getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
-    public Loader<DomainFactory> onCreateLoader(int id, Bundle args) {
-        return new DomainLoader(this);
+    public Loader<ShowTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ShowTaskLoader(this, mTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<DomainFactory> loader, DomainFactory domainFactory) {
-        Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        int taskId = intent.getIntExtra(INTENT_KEY, -1);
-        Assert.assertTrue(taskId != -1);
-        final Task task = domainFactory.getTask(taskId);
-        Assert.assertTrue(task != null);
-
+    public void onLoadFinished(Loader<ShowTaskLoader.Data> loader, final ShowTaskLoader.Data data) {
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateChildTaskActivity.getCreateIntent(ShowTaskActivity.this, task));
+                startActivity(CreateChildTaskActivity.getCreateIntent(ShowTaskActivity.this, data.TaskId));
             }
         });
 
         mShowTaskEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (task.isRootTask(TimeStamp.getNow()))
-                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, task));
+                if (data.IsRootTask)
+                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, data.TaskId));
                 else
-                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, task));
+                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, data.TaskId));
             }
         });
 
-        mShowTaskRecycler.setAdapter(new TaskAdapter(this, domainFactory, task.getChildTasks(TimeStamp.getNow())));
+        ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
+        for (ShowTaskLoader.ChildTaskData childTaskData : data.ChildTaskDatas)
+            taskDatas.add(new TaskAdapter.Data(childTaskData.TaskId, childTaskData.Name, null, childTaskData.HasChildTasks));
 
-        mTasksHeadingLabel.setText(task.getName());
-        String scheduleText = task.getScheduleText(this, TimeStamp.getNow());
+        mShowTaskRecycler.setAdapter(new TaskAdapter(this, taskDatas, data.DataId));
+
+        mTasksHeadingLabel.setText(data.Name);
+        String scheduleText = data.ScheduleText;
         if (TextUtils.isEmpty(scheduleText))
             mTasksRowSchedule.setVisibility(View.GONE);
         else
@@ -98,9 +101,6 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     }
 
     @Override
-    public void onLoaderReset(Loader<DomainFactory> loader) {
-        mFloatingActionButton.setOnClickListener(null);
-        mShowTaskEdit.setOnClickListener(null);
-        mShowTaskRecycler.setAdapter(null);
+    public void onLoaderReset(Loader<ShowTaskLoader.Data> loader) {
     }
 }

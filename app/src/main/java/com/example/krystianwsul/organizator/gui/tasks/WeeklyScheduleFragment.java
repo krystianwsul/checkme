@@ -28,6 +28,7 @@ import com.example.krystianwsul.organizator.loaders.WeeklyScheduleLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -179,12 +180,12 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         return true;
     }
 
-    private ArrayList<Pair<DayOfWeek, Pair<Integer, HourMinute>>> getDayOfWeekTimePairs() {
+    private ArrayList<Pair<DayOfWeek, TimePair>> getDayOfWeekTimePairs() {
         Assert.assertTrue(!mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries().isEmpty());
 
-        ArrayList<Pair<DayOfWeek, Pair<Integer, HourMinute>>> dayOfWeekTimePairs = new ArrayList<>();
+        ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = new ArrayList<>();
         for (DayOfWeekTimeEntry dayOfWeekTimeEntry : mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
-            dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), new Pair<>(dayOfWeekTimeEntry.getCustomTimeId(), dayOfWeekTimeEntry.getHourMinute())));
+            dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), new TimePair(dayOfWeekTimeEntry.getCustomTimeId(), dayOfWeekTimeEntry.getHourMinute())));
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
         return dayOfWeekTimePairs;
@@ -194,7 +195,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     public void createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        ArrayList<Pair<DayOfWeek, Pair<Integer, HourMinute>>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
+        ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).createWeeklyScheduleRootTask(mData.DataId, name, dayOfWeekTimePairs);
@@ -206,7 +207,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        ArrayList<Pair<DayOfWeek, Pair<Integer, HourMinute>>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
+        ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).updateWeeklyScheduleRootTask(mData.DataId, mRootTaskId, name, dayOfWeekTimePairs);
@@ -220,7 +221,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
-        ArrayList<Pair<DayOfWeek, Pair<Integer, HourMinute>>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
+        ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).createWeeklyScheduleJoinRootTask(mData.DataId, name, dayOfWeekTimePairs, joinTaskIds);

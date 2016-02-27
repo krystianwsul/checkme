@@ -22,6 +22,7 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -41,9 +42,9 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
     private TextView mEditInstanceName;
     private Button mEditInstanceSave;
 
-    public static Intent getIntent(Context context, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
+    public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
-        intent.putExtra(INSTANCE_KEY, new InstanceKey(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
+        intent.putExtra(INSTANCE_KEY, instanceKey);
         return intent;
     }
 
@@ -112,13 +113,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
         Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
 
-        if (instanceKey.ScheduleCustomTimeId != null) {
-            Assert.assertTrue(instanceKey.ScheduleHourMinute == null);
-            return new EditInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId);
-        } else {
-            Assert.assertTrue(instanceKey.ScheduleHourMinute != null);
-            return new EditInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleHourMinute);
-        }
+        return new EditInstanceLoader(this, instanceKey);
     }
 
     @Override
@@ -192,7 +187,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
                     return;
                 }
 
-                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, EditInstanceActivity.this, mData.TaskId, mData.ScheduleDate, mData.ScheduleCustomTimeId, mData.ScheduleHourMinute, mDate, mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute());
+                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, EditInstanceActivity.this, mData.InstanceKey, mDate, new TimePair(mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute()));
 
                 TickService.startService(EditInstanceActivity.this);
 

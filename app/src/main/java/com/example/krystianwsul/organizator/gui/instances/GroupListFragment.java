@@ -211,7 +211,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 boolean isChecked = checkBox.isChecked();
 
                 GroupListLoader.InstanceData instanceData = group.getSingleSinstanceData();
-                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mData.DataId, mContext, instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, isChecked);
+                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mData.DataId, mContext, instanceData.InstanceKey, isChecked);
 
                 TickService.startService(mContext);
 
@@ -259,7 +259,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 if (group.singleInstance()) {
                     GroupListLoader.InstanceData instanceData = group.getSingleSinstanceData();
-                    return ShowInstanceActivity.getIntent(instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, context);
+                    return ShowInstanceActivity.getIntent(context, instanceData.InstanceKey);
                 } else {
                     return ShowGroupActivity.getIntent(group, context);
                 }

@@ -5,7 +5,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
@@ -99,28 +99,21 @@ public class GroupListLoader extends AsyncTaskLoader<GroupListLoader.Data> {
 
     public static class InstanceData {
         public TimeStamp Done;
+        public final InstanceKey InstanceKey;
         public final boolean HasChildren;
-        public final int TaskId;
-        public final Date ScheduleDate;
-        public final Integer ScheduleCustomTimeId;
-        public final HourMinute ScheduleHourMinute;
         public final String DisplayText;
         public final String Name;
         public final TimeStamp InstanceTimeStamp;
 
-        public InstanceData(TimeStamp done, boolean hasChildren, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, String displayText, String name, TimeStamp instanceTimeStamp) {
-            Assert.assertTrue(scheduleDate != null);
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+        public InstanceData(TimeStamp done, boolean hasChildren, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp) {
+            Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
 
             Done = done;
             HasChildren = hasChildren;
-            TaskId = taskId;
-            ScheduleDate = scheduleDate;
-            ScheduleCustomTimeId = scheduleCustomTimeId;
-            ScheduleHourMinute = scheduleHourMinute;
+            InstanceKey = instanceKey;
             DisplayText = displayText;
             Name = name;
             InstanceTimeStamp = instanceTimeStamp;

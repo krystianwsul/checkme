@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -194,6 +195,10 @@ public class TimePickerView extends LinearLayout {
     public Integer getCustomTimeId() {
         Assert.assertTrue(mCustomTimeDatas != null);
         return mCustomTimeId;
+    }
+
+    public TimePair getTimePair() {
+        return new TimePair(mCustomTimeId, mHourMinute);
     }
 
     private void setSpinnerPosition(int position) {

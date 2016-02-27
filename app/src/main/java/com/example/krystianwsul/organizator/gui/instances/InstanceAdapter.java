@@ -15,8 +15,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.notifications.TickService;
-import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -166,7 +165,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
             boolean isChecked = checkBox.isChecked();
 
-            DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mContext, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute, isChecked);
+            DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mContext, data.InstanceKey, isChecked);
 
             TickService.startService(mContext);
 
@@ -200,7 +199,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             Data data = getData(getAdapterPosition());
             Assert.assertTrue(data != null);
 
-            mContext.startActivity(ShowInstanceActivity.getIntent(data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute, mContext));
+            mContext.startActivity(ShowInstanceActivity.getIntent(mContext, data.InstanceKey));
         }
     }
 
@@ -208,24 +207,17 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         public final TimeStamp Done;
         public final String Name;
         public final boolean HasChildren;
-        public final int TaskId;
-        public final Date ScheduleDate;
-        public final Integer ScheduleCustomTimeId;
-        public final HourMinute ScheduleHourMinute;
+        public final InstanceKey InstanceKey;
         public final String DisplayText;
 
-        public Data(TimeStamp done, String name, boolean hasChildren, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, String displayText) {
+        public Data(TimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey, String displayText) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(scheduleDate != null);
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+            Assert.assertTrue(instanceKey != null);
 
             Done = done;
             Name = name;
             HasChildren = hasChildren;
-            TaskId = taskId;
-            ScheduleDate = scheduleDate;
-            ScheduleCustomTimeId = scheduleCustomTimeId;
-            ScheduleHourMinute = scheduleHourMinute;
+            InstanceKey = instanceKey;
             DisplayText = displayText;
         }
     }

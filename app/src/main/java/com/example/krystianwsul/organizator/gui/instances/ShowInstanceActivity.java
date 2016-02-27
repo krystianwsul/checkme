@@ -19,8 +19,6 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
-import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
@@ -37,12 +35,12 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     private ImageView mShowInstanceEdit;
 
-    public static Intent getIntent(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, Context context) {
-        Assert.assertTrue(scheduleDate != null);
-        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+    public static Intent getIntent(Context context, InstanceKey instanceKey) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(instanceKey != null);
 
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INSTANCE_KEY, new InstanceKey(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
+        intent.putExtra(INSTANCE_KEY, instanceKey);
         return intent;
     }
 
@@ -84,13 +82,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
 
-        if (instanceKey.ScheduleCustomTimeId != null) {
-            Assert.assertTrue(instanceKey.ScheduleHourMinute == null);
-            return new ShowInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId);
-        } else {
-            Assert.assertTrue(instanceKey.ScheduleHourMinute != null);
-            return new ShowInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleHourMinute);
-        }
+        return new ShowInstanceLoader(this, instanceKey);
     }
 
     @Override
@@ -99,7 +91,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-            DomainFactory.getDomainFactory(this).setInstanceNotifiedNotShown(data.DataId, new InstanceKey(data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute));
+            DomainFactory.getDomainFactory(this).setInstanceNotifiedNotShown(data.DataId, data.InstanceKey);
         }
 
         mShowInstanceName.setText(data.Name);
@@ -115,7 +107,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         if (data.HasChildren) {
             ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
             for (ShowInstanceLoader.InstanceData instanceData : data.InstanceDatas)
-                datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, null));
+                datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, null));
 
             mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
         }
@@ -125,7 +117,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
             public void onClick(View v) {
                 boolean isChecked = mCheckBox.isChecked();
 
-                DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, ShowInstanceActivity.this, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute, isChecked);
+                DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, ShowInstanceActivity.this, data.InstanceKey, isChecked);
                 data.Done = isChecked;
 
                 TickService.startService(ShowInstanceActivity.this);
@@ -135,7 +127,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         mShowInstanceEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = EditInstanceActivity.getIntent(ShowInstanceActivity.this, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute);
+                Intent intent = EditInstanceActivity.getIntent(ShowInstanceActivity.this, data.InstanceKey);
                 startActivity(intent);
             }
         });

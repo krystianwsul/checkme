@@ -5,8 +5,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -18,51 +17,22 @@ public class ShowInstanceLoader extends AsyncTaskLoader<ShowInstanceLoader.Data>
 
     private Observer mObserver;
 
-    private final int mTaskId;
-    private final Date mDate;
-    private final Integer mCustomTimeId;
-    private final HourMinute mHourMinute;
+    private final InstanceKey mInstanceKey;
 
-    public ShowInstanceLoader(Context context, int taskId, Date date, int customTimeId) {
+    public ShowInstanceLoader(Context context, InstanceKey instanceKey) {
         super(context);
 
-        Assert.assertTrue(date != null);
+        Assert.assertTrue(instanceKey != null);
 
-        mTaskId = taskId;
-        mDate = date;
-        mCustomTimeId = customTimeId;
-        mHourMinute = null;
-    }
-
-    public ShowInstanceLoader(Context context, int taskId, Date date, HourMinute hourMinute) {
-        super(context);
-
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(hourMinute != null);
-
-        mTaskId = taskId;
-        mDate = date;
-        mCustomTimeId = null;
-        mHourMinute = hourMinute;
+        mInstanceKey = instanceKey;
     }
 
     @Override
     public Data loadInBackground() {
-        if (mCustomTimeId != null) {
-            Assert.assertTrue(mHourMinute == null);
+        Data data = DomainFactory.getDomainFactory(getContext()).getShowInstanceData(getContext(), mInstanceKey);
+        Assert.assertTrue(data != null);
 
-            Data data = DomainFactory.getDomainFactory(getContext()).getShowInstanceData(getContext(), mTaskId, mDate, mCustomTimeId);
-            Assert.assertTrue(data != null);
-
-            return data;
-        } else  {
-            Assert.assertTrue(mHourMinute != null);
-
-            Data data = DomainFactory.getDomainFactory(getContext()).getShowInstanceData(getContext(), mTaskId, mDate, mHourMinute);
-            Assert.assertTrue(data != null);
-
-            return data;
-        }
+        return data;
     }
 
     @Override
@@ -119,25 +89,18 @@ public class ShowInstanceLoader extends AsyncTaskLoader<ShowInstanceLoader.Data>
     }
 
     public static class Data extends LoaderData {
-        public final int TaskId;
-        public final Date ScheduleDate;
-        public final Integer ScheduleCustomTimeId;
-        public final HourMinute ScheduleHourMinute;
+        public final InstanceKey InstanceKey;
         public final String Name;
         public final String DisplayText;
         public boolean Done;
         public final boolean HasChildren;
         public final ArrayList<InstanceData> InstanceDatas;
 
-        public Data(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, String name, String displayText, boolean done, boolean hasChildren, ArrayList<InstanceData> instanceDatas) {
-            Assert.assertTrue(scheduleDate != null);
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean hasChildren, ArrayList<InstanceData> instanceDatas) {
+            Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
-            TaskId = taskId;
-            ScheduleDate = scheduleDate;
-            ScheduleCustomTimeId = scheduleCustomTimeId;
-            ScheduleHourMinute = scheduleHourMinute;
+            InstanceKey = instanceKey;
             Name = name;
             DisplayText = displayText;
             Done = done;
@@ -150,24 +113,17 @@ public class ShowInstanceLoader extends AsyncTaskLoader<ShowInstanceLoader.Data>
         public final TimeStamp Done;
         public final String Name;
         public final boolean HasChildren;
-        public final int TaskId;
-        public final Date ScheduleDate;
-        public final Integer ScheduleCustomTimeId;
-        public final HourMinute ScheduleHourMinute;
+        public final InstanceKey InstanceKey;
         public final String DisplayText;
 
-        public InstanceData(TimeStamp done, String name, boolean hasChildren, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, String displayText) {
+        public InstanceData(TimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey, String displayText) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(scheduleDate != null);
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+            Assert.assertTrue(instanceKey != null);
 
             Done = done;
             Name = name;
             HasChildren = hasChildren;
-            TaskId = taskId;
-            ScheduleDate = scheduleDate;
-            ScheduleCustomTimeId = scheduleCustomTimeId;
-            ScheduleHourMinute = scheduleHourMinute;
+            InstanceKey = instanceKey;
             DisplayText = displayText;
         }
     }

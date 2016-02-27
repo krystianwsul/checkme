@@ -166,11 +166,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Assert.assertTrue(mRootTaskId == null);
 
-        HourMinute hourMinute = mTimePickerView.getHourMinute();
-        Integer customTimeId = mTimePickerView.getCustomTimeId();
-        Assert.assertTrue((hourMinute == null) != (customTimeId == null));
-
-        DomainFactory.getDomainFactory(getActivity()).createSingleScheduleRootTask(mData.DataId, name, mDate, customTimeId, hourMinute);
+        DomainFactory.getDomainFactory(getActivity()).createSingleScheduleRootTask(mData.DataId, name, mDate, mTimePickerView.getTimePair());
 
         TickService.startService(getActivity());
     }
@@ -181,11 +177,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Assert.assertTrue(mRootTaskId != null);
 
-        HourMinute hourMinute = mTimePickerView.getHourMinute();
-        Integer customTimeId = mTimePickerView.getCustomTimeId();
-        Assert.assertTrue((hourMinute == null) != (customTimeId == null));
-
-        DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleRootTask(mData.DataId, mRootTaskId, name, mDate, customTimeId, hourMinute);
+        DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleRootTask(mData.DataId, mRootTaskId, name, mDate, mTimePickerView.getTimePair());
 
         TickService.startService(getActivity());
     }
@@ -198,10 +190,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Assert.assertTrue(mRootTaskId == null);
 
-        HourMinute hourMinute = mTimePickerView.getHourMinute();
-        Integer customTimeId = mTimePickerView.getCustomTimeId();
-
-        DomainFactory.getDomainFactory(getActivity()).createSingleScheduleJoinRootTask(mData.DataId, name, mDate, customTimeId, hourMinute, joinTaskIds);
+        DomainFactory.getDomainFactory(getActivity()).createSingleScheduleJoinRootTask(mData.DataId, name, mDate, mTimePickerView.getTimePair(), joinTaskIds);
 
         TickService.startService(getActivity());
     }

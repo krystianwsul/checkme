@@ -67,14 +67,14 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
         if (mSavedInstanceState == null) {
             ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
             for (ShowNotificationGroupLoader.InstanceData instanceData : data.InstanceDatas)
-                instanceKeys.add(new InstanceKey(instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute));
+                instanceKeys.add(instanceData.InstanceKey);
 
             DomainFactory.getDomainFactory(this).setInstanceKeysNotified(data.DataId, instanceKeys);
         }
 
         ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
         for (ShowNotificationGroupLoader.InstanceData instanceData : data.InstanceDatas)
-            datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, instanceData.DisplayText));
+            datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, instanceData.DisplayText));
 
         mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
     }

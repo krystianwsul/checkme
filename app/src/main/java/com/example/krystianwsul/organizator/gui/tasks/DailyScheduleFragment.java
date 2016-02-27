@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -24,6 +23,7 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -174,13 +174,13 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         return true;
     }
 
-    private ArrayList<Pair<Integer, HourMinute>> getTimePairs() {
+    private ArrayList<TimePair> getTimePairs() {
         Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
 
-        ArrayList<Pair<Integer, HourMinute>> timePairs = new ArrayList<>();
+        ArrayList<TimePair> timePairs = new ArrayList<>();
 
         for (TimeEntry timeEntry : mTimeEntryAdapter.getTimeEntries())
-            timePairs.add(new Pair<>(timeEntry.getCustomTimeId(), timeEntry.getHourMinute()));
+            timePairs.add(new TimePair(timeEntry.getCustomTimeId(), timeEntry.getHourMinute()));
         Assert.assertTrue(!timePairs.isEmpty());
 
         return timePairs;
@@ -192,7 +192,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         Assert.assertTrue(mRootTaskId == null);
 
-        ArrayList<Pair<Integer, HourMinute>> timePairs = getTimePairs();
+        ArrayList<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).createDailyScheduleRootTask(mData.DataId, name, timePairs);
@@ -206,7 +206,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         Assert.assertTrue(mRootTaskId != null);
 
-        ArrayList<Pair<Integer, HourMinute>> timePairs = getTimePairs();
+        ArrayList<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleRootTask(mData.DataId, mRootTaskId, name, timePairs);
@@ -222,7 +222,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         Assert.assertTrue(mRootTaskId == null);
 
-        ArrayList<Pair<Integer, HourMinute>> timePairs = getTimePairs();
+        ArrayList<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).createDailyScheduleJoinRootTask(mData.DataId, name, timePairs, joinTaskIds);

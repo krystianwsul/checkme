@@ -12,8 +12,7 @@ import junit.framework.Assert;
 public class InstanceKey implements Parcelable {
     public final int TaskId;
     public final Date ScheduleDate;
-    public final Integer ScheduleCustomTimeId;
-    public final HourMinute ScheduleHourMinute;
+    public final TimePair ScheduleTimePair;
 
     public InstanceKey(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
         Assert.assertTrue(scheduleDate != null);
@@ -21,13 +20,21 @@ public class InstanceKey implements Parcelable {
 
         TaskId = taskId;
         ScheduleDate = scheduleDate;
-        ScheduleCustomTimeId = scheduleCustomTimeId;
-        ScheduleHourMinute = scheduleHourMinute;
+        ScheduleTimePair = new TimePair(scheduleCustomTimeId, scheduleHourMinute);
+    }
+
+    public InstanceKey(int taskId, Date scheduleDate, TimePair scheduleTimePair) {
+        Assert.assertTrue(scheduleDate != null);
+        Assert.assertTrue(scheduleTimePair != null);
+
+        TaskId = taskId;
+        ScheduleDate = scheduleDate;
+        ScheduleTimePair = scheduleTimePair;
     }
 
     @Override
     public int hashCode() {
-        return TaskId + ScheduleDate.hashCode() + (ScheduleCustomTimeId != null ? ScheduleCustomTimeId : 0) + (ScheduleHourMinute != null ? ScheduleHourMinute.hashCode() : 0);
+        return TaskId + ScheduleDate.hashCode() + (ScheduleTimePair.CustomTimeId != null ? ScheduleTimePair.CustomTimeId : 0) + (ScheduleTimePair.HourMinute != null ? ScheduleTimePair.HourMinute.hashCode() : 0);
     }
 
     @Override
@@ -49,10 +56,10 @@ public class InstanceKey implements Parcelable {
         if (!ScheduleDate.equals(instanceKey.ScheduleDate))
             return false;
 
-        if (ScheduleCustomTimeId == null) {
-            return (instanceKey.ScheduleCustomTimeId == null && ScheduleHourMinute.equals(instanceKey.ScheduleHourMinute));
+        if (ScheduleTimePair.CustomTimeId == null) {
+            return (instanceKey.ScheduleTimePair.CustomTimeId == null && ScheduleTimePair.HourMinute.equals(instanceKey.ScheduleTimePair.HourMinute));
         } else {
-            return (instanceKey.ScheduleCustomTimeId != null &&ScheduleCustomTimeId.equals(instanceKey.ScheduleCustomTimeId));
+            return (instanceKey.ScheduleTimePair.CustomTimeId != null && ScheduleTimePair.CustomTimeId.equals(instanceKey.ScheduleTimePair.CustomTimeId));
         }
     }
 
@@ -65,7 +72,7 @@ public class InstanceKey implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(TaskId);
         out.writeParcelable(ScheduleDate, 0);
-        out.writeParcelable(new TimePair(ScheduleCustomTimeId, ScheduleHourMinute), 0);
+        out.writeParcelable(ScheduleTimePair, 0);
     }
 
     public static final Parcelable.Creator<InstanceKey> CREATOR = new Creator<InstanceKey>() {

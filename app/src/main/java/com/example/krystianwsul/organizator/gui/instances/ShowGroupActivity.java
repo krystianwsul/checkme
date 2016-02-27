@@ -61,7 +61,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
         ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
         for (ShowGroupLoader.InstanceData instanceData : data.InstanceDatas)
-            datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute, null));
+            datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, null));
 
         mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
     }

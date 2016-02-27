@@ -5,6 +5,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -18,51 +19,22 @@ public class EditInstanceLoader extends AsyncTaskLoader<EditInstanceLoader.Data>
 
     private Observer mObserver;
 
-    private final int mTaskId;
-    private final Date mDate;
-    private final Integer mCustomTimeId;
-    private final HourMinute mHourMinute;
+    private final InstanceKey mInstanceKey;
 
-    public EditInstanceLoader(Context context, int taskId, Date date, int customTimeId) {
+    public EditInstanceLoader(Context context, InstanceKey instanceKey) {
         super(context);
 
-        Assert.assertTrue(date != null);
+        Assert.assertTrue(instanceKey != null);
 
-        mTaskId = taskId;
-        mDate = date;
-        mCustomTimeId = customTimeId;
-        mHourMinute = null;
-    }
-
-    public EditInstanceLoader(Context context, int taskId, Date date, HourMinute hourMinute) {
-        super(context);
-
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(hourMinute != null);
-
-        mTaskId = taskId;
-        mDate = date;
-        mCustomTimeId = null;
-        mHourMinute = hourMinute;
+        mInstanceKey = instanceKey;
     }
 
     @Override
     public Data loadInBackground() {
-        if (mCustomTimeId != null) {
-            Assert.assertTrue(mHourMinute == null);
+        Data data = DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mInstanceKey);
+        Assert.assertTrue(data != null);
 
-            Data data = DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mTaskId, mDate, mCustomTimeId);
-            Assert.assertTrue(data != null);
-
-            return data;
-        } else  {
-            Assert.assertTrue(mHourMinute != null);
-
-            Data data = DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mTaskId, mDate, mHourMinute);
-            Assert.assertTrue(data != null);
-
-            return data;
-        }
+        return data;
     }
 
     @Override
@@ -119,28 +91,21 @@ public class EditInstanceLoader extends AsyncTaskLoader<EditInstanceLoader.Data>
     }
 
     public static class Data extends LoaderData {
-        public final int TaskId;
-        public final Date ScheduleDate;
-        public final Integer ScheduleCustomTimeId;
-        public final HourMinute ScheduleHourMinute;
+        public final InstanceKey InstanceKey;
         public final Date InstanceDate;
         public final Integer InstanceCustomTimeId;
         public final HourMinute InstanceHourMinute;
         public final String Name;
         public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, Date instanceDate, Integer instanceCustomTimeId, HourMinute instanceHourMinute, String name, HashMap<Integer, CustomTimeData> customTimeDatas) {
-            Assert.assertTrue(scheduleDate != null);
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+        public Data(InstanceKey instanceKey, Date instanceDate, Integer instanceCustomTimeId, HourMinute instanceHourMinute, String name, HashMap<Integer, CustomTimeData> customTimeDatas) {
+            Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(instanceDate != null);
             Assert.assertTrue((instanceCustomTimeId == null) != (instanceHourMinute == null));
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(customTimeDatas != null);
 
-            TaskId = taskId;
-            ScheduleDate = scheduleDate;
-            ScheduleCustomTimeId = scheduleCustomTimeId;
-            ScheduleHourMinute = scheduleHourMinute;
+            InstanceKey = instanceKey;
             InstanceDate = instanceDate;
             InstanceCustomTimeId = instanceCustomTimeId;
             InstanceHourMinute = instanceHourMinute;

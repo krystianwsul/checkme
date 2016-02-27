@@ -18,6 +18,7 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
@@ -106,7 +107,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-            DomainFactory.getDomainFactory(this).setInstanceNotifiedNotShown(data.DataId, data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute);
+            DomainFactory.getDomainFactory(this).setInstanceNotifiedNotShown(data.DataId, new InstanceKey(data.TaskId, data.ScheduleDate, data.ScheduleCustomTimeId, data.ScheduleHourMinute));
         }
 
         mShowInstanceName.setText(data.Name);

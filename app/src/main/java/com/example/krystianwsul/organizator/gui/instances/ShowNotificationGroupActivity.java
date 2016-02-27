@@ -12,28 +12,27 @@ import android.support.v7.widget.RecyclerView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowNotificationGroupLoader;
-import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
 public class ShowNotificationGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowNotificationGroupLoader.Data> {
-    private static final String INSTANCES_KEY = "instances";
+    private static final String INSTANCES_KEY = "instanceKeys";
 
     private RecyclerView mShowNotificationGroupList;
 
     private Bundle mSavedInstanceState;
 
-    public static Intent getIntent(Context context, ArrayList<Bundle> bundles) {
+    public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(bundles != null);
-        Assert.assertTrue(!bundles.isEmpty());
+        Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(!instanceKeys.isEmpty());
 
         Intent intent = new Intent(context, ShowNotificationGroupActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putParcelableArrayListExtra(INSTANCES_KEY, bundles);
+        intent.putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys);
         return intent;
     }
 
@@ -54,23 +53,9 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
     public Loader<ShowNotificationGroupLoader.Data> onCreateLoader(int id, Bundle args) {
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INSTANCES_KEY));
-        ArrayList<Bundle> bundles = intent.getParcelableArrayListExtra(INSTANCES_KEY);
-        Assert.assertTrue(bundles != null);
-        Assert.assertTrue(!bundles.isEmpty());
-
-        ArrayList<ShowNotificationGroupLoader.InstanceKey> instanceKeys = new ArrayList<>();
-        for (Bundle bundle : bundles) {
-            int taskId = NewInstanceData.getTaskId(bundle);
-
-            Date scheduleDate = NewInstanceData.getScheduleDate(bundle);
-            Assert.assertTrue(scheduleDate != null);
-
-            Integer scheduleCustomTimeId = NewInstanceData.getScheduleCustomTimeId(bundle);
-            HourMinute scheduleHourMinute = NewInstanceData.getScheduleHourMinute(bundle);
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
-
-            instanceKeys.add(new ShowNotificationGroupLoader.InstanceKey(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
-        }
+        ArrayList<InstanceKey> instanceKeys = intent.getParcelableArrayListExtra(INSTANCES_KEY);
+        Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(!instanceKeys.isEmpty());
 
         return new ShowNotificationGroupLoader(this, instanceKeys);
     }
@@ -80,9 +65,9 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
         Assert.assertTrue(!data.InstanceDatas.isEmpty());
 
         if (mSavedInstanceState == null) {
-            ArrayList<ShowNotificationGroupLoader.InstanceKey> instanceKeys = new ArrayList<>();
+            ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
             for (ShowNotificationGroupLoader.InstanceData instanceData : data.InstanceDatas)
-                instanceKeys.add(new ShowNotificationGroupLoader.InstanceKey(instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute));
+                instanceKeys.add(new InstanceKey(instanceData.TaskId, instanceData.ScheduleDate, instanceData.ScheduleCustomTimeId, instanceData.ScheduleHourMinute));
 
             DomainFactory.getDomainFactory(this).setInstanceKeysNotified(data.DataId, instanceKeys);
         }

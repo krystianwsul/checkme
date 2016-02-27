@@ -7,7 +7,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
@@ -15,9 +14,9 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.domainmodel.Instance;
-import com.example.krystianwsul.organizator.gui.instances.InstanceData;
 import com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity;
 import com.example.krystianwsul.organizator.gui.instances.ShowNotificationGroupActivity;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
 
@@ -120,16 +119,16 @@ public class TickService extends IntentService {
         Assert.assertTrue(instances.size() > MAX_NOTIFICATIONS);
 
         ArrayList<String> names = new ArrayList<>();
-        ArrayList<Bundle> bundles = new ArrayList<>();
+        ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
         for (Instance instance : instances) {
             names.add(instance.getName());
-            bundles.add(InstanceData.getBundle(instance));
+            instanceKeys.add(instance.getInstanceKey());
         }
 
-        Intent deleteIntent = GroupNotificationDeleteService.getIntent(this, bundles);
+        Intent deleteIntent = GroupNotificationDeleteService.getIntent(this, instanceKeys);
         PendingIntent pendingDeleteIntent = PendingIntent.getService(this, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, bundles);
+        Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, instanceKeys);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         notify(instances.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent);

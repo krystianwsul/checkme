@@ -5,6 +5,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
@@ -90,23 +91,6 @@ public class ShowNotificationGroupLoader extends AsyncTaskLoader<ShowNotificatio
                 return;
 
             onContentChanged();
-        }
-    }
-
-    public static class InstanceKey {
-        public final int TaskId;
-        public final Date ScheduleDate;
-        public final Integer ScheduleCustomTimeId;
-        public final HourMinute ScheduleHourMinute;
-
-        public InstanceKey(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
-            Assert.assertTrue(scheduleDate != null);
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
-
-            TaskId = taskId;
-            ScheduleDate = scheduleDate;
-            ScheduleCustomTimeId = scheduleCustomTimeId;
-            ScheduleHourMinute = scheduleHourMinute;
         }
     }
 

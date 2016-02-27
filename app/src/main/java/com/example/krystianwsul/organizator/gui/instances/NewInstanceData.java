@@ -2,6 +2,7 @@ package com.example.krystianwsul.organizator.gui.instances;
 
 import android.os.Bundle;
 
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
@@ -27,6 +28,11 @@ public class NewInstanceData {
             bundle.putParcelable(HOUR_MINUTE_KEY, scheduleHourMinute);
 
         return bundle;
+    }
+
+    public static InstanceKey getInstanceKey(Bundle bundle) {
+        Assert.assertTrue(bundle != null);
+        return new InstanceKey(getTaskId(bundle), getScheduleDate(bundle), getScheduleCustomTimeId(bundle), getScheduleHourMinute(bundle));
     }
 
     public static int getTaskId(Bundle bundle) {

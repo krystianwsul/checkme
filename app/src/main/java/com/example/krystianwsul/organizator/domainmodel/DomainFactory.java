@@ -27,6 +27,7 @@ import com.example.krystianwsul.organizator.persistencemodel.SingleScheduleDateT
 import com.example.krystianwsul.organizator.persistencemodel.TaskHierarchyRecord;
 import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
 import com.example.krystianwsul.organizator.persistencemodel.WeeklyScheduleDayOfWeekTimeRecord;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
@@ -366,12 +367,12 @@ public class DomainFactory {
         }
     }
 
-    public void setInstanceKeysNotified(int dataId, ArrayList<ShowNotificationGroupLoader.InstanceKey> instanceKeys) {
+    public void setInstanceKeysNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         ArrayList<Instance> instances = new ArrayList<>();
-        for (ShowNotificationGroupLoader.InstanceKey instanceKey : instanceKeys)
+        for (InstanceKey instanceKey : instanceKeys)
             instances.add(getInstance(instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId, instanceKey.ScheduleHourMinute));
 
         setInstancesNotified(instances);
@@ -386,17 +387,23 @@ public class DomainFactory {
         instance.setNotificationShown(false);
     }
 
-    public void setInstanceNotifiedNotShown(int dataId, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
-        Assert.assertTrue(scheduleDate != null);
-        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
-
-        Task task = mTasks.get(taskId);
+    private Instance getInstance(InstanceKey instanceKey) {
+        Task task = mTasks.get(instanceKey.TaskId);
         Assert.assertTrue(task != null);
 
-        DateTime scheduleDateTime = getDateTime(scheduleDate, scheduleCustomTimeId, scheduleHourMinute);
+        DateTime scheduleDateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId, instanceKey.ScheduleHourMinute);
         Assert.assertTrue(scheduleDateTime != null);
 
         Instance instance = getInstance(task, scheduleDateTime);
+        Assert.assertTrue(instance != null);
+
+        return instance;
+    }
+
+    public void setInstanceNotifiedNotShown(int dataId, InstanceKey instanceKey) {
+        Assert.assertTrue(instanceKey != null);
+
+        Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
         setInstanceNotifiedNotShown(instance);
@@ -1174,13 +1181,13 @@ public class DomainFactory {
         return instance;
     }
 
-    public ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<ShowNotificationGroupLoader.InstanceKey> instanceKeys) {
+    public ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         ArrayList<Instance> instances = new ArrayList<>();
-        for (ShowNotificationGroupLoader.InstanceKey instanceKey : instanceKeys) {
+        for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId, instanceKey.ScheduleHourMinute);
             Assert.assertTrue(instance != null);
 

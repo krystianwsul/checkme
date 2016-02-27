@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -368,5 +369,9 @@ public class Instance {
             return ((NormalTime) instanceTime).getHourMinute();
         else
             return null;
+    }
+
+    public InstanceKey getInstanceKey() {
+        return new InstanceKey(getTaskId(), getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute());
     }
 }

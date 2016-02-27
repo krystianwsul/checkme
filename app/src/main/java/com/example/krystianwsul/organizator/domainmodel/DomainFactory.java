@@ -128,10 +128,6 @@ public class DomainFactory {
         }
     }
 
-    public void save() {
-        save(0);
-    }
-
     private void save(int dataId) {
         mPersistenceManager.save();
         notifyDomainObservers(dataId);
@@ -151,7 +147,7 @@ public class DomainFactory {
 
     private synchronized void notifyDomainObservers(int dataId) {
         for (Observer observer : sObservers)
-            observer.onDomainChanged(this, dataId);
+            observer.onDomainChanged(dataId);
     }
 
     public Instance getInstance(Task task, DateTime scheduleDateTime) {
@@ -845,7 +841,7 @@ public class DomainFactory {
 
         createChildTask(parentTask, name, TimeStamp.getNow());
 
-        save();
+        save(0);
     }
 
     public void updateChildTask(Task childTask, String name) {
@@ -1116,7 +1112,7 @@ public class DomainFactory {
         CustomTime customTime = new CustomTime(customTimeRecord);
         mCustomTimes.put(customTime.getId(), customTime);
 
-        save();
+        save(0);
     }
 
     public void updateCustomTime(int dataId, int customTimeId, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
@@ -1403,6 +1399,6 @@ public class DomainFactory {
     }
 
     public interface Observer {
-        void onDomainChanged(DomainFactory domainFactory, int dataId);
+        void onDomainChanged(int dataId);
     }
 }

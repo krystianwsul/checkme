@@ -80,7 +80,7 @@ public class ShowGroupLoader extends AsyncTaskLoader<ShowGroupLoader.Data> {
 
     private class Observer implements DomainFactory.Observer {
         @Override
-        public void onDomainChanged(DomainFactory domainFactory, int dataId) {
+        public void onDomainChanged(int dataId) {
             if (mData != null && dataId == mData.DataId)
                 return;
 

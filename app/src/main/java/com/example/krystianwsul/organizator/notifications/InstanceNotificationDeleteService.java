@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -13,12 +12,12 @@ import junit.framework.Assert;
 public class InstanceNotificationDeleteService extends IntentService {
     private final static String INSTANCE_KEY = "instanceKey";
 
-    public static Intent getIntent(Context context, Instance instance) {
+    public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(instance != null);
+        Assert.assertTrue(instanceKey != null);
 
         Intent intent = new Intent(context, InstanceNotificationDeleteService.class);
-        intent.putExtra(INSTANCE_KEY, instance.getInstanceKey());
+        intent.putExtra(INSTANCE_KEY, instanceKey);
         return intent;
     }
 

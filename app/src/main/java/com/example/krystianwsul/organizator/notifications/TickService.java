@@ -13,9 +13,9 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.domainmodel.Instance;
 import com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity;
 import com.example.krystianwsul.organizator.gui.instances.ShowNotificationGroupActivity;
+import com.example.krystianwsul.organizator.loaders.LoaderData;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -57,72 +57,68 @@ public class TickService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
-        Assert.assertTrue(domainFactory != null);
-
-        ArrayList<Instance> instances = domainFactory.getNotificationInstances();
+        Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        ArrayList<Instance> shownInstances = domainFactory.getShownInstances();
-
-        if (instances.size() > MAX_NOTIFICATIONS) {
-            for (Instance instance : shownInstances)
-                notificationManager.cancel(instance.getNotificationId());
-
-            if (!shownInstances.isEmpty()) {
-                domainFactory.setInstancesNotShown(shownInstances);
-                domainFactory.save();
+        if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) {
+            ArrayList<InstanceKey> shownInstanceKeys = new ArrayList<>();
+            for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas) {
+                shownInstanceKeys.add(shownInstanceData.InstanceKey);
+                notificationManager.cancel(shownInstanceData.NotificationId);
             }
 
-            notify(instances);
+            if (!shownInstanceKeys.isEmpty())
+                DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, null, shownInstanceKeys);
+
+            notify(data.NotificationInstanceDatas);
         } else {
             notificationManager.cancel(0);
 
-            ArrayList<Instance> setNotificationShownInstances = new ArrayList<>();
-            for (Instance instance : shownInstances) {
-                if (!instances.contains(instance)) {
-                    notificationManager.cancel(instance.getNotificationId());
-                    setNotificationShownInstances.add(instance);
+            ArrayList<InstanceKey> notificationInstanceKeys = new ArrayList<>();
+            for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas)
+                notificationInstanceKeys.add(notificationInstanceData.InstanceKey);
+
+            ArrayList<InstanceKey> hideInstanceKeys = new ArrayList<>();
+            for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas) {
+                if (!notificationInstanceKeys.contains(shownInstanceData.InstanceKey)) {
+                    notificationManager.cancel(shownInstanceData.NotificationId);
+                    hideInstanceKeys.add(shownInstanceData.InstanceKey);
                 }
             }
 
-            if (!setNotificationShownInstances.isEmpty()) {
-                domainFactory.setInstancesNotShown(instances);
-                domainFactory.save();
+            ArrayList<InstanceKey> showInstanceKeys = new ArrayList<>();
+            for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas) {
+                showInstanceKeys.add(notificationInstanceData.InstanceKey);
+                notify(notificationInstanceData);
             }
 
-            for (Instance instance : instances)
-                notify(instance);
-
-            if (!instances.isEmpty()) {
-                domainFactory.setInstancesShown(instances);
-                domainFactory.save();
-            }
+            if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
+                DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, showInstanceKeys, hideInstanceKeys);
         }
     }
 
-    private void notify(Instance instance) {
-        Assert.assertTrue(instance != null);
+    private void notify(NotificationInstanceData notificationInstanceData) {
+        Assert.assertTrue(notificationInstanceData != null);
 
-        Intent deleteIntent = InstanceNotificationDeleteService.getIntent(this, instance);
-        PendingIntent pendingDeleteIntent = PendingIntent.getService(this, instance.getNotificationId(), deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent deleteIntent = InstanceNotificationDeleteService.getIntent(this, notificationInstanceData.InstanceKey);
+        PendingIntent pendingDeleteIntent = PendingIntent.getService(this, notificationInstanceData.NotificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        Intent contentIntent = ShowInstanceActivity.getNotificationIntent(instance.getTaskId(), instance.getScheduleDate(), instance.getScheduleCustomTimeId(), instance.getScheduleHourMinute(), this);
-        PendingIntent pendingContentIntent = PendingIntent.getActivity(this, instance.getNotificationId(), contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent contentIntent = ShowInstanceActivity.getNotificationIntent(this, notificationInstanceData.InstanceKey);
+        PendingIntent pendingContentIntent = PendingIntent.getActivity(this, notificationInstanceData.NotificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notify(instance.getName(), instance.getDisplayText(this), instance.getNotificationId(), pendingDeleteIntent, pendingContentIntent);
+        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent);
     }
 
-    private void notify(ArrayList<Instance> instances) {
-        Assert.assertTrue(instances != null);
-        Assert.assertTrue(instances.size() > MAX_NOTIFICATIONS);
+    private void notify(ArrayList<NotificationInstanceData> notificationInstanceDatas) {
+        Assert.assertTrue(notificationInstanceDatas != null);
+        Assert.assertTrue(notificationInstanceDatas.size() > MAX_NOTIFICATIONS);
 
         ArrayList<String> names = new ArrayList<>();
         ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
-        for (Instance instance : instances) {
-            names.add(instance.getName());
-            instanceKeys.add(instance.getInstanceKey());
+        for (NotificationInstanceData notificationInstanceData : notificationInstanceDatas) {
+            names.add(notificationInstanceData.Name);
+            instanceKeys.add(notificationInstanceData.InstanceKey);
         }
 
         Intent deleteIntent = GroupNotificationDeleteService.getIntent(this, instanceKeys);
@@ -131,7 +127,7 @@ public class TickService extends IntentService {
         Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, instanceKeys);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notify(instances.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent);
+        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent);
     }
 
     private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent) {
@@ -144,5 +140,48 @@ public class TickService extends IntentService {
 
         Notification notification = (new NotificationCompat.Builder(this)).setContentTitle(title).setContentText(text).setSmallIcon(R.drawable.ic_label_outline_white_24dp).setSound(Settings.System.DEFAULT_NOTIFICATION_URI).setDeleteIntent(deleteIntent).setContentIntent(contentIntent).setAutoCancel(true).build();
         notificationManager.notify(notificationId, notification);
+    }
+
+    public static class Data extends LoaderData {
+        public final ArrayList<NotificationInstanceData> NotificationInstanceDatas;
+        public final ArrayList<ShownInstanceData> ShownInstanceDatas;
+
+        public Data(ArrayList<NotificationInstanceData> notificationInstanceDatas, ArrayList<ShownInstanceData> shownInstanceDatas) {
+            Assert.assertTrue(notificationInstanceDatas != null);
+            Assert.assertTrue(shownInstanceDatas != null);
+
+            NotificationInstanceDatas = notificationInstanceDatas;
+            ShownInstanceDatas = shownInstanceDatas;
+        }
+    }
+
+    public static class NotificationInstanceData {
+        public final InstanceKey InstanceKey;
+        public final String Name;
+        public final int NotificationId;
+        public final String DisplayText;
+
+        public NotificationInstanceData(InstanceKey instanceKey, String name, int notificationId, String displayText) {
+            Assert.assertTrue(instanceKey != null);
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(!TextUtils.isEmpty(displayText));
+
+            InstanceKey = instanceKey;
+            Name = name;
+            NotificationId = notificationId;
+            DisplayText = displayText;
+        }
+    }
+
+    public static class ShownInstanceData {
+        public final int NotificationId;
+        public final InstanceKey InstanceKey;
+
+        public ShownInstanceData(int notificationId, InstanceKey instanceKey) {
+            Assert.assertTrue(instanceKey != null);
+
+            NotificationId = notificationId;
+            InstanceKey = instanceKey;
+        }
     }
 }

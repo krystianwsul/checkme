@@ -18,6 +18,7 @@ import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 import com.example.krystianwsul.organizator.loaders.SingleScheduleLoader;
 import com.example.krystianwsul.organizator.loaders.TaskListLoader;
 import com.example.krystianwsul.organizator.loaders.WeeklyScheduleLoader;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.DailyScheduleTimeRecord;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
@@ -411,12 +412,30 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void setInstancesNotShown(ArrayList<Instance> instances) {
-        Assert.assertTrue(instances != null);
-        Assert.assertTrue(!instances.isEmpty());
+    public void updateInstancesShown(int dataId, ArrayList<InstanceKey> showInstanceKeys, ArrayList<InstanceKey>hideInstanceKeys) {
+        Assert.assertTrue(hideInstanceKeys != null);
 
-        for (Instance instance : instances)
-            instance.setNotificationShown(false);
+        if (showInstanceKeys != null) {
+            for (InstanceKey showInstanceKey : showInstanceKeys) {
+                Assert.assertTrue(showInstanceKey != null);
+
+                Instance showInstance = getInstance(showInstanceKey);
+                Assert.assertTrue(showInstance != null);
+
+                showInstance.setNotificationShown(true);
+            }
+        }
+
+        for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+            Assert.assertTrue(hideInstanceKey != null);
+
+            Instance hideInstance = getInstance(hideInstanceKey);
+            Assert.assertTrue(hideInstance != null);
+
+            hideInstance.setNotificationShown(false);
+        }
+
+        save(dataId);
     }
 
     public void setInstancesShown(ArrayList<Instance> instances) {
@@ -1360,6 +1379,27 @@ public class DomainFactory {
             rootTaskDatas.add(new TaskListLoader.RootTaskData(rootTask.getId(), rootTask.getName(), rootTask.getScheduleText(context, timeStamp), !rootTask.getChildTasks(timeStamp).isEmpty()));
 
         return new TaskListLoader.Data(rootTaskDatas);
+    }
+
+    public TickService.Data getTickServiceData(Context context)
+    {
+        Assert.assertTrue(context != null);
+
+        ArrayList<Instance> notificationInstances = getNotificationInstances();
+        Assert.assertTrue(notificationInstances != null);
+
+        ArrayList<TickService.NotificationInstanceData> notificationInstanceDatas = new ArrayList<>();
+        for (Instance notificationInstance : notificationInstances)
+            notificationInstanceDatas.add(new TickService.NotificationInstanceData(notificationInstance.getInstanceKey(), notificationInstance.getName(), notificationInstance.getNotificationId(), notificationInstance.getDisplayText(context)));
+
+        ArrayList<Instance> shownInstances = getShownInstances();
+        Assert.assertTrue(shownInstances != null);
+
+        ArrayList<TickService.ShownInstanceData> shownInstanceDatas = new ArrayList<>();
+        for (Instance shownInstance : shownInstances)
+            shownInstanceDatas.add(new TickService.ShownInstanceData(shownInstance.getNotificationId(), shownInstance.getInstanceKey()));
+
+        return new TickService.Data(notificationInstanceDatas, shownInstanceDatas);
     }
 
     public interface Observer {

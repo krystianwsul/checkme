@@ -27,7 +27,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data> {
-    private static final String INTENT_KEY = "instanceId";
+    private static final String INSTANCE_KEY = "instanceKey";
     private static final String SET_NOTIFIED_KEY = "setNotified";
 
     private TextView mShowInstanceName;
@@ -42,13 +42,13 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
 
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
+        intent.putExtra(INSTANCE_KEY, new InstanceKey(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
         return intent;
     }
 
-    public static Intent getNotificationIntent(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute, Context context) {
+    public static Intent getNotificationIntent(Context context, InstanceKey instanceKey) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
+        intent.putExtra(INSTANCE_KEY, instanceKey);
         intent.putExtra(SET_NOTIFIED_KEY, true);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
@@ -81,23 +81,15 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     @Override
     public Loader<ShowInstanceLoader.Data> onCreateLoader(int id, Bundle args) {
         Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
+        Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
+        InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
 
-        int taskId = NewInstanceData.getTaskId(bundle);
-
-        Date date = NewInstanceData.getScheduleDate(bundle);
-        Assert.assertTrue(date != null);
-
-        Integer customTimeId = NewInstanceData.getScheduleCustomTimeId(bundle);
-        HourMinute hourMinute = NewInstanceData.getScheduleHourMinute(bundle);
-
-        if (customTimeId != null) {
-            Assert.assertTrue(hourMinute == null);
-            return new ShowInstanceLoader(this, taskId, date, customTimeId);
+        if (instanceKey.ScheduleCustomTimeId != null) {
+            Assert.assertTrue(instanceKey.ScheduleHourMinute == null);
+            return new ShowInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId);
         } else {
-            Assert.assertTrue(hourMinute != null);
-            return new ShowInstanceLoader(this, taskId, date, hourMinute);
+            Assert.assertTrue(instanceKey.ScheduleHourMinute != null);
+            return new ShowInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleHourMinute);
         }
     }
 

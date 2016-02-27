@@ -26,6 +26,34 @@ public class InstanceKey implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        return TaskId + ScheduleDate.hashCode() + (ScheduleCustomTimeId != null ? ScheduleCustomTimeId : 0) + (ScheduleHourMinute != null ? ScheduleHourMinute.hashCode() : 0);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof InstanceKey))
+            return false;
+
+        if (object == this)
+            return true;
+
+        InstanceKey instanceKey = (InstanceKey) object;
+
+        if (TaskId != instanceKey.TaskId)
+            return false;
+
+        if (!ScheduleDate.equals(instanceKey.ScheduleDate))
+            return false;
+
+        if (ScheduleCustomTimeId == null) {
+            return (instanceKey.ScheduleCustomTimeId == null && ScheduleHourMinute.equals(instanceKey.ScheduleHourMinute));
+        } else {
+            return (instanceKey.ScheduleCustomTimeId != null &&ScheduleCustomTimeId.equals(instanceKey.ScheduleCustomTimeId));
+        }
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

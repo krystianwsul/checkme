@@ -7,6 +7,7 @@ import com.example.krystianwsul.organizator.persistencemodel.CustomTimeRecord;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -118,5 +119,10 @@ public class CustomTime implements Time {
 
     void setCurrent() {
         mCustomTimeRecord.setCurrent(false);
+    }
+
+    @Override
+    public TimePair getTimePair() {
+        return new TimePair(mCustomTimeRecord.getId(), null);
     }
 }

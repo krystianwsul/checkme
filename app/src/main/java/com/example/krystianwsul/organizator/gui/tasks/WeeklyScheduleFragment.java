@@ -135,12 +135,9 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
             ArrayList<DayOfWeekTimeEntry> dayOfWeekTimeEntries = new ArrayList<>();
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
-            for (WeeklyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas) {
-                if (scheduleData.CustomTimeId != null)
-                    dayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(scheduleData.DayOfWeek, scheduleData.CustomTimeId, showDelete));
-                else
-                    dayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(scheduleData.DayOfWeek, scheduleData.HourMinute, showDelete));
-            }
+            for (WeeklyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas)
+                dayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(scheduleData.DayOfWeek, scheduleData.TimePair, showDelete));
+
             mDayOfWeekTimeEntryAdapter = new DayOfWeekTimeEntryAdapter(getContext(), dayOfWeekTimeEntries);
 
             mHourMinutePickerPosition = -1;
@@ -161,7 +158,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         DayOfWeekTimeEntry dayOfWeekTimeEntry = mDayOfWeekTimeEntryAdapter.getDateTimeEntry(mHourMinutePickerPosition);
 
-        dayOfWeekTimeEntry.setHourMinute(hourMinute);
+        dayOfWeekTimeEntry.setTimePair(new TimePair(hourMinute));
         mDayOfWeekTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
         mHourMinutePickerPosition = -1;
@@ -238,7 +235,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
             mContext = context;
             mDateTimeEntries = new ArrayList<>();
-            mDateTimeEntries.add(new DayOfWeekTimeEntry(DayOfWeek.today(), HourMinute.getNow(), false));
+            mDateTimeEntries.add(new DayOfWeekTimeEntry(DayOfWeek.today(), new TimePair(HourMinute.getNow()), false));
         }
 
         public DayOfWeekTimeEntryAdapter(Context context, List<DayOfWeekTimeEntry> dateTimeEntries) {
@@ -313,13 +310,13 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             dayOfWeekTimeHolder.mWeeklyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
                 @Override
                 public void onCustomTimeSelected(int customTimeId) {
-                    dayOfWeekTimeEntry.setCustomTime(customTimeId);
+                    dayOfWeekTimeEntry.setTimePair(new TimePair(customTimeId));
                 }
 
                 @Override
                 public void onHourMinuteSelected(HourMinute hourMinute) {
                     Assert.assertTrue(hourMinute != null);
-                    dayOfWeekTimeEntry.setHourMinute(hourMinute);
+                    dayOfWeekTimeEntry.setTimePair(new TimePair(hourMinute));
                 }
 
                 @Override
@@ -358,7 +355,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
                 notifyItemChanged(0);
             }
 
-            DayOfWeekTimeEntry dayOfWeekTimeEntry = new DayOfWeekTimeEntry(DayOfWeek.today(), HourMinute.getNow(), true);
+            DayOfWeekTimeEntry dayOfWeekTimeEntry = new DayOfWeekTimeEntry(DayOfWeek.today(), new TimePair(HourMinute.getNow()), true);
             mDateTimeEntries.add(position, dayOfWeekTimeEntry);
             notifyItemInserted(position);
         }
@@ -413,24 +410,15 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
     public static class DayOfWeekTimeEntry implements Parcelable {
         private DayOfWeek mDayOfWeek;
-        private Integer mCustomTimeId;
-        private HourMinute mHourMinute;
+        private TimePair mTimePair;
         private boolean mShowDelete = false;
 
-        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, int customTimeId, boolean showDelete) {
+        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, TimePair timePair, boolean showDelete) {
             Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(timePair != null);
 
             mDayOfWeek = dayOfWeek;
-            setCustomTime(customTimeId);
-            mShowDelete = showDelete;
-        }
-
-        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, HourMinute hourMinute, boolean showDelete) {
-            Assert.assertTrue(dayOfWeek != null);
-            Assert.assertTrue(hourMinute != null);
-
-            mDayOfWeek = dayOfWeek;
-            setHourMinute(hourMinute);
+            mTimePair = timePair;
             mShowDelete = showDelete;
         }
 
@@ -439,11 +427,11 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         }
 
         public Integer getCustomTimeId() {
-            return mCustomTimeId;
+            return mTimePair.CustomTimeId;
         }
 
         public HourMinute getHourMinute() {
-            return mHourMinute;
+            return mTimePair.HourMinute;
         }
 
         public void setDayOfWeek(DayOfWeek dayOfWeek) {
@@ -451,16 +439,9 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             mDayOfWeek = dayOfWeek;
         }
 
-        public void setCustomTime(int customTimeId) {
-            mCustomTimeId = customTimeId;
-            mHourMinute = null;
-        }
-
-        public void setHourMinute(HourMinute hourMinute) {
-            Assert.assertTrue(hourMinute != null);
-
-            mHourMinute = hourMinute;
-            mCustomTimeId = null;
+        public void setTimePair(TimePair timePair) {
+            Assert.assertTrue(timePair != null);
+            mTimePair = timePair;
         }
 
         @Override
@@ -470,40 +451,20 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
-            Assert.assertTrue((mCustomTimeId == null) != (mHourMinute == null));
-
             out.writeSerializable(mDayOfWeek);
-
-            if (mCustomTimeId == null) {
-                out.writeInt(-1);
-                out.writeInt(mHourMinute.getHour());
-                out.writeInt(mHourMinute.getMinute());
-            } else {
-                out.writeInt(mCustomTimeId);
-                out.writeInt(-1);
-                out.writeInt(-1);
-            }
-
+            out.writeParcelable(mTimePair, 0);
             out.writeInt(mShowDelete ? 1 : 0);
         }
 
         public static final Parcelable.Creator<DayOfWeekTimeEntry> CREATOR = new Creator<DayOfWeekTimeEntry>() {
             public DayOfWeekTimeEntry createFromParcel(Parcel in) {
                 DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
-                int customTimeId = in.readInt();
-                int hour = in.readInt();
-                int minute = in.readInt();
+                TimePair timePair = in.readParcelable(TimePair.class.getClassLoader());
                 int showDeleteInt = in.readInt();
                 Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
                 boolean showDelete = (showDeleteInt == 1);
 
-                Assert.assertTrue((hour == -1) == (minute == -1));
-                Assert.assertTrue((hour == -1) != (customTimeId == -1));
-
-                if (customTimeId != -1)
-                    return new DayOfWeekTimeEntry(dayOfWeek, customTimeId, showDelete);
-                else
-                    return new DayOfWeekTimeEntry(dayOfWeek, new HourMinute(hour, minute), showDelete);
+                return new DayOfWeekTimeEntry(dayOfWeek, timePair, showDelete);
             }
 
             public DayOfWeekTimeEntry[] newArray(int size) {

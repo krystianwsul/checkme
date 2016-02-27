@@ -9,6 +9,7 @@ import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -93,22 +94,20 @@ public class EditInstanceLoader extends AsyncTaskLoader<EditInstanceLoader.Data>
     public static class Data extends LoaderData {
         public final InstanceKey InstanceKey;
         public final Date InstanceDate;
-        public final Integer InstanceCustomTimeId;
-        public final HourMinute InstanceHourMinute;
+        public final TimePair InstanceTimePair;
         public final String Name;
         public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(InstanceKey instanceKey, Date instanceDate, Integer instanceCustomTimeId, HourMinute instanceHourMinute, String name, HashMap<Integer, CustomTimeData> customTimeDatas) {
+        public Data(InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair, String name, HashMap<Integer, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(instanceDate != null);
-            Assert.assertTrue((instanceCustomTimeId == null) != (instanceHourMinute == null));
+            Assert.assertTrue(instanceTimePair != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(customTimeDatas != null);
 
             InstanceKey = instanceKey;
             InstanceDate = instanceDate;
-            InstanceCustomTimeId = instanceCustomTimeId;
-            InstanceHourMinute = instanceHourMinute;
+            InstanceTimePair = instanceTimePair;
             Name = name;
             CustomTimeDatas = customTimeDatas;
         }

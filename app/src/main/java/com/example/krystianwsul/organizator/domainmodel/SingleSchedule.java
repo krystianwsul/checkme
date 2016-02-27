@@ -7,6 +7,7 @@ import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -74,5 +75,9 @@ public class SingleSchedule extends Schedule {
     public HourMinute getHourMinute() {
         Assert.assertTrue(mSingleScheduleDateTime != null);
         return mSingleScheduleDateTime.getHourMinute();
+    }
+
+    public TimePair getTimePair() {
+        return new TimePair(getCustomTimeId(), getHourMinute());
     }
 }

@@ -8,6 +8,7 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -101,16 +102,14 @@ public class SingleScheduleLoader extends AsyncTaskLoader<SingleScheduleLoader.D
 
     public static class ScheduleData {
         public final Date Date;
-        public final Integer CustomTimeId;
-        public final HourMinute HourMinute;
+        public final TimePair TimePair;
 
-        public ScheduleData(Date date, Integer customTimeId, HourMinute hourMinute) {
+        public ScheduleData(Date date, TimePair timePair) {
             Assert.assertTrue(date != null);
-            Assert.assertTrue((customTimeId == null) != (hourMinute == null));
+            Assert.assertTrue(timePair != null);
 
             Date = date;
-            CustomTimeId = customTimeId;
-            HourMinute = hourMinute;
+            TimePair = timePair;
         }
     }
 

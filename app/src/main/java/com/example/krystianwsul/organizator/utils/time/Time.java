@@ -8,4 +8,5 @@ public interface Time {
     String getName();
     HourMinute getHourMinute(DayOfWeek dayOfWeek);
     Pair<CustomTime, HourMinute> getPair();
+    TimePair getTimePair();
 }

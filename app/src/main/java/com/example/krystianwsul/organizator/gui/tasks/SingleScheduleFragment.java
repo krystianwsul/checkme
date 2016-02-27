@@ -206,8 +206,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         Bundle args = getArguments();
 
-        Integer customTimeId = null;
-        HourMinute hourMinute = null;
         if (mSavedInstanceState != null) {
             int year = mSavedInstanceState.getInt(YEAR_KEY, -1);
             int month = mSavedInstanceState.getInt(MONTH_KEY, -1);
@@ -222,10 +220,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             Assert.assertTrue(mData.ScheduleData != null);
 
             mDate = mData.ScheduleData.Date;
-
-            customTimeId = mData.ScheduleData.CustomTimeId;
-            hourMinute = mData.ScheduleData.HourMinute;
-            Assert.assertTrue((customTimeId == null) != (hourMinute == null));
         } else {
             mDate = Date.today();
         }
@@ -237,11 +231,9 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
             customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name, customTimeData.HourMinutes));
         mTimePickerView.setCustomTimeDatas(customTimeDatas);
 
-        if (mSavedInstanceState == null) {
-            if (customTimeId != null)
-                mTimePickerView.setCustomTimeId(customTimeId);
-            else if (hourMinute != null)
-                mTimePickerView.setHourMinute(hourMinute);
+        if (mSavedInstanceState == null && args != null) {
+            Assert.assertTrue(mData.ScheduleData != null);
+            mTimePickerView.setTimePair(mData.ScheduleData.TimePair);
         }
     }
 

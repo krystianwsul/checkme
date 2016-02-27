@@ -23,15 +23,12 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class TickService extends IntentService {
-    private static boolean mRegistered = false;
+    private static boolean sRegistered = false;
 
     private static final int MAX_NOTIFICATIONS = 4;
 
-    public static final String INSTANCE_KEY = "instance";
-    public static final String INSTANCES_KEY = "instances";
-
     public static synchronized void register(Context context) {
-        if (mRegistered)
+        if (sRegistered)
             return;
 
         Intent intent = new Intent(context, TickService.class);
@@ -42,7 +39,7 @@ public class TickService extends IntentService {
 
         alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, 60 * 1000, pendingIntent);
 
-        mRegistered = true;
+        sRegistered = true;
     }
 
     public static void startService(Context context) {

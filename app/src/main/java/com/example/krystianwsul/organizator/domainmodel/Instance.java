@@ -10,6 +10,7 @@ import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -373,5 +374,9 @@ public class Instance {
 
     public InstanceKey getInstanceKey() {
         return new InstanceKey(getTaskId(), getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute());
+    }
+
+    public TimePair getInstanceTimePair() {
+        return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
     }
 }

@@ -132,14 +132,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
             Assert.assertTrue(mDate != null);
         } else {
             mDate = mData.InstanceDate;
-
-            if (mData.InstanceCustomTimeId != null) {
-                Assert.assertTrue(mData.InstanceHourMinute == null);
-                mEditInstanceTimePickerView.setCustomTimeId(mData.InstanceCustomTimeId);
-            } else {
-                Assert.assertTrue(mData.InstanceHourMinute != null);
-                mEditInstanceTimePickerView.setHourMinute(mData.InstanceHourMinute);
-            }
+            mEditInstanceTimePickerView.setTimePair(mData.InstanceTimePair);
         }
 
         mEditInstanceName.setText(mData.Name);

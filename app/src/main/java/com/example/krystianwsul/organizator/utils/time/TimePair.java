@@ -16,6 +16,16 @@ public class TimePair implements Parcelable {
         HourMinute = hourMinute;
     }
 
+    public TimePair(Integer customTimeId) {
+        CustomTimeId = customTimeId;
+        HourMinute = null;
+    }
+
+    public TimePair(HourMinute hourMinute) {
+        CustomTimeId = null;
+        HourMinute = hourMinute;
+    }
+
     @Override
     public int describeContents() {
         return 0;

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -101,16 +102,14 @@ public class WeeklyScheduleLoader extends AsyncTaskLoader<WeeklyScheduleLoader.D
 
     public static class ScheduleData {
         public final DayOfWeek DayOfWeek;
-        public final Integer CustomTimeId;
-        public final HourMinute HourMinute;
+        public final TimePair TimePair;
 
-        public ScheduleData(DayOfWeek dayOfWeek, Integer customTimeId, HourMinute hourMinute) {
+        public ScheduleData(DayOfWeek dayOfWeek, TimePair timePair) {
             Assert.assertTrue(dayOfWeek != null);
-            Assert.assertTrue((customTimeId == null) != (hourMinute == null));
+            Assert.assertTrue(timePair != null);
 
             DayOfWeek = dayOfWeek;
-            CustomTimeId = customTimeId;
-            HourMinute = hourMinute;
+            TimePair = timePair;
         }
     }
 

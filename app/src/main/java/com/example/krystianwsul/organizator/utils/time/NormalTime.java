@@ -35,7 +35,13 @@ public class NormalTime implements Time {
         return mHourMinute.toString();
     }
 
+    @Override
     public Pair<CustomTime, HourMinute> getPair() {
         return new Pair<>(null, mHourMinute);
+    }
+
+    @Override
+    public TimePair getTimePair() {
+        return new TimePair(null, mHourMinute);
     }
 }

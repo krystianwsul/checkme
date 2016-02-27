@@ -166,6 +166,16 @@ public class TimePickerView extends LinearLayout {
         mOnTimeSelectedListener = onTimeSelectedListener;
     }
 
+    public void setTimePair(TimePair timePair) {
+        if (timePair.CustomTimeId != null) {
+            Assert.assertTrue(timePair.HourMinute == null);
+            setCustomTimeId(timePair.CustomTimeId);
+        } else {
+            Assert.assertTrue(timePair.HourMinute != null);
+            setHourMinute(timePair.HourMinute);
+        }
+    }
+
     public void setHourMinute(HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
 

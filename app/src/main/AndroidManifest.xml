@@ -50,7 +50,7 @@
             android:exported="false" />
         <service
             android:name=".notifications.InstanceNotificationDeleteService"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>

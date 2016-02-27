@@ -167,7 +167,7 @@ public class DomainFactory {
         for (CustomTime customTime : getCurrentCustomTimes())
             customTimeDatas.put(customTime.getId(), new EditInstanceLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceCustomTimeId(), instance.getInstanceHourMinute(), instance.getName(), customTimeDatas);
+        return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas);
     }
 
     public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
@@ -319,7 +319,7 @@ public class DomainFactory {
             Assert.assertTrue(singleSchedule != null);
             Assert.assertTrue(singleSchedule.current(TimeStamp.getNow()));
 
-            scheduleData = new SingleScheduleLoader.ScheduleData(singleSchedule.getDateTime().getDate(), singleSchedule.getCustomTimeId(), singleSchedule.getHourMinute());
+            scheduleData = new SingleScheduleLoader.ScheduleData(singleSchedule.getDateTime().getDate(), singleSchedule.getTimePair());
         }
 
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
@@ -342,12 +342,8 @@ public class DomainFactory {
             Assert.assertTrue(dailySchedule.current(TimeStamp.getNow()));
 
             scheduleDatas = new ArrayList<>();
-            for (Time time : dailySchedule.getTimes()) {
-                if (time instanceof CustomTime)
-                    scheduleDatas.add(new DailyScheduleLoader.ScheduleData(((CustomTime)time).getId(), null));
-                else
-                    scheduleDatas.add(new DailyScheduleLoader.ScheduleData(null, ((NormalTime)time).getHourMinute()));
-            }
+            for (Time time : dailySchedule.getTimes())
+                scheduleDatas.add(new DailyScheduleLoader.ScheduleData(time.getTimePair()));
         }
 
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
@@ -370,12 +366,8 @@ public class DomainFactory {
             Assert.assertTrue(weeklySchedule.current(TimeStamp.getNow()));
 
             scheduleDatas = new ArrayList<>();
-            for (Pair<DayOfWeek, Time> pair : weeklySchedule.getDayOfWeekTimes()) {
-                if (pair.second instanceof CustomTime)
-                    scheduleDatas.add(new WeeklyScheduleLoader.ScheduleData(pair.first, ((CustomTime)pair.second).getId(), null));
-                else
-                    scheduleDatas.add(new WeeklyScheduleLoader.ScheduleData(pair.first, null, ((NormalTime)pair.second).getHourMinute()));
-            }
+            for (Pair<DayOfWeek, Time> pair : weeklySchedule.getDayOfWeekTimes())
+                scheduleDatas.add(new WeeklyScheduleLoader.ScheduleData(pair.first, pair.second.getTimePair()));
         }
 
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();

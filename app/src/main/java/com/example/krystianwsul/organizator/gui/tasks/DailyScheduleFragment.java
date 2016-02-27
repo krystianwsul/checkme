@@ -128,12 +128,9 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
             ArrayList<TimeEntry> timeEntries = new ArrayList<>();
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
-            for (DailyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas) {
-                if (scheduleData.CustomTimeId != null)
-                    timeEntries.add(new TimeEntry(scheduleData.CustomTimeId, showDelete));
-                else
-                    timeEntries.add(new TimeEntry(scheduleData.HourMinute, showDelete));
-            }
+            for (DailyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas)
+                timeEntries.add(new TimeEntry(scheduleData.TimePair, showDelete));
+
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
 
             mHourMinutePickerPosition = -1;
@@ -155,7 +152,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
         TimeEntry timeEntry = mTimeEntryAdapter.getTimeEntry(mHourMinutePickerPosition);
         Assert.assertTrue(timeEntry != null);
 
-        timeEntry.setHourMinute(hourMinute);
+        timeEntry.setTimePair(new TimePair(hourMinute));
         mTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
         mHourMinutePickerPosition = -1;
@@ -239,7 +236,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
             mContext = context;
             mTimeEntries = new ArrayList<>();
-            mTimeEntries.add(new TimeEntry(HourMinute.getNow(), false));
+            mTimeEntries.add(new TimeEntry(new TimePair(HourMinute.getNow()), false));
         }
 
         public TimeEntryAdapter(Context context, List<TimeEntry> timeEntries) {
@@ -291,12 +288,12 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             timeHolder.mDailyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
                 @Override
                 public void onCustomTimeSelected(int customTimeId) {
-                    timeEntry.setCustomTimeId(customTimeId);
+                    timeEntry.setTimePair(new TimePair(customTimeId));
                 }
 
                 @Override
                 public void onHourMinuteSelected(HourMinute hourMinute) {
-                    timeEntry.setHourMinute(hourMinute);
+                    timeEntry.setTimePair(new TimePair(hourMinute));
                 }
 
                 @Override
@@ -335,7 +332,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
                 notifyItemChanged(0);
             }
 
-            TimeEntry timeEntry = new TimeEntry(HourMinute.getNow(), true);
+            TimeEntry timeEntry = new TimeEntry(new TimePair(HourMinute.getNow()), true);
             mTimeEntries.add(position, timeEntry);
             notifyItemInserted(position);
         }
@@ -377,40 +374,24 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     }
 
     public static class TimeEntry implements Parcelable {
-        private Integer mCustomTimeId;
-        private HourMinute mHourMinute;
+        private TimePair mTimePair;
         private boolean mShowDelete;
 
-        public TimeEntry(int customTimeId, boolean showDelete) {
-            setCustomTimeId(customTimeId);
-            mShowDelete = showDelete;
-        }
-
-        public TimeEntry(HourMinute hourMinute, boolean showDelete) {
-            Assert.assertTrue(hourMinute != null);
-
-            setHourMinute(hourMinute);
+        public TimeEntry(TimePair timePair, boolean showDelete) {
+            mTimePair = timePair;
             mShowDelete = showDelete;
         }
 
         public Integer getCustomTimeId() {
-            return mCustomTimeId;
+            return mTimePair.CustomTimeId;
         }
 
         public HourMinute getHourMinute() {
-            return mHourMinute;
+            return mTimePair.HourMinute;
         }
 
-        public void setCustomTimeId(int customTimeId) {
-            mCustomTimeId = customTimeId;
-            mHourMinute = null;
-        }
-
-        public void setHourMinute(HourMinute hourMinute) {
-            Assert.assertTrue(hourMinute != null);
-
-            mHourMinute = hourMinute;
-            mCustomTimeId = null;
+        public void setTimePair(TimePair timePair) {
+            mTimePair = timePair;
         }
 
         @Override
@@ -420,40 +401,20 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
-            Assert.assertTrue((mCustomTimeId == null) != (mHourMinute == null));
-
-            if (mCustomTimeId != null)
-                out.writeInt(mCustomTimeId);
-            else
-                out.writeInt(-1);
-
-            if (mHourMinute != null) {
-                out.writeInt(mHourMinute.getHour());
-                out.writeInt(mHourMinute.getMinute());
-            } else {
-                out.writeInt(-1);
-                out.writeInt(-1);
-            }
-
+            out.writeParcelable(mTimePair, 0);
             out.writeInt(mShowDelete ? 1 : 0);
         }
 
         public static final Parcelable.Creator<TimeEntry> CREATOR = new Parcelable.Creator<TimeEntry>() {
             public TimeEntry createFromParcel(Parcel in) {
-                int customTimeId = in.readInt();
-                int hour = in.readInt();
-                int minute = in.readInt();
+                TimePair timePair = in.readParcelable(TimePair.class.getClassLoader());
+                Assert.assertTrue(timePair != null);
+
                 int showDeleteInt = in.readInt();
                 Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
                 boolean showDelete = (showDeleteInt == 1);
 
-                Assert.assertTrue((hour == -1) == (minute == -1));
-                Assert.assertTrue((hour == -1) != (customTimeId == -1));
-
-                if (customTimeId != -1)
-                    return new TimeEntry(customTimeId, showDelete);
-                else
-                    return new TimeEntry(new HourMinute(hour, minute), showDelete);
+                return new TimeEntry(timePair, showDelete);
             }
 
             public TimeEntry[] newArray(int size) {

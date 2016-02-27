@@ -51,11 +51,6 @@ public class TimeStamp implements Comparable<TimeStamp> {
         return mLong.compareTo(timeStamp.getLong());
     }
 
-    public boolean equals(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
-        return (compareTo(timeStamp) == 0);
-    }
-
     public Long getLong() {
         return mLong;
     }
@@ -68,14 +63,17 @@ public class TimeStamp implements Comparable<TimeStamp> {
         return mLong.hashCode();
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof TimeStamp))
+    public boolean equals(Object object) {
+        if (object == null)
             return false;
 
-        if (obj == this)
+        if (!(object instanceof TimeStamp))
+            return false;
+
+        if (object == this)
             return true;
 
-        TimeStamp other = (TimeStamp) obj;
+        TimeStamp other = (TimeStamp) object;
         return mLong.equals(other.getLong());
     }
 }

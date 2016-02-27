@@ -41,9 +41,14 @@ public class DateTime implements Comparable<DateTime> {
         return myHourMinute.compareTo(otherHourMinute);
     }
 
-    public boolean equals(DateTime dateTime) {
-        Assert.assertTrue(dateTime != null);
-        return (compareTo(dateTime) == 0);
+    @Override
+    public int hashCode() {
+        return mDate.hashCode() + mTime.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return ((object != null) && (object instanceof DateTime) && (object == this || compareTo((DateTime) object) == 0));
     }
 
     public String toString() {

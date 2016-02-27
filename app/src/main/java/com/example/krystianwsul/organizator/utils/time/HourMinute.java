@@ -4,8 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import junit.framework.Assert;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -44,9 +42,14 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable {
         return mMinute.compareTo(hourMinute.getMinute());
     }
 
-    public boolean equals(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-        return (compareTo(hourMinute) == 0);
+    @Override
+    public int hashCode() {
+        return mHour + mMinute;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return ((object != null) && (object instanceof HourMinute) && (object == this || compareTo((HourMinute) object) == 0));
     }
 
     @SuppressWarnings({"deprecation"})

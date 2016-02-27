@@ -32,6 +32,9 @@ public class InstanceKey implements Parcelable {
 
     @Override
     public boolean equals(Object object) {
+        if (object == null)
+            return false;
+
         if (!(object instanceof InstanceKey))
             return false;
 

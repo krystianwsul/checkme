@@ -60,9 +60,14 @@ public class Date implements Comparable<Date>, Parcelable {
         return mDay.compareTo(date.getDay());
     }
 
-    public boolean equals(Date date) {
-        Assert.assertTrue(date != null);
-        return (compareTo(date) == 0);
+    @Override
+    public int hashCode() {
+        return mYear + mMonth + mDay;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return ((object != null) && (object instanceof Date) && ((object == this) || (compareTo((Date) object) == 0)));
     }
 
     public DayOfWeek getDayOfWeek() {

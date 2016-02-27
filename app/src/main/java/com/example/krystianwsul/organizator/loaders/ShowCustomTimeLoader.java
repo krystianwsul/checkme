@@ -27,10 +27,7 @@ public class ShowCustomTimeLoader extends AsyncTaskLoader<ShowCustomTimeLoader.D
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getShowCustomTimeData(mCustomTimeId);
+        Data data = DomainFactory.getDomainFactory(getContext()).getShowCustomTimeData(mCustomTimeId);
         Assert.assertTrue(data != null);
 
         return data;

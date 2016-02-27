@@ -48,20 +48,17 @@ public class EditInstanceLoader extends AsyncTaskLoader<EditInstanceLoader.Data>
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
         if (mCustomTimeId != null) {
             Assert.assertTrue(mHourMinute == null);
 
-            Data data = domainFactory.getEditInstanceData(mTaskId, mDate, mCustomTimeId);
+            Data data = DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mTaskId, mDate, mCustomTimeId);
             Assert.assertTrue(data != null);
 
             return data;
         } else  {
             Assert.assertTrue(mHourMinute != null);
 
-            Data data = domainFactory.getEditInstanceData(mTaskId, mDate, mHourMinute);
+            Data data = DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mTaskId, mDate, mHourMinute);
             Assert.assertTrue(data != null);
 
             return data;

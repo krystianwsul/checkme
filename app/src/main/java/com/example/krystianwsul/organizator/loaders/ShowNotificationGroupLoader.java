@@ -32,10 +32,7 @@ public class ShowNotificationGroupLoader extends AsyncTaskLoader<ShowNotificatio
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getShowNotificationGroupData(getContext(), mInstanceKeys);
+        Data data = DomainFactory.getDomainFactory(getContext()).getShowNotificationGroupData(getContext(), mInstanceKeys);
         Assert.assertTrue(data != null);
 
         return data;

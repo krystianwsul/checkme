@@ -21,10 +21,7 @@ public class TaskListLoader extends AsyncTaskLoader<TaskListLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getTaskListData(getContext());
+        Data data = DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext());
         Assert.assertTrue(data != null);
 
         return data;

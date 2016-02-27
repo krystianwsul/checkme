@@ -28,10 +28,7 @@ public class SingleScheduleLoader extends AsyncTaskLoader<SingleScheduleLoader.D
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getSingleScheduleData(mRootTaskId);
+        Data data = DomainFactory.getDomainFactory(getContext()).getSingleScheduleData(mRootTaskId);
         Assert.assertTrue(data != null);
 
         return data;

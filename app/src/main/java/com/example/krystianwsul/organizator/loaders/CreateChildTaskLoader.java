@@ -23,10 +23,7 @@ public class CreateChildTaskLoader extends AsyncTaskLoader<CreateChildTaskLoader
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getCreateChildTaskData(mChildTaskId);
+        Data data = DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mChildTaskId);
         Assert.assertTrue(data != null);
 
         return data;

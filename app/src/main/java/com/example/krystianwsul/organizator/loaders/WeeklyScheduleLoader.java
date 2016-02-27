@@ -28,10 +28,7 @@ public class WeeklyScheduleLoader extends AsyncTaskLoader<WeeklyScheduleLoader.D
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getWeeklyScheduleData(mRootTaskId);
+        Data data = DomainFactory.getDomainFactory(getContext()).getWeeklyScheduleData(mRootTaskId);
         Assert.assertTrue(data != null);
 
         return data;

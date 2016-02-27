@@ -19,6 +19,7 @@ import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TimePickerView;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
@@ -28,7 +29,7 @@ import junit.framework.Assert;
 import java.util.HashMap;
 
 public class EditInstanceActivity extends AppCompatActivity implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, LoaderManager.LoaderCallbacks<EditInstanceLoader.Data> {
-    private static final String INTENT_KEY = "instanceData";
+    private static final String INSTANCE_KEY = "instanceKey";
     private static final String DATE_KEY = "date";
 
     private Date mDate;
@@ -42,7 +43,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
     public static Intent getIntent(Context context, int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
-        intent.putExtra(INTENT_KEY, NewInstanceData.getBundle(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
+        intent.putExtra(INSTANCE_KEY, new InstanceKey(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute));
         return intent;
     }
 
@@ -108,23 +109,15 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
     @Override
     public Loader<EditInstanceLoader.Data> onCreateLoader(int id, Bundle args) {
         Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        Bundle bundle = intent.getParcelableExtra(INTENT_KEY);
+        Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
+        InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
 
-        int taskId = NewInstanceData.getTaskId(bundle);
-
-        Date date = NewInstanceData.getScheduleDate(bundle);
-        Assert.assertTrue(date != null);
-
-        Integer customTimeId = NewInstanceData.getScheduleCustomTimeId(bundle);
-        HourMinute hourMinute = NewInstanceData.getScheduleHourMinute(bundle);
-
-        if (customTimeId != null) {
-            Assert.assertTrue(hourMinute == null);
-            return new EditInstanceLoader(this, taskId, date, customTimeId);
+        if (instanceKey.ScheduleCustomTimeId != null) {
+            Assert.assertTrue(instanceKey.ScheduleHourMinute == null);
+            return new EditInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleCustomTimeId);
         } else {
-            Assert.assertTrue(hourMinute != null);
-            return new EditInstanceLoader(this, taskId, date, hourMinute);
+            Assert.assertTrue(instanceKey.ScheduleHourMinute != null);
+            return new EditInstanceLoader(this, instanceKey.TaskId, instanceKey.ScheduleDate, instanceKey.ScheduleHourMinute);
         }
     }
 

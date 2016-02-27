@@ -26,10 +26,7 @@ public class GroupListLoader extends AsyncTaskLoader<GroupListLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getGroupListData(getContext());
+        Data data = DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext());
         Assert.assertTrue(data != null);
 
         return data;

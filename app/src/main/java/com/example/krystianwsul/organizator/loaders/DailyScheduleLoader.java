@@ -28,10 +28,7 @@ public class DailyScheduleLoader extends AsyncTaskLoader<DailyScheduleLoader.Dat
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getDailyScheduleData(mRootTaskId);
+        Data data = DomainFactory.getDomainFactory(getContext()).getDailyScheduleData(mRootTaskId);
         Assert.assertTrue(data != null);
 
         return data;

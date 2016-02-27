@@ -25,10 +25,7 @@ public class ShowTaskLoader extends AsyncTaskLoader<ShowTaskLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getShowTaskData(mTaskId, getContext());
+        Data data = DomainFactory.getDomainFactory(getContext()).getShowTaskData(mTaskId, getContext());
         Assert.assertTrue(data != null);
 
         return data;

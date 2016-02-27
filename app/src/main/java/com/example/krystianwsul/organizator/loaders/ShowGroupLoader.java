@@ -29,10 +29,7 @@ public class ShowGroupLoader extends AsyncTaskLoader<ShowGroupLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
-        Data data = domainFactory.getShowGroupData(getContext(), mTimeStamp);
+        Data data = DomainFactory.getDomainFactory(getContext()).getShowGroupData(getContext(), mTimeStamp);
         Assert.assertTrue(data != null);
 
         return data;

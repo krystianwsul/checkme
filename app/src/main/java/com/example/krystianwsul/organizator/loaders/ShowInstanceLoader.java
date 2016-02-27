@@ -48,20 +48,17 @@ public class ShowInstanceLoader extends AsyncTaskLoader<ShowInstanceLoader.Data>
 
     @Override
     public Data loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-        Assert.assertTrue(domainFactory != null);
-
         if (mCustomTimeId != null) {
             Assert.assertTrue(mHourMinute == null);
 
-            Data data = domainFactory.getShowInstanceData(getContext(), mTaskId, mDate, mCustomTimeId);
+            Data data = DomainFactory.getDomainFactory(getContext()).getShowInstanceData(getContext(), mTaskId, mDate, mCustomTimeId);
             Assert.assertTrue(data != null);
 
             return data;
         } else  {
             Assert.assertTrue(mHourMinute != null);
 
-            Data data = domainFactory.getShowInstanceData(getContext(), mTaskId, mDate, mHourMinute);
+            Data data = DomainFactory.getDomainFactory(getContext()).getShowInstanceData(getContext(), mTaskId, mDate, mHourMinute);
             Assert.assertTrue(data != null);
 
             return data;

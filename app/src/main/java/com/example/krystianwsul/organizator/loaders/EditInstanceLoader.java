@@ -55,7 +55,7 @@ public class EditInstanceLoader extends AsyncTaskLoader<EditInstanceLoader.Data>
 
         if (mObserver == null) {
             mObserver = new Observer();
-            DomainFactory.addDomainObserver(mObserver);
+            DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
         }
 
         if (takeContentChanged() || mData == null)
@@ -75,7 +75,7 @@ public class EditInstanceLoader extends AsyncTaskLoader<EditInstanceLoader.Data>
             mData = null;
 
         if (mObserver != null) {
-            DomainFactory.removeDomainObserver(mObserver);
+            DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
             mObserver = null;
         }
     }

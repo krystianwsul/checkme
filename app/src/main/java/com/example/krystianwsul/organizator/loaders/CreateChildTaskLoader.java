@@ -47,7 +47,7 @@ public class CreateChildTaskLoader extends AsyncTaskLoader<CreateChildTaskLoader
 
         if (mObserver == null) {
             mObserver = new Observer();
-            DomainFactory.addDomainObserver(mObserver);
+            DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
         }
 
         if (takeContentChanged() || mData == null)
@@ -67,7 +67,7 @@ public class CreateChildTaskLoader extends AsyncTaskLoader<CreateChildTaskLoader
             mData = null;
 
         if (mObserver != null) {
-            DomainFactory.removeDomainObserver(mObserver);
+            DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
             mObserver = null;
         }
     }

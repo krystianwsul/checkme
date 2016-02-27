@@ -51,7 +51,7 @@ public class ShowCustomTimeLoader extends AsyncTaskLoader<ShowCustomTimeLoader.D
 
         if (mObserver == null) {
             mObserver = new Observer();
-            DomainFactory.addDomainObserver(mObserver);
+            DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
         }
 
         if (takeContentChanged() || mData == null)
@@ -71,7 +71,7 @@ public class ShowCustomTimeLoader extends AsyncTaskLoader<ShowCustomTimeLoader.D
             mData = null;
 
         if (mObserver != null) {
-            DomainFactory.removeDomainObserver(mObserver);
+            DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
             mObserver = null;
         }
     }

@@ -6,11 +6,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class MySQLiteHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "tasks.db";
-    public static final int DATABASE_VERSION = 21;
+    public static final int DATABASE_VERSION = 22;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
-    public synchronized static SQLiteDatabase getDatabase(Context context) {
+    public static SQLiteDatabase getDatabase(Context context) {
         if (sSQLiteDatabase == null)
             sSQLiteDatabase = new MySQLiteHelper(context.getApplicationContext()).getWritableDatabase();
         return sSQLiteDatabase;

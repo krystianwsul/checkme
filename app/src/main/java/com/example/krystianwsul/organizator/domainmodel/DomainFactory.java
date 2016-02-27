@@ -57,26 +57,30 @@ public class DomainFactory {
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
-    private static ArrayList<Observer> sObservers = new ArrayList<>();
+    private final ArrayList<Observer> mObservers = new ArrayList<>();
 
-    public static DomainFactory getDomainFactory(Context context) {
+    private static DomainFactory sDomainFactory;
+
+    public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
 
-        DomainFactory domainFactory = new DomainFactory(context);
-        domainFactory.initialize();
-        return domainFactory;
+        if (sDomainFactory == null) {
+            sDomainFactory = new DomainFactory(context);
+            sDomainFactory.initialize();
+        }
+        return sDomainFactory;
     }
 
-    public static synchronized void addDomainObserver(Observer observer) {
+    public synchronized void addDomainObserver(Observer observer) {
         Assert.assertTrue(observer != null);
-        sObservers.add(observer);
+        mObservers.add(observer);
     }
 
-    public static synchronized void removeDomainObserver(Observer observer) {
+    public synchronized void removeDomainObserver(Observer observer) {
         Assert.assertTrue(observer != null);
-        Assert.assertTrue(sObservers.contains(observer));
+        Assert.assertTrue(mObservers.contains(observer));
 
-        sObservers.remove(observer);
+        mObservers.remove(observer);
     }
 
     private DomainFactory(Context context) {
@@ -146,14 +150,14 @@ public class DomainFactory {
         notifyDomainObservers(dataId);
     }
 
-    private synchronized void notifyDomainObservers(int dataId) {
-        for (Observer observer : sObservers)
+    private void notifyDomainObservers(int dataId) {
+        for (Observer observer : mObservers)
             observer.onDomainChanged(dataId);
     }
 
     // gets
 
-    public EditInstanceLoader.Data getEditInstanceData(InstanceKey instanceKey) {
+    public synchronized EditInstanceLoader.Data getEditInstanceData(InstanceKey instanceKey) {
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);
@@ -166,7 +170,7 @@ public class DomainFactory {
         return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceCustomTimeId(), instance.getInstanceHourMinute(), instance.getName(), customTimeDatas);
     }
 
-    public ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
+    public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
         CustomTime customTime = mCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
 
@@ -181,7 +185,7 @@ public class DomainFactory {
         return new ShowCustomTimeLoader.Data(customTime.getId(), customTime.getName(), hourMinutes);
     }
 
-    public ShowCustomTimesLoader.Data getShowCustomTimesData() {
+    public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
 
         ArrayList<ShowCustomTimesLoader.Data.Entry> entries = new ArrayList<>();
@@ -193,7 +197,7 @@ public class DomainFactory {
         return new ShowCustomTimesLoader.Data(entries);
     }
 
-    public GroupListLoader.Data getGroupListData(Context context) {
+    public synchronized GroupListLoader.Data getGroupListData(Context context) {
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.add(Calendar.DATE, 2);
         Date endDate = new Date(endCalendar);
@@ -211,7 +215,7 @@ public class DomainFactory {
         return new GroupListLoader.Data(instanceDatas, customTimeDatas);
     }
 
-    public ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
+    public synchronized ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
 
@@ -249,7 +253,7 @@ public class DomainFactory {
         return new ShowGroupLoader.Data(displayText, instanceDatas);
     }
 
-    public ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<InstanceKey> instanceKeys) {
+    public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
@@ -276,7 +280,7 @@ public class DomainFactory {
         return new ShowNotificationGroupLoader.Data(instanceDatas);
     }
 
-    public ShowInstanceLoader.Data getShowInstanceData(Context context, InstanceKey instanceKey) {
+    public synchronized ShowInstanceLoader.Data getShowInstanceData(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -290,21 +294,21 @@ public class DomainFactory {
         return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context), instance.getDone() != null, !instance.getChildInstances().isEmpty(), instanceDatas);
     }
 
-    public CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {
+    public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {
         Task childTask = mTasks.get(childTaskId);
         Assert.assertTrue(childTask != null);
 
         return new CreateChildTaskLoader.Data(childTask.getName());
     }
 
-    public CreateRootTaskLoader.Data getCreateRootTaskData(int rootTaskId) {
+    public synchronized CreateRootTaskLoader.Data getCreateRootTaskData(int rootTaskId) {
         Task rootTask = mTasks.get(rootTaskId);
         Assert.assertTrue(rootTask != null);
 
         return new CreateRootTaskLoader.Data(rootTask.getName(), rootTask.getCurrentSchedule(TimeStamp.getNow()).getType());
     }
 
-    public SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
+    public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
         SingleScheduleLoader.ScheduleData scheduleData = null;
 
         if (rootTaskId != null) {
@@ -326,7 +330,7 @@ public class DomainFactory {
         return new SingleScheduleLoader.Data(scheduleData, customTimeDatas);
     }
 
-    public DailyScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
+    public synchronized DailyScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
         ArrayList<DailyScheduleLoader.ScheduleData> scheduleDatas = null;
 
         if (rootTaskId != null) {
@@ -354,7 +358,7 @@ public class DomainFactory {
         return new DailyScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
 
-    public WeeklyScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
+    public synchronized WeeklyScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
         ArrayList<WeeklyScheduleLoader.ScheduleData> scheduleDatas = null;
 
         if (rootTaskId != null) {
@@ -382,7 +386,7 @@ public class DomainFactory {
         return new WeeklyScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
 
-    public ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {
+    public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {
         Assert.assertTrue(context != null);
 
         Task task = mTasks.get(taskId);
@@ -397,7 +401,7 @@ public class DomainFactory {
         return new ShowTaskLoader.Data(task.isRootTask(timeStamp), task.getName(), task.getScheduleText(context, timeStamp), task.getId(), childTaskDatas);
     }
 
-    public TaskListLoader.Data getTaskListData(Context context) {
+    public synchronized TaskListLoader.Data getTaskListData(Context context) {
         Assert.assertTrue(context != null);
 
         TimeStamp timeStamp = TimeStamp.getNow();
@@ -410,7 +414,7 @@ public class DomainFactory {
         return new TaskListLoader.Data(rootTaskDatas);
     }
 
-    public TickService.Data getTickServiceData(Context context) {
+    public synchronized TickService.Data getTickServiceData(Context context) {
         Assert.assertTrue(context != null);
 
         Calendar endCalendar = Calendar.getInstance();
@@ -443,7 +447,7 @@ public class DomainFactory {
 
     // sets
 
-    public void setInstanceDateTime(int dataId, Context context, InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair) {
+    public synchronized void setInstanceDateTime(int dataId, Context context, InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
         Assert.assertTrue(instanceDate != null);
@@ -458,7 +462,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public TimeStamp setInstanceDone(int dataId, Context context, InstanceKey instanceKey, boolean done) {
+    public synchronized TimeStamp setInstanceDone(int dataId, Context context, InstanceKey instanceKey, boolean done) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -472,7 +476,7 @@ public class DomainFactory {
         return instance.getDone();
     }
 
-    public void setInstanceKeysNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
+    public synchronized void setInstanceKeysNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
@@ -486,7 +490,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void setInstanceNotifiedNotShown(int dataId, InstanceKey instanceKey) {
+    public synchronized void setInstanceNotifiedNotShown(int dataId, InstanceKey instanceKey) {
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);
@@ -498,7 +502,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void updateInstancesShown(int dataId, ArrayList<InstanceKey> showInstanceKeys, ArrayList<InstanceKey> hideInstanceKeys) {
+    public synchronized void updateInstancesShown(int dataId, ArrayList<InstanceKey> showInstanceKeys, ArrayList<InstanceKey> hideInstanceKeys) {
         Assert.assertTrue(hideInstanceKeys != null);
 
         if (showInstanceKeys != null) {
@@ -524,7 +528,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createSingleScheduleRootTask(int dataId, String name, Date date, TimePair timePair) {
+    public synchronized void createSingleScheduleRootTask(int dataId, String name, Date date, TimePair timePair) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
@@ -544,7 +548,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createDailyScheduleRootTask(int dataId, String name, ArrayList<TimePair> timePairs) {
+    public synchronized void createDailyScheduleRootTask(int dataId, String name, ArrayList<TimePair> timePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -564,7 +568,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createWeeklyScheduleRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
+    public synchronized void createWeeklyScheduleRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -582,7 +586,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void updateSingleScheduleRootTask(int dataId, int rootTaskId, String name, Date date, TimePair timePair) {
+    public synchronized void updateSingleScheduleRootTask(int dataId, int rootTaskId, String name, Date date, TimePair timePair) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
@@ -605,7 +609,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void updateDailyScheduleRootTask(int dataId, int rootTaskId, String name, ArrayList<TimePair> timePairs) {
+    public synchronized void updateDailyScheduleRootTask(int dataId, int rootTaskId, String name, ArrayList<TimePair> timePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -630,7 +634,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void updateWeeklyScheduleRootTask(int dataId, int rootTaskId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
+    public synchronized void updateWeeklyScheduleRootTask(int dataId, int rootTaskId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -653,7 +657,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createSingleScheduleJoinRootTask(int dataId, String name, Date date, TimePair timePair, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createSingleScheduleJoinRootTask(int dataId, String name, Date date, TimePair timePair, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
@@ -678,7 +682,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createDailyScheduleJoinRootTask(int dataId, String name, ArrayList<TimePair> timePairs, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createDailyScheduleJoinRootTask(int dataId, String name, ArrayList<TimePair> timePairs, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -702,7 +706,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createWeeklyScheduleJoinRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createWeeklyScheduleJoinRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -724,7 +728,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createChildTask(int parentTaskId, String name) {
+    public synchronized void createChildTask(int parentTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task parentTask = mTasks.get(parentTaskId);
@@ -745,7 +749,7 @@ public class DomainFactory {
         save(0);
     }
 
-    public void updateChildTask(int dataId, int childTaskId, String name) {
+    public synchronized void updateChildTask(int dataId, int childTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task childTask = mTasks.get(childTaskId);
@@ -756,7 +760,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void setTaskEndTimeStamp(int dataId, int taskId) {
+    public synchronized void setTaskEndTimeStamp(int dataId, int taskId) {
         Task task = mTasks.get(taskId);
         Assert.assertTrue(task != null);
 
@@ -768,7 +772,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
 
@@ -789,7 +793,7 @@ public class DomainFactory {
         save(0);
     }
 
-    public void updateCustomTime(int dataId, int customTimeId, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized void updateCustomTime(int dataId, int customTimeId, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
 
@@ -809,7 +813,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public void setCustomTimeCurrent(int dataId, int customTimeId) {
+    public synchronized void setCustomTimeCurrent(int dataId, int customTimeId) {
         CustomTime customTime = mCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
 

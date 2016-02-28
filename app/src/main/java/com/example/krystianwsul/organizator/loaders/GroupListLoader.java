@@ -121,7 +121,6 @@ public class GroupListLoader extends AsyncTaskLoader<GroupListLoader.Data> {
     }
 
     public static class CustomTimeData {
-        //public final int Id;
         public final String Name;
         public final HashMap<DayOfWeek, HourMinute> HourMinutes;
 
@@ -129,10 +128,7 @@ public class GroupListLoader extends AsyncTaskLoader<GroupListLoader.Data> {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(hourMinutes != null);
             Assert.assertTrue(hourMinutes.size() == 7);
-            /*
 
-            Id = id;
-            */
             Name = name;
             HourMinutes = hourMinutes;
         }

@@ -144,26 +144,27 @@ public class Instance {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
-    void setInstanceDateTime(Context context, DateTime dateTime) {
+    void setInstanceDateTime(Context context, Date date, TimePair timePair) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(dateTime != null);
+        Assert.assertTrue(date != null);
+        Assert.assertTrue(timePair != null);
         Assert.assertTrue(isRootInstance());
 
         if (mInstanceRecord == null)
             createInstanceHierarchy();
 
-        mInstanceRecord.setInstanceYear(dateTime.getDate().getYear());
-        mInstanceRecord.setInstanceMonth(dateTime.getDate().getMonth());
-        mInstanceRecord.setInstanceDay(dateTime.getDate().getDay());
+        mInstanceRecord.setInstanceYear(date.getYear());
+        mInstanceRecord.setInstanceMonth(date.getMonth());
+        mInstanceRecord.setInstanceDay(date.getDay());
 
-        Time time = dateTime.getTime();
-        if (time instanceof CustomTime) {
-            mInstanceRecord.setInstanceCustomTimeId(((CustomTime) time).getId());
+        if (timePair.CustomTimeId != null) {
+            Assert.assertTrue(timePair.HourMinute == null);
+            mInstanceRecord.setInstanceCustomTimeId(timePair.CustomTimeId);
         } else {
-            NormalTime normalTime = (NormalTime) time;
+            Assert.assertTrue(timePair.HourMinute != null);
 
-            mInstanceRecord.setInstanceHour(normalTime.getHourMinute().getHour());
-            mInstanceRecord.setInstanceMinute(normalTime.getHourMinute().getMinute());
+            mInstanceRecord.setInstanceHour(timePair.HourMinute.getHour());
+            mInstanceRecord.setInstanceMinute(timePair.HourMinute.getMinute());
         }
 
         resetNotification(context);
@@ -241,10 +242,10 @@ public class Instance {
         Assert.assertTrue(context != null);
 
         if (mInstanceRecord == null) {
-            if (done) {
-                getRootInstance().createInstanceHierarchy();
-                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
-            }
+            Assert.assertTrue(done);
+
+            getRootInstance().createInstanceHierarchy();
+            mInstanceRecord.setDone(TimeStamp.getNow().getLong());
         } else {
             if (done)
                 mInstanceRecord.setDone(TimeStamp.getNow().getLong());
@@ -360,8 +361,11 @@ public class Instance {
         Assert.assertTrue(isRootInstance());
         Assert.assertTrue(context != null);
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(getNotificationId());
+        if (mInstanceRecord.getNotificationShown()) {
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(getNotificationId());
+        }
+
         mInstanceRecord.setNotificationShown(false);
         mInstanceRecord.setNotified(false);
     }

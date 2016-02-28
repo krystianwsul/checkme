@@ -440,8 +440,7 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
-        DateTime instanceDateTime = getDateTime(instanceDate, instanceTimePair);
-        instance.setInstanceDateTime(context, instanceDateTime);
+        instance.setInstanceDateTime(context, instanceDate, instanceTimePair);
 
         save(dataId);
     }

@@ -310,11 +310,36 @@ public class Instance {
         mInstanceRecord.setNotified(true);
     }
 
-    public int getNotificationId() {
-        if (mInstanceRecord == null)
-            createInstanceHierarchy();
+    /*
+    I'm going to make some assumptions here:
+        1. I won't live past a hundred years
+        2. scheduleYear is between 2016 and 2088 (that way the algorithm should be fine during my lifetime)
+        3. scheduleCustomTimeId is between 1 and 10,000
+        4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
+     */
 
-        return mInstanceRecord.getId();
+    public int getNotificationId() {
+        Date scheduleDate = getScheduleDate();
+
+        Integer scheduleCustomTimeId = getScheduleCustomTimeId();
+        HourMinute scheduleHourMinute = getScheduleHourMinute();
+        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+
+        int hash = scheduleDate.getMonth();
+        hash += 12 * scheduleDate.getDay();
+        hash += 12 * 31 * (scheduleDate.getYear() - 2015);
+
+        if (scheduleCustomTimeId == null) {
+            hash += 12 * 31 * 73 * (scheduleHourMinute.getHour() + 1);
+            hash += 12 * 31 * 73 * 24 * (scheduleHourMinute.getMinute() + 1);
+        } else {
+            hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeId;
+        }
+
+        //noinspection NumericOverflow
+        hash += 12 * 31 * 73 * 24 * 60 * 10000 * getTaskId();
+
+        return hash;
     }
 
     boolean getNotificationShown() {
@@ -326,6 +351,7 @@ public class Instance {
             createInstanceHierarchy();
 
         Assert.assertTrue(mInstanceRecord != null);
+
         mInstanceRecord.setNotificationShown(notificationShown);
     }
 

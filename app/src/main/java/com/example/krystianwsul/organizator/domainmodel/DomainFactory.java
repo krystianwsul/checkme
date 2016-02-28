@@ -416,23 +416,15 @@ public class DomainFactory {
 
         ArrayList<Instance> rootInstances = getRootInstances(null, endTimeStamp);
 
-        ArrayList<Instance> notificationInstances = new ArrayList<>();
+        ArrayList<TickService.NotificationInstanceData> notificationInstanceDatas = new ArrayList<>();
         for (Instance instance : rootInstances)
             if (instance.getDone() == null && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
-                notificationInstances.add(instance);
-
-        ArrayList<TickService.NotificationInstanceData> notificationInstanceDatas = new ArrayList<>();
-        for (Instance notificationInstance : notificationInstances)
-            notificationInstanceDatas.add(new TickService.NotificationInstanceData(notificationInstance.getInstanceKey(), notificationInstance.getName(), notificationInstance.getNotificationId(), notificationInstance.getDisplayText(context)));
-
-        ArrayList<Instance> shownInstances = new ArrayList<>();
-        for (Instance instance : mExistingInstances)
-            if (instance.getNotificationShown())
-                shownInstances.add(instance);
+                notificationInstanceDatas.add(new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context)));
 
         ArrayList<TickService.ShownInstanceData> shownInstanceDatas = new ArrayList<>();
-        for (Instance shownInstance : shownInstances)
-            shownInstanceDatas.add(new TickService.ShownInstanceData(shownInstance.getNotificationId(), shownInstance.getInstanceKey()));
+        for (Instance instance : mExistingInstances)
+            if (instance.getNotificationShown())
+                shownInstanceDatas.add(new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey()));
 
         return new TickService.Data(notificationInstanceDatas, shownInstanceDatas);
     }

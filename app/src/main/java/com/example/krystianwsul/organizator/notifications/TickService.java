@@ -58,15 +58,17 @@ public class TickService extends IntentService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) {
-            ArrayList<InstanceKey> shownInstanceKeys = new ArrayList<>();
-            for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas) {
-                shownInstanceKeys.add(shownInstanceData.InstanceKey);
-                notificationManager.cancel(shownInstanceData.NotificationId);
-            }
+        ArrayList<InstanceKey> shownInstanceKeys = new ArrayList<>();
+        for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas)
+            shownInstanceKeys.add(shownInstanceData.InstanceKey);
 
-            if (!shownInstanceKeys.isEmpty())
+        if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) {
+            if (!data.ShownInstanceDatas.isEmpty()) {
+                for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas)
+                    notificationManager.cancel(shownInstanceData.NotificationId);
+
                 DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, null, shownInstanceKeys);
+            }
 
             notify(data.NotificationInstanceDatas);
         } else {
@@ -86,7 +88,9 @@ public class TickService extends IntentService {
 
             ArrayList<InstanceKey> showInstanceKeys = new ArrayList<>();
             for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas) {
-                showInstanceKeys.add(notificationInstanceData.InstanceKey);
+                if (!shownInstanceKeys.contains(notificationInstanceData.InstanceKey))
+                    showInstanceKeys.add(notificationInstanceData.InstanceKey);
+
                 notify(notificationInstanceData);
             }
 

@@ -32,6 +32,11 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
@@ -43,6 +48,27 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;
+        }
+
+        @Override
+        public int hashCode() {
+            return Name.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return Name.equals(data.Name);
         }
     }
 }

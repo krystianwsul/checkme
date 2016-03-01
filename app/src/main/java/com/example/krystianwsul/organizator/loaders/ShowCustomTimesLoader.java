@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizator.loaders;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
@@ -10,11 +9,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowCustomTimesLoader extends AsyncTaskLoader<ShowCustomTimesLoader.Data> {
-    private Data mData;
-
-    private Observer mObserver;
-
+public class ShowCustomTimesLoader extends DomainLoader<ShowCustomTimesLoader.Data, ShowCustomTimesLoader.Observer> {
     public ShowCustomTimesLoader(Context context) {
         super(context);
     }
@@ -28,49 +23,11 @@ public class ShowCustomTimesLoader extends AsyncTaskLoader<ShowCustomTimesLoader
     }
 
     @Override
-    public void deliverResult(Data data) {
-        if (isReset())
-            return;
-
-        mData = data;
-
-        if (isStarted())
-            super.deliverResult(data);
+    protected ShowCustomTimesLoader.Observer newObserver() {
+        return new Observer();
     }
 
-    @Override
-    protected void onStartLoading() {
-        if (mData != null)
-            deliverResult(mData);
-
-        if (mObserver == null) {
-            mObserver = new Observer();
-            DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
-        }
-
-        if (takeContentChanged() || mData == null)
-            forceLoad();
-    }
-
-    @Override
-    protected void onStopLoading() {
-        cancelLoad();
-    }
-
-    @Override
-    protected void onReset() {
-        onStopLoading();
-
-        if (mData != null)
-            mData = null;
-
-        if (mObserver != null) {
-            DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
-            mObserver = null;
-        }
-    }
-
-    private class Observer implements DomainFactory.Observer {
+    public class Observer implements DomainFactory.Observer {
         @Override
         public void onDomainChanged(int dataId) {
             if (mData != null && dataId == mData.DataId)
@@ -80,7 +37,7 @@ public class ShowCustomTimesLoader extends AsyncTaskLoader<ShowCustomTimesLoader
         }
     }
 
-    public static class Data extends LoaderData {
+    public static class Data extends DomainLoader.Data {
         public final ArrayList<Entry> Entries;
 
         public Data(ArrayList<Entry> entries) {

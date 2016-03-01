@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizator.loaders;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
@@ -10,11 +9,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowTaskLoader extends AsyncTaskLoader<ShowTaskLoader.Data> {
-    private Data mData;
-
-    private Observer mObserver;
-
+public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data, ShowTaskLoader.Observer> {
     private final int mTaskId;
 
     public ShowTaskLoader(Context context, int taskId) {
@@ -25,56 +20,15 @@ public class ShowTaskLoader extends AsyncTaskLoader<ShowTaskLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        Data data = DomainFactory.getDomainFactory(getContext()).getShowTaskData(mTaskId, getContext());
-        Assert.assertTrue(data != null);
-
-        return data;
+        return DomainFactory.getDomainFactory(getContext()).getShowTaskData(mTaskId, getContext());
     }
 
     @Override
-    public void deliverResult(Data data) {
-        if (isReset())
-            return;
-
-        mData = data;
-
-        if (isStarted())
-            super.deliverResult(data);
+    protected ShowTaskLoader.Observer newObserver() {
+        return new Observer();
     }
 
-    @Override
-    protected void onStartLoading() {
-        if (mData != null)
-            deliverResult(mData);
-
-        if (mObserver == null) {
-            mObserver = new Observer();
-            DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
-        }
-
-        if (takeContentChanged() || mData == null)
-            forceLoad();
-    }
-
-    @Override
-    protected void onStopLoading() {
-        cancelLoad();
-    }
-
-    @Override
-    protected void onReset() {
-        onStopLoading();
-
-        if (mData != null)
-            mData = null;
-
-        if (mObserver != null) {
-            DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
-            mObserver = null;
-        }
-    }
-
-    private class Observer implements DomainFactory.Observer {
+    public class Observer implements DomainFactory.Observer {
         @Override
         public void onDomainChanged(int dataId) {
             if (mData != null && dataId == mData.DataId)
@@ -84,7 +38,7 @@ public class ShowTaskLoader extends AsyncTaskLoader<ShowTaskLoader.Data> {
         }
     }
 
-    public static class Data extends LoaderData {
+    public static class Data extends DomainLoader.Data {
         public final boolean IsRootTask;
         public final String Name;
         public final String ScheduleText;

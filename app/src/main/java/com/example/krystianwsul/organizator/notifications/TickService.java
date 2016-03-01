@@ -15,7 +15,7 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity;
 import com.example.krystianwsul.organizator.gui.instances.ShowNotificationGroupActivity;
-import com.example.krystianwsul.organizator.loaders.LoaderData;
+import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -143,7 +143,7 @@ public class TickService extends IntentService {
         notificationManager.notify(notificationId, notification);
     }
 
-    public static class Data extends LoaderData {
+    public static class Data extends DomainLoader.Data {
         public final ArrayList<NotificationInstanceData> NotificationInstanceDatas;
         public final ArrayList<ShownInstanceData> ShownInstanceDatas;
 

@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizator.loaders;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
@@ -14,11 +13,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class WeeklyScheduleLoader extends AsyncTaskLoader<WeeklyScheduleLoader.Data> {
-    private Data mData;
-
-    private Observer mObserver;
-
+public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data, WeeklyScheduleLoader.Observer> {
     private final Integer mRootTaskId; // possibly null
 
     public WeeklyScheduleLoader(Context context, Integer rootTaskId) {
@@ -29,56 +24,15 @@ public class WeeklyScheduleLoader extends AsyncTaskLoader<WeeklyScheduleLoader.D
 
     @Override
     public Data loadInBackground() {
-        Data data = DomainFactory.getDomainFactory(getContext()).getWeeklyScheduleData(mRootTaskId);
-        Assert.assertTrue(data != null);
-
-        return data;
+        return DomainFactory.getDomainFactory(getContext()).getWeeklyScheduleData(mRootTaskId);
     }
 
     @Override
-    public void deliverResult(Data data) {
-        if (isReset())
-            return;
-
-        mData = data;
-
-        if (isStarted())
-            super.deliverResult(data);
+    protected WeeklyScheduleLoader.Observer newObserver() {
+        return new Observer();
     }
 
-    @Override
-    protected void onStartLoading() {
-        if (mData != null)
-            deliverResult(mData);
-
-        if (mObserver == null) {
-            mObserver = new Observer();
-            DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
-        }
-
-        if (takeContentChanged() || mData == null)
-            forceLoad();
-    }
-
-    @Override
-    protected void onStopLoading() {
-        cancelLoad();
-    }
-
-    @Override
-    protected void onReset() {
-        onStopLoading();
-
-        if (mData != null)
-            mData = null;
-
-        if (mObserver != null) {
-            DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
-            mObserver = null;
-        }
-    }
-
-    private class Observer implements DomainFactory.Observer {
+    public class Observer implements DomainFactory.Observer {
         @Override
         public void onDomainChanged(int dataId) {
             if (mData != null && dataId == mData.DataId)
@@ -88,7 +42,7 @@ public class WeeklyScheduleLoader extends AsyncTaskLoader<WeeklyScheduleLoader.D
         }
     }
 
-    public static class Data extends LoaderData {
+    public static class Data extends DomainLoader.Data {
         public final ArrayList<ScheduleData> ScheduleDatas;
         public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
 

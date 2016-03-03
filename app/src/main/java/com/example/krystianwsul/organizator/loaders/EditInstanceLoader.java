@@ -41,6 +41,10 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data, Ed
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
@@ -65,6 +69,27 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data, Ed
             Name = name;
             CustomTimeDatas = customTimeDatas;
         }
+
+        @Override
+        public int hashCode() {
+            return (InstanceKey.hashCode() + InstanceDate.hashCode() + InstanceTimePair.hashCode() + Name.hashCode() + CustomTimeDatas.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return (InstanceKey.equals(data.InstanceKey) && InstanceDate.equals(data.InstanceDate) && InstanceTimePair.equals(data.InstanceTimePair) && Name.equals(data.Name) && CustomTimeDatas.equals(data.CustomTimeDatas));
+        }
     }
 
     public static class CustomTimeData {
@@ -80,6 +105,27 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data, Ed
             Id = id;
             Name = name;
             HourMinutes = hourMinutes;
+        }
+
+        @Override
+        public int hashCode() {
+            return (Id + Name.hashCode() + HourMinutes.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof CustomTimeData))
+                return false;
+
+            CustomTimeData customTimeData = (CustomTimeData) object;
+
+            return (Id == customTimeData.Id && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
         }
     }
 }

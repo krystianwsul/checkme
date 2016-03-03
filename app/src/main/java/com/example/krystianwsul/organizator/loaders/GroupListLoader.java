@@ -35,19 +35,45 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data, GroupLis
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<InstanceData> InstanceDatas;
+        public final HashMap<InstanceKey, InstanceData> InstanceDatas;
         public final ArrayList<CustomTimeData> CustomTimeDatas;
 
-        public Data(ArrayList<InstanceData> instanceDatas, ArrayList<CustomTimeData> customTimeDatas) {
+        public Data(HashMap<InstanceKey, InstanceData> instanceDatas, ArrayList<CustomTimeData> customTimeDatas) {
             Assert.assertTrue(instanceDatas != null);
+            Assert.assertTrue(customTimeDatas != null);
 
             InstanceDatas = instanceDatas;
             CustomTimeDatas = customTimeDatas;
+        }
+
+        @Override
+        public int hashCode() {
+            return (InstanceDatas.hashCode() + CustomTimeDatas.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return (InstanceDatas.equals(data.InstanceDatas) && CustomTimeDatas.equals(data.CustomTimeDatas));
         }
     }
 
@@ -72,6 +98,27 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data, GroupLis
             Name = name;
             InstanceTimeStamp = instanceTimeStamp;
         }
+
+        @Override
+        public int hashCode() {
+            return (Done.hashCode() + InstanceKey.hashCode() + (HasChildren ? 1 : 0) + DisplayText.hashCode() + Name.hashCode() + InstanceTimeStamp.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof InstanceData))
+                return false;
+
+            InstanceData instanceData = (InstanceData) object;
+
+            return ((((Done == null) && (instanceData.Done == null)) || ((Done != null) && (instanceData.Done != null) && Done.equals(instanceData.Done))) && InstanceKey.equals(instanceData.InstanceKey) && (HasChildren == instanceData.HasChildren) && DisplayText.equals(instanceData.DisplayText) && Name.equals(instanceData.Name) && InstanceTimeStamp.equals(instanceData.InstanceTimeStamp));
+        }
     }
 
     public static class CustomTimeData {
@@ -85,6 +132,27 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data, GroupLis
 
             Name = name;
             HourMinutes = hourMinutes;
+        }
+
+        @Override
+        public int hashCode() {
+            return (Name.hashCode() + HourMinutes.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof CustomTimeData))
+                return false;
+
+            CustomTimeData customTimeData = (CustomTimeData) object;
+
+            return (Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
         }
     }
 }

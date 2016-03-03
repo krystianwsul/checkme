@@ -204,9 +204,9 @@ public class DomainFactory {
 
         ArrayList<Instance> currentInstances = getRootInstances(null, new TimeStamp(endDate, new HourMinute(0, 0)));
 
-        ArrayList<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>();
+        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances)
-            instanceDatas.add(new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context), instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context), instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
 
         ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
         for (CustomTime customTime : getCurrentCustomTimes())

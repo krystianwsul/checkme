@@ -93,7 +93,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             ArrayList<GroupListLoader.InstanceData> doneInstanceDatas = new ArrayList<>();
             ArrayList<GroupListLoader.InstanceData> notDoneInstanceDatas = new ArrayList<>();
-            for (GroupListLoader.InstanceData instanceData : data.InstanceDatas) {
+            for (GroupListLoader.InstanceData instanceData : data.InstanceDatas.values()) {
                 if (instanceData.Done != null)
                     doneInstanceDatas.add(instanceData);
                 else

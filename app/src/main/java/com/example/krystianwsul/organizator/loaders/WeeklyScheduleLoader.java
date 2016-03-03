@@ -38,6 +38,10 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
@@ -52,6 +56,31 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
             ScheduleDatas = scheduleDatas;
             CustomTimeDatas = customTimeDatas;
         }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            if (ScheduleDatas != null)
+                hashCode += ScheduleDatas.hashCode();
+            hashCode += CustomTimeDatas.hashCode();
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return (((ScheduleDatas == null) == (data.ScheduleDatas == null)) && ((ScheduleDatas == null) || ScheduleDatas.equals(data.ScheduleDatas)) && CustomTimeDatas.equals(data.CustomTimeDatas));
+        }
     }
 
     public static class ScheduleData {
@@ -64,6 +93,27 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
 
             DayOfWeek = dayOfWeek;
             TimePair = timePair;
+        }
+
+        @Override
+        public int hashCode() {
+            return TimePair.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof ScheduleData))
+                return false;
+
+            ScheduleData scheduleData = (ScheduleData) object;
+
+            return (DayOfWeek.equals(scheduleData.DayOfWeek) && TimePair.equals(scheduleData.TimePair));
         }
     }
 
@@ -80,6 +130,27 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
             Id = id;
             Name = name;
             HourMinutes = hourMinutes;
+        }
+
+        @Override
+        public int hashCode() {
+            return (Id + Name.hashCode() + HourMinutes.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof CustomTimeData))
+                return false;
+
+            CustomTimeData customTimeData = (CustomTimeData) object;
+
+            return (Id == customTimeData.Id && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
         }
     }
 }

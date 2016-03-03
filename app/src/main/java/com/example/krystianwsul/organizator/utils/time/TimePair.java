@@ -27,6 +27,39 @@ public class TimePair implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        if (CustomTimeId != null) {
+            Assert.assertTrue(HourMinute == null);
+            return CustomTimeId.hashCode();
+        } else {
+            Assert.assertTrue(HourMinute != null);
+            return HourMinute.hashCode();
+        }
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null)
+            return false;
+
+        if (object == this)
+            return true;
+
+        if (!(object instanceof TimePair))
+            return false;
+
+        TimePair timePair = (TimePair) object;
+
+        if (CustomTimeId != null) {
+            Assert.assertTrue(HourMinute == null);
+            return CustomTimeId.equals(timePair.CustomTimeId);
+        } else {
+            Assert.assertTrue(HourMinute != null);
+            return HourMinute.equals(timePair.HourMinute);
+        }
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

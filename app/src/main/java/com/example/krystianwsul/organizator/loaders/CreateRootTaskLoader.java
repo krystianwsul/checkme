@@ -32,6 +32,11 @@ public class CreateRootTaskLoader extends DomainLoader<CreateRootTaskLoader.Data
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
@@ -45,6 +50,27 @@ public class CreateRootTaskLoader extends DomainLoader<CreateRootTaskLoader.Data
 
             Name = name;
             ScheduleType = scheduleType;
+        }
+
+        @Override
+        public int hashCode() {
+            return (Name.hashCode() + ScheduleType.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return (Name.equals(data.Name) && ScheduleType.equals(data.ScheduleType));
         }
     }
 }

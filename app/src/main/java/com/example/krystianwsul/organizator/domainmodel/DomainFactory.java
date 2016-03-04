@@ -246,9 +246,9 @@ public class DomainFactory {
 
         String displayText = new DateTime(currentInstances.get(0).getInstanceDate(), time).getDisplayText(context);
 
-        ArrayList<ShowGroupLoader.InstanceData> instanceDatas = new ArrayList<>();
+        HashMap<InstanceKey, ShowGroupLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances)
-            instanceDatas.add(new ShowGroupLoader.InstanceData(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey(), null));
+            instanceDatas.put(instance.getInstanceKey(), new ShowGroupLoader.InstanceData(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey()));
 
         return new ShowGroupLoader.Data(displayText, instanceDatas);
     }

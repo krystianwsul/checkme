@@ -60,7 +60,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         mShowGroupName.setText(data.DisplayText);
 
         ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
-        for (ShowGroupLoader.InstanceData instanceData : data.InstanceDatas)
+        for (ShowGroupLoader.InstanceData instanceData : data.InstanceDatas.values())
             datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, null));
 
         mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, datas));

@@ -39,6 +39,10 @@ public class ShowNotificationGroupLoader extends DomainLoader<ShowNotificationGr
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
@@ -52,6 +56,27 @@ public class ShowNotificationGroupLoader extends DomainLoader<ShowNotificationGr
 
             InstanceDatas = instanceDatas;
         }
+
+        @Override
+        public int hashCode() {
+            return InstanceDatas.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return InstanceDatas.equals(data.InstanceDatas);
+        }
     }
 
     public static class InstanceData {
@@ -64,12 +89,41 @@ public class ShowNotificationGroupLoader extends DomainLoader<ShowNotificationGr
         public InstanceData(TimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey, String displayText) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceKey != null);
+            Assert.assertTrue(!TextUtils.isEmpty(displayText));
 
             Done = done;
             Name = name;
             HasChildren = hasChildren;
             InstanceKey = instanceKey;
             DisplayText = displayText;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            if (Done != null)
+                hashCode += Done.hashCode();
+            hashCode += Name.hashCode();
+            hashCode += (HasChildren ? 1 : 0);
+            hashCode += InstanceKey.hashCode();
+            hashCode += DisplayText.hashCode();
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof InstanceData))
+                return false;
+
+            InstanceData instanceData = (InstanceData) object;
+
+            return (((Done == null) && (instanceData.Done == null)) || (((Done != null) && (instanceData.Done != null)) && Done.equals(instanceData.Done)) && Name.equals(instanceData.Name) && (HasChildren == instanceData.HasChildren) && InstanceKey.equals(instanceData.InstanceKey) && DisplayText.equals(instanceData.DisplayText));
         }
     }
 }

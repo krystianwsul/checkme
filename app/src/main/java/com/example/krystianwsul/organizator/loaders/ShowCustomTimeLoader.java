@@ -36,6 +36,10 @@ public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
@@ -53,6 +57,27 @@ public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data
             Id = id;
             Name = name;
             HourMinutes = hourMinutes;
+        }
+
+        @Override
+        public int hashCode() {
+            return (Id + Name.hashCode() + HourMinutes.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return (Id == data.Id && Name.equals(data.Name) && HourMinutes.equals(data.HourMinutes));
         }
     }
 }

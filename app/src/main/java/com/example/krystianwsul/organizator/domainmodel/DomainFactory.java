@@ -188,10 +188,10 @@ public class DomainFactory {
     public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
 
-        ArrayList<ShowCustomTimesLoader.Data.Entry> entries = new ArrayList<>();
+        ArrayList<ShowCustomTimesLoader.CustomTimeData> entries = new ArrayList<>();
         for (CustomTime customTime : currentCustomTimes) {
             Assert.assertTrue(customTime != null);
-            entries.add(new ShowCustomTimesLoader.Data.Entry(customTime.getId(), customTime.getName()));
+            entries.add(new ShowCustomTimesLoader.CustomTimeData(customTime.getId(), customTime.getName()));
         }
 
         return new ShowCustomTimesLoader.Data(entries);

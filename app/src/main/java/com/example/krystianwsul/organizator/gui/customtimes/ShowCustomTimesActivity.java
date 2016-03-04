@@ -92,10 +92,10 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
 
         @Override
         public void onBindViewHolder(final CustomTimeHolder customTimeHolder, int position) {
-            ShowCustomTimesLoader.Data.Entry entry = mData.Entries.get(position);
-            Assert.assertTrue(entry != null);
+            ShowCustomTimesLoader.CustomTimeData customTimeData = mData.Entries.get(position);
+            Assert.assertTrue(customTimeData != null);
 
-            customTimeHolder.mTimesRowName.setText(entry.Name);
+            customTimeHolder.mTimesRowName.setText(customTimeData.Name);
 
             customTimeHolder.mShowCustomTimeRow.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -129,17 +129,17 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
             }
 
             public void onRowClick() {
-                ShowCustomTimesLoader.Data.Entry entry = mData.Entries.get(getAdapterPosition());
-                mActivity.startActivity(ShowCustomTimeActivity.getEditIntent(entry.Id, mActivity));
+                ShowCustomTimesLoader.CustomTimeData customTimeData = mData.Entries.get(getAdapterPosition());
+                mActivity.startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.Id, mActivity));
             }
 
             public void onDeleteClick() {
                 int position = getAdapterPosition();
-                ShowCustomTimesLoader.Data.Entry entry = mData.Entries.get(position);
+                ShowCustomTimesLoader.CustomTimeData customTimeData = mData.Entries.get(position);
 
-                DomainFactory.getDomainFactory(mActivity).setCustomTimeCurrent(mData.DataId, entry.Id);
+                DomainFactory.getDomainFactory(mActivity).setCustomTimeCurrent(mData.DataId, customTimeData.Id);
 
-                mData.Entries.remove(entry);
+                mData.Entries.remove(customTimeData);
                 notifyItemRemoved(position);
             }
         }

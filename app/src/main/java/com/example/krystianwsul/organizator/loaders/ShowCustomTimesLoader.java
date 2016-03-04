@@ -33,28 +33,74 @@ public class ShowCustomTimesLoader extends DomainLoader<ShowCustomTimesLoader.Da
             if (mData != null && dataId == mData.DataId)
                 return;
 
+            Data newData = loadInBackground();
+            if (mData.equals(newData))
+                return;
+
             onContentChanged();
         }
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<Entry> Entries;
+        public final ArrayList<CustomTimeData> Entries;
 
-        public Data(ArrayList<Entry> entries) {
+        public Data(ArrayList<CustomTimeData> entries) {
             Assert.assertTrue(entries != null);
             Entries = entries;
         }
 
-        public static class Entry {
-            public final int Id;
-            public final String Name;
+        @Override
+        public int hashCode() {
+            return Entries.hashCode();
+        }
 
-            public Entry(int id, String name) {
-                Assert.assertTrue(!TextUtils.isEmpty(name));
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
 
-                Id = id;
-                Name = name;
-            }
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return Entries.equals(data.Entries);
+        }
+    }
+
+    public static class CustomTimeData {
+        public final int Id;
+        public final String Name;
+
+        public CustomTimeData(int id, String name) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+
+            Id = id;
+            Name = name;
+        }
+
+        @Override
+        public int hashCode() {
+            return (Id + Name.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof CustomTimeData))
+                return false;
+
+            CustomTimeData data = (CustomTimeData) object;
+
+            return (Id == data.Id && Name.equals(data.Name));
         }
     }
 }

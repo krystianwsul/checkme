@@ -106,7 +106,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         if (data.HasChildren) {
             ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
-            for (ShowInstanceLoader.InstanceData instanceData : data.InstanceDatas)
+            for (ShowInstanceLoader.InstanceData instanceData : data.InstanceDatas.values())
                 datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, null));
 
             mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, datas));

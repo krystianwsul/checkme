@@ -287,9 +287,10 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
-        ArrayList<ShowInstanceLoader.InstanceData> instanceDatas = new ArrayList<>();
+        HashMap<InstanceKey, ShowInstanceLoader.InstanceData> instanceDatas = new HashMap<>();
+
         for (Instance childInstance : instance.getChildInstances())
-            instanceDatas.add(new ShowInstanceLoader.InstanceData(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances().isEmpty(), childInstance.getInstanceKey(), null));
+            instanceDatas.put(childInstance.getInstanceKey(), new ShowInstanceLoader.InstanceData(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances().isEmpty(), childInstance.getInstanceKey()));
 
         return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context), instance.getDone() != null, !instance.getChildInstances().isEmpty(), instanceDatas);
     }

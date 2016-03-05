@@ -1,6 +1,6 @@
 package com.example.krystianwsul.organizator.notifications;
 
-import android.app.IntentService;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
@@ -11,28 +11,24 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class GroupNotificationDeleteService extends IntentService {
+public class GroupNotificationDeleteReceiver extends BroadcastReceiver {
     private final static String INSTANCES_KEY = "instanceKeys";
-
-    public GroupNotificationDeleteService() {
-        super("GroupNotificationDeleteService");
-    }
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        Intent intent = new Intent(context, GroupNotificationDeleteService.class);
+        Intent intent = new Intent(context, GroupNotificationDeleteReceiver.class);
         intent.putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys);
         return intent;
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    public void onReceive(Context context, Intent intent) {
         ArrayList<InstanceKey> instanceKeys = intent.getParcelableArrayListExtra(INSTANCES_KEY);
         Assert.assertTrue(instanceKeys != null);
 
-        DomainFactory.getDomainFactory(this).setInstanceKeysNotified(0, instanceKeys);
+        DomainFactory.getDomainFactory(context).setInstanceKeysNotified(0, instanceKeys);
     }
 }

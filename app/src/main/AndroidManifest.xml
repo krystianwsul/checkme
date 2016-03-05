@@ -46,14 +46,17 @@
             android:name=".notifications.TickService"
             android:exported="false" />
         <service
-            android:name=".notifications.GroupNotificationDeleteService"
-            android:exported="false" />
-        <service
-            android:name=".notifications.InstanceNotificationDeleteService"
-            android:exported="false" />
-        <service
             android:name=".persistencemodel.SaveService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <receiver
+            android:name=".notifications.GroupNotificationDeleteReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".notifications.InstanceNotificationDeleteReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

@@ -102,8 +102,8 @@ public class TickService extends IntentService {
     private void notify(NotificationInstanceData notificationInstanceData) {
         Assert.assertTrue(notificationInstanceData != null);
 
-        Intent deleteIntent = InstanceNotificationDeleteService.getIntent(this, notificationInstanceData.InstanceKey);
-        PendingIntent pendingDeleteIntent = PendingIntent.getService(this, notificationInstanceData.NotificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent deleteIntent = InstanceNotificationDeleteReceiver.getIntent(this, notificationInstanceData.InstanceKey);
+        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(this, notificationInstanceData.NotificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Intent contentIntent = ShowInstanceActivity.getNotificationIntent(this, notificationInstanceData.InstanceKey);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, notificationInstanceData.NotificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -122,8 +122,8 @@ public class TickService extends IntentService {
             instanceKeys.add(notificationInstanceData.InstanceKey);
         }
 
-        Intent deleteIntent = GroupNotificationDeleteService.getIntent(this, instanceKeys);
-        PendingIntent pendingDeleteIntent = PendingIntent.getService(this, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent deleteIntent = GroupNotificationDeleteReceiver.getIntent(this, instanceKeys);
+        PendingIntent pendingDeleteIntent = PendingIntent.getBroadcast(this, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, instanceKeys);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);

@@ -165,7 +165,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
             boolean isChecked = checkBox.isChecked();
 
-            DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mContext, data.InstanceKey, isChecked);
+            data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mContext, data.InstanceKey, isChecked);
 
             TickService.startService(mContext);
 
@@ -204,7 +204,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     }
 
     public static class Data {
-        public final TimeStamp Done;
+        public TimeStamp Done;
         public final String Name;
         public final boolean HasChildren;
         public final InstanceKey InstanceKey;

@@ -17,7 +17,6 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
-import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -91,7 +90,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-            DomainFactory.getDomainFactory(this).setInstanceNotifiedNotShown(data.DataId, data.InstanceKey);
+            DomainFactory.getDomainFactory(this).setInstanceNotified(data.DataId, data.InstanceKey);
         }
 
         mShowInstanceName.setText(data.Name);
@@ -119,8 +118,6 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
                 DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, ShowInstanceActivity.this, data.InstanceKey, isChecked);
                 data.Done = isChecked;
-
-                TickService.startService(ShowInstanceActivity.this);
             }
         });
 

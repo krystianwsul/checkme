@@ -434,15 +434,15 @@ public class DomainFactory {
 
         ArrayList<Instance> rootInstances = getRootInstances(null, endTimeStamp);
 
-        ArrayList<TickService.NotificationInstanceData> notificationInstanceDatas = new ArrayList<>();
+        HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
         for (Instance instance : rootInstances)
             if (instance.getDone() == null && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
-                notificationInstanceDatas.add(new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context)));
+                notificationInstanceDatas.put(instance.getInstanceKey(), new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context)));
 
-        ArrayList<TickService.ShownInstanceData> shownInstanceDatas = new ArrayList<>();
+        HashMap<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = new HashMap<>();
         for (Instance instance : mExistingInstances)
             if (instance.getNotificationShown())
-                shownInstanceDatas.add(new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey()));
+                shownInstanceDatas.put(instance.getInstanceKey(), new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey()));
 
         return new TickService.Data(notificationInstanceDatas, shownInstanceDatas);
     }
@@ -458,7 +458,9 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
-        instance.setInstanceDateTime(context, instanceDate, instanceTimePair);
+        instance.setInstanceDateTime(instanceDate, instanceTimePair);
+
+        TickService.startService(context);
 
         save(dataId);
     }
@@ -470,14 +472,16 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
-        instance.setDone(done, context);
+        instance.setDone(done);
 
         save(dataId);
+
+        TickService.startService(context);
 
         return instance.getDone();
     }
 
-    public synchronized void setInstanceKeysNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
+    public synchronized void setInstancesNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
@@ -486,12 +490,13 @@ public class DomainFactory {
             Assert.assertTrue(instance != null);
 
             instance.setNotified();
+            instance.setNotificationShown(false);
         }
 
         save(dataId);
     }
 
-    public synchronized void setInstanceNotifiedNotShown(int dataId, InstanceKey instanceKey) {
+    public synchronized void setInstanceNotified(int dataId, InstanceKey instanceKey) {
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);

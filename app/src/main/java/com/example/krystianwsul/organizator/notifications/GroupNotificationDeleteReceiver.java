@@ -29,6 +29,6 @@ public class GroupNotificationDeleteReceiver extends BroadcastReceiver {
         ArrayList<InstanceKey> instanceKeys = intent.getParcelableArrayListExtra(INSTANCES_KEY);
         Assert.assertTrue(instanceKeys != null);
 
-        DomainFactory.getDomainFactory(context).setInstanceKeysNotified(0, instanceKeys);
+        DomainFactory.getDomainFactory(context).setInstancesNotified(0, instanceKeys);
     }
 }

@@ -1,6 +1,5 @@
 package com.example.krystianwsul.organizator.domainmodel;
 
-import android.app.NotificationManager;
 import android.content.Context;
 
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
@@ -144,8 +143,7 @@ public class Instance {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
-    void setInstanceDateTime(Context context, Date date, TimePair timePair) {
-        Assert.assertTrue(context != null);
+    void setInstanceDateTime(Date date, TimePair timePair) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
         Assert.assertTrue(isRootInstance());
@@ -167,7 +165,7 @@ public class Instance {
             mInstanceRecord.setInstanceMinute(timePair.HourMinute.getMinute());
         }
 
-        resetNotification(context);
+        resetNotification();
     }
 
     public String getDisplayText(Context context) {
@@ -238,19 +236,21 @@ public class Instance {
             return null;
     }
 
-    void setDone(boolean done, Context context) {
-        Assert.assertTrue(context != null);
+    void setDone(boolean done) {
+        if (done) {
+            TimeStamp timeStamp = TimeStamp.getNow();
 
-        if (mInstanceRecord == null) {
-            Assert.assertTrue(done);
-
-            getRootInstance().createInstanceHierarchy();
-            mInstanceRecord.setDone(TimeStamp.getNow().getLong());
+            if (mInstanceRecord == null) {
+                getRootInstance().createInstanceHierarchy();
+                mInstanceRecord.setDone(timeStamp.getLong());
+            } else {
+                mInstanceRecord.setDone(timeStamp.getLong());
+            }
         } else {
-            if (done)
-                mInstanceRecord.setDone(TimeStamp.getNow().getLong());
-            else
-                mInstanceRecord.setDone(null);
+            Assert.assertTrue(mInstanceRecord != null);
+            mInstanceRecord.setDone(null);
+
+            resetNotification();
         }
     }
 
@@ -356,17 +356,10 @@ public class Instance {
         mInstanceRecord.setNotificationShown(notificationShown);
     }
 
-    private void resetNotification(Context context) {
+    private void resetNotification() {
         Assert.assertTrue(mInstanceRecord != null);
         Assert.assertTrue(isRootInstance());
-        Assert.assertTrue(context != null);
 
-        if (mInstanceRecord.getNotificationShown()) {
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(getNotificationId());
-        }
-
-        mInstanceRecord.setNotificationShown(false);
         mInstanceRecord.setNotified(false);
     }
 

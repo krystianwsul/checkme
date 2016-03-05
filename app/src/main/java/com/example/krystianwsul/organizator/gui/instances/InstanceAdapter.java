@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
@@ -166,8 +165,6 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             boolean isChecked = checkBox.isChecked();
 
             data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mContext, data.InstanceKey, isChecked);
-
-            TickService.startService(mContext);
 
             if (isChecked) {
                 Assert.assertTrue(mNotDoneInstances.contains(data));

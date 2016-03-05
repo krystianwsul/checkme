@@ -21,6 +21,8 @@ import com.example.krystianwsul.organizator.utils.InstanceKey;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class TickService extends IntentService {
     private static boolean sRegistered = false;
@@ -59,47 +61,61 @@ public class TickService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         ArrayList<InstanceKey> shownInstanceKeys = new ArrayList<>();
-        for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas)
+        for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
             shownInstanceKeys.add(shownInstanceData.InstanceKey);
 
-        if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) {
-            if (!data.ShownInstanceDatas.isEmpty()) {
-                for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas)
+        ArrayList<InstanceKey> notificationInstanceKeys = new ArrayList<>();
+        for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values())
+            notificationInstanceKeys.add(notificationInstanceData.InstanceKey);
+
+        ArrayList<InstanceKey> showInstanceKeys = new ArrayList<>();
+        for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values())
+            if (!shownInstanceKeys.contains(notificationInstanceData.InstanceKey))
+                showInstanceKeys.add(notificationInstanceData.InstanceKey);
+
+        ArrayList<InstanceKey> hideInstanceKeys = new ArrayList<>();
+        for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
+            if (!notificationInstanceKeys.contains(shownInstanceData.InstanceKey))
+                hideInstanceKeys.add(shownInstanceData.InstanceKey);
+
+        if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
+            DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, showInstanceKeys, hideInstanceKeys);
+
+        if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
+            if (data.ShownInstanceDatas.size() > MAX_NOTIFICATIONS) { // group shown
+                if (!showInstanceKeys.isEmpty())
+                    notifyGroup(data.NotificationInstanceDatas.values());
+            } else { // instances shown
+                for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
                     notificationManager.cancel(shownInstanceData.NotificationId);
 
-                DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, null, shownInstanceKeys);
+                notifyGroup(data.NotificationInstanceDatas.values());
             }
+        } else { // show instances
+            if (data.ShownInstanceDatas.size() > MAX_NOTIFICATIONS) { // group shown
+                notificationManager.cancel(0);
 
-            notify(data.NotificationInstanceDatas);
-        } else {
-            notificationManager.cancel(0);
+                for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values())
+                    notifyInstance(notificationInstanceData);
+            } else { // instances shown
+                for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                    ShownInstanceData shownInstanceData = data.ShownInstanceDatas.get(hideInstanceKey);
+                    Assert.assertTrue(shownInstanceData != null);
 
-            ArrayList<InstanceKey> notificationInstanceKeys = new ArrayList<>();
-            for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas)
-                notificationInstanceKeys.add(notificationInstanceData.InstanceKey);
-
-            ArrayList<InstanceKey> hideInstanceKeys = new ArrayList<>();
-            for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas) {
-                if (!notificationInstanceKeys.contains(shownInstanceData.InstanceKey)) {
                     notificationManager.cancel(shownInstanceData.NotificationId);
-                    hideInstanceKeys.add(shownInstanceData.InstanceKey);
+                }
+
+                for (InstanceKey showInstanceKey : showInstanceKeys) {
+                    NotificationInstanceData notificationInstanceData = data.NotificationInstanceDatas.get(showInstanceKey);
+                    Assert.assertTrue(notificationInstanceData != null);
+
+                    notifyInstance(notificationInstanceData);
                 }
             }
-
-            ArrayList<InstanceKey> showInstanceKeys = new ArrayList<>();
-            for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas) {
-                if (!shownInstanceKeys.contains(notificationInstanceData.InstanceKey)) {
-                    notify(notificationInstanceData);
-                    showInstanceKeys.add(notificationInstanceData.InstanceKey);
-                }
-            }
-
-            if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
-                DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, showInstanceKeys, hideInstanceKeys);
         }
     }
 
-    private void notify(NotificationInstanceData notificationInstanceData) {
+    private void notifyInstance(NotificationInstanceData notificationInstanceData) {
         Assert.assertTrue(notificationInstanceData != null);
 
         Intent deleteIntent = InstanceNotificationDeleteReceiver.getIntent(this, notificationInstanceData.InstanceKey);
@@ -111,7 +127,7 @@ public class TickService extends IntentService {
         notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent);
     }
 
-    private void notify(ArrayList<NotificationInstanceData> notificationInstanceDatas) {
+    private void notifyGroup(Collection<NotificationInstanceData> notificationInstanceDatas) {
         Assert.assertTrue(notificationInstanceDatas != null);
         Assert.assertTrue(notificationInstanceDatas.size() > MAX_NOTIFICATIONS);
 
@@ -154,10 +170,10 @@ public class TickService extends IntentService {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<NotificationInstanceData> NotificationInstanceDatas;
-        public final ArrayList<ShownInstanceData> ShownInstanceDatas;
+        public final HashMap<InstanceKey, NotificationInstanceData> NotificationInstanceDatas;
+        public final HashMap<InstanceKey, ShownInstanceData> ShownInstanceDatas;
 
-        public Data(ArrayList<NotificationInstanceData> notificationInstanceDatas, ArrayList<ShownInstanceData> shownInstanceDatas) {
+        public Data(HashMap<InstanceKey, NotificationInstanceData> notificationInstanceDatas, HashMap<InstanceKey, ShownInstanceData> shownInstanceDatas) {
             Assert.assertTrue(notificationInstanceDatas != null);
             Assert.assertTrue(shownInstanceDatas != null);
 

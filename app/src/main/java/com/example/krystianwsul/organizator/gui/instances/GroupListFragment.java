@@ -21,7 +21,6 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
-import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -145,7 +144,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             groupHolder.mGroupRowDetails.setText(group.getDetailsText());
 
-            if (group.singleInstance() && !group.getSingleSinstanceData().HasChildren)
+            if (group.singleInstance() && !group.getSingleInstanceData().HasChildren)
                 groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
             else
                 groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
@@ -160,7 +159,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     }
                 });
 
-                groupHolder.mGroupRowCheckBox.setChecked(group.getSingleSinstanceData().Done != null);
+                groupHolder.mGroupRowCheckBox.setChecked(group.getSingleInstanceData().Done != null);
             } else {
                 groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
             }
@@ -210,29 +209,29 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 boolean isChecked = checkBox.isChecked();
 
-                GroupListLoader.InstanceData instanceData = group.getSingleSinstanceData();
+                GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
                 instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mData.DataId, mContext, instanceData.InstanceKey, isChecked);
 
-                TickService.startService(mContext);
-
                 if (isChecked) {
+                    Assert.assertTrue(instanceData.Done != null);
                     Assert.assertTrue(mNotDoneGroupContainer.contains(group));
 
                     int oldPosition = indexOf(group);
 
                     mNotDoneGroupContainer.remove(group);
-                    Group newGroup = mDoneGroupContainer.addInstanceData(group.getSingleSinstanceData());
+                    Group newGroup = mDoneGroupContainer.addInstanceData(instanceData);
 
                     int newPosition = indexOf(newGroup);
 
                     notifyItemMoved(oldPosition, newPosition);
                 } else {
+                    Assert.assertTrue(instanceData.Done == null);
                     Assert.assertTrue(mDoneGroupContainer.contains(group));
 
                     int oldPosition = indexOf(group);
 
                     mDoneGroupContainer.remove(group);
-                    Group newGroup = mNotDoneGroupContainer.addInstanceData(group.getSingleSinstanceData());
+                    Group newGroup = mNotDoneGroupContainer.addInstanceData(instanceData);
 
                     int newPosition = indexOf(newGroup);
 
@@ -258,7 +257,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(context != null);
 
                 if (group.singleInstance()) {
-                    GroupListLoader.InstanceData instanceData = group.getSingleSinstanceData();
+                    GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
                     return ShowInstanceActivity.getIntent(context, instanceData.InstanceKey);
                 } else {
                     return ShowGroupActivity.getIntent(group, context);
@@ -411,7 +410,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public String getNameText(Context context) {
             Assert.assertTrue(!mInstanceDatas.isEmpty());
             if (singleInstance()) {
-                return getSingleSinstanceData().DisplayText;
+                return getSingleInstanceData().DisplayText;
             } else {
                 Date date = mTimeStamp.getDate();
                 HourMinute hourMinute = mTimeStamp.getHourMinute();
@@ -442,7 +441,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public String getDetailsText() {
             Assert.assertTrue(!mInstanceDatas.isEmpty());
             if (singleInstance()) {
-                return getSingleSinstanceData().Name;
+                return getSingleInstanceData().Name;
             } else {
                 ArrayList<String> names = new ArrayList<>();
                 for (GroupListLoader.InstanceData instanceData : mInstanceDatas)
@@ -460,7 +459,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             return (mInstanceDatas.size() == 1);
         }
 
-        public GroupListLoader.InstanceData getSingleSinstanceData() {
+        public GroupListLoader.InstanceData getSingleInstanceData() {
             Assert.assertTrue(mInstanceDatas.size() == 1);
             return mInstanceDatas.get(0);
         }

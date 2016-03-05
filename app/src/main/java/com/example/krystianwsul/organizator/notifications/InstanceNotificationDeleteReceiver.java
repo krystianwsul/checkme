@@ -26,6 +26,6 @@ public class InstanceNotificationDeleteReceiver extends BroadcastReceiver {
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
         Assert.assertTrue(instanceKey != null);
 
-        DomainFactory.getDomainFactory(context).setInstanceNotifiedNotShown(0, instanceKey);
+        DomainFactory.getDomainFactory(context).setInstanceNotified(0, instanceKey);
     }
 }

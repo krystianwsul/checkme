@@ -69,7 +69,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
             for (ShowNotificationGroupLoader.InstanceData instanceData : data.InstanceDatas)
                 instanceKeys.add(instanceData.InstanceKey);
 
-            DomainFactory.getDomainFactory(this).setInstanceKeysNotified(data.DataId, instanceKeys);
+            DomainFactory.getDomainFactory(this).setInstancesNotified(data.DataId, instanceKeys);
         }
 
         ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();

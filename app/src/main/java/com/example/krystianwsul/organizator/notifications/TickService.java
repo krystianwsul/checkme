@@ -139,15 +139,16 @@ public class TickService extends IntentService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Notification notification = (new NotificationCompat.Builder(this))
+        NotificationCompat.Builder builder = (new NotificationCompat.Builder(this))
                 .setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon(R.drawable.ic_label_outline_white_24dp)
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setDeleteIntent(deleteIntent)
                 .setContentIntent(contentIntent)
-                .setAutoCancel(true)
-                .build();
+                .setAutoCancel(true);
+
+        Notification notification = builder.build();
         notification.defaults |= Notification.DEFAULT_VIBRATE;
         notificationManager.notify(notificationId, notification);
     }

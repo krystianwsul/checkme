@@ -3,6 +3,7 @@
     package="com.example.krystianwsul.organizator">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -56,7 +57,7 @@
         <receiver
             android:name=".notifications.InstanceNotificationDeleteReceiver"
             android:enabled="true"
-            android:exported="true"></receiver>
+            android:exported="true" />
     </application>
 
 </manifest>

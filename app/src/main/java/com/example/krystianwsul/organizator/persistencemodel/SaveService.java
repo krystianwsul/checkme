@@ -4,6 +4,9 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
@@ -26,27 +29,34 @@ public class SaveService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        ArrayList<InsertCommand> insertCommands = intent.getParcelableArrayListExtra(INSERT_COMMAND_KEY);
-        Assert.assertTrue(insertCommands != null);
-
-        ArrayList<UpdateCommand> updateCommands = intent.getParcelableArrayListExtra(UPDATE_COMMAND_KEY);
-        Assert.assertTrue(updateCommands != null);
-
-        SQLiteDatabase sqLiteDatabase = PersistenceManger.getInstance(this).getSQLiteDatabase();
-
-        sqLiteDatabase.beginTransaction();
-
         try
         {
-            for (InsertCommand insertCommand : insertCommands)
-                insertCommand.execute(sqLiteDatabase);
+            ArrayList<InsertCommand> insertCommands = intent.getParcelableArrayListExtra(INSERT_COMMAND_KEY);
+            Assert.assertTrue(insertCommands != null);
 
-            for (UpdateCommand updateCommand : updateCommands)
-                updateCommand.execute(sqLiteDatabase);
+            ArrayList<UpdateCommand> updateCommands = intent.getParcelableArrayListExtra(UPDATE_COMMAND_KEY);
+            Assert.assertTrue(updateCommands != null);
 
-            sqLiteDatabase.setTransactionSuccessful();
-        } finally {
-            sqLiteDatabase.endTransaction();
+            SQLiteDatabase sqLiteDatabase = PersistenceManger.getInstance(this).getSQLiteDatabase();
+
+            sqLiteDatabase.beginTransaction();
+
+            try
+            {
+                for (InsertCommand insertCommand : insertCommands)
+                    insertCommand.execute(sqLiteDatabase);
+
+                for (UpdateCommand updateCommand : updateCommands)
+                    updateCommand.execute(sqLiteDatabase);
+
+                sqLiteDatabase.setTransactionSuccessful();
+            } finally {
+                sqLiteDatabase.endTransaction();
+            }
+        } catch (Exception e)
+        {
+            Log.e("SaveService", "save error", e);
+            DomainFactory.getDomainFactory(this).reset();
         }
     }
 }

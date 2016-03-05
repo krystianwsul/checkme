@@ -57,7 +57,7 @@ public abstract class DomainLoader<D, O extends DomainFactory.Observer> extends 
             mData = null;
 
         if (mObserver != null) {
-            DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
+            //DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
             mObserver = null;
         }
     }

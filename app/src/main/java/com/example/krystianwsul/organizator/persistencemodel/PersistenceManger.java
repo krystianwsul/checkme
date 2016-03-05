@@ -93,6 +93,10 @@ public class PersistenceManger {
             mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
     }
 
+    public synchronized void reset() {
+        sInstance = null;
+    }
+
     public Collection<CustomTimeRecord> getCustomTimeRecords() {
         return mCustomTimeRecords.values();
     }

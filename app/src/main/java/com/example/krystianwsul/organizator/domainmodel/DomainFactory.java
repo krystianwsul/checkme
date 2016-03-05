@@ -41,6 +41,7 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -57,7 +58,7 @@ public class DomainFactory {
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
-    private final ArrayList<Observer> mObservers = new ArrayList<>();
+    private final ArrayList<WeakReference<Observer>> mObservers = new ArrayList<>();
 
     private static DomainFactory sDomainFactory;
 
@@ -73,14 +74,16 @@ public class DomainFactory {
 
     public synchronized void addDomainObserver(Observer observer) {
         Assert.assertTrue(observer != null);
-        mObservers.add(observer);
+        mObservers.add(new WeakReference<>(observer));
     }
 
-    public synchronized void removeDomainObserver(Observer observer) {
-        Assert.assertTrue(observer != null);
-        Assert.assertTrue(mObservers.contains(observer));
+    public synchronized void reset() {
+        sDomainFactory = null;
+        mPersistenceManager.reset();
 
-        mObservers.remove(observer);
+        notifyDomainObservers(0);
+
+        mObservers.clear();
     }
 
     private DomainFactory(Context context) {
@@ -152,8 +155,20 @@ public class DomainFactory {
     }
 
     private void notifyDomainObservers(int dataId) {
-        for (Observer observer : mObservers)
-            observer.onDomainChanged(dataId);
+        ArrayList<WeakReference<Observer>> remove = new ArrayList<>();
+
+        for (WeakReference<Observer> reference : mObservers) {
+            Assert.assertTrue(reference != null);
+
+            Observer observer = reference.get();
+            if (observer == null)
+                remove.add(reference);
+            else
+                observer.onDomainChanged(dataId);
+        }
+
+        for (WeakReference<Observer> reference : remove)
+            mObservers.remove(reference);
     }
 
     // gets

@@ -122,19 +122,12 @@ public class TaskHierarchyRecord extends Record {
     }
 
     @Override
-    void update(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        update(sqLiteDatabase, TABLE_TASK_HIERARCHIES, COLUMN_ID, mId);
+    UpdateCommand getUpdateCommand() {
+        return getUpdateCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, mId);
     }
 
     @Override
-    void create(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (mCreated)
-            return;
-
-        long insertId = create(sqLiteDatabase, TABLE_TASK_HIERARCHIES);
-        Assert.assertTrue(insertId == mId);
+    InsertCommand getInsertCommand() {
+        return getInsertCommand(TABLE_TASK_HIERARCHIES);
     }
 }

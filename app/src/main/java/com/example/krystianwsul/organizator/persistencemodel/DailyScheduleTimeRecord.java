@@ -118,18 +118,12 @@ public class DailyScheduleTimeRecord extends Record {
     }
 
     @Override
-    void update(SQLiteDatabase sqLiteDatabase) {
-        update(sqLiteDatabase, TABLE_DAILY_SCHEDULE_TIMES, COLUMN_ID, mId);
+    UpdateCommand getUpdateCommand() {
+        return getUpdateCommand(TABLE_DAILY_SCHEDULE_TIMES, COLUMN_ID, mId);
     }
 
     @Override
-    void create(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (mCreated)
-            return;
-
-        long insertId = create(sqLiteDatabase, TABLE_DAILY_SCHEDULE_TIMES);
-        Assert.assertTrue(insertId == mId);
+    InsertCommand getInsertCommand() {
+        return getInsertCommand(TABLE_DAILY_SCHEDULE_TIMES);
     }
 }

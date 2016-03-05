@@ -10,9 +10,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     private static SQLiteDatabase sSQLiteDatabase;
 
-    public static SQLiteDatabase getDatabase(Context context) {
+    public static SQLiteDatabase getDatabase(Context applicationContext) {
         if (sSQLiteDatabase == null)
-            sSQLiteDatabase = new MySQLiteHelper(context.getApplicationContext()).getWritableDatabase();
+            sSQLiteDatabase = new MySQLiteHelper(applicationContext).getWritableDatabase();
         return sSQLiteDatabase;
     }
 

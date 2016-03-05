@@ -332,19 +332,12 @@ public class CustomTimeRecord extends Record {
     }
 
     @Override
-    void update(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        update(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID, mId);
+    UpdateCommand getUpdateCommand() {
+        return getUpdateCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, mId);
     }
 
     @Override
-    void create(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (mCreated)
-            return;
-
-        long insertId = create(sqLiteDatabase, TABLE_CUSTOM_TIMES);
-        Assert.assertTrue(insertId == mId);
+    InsertCommand getInsertCommand() {
+        return getInsertCommand(TABLE_CUSTOM_TIMES);
     }
 }

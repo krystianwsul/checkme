@@ -84,7 +84,8 @@ public class DomainFactory {
     }
 
     private DomainFactory(Context context) {
-        mPersistenceManager = new PersistenceManger(context);
+        mPersistenceManager = PersistenceManger.getInstance(context);
+        Assert.assertTrue(mPersistenceManager != null);
     }
 
     private void initialize() {

@@ -51,6 +51,9 @@
         <service
             android:name=".notifications.InstanceNotificationDeleteService"
             android:exported="false" />
+        <service
+            android:name=".persistencemodel.SaveService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

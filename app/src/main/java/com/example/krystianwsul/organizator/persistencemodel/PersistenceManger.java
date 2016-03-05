@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 public class PersistenceManger {
+    private static PersistenceManger sInstance;
+
     private final SQLiteDatabase mSQLiteDatabase;
 
     private final TreeMap<Integer, CustomTimeRecord> mCustomTimeRecords;
@@ -42,10 +44,21 @@ public class PersistenceManger {
 
     private final TreeMap<Integer, InstanceRecord> mInstanceRecords;
 
-    public PersistenceManger(Context context) {
+    private final Context mApplicationContext;
+
+    public static synchronized PersistenceManger getInstance(Context context) {
+        Assert.assertTrue(context != null);
+        if (sInstance == null)
+            sInstance = new PersistenceManger(context);
+        return sInstance;
+    }
+
+    private PersistenceManger(Context context) {
         Assert.assertTrue(context != null);
 
-        mSQLiteDatabase = MySQLiteHelper.getDatabase(context);
+        mApplicationContext = context.getApplicationContext();
+
+        mSQLiteDatabase = MySQLiteHelper.getDatabase(mApplicationContext);
 
         mCustomTimeRecords = new TreeMap<>();
         for (CustomTimeRecord customTimeRecord : CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase))
@@ -307,65 +320,82 @@ public class PersistenceManger {
     }
 
     public void save() {
-        mSQLiteDatabase.beginTransaction();
+        // insert
 
-        try
-        {
-            // create
+        ArrayList<InsertCommand> insertCommands = new ArrayList<>();
 
-            for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
-                customTimeRecord.create(mSQLiteDatabase);
+        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
+            if (customTimeRecord.needsInsert())
+                insertCommands.add(customTimeRecord.getInsertCommand());
 
-            for (TaskRecord taskRecord : mTaskRecords.values())
-                taskRecord.create(mSQLiteDatabase);
+        for (TaskRecord taskRecord : mTaskRecords.values())
+            if (taskRecord.needsInsert())
+                insertCommands.add(taskRecord.getInsertCommand());
 
-            for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
-                taskHierarchyRecord.create(mSQLiteDatabase);
+        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
+            if (taskHierarchyRecord.needsInsert())
+                insertCommands.add(taskHierarchyRecord.getInsertCommand());
 
-            for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
-                scheduleRecord.create(mSQLiteDatabase);
+        for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
+            if (scheduleRecord.needsInsert())
+                insertCommands.add(scheduleRecord.getInsertCommand());
 
-            for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
-                singleScheduleDateTimeRecord.create(mSQLiteDatabase);
+        for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
+            if (singleScheduleDateTimeRecord.needsInsert())
+                insertCommands.add(singleScheduleDateTimeRecord.getInsertCommand());
 
-            for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
-                dailyScheduleTimeRecord.create(mSQLiteDatabase);
+        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
+            if (dailyScheduleTimeRecord.needsInsert())
+                insertCommands.add(dailyScheduleTimeRecord.getInsertCommand());
 
-            for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
-                weeklyScheduleDayOfWeekTimeRecord.create(mSQLiteDatabase);
+        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
+            if (weeklyScheduleDayOfWeekTimeRecord.needsInsert())
+                insertCommands.add(weeklyScheduleDayOfWeekTimeRecord.getInsertCommand());
 
-            for (InstanceRecord instanceRecord : mInstanceRecords.values())
-                instanceRecord.create(mSQLiteDatabase);
+        for (InstanceRecord instanceRecord : mInstanceRecords.values())
+            if (instanceRecord.needsInsert())
+                insertCommands.add(instanceRecord.getInsertCommand());
 
-            // update
+        // update
 
-            for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
-                customTimeRecord.update(mSQLiteDatabase);
+        ArrayList<UpdateCommand> updateCommands = new ArrayList<>();
 
-            for (TaskRecord taskRecord : mTaskRecords.values())
-                taskRecord.update(mSQLiteDatabase);
+        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords.values())
+            if (customTimeRecord.needsUpdate())
+                updateCommands.add(customTimeRecord.getUpdateCommand());
 
-            for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
-                taskHierarchyRecord.update(mSQLiteDatabase);
+        for (TaskRecord taskRecord : mTaskRecords.values())
+            if (taskRecord.needsUpdate())
+                updateCommands.add(taskRecord.getUpdateCommand());
 
-            for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
-                scheduleRecord.update(mSQLiteDatabase);
+        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords.values())
+            if (taskHierarchyRecord.needsUpdate())
+                updateCommands.add(taskHierarchyRecord.getUpdateCommand());
 
-            for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
-                singleScheduleDateTimeRecord.update(mSQLiteDatabase);
+        for (ScheduleRecord scheduleRecord : mScheduleRecords.values())
+            if (scheduleRecord.needsUpdate())
+                updateCommands.add(scheduleRecord.getUpdateCommand());
 
-            for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
-                dailyScheduleTimeRecord.update(mSQLiteDatabase);
+        for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
+            if (singleScheduleDateTimeRecord.needsUpdate())
+                updateCommands.add(singleScheduleDateTimeRecord.getUpdateCommand());
 
-            for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
-                weeklyScheduleDayOfWeekTimeRecord.update(mSQLiteDatabase);
+        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords.values())
+            if (dailyScheduleTimeRecord.needsUpdate())
+                updateCommands.add(dailyScheduleTimeRecord.getUpdateCommand());
 
-            for (InstanceRecord instanceRecord : mInstanceRecords.values())
-                instanceRecord.update(mSQLiteDatabase);
+        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords.values())
+            if (weeklyScheduleDayOfWeekTimeRecord.needsUpdate())
+                updateCommands.add(weeklyScheduleDayOfWeekTimeRecord.getUpdateCommand());
 
-            mSQLiteDatabase.setTransactionSuccessful();
-        } finally {
-            mSQLiteDatabase.endTransaction();
-        }
-   }
+        for (InstanceRecord instanceRecord : mInstanceRecords.values())
+            if (instanceRecord.needsUpdate())
+                updateCommands.add(instanceRecord.getUpdateCommand());
+
+        SaveService.startService(mApplicationContext, insertCommands, updateCommands);
+    }
+
+    SQLiteDatabase getSQLiteDatabase() {
+        return mSQLiteDatabase;
+    }
 }

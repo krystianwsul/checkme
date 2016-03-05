@@ -95,7 +95,7 @@ public class InstanceKey implements Parcelable {
 
         @Override
         public InstanceKey[] newArray(int size) {
-            return new InstanceKey[0];
+            return new InstanceKey[size];
         }
     };
 }

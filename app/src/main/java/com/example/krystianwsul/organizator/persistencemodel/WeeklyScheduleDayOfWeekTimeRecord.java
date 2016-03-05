@@ -130,18 +130,12 @@ public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
     }
 
     @Override
-    void update(SQLiteDatabase sqLiteDatabase) {
-        update(sqLiteDatabase, TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, COLUMN_ID, mId);
+    UpdateCommand getUpdateCommand() {
+        return getUpdateCommand(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, COLUMN_ID, mId);
     }
 
     @Override
-    void create(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (mCreated)
-            return;
-
-        long insertId = create(sqLiteDatabase, TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES);
-        Assert.assertTrue(insertId == mId);
+    InsertCommand getInsertCommand() {
+        return getInsertCommand(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES);
     }
 }

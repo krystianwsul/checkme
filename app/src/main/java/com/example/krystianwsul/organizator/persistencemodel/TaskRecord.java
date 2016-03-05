@@ -119,19 +119,12 @@ public class TaskRecord extends Record {
     }
 
     @Override
-    void update(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        update(sqLiteDatabase, TABLE_TASKS, COLUMN_ID, mId);
+    UpdateCommand getUpdateCommand() {
+        return getUpdateCommand(TABLE_TASKS, COLUMN_ID, mId);
     }
 
     @Override
-    void create(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (mCreated)
-            return;
-
-        long insertId = create(sqLiteDatabase, TABLE_TASKS);
-        Assert.assertTrue(insertId == mId);
+    InsertCommand getInsertCommand() {
+        return getInsertCommand(TABLE_TASKS);
     }
 }

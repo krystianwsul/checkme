@@ -1,7 +1,6 @@
 package com.example.krystianwsul.organizator.persistencemodel;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
@@ -16,33 +15,38 @@ abstract class Record {
         mCreated = created;
     }
 
-    protected long create(SQLiteDatabase sqLiteDatabase, String tableName) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    protected InsertCommand getInsertCommand(String tableName) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
 
-        long id = sqLiteDatabase.insert(tableName, null, getContentValues());
-        Assert.assertTrue(id != -1);
+        Assert.assertTrue(!mCreated);
 
         mCreated = true;
         mChanged = false;
 
-        return id;
+        return new InsertCommand(tableName, getContentValues());
     }
 
-    protected void update(SQLiteDatabase sqLiteDatabase, String tableName, String idColumn, int id) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    protected UpdateCommand getUpdateCommand(String tableName, String idColumn, int id) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
         Assert.assertTrue(!TextUtils.isEmpty(idColumn));
 
-        if (!mChanged)
-            return;
-
-        sqLiteDatabase.update(tableName, getContentValues(), idColumn + " = " + id, null);
+        Assert.assertTrue(mChanged);
 
         mChanged = false;
+
+        return new UpdateCommand(tableName, getContentValues(), idColumn + " = " + id);
     }
 
-    abstract void update(SQLiteDatabase sqLiteDatabase);
+    public boolean needsInsert() {
+        return !mCreated;
+    }
 
-    abstract void create(SQLiteDatabase sqLiteDatabase);
+    public boolean needsUpdate() {
+        Assert.assertTrue(mCreated);
+        return mChanged;
+    }
+
+    abstract InsertCommand getInsertCommand();
+
+    abstract UpdateCommand getUpdateCommand();
 }

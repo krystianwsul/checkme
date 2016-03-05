@@ -141,17 +141,12 @@ public class SingleScheduleDateTimeRecord extends Record {
     }
 
     @Override
-    void update(SQLiteDatabase sqLiteDatabase) {
-        update(sqLiteDatabase, TABLE_SINGLE_SCHEDULE_DATE_TIMES, COLUMN_SCHEDULE_ID, mScheduleId);
+    UpdateCommand getUpdateCommand() {
+        return getUpdateCommand(TABLE_SINGLE_SCHEDULE_DATE_TIMES, COLUMN_SCHEDULE_ID, mScheduleId);
     }
 
     @Override
-    void create(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (mCreated)
-            return;
-
-        create(sqLiteDatabase, TABLE_SINGLE_SCHEDULE_DATE_TIMES);
+    InsertCommand getInsertCommand() {
+        return getInsertCommand(TABLE_SINGLE_SCHEDULE_DATE_TIMES);
     }
 }

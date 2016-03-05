@@ -324,19 +324,12 @@ public class InstanceRecord extends Record {
     }
 
     @Override
-    void update(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        update(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID, mId);
+    UpdateCommand getUpdateCommand() {
+        return getUpdateCommand(TABLE_INSTANCES, COLUMN_ID, mId);
     }
 
     @Override
-    void create(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (mCreated)
-            return;
-
-        long insertId = create(sqLiteDatabase, TABLE_INSTANCES);
-        Assert.assertTrue(insertId + " " + mId, insertId == mId);
+    InsertCommand getInsertCommand() {
+        return getInsertCommand(TABLE_INSTANCES);
     }
 }

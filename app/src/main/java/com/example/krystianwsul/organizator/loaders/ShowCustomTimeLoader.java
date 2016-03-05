@@ -11,7 +11,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data, ShowCustomTimeLoader.Observer> {
+public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data> {
     private final int mCustomTimeId;
 
     public ShowCustomTimeLoader(Context context, int customTimeId) {
@@ -23,25 +23,6 @@ public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getShowCustomTimeData(mCustomTimeId);
-    }
-
-    @Override
-    protected ShowCustomTimeLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

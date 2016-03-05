@@ -88,10 +88,10 @@ public class TickService extends IntentService {
 
             ArrayList<InstanceKey> showInstanceKeys = new ArrayList<>();
             for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas) {
-                if (!shownInstanceKeys.contains(notificationInstanceData.InstanceKey))
+                if (!shownInstanceKeys.contains(notificationInstanceData.InstanceKey)) {
+                    notify(notificationInstanceData);
                     showInstanceKeys.add(notificationInstanceData.InstanceKey);
-
-                notify(notificationInstanceData);
+                }
             }
 
             if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())

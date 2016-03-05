@@ -11,7 +11,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data, ShowInstanceLoader.Observer> {
+public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
 
     public ShowInstanceLoader(Context context, InstanceKey instanceKey) {
@@ -25,25 +25,6 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data, Sh
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getShowInstanceData(getContext(), mInstanceKey);
-    }
-
-    @Override
-    protected ShowInstanceLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

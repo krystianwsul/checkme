@@ -14,7 +14,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GroupListLoader extends DomainLoader<GroupListLoader.Data, GroupListLoader.Observer> {
+public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     public GroupListLoader(Context context) {
         super(context);
     }
@@ -22,25 +22,6 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data, GroupLis
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext());
-    }
-
-    @Override
-    protected GroupListLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

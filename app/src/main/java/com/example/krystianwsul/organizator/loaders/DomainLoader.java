@@ -7,9 +7,9 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
-public abstract class DomainLoader<D, O extends DomainFactory.Observer> extends AsyncTaskLoader<D> {
+public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTaskLoader<D> {
     protected D mData;
-    protected O mObserver;
+    protected Observer mObserver;
 
     public DomainLoader(Context context) {
         super(context);
@@ -34,15 +34,13 @@ public abstract class DomainLoader<D, O extends DomainFactory.Observer> extends 
             deliverResult(mData);
 
         if (mObserver == null) {
-            mObserver = newObserver();
+            mObserver = new Observer();
             DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
         }
 
         if (takeContentChanged() || mData == null)
             forceLoad();
     }
-
-    protected abstract O newObserver();
 
     @Override
     protected void onStopLoading() {
@@ -59,6 +57,21 @@ public abstract class DomainLoader<D, O extends DomainFactory.Observer> extends 
         if (mObserver != null) {
             //DomainFactory.getDomainFactory(getContext()).removeDomainObserver(mObserver);
             mObserver = null;
+        }
+    }
+
+    public class Observer {
+        public void onDomainChanged(int dataId) {
+            if (mData != null && dataId == mData.DataId)
+                return;
+
+            if (mData != null) {
+                D newData = loadInBackground();
+                if (mData.equals(newData))
+                    return;
+            }
+
+            onContentChanged();
         }
     }
 

@@ -9,7 +9,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class TaskListLoader extends DomainLoader<TaskListLoader.Data, TaskListLoader.Observer> {
+public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     public TaskListLoader(Context context) {
         super(context);
     }
@@ -17,25 +17,6 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data, TaskListLo
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext());
-    }
-
-    @Override
-    protected TaskListLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

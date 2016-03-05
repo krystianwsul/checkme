@@ -14,7 +14,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data, EditInstanceLoader.Observer> {
+public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
 
     public EditInstanceLoader(Context context, InstanceKey instanceKey) {
@@ -28,25 +28,6 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data, Ed
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mInstanceKey);
-    }
-
-    @Override
-    protected EditInstanceLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

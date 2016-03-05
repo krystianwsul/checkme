@@ -11,7 +11,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data, ShowGroupLoader.Observer> {
+public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     private final TimeStamp mTimeStamp;
 
     public ShowGroupLoader(Context context, TimeStamp timeStamp) {
@@ -24,25 +24,6 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data, ShowGrou
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getShowGroupData(getContext(), mTimeStamp);
-    }
-
-    @Override
-    protected ShowGroupLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

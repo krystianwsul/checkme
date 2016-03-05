@@ -13,7 +13,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class DailyScheduleLoader extends DomainLoader<DailyScheduleLoader.Data, DailyScheduleLoader.Observer> {
+public class DailyScheduleLoader extends DomainLoader<DailyScheduleLoader.Data> {
     private final Integer mRootTaskId; // possibly null
 
     public DailyScheduleLoader(Context context, Integer rootTaskId) {
@@ -25,25 +25,6 @@ public class DailyScheduleLoader extends DomainLoader<DailyScheduleLoader.Data, 
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getDailyScheduleData(mRootTaskId);
-    }
-
-    @Override
-    protected DailyScheduleLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

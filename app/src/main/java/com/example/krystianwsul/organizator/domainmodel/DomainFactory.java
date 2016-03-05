@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
+import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
@@ -58,7 +59,7 @@ public class DomainFactory {
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
-    private final ArrayList<WeakReference<Observer>> mObservers = new ArrayList<>();
+    private final ArrayList<WeakReference<DomainLoader.Observer>> mObservers = new ArrayList<>();
 
     private static DomainFactory sDomainFactory;
 
@@ -72,7 +73,7 @@ public class DomainFactory {
         return sDomainFactory;
     }
 
-    public synchronized void addDomainObserver(Observer observer) {
+    public synchronized void addDomainObserver(DomainLoader.Observer observer) {
         Assert.assertTrue(observer != null);
         mObservers.add(new WeakReference<>(observer));
     }
@@ -155,19 +156,19 @@ public class DomainFactory {
     }
 
     private void notifyDomainObservers(int dataId) {
-        ArrayList<WeakReference<Observer>> remove = new ArrayList<>();
+        ArrayList<WeakReference<DomainLoader.Observer>> remove = new ArrayList<>();
 
-        for (WeakReference<Observer> reference : mObservers) {
+        for (WeakReference<DomainLoader.Observer> reference : mObservers) {
             Assert.assertTrue(reference != null);
 
-            Observer observer = reference.get();
+            DomainLoader.Observer observer = reference.get();
             if (observer == null)
                 remove.add(reference);
             else
                 observer.onDomainChanged(dataId);
         }
 
-        for (WeakReference<Observer> reference : remove)
+        for (WeakReference<DomainLoader.Observer> reference : remove)
             mObservers.remove(reference);
     }
 
@@ -1206,7 +1207,4 @@ public class DomainFactory {
         return customTimes;
     }
 
-    public interface Observer {
-        void onDomainChanged(int dataId);
-    }
 }

@@ -7,7 +7,7 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
-public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Data, CreateChildTaskLoader.Observer> {
+public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Data> {
     private final int mChildTaskId;
 
     public CreateChildTaskLoader(Context context, int childTaskId) {
@@ -19,26 +19,6 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
     @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mChildTaskId);
-    }
-
-    @Override
-    protected CreateChildTaskLoader.Observer newObserver() {
-        return new Observer();
-    }
-
-    public class Observer implements DomainFactory.Observer {
-        @Override
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
-                return;
-
-            Data newData = loadInBackground();
-
-            if (mData.equals(newData))
-                return;
-
-            onContentChanged();
-        }
     }
 
     public static class Data extends DomainLoader.Data {

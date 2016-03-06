@@ -21,8 +21,10 @@ import com.example.krystianwsul.organizator.utils.InstanceKey;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 public class TickService extends IntentService {
     private static boolean sRegistered = false;
@@ -38,14 +40,26 @@ public class TickService extends IntentService {
 
         Intent intent = new Intent(context, TickService.class);
         intent.putExtra(SILENT_KEY, false);
+        context.startService(intent);
+
+        sRegistered = true;
+    }
+
+    private static void setNextMinute(Context context) {
+        Assert.assertTrue(context != null);
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.MINUTE, 1);
+
+        Intent intent = new Intent(context, TickService.class);
+        intent.putExtra(SILENT_KEY, false);
 
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, 60 * 1000, pendingIntent);
-
-        sRegistered = true;
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 
     public static void startService(Context context) {
@@ -138,6 +152,9 @@ public class TickService extends IntentService {
         }
 
         sFirst = false;
+
+        if (!silent)
+            setNextMinute(this);
     }
 
     private void notifyInstance(NotificationInstanceData notificationInstanceData, boolean silent) {

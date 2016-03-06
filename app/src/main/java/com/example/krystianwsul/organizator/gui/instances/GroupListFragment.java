@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -210,7 +211,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 boolean isChecked = checkBox.isChecked();
 
                 GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
-                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mData.DataId, mContext, instanceData.InstanceKey, isChecked);
+                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mData.DataId, instanceData.InstanceKey, isChecked);
+
+                TickService.startService(mContext);
 
                 if (isChecked) {
                     Assert.assertTrue(instanceData.Done != null);

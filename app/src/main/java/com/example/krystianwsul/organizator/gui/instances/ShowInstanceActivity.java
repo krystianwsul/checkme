@@ -17,11 +17,10 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
-
-import java.util.ArrayList;
 
 public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data> {
     private static final String INSTANCE_KEY = "instanceKey";
@@ -103,20 +102,18 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         else
             mShowInstanceDetails.setText(scheduleText);
 
-        if (data.HasChildren) {
-            ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
-            for (ShowInstanceLoader.InstanceData instanceData : data.InstanceDatas.values())
-                datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, null));
-
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
-        }
+        if (data.HasChildren)
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), false));
 
         mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean isChecked = mCheckBox.isChecked();
 
-                DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, ShowInstanceActivity.this, data.InstanceKey, isChecked);
+                DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, data.InstanceKey, isChecked);
+
+                TickService.startService(ShowInstanceActivity.this);
+
                 data.Done = isChecked;
             }
         });

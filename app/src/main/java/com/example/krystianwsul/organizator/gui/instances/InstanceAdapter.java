@@ -14,12 +14,14 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -27,6 +29,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     private final Context mContext;
 
     private final int mDataId;
+    private final boolean mResetNotified;
 
     private final ArrayList<Data> mDoneInstances = new ArrayList<>();
     private final ArrayList<Data> mNotDoneInstances = new ArrayList<>();
@@ -41,13 +44,14 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         }
     };
 
-    public InstanceAdapter(Context context, int dataId, ArrayList<Data> datas) {
+    public InstanceAdapter(Context context, int dataId, Collection<Data> datas, boolean resetNotified) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(datas != null);
         Assert.assertTrue(!datas.isEmpty());
 
         mContext = context;
         mDataId = dataId;
+        mResetNotified = resetNotified;
 
         for (Data data : datas) {
             if (data.Done != null)
@@ -164,7 +168,17 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
             boolean isChecked = checkBox.isChecked();
 
-            data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mContext, data.InstanceKey, isChecked);
+            if (mResetNotified) {
+                ArrayList<InstanceKey> notDoneInstanceKeys = new ArrayList<>();
+                for (Data notDoneInstanceData : mNotDoneInstances)
+                    notDoneInstanceKeys.add(notDoneInstanceData.InstanceKey);
+
+                data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, data.InstanceKey, isChecked, notDoneInstanceKeys);
+            } else {
+                data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, data.InstanceKey, isChecked);
+            }
+
+            TickService.startService(mContext);
 
             if (isChecked) {
                 Assert.assertTrue(mNotDoneInstances.contains(data));
@@ -216,6 +230,35 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
             HasChildren = hasChildren;
             InstanceKey = instanceKey;
             DisplayText = displayText;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            if (Done != null)
+                hashCode += Done.hashCode();
+            hashCode += Name.hashCode();
+            hashCode += (HasChildren ? 1 : 0);
+            hashCode += InstanceKey.hashCode();
+            if (!TextUtils.isEmpty(DisplayText))
+                hashCode += DisplayText.hashCode();
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            return (((Done == null) && (data.Done == null)) || (((Done != null) && (data.Done != null)) && Done.equals(data.Done)) && Name.equals(data.Name) && (HasChildren == data.HasChildren) && InstanceKey.equals(data.InstanceKey) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))));
         }
     }
 }

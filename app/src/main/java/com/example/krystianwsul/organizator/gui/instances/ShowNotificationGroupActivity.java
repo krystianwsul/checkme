@@ -62,21 +62,17 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
 
     @Override
     public void onLoadFinished(Loader<ShowNotificationGroupLoader.Data> loader, ShowNotificationGroupLoader.Data data) {
-        Assert.assertTrue(!data.InstanceDatas.isEmpty());
+        Assert.assertTrue(!data.InstanceAdapterDatas.isEmpty());
 
         if (mSavedInstanceState == null) {
             ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
-            for (ShowNotificationGroupLoader.InstanceData instanceData : data.InstanceDatas)
-                instanceKeys.add(instanceData.InstanceKey);
+            for (InstanceAdapter.Data instanceAdapterData : data.InstanceAdapterDatas)
+                instanceKeys.add(instanceAdapterData.InstanceKey);
 
             DomainFactory.getDomainFactory(this).setInstancesNotified(data.DataId, instanceKeys);
         }
 
-        ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
-        for (ShowNotificationGroupLoader.InstanceData instanceData : data.InstanceDatas)
-            datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, instanceData.DisplayText));
-
-        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
+        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas, true));
     }
 
     @Override

@@ -4,8 +4,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -33,9 +33,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final String DisplayText;
         public boolean Done;
         public final boolean HasChildren;
-        public final HashMap<InstanceKey, InstanceData> InstanceDatas;
+        public final HashMap<InstanceKey, InstanceAdapter.Data> InstanceAdapterDatas;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean hasChildren, HashMap<InstanceKey, InstanceData> instanceDatas) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean hasChildren, HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -44,7 +44,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             DisplayText = displayText;
             Done = done;
             HasChildren = hasChildren;
-            InstanceDatas = instanceDatas;
+            InstanceAdapterDatas = instanceAdapterDatas;
         }
 
         @Override
@@ -56,7 +56,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
                 hashCode += DisplayText.hashCode();
             hashCode += (Done ? 1 : 0);
             hashCode += (HasChildren ? 1 : 0);
-            hashCode += InstanceDatas.hashCode();
+            hashCode += InstanceAdapterDatas.hashCode();
             return hashCode;
         }
 
@@ -73,51 +73,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (HasChildren == data.HasChildren) && InstanceDatas.equals(data.InstanceDatas));
-        }
-    }
-
-    public static class InstanceData {
-        public final TimeStamp Done;
-        public final String Name;
-        public final boolean HasChildren;
-        public final InstanceKey InstanceKey;
-
-        public InstanceData(TimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(instanceKey != null);
-
-            Done = done;
-            Name = name;
-            HasChildren = hasChildren;
-            InstanceKey = instanceKey;
-        }
-
-        @Override
-        public int hashCode() {
-            int hashCode = 0;
-            if (Done != null)
-                hashCode += Done.hashCode();
-            hashCode += Name.hashCode();
-            hashCode += (HasChildren ? 1 : 0);
-            hashCode += InstanceKey.hashCode();
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (object == null)
-                return false;
-
-            if (object == this)
-                return true;
-
-            if (!(object instanceof InstanceData))
-                return false;
-
-            InstanceData instanceData = (InstanceData) object;
-
-            return (((Done == null) && (instanceData.Done == null)) || (((Done != null) && (instanceData.Done != null)) && Done.equals(instanceData.Done)) && Name.equals(instanceData.Name) && (HasChildren == instanceData.HasChildren) && InstanceKey.equals(instanceData.InstanceKey));
+            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (HasChildren == data.HasChildren) && InstanceAdapterDatas.equals(data.InstanceAdapterDatas));
         }
     }
 }

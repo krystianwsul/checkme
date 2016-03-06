@@ -1,11 +1,10 @@
 package com.example.krystianwsul.organizator.loaders;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -29,18 +28,18 @@ public class ShowNotificationGroupLoader extends DomainLoader<ShowNotificationGr
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<InstanceData> InstanceDatas;
+        public final ArrayList<InstanceAdapter.Data> InstanceAdapterDatas;
 
-        public Data(ArrayList<InstanceData> instanceDatas) {
-            Assert.assertTrue(instanceDatas != null);
-            Assert.assertTrue(!instanceDatas.isEmpty());
+        public Data(ArrayList<InstanceAdapter.Data> instanceAdapterDatas) {
+            Assert.assertTrue(instanceAdapterDatas != null);
+            Assert.assertTrue(!instanceAdapterDatas.isEmpty());
 
-            InstanceDatas = instanceDatas;
+            InstanceAdapterDatas = instanceAdapterDatas;
         }
 
         @Override
         public int hashCode() {
-            return InstanceDatas.hashCode();
+            return InstanceAdapterDatas.hashCode();
         }
 
         @Override
@@ -56,55 +55,7 @@ public class ShowNotificationGroupLoader extends DomainLoader<ShowNotificationGr
 
             Data data = (Data) object;
 
-            return InstanceDatas.equals(data.InstanceDatas);
-        }
-    }
-
-    public static class InstanceData {
-        public final TimeStamp Done;
-        public final String Name;
-        public final boolean HasChildren;
-        public final InstanceKey InstanceKey;
-        public final String DisplayText;
-
-        public InstanceData(TimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey, String displayText) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(instanceKey != null);
-            Assert.assertTrue(!TextUtils.isEmpty(displayText));
-
-            Done = done;
-            Name = name;
-            HasChildren = hasChildren;
-            InstanceKey = instanceKey;
-            DisplayText = displayText;
-        }
-
-        @Override
-        public int hashCode() {
-            int hashCode = 0;
-            if (Done != null)
-                hashCode += Done.hashCode();
-            hashCode += Name.hashCode();
-            hashCode += (HasChildren ? 1 : 0);
-            hashCode += InstanceKey.hashCode();
-            hashCode += DisplayText.hashCode();
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (object == null)
-                return false;
-
-            if (object == this)
-                return true;
-
-            if (!(object instanceof InstanceData))
-                return false;
-
-            InstanceData instanceData = (InstanceData) object;
-
-            return (((Done == null) && (instanceData.Done == null)) || (((Done != null) && (instanceData.Done != null)) && Done.equals(instanceData.Done)) && Name.equals(instanceData.Name) && (HasChildren == instanceData.HasChildren) && InstanceKey.equals(instanceData.InstanceKey) && DisplayText.equals(instanceData.DisplayText));
+            return InstanceAdapterDatas.equals(data.InstanceAdapterDatas);
         }
     }
 }

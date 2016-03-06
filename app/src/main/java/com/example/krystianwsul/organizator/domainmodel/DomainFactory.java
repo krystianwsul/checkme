@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
@@ -263,11 +264,11 @@ public class DomainFactory {
 
         String displayText = new DateTime(currentInstances.get(0).getInstanceDate(), time).getDisplayText(context);
 
-        HashMap<InstanceKey, ShowGroupLoader.InstanceData> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
         for (Instance instance : currentInstances)
-            instanceDatas.put(instance.getInstanceKey(), new ShowGroupLoader.InstanceData(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey()));
+            instanceAdapterDatas.put(instance.getInstanceKey(), new InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey(), null));
 
-        return new ShowGroupLoader.Data(displayText, instanceDatas);
+        return new ShowGroupLoader.Data(displayText, instanceAdapterDatas);
     }
 
     public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<InstanceKey> instanceKeys) {
@@ -290,9 +291,9 @@ public class DomainFactory {
             }
         });
 
-        ArrayList<ShowNotificationGroupLoader.InstanceData> instanceDatas = new ArrayList<>();
+        ArrayList<InstanceAdapter.Data> instanceDatas = new ArrayList<>();
         for (Instance instance : instances)
-            instanceDatas.add(new ShowNotificationGroupLoader.InstanceData(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context)));
+            instanceDatas.add(new InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances().isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context)));
 
         return new ShowNotificationGroupLoader.Data(instanceDatas);
     }
@@ -304,12 +305,12 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
-        HashMap<InstanceKey, ShowInstanceLoader.InstanceData> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
 
         for (Instance childInstance : instance.getChildInstances())
-            instanceDatas.put(childInstance.getInstanceKey(), new ShowInstanceLoader.InstanceData(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances().isEmpty(), childInstance.getInstanceKey()));
+            instanceAdapterDatas.put(childInstance.getInstanceKey(), new InstanceAdapter.Data(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances().isEmpty(), childInstance.getInstanceKey(), null));
 
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context), instance.getDone() != null, !instance.getChildInstances().isEmpty(), instanceDatas);
+        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context), instance.getDone() != null, !instance.getChildInstances().isEmpty(), instanceAdapterDatas);
     }
 
     public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {
@@ -449,8 +450,7 @@ public class DomainFactory {
 
     // sets
 
-    public synchronized void setInstanceDateTime(int dataId, Context context, InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair) {
-        Assert.assertTrue(context != null);
+    public synchronized void setInstanceDateTime(int dataId, InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair) {
         Assert.assertTrue(instanceKey != null);
         Assert.assertTrue(instanceDate != null);
         Assert.assertTrue(instanceTimePair != null);
@@ -460,13 +460,10 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair);
 
-        TickService.startService(context);
-
         save(dataId);
     }
 
-    public synchronized TimeStamp setInstanceDone(int dataId, Context context, InstanceKey instanceKey, boolean done) {
-        Assert.assertTrue(context != null);
+    public synchronized TimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done) {
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);
@@ -476,7 +473,28 @@ public class DomainFactory {
 
         save(dataId);
 
-        TickService.startService(context);
+        return instance.getDone();
+    }
+
+    public synchronized TimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done, ArrayList<InstanceKey> notDoneInstanceKeys) {
+        Assert.assertTrue(instanceKey != null);
+        Assert.assertTrue(notDoneInstanceKeys != null);
+
+        Instance instance = getInstance(instanceKey);
+        Assert.assertTrue(instance != null);
+
+        instance.setDone(done);
+
+        for (InstanceKey notDoneInstanceKey : notDoneInstanceKeys) {
+            Assert.assertTrue(notDoneInstanceKey != null);
+
+            Instance notDoneInstance = getInstance(notDoneInstanceKey);
+            Assert.assertTrue(notDoneInstance != null);
+
+            notDoneInstance.setNotified(false);
+        }
+
+        save(dataId);
 
         return instance.getDone();
     }
@@ -489,7 +507,7 @@ public class DomainFactory {
             Instance instance = getInstance(instanceKey);
             Assert.assertTrue(instance != null);
 
-            instance.setNotified();
+            instance.setNotified(true);
             instance.setNotificationShown(false);
         }
 
@@ -502,7 +520,7 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
-        instance.setNotified();
+        instance.setNotified(true);
         instance.setNotificationShown(false);
 
         save(dataId);

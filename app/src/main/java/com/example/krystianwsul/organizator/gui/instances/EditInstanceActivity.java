@@ -18,6 +18,7 @@ import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TimePickerView;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
+import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -179,7 +180,9 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
                     return;
                 }
 
-                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, EditInstanceActivity.this, mData.InstanceKey, mDate, new TimePair(mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute()));
+                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, new TimePair(mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute()));
+
+                TickService.startService(EditInstanceActivity.this);
 
                 finish();
             }

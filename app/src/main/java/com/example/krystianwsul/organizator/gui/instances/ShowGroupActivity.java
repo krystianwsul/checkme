@@ -16,8 +16,6 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data> {
     private RecyclerView mShowGroupList;
     private TimeStamp mTimeStamp;
@@ -59,11 +57,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
     public void onLoadFinished(Loader<ShowGroupLoader.Data> loader, ShowGroupLoader.Data data) {
         mShowGroupName.setText(data.DisplayText);
 
-        ArrayList<InstanceAdapter.Data> datas = new ArrayList<>();
-        for (ShowGroupLoader.InstanceData instanceData : data.InstanceDatas.values())
-            datas.add(new InstanceAdapter.Data(instanceData.Done, instanceData.Name, instanceData.HasChildren, instanceData.InstanceKey, null));
-
-        mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, datas));
+        mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), false));
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
@@ -28,20 +29,20 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
 
     public static class Data extends DomainLoader.Data {
         public final String DisplayText;
-        public final HashMap<InstanceKey, InstanceData> InstanceDatas;
+        public final HashMap<InstanceKey, InstanceAdapter.Data> InstanceAdapterDatas;
 
-        public Data(String displayText, HashMap<InstanceKey, InstanceData> instanceDatas) {
+        public Data(String displayText, HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas) {
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
-            Assert.assertTrue(instanceDatas != null);
-            Assert.assertTrue(!instanceDatas.isEmpty());
+            Assert.assertTrue(instanceAdapterDatas != null);
+            Assert.assertTrue(!instanceAdapterDatas.isEmpty());
 
             DisplayText = displayText;
-            InstanceDatas = instanceDatas;
+            InstanceAdapterDatas = instanceAdapterDatas;
         }
 
         @Override
         public int hashCode() {
-            return (DisplayText.hashCode() + InstanceDatas.hashCode());
+            return (DisplayText.hashCode() + InstanceAdapterDatas.hashCode());
         }
 
         @Override
@@ -57,51 +58,7 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
 
             Data data = (Data) object;
 
-            return (DisplayText.equals(data.DisplayText) && InstanceDatas.equals(data.InstanceDatas));
-        }
-    }
-
-    public static class InstanceData {
-        public final TimeStamp Done;
-        public final String Name;
-        public final boolean HasChildren;
-        public final InstanceKey InstanceKey;
-
-        public InstanceData(TimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(instanceKey != null);
-
-            Done = done;
-            Name = name;
-            HasChildren = hasChildren;
-            InstanceKey = instanceKey;
-        }
-
-        @Override
-        public int hashCode() {
-            int hashCode = 0;
-            if (Done != null)
-                hashCode += Done.hashCode();
-            hashCode += Name.hashCode();
-            hashCode += (HasChildren ? 1 : 0);
-            hashCode += InstanceKey.hashCode();
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (object == null)
-                return false;
-
-            if (object == this)
-                return true;
-
-            if (!(object instanceof InstanceData))
-                return false;
-
-            InstanceData instanceData = (InstanceData) object;
-
-            return (((Done == null) && (instanceData.Done == null)) || (((Done != null) && (instanceData.Done != null)) && Done.equals(instanceData.Done)) && Name.equals(instanceData.Name) && (HasChildren == instanceData.HasChildren) && InstanceKey.equals(instanceData.InstanceKey));
+            return (DisplayText.equals(data.DisplayText) && InstanceAdapterDatas.equals(data.InstanceAdapterDatas));
         }
     }
 }

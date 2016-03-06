@@ -303,12 +303,12 @@ public class Instance {
         return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }
 
-    void setNotified() {
+    void setNotified(boolean notified) {
         if (mInstanceRecord == null)
             createInstanceHierarchy();
 
         Assert.assertTrue(mInstanceRecord != null);
-        mInstanceRecord.setNotified(true);
+        mInstanceRecord.setNotified(notified);
     }
 
     /*

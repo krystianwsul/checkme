@@ -237,7 +237,6 @@ public class DomainFactory {
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
 
-
         Calendar endCalendar = timeStamp.getCalendar();
         endCalendar.add(Calendar.MINUTE, 1);
         TimeStamp endTimeStamp = new TimeStamp(endCalendar);
@@ -248,12 +247,11 @@ public class DomainFactory {
         for (Instance instance : rootInstances)
             if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 currentInstances.add(instance);
-        Assert.assertTrue(!currentInstances.isEmpty());
+        //Assert.assertTrue(!currentInstances.isEmpty()); // group hack
 
-        DateTime dateTime = currentInstances.get(0).getInstanceDateTime();
-
-        DayOfWeek dayOfWeek = dateTime.getDate().getDayOfWeek();
-        HourMinute hourMinute = dateTime.getTime().getHourMinute(dayOfWeek);
+        Date date = timeStamp.getDate();
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        HourMinute hourMinute = timeStamp.getHourMinute();
 
         Time time = null;
         for (CustomTime customTime : getCurrentCustomTimes())
@@ -262,7 +260,7 @@ public class DomainFactory {
         if (time == null)
             time = new NormalTime(hourMinute);
 
-        String displayText = new DateTime(currentInstances.get(0).getInstanceDate(), time).getDisplayText(context);
+        String displayText = new DateTime(date, time).getDisplayText(context);
 
         HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
         for (Instance instance : currentInstances)
@@ -437,7 +435,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
         for (Instance instance : rootInstances)
-            if (instance.getDone() == null && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
+            if (!instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
                 notificationInstanceDatas.put(instance.getInstanceKey(), new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context)));
 
         HashMap<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = new HashMap<>();
@@ -879,7 +877,7 @@ public class DomainFactory {
 
         ArrayList<Instance> rootInstances = new ArrayList<>();
         for (Instance instance : allInstances)
-            if (instance.isRootInstance())
+            if (instance.isRootInstance() && (instance.getDone() == null)) // group hack
                 rootInstances.add(instance);
 
         return rootInstances;

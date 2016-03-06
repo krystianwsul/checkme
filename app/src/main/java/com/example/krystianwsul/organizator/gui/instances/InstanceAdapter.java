@@ -30,6 +30,8 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
     private final int mDataId;
     private final boolean mResetNotified;
+    private final boolean mGroupHack;
+    private final Collection<Data> mDatas;
 
     private final ArrayList<Data> mDoneInstances = new ArrayList<>();
     private final ArrayList<Data> mNotDoneInstances = new ArrayList<>();
@@ -44,7 +46,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         }
     };
 
-    public InstanceAdapter(Context context, int dataId, Collection<Data> datas, boolean resetNotified) {
+    public InstanceAdapter(Context context, int dataId, Collection<Data> datas, boolean resetNotified, boolean groupHack) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(datas != null);
         Assert.assertTrue(!datas.isEmpty());
@@ -52,12 +54,19 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         mContext = context;
         mDataId = dataId;
         mResetNotified = resetNotified;
+        mGroupHack = groupHack;
+        mDatas = datas;
 
         for (Data data : datas) {
-            if (data.Done != null)
-                mDoneInstances.add(data);
-            else
+            if (groupHack) {
+                Assert.assertTrue(data.Done == null);
                 mNotDoneInstances.add(data);
+            } else {
+                if (data.Done != null)
+                    mDoneInstances.add(data);
+                else
+                    mNotDoneInstances.add(data);
+            }
         }
 
         sort();
@@ -180,29 +189,42 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
             TickService.startService(mContext);
 
-            if (isChecked) {
+            if (mGroupHack) {
+                Assert.assertTrue(isChecked);
+
                 Assert.assertTrue(mNotDoneInstances.contains(data));
 
                 int oldPosition = indexOf(data);
 
                 mNotDoneInstances.remove(data);
-                mDoneInstances.add(data);
-                sort();
+                mDatas.remove(data);
 
-                int newPosition = indexOf(data);
-
-                notifyItemMoved(oldPosition, newPosition);
+                notifyItemRemoved(oldPosition);
             } else {
-                Assert.assertTrue(mDoneInstances.contains(data));
+                if (isChecked) {
+                    Assert.assertTrue(mNotDoneInstances.contains(data));
 
-                int oldPosition = indexOf(data);
+                    int oldPosition = indexOf(data);
 
-                mDoneInstances.remove(data);
-                mNotDoneInstances.add(data);
+                    mNotDoneInstances.remove(data);
+                    mDoneInstances.add(data);
+                    sort();
 
-                int newPosition = indexOf(data);
+                    int newPosition = indexOf(data);
 
-                notifyItemMoved(oldPosition, newPosition);
+                    notifyItemMoved(oldPosition, newPosition);
+                } else {
+                    Assert.assertTrue(mDoneInstances.contains(data));
+
+                    int oldPosition = indexOf(data);
+
+                    mDoneInstances.remove(data);
+                    mNotDoneInstances.add(data);
+
+                    int newPosition = indexOf(data);
+
+                    notifyItemMoved(oldPosition, newPosition);
+                }
             }
         }
 

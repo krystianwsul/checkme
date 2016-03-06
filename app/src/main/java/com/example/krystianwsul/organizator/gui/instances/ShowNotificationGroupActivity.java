@@ -72,7 +72,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
             DomainFactory.getDomainFactory(this).setInstancesNotified(data.DataId, instanceKeys);
         }
 
-        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas, true));
+        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas, true, false));
     }
 
     @Override

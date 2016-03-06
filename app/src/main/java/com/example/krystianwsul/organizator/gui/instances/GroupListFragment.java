@@ -94,9 +94,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             ArrayList<GroupListLoader.InstanceData> doneInstanceDatas = new ArrayList<>();
             ArrayList<GroupListLoader.InstanceData> notDoneInstanceDatas = new ArrayList<>();
             for (GroupListLoader.InstanceData instanceData : data.InstanceDatas.values()) {
-                if (instanceData.Done != null)
-                    doneInstanceDatas.add(instanceData);
-                else
+                Assert.assertTrue(instanceData.Done == null); // group hack
+
+                //if (instanceData.Done != null)
+                //    doneInstanceDatas.add(instanceData);
+                //else
                     notDoneInstanceDatas.add(instanceData);
             }
 
@@ -215,18 +217,29 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 TickService.startService(mContext);
 
-                if (isChecked) {
+                Assert.assertTrue(isChecked); // group hack
+
+                //if (isChecked) {
                     Assert.assertTrue(instanceData.Done != null);
                     Assert.assertTrue(mNotDoneGroupContainer.contains(group));
 
                     int oldPosition = indexOf(group);
 
                     mNotDoneGroupContainer.remove(group);
+
+                    /* // group hack
                     Group newGroup = mDoneGroupContainer.addInstanceData(instanceData);
 
                     int newPosition = indexOf(newGroup);
 
                     notifyItemMoved(oldPosition, newPosition);
+                    */ // group hack
+
+                    // group hack
+                    mData.InstanceDatas.remove(instanceData.InstanceKey);
+                    notifyItemRemoved(oldPosition);
+                    // group hack
+                /*
                 } else {
                     Assert.assertTrue(instanceData.Done == null);
                     Assert.assertTrue(mDoneGroupContainer.contains(group));
@@ -244,7 +257,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         notifyItemRemoved(oldPosition);
                         notifyItemChanged(newPosition);
                     }
-                }
+                }*/
             }
 
             public void onRowClick() {

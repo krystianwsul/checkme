@@ -28,19 +28,19 @@ import java.util.TimeZone;
 
 public class TickService extends IntentService {
     private static boolean sRegistered = false;
-    private static boolean sFirst = true;
 
     private static final int MAX_NOTIFICATIONS = 4;
 
     private static final String SILENT_KEY = "silent";
+    private static final String REGISTER_KEY = "register";
+
+    // DON'T HOLD STATE IN STATIC VARIABLES
 
     public static synchronized void register(Context context) {
         if (sRegistered)
             return;
 
-        Intent intent = new Intent(context, TickService.class);
-        intent.putExtra(SILENT_KEY, false);
-        context.startService(intent);
+        context.startService(getIntent(context, false, true));
 
         sRegistered = true;
     }
@@ -52,8 +52,7 @@ public class TickService extends IntentService {
         calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.MINUTE, 1);
 
-        Intent intent = new Intent(context, TickService.class);
-        intent.putExtra(SILENT_KEY, false);
+        Intent intent = getIntent(context, false, false);
 
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -65,9 +64,16 @@ public class TickService extends IntentService {
     public static void startService(Context context) {
         Assert.assertTrue(context != null);
 
+        context.startService(getIntent(context, true, false));
+    }
+
+    private static Intent getIntent(Context context, boolean silent, boolean register) {
+        Assert.assertTrue(context != null);
+
         Intent intent = new Intent(context, TickService.class);
-        intent.putExtra(SILENT_KEY, true);
-        context.startService(intent);
+        intent.putExtra(SILENT_KEY, silent);
+        intent.putExtra(REGISTER_KEY, register);
+        return intent;
     }
 
     public TickService() {
@@ -77,8 +83,10 @@ public class TickService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
+        Assert.assertTrue(intent.hasExtra(REGISTER_KEY));
 
         boolean silent = intent.getBooleanExtra(SILENT_KEY, false);
+        boolean register = intent.getBooleanExtra(REGISTER_KEY, false);
 
         Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this);
 
@@ -105,14 +113,12 @@ public class TickService extends IntentService {
         if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
             DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, showInstanceKeys, hideInstanceKeys);
 
-        if (sFirst) {
+        if (register) {
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
                 notifyGroup(data.NotificationInstanceDatas.values(), silent);
             } else { // show instances
-                for (InstanceKey showInstanceKey : showInstanceKeys) {
-                    NotificationInstanceData notificationInstanceData = data.NotificationInstanceDatas.get(showInstanceKey);
+                for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values()) {
                     Assert.assertTrue(notificationInstanceData != null);
-
                     notifyInstance(notificationInstanceData, silent);
                 }
             }
@@ -150,8 +156,6 @@ public class TickService extends IntentService {
                 }
             }
         }
-
-        sFirst = false;
 
         if (!silent)
             setNextMinute(this);

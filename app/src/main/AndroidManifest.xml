@@ -30,8 +30,12 @@
             android:name=".gui.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
-        <activity android:name=".gui.tasks.CreateRootTaskActivity" />
-        <activity android:name=".gui.tasks.CreateChildTaskActivity" />
+        <activity
+            android:name=".gui.tasks.CreateRootTaskActivity"
+            android:windowSoftInputMode="stateVisible"/>
+        <activity
+            android:name=".gui.tasks.CreateChildTaskActivity"
+            android:windowSoftInputMode="stateVisible" />
         <activity android:name=".gui.instances.EditInstanceActivity" />
 
         <receiver

@@ -14,10 +14,10 @@ import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -182,41 +182,41 @@ public class PersistenceManger {
         return customTimeRecord;
     }
 
-    public TaskRecord createTaskRecord(String name, TimeStamp startTimeStamp) {
+    public TaskRecord createTaskRecord(String name, ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(startTimeStamp != null);
+        Assert.assertTrue(startExactTimeStamp != null);
 
         int id = getNextId(mTaskRecords);
 
-        TaskRecord taskRecord = new TaskRecord(false, id, name, startTimeStamp.getLong(), null);
+        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null);
         mTaskRecords.put(taskRecord.getId(), taskRecord);
 
         return taskRecord;
     }
 
-    public TaskHierarchyRecord createTaskHierarchyRecord(Task parentTask, Task childTask, TimeStamp startTimeStamp) {
-        Assert.assertTrue(startTimeStamp != null);
+    public TaskHierarchyRecord createTaskHierarchyRecord(Task parentTask, Task childTask, ExactTimeStamp startExactTimeStamp) {
+        Assert.assertTrue(startExactTimeStamp != null);
         Assert.assertTrue(parentTask != null);
-        Assert.assertTrue(parentTask.current(startTimeStamp));
+        Assert.assertTrue(parentTask.current(startExactTimeStamp));
         Assert.assertTrue(childTask != null);
-        Assert.assertTrue(childTask.current(startTimeStamp));
+        Assert.assertTrue(childTask.current(startExactTimeStamp));
 
         int id = getNextId(mTaskHierarchyRecords);
 
-        TaskHierarchyRecord taskHierarchyRecord = new TaskHierarchyRecord(false, id, parentTask.getId(), childTask.getId(), startTimeStamp.getLong(), null);
+        TaskHierarchyRecord taskHierarchyRecord = new TaskHierarchyRecord(false, id, parentTask.getId(), childTask.getId(), startExactTimeStamp.getLong(), null);
         mTaskHierarchyRecords.put(taskHierarchyRecord.getId(), taskHierarchyRecord);
         return taskHierarchyRecord;
     }
 
-    public ScheduleRecord createScheduleRecord(Task rootTask, ScheduleType scheduleType, TimeStamp startTimeStamp) {
+    public ScheduleRecord createScheduleRecord(Task rootTask, ScheduleType scheduleType, ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(scheduleType != null);
-        Assert.assertTrue(startTimeStamp != null);
-        Assert.assertTrue(rootTask.current(startTimeStamp));
+        Assert.assertTrue(startExactTimeStamp != null);
+        Assert.assertTrue(rootTask.current(startExactTimeStamp));
 
         int id = getNextId(mScheduleRecords);
 
-        ScheduleRecord scheduleRecord = new ScheduleRecord(false, id, rootTask.getId(), startTimeStamp.getLong(), null, scheduleType.ordinal());
+        ScheduleRecord scheduleRecord = new ScheduleRecord(false, id, rootTask.getId(), startExactTimeStamp.getLong(), null, scheduleType.ordinal());
         mScheduleRecords.put(scheduleRecord.getId(), scheduleRecord);
 
         return scheduleRecord;
@@ -294,7 +294,7 @@ public class PersistenceManger {
 
     public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
-        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
         Date scheduleDate = scheduleDateTime.getDate();
         Time scheduleTime = scheduleDateTime.getTime();
@@ -312,9 +312,9 @@ public class PersistenceManger {
             scheduleMinute = hourMinute.getMinute();
         }
 
-        TimeStamp now = TimeStamp.getNow();
-        TimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp();
-        TimeStamp hierarchy = (now.compareTo(scheduleTimeStamp) < 0 ? now : scheduleTimeStamp);
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp().toExactTimeStamp();
+        ExactTimeStamp hierarchy = (now.compareTo(scheduleTimeStamp) < 0 ? now : scheduleTimeStamp);
 
         int id = getNextId(mInstanceRecords);
 

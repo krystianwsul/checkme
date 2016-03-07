@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMili;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.Time;
 
@@ -35,7 +36,7 @@ public class WeeklySchedule extends Schedule {
     }
 
     @Override
-    protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
+    protected ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili) {
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
@@ -52,10 +53,10 @@ public class WeeklySchedule extends Schedule {
             HourMinute hourMinute = weeklyScheduleDayOfWeekTime.getTime().getHourMinute(day);
             Assert.assertTrue(hourMinute != null);
 
-            if (startHourMinute != null && startHourMinute.compareTo(hourMinute) > 0)
+            if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
                 continue;
 
-            if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
+            if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
                 continue;
 
             instances.add(weeklyScheduleDayOfWeekTime.getInstance(rootTask, date));

@@ -51,7 +51,7 @@ class WeeklyScheduleDayOfWeekTime {
         Assert.assertTrue(scheduleDate != null);
 
         DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
-        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp()));
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);

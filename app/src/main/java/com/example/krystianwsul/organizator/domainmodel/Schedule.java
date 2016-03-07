@@ -5,8 +5,8 @@ import android.content.Context;
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
+import com.example.krystianwsul.organizator.utils.time.HourMili;
 
 import junit.framework.Assert;
 
@@ -32,76 +32,76 @@ public abstract class Schedule {
         return mScheduleRecord.getId();
     }
 
-    private TimeStamp getStartTimeStamp() {
-        return new TimeStamp(mScheduleRecord.getStartTime());
+    private ExactTimeStamp getStartExactTimeStamp() {
+        return new ExactTimeStamp(mScheduleRecord.getStartTime());
     }
 
-    private TimeStamp getEndTimeStamp() {
+    private ExactTimeStamp getEndExactTimeStamp() {
         if (mScheduleRecord.getEndTime() == null)
             return null;
         else
-            return new TimeStamp(mScheduleRecord.getEndTime());
+            return new ExactTimeStamp(mScheduleRecord.getEndTime());
     }
 
-    void setEndTimeStamp(TimeStamp endTimeStamp) {
-        Assert.assertTrue(endTimeStamp != null);
-        mScheduleRecord.setEndTime(endTimeStamp.getLong());
+    void setEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
+        Assert.assertTrue(endExactTimeStamp != null);
+        mScheduleRecord.setEndTime(endExactTimeStamp.getLong());
     }
 
-    public boolean current(TimeStamp timeStamp) {
-        TimeStamp startTimeStamp = getStartTimeStamp();
-        TimeStamp endTimeStamp = getEndTimeStamp();
+    public boolean current(ExactTimeStamp exactTimeStamp) {
+        ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
-        return (startTimeStamp.compareTo(timeStamp) <= 0 && (endTimeStamp == null || endTimeStamp.compareTo(timeStamp) > 0));
+        return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
     public ScheduleType getType() {
         return ScheduleType.values()[mScheduleRecord.getType()];
     }
 
-    ArrayList<Instance> getInstances(TimeStamp givenStartTimeStamp, TimeStamp givenEndTimeStamp) {
-        Assert.assertTrue(givenEndTimeStamp != null);
+    ArrayList<Instance> getInstances(ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
+        Assert.assertTrue(givenExactEndTimeStamp != null);
 
-        TimeStamp myStartTimeStamp = getStartTimeStamp();
-        TimeStamp myEndTimeStamp = getEndTimeStamp();
+        ExactTimeStamp myStartTimeStamp = getStartExactTimeStamp();
+        ExactTimeStamp myEndTimeStamp = getEndExactTimeStamp();
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        TimeStamp startTimeStamp;
-        TimeStamp endTimeStamp;
+        ExactTimeStamp startExactTimeStamp;
+        ExactTimeStamp endExactTimeStamp;
 
-        if (givenStartTimeStamp == null || (givenStartTimeStamp.compareTo(myStartTimeStamp) < 0))
-            startTimeStamp = myStartTimeStamp;
+        if (givenStartExactTimeStamp == null || (givenStartExactTimeStamp.compareTo(myStartTimeStamp) < 0))
+            startExactTimeStamp = myStartTimeStamp;
         else
-            startTimeStamp = givenStartTimeStamp;
+            startExactTimeStamp = givenStartExactTimeStamp;
 
-        if (myEndTimeStamp == null || (myEndTimeStamp.compareTo(givenEndTimeStamp) > 0))
-            endTimeStamp = givenEndTimeStamp;
+        if (myEndTimeStamp == null || (myEndTimeStamp.compareTo(givenExactEndTimeStamp) > 0))
+            endExactTimeStamp = givenExactEndTimeStamp;
         else
-            endTimeStamp = myEndTimeStamp;
+            endExactTimeStamp = myEndTimeStamp;
 
-        if (startTimeStamp.compareTo(endTimeStamp) >= 0)
+        if (startExactTimeStamp.compareTo(endExactTimeStamp) >= 0)
             return instances;
 
-        Assert.assertTrue(startTimeStamp.compareTo(endTimeStamp) < 0);
+        Assert.assertTrue(startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
 
-        if (startTimeStamp.getDate().equals(endTimeStamp.getDate())) {
-            return getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), endTimeStamp.getHourMinute());
+        if (startExactTimeStamp.getDate().equals(endExactTimeStamp.getDate())) {
+            return getInstancesInDate(startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), endExactTimeStamp.getHourMili());
         } else {
-            instances.addAll(getInstancesInDate(startTimeStamp.getDate(), startTimeStamp.getHourMinute(), null));
+            instances.addAll(getInstancesInDate(startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), null));
 
-            Calendar loopStartCalendar = startTimeStamp.getDate().getCalendar();
+            Calendar loopStartCalendar = startExactTimeStamp.getDate().getCalendar();
             loopStartCalendar.add(Calendar.DATE, 1);
-            Calendar loopEndCalendar = endTimeStamp.getDate().getCalendar();
+            Calendar loopEndCalendar = endExactTimeStamp.getDate().getCalendar();
 
             for (; loopStartCalendar.before(loopEndCalendar); loopStartCalendar.add(Calendar.DATE, 1))
                 instances.addAll(getInstancesInDate(new Date(loopStartCalendar), null, null));
 
-            instances.addAll(getInstancesInDate(endTimeStamp.getDate(), null, endTimeStamp.getHourMinute()));
+            instances.addAll(getInstancesInDate(endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMili()));
         }
 
         return instances;
     }
 
-    protected abstract ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute);
+    protected abstract ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili);
 }

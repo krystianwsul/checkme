@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
@@ -35,15 +35,15 @@ public class Task {
         mSchedules.add(schedule);
     }
 
-    public String getScheduleText(Context context, TimeStamp timeStamp) {
+    public String getScheduleText(Context context, ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(timeStamp != null);
-        Assert.assertTrue(current(timeStamp));
+        Assert.assertTrue(exactTimeStamp != null);
+        Assert.assertTrue(current(exactTimeStamp));
 
-        Schedule currentSchedule = getCurrentSchedule(timeStamp);
-        if (isRootTask(timeStamp)) {
+        Schedule currentSchedule = getCurrentSchedule(exactTimeStamp);
+        if (isRootTask(exactTimeStamp)) {
             Assert.assertTrue(currentSchedule != null);
-            Assert.assertTrue(currentSchedule.current(timeStamp));
+            Assert.assertTrue(currentSchedule.current(exactTimeStamp));
             return currentSchedule.getTaskText(context);
         } else {
             Assert.assertTrue(currentSchedule == null);
@@ -51,21 +51,21 @@ public class Task {
         }
     }
 
-    public Schedule getCurrentSchedule(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
-        Assert.assertTrue(current(timeStamp));
+    public Schedule getCurrentSchedule(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+        Assert.assertTrue(current(exactTimeStamp));
 
         ArrayList<Schedule> currentSchedules = new ArrayList<>();
         for (Schedule schedule : mSchedules)
-            if (schedule.current(timeStamp))
+            if (schedule.current(exactTimeStamp))
                 currentSchedules.add(schedule);
 
         if (currentSchedules.isEmpty()) {
-            Assert.assertTrue(!isRootTask(timeStamp));
+            Assert.assertTrue(!isRootTask(exactTimeStamp));
             return null;
         } else {
             Assert.assertTrue(currentSchedules.size() == 1);
-            Assert.assertTrue(isRootTask(timeStamp));
+            Assert.assertTrue(isRootTask(exactTimeStamp));
             return currentSchedules.get(0);
         }
     }
@@ -79,96 +79,96 @@ public class Task {
         mTaskRecord.setName(name);
     }
 
-    public ArrayList<Task> getChildTasks(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
-        Assert.assertTrue(current(timeStamp));
+    public ArrayList<Task> getChildTasks(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+        Assert.assertTrue(current(exactTimeStamp));
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        return domainFactory.getChildTasks(this, timeStamp);
+        return domainFactory.getChildTasks(this, exactTimeStamp);
     }
 
-    Task getParentTask(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
-        Assert.assertTrue(current(timeStamp));
+    Task getParentTask(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+        Assert.assertTrue(current(exactTimeStamp));
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        return domainFactory.getParentTask(this, timeStamp);
+        return domainFactory.getParentTask(this, exactTimeStamp);
     }
 
     public int getId() {
         return mTaskRecord.getId();
     }
 
-    public boolean isRootTask(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
-        Assert.assertTrue(current(timeStamp));
+    public boolean isRootTask(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+        Assert.assertTrue(current(exactTimeStamp));
 
-        return (getParentTask(timeStamp) == null);
+        return (getParentTask(exactTimeStamp) == null);
     }
 
-    private TimeStamp getStartTimeStamp() {
-        return new TimeStamp(mTaskRecord.getStartTime());
+    private ExactTimeStamp getStartExactTimeStamp() {
+        return new ExactTimeStamp(mTaskRecord.getStartTime());
     }
 
-    private TimeStamp getEndTimeStamp() {
+    private ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskRecord.getEndTime() != null)
-            return new TimeStamp(mTaskRecord.getEndTime());
+            return new ExactTimeStamp(mTaskRecord.getEndTime());
         else
             return null;
     }
 
-    void setEndTimeStamp(TimeStamp endTimeStamp) {
-        Assert.assertTrue(endTimeStamp != null);
-        Assert.assertTrue(current(endTimeStamp));
+    void setEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
+        Assert.assertTrue(endExactTimeStamp != null);
+        Assert.assertTrue(current(endExactTimeStamp));
 
-        if (isRootTask(endTimeStamp))
-            setScheduleEndTimeStamp(endTimeStamp);
+        if (isRootTask(endExactTimeStamp))
+            setScheduleEndExactTimeStamp(endExactTimeStamp);
         else
-            Assert.assertTrue(getCurrentSchedule(endTimeStamp) == null);
+            Assert.assertTrue(getCurrentSchedule(endExactTimeStamp) == null);
 
-        for (Task childTask : getChildTasks(endTimeStamp)) {
+        for (Task childTask : getChildTasks(endExactTimeStamp)) {
             Assert.assertTrue(childTask != null);
-            childTask.setEndTimeStamp(endTimeStamp);
+            childTask.setEndExactTimeStamp(endExactTimeStamp);
         }
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        domainFactory.setParentHierarchyEndTimeStamp(this, endTimeStamp);
+        domainFactory.setParentHierarchyEndTimeStamp(this, endExactTimeStamp);
 
-        mTaskRecord.setEndTime(endTimeStamp.getLong());
+        mTaskRecord.setEndTime(endExactTimeStamp.getLong());
     }
 
-    void setScheduleEndTimeStamp(TimeStamp endTimeStamp) {
-        Assert.assertTrue(endTimeStamp != null);
-        Assert.assertTrue(current(endTimeStamp));
+    void setScheduleEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
+        Assert.assertTrue(endExactTimeStamp != null);
+        Assert.assertTrue(current(endExactTimeStamp));
 
-        Schedule currentSchedule = getCurrentSchedule(endTimeStamp);
+        Schedule currentSchedule = getCurrentSchedule(endExactTimeStamp);
         Assert.assertTrue(currentSchedule != null);
-        Assert.assertTrue(currentSchedule.current(endTimeStamp));
+        Assert.assertTrue(currentSchedule.current(endExactTimeStamp));
 
-        currentSchedule.setEndTimeStamp(endTimeStamp);
+        currentSchedule.setEndExactTimeStamp(endExactTimeStamp);
     }
 
-    public boolean current(TimeStamp timeStamp) {
-        Assert.assertTrue(timeStamp != null);
+    public boolean current(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
 
-        TimeStamp startTimeStamp = getStartTimeStamp();
-        TimeStamp endTimeStamp = getEndTimeStamp();
+        ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
-        return (startTimeStamp.compareTo(timeStamp) <= 0 && (endTimeStamp == null || endTimeStamp.compareTo(timeStamp) > 0));
+        return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    ArrayList<Instance> getInstances(TimeStamp startTimeStamp, TimeStamp endTimeStamp) {
-        Assert.assertTrue(endTimeStamp != null);
+    ArrayList<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp) {
+        Assert.assertTrue(endExactTimeStamp != null);
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
-            instances.addAll(schedule.getInstances(startTimeStamp, endTimeStamp));
+            instances.addAll(schedule.getInstances(startExactTimeStamp, endExactTimeStamp));
 
         return instances;
     }

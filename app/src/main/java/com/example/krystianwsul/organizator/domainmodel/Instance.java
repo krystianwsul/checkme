@@ -6,6 +6,7 @@ import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
@@ -177,7 +178,7 @@ public class Instance {
     }
 
     public ArrayList<Instance> getChildInstances() {
-        TimeStamp hierarchyTimeStamp = getHierarchyTimeStamp();
+        ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp();
 
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
@@ -186,8 +187,8 @@ public class Instance {
         Assert.assertTrue(domainFactory != null);
 
         ArrayList<Instance> childInstances = new ArrayList<>();
-        for (Task childTask : task.getChildTasks(hierarchyTimeStamp)) {
-            Assert.assertTrue(childTask.current(hierarchyTimeStamp));
+        for (Task childTask : task.getChildTasks(hierarchyExactTimeStamp)) {
+            Assert.assertTrue(childTask.current(hierarchyExactTimeStamp));
 
             Instance childInstance = domainFactory.getInstance(childTask, getScheduleDateTime());
             Assert.assertTrue(childInstance != null);
@@ -198,7 +199,7 @@ public class Instance {
     }
 
     private Instance getParentInstance() {
-        TimeStamp hierarchyTimeStamp = getHierarchyTimeStamp();
+        ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp();
 
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
@@ -206,11 +207,11 @@ public class Instance {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        Task parentTask = task.getParentTask(hierarchyTimeStamp);
+        Task parentTask = task.getParentTask(hierarchyExactTimeStamp);
         if (parentTask == null)
             return null;
 
-        Assert.assertTrue(parentTask.current(hierarchyTimeStamp));
+        Assert.assertTrue(parentTask.current(hierarchyExactTimeStamp));
 
         Instance parentInstance = domainFactory.getInstance(parentTask, getScheduleDateTime());
         Assert.assertTrue(parentInstance != null);
@@ -222,7 +223,7 @@ public class Instance {
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
 
-        return task.isRootTask(getHierarchyTimeStamp());
+        return task.isRootTask(getHierarchyExactTimeStamp());
     }
 
     public TimeStamp getDone() {
@@ -287,11 +288,11 @@ public class Instance {
         mInstanceRecord = domainFactory.createInstanceRecord(task, this, scheduleDateTime);
     }
 
-    private TimeStamp getHierarchyTimeStamp() {
+    private ExactTimeStamp getHierarchyExactTimeStamp() {
         if (mInstanceRecord != null)
-            return new TimeStamp(mInstanceRecord.getHierarchyTime());
+            return new ExactTimeStamp(mInstanceRecord.getHierarchyTime());
         else
-            return getScheduleDateTime().getTimeStamp();
+            return getScheduleDateTime().getTimeStamp().toExactTimeStamp();
     }
 
     @Override

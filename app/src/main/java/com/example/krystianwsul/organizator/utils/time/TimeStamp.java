@@ -76,4 +76,8 @@ public class TimeStamp implements Comparable<TimeStamp> {
         TimeStamp other = (TimeStamp) object;
         return mLong.equals(other.getLong());
     }
+
+    public ExactTimeStamp toExactTimeStamp() {
+        return new ExactTimeStamp(mLong);
+    }
 }

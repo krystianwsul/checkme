@@ -1,7 +1,7 @@
 package com.example.krystianwsul.organizator.domainmodel;
 
 import com.example.krystianwsul.organizator.persistencemodel.TaskHierarchyRecord;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
@@ -39,28 +39,28 @@ class TaskHierarchy {
         return mChildTask;
     }
 
-    private TimeStamp getStartTimeStamp() {
-        return new TimeStamp(mTaskHierarchyRecord.getStartTime());
+    private ExactTimeStamp getStartExactTimeStamp() {
+        return new ExactTimeStamp(mTaskHierarchyRecord.getStartTime());
     }
 
-    private TimeStamp getEndTimeStamp() {
+    private ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskHierarchyRecord.getEndTime() != null)
-            return new TimeStamp(mTaskHierarchyRecord.getEndTime());
+            return new ExactTimeStamp(mTaskHierarchyRecord.getEndTime());
         else
             return null;
     }
 
-    boolean current(TimeStamp timeStamp) {
-        TimeStamp startTimeStamp = getStartTimeStamp();
-        TimeStamp endTimeStamp = getEndTimeStamp();
+    boolean current(ExactTimeStamp exactTimeStamp) {
+        ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
-        return (startTimeStamp.compareTo(timeStamp) <= 0 && (endTimeStamp == null || endTimeStamp.compareTo(timeStamp) > 0));
+        return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    void setEndTimeStamp(TimeStamp endTimeStamp) {
-        Assert.assertTrue(endTimeStamp != null);
-        Assert.assertTrue(current(endTimeStamp));
+    void setEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
+        Assert.assertTrue(endExactTimeStamp != null);
+        Assert.assertTrue(current(endExactTimeStamp));
 
-        mTaskHierarchyRecord.setEndTime(endTimeStamp.getLong());
+        mTaskHierarchyRecord.setEndTime(endExactTimeStamp.getLong());
     }
 }

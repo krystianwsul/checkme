@@ -8,8 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class HourMinute implements Comparable<HourMinute>, Parcelable {
-    private final Integer mHour;
-    private final Integer mMinute;
+    private final int mHour;
+    private final int mMinute;
 
     public static HourMinute getNow() {
         return TimeStamp.getNow().getHourMinute();
@@ -25,21 +25,21 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable {
         mMinute = calendar.get(Calendar.MINUTE);
     }
 
-    public Integer getHour() {
+    public int getHour() {
         return mHour;
     }
 
-    public Integer getMinute() {
+    public int getMinute() {
         return mMinute;
     }
 
     public int compareTo(@NonNull HourMinute hourMinute) {
-        int comparisonHour = mHour.compareTo(hourMinute.getHour());
+        int comparisonHour = (new Integer(mHour)).compareTo(hourMinute.getHour());
 
         if (comparisonHour != 0)
             return comparisonHour;
 
-        return mMinute.compareTo(hourMinute.getMinute());
+        return (new Integer(mMinute)).compareTo(hourMinute.getMinute());
     }
 
     @Override
@@ -84,4 +84,8 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable {
             return new HourMinute[size];
         }
     };
+
+    public HourMili toHourMili() {
+        return new HourMili(mHour, mMinute, 0, 0);
+    }
 }

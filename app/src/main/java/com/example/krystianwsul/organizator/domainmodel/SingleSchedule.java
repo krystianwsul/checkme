@@ -6,6 +6,7 @@ import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMili;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimePair;
 
@@ -34,7 +35,7 @@ public class SingleSchedule extends Schedule {
     }
 
     @Override
-    protected ArrayList<Instance> getInstancesInDate(Date date, HourMinute startHourMinute, HourMinute endHourMinute) {
+    protected ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili) {
         Assert.assertTrue(mSingleScheduleDateTime != null);
         Assert.assertTrue(date != null);
 
@@ -48,10 +49,10 @@ public class SingleSchedule extends Schedule {
         HourMinute hourMinute = mSingleScheduleDateTime.getTime().getHourMinute(dayOfWeek);
         Assert.assertTrue(hourMinute != null);
 
-        if (startHourMinute != null && startHourMinute.compareTo(hourMinute) > 0)
+        if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
             return instances;
 
-        if (endHourMinute != null && endHourMinute.compareTo(hourMinute) <= 0)
+        if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
             return instances;
 
         Task rootTask = mRootTaskReference.get();

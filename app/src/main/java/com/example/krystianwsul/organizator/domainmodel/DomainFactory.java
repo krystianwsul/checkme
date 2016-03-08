@@ -960,7 +960,7 @@ public class DomainFactory {
         Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
-        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
+        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask, this);
 
         SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.getSingleScheduleDateTimeRecord(singleSchedule);
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
@@ -1093,7 +1093,7 @@ public class DomainFactory {
         ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startExactTimeStamp);
         Assert.assertTrue(scheduleRecord != null);
 
-        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask);
+        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask, this);
 
         SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
         Assert.assertTrue(singleScheduleDateTimeRecord != null);

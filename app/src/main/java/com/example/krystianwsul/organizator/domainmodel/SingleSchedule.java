@@ -12,13 +12,19 @@ import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class SingleSchedule extends Schedule {
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
+
     private SingleScheduleDateTime mSingleScheduleDateTime;
 
-    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory) {
         super(scheduleRecord, rootTask);
+
+        Assert.assertTrue(domainFactory != null);
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
     }
 
     void setSingleScheduleDateTime(SingleScheduleDateTime singleScheduleDateTime) {
@@ -31,7 +37,16 @@ public class SingleSchedule extends Schedule {
     @Override
     String getTaskText(Context context) {
         Assert.assertTrue(mSingleScheduleDateTime != null);
-        return mSingleScheduleDateTime.getDateTime().getDisplayText(context);
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        Task rootTask = mRootTaskReference.get();
+        Assert.assertTrue(rootTask != null);
+
+        Instance instance = domainFactory.getInstance(rootTask, mSingleScheduleDateTime.getDateTime());
+
+        return instance.getInstanceDateTime().getDisplayText(context);
     }
 
     @Override

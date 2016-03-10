@@ -434,16 +434,13 @@ public class DomainFactory {
     public synchronized TickService.Data getTickServiceData(Context context) {
         Assert.assertTrue(context != null);
 
-        Calendar endCalendar = Calendar.getInstance();
-        endCalendar.add(Calendar.MINUTE, 1);
+        ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
-
-        ArrayList<Instance> rootInstances = getRootInstances(null, endTimeStamp.toExactTimeStamp());
+        ArrayList<Instance> rootInstances = getRootInstances(null, now.plusOne());
 
         HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
         for (Instance instance : rootInstances)
-            if (!instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().compareTo(endTimeStamp) < 0)
+            if (!instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
                 notificationInstanceDatas.put(instance.getInstanceKey(), new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context)));
 
         HashMap<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = new HashMap<>();
@@ -451,7 +448,27 @@ public class DomainFactory {
             if (instance.getNotificationShown())
                 shownInstanceDatas.put(instance.getInstanceKey(), new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey()));
 
-        return new TickService.Data(notificationInstanceDatas, shownInstanceDatas);
+        TimeStamp nextAlarm = null;
+        for (Instance existingInstance : mExistingInstances) {
+            TimeStamp instanceTimeStamp = existingInstance.getInstanceDateTime().getTimeStamp();
+            if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
+                if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
+                    nextAlarm = instanceTimeStamp;
+        }
+
+        for (Task task : mTasks.values()) {
+            if (task.current(now) && task.isRootTask(now)) {
+                Schedule schedule = task.getCurrentSchedule(now);
+                TimeStamp scheduleTimeStamp = schedule.getNextAlarm(now);
+                if (scheduleTimeStamp != null) {
+                    Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
+                    if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
+                        nextAlarm = scheduleTimeStamp;
+                }
+            }
+        }
+
+        return new TickService.Data(notificationInstanceDatas, shownInstanceDatas, nextAlarm);
     }
 
     // sets
@@ -854,14 +871,29 @@ public class DomainFactory {
 
     // internal
 
-    Instance getInstance(Task task, DateTime scheduleDateTime) {
+    ArrayList<Instance> getExistingInstances(Task task) {
         Assert.assertTrue(task != null);
-        Assert.assertTrue(scheduleDateTime != null);
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Instance instance : mExistingInstances) {
             Assert.assertTrue(instance != null);
-            if (instance.getTaskId() == task.getId() && instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
+            if (instance.getTaskId() == task.getId())
+                instances.add(instance);
+        }
+
+        return instances;
+    }
+
+    Instance getInstance(Task task, DateTime scheduleDateTime) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(scheduleDateTime != null);
+
+        ArrayList<Instance> taskInstances = getExistingInstances(task);
+
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (Instance instance : taskInstances) {
+            Assert.assertTrue(instance != null);
+            if (instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
                 instances.add(instance);
         }
 
@@ -891,14 +923,15 @@ public class DomainFactory {
         return rootInstances;
     }
 
-    InstanceRecord createInstanceRecord(Task task, Instance instance, DateTime scheduleDateTime) {
+    InstanceRecord createInstanceRecord(Task task, Instance instance, DateTime scheduleDateTime, ExactTimeStamp now) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(instance != null);
         Assert.assertTrue(scheduleDateTime != null);
+        Assert.assertTrue(now != null);
 
         mExistingInstances.add(instance);
 
-        return mPersistenceManager.createInstanceRecord(task, scheduleDateTime);
+        return mPersistenceManager.createInstanceRecord(task, scheduleDateTime, now);
     }
 
     private DateTime getDateTime(Date date, TimePair timePair) {

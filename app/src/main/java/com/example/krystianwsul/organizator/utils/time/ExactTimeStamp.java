@@ -82,4 +82,16 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         ExactTimeStamp other = (ExactTimeStamp) object;
         return mLong.equals(other.getLong());
     }
+
+    public ExactTimeStamp plusOne() {
+        return new ExactTimeStamp(mLong + 1);
+    }
+
+    public TimeStamp toTimeStamp() {
+        return new TimeStamp(mLong);
+    }
+
+    public String toString() {
+        return getDate().toString() + " " + getHourMili().toString();
+    }
 }

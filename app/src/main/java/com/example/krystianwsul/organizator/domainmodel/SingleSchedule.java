@@ -6,9 +6,11 @@ import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMili;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimePair;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -47,6 +49,20 @@ public class SingleSchedule extends Schedule {
         Instance instance = domainFactory.getInstance(rootTask, mSingleScheduleDateTime.getDateTime());
 
         return instance.getInstanceDateTime().getDisplayText(context);
+    }
+
+    Instance getInstance(Task task) {
+        Assert.assertTrue(task != null);
+
+        Assert.assertTrue(mSingleScheduleDateTime != null);
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        Instance instance = domainFactory.getInstance(task, getDateTime());
+        Assert.assertTrue(instance != null);
+
+        return instance;
     }
 
     @Override
@@ -95,5 +111,14 @@ public class SingleSchedule extends Schedule {
 
     public TimePair getTimePair() {
         return new TimePair(getCustomTimeId(), getHourMinute());
+    }
+
+    @Override
+    protected TimeStamp getNextAlarm(ExactTimeStamp now) {
+        TimeStamp timeStamp = getDateTime().getTimeStamp();
+        if (timeStamp.toExactTimeStamp().compareTo(now) > 0)
+            return timeStamp;
+        else
+            return null;
     }
 }

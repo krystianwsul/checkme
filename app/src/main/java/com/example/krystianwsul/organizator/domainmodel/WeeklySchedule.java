@@ -6,14 +6,18 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMili;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class WeeklySchedule extends Schedule {
     private final ArrayList<WeeklyScheduleDayOfWeekTime> mWeeklyScheduleDayOfWeekTimes = new ArrayList<>();
@@ -73,5 +77,38 @@ public class WeeklySchedule extends Schedule {
             dayOfWeekTimes.add(new Pair<>(weeklyScheduleDayOfWeekTime.getDayOfWeek(), weeklyScheduleDayOfWeekTime.getTime()));
 
         return dayOfWeekTimes;
+    }
+
+    @Override
+    protected TimeStamp getNextAlarm(ExactTimeStamp now) {
+        Assert.assertTrue(!mWeeklyScheduleDayOfWeekTimes.isEmpty());
+
+        Date today = Date.today();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 7);
+        Date nextWeek = new Date(calendar);
+
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        HourMinute nowHourMinute = new HourMinute(now.getCalendar());
+
+        TimeStamp nextAlarm = null;
+        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes) {
+            int ordinalDifference = (weeklyScheduleDayOfWeekTime.getDayOfWeek().ordinal() - dayOfWeek.ordinal());
+            Calendar thisCalendar = today.getCalendar();
+            if ((ordinalDifference > 0) || ((ordinalDifference == 0) && weeklyScheduleDayOfWeekTime.getTime().getHourMinute(dayOfWeek).compareTo(nowHourMinute) > 0))
+                thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference);
+            else
+                thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference + 7);
+            Date thisDate = new Date(thisCalendar);
+
+            TimeStamp timeStamp = (new DateTime(thisDate, weeklyScheduleDayOfWeekTime.getTime())).getTimeStamp();
+            Assert.assertTrue(timeStamp.toExactTimeStamp().compareTo(now) > 0);
+
+            if (nextAlarm == null || timeStamp.compareTo(nextAlarm) < 0)
+                nextAlarm = timeStamp;
+        }
+
+        return nextAlarm;
     }
 }

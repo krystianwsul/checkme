@@ -175,9 +175,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Assert.assertTrue(mRootTaskId != null);
-
-        DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleRootTask(mData.DataId, mRootTaskId, name, mDate, mTimePickerView.getTimePair());
+        DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleRootTask(mData.DataId, rootTaskId, name, mDate, mTimePickerView.getTimePair());
 
         TickService.startService(getActivity());
     }

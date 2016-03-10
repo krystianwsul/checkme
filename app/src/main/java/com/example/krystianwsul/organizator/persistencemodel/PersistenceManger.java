@@ -292,7 +292,7 @@ public class PersistenceManger {
         return weeklyScheduleDayOfWeekTimeRecord;
     }
 
-    public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime) {
+    public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime, ExactTimeStamp now) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
@@ -312,7 +312,6 @@ public class PersistenceManger {
             scheduleMinute = hourMinute.getMinute();
         }
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
         ExactTimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp().toExactTimeStamp();
         ExactTimeStamp hierarchy = (now.compareTo(scheduleTimeStamp) < 0 ? now : scheduleTimeStamp);
 

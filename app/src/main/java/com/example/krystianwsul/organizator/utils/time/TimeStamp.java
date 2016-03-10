@@ -30,7 +30,10 @@ public class TimeStamp implements Comparable<TimeStamp> {
     }
 
     public TimeStamp(long milis) {
-        mLong = milis;
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(milis);
+        calendar.set(Calendar.MILLISECOND ,0);
+        mLong = calendar.getTimeInMillis();
     }
 
     public Calendar getCalendar() {

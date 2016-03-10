@@ -201,12 +201,10 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Assert.assertTrue(mRootTaskId != null);
-
         ArrayList<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
-        DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleRootTask(mData.DataId, mRootTaskId, name, timePairs);
+        DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleRootTask(mData.DataId, rootTaskId, name, timePairs);
 
         TickService.startService(getActivity());
     }

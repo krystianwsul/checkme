@@ -6,14 +6,18 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMili;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.Time;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class DailySchedule extends Schedule {
     private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
@@ -70,5 +74,33 @@ public class DailySchedule extends Schedule {
             times.add(dailyScheduleTime.getTime());
 
         return times;
+    }
+
+    @Override
+    protected TimeStamp getNextAlarm(ExactTimeStamp now) {
+        Assert.assertTrue(!mDailyScheduleTimes.isEmpty());
+
+        Date today = Date.today();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        Date tomorrow = new Date(calendar);
+
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        HourMinute nowHourMinute = new HourMinute(now.getCalendar());
+
+        TimeStamp nextAlarm = null;
+        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
+            HourMinute dailyScheduleHourMinute = dailyScheduleTime.getTime().getHourMinute(dayOfWeek);
+            DateTime dailyScheduleDateTime;
+            if (dailyScheduleHourMinute.compareTo(nowHourMinute) > 0)
+                dailyScheduleDateTime = new DateTime(today, dailyScheduleTime.getTime());
+            else
+                dailyScheduleDateTime = new DateTime(tomorrow, dailyScheduleTime.getTime());
+            if (nextAlarm == null || dailyScheduleDateTime.getTimeStamp().compareTo(nextAlarm) < 0)
+                nextAlarm = dailyScheduleDateTime.getTimeStamp();
+        }
+
+        return nextAlarm;
     }
 }

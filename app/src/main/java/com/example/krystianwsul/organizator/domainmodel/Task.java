@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
+import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -171,5 +172,12 @@ public class Task {
             instances.addAll(schedule.getInstances(startExactTimeStamp, endExactTimeStamp));
 
         return instances;
+    }
+
+    boolean onlySingleSchedules() {
+        for (Schedule schedule : mSchedules)
+            if (schedule.getType() != ScheduleType.SINGLE)
+                return false;
+        return true;
     }
 }

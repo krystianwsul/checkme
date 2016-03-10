@@ -150,7 +150,7 @@ public class Instance {
         Assert.assertTrue(isRootInstance());
 
         if (mInstanceRecord == null)
-            createInstanceHierarchy();
+            createInstanceHierarchy(ExactTimeStamp.getNow());
 
         mInstanceRecord.setInstanceYear(date.getYear());
         mInstanceRecord.setInstanceMonth(date.getMonth());
@@ -239,13 +239,36 @@ public class Instance {
 
     void setDone(boolean done) {
         if (done) {
-            TimeStamp timeStamp = TimeStamp.getNow();
+            ExactTimeStamp now = ExactTimeStamp.getNow();
 
             if (mInstanceRecord == null) {
-                getRootInstance().createInstanceHierarchy();
-                mInstanceRecord.setDone(timeStamp.getLong());
+                getRootInstance().createInstanceHierarchy(now);
+                mInstanceRecord.setDone(now.toTimeStamp().getLong());
             } else {
-                mInstanceRecord.setDone(timeStamp.getLong());
+                mInstanceRecord.setDone(now.toTimeStamp().getLong());
+            }
+
+            if (isRootInstance()) {
+                Task rootTask = mTaskReference.get();
+                Assert.assertTrue(rootTask != null);
+                Assert.assertTrue(rootTask.isRootTask(getHierarchyExactTimeStamp()));
+
+                if (rootTask.current(now) && rootTask.onlySingleSchedules()) {
+                    SingleSchedule singleSchedule = (SingleSchedule)rootTask.getCurrentSchedule(now);
+                    if (singleSchedule.getDateTime().equals(getScheduleDateTime())) {
+                        DomainFactory domainFactory = mDomainFactoryReference.get();
+                        Assert.assertTrue(domainFactory != null);
+
+                        ArrayList<Instance> allInstances = domainFactory.getExistingInstances(rootTask);
+                        ArrayList<Instance> notDoneInstances = new ArrayList<>();
+                        for (Instance taskInstance : allInstances)
+                            if (taskInstance.getDone() == null)
+                                notDoneInstances.add(taskInstance);
+
+                        if (notDoneInstances.isEmpty())
+                            rootTask.setEndExactTimeStamp(now.plusOne());
+                    }
+                }
             }
         } else {
             Assert.assertTrue(mInstanceRecord != null);
@@ -264,15 +287,19 @@ public class Instance {
             return this;
     }
 
-    private void createInstanceHierarchy() {
+    private void createInstanceHierarchy(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
         if (mInstanceRecord == null)
-            createInstanceRecord();
+            createInstanceRecord(now);
 
         for (Instance childInstance : getChildInstances())
-            childInstance.createInstanceHierarchy();
+            childInstance.createInstanceHierarchy(now);
     }
 
-    private void createInstanceRecord() {
+    private void createInstanceRecord(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
         Assert.assertTrue(mInstanceRecord == null);
         Assert.assertTrue(mScheduleDateTime != null);
 
@@ -285,7 +312,7 @@ public class Instance {
         DateTime scheduleDateTime = getScheduleDateTime();
 
         mScheduleDateTime = null;
-        mInstanceRecord = domainFactory.createInstanceRecord(task, this, scheduleDateTime);
+        mInstanceRecord = domainFactory.createInstanceRecord(task, this, scheduleDateTime, now);
     }
 
     private ExactTimeStamp getHierarchyExactTimeStamp() {
@@ -306,7 +333,7 @@ public class Instance {
 
     void setNotified(boolean notified) {
         if (mInstanceRecord == null)
-            createInstanceHierarchy();
+            createInstanceHierarchy(ExactTimeStamp.getNow());
 
         Assert.assertTrue(mInstanceRecord != null);
         mInstanceRecord.setNotified(notified);
@@ -350,7 +377,7 @@ public class Instance {
 
     void setNotificationShown(boolean notificationShown) {
         if (mInstanceRecord == null)
-            createInstanceHierarchy();
+            createInstanceHierarchy(ExactTimeStamp.getNow());
 
         Assert.assertTrue(mInstanceRecord != null);
 

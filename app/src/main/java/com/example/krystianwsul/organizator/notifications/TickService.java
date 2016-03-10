@@ -17,48 +17,24 @@ import com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity;
 import com.example.krystianwsul.organizator.gui.instances.ShowNotificationGroupActivity;
 import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.TimeZone;
 
 public class TickService extends IntentService {
-    private static boolean sRegistered = false;
-
     private static final int MAX_NOTIFICATIONS = 4;
 
     private static final String SILENT_KEY = "silent";
-    private static final String REGISTER_KEY = "register";
+    private static final String REGISTERING_KEY = "registering";
 
     // DON'T HOLD STATE IN STATIC VARIABLES
 
     public static synchronized void register(Context context) {
-        if (sRegistered)
-            return;
-
-        context.startService(getIntent(context, false, true));
-
-        sRegistered = true;
-    }
-
-    private static void setNextMinute(Context context) {
-        Assert.assertTrue(context != null);
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.MINUTE, 1);
-
-        Intent intent = getIntent(context, false, false);
-
-        PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        context.startService(getIntent(context, true, true));
     }
 
     public static void startService(Context context) {
@@ -67,12 +43,12 @@ public class TickService extends IntentService {
         context.startService(getIntent(context, true, false));
     }
 
-    private static Intent getIntent(Context context, boolean silent, boolean register) {
+    private static Intent getIntent(Context context, boolean silent, boolean registering) {
         Assert.assertTrue(context != null);
 
         Intent intent = new Intent(context, TickService.class);
         intent.putExtra(SILENT_KEY, silent);
-        intent.putExtra(REGISTER_KEY, register);
+        intent.putExtra(REGISTERING_KEY, registering);
         return intent;
     }
 
@@ -83,10 +59,10 @@ public class TickService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
-        Assert.assertTrue(intent.hasExtra(REGISTER_KEY));
+        Assert.assertTrue(intent.hasExtra(REGISTERING_KEY));
 
         boolean silent = intent.getBooleanExtra(SILENT_KEY, false);
-        boolean register = intent.getBooleanExtra(REGISTER_KEY, false);
+        boolean registering = intent.getBooleanExtra(REGISTERING_KEY, false);
 
         Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this);
 
@@ -113,7 +89,7 @@ public class TickService extends IntentService {
         if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
             DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, showInstanceKeys, hideInstanceKeys);
 
-        if (register) {
+        if (registering) {
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
                 notifyGroup(data.NotificationInstanceDatas.values(), silent);
             } else { // show instances
@@ -157,8 +133,15 @@ public class TickService extends IntentService {
             }
         }
 
-        if (!silent)
-            setNextMinute(this);
+        if (data.NextAlarm != null) {
+            Intent nextIntent = getIntent(this, false, false);
+
+            PendingIntent pendingIntent = PendingIntent.getService(this, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+            alarmManager.set(AlarmManager.RTC_WAKEUP, data.NextAlarm.getLong(), pendingIntent);
+        }
     }
 
     private void notifyInstance(NotificationInstanceData notificationInstanceData, boolean silent) {
@@ -223,13 +206,15 @@ public class TickService extends IntentService {
     public static class Data extends DomainLoader.Data {
         public final HashMap<InstanceKey, NotificationInstanceData> NotificationInstanceDatas;
         public final HashMap<InstanceKey, ShownInstanceData> ShownInstanceDatas;
+        public final TimeStamp NextAlarm;
 
-        public Data(HashMap<InstanceKey, NotificationInstanceData> notificationInstanceDatas, HashMap<InstanceKey, ShownInstanceData> shownInstanceDatas) {
+        public Data(HashMap<InstanceKey, NotificationInstanceData> notificationInstanceDatas, HashMap<InstanceKey, ShownInstanceData> shownInstanceDatas, TimeStamp nextAlarm) {
             Assert.assertTrue(notificationInstanceDatas != null);
             Assert.assertTrue(shownInstanceDatas != null);
 
             NotificationInstanceDatas = notificationInstanceDatas;
             ShownInstanceDatas = shownInstanceDatas;
+            NextAlarm = nextAlarm;
         }
     }
 

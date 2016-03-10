@@ -207,7 +207,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
         ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        DomainFactory.getDomainFactory(getActivity()).updateWeeklyScheduleRootTask(mData.DataId, mRootTaskId, name, dayOfWeekTimePairs);
+        DomainFactory.getDomainFactory(getActivity()).updateWeeklyScheduleRootTask(mData.DataId, rootTaskId, name, dayOfWeekTimePairs);
 
         TickService.startService(getActivity());
     }

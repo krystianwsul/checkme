@@ -340,7 +340,9 @@ public class DomainFactory {
             Assert.assertTrue(singleSchedule != null);
             Assert.assertTrue(singleSchedule.current(now));
 
-            scheduleData = new SingleScheduleLoader.ScheduleData(singleSchedule.getDateTime().getDate(), singleSchedule.getTimePair());
+            Instance instance = singleSchedule.getInstance(rootTask);
+
+            scheduleData = new SingleScheduleLoader.ScheduleData(instance.getInstanceDate(), instance.getInstanceTimePair());
         }
 
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
@@ -646,12 +648,22 @@ public class DomainFactory {
         Assert.assertTrue(rootTask.isRootTask(now));
 
         rootTask.setName(name);
-        rootTask.setScheduleEndExactTimeStamp(now);
 
-        Schedule schedule = createSingleSchedule(rootTask, date, getTime(timePair), now);
-        Assert.assertTrue(schedule != null);
+        if (rootTask.getCurrentSchedule(now).getType() == ScheduleType.SINGLE) {
+            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(now);
 
-        rootTask.addSchedule(schedule);
+            Instance instance = singleSchedule.getInstance(rootTask);
+            Assert.assertTrue(instance != null);
+
+            instance.setInstanceDateTime(date, timePair);
+        } else {
+            rootTask.setScheduleEndExactTimeStamp(now);
+
+            Schedule schedule = createSingleSchedule(rootTask, date, getTime(timePair), now);
+            Assert.assertTrue(schedule != null);
+
+            rootTask.addSchedule(schedule);
+        }
 
         save(dataId);
     }

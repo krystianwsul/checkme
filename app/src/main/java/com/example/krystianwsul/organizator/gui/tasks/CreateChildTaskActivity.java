@@ -8,6 +8,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -64,6 +65,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
             getSupportLoaderManager().initLoader(0, null, this);
         }
+
+        if (mFirstLoad)
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @Override

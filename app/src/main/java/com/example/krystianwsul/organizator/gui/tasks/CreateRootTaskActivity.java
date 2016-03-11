@@ -9,6 +9,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -88,6 +89,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
                 Assert.assertTrue(mTaskIds.size() > 1);
             }
             updateGui(null);
+
+            if (savedInstanceState == null)
+                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
     }
 

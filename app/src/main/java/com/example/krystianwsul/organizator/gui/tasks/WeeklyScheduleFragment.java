@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
 import com.example.krystianwsul.organizator.R;
@@ -256,7 +255,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         @Override
         public DayOfWeekTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            RelativeLayout weeklyScheduleRow = (RelativeLayout) LayoutInflater.from(mContext).inflate(R.layout.weekly_schedule_row, parent, false);
+            View weeklyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.weekly_schedule_row, parent, false);
 
             Spinner weeklyScheduleDay = (Spinner) weeklyScheduleRow.findViewById(R.id.weekly_schedule_day);
 
@@ -369,7 +368,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             public final TimePickerView mWeeklyScheduleTime;
             public final ImageView mWeeklyScheduleImage;
 
-            public DayOfWeekTimeHolder(RelativeLayout weeklyScheduleRow, Spinner weeklyScheduleDay, TimePickerView weeklyScheduleTime, ImageView weeklyScheduleImage) {
+            public DayOfWeekTimeHolder(View weeklyScheduleRow, Spinner weeklyScheduleDay, TimePickerView weeklyScheduleTime, ImageView weeklyScheduleImage) {
                 super(weeklyScheduleRow);
 
                 Assert.assertTrue(weeklyScheduleDay != null);

@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:stretchColumns="0"
+    android:shrinkColumns="0">
 
-    <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
-        android:id="@+id/daily_schedule_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <TableRow>
 
-    <ImageView
-        android:id="@+id/daily_schedule_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/ic_delete_black_24dp"/>
+        <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
+            android:id="@+id/daily_schedule_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/daily_schedule_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/ic_delete_black_24dp"/>
+
+    </TableRow>
+
+</TableLayout>

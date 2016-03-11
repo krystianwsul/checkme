@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
@@ -255,7 +254,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         @Override
         public TimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            RelativeLayout dailyScheduleRow = (RelativeLayout) LayoutInflater.from(mContext).inflate(R.layout.daily_schedule_row, parent, false);
+            View dailyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.daily_schedule_row, parent, false);
 
             TimePickerView dailyScheduleTime = (TimePickerView) dailyScheduleRow.findViewById(R.id.daily_schedule_time);
             Assert.assertTrue(dailyScheduleTime != null);
@@ -343,7 +342,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             public final TimePickerView mDailyScheduleTime;
             public final ImageView mDailyScheduleImage;
 
-            public TimeHolder(RelativeLayout dailyScheduleRow, TimePickerView dailyScheduleTime, ImageView dailyScheduleImage) {
+            public TimeHolder(View dailyScheduleRow, TimePickerView dailyScheduleTime, ImageView dailyScheduleImage) {
                 super(dailyScheduleRow);
 
                 Assert.assertTrue(dailyScheduleTime != null);

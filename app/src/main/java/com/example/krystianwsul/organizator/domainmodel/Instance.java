@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
+import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
@@ -253,21 +254,20 @@ public class Instance {
                 Assert.assertTrue(rootTask != null);
                 Assert.assertTrue(rootTask.isRootTask(getHierarchyExactTimeStamp()));
 
-                if (rootTask.current(now) && rootTask.onlySingleSchedules()) {
-                    SingleSchedule singleSchedule = (SingleSchedule)rootTask.getCurrentSchedule(now);
-                    if (singleSchedule.getDateTime().equals(getScheduleDateTime())) {
-                        DomainFactory domainFactory = mDomainFactoryReference.get();
-                        Assert.assertTrue(domainFactory != null);
+                if (rootTask.current(now) && rootTask.getCurrentSchedule(now).getType() == ScheduleType.SINGLE) {
+                    DomainFactory domainFactory = mDomainFactoryReference.get();
+                    Assert.assertTrue(domainFactory != null);
 
-                        ArrayList<Instance> allInstances = domainFactory.getExistingInstances(rootTask);
-                        ArrayList<Instance> notDoneInstances = new ArrayList<>();
-                        for (Instance taskInstance : allInstances)
-                            if (taskInstance.getDone() == null)
-                                notDoneInstances.add(taskInstance);
+                    ArrayList<Instance> allInstances = domainFactory.getExistingInstances(rootTask);
+                    allInstances.addAll(rootTask.getInstances(null, now.plusOne()));
 
-                        if (notDoneInstances.isEmpty())
-                            rootTask.setEndExactTimeStamp(now.plusOne());
-                    }
+                    ArrayList<Instance> notDoneInstances = new ArrayList<>();
+                    for (Instance taskInstance : allInstances)
+                        if (taskInstance.getDone() == null)
+                            notDoneInstances.add(taskInstance);
+
+                    if (notDoneInstances.isEmpty())
+                        rootTask.setEndExactTimeStamp(now.plusOne());
                 }
             }
         } else {

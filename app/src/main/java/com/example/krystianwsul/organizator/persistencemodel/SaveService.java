@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
@@ -55,8 +54,8 @@ public class SaveService extends IntentService {
             }
         } catch (Exception e)
         {
-            Log.e("SaveService", "save error", e);
             DomainFactory.getDomainFactory(this).reset();
+            throw e;
         }
     }
 }

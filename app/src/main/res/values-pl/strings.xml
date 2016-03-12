@@ -16,4 +16,5 @@
     <string name="join">Połącz</string>
     <string name="two_tasks_message">Proszę wybrać co najmniej dwa zadania.</string>
     <string name="done">Zrobione</string>
+    <string name="crash_toast_text">Błąd!</string>
 </resources>

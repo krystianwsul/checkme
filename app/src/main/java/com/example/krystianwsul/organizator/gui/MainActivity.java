@@ -106,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_task_edit:
                 startSupportActionMode(new TaskEditCallback());
+                return true;
+            case R.id.action_debug:
+                startActivity(DebugActivity.getIntent(this));
             default:
                 return super.onOptionsItemSelected(item);
         }

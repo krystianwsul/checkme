@@ -17,6 +17,7 @@
     <string name="join">Join</string>
     <string name="two_tasks_message">Please select at least two tasks.</string>
     <string name="done">Done</string>
+    <string name="crash_toast_text">Error!</string>
 
     <!-- Strings related to Settings -->
 
@@ -75,4 +76,5 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="title_activity_debug">DebugActivity</string>
 </resources>

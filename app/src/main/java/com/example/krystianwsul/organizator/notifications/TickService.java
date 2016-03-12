@@ -153,7 +153,14 @@ public class TickService extends IntentService {
         Intent contentIntent = ShowInstanceActivity.getNotificationIntent(this, notificationInstanceData.InstanceKey);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, notificationInstanceData.NotificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent);
+        Intent doneIntent = InstanceDoneReceiver.getIntent(this, notificationInstanceData.InstanceKey);
+        PendingIntent pendingDoneIntent = PendingIntent.getBroadcast(this, notificationInstanceData.NotificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Action.Builder builder = new NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, getString(R.string.done), pendingDoneIntent);
+
+        ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
+        actions.add(builder.build());
+
+        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions);
     }
 
     private void notifyGroup(Collection<NotificationInstanceData> notificationInstanceDatas, boolean silent) {
@@ -173,10 +180,10 @@ public class TickService extends IntentService {
         Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, instanceKeys);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent);
+        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null);
     }
 
-    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent) {
+    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions) {
         Assert.assertTrue(!TextUtils.isEmpty(title));
         Assert.assertTrue(!TextUtils.isEmpty(text));
         Assert.assertTrue(deleteIntent != null);
@@ -194,6 +201,12 @@ public class TickService extends IntentService {
 
         if (!silent)
             builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+
+        if (actions != null) {
+            Assert.assertTrue(actions.size() <= 3);
+            for (NotificationCompat.Action action : actions)
+                builder.addAction(action);
+        }
 
         Notification notification = builder.build();
 

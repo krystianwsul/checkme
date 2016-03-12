@@ -30,8 +30,8 @@
             android:name=".gui.SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
-        <activity android:name=".gui.tasks.CreateRootTaskActivity"/>
-        <activity android:name=".gui.tasks.CreateChildTaskActivity"/>
+        <activity android:name=".gui.tasks.CreateRootTaskActivity" />
+        <activity android:name=".gui.tasks.CreateChildTaskActivity" />
         <activity android:name=".gui.instances.EditInstanceActivity" />
 
         <receiver
@@ -58,6 +58,10 @@
             android:name=".notifications.InstanceNotificationDeleteReceiver"
             android:enabled="true"
             android:exported="true" />
+        <receiver
+            android:name=".notifications.InstanceDoneReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

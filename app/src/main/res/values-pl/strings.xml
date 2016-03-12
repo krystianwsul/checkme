@@ -15,4 +15,5 @@
     <string name="multiple_reminders">przypomnienia</string>
     <string name="join">Połącz</string>
     <string name="two_tasks_message">Proszę wybrać co najmniej dwa zadania.</string>
+    <string name="done">Zrobione</string>
 </resources>

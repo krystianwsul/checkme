@@ -57,11 +57,13 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
     public void onLoadFinished(Loader<ShowGroupLoader.Data> loader, ShowGroupLoader.Data data) {
         mShowGroupName.setText(data.DisplayText);
 
-        mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), false, true));
+        if (data.InstanceAdapterDatas.isEmpty())
+            finish();
+        else
+            mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), false, true));
     }
 
     @Override
     public void onLoaderReset(Loader<ShowGroupLoader.Data> loader) {
-        mShowGroupList.setAdapter(null);
     }
 }

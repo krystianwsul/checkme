@@ -16,7 +16,7 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
@@ -237,13 +237,13 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     }
 
     public static class Data {
-        public TimeStamp Done;
+        public ExactTimeStamp Done;
         public final String Name;
         public final boolean HasChildren;
         public final InstanceKey InstanceKey;
         public final String DisplayText;
 
-        public Data(TimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey, String displayText) {
+        public Data(ExactTimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey, String displayText) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceKey != null);
 

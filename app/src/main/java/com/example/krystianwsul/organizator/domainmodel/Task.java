@@ -114,7 +114,7 @@ public class Task {
         return new ExactTimeStamp(mTaskRecord.getStartTime());
     }
 
-    private ExactTimeStamp getEndExactTimeStamp() {
+    public ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskRecord.getEndTime() != null)
             return new ExactTimeStamp(mTaskRecord.getEndTime());
         else

@@ -294,7 +294,9 @@ public class PersistenceManger {
 
     public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime, ExactTimeStamp now) {
         Assert.assertTrue(task != null);
-        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
+
+        ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
+        Assert.assertTrue((taskEndExactTimeStamp == null || taskEndExactTimeStamp.compareTo(scheduleDateTime.getTimeStamp().toExactTimeStamp()) > 0));
 
         Date scheduleDate = scheduleDateTime.getDate();
         Time scheduleTime = scheduleDateTime.getTime();
@@ -312,12 +314,9 @@ public class PersistenceManger {
             scheduleMinute = hourMinute.getMinute();
         }
 
-        ExactTimeStamp scheduleTimeStamp = scheduleDateTime.getTimeStamp().toExactTimeStamp();
-        ExactTimeStamp hierarchy = (now.compareTo(scheduleTimeStamp) < 0 ? now : scheduleTimeStamp);
-
         int id = getNextId(mInstanceRecords);
 
-        InstanceRecord instanceRecord = new InstanceRecord(false, id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, hierarchy.getLong(), false, false);
+        InstanceRecord instanceRecord = new InstanceRecord(false, id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
     }

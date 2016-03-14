@@ -10,6 +10,10 @@ import java.util.GregorianCalendar;
 public class TimeStamp implements Comparable<TimeStamp> {
     private final Long mLong;
 
+    public static TimeStamp getNow() {
+        return new TimeStamp(Calendar.getInstance());
+    }
+
     public TimeStamp(Date date, HourMinute hourMinute) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(hourMinute != null);
@@ -23,10 +27,6 @@ public class TimeStamp implements Comparable<TimeStamp> {
         HourMinute hourMinute = new HourMinute(calendar);
 
         mLong = new GregorianCalendar(date.getYear(), date.getMonth() - 1, date.getDay(), hourMinute.getHour(), hourMinute.getMinute()).getTimeInMillis();
-    }
-
-    public static TimeStamp getNow() {
-        return new TimeStamp(Calendar.getInstance());
     }
 
     public TimeStamp(long milis) {

@@ -12,12 +12,12 @@ import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
 import com.example.krystianwsul.organizator.utils.time.TimePair;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Instance {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
@@ -145,13 +145,14 @@ public class Instance {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
-    void setInstanceDateTime(Date date, TimePair timePair) {
+    void setInstanceDateTime(Date date, TimePair timePair, ExactTimeStamp now) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
-        Assert.assertTrue(isRootInstance());
+        Assert.assertTrue(now != null);
+        Assert.assertTrue(isRootInstance(now));
 
         if (mInstanceRecord == null)
-            createInstanceHierarchy(ExactTimeStamp.getNow());
+            createInstanceHierarchy(now);
 
         mInstanceRecord.setInstanceYear(date.getYear());
         mInstanceRecord.setInstanceMonth(date.getMonth());
@@ -167,19 +168,24 @@ public class Instance {
             mInstanceRecord.setInstanceMinute(timePair.HourMinute.getMinute());
         }
 
-        resetNotification();
+        resetNotification(now);
     }
 
-    public String getDisplayText(Context context) {
-        if (isRootInstance()) {
+    public String getDisplayText(Context context, ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        if (isRootInstance(now)) {
             return getInstanceDateTime().getDisplayText(context);
         } else {
             return null;
         }
     }
 
-    public ArrayList<Instance> getChildInstances() {
-        ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp();
+    public ArrayList<Instance> getChildInstances(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
+        Assert.assertTrue(hierarchyExactTimeStamp != null);
 
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
@@ -187,8 +193,9 @@ public class Instance {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
+        ArrayList<Task> childTasks = task.getChildTasks(hierarchyExactTimeStamp);
         ArrayList<Instance> childInstances = new ArrayList<>();
-        for (Task childTask : task.getChildTasks(hierarchyExactTimeStamp)) {
+        for (Task childTask : childTasks) {
             Assert.assertTrue(childTask.current(hierarchyExactTimeStamp));
 
             Instance childInstance = domainFactory.getInstance(childTask, getScheduleDateTime());
@@ -199,8 +206,11 @@ public class Instance {
         return childInstances;
     }
 
-    private Instance getParentInstance() {
-        ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp();
+    private Instance getParentInstance(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
+        Assert.assertTrue(hierarchyExactTimeStamp != null);
 
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
@@ -220,39 +230,42 @@ public class Instance {
         return parentInstance;
     }
 
-    boolean isRootInstance() {
+    boolean isRootInstance(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
 
-        return task.isRootTask(getHierarchyExactTimeStamp());
+        return task.isRootTask(getHierarchyExactTimeStamp(now));
     }
 
-    public TimeStamp getDone() {
+    public ExactTimeStamp getDone() {
         if (mInstanceRecord == null)
             return null;
 
         Long done = mInstanceRecord.getDone();
         if (done != null)
-            return new TimeStamp(done);
+            return new ExactTimeStamp(done);
         else
             return null;
     }
 
-    void setDone(boolean done) {
-        if (done) {
-            ExactTimeStamp now = ExactTimeStamp.getNow();
+    void setDone(boolean done, ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
 
+        if (done) {
             if (mInstanceRecord == null) {
-                getRootInstance().createInstanceHierarchy(now);
-                mInstanceRecord.setDone(now.toTimeStamp().getLong());
+                createInstanceRecord(now);
+                getRootInstance(now).createInstanceHierarchy(now);
+                mInstanceRecord.setDone(now.getLong());
             } else {
-                mInstanceRecord.setDone(now.toTimeStamp().getLong());
+                mInstanceRecord.setDone(now.getLong());
             }
 
-            if (isRootInstance()) {
+            if (isRootInstance(now)) {
                 Task rootTask = mTaskReference.get();
                 Assert.assertTrue(rootTask != null);
-                Assert.assertTrue(rootTask.isRootTask(getHierarchyExactTimeStamp()));
+                Assert.assertTrue(rootTask.isRootTask(getHierarchyExactTimeStamp(now)));
 
                 if (rootTask.current(now) && rootTask.getCurrentSchedule(now).getType() == ScheduleType.SINGLE) {
                     DomainFactory domainFactory = mDomainFactoryReference.get();
@@ -274,15 +287,17 @@ public class Instance {
             Assert.assertTrue(mInstanceRecord != null);
             mInstanceRecord.setDone(null);
 
-            resetNotification();
+            resetNotification(now);
         }
     }
 
-    private Instance getRootInstance() {
-        Instance parentInstance = getParentInstance();
+    private Instance getRootInstance(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        Instance parentInstance = getParentInstance(now);
 
         if (parentInstance != null)
-            return parentInstance.getRootInstance();
+            return parentInstance.getRootInstance(now);
         else
             return this;
     }
@@ -293,7 +308,8 @@ public class Instance {
         if (mInstanceRecord == null)
             createInstanceRecord(now);
 
-        for (Instance childInstance : getChildInstances())
+        ArrayList<Instance> childInstances = getChildInstances(now);
+        for (Instance childInstance : childInstances)
             childInstance.createInstanceHierarchy(now);
     }
 
@@ -315,11 +331,23 @@ public class Instance {
         mInstanceRecord = domainFactory.createInstanceRecord(task, this, scheduleDateTime, now);
     }
 
-    private ExactTimeStamp getHierarchyExactTimeStamp() {
-        if (mInstanceRecord != null)
-            return new ExactTimeStamp(mInstanceRecord.getHierarchyTime());
-        else
-            return getScheduleDateTime().getTimeStamp().toExactTimeStamp();
+    private ExactTimeStamp getHierarchyExactTimeStamp(ExactTimeStamp now) {
+        ArrayList<ExactTimeStamp> exactTimeStamps = new ArrayList<>();
+
+        exactTimeStamps.add(now);
+
+        Task task = mTaskReference.get();
+        if (task != null) {
+            ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
+            if (taskEndExactTimeStamp != null)
+                exactTimeStamps.add(taskEndExactTimeStamp.minusOne());
+        }
+
+        ExactTimeStamp done = getDone();
+        if (done != null)
+            exactTimeStamps.add(done.minusOne());
+
+        return Collections.min(exactTimeStamps);
     }
 
     @Override
@@ -331,9 +359,11 @@ public class Instance {
         return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }
 
-    void setNotified(boolean notified) {
+    void setNotified(boolean notified, ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
         if (mInstanceRecord == null)
-            createInstanceHierarchy(ExactTimeStamp.getNow());
+            createInstanceHierarchy(now);
 
         Assert.assertTrue(mInstanceRecord != null);
         mInstanceRecord.setNotified(notified);
@@ -375,18 +405,22 @@ public class Instance {
         return (mInstanceRecord != null && mInstanceRecord.getNotificationShown());
     }
 
-    void setNotificationShown(boolean notificationShown) {
+    void setNotificationShown(boolean notificationShown, ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
         if (mInstanceRecord == null)
-            createInstanceHierarchy(ExactTimeStamp.getNow());
+            createInstanceHierarchy(now);
 
         Assert.assertTrue(mInstanceRecord != null);
 
         mInstanceRecord.setNotificationShown(notificationShown);
     }
 
-    private void resetNotification() {
+    private void resetNotification(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
         Assert.assertTrue(mInstanceRecord != null);
-        Assert.assertTrue(isRootInstance());
+        Assert.assertTrue(isRootInstance(now));
 
         mInstanceRecord.setNotified(false);
     }

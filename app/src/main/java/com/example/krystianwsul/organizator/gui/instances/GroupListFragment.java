@@ -288,7 +288,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(instanceData != null);
                 Assert.assertTrue(instanceData.Done != null);
 
-                Group group = new Group(mData.CustomTimeDatas, instanceData.Done);
+                Group group = new Group(mData.CustomTimeDatas, instanceData.Done.toTimeStamp());
                 group.addInstanceData(instanceData);
                 mGroups.add(group);
 
@@ -303,7 +303,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 for (GroupListLoader.InstanceData instanceData : instanceDatas) {
                     Assert.assertTrue(instanceData.Done != null);
 
-                    Group group = new Group(mData.CustomTimeDatas, instanceData.Done);
+                    Group group = new Group(mData.CustomTimeDatas, instanceData.Done.toTimeStamp());
                     group.addInstanceData(instanceData);
                     mGroups.add(group);
                 }

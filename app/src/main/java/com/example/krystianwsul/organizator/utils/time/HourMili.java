@@ -12,10 +12,6 @@ public class HourMili implements Comparable<HourMili>, Parcelable {
     private final int mSecond;
     private final int mMili;
 
-    public static HourMili getNow() {
-        return ExactTimeStamp.getNow().getHourMili();
-    }
-
     public HourMili(int hour, int minute, int second, int mili) {
         mHour = hour;
         mMinute = minute;

@@ -87,6 +87,10 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         return new ExactTimeStamp(mLong + 1);
     }
 
+    public ExactTimeStamp minusOne() {
+        return new ExactTimeStamp(mLong - 1);
+    }
+
     public TimeStamp toTimeStamp() {
         return new TimeStamp(mLong);
     }

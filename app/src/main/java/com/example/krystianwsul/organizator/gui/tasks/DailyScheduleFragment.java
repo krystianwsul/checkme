@@ -171,11 +171,11 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
     }
 
     private ArrayList<TimePair> getTimePairs() {
-        Assert.assertTrue(!mTimeEntryAdapter.getTimeEntries().isEmpty());
+        ArrayList<TimeEntry> timeEntries = mTimeEntryAdapter.getTimeEntries();
+        Assert.assertTrue(!timeEntries.isEmpty());
 
         ArrayList<TimePair> timePairs = new ArrayList<>();
-
-        for (TimeEntry timeEntry : mTimeEntryAdapter.getTimeEntries())
+        for (TimeEntry timeEntry : timeEntries)
             timePairs.add(new TimePair(timeEntry.getCustomTimeId(), timeEntry.getHourMinute()));
         Assert.assertTrue(!timePairs.isEmpty());
 

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
@@ -59,14 +60,14 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     }
 
     public static class InstanceData {
-        public TimeStamp Done;
+        public ExactTimeStamp Done;
         public final InstanceKey InstanceKey;
         public final boolean HasChildren;
         public final String DisplayText;
         public final String Name;
         public final TimeStamp InstanceTimeStamp;
 
-        public InstanceData(TimeStamp done, boolean hasChildren, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp) {
+        public InstanceData(ExactTimeStamp done, boolean hasChildren, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
             Assert.assertTrue(!TextUtils.isEmpty(name));

@@ -7,10 +7,6 @@ import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 public class NormalTime implements Time {
     private final HourMinute mHourMinute;
 
-    public static NormalTime getNow() {
-        return new NormalTime(TimeStamp.getNow().getHourMinute());
-    }
-
     public NormalTime(HourMinute hourMinute) {
         mHourMinute = hourMinute;
     }

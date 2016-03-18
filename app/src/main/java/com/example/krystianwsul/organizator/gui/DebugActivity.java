@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.notifications.TickService;
 
 import junit.framework.Assert;
 
@@ -37,7 +38,16 @@ public class DebugActivity extends AppCompatActivity {
         Assert.assertTrue(debugTime != null);
 
         DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
-
         debugTime.setText("data load time: " + domainFactory.getTotalMillis() + "ms (read: " + domainFactory.getReadMillis() + "ms)");
+
+        Button debugTick = (Button) findViewById(R.id.debug_tick);
+        Assert.assertTrue(debugTick != null);
+
+        debugTick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TickService.startService(DebugActivity.this);
+            }
+        });
     }
 }

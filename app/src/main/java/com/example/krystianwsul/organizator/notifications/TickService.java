@@ -23,6 +23,8 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class TickService extends IntentService {
@@ -101,7 +103,7 @@ public class TickService extends IntentService {
         } else {
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
                 if (data.ShownInstanceDatas.size() > MAX_NOTIFICATIONS) { // group shown
-                    if (!showInstanceKeys.isEmpty())
+                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
                         notifyGroup(data.NotificationInstanceDatas.values(), silent);
                 } else { // instances shown
                     for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
@@ -160,7 +162,7 @@ public class TickService extends IntentService {
         ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
         actions.add(builder.build());
 
-        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong());
+        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), null);
     }
 
     private void notifyGroup(Collection<NotificationInstanceData> notificationInstanceDatas, boolean silent) {
@@ -180,10 +182,33 @@ public class TickService extends IntentService {
         Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, instanceKeys);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null, null);
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+
+        ArrayList<NotificationInstanceData> notificationInstanceDataArray = new ArrayList<>(notificationInstanceDatas);
+        Collections.sort(notificationInstanceDataArray, new Comparator<NotificationInstanceData>() {
+            @Override
+            public int compare(NotificationInstanceData lhs, NotificationInstanceData rhs) {
+                int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
+                if (timeStampComparison != 0)
+                    return timeStampComparison;
+
+                return new Integer(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
+            }
+        });
+
+        int lineCount = Math.min(5, notificationInstanceDataArray.size());
+        for (int i = 0; i < lineCount; i++) {
+            NotificationInstanceData notificationInstanceData = notificationInstanceDataArray.get(i);
+            inboxStyle.addLine(notificationInstanceData.Name + " (" + notificationInstanceData.DisplayText + ")");
+        }
+        int extraCount = notificationInstanceDatas.size() - lineCount;
+        if (extraCount > 0)
+            inboxStyle.setSummaryText("+" + extraCount + " " + getString(R.string.more));
+
+        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null, null, inboxStyle);
     }
 
-    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions, Long when) {
+    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions, Long when, NotificationCompat.InboxStyle inboxStyle) {
         Assert.assertTrue(!TextUtils.isEmpty(title));
         Assert.assertTrue(!TextUtils.isEmpty(text));
         Assert.assertTrue(deleteIntent != null);
@@ -211,6 +236,9 @@ public class TickService extends IntentService {
 
         if (when != null)
             builder.setWhen(when);
+
+        if (inboxStyle != null)
+            builder.setStyle(inboxStyle);
 
         Notification notification = builder.build();
 

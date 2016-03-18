@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class DomainFactory {
+    private static DomainFactory sDomainFactory;
+
     private final PersistenceManger mPersistenceManager;
 
     private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
@@ -64,7 +66,9 @@ public class DomainFactory {
 
     private final ArrayList<WeakReference<DomainLoader.Observer>> mObservers = new ArrayList<>();
 
-    private static DomainFactory sDomainFactory;
+    private ExactTimeStamp mStart;
+    private ExactTimeStamp mRead;
+    private ExactTimeStamp mStop;
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -91,8 +95,12 @@ public class DomainFactory {
     }
 
     private DomainFactory(Context context) {
+        mStart = ExactTimeStamp.getNow();
+
         mPersistenceManager = PersistenceManger.getInstance(context);
         Assert.assertTrue(mPersistenceManager != null);
+
+        mRead = ExactTimeStamp.getNow();
     }
 
     private void initialize() {
@@ -151,6 +159,16 @@ public class DomainFactory {
             Instance instance = new Instance(this, task, instanceRecord);
             mExistingInstances.add(instance);
         }
+
+        mStop = ExactTimeStamp.getNow();
+    }
+
+    public long getReadMillis() {
+        return (mRead.getLong() - mStart.getLong());
+    }
+
+    public long getTotalMillis() {
+        return (mStop.getLong() - mStart.getLong());
     }
 
     private void save(int dataId) {

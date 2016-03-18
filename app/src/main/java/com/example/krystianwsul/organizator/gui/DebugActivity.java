@@ -6,8 +6,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+
+import junit.framework.Assert;
 
 public class DebugActivity extends AppCompatActivity {
 
@@ -28,5 +32,12 @@ public class DebugActivity extends AppCompatActivity {
                 int j = 1 / i;
             }
         });
+
+        TextView debugTime = (TextView) findViewById(R.id.debug_time);
+        Assert.assertTrue(debugTime != null);
+
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+
+        debugTime.setText("data load time: " + domainFactory.getTotalMillis() + "ms (read: " + domainFactory.getReadMillis() + "ms)");
     }
 }

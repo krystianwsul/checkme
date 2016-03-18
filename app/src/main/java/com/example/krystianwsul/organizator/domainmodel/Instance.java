@@ -18,6 +18,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 
 public class Instance {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
@@ -168,7 +169,7 @@ public class Instance {
             mInstanceRecord.setInstanceMinute(timePair.HourMinute.getMinute());
         }
 
-        resetNotification(now);
+        mInstanceRecord.setNotified(false);
     }
 
     public String getDisplayText(Context context, ExactTimeStamp now) {
@@ -193,8 +194,27 @@ public class Instance {
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
+        DateTime scheduleDateTime = getScheduleDateTime();
+        Assert.assertTrue(scheduleDateTime != null);
+
+        HashSet<Instance> childInstances = new HashSet<>();
+
+        ArrayList<TaskHierarchy> taskHierarchies = domainFactory.getTaskHierarchies(task);
+        for (TaskHierarchy taskHierarchy : taskHierarchies) {
+            Assert.assertTrue(taskHierarchy != null);
+
+            Task childTask = taskHierarchy.getChildTask();
+            Assert.assertTrue(childTask != null);
+
+            Instance childInstance = domainFactory.getInstance(childTask, scheduleDateTime);
+            Assert.assertTrue(childInstance != null);
+
+            ExactTimeStamp done = childInstance.getDone();
+            if (done != null && taskHierarchy.current(done))
+                childInstances.add(childInstance);
+        }
+
         ArrayList<Task> childTasks = task.getChildTasks(hierarchyExactTimeStamp);
-        ArrayList<Instance> childInstances = new ArrayList<>();
         for (Task childTask : childTasks) {
             Assert.assertTrue(childTask.current(hierarchyExactTimeStamp));
 
@@ -203,7 +223,8 @@ public class Instance {
 
             childInstances.add(childInstance);
         }
-        return childInstances;
+
+        return new ArrayList<>(childInstances);
     }
 
     private Instance getParentInstance(ExactTimeStamp now) {
@@ -286,8 +307,7 @@ public class Instance {
         } else {
             Assert.assertTrue(mInstanceRecord != null);
             mInstanceRecord.setDone(null);
-
-            resetNotification(now);
+            mInstanceRecord.setNotified(false);
         }
     }
 
@@ -337,11 +357,11 @@ public class Instance {
         exactTimeStamps.add(now);
 
         Task task = mTaskReference.get();
-        if (task != null) {
-            ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
-            if (taskEndExactTimeStamp != null)
-                exactTimeStamps.add(taskEndExactTimeStamp.minusOne());
-        }
+        Assert.assertTrue(task != null);
+
+        ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
+        if (taskEndExactTimeStamp != null)
+            exactTimeStamps.add(taskEndExactTimeStamp.minusOne());
 
         ExactTimeStamp done = getDone();
         if (done != null)

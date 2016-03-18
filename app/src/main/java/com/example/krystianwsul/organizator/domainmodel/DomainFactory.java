@@ -1237,11 +1237,22 @@ public class DomainFactory {
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
+        ArrayList<TaskHierarchy> taskHierarchies = getTaskHierarchies(parentTask);
         ArrayList<Task> childTasks = new ArrayList<>();
-        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values())
-            if (taskHierarchy.current(exactTimeStamp) && taskHierarchy.getChildTask().current(exactTimeStamp) && taskHierarchy.getParentTask() == parentTask)
+        for (TaskHierarchy taskHierarchy : taskHierarchies)
+            if (taskHierarchy.current(exactTimeStamp) && taskHierarchy.getChildTask().current(exactTimeStamp))
                 childTasks.add(taskHierarchy.getChildTask());
         return childTasks;
+    }
+
+    ArrayList<TaskHierarchy> getTaskHierarchies(Task parentTask) {
+        Assert.assertTrue(parentTask != null);
+
+        ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
+        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values())
+            if (taskHierarchy.getParentTask() == parentTask)
+                taskHierarchies.add(taskHierarchy);
+        return taskHierarchies;
     }
 
     Task getParentTask(Task childTask, ExactTimeStamp exactTimeStamp) {

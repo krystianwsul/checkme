@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -30,13 +32,20 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeMap;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
-    private RecyclerView mGroupList;
+    private final static String EXPANDED_KEY = "expanded";
+
+    private LinearLayout mGroupListToggle;
+    private ImageView mGroupListExpand;
+
+    private RecyclerView mGroupListNotDone;
+    private RecyclerView mGroupListDone;
+
+    private boolean mExpanded = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,10 +58,56 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         View view = getView();
         Assert.assertTrue(view != null);
-        mGroupList = (RecyclerView) view.findViewById(R.id.groups_list);
-        mGroupList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        if (savedInstanceState != null) {
+            Assert.assertTrue(savedInstanceState.containsKey(EXPANDED_KEY));
+            mExpanded = savedInstanceState.getBoolean(EXPANDED_KEY);
+        }
+
+        mGroupListToggle = (LinearLayout) view.findViewById(R.id.group_list_toggle);
+        Assert.assertTrue(mGroupListToggle != null);
+
+        mGroupListExpand = (ImageView) view.findViewById(R.id.group_list_expand);
+        Assert.assertTrue(mGroupListExpand != null);
+
+        mGroupListToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mExpanded = !mExpanded;
+                toggle();
+            }
+        });
+
+        mGroupListDone = (RecyclerView) view.findViewById(R.id.group_list_done);
+        Assert.assertTrue(mGroupListDone != null);
+
+        mGroupListDone.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        mGroupListNotDone = (RecyclerView) view.findViewById(R.id.group_list_not_done);
+        Assert.assertTrue(mGroupListNotDone != null);
+
+        mGroupListNotDone.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        toggle();
 
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void toggle() {
+        if (mExpanded) {
+            mGroupListDone.setVisibility(View.VISIBLE);
+            mGroupListExpand.setImageResource(R.drawable.ic_expand_less_black_24dp);
+        } else {
+            mGroupListDone.setVisibility(View.GONE);
+            mGroupListExpand.setImageResource(R.drawable.ic_expand_more_black_24dp);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(EXPANDED_KEY, mExpanded);
     }
 
     @Override
@@ -62,73 +117,63 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<GroupListLoader.Data> loader, GroupListLoader.Data data) {
-        mGroupList.setAdapter(new GroupAdapter(data, getActivity()));
+        ArrayList<GroupListLoader.InstanceData> doneInstances = new ArrayList<>();
+        ArrayList<GroupListLoader.InstanceData> notDoneInstances = new ArrayList<>();
+
+        for (GroupListLoader.InstanceData instanceData : data.InstanceDatas.values()) {
+            if (instanceData.Done != null)
+                doneInstances.add(instanceData);
+            else
+                notDoneInstances.add(instanceData);
+        }
+
+        mGroupListNotDone.setAdapter(new NotDoneGroupAdapter(getActivity(), data.DataId, data.CustomTimeDatas, notDoneInstances, new NotDoneGroupAdapter.OnCheckListner() {
+            @Override
+            public void onChecked(GroupListLoader.InstanceData instanceData) {
+                ((DoneGroupAdapter) mGroupListDone.getAdapter()).add(instanceData);
+            }
+        }));
+        mGroupListDone.setAdapter(new DoneGroupAdapter(data.DataId, data.CustomTimeDatas, doneInstances, getActivity(), new DoneGroupAdapter.OnUncheckListner() {
+            @Override
+            public void onUnchecked(GroupListLoader.InstanceData instanceData) {
+                ((NotDoneGroupAdapter) mGroupListNotDone.getAdapter()).add(instanceData);
+            }
+        }));
     }
 
     @Override
     public void onLoaderReset(Loader<GroupListLoader.Data> loader) {
     }
 
-    public static class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder> {
-        private final GroupListLoader.Data mData;
-
+    public static class NotDoneGroupAdapter extends RecyclerView.Adapter<NotDoneGroupAdapter.Holder> {
         private final Context mContext;
 
-        private final DoneGroupContainer mDoneGroupContainer = new DoneGroupContainer();
-        private final NotDoneGroupContainer mNotDoneGroupContainer = new NotDoneGroupContainer();
+        private final int mDataId;
+        private final ArrayList<GroupListLoader.CustomTimeData> mCustomTimeDatas;
 
-        private final static Comparator<Group> sComparator = new Comparator<Group>() {
-            @Override
-            public int compare(Group lhs, Group rhs) {
-                return lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
-            }
-        };
+        private ArrayList<Group> mGroupArray = new ArrayList<>();
+        private final TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
 
-        public GroupAdapter(GroupListLoader.Data data, Context context) {
-            Assert.assertTrue(data != null);
+        private final OnCheckListner mOnCheckListener;
+
+        public NotDoneGroupAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, ArrayList<GroupListLoader.InstanceData> instanceDatas, OnCheckListner onCheckListner) {
             Assert.assertTrue(context != null);
+            Assert.assertTrue(customTimeDatas != null);
+            Assert.assertTrue(instanceDatas != null);
+            Assert.assertTrue(onCheckListner != null);
 
-            mData = data;
             mContext = context;
+            mDataId = dataId;
+            mCustomTimeDatas = customTimeDatas;
+            mOnCheckListener = onCheckListner;
 
-            ArrayList<GroupListLoader.InstanceData> doneInstanceDatas = new ArrayList<>();
-            ArrayList<GroupListLoader.InstanceData> notDoneInstanceDatas = new ArrayList<>();
-            for (GroupListLoader.InstanceData instanceData : data.InstanceDatas.values()) {
-                Assert.assertTrue(instanceData.Done == null); // group hack
-
-                //if (instanceData.Done != null)
-                //    doneInstanceDatas.add(instanceData);
-                //else
-                    notDoneInstanceDatas.add(instanceData);
-            }
-
-            mDoneGroupContainer.addInstanceDataRange(doneInstanceDatas);
-            mNotDoneGroupContainer.addInstanceRange(notDoneInstanceDatas);
-        }
-
-        private Group getGroup(int position) {
-            Assert.assertTrue(position >= 0);
-            Assert.assertTrue(position < getItemCount());
-
-            if (position < mDoneGroupContainer.size())
-                return mDoneGroupContainer.get(position);
-            else
-                return mNotDoneGroupContainer.get(position - mDoneGroupContainer.size());
-        }
-
-        private int indexOf(Group group) {
-            Assert.assertTrue(group != null);
-
-            if (mDoneGroupContainer.contains(group)) {
-                return mDoneGroupContainer.indexOf(group);
-            } else {
-                Assert.assertTrue(mNotDoneGroupContainer.contains(group));
-                return mDoneGroupContainer.size() + mNotDoneGroupContainer.indexOf(group);
-            }
+            for (GroupListLoader.InstanceData instanceData : instanceDatas)
+                addInstanceHelper(instanceData);
+            makeArray();
         }
 
         @Override
-        public GroupHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
             TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.show_group_row, parent, false);
 
             TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
@@ -136,58 +181,101 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             ImageView groupRowImg = (ImageView) groupRow.findViewById(R.id.group_row_img);
             CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
 
-            return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
+            return new Holder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
         }
 
         @Override
-        public void onBindViewHolder(final GroupHolder groupHolder, int position) {
-            Group group = getGroup(position);
+        public void onBindViewHolder(final Holder holder, int position) {
+            Group group = mGroupArray.get(position);
+            Assert.assertTrue(group != null);
 
-            groupHolder.mGroupRowName.setText(group.getNameText(mContext));
+            holder.mGroupRowName.setText(group.getNameText(mContext));
 
-            groupHolder.mGroupRowDetails.setText(group.getDetailsText());
+            holder.mGroupRowDetails.setText(group.getDetailsText());
 
             if (group.singleInstance() && !group.getSingleInstanceData().HasChildren)
-                groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
+                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
             else
-                groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
+                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
 
             if (group.singleInstance()) {
-                groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+                holder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
 
-                groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
+                holder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        groupHolder.onCheckBoxClick((CheckBox) v);
+                        holder.onCheckBoxClick();
                     }
                 });
 
-                groupHolder.mGroupRowCheckBox.setChecked(group.getSingleInstanceData().Done != null);
+                holder.mGroupRowCheckBox.setChecked(group.getSingleInstanceData().Done != null);
             } else {
-                groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
+                holder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
             }
 
-            groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
+            holder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    groupHolder.onRowClick();
+                    holder.onRowClick();
                 }
             });
         }
 
         @Override
         public int getItemCount() {
-            return mDoneGroupContainer.size() + mNotDoneGroupContainer.size();
+            return mGroupArray.size();
         }
 
-        public class GroupHolder extends RecyclerView.ViewHolder {
+        private Pair<Group, Boolean> addInstanceHelper(GroupListLoader.InstanceData instanceData) {
+            Assert.assertTrue(instanceData != null);
+            Assert.assertTrue(instanceData.Done == null);
+
+            TimeStamp timeStamp = instanceData.InstanceTimeStamp;
+
+            if (mGroupTree.containsKey(timeStamp)) {
+                Group group = mGroupTree.get(timeStamp);
+                group.addInstanceData(instanceData);
+                return new Pair<>(group, false);
+            } else {
+                Group group = new Group(mCustomTimeDatas, timeStamp);
+                group.addInstanceData(instanceData);
+                mGroupTree.put(timeStamp, group);
+                return new Pair<>(group, true);
+            }
+        }
+
+        private void makeArray() {
+            mGroupArray = new ArrayList<>(mGroupTree.values());
+        }
+
+        public void add(GroupListLoader.InstanceData instanceData) {
+            Assert.assertTrue(instanceData != null);
+            Assert.assertTrue(instanceData.Done == null);
+
+            Pair<Group, Boolean> pair = addInstanceHelper(instanceData);
+            makeArray();
+
+            int postition = mGroupArray.indexOf(pair.first);
+            if (pair.second)
+                notifyItemInserted(postition);
+            else
+                notifyItemChanged(postition);
+        }
+
+        public void remove(Group group) {
+            Assert.assertTrue(mGroupArray.contains(group));
+            mGroupTree.remove(group.getTimeStamp());
+            mGroupArray.remove(group);
+        }
+
+        public class Holder extends RecyclerView.ViewHolder {
             public final TableLayout mGroupRow;
             public final TextView mGroupRowName;
             public final TextView mGroupRowDetails;
             public final ImageView mGroupRowImg;
             public final CheckBox mGroupRowCheckBox;
 
-            public GroupHolder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
+            public Holder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
                 super(groupRow);
 
                 Assert.assertTrue(groupRowName != null);
@@ -202,66 +290,27 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 mGroupRowCheckBox = groupRowCheckBox;
             }
 
-            public void onCheckBoxClick(CheckBox checkBox) {
-                Assert.assertTrue(checkBox != null);
-
+            public void onCheckBoxClick() {
                 int position = getAdapterPosition();
-                Group group = getGroup(position);
+                Group group = mGroupArray.get(position);
                 Assert.assertTrue(group != null);
                 Assert.assertTrue(group.singleInstance());
 
-                boolean isChecked = checkBox.isChecked();
-
                 GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
-                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mData.DataId, instanceData.InstanceKey, isChecked);
+                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, instanceData.InstanceKey, true);
+                Assert.assertTrue(instanceData.Done != null);
 
                 TickService.startService(mContext);
 
-                Assert.assertTrue(isChecked); // group hack
+                remove(group);
 
-                //if (isChecked) {
-                    Assert.assertTrue(instanceData.Done != null);
-                    Assert.assertTrue(mNotDoneGroupContainer.contains(group));
+                notifyItemRemoved(position);
 
-                    int oldPosition = indexOf(group);
-
-                    mNotDoneGroupContainer.remove(group);
-
-                    /* // group hack
-                    Group newGroup = mDoneGroupContainer.addInstanceData(instanceData);
-
-                    int newPosition = indexOf(newGroup);
-
-                    notifyItemMoved(oldPosition, newPosition);
-                    */ // group hack
-
-                    // group hack
-                    mData.InstanceDatas.remove(instanceData.InstanceKey);
-                    notifyItemRemoved(oldPosition);
-                    // group hack
-                /*
-                } else {
-                    Assert.assertTrue(instanceData.Done == null);
-                    Assert.assertTrue(mDoneGroupContainer.contains(group));
-
-                    int oldPosition = indexOf(group);
-
-                    mDoneGroupContainer.remove(group);
-                    Group newGroup = mNotDoneGroupContainer.addInstanceData(instanceData);
-
-                    int newPosition = indexOf(newGroup);
-
-                    if (newGroup.singleInstance()) {
-                        notifyItemMoved(oldPosition, newPosition);
-                    } else {
-                        notifyItemRemoved(oldPosition);
-                        notifyItemChanged(newPosition);
-                    }
-                }*/
+                mOnCheckListener.onChecked(instanceData);
             }
 
             public void onRowClick() {
-                Group group = getGroup(getAdapterPosition());
+                Group group = mGroupArray.get(getAdapterPosition());
                 Assert.assertTrue(group != null);
 
                 Intent intent = getIntent(group, mContext);
@@ -281,125 +330,177 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
         }
 
-        private class DoneGroupContainer {
-            private final ArrayList<Group> mGroups = new ArrayList<>();
+        public interface OnCheckListner {
+            void onChecked(GroupListLoader.InstanceData instanceData);
+        }
+    }
 
-            public Group addInstanceData(GroupListLoader.InstanceData instanceData) {
-                Assert.assertTrue(instanceData != null);
+    public static class DoneGroupAdapter extends RecyclerView.Adapter<DoneGroupAdapter.Holder> {
+        private final static Comparator<Group> sComparator = new Comparator<Group>() {
+            @Override
+            public int compare(Group lhs, Group rhs) {
+                return lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
+            }
+        };
+
+        private final ArrayList<Group> mGroups = new ArrayList<>();
+
+        private final int mDataId;
+        private final ArrayList<GroupListLoader.CustomTimeData> mCustomTimeDatas;
+
+        private final Context mContext;
+
+        private final OnUncheckListner mOnUncheckListener;
+
+        public DoneGroupAdapter(int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, ArrayList<GroupListLoader.InstanceData> instanceDatas, Context context, OnUncheckListner onUncheckListner) {
+            Assert.assertTrue(customTimeDatas != null);
+            Assert.assertTrue(instanceDatas != null);
+            Assert.assertTrue(context != null);
+            Assert.assertTrue(onUncheckListner != null);
+
+            mDataId = dataId;
+            mCustomTimeDatas = customTimeDatas;
+            mContext = context;
+            mOnUncheckListener = onUncheckListner;
+
+            for (GroupListLoader.InstanceData instanceData : instanceDatas) {
                 Assert.assertTrue(instanceData.Done != null);
 
-                Group group = new Group(mData.CustomTimeDatas, instanceData.Done.toTimeStamp());
+                Group group = new Group(mCustomTimeDatas, instanceData.Done.toTimeStamp());
                 group.addInstanceData(instanceData);
                 mGroups.add(group);
-
-                Collections.sort(mGroups, sComparator);
-
-                return group;
             }
 
-            public void addInstanceDataRange(Collection<GroupListLoader.InstanceData> instanceDatas) {
-                Assert.assertTrue(instanceDatas != null);
+            Collections.sort(mGroups, sComparator);
+        }
 
-                for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-                    Assert.assertTrue(instanceData.Done != null);
+        private Group getGroup(int position) {
+            return mGroups.get(position);
+        }
 
-                    Group group = new Group(mData.CustomTimeDatas, instanceData.Done.toTimeStamp());
-                    group.addInstanceData(instanceData);
-                    mGroups.add(group);
+        @Override
+        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.show_group_row, parent, false);
+
+            TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
+            TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
+            ImageView groupRowImg = (ImageView) groupRow.findViewById(R.id.group_row_img);
+            CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
+
+            return new Holder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
+        }
+
+        @Override
+        public void onBindViewHolder(final Holder holder, int position) {
+            Group group = getGroup(position);
+            Assert.assertTrue(group.singleInstance());
+
+            GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
+            Assert.assertTrue(instanceData != null);
+
+            holder.mGroupRowName.setText(group.getNameText(mContext));
+
+            holder.mGroupRowDetails.setText(group.getDetailsText());
+
+            if (!instanceData.HasChildren)
+                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
+            else
+                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
+
+            holder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+            holder.mGroupRowCheckBox.setChecked(true);
+            holder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    holder.onCheckBoxClick();
                 }
+            });
 
-                Collections.sort(mGroups, sComparator);
+            holder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    holder.onRowClick();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return mGroups.size();
+        }
+
+        public void add(GroupListLoader.InstanceData instanceData) {
+            Assert.assertTrue(instanceData != null);
+
+            Group group = new Group(mCustomTimeDatas, instanceData.Done.toTimeStamp());
+            group.addInstanceData(instanceData);
+            mGroups.add(group);
+
+            notifyItemInserted(mGroups.size() - 1);
+        }
+
+        public class Holder extends RecyclerView.ViewHolder {
+            public final TableLayout mGroupRow;
+            public final TextView mGroupRowName;
+            public final TextView mGroupRowDetails;
+            public final ImageView mGroupRowImg;
+            public final CheckBox mGroupRowCheckBox;
+
+            public Holder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
+                super(groupRow);
+
+                Assert.assertTrue(groupRowName != null);
+                Assert.assertTrue(groupRowDetails != null);
+                Assert.assertTrue(groupRowImg != null);
+                Assert.assertTrue(groupRowCheckBox != null);
+
+                mGroupRow = groupRow;
+                mGroupRowName = groupRowName;
+                mGroupRowDetails = groupRowDetails;
+                mGroupRowImg = groupRowImg;
+                mGroupRowCheckBox = groupRowCheckBox;
             }
 
-            public int size() {
-                return mGroups.size();
-            }
+            public void onCheckBoxClick() {
+                int position = getAdapterPosition();
+                Group group = getGroup(position);
+                Assert.assertTrue(group != null);
+                Assert.assertTrue(group.singleInstance());
 
-            public Group get(int index) {
-                return mGroups.get(index);
-            }
+                GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
+                Assert.assertTrue(instanceData != null);
 
-            public int indexOf(Group group) {
-                Assert.assertTrue(mGroups.contains(group));
-                return mGroups.indexOf(group);
-            }
+                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, instanceData.InstanceKey, false);
+                Assert.assertTrue(instanceData.Done == null);
 
-            public boolean contains(Group group) {
-                return mGroups.contains(group);
-            }
+                TickService.startService(mContext);
 
-            public void remove(Group group) {
-                Assert.assertTrue(mGroups.contains(group));
                 mGroups.remove(group);
+
+                notifyItemRemoved(position);
+
+                mOnUncheckListener.onUnchecked(instanceData);
+            }
+
+            public void onRowClick() {
+                Group group = getGroup(getAdapterPosition());
+                Assert.assertTrue(group != null);
+
+                Intent intent = getIntent(group, mContext);
+                mContext.startActivity(intent);
+            }
+
+            private Intent getIntent(Group group, Context context) {
+                Assert.assertTrue(group != null);
+                Assert.assertTrue(context != null);
+
+                GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
+                return ShowInstanceActivity.getIntent(context, instanceData.InstanceKey);
             }
         }
 
-        private class NotDoneGroupContainer {
-            private ArrayList<Group> mGroupArray = new ArrayList<>();
-            private final TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
-
-            public Group addInstanceData(GroupListLoader.InstanceData instanceData) {
-                Assert.assertTrue(instanceData != null);
-                Assert.assertTrue(instanceData.Done == null);
-
-                Group group = addInstanceHelper(instanceData);
-                makeArray();
-
-                return group;
-            }
-
-            public void addInstanceRange(Collection<GroupListLoader.InstanceData> instanceDatas) {
-                Assert.assertTrue(instanceDatas != null);
-
-                for (GroupListLoader.InstanceData instanceData : instanceDatas)
-                    addInstanceHelper(instanceData);
-                makeArray();
-            }
-
-            private Group addInstanceHelper(GroupListLoader.InstanceData instanceData) {
-                Assert.assertTrue(instanceData != null);
-                Assert.assertTrue(instanceData.Done == null);
-
-                TimeStamp timeStamp = instanceData.InstanceTimeStamp;
-
-                if (mGroupTree.containsKey(timeStamp)) {
-                    Group group = mGroupTree.get(timeStamp);
-                    group.addInstanceData(instanceData);
-                    return group;
-                } else {
-                    Group group = new Group(mData.CustomTimeDatas, timeStamp);
-                    group.addInstanceData(instanceData);
-                    mGroupTree.put(timeStamp, group);
-                    return group;
-                }
-            }
-
-            private void makeArray() {
-                mGroupArray = new ArrayList<>(mGroupTree.values());
-            }
-
-            public int size() {
-                return mGroupArray.size();
-            }
-
-            public Group get(int index) {
-                return mGroupArray.get(index);
-            }
-
-            public int indexOf(Group group) {
-                Assert.assertTrue(mGroupArray.contains(group));
-                return mGroupArray.indexOf(group);
-            }
-
-            public boolean contains(Group group) {
-                return mGroupArray.contains(group);
-            }
-
-            public void remove(Group group) {
-                Assert.assertTrue(mGroupArray.contains(group));
-                mGroupTree.remove(group.getTimeStamp());
-                mGroupArray.remove(group);
-            }
+        public interface OnUncheckListner {
+            void onUnchecked(GroupListLoader.InstanceData instanceData);
         }
     }
 

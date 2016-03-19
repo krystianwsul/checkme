@@ -477,7 +477,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
         for (Instance instance : rootInstances)
-            if (!instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
+            if ((instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
                 notificationInstanceDatas.put(instance.getInstanceKey(), new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp()));
 
         HashMap<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = new HashMap<>();
@@ -968,9 +968,13 @@ public class DomainFactory {
         for (Task task : mTasks.values())
             allInstances.addAll(task.getInstances(startExactTimeStamp, endExactTimeStamp));
 
+        Calendar calendar = now.getCalendar();
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
+        ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
+
         ArrayList<Instance> rootInstances = new ArrayList<>();
         for (Instance instance : allInstances)
-            if (instance.isRootInstance(now) && (instance.getDone() == null)) // group hack
+            if (instance.isRootInstance(now) && (instance.getDone() == null || (instance.getDone().compareTo(twentyFourHoursAgo) > 0)))
                 rootInstances.add(instance);
 
         return rootInstances;

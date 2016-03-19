@@ -29,7 +29,6 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     private final Context mContext;
 
     private final int mDataId;
-    private final Collection<Data> mDatas;
 
     private final ArrayList<Data> mDoneInstances = new ArrayList<>();
     private final ArrayList<Data> mNotDoneInstances = new ArrayList<>();
@@ -51,7 +50,6 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
         mContext = context;
         mDataId = dataId;
-        mDatas = datas;
 
         for (Data data : datas) {
             if (data.Done != null)

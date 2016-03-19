@@ -3,7 +3,7 @@ package com.example.krystianwsul.organizator.loaders;
 import android.content.Context;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
+import com.example.krystianwsul.organizator.gui.instances.InstanceListFragment;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -28,9 +28,9 @@ public class ShowNotificationGroupLoader extends DomainLoader<ShowNotificationGr
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<InstanceAdapter.Data> InstanceAdapterDatas;
+        public final ArrayList<InstanceListFragment.InstanceAdapter.Data> InstanceAdapterDatas;
 
-        public Data(ArrayList<InstanceAdapter.Data> instanceAdapterDatas) {
+        public Data(ArrayList<InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas) {
             Assert.assertTrue(instanceAdapterDatas != null);
             Assert.assertTrue(!instanceAdapterDatas.isEmpty());
 

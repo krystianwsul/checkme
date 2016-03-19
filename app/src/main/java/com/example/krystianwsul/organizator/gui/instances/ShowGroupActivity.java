@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
@@ -17,7 +15,7 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data> {
-    private RecyclerView mShowGroupList;
+    private InstanceListFragment mShowGroupList;
     private TimeStamp mTimeStamp;
     private TextView mShowGroupName;
 
@@ -42,8 +40,8 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
         mShowGroupName = (TextView) findViewById(R.id.show_group_name);
 
-        mShowGroupList = (RecyclerView) findViewById(R.id.show_group_list);
-        mShowGroupList.setLayoutManager(new LinearLayoutManager(this));
+        mShowGroupList = (InstanceListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
+        Assert.assertTrue(mShowGroupList != null);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -60,7 +58,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         if (data.InstanceAdapterDatas.isEmpty())
             finish();
         else
-            mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values()));
+            mShowGroupList.setAdapter(data.DataId, data.InstanceAdapterDatas.values());
     }
 
     @Override

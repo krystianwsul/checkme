@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
-import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
+import com.example.krystianwsul.organizator.gui.instances.InstanceListFragment;
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
@@ -289,9 +289,9 @@ public class DomainFactory {
 
         String displayText = new DateTime(date, time).getDisplayText(context);
 
-        HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
+        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
         for (Instance instance : currentInstances)
-            instanceAdapterDatas.put(instance.getInstanceKey(), new InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null));
+            instanceAdapterDatas.put(instance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null));
 
         return new ShowGroupLoader.Data(displayText, instanceAdapterDatas);
     }
@@ -318,9 +318,9 @@ public class DomainFactory {
             }
         });
 
-        ArrayList<InstanceAdapter.Data> instanceDatas = new ArrayList<>();
+        ArrayList<InstanceListFragment.InstanceAdapter.Data> instanceDatas = new ArrayList<>();
         for (Instance instance : instances)
-            instanceDatas.add(new InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now)));
+            instanceDatas.add(new InstanceListFragment.InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now)));
 
         return new ShowNotificationGroupLoader.Data(instanceDatas);
     }
@@ -334,11 +334,11 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
+        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
 
         ArrayList<Instance> childInstances = instance.getChildInstances(now);
         for (Instance childInstance : childInstances)
-            instanceAdapterDatas.put(childInstance.getInstanceKey(), new InstanceAdapter.Data(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null));
+            instanceAdapterDatas.put(childInstance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null));
 
         return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, !instance.getChildInstances(now).isEmpty(), instanceAdapterDatas);
     }

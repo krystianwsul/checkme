@@ -53,9 +53,10 @@
 
     </TableLayout>
 
-    <android.support.v7.widget.RecyclerView
+    <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/show_instance_list" />
+        android:name="com.example.krystianwsul.organizator.gui.instances.InstanceListFragment"
+        android:id="@+id/show_instance_list"/>
 
 </LinearLayout>

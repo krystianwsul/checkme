@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
+import com.example.krystianwsul.organizator.gui.instances.InstanceListFragment;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
@@ -29,9 +29,9 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
 
     public static class Data extends DomainLoader.Data {
         public final String DisplayText;
-        public final HashMap<InstanceKey, InstanceAdapter.Data> InstanceAdapterDatas;
+        public final HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> InstanceAdapterDatas;
 
-        public Data(String displayText, HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas) {
+        public Data(String displayText, HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas) {
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
             Assert.assertTrue(instanceAdapterDatas != null);
             Assert.assertTrue(!instanceAdapterDatas.isEmpty());

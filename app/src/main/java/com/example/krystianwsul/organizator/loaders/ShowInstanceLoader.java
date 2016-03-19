@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.instances.InstanceAdapter;
+import com.example.krystianwsul.organizator.gui.instances.InstanceListFragment;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -33,9 +33,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final String DisplayText;
         public boolean Done;
         public final boolean HasChildren;
-        public final HashMap<InstanceKey, InstanceAdapter.Data> InstanceAdapterDatas;
+        public final HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> InstanceAdapterDatas;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean hasChildren, HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean hasChildren, HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 

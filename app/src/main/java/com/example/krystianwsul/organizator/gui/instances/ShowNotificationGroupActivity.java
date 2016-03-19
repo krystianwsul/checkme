@@ -10,7 +10,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowNotificationGroupLoader;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
@@ -63,16 +62,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
     @Override
     public void onLoadFinished(Loader<ShowNotificationGroupLoader.Data> loader, ShowNotificationGroupLoader.Data data) {
         Assert.assertTrue(!data.InstanceAdapterDatas.isEmpty());
-
-        if (mSavedInstanceState == null) {
-            ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
-            for (InstanceAdapter.Data instanceAdapterData : data.InstanceAdapterDatas)
-                instanceKeys.add(instanceAdapterData.InstanceKey);
-
-            DomainFactory.getDomainFactory(this).setInstancesNotified(data.DataId, instanceKeys);
-        }
-
-        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas, true, false));
+        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas, false));
     }
 
     @Override

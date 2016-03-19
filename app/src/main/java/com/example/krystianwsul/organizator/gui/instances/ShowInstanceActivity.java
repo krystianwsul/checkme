@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -87,6 +88,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     public void onLoadFinished(Loader<ShowInstanceLoader.Data> loader, final ShowInstanceLoader.Data data) {
         Intent intent = getIntent();
 
+        Log.e("asdf", "activity cancel");
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
             DomainFactory.getDomainFactory(this).setInstanceNotified(data.DataId, data.InstanceKey);
@@ -103,7 +105,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
             mShowInstanceDetails.setText(scheduleText);
 
         if (data.HasChildren)
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), false, false));
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), false));
 
         mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override

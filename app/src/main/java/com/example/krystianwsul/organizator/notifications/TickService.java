@@ -162,7 +162,7 @@ public class TickService extends IntentService {
         ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
         actions.add(builder.build());
 
-        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), null);
+        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), null, true);
     }
 
     private void notifyGroup(Collection<NotificationInstanceData> notificationInstanceDatas, boolean silent) {
@@ -205,10 +205,10 @@ public class TickService extends IntentService {
         if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + getString(R.string.more));
 
-        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null, null, inboxStyle);
+        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null, null, inboxStyle, false);
     }
 
-    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions, Long when, NotificationCompat.InboxStyle inboxStyle) {
+    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions, Long when, NotificationCompat.InboxStyle inboxStyle, boolean autoCancel) {
         Assert.assertTrue(!TextUtils.isEmpty(title));
         Assert.assertTrue(!TextUtils.isEmpty(text));
         Assert.assertTrue(deleteIntent != null);
@@ -222,7 +222,6 @@ public class TickService extends IntentService {
                 .setSmallIcon(R.drawable.ic_label_outline_white_24dp)
                 .setDeleteIntent(deleteIntent)
                 .setContentIntent(contentIntent)
-                .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_ALARM);
 
         if (!silent)
@@ -239,6 +238,9 @@ public class TickService extends IntentService {
 
         if (inboxStyle != null)
             builder.setStyle(inboxStyle);
+
+        if (autoCancel)
+            builder.setAutoCancel(true);
 
         Notification notification = builder.build();
 

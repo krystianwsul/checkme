@@ -540,31 +540,6 @@ public class DomainFactory {
         return instance.getDone();
     }
 
-    public synchronized ExactTimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done, ArrayList<InstanceKey> notDoneInstanceKeys) {
-        Assert.assertTrue(instanceKey != null);
-        Assert.assertTrue(notDoneInstanceKeys != null);
-
-        Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        instance.setDone(done, now);
-
-        for (InstanceKey notDoneInstanceKey : notDoneInstanceKeys) {
-            Assert.assertTrue(notDoneInstanceKey != null);
-
-            Instance notDoneInstance = getInstance(notDoneInstanceKey);
-            Assert.assertTrue(notDoneInstance != null);
-
-            notDoneInstance.setNotified(false, now);
-        }
-
-        save(dataId);
-
-        return instance.getDone();
-    }
-
     public synchronized void setInstancesNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());

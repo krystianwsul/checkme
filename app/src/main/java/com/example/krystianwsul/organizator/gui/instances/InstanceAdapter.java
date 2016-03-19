@@ -29,7 +29,6 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
     private final Context mContext;
 
     private final int mDataId;
-    private final boolean mResetNotified;
     private final boolean mGroupHack;
     private final Collection<Data> mDatas;
 
@@ -46,14 +45,13 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
         }
     };
 
-    public InstanceAdapter(Context context, int dataId, Collection<Data> datas, boolean resetNotified, boolean groupHack) {
+    public InstanceAdapter(Context context, int dataId, Collection<Data> datas, boolean groupHack) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(datas != null);
         Assert.assertTrue(!datas.isEmpty());
 
         mContext = context;
         mDataId = dataId;
-        mResetNotified = resetNotified;
         mGroupHack = groupHack;
         mDatas = datas;
 
@@ -177,15 +175,7 @@ public class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.Instan
 
             boolean isChecked = checkBox.isChecked();
 
-            if (mResetNotified) {
-                ArrayList<InstanceKey> notDoneInstanceKeys = new ArrayList<>();
-                for (Data notDoneInstanceData : mNotDoneInstances)
-                    notDoneInstanceKeys.add(notDoneInstanceData.InstanceKey);
-
-                data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, data.InstanceKey, isChecked, notDoneInstanceKeys);
-            } else {
-                data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, data.InstanceKey, isChecked);
-            }
+            data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, data.InstanceKey, isChecked);
 
             TickService.startService(mContext);
 

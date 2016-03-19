@@ -1,53 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/group_list_not_done"
+            android:nestedScrollingEnabled="false"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:id="@+id/group_list_toggle"
+            android:layout_marginBottom="6dp"
+            android:layout_marginTop="6dp">
 
-            <android.support.v7.widget.RecyclerView
-                android:layout_width="fill_parent"
+            <ImageView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/group_list_not_done"
-                android:nestedScrollingEnabled="false"/>
+                android:src="@drawable/ic_expand_more_black_24dp"
+                android:id="@+id/group_list_expand"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/group_list_toggle"
-                android:layout_marginBottom="6dp"
-                android:layout_marginTop="6dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_expand_more_black_24dp"
-                    android:id="@+id/group_list_expand"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/done"/>
-
-            </LinearLayout>
-
-            <android.support.v7.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/group_list_done"
-                android:nestedScrollingEnabled="false"
-                android:visibility="gone"/>
+                android:text="@string/done"/>
 
         </LinearLayout>
 
-    </ScrollView>
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/group_list_done"
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone"/>
 
-</LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

@@ -34,7 +34,7 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
         public Data(String displayText, HashMap<InstanceKey, InstanceAdapter.Data> instanceAdapterDatas) {
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
             Assert.assertTrue(instanceAdapterDatas != null);
-            //Assert.assertTrue(!instanceAdapterDatas.isEmpty()); group hack
+            Assert.assertTrue(!instanceAdapterDatas.isEmpty());
 
             DisplayText = displayText;
             InstanceAdapterDatas = instanceAdapterDatas;

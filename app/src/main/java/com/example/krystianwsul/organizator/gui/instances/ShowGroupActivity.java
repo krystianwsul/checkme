@@ -60,7 +60,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         if (data.InstanceAdapterDatas.isEmpty())
             finish();
         else
-            mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), true));
+            mShowGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values()));
     }
 
     @Override

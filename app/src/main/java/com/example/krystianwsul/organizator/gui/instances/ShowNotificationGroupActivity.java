@@ -22,8 +22,6 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
 
     private RecyclerView mShowNotificationGroupList;
 
-    private Bundle mSavedInstanceState;
-
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
@@ -39,8 +37,6 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_group);
-
-        mSavedInstanceState = savedInstanceState;
 
         mShowNotificationGroupList = (RecyclerView) findViewById(R.id.show_notification_group_list);
         mShowNotificationGroupList.setLayoutManager(new LinearLayoutManager(this));
@@ -62,7 +58,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
     @Override
     public void onLoadFinished(Loader<ShowNotificationGroupLoader.Data> loader, ShowNotificationGroupLoader.Data data) {
         Assert.assertTrue(!data.InstanceAdapterDatas.isEmpty());
-        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas, false));
+        mShowNotificationGroupList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas));
     }
 
     @Override

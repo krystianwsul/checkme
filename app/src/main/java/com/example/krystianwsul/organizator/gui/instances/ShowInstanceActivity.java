@@ -103,7 +103,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
             mShowInstanceDetails.setText(scheduleText);
 
         if (data.HasChildren)
-            mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values(), false));
+            mShowInstanceList.setAdapter(new InstanceAdapter(this, data.DataId, data.InstanceAdapterDatas.values()));
 
         mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override

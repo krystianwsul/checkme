@@ -273,7 +273,7 @@ public class DomainFactory {
         for (Instance instance : rootInstances)
             if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 currentInstances.add(instance);
-        //Assert.assertTrue(!currentInstances.isEmpty()); // group hack
+        Assert.assertTrue(!currentInstances.isEmpty());
 
         Date date = timeStamp.getDate();
         DayOfWeek dayOfWeek = date.getDayOfWeek();

@@ -18,4 +18,5 @@
     <string name="done">Zrobione</string>
     <string name="crash_toast_text">Błąd!</string>
     <string name="more">więcej</string>
+    <string name="hour">Za godzinę</string>
 </resources>

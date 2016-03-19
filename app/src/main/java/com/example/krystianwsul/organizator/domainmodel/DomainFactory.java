@@ -525,6 +525,24 @@ public class DomainFactory {
         save(dataId);
     }
 
+    public synchronized void setInstanceAddHour(int dataId, InstanceKey instanceKey) {
+        Assert.assertTrue(instanceKey != null);
+
+        Instance instance = getInstance(instanceKey);
+        Assert.assertTrue(instance != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+        Calendar calendar = now.getCalendar();
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+
+        Date date = new Date(calendar);
+        HourMinute hourMinute = new HourMinute(calendar);
+
+        instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
+
+        save(dataId);
+    }
+
     public synchronized ExactTimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done) {
         Assert.assertTrue(instanceKey != null);
 

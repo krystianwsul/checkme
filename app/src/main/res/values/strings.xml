@@ -19,6 +19,7 @@
     <string name="done">Done</string>
     <string name="crash_toast_text">Error!</string>
     <string name="more">more</string>
+    <string name="hour">In an hour</string>
 
     <!-- Strings related to Settings -->
 

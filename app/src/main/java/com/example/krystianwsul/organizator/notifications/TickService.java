@@ -155,12 +155,15 @@ public class TickService extends IntentService {
         Intent contentIntent = ShowInstanceActivity.getNotificationIntent(this, notificationInstanceData.InstanceKey);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, notificationInstanceData.NotificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
+        ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
+
         Intent doneIntent = InstanceDoneReceiver.getIntent(this, notificationInstanceData.InstanceKey);
         PendingIntent pendingDoneIntent = PendingIntent.getBroadcast(this, notificationInstanceData.NotificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        NotificationCompat.Action.Builder builder = new NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, getString(R.string.done), pendingDoneIntent);
+        actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, getString(R.string.done), pendingDoneIntent).build());
 
-        ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
-        actions.add(builder.build());
+        Intent hourIntent = InstanceHourReceiver.getIntent(this, notificationInstanceData.InstanceKey);
+        PendingIntent pendingHourIntent = PendingIntent.getBroadcast(this, notificationInstanceData.NotificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, getString(R.string.hour), pendingHourIntent).build());
 
         notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), null, true);
     }

@@ -64,7 +64,12 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".gui.DebugActivity"></activity>
+        <activity android:name=".gui.DebugActivity" />
+
+        <receiver
+            android:name=".notifications.InstanceHourReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

@@ -22,10 +22,12 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         if (isReset())
             return;
 
-        mData = data;
+        if ((mData == null) || !mData.equals(data)) {
+            mData = data;
 
-        if (isStarted())
-            super.deliverResult(data);
+            if (isStarted())
+                super.deliverResult(data);
+        }
     }
 
     @Override
@@ -64,12 +66,6 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         public void onDomainChanged(int dataId) {
             if (mData != null && dataId == mData.DataId)
                 return;
-
-            if (mData != null) {
-                D newData = loadInBackground();
-                if (mData.equals(newData))
-                    return;
-            }
 
             onContentChanged();
         }

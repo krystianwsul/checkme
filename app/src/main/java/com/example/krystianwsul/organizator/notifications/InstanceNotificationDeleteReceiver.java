@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizator.notifications;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
@@ -26,8 +25,6 @@ public class InstanceNotificationDeleteReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
         Assert.assertTrue(instanceKey != null);
-
-        Log.e("asdf", "broadcast cancel");
 
         DomainFactory.getDomainFactory(context).setInstanceNotified(0, instanceKey);
     }

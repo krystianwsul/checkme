@@ -54,13 +54,17 @@ public class InstanceListFragment extends Fragment {
     }
 
     public static class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.InstanceHolder> {
-        private final static Comparator<Data> sComparator = new Comparator<Data>() {
+        private final static Comparator<Data> sDoneComparator = new Comparator<Data>() {
             @Override
             public int compare(Data lhs, Data rhs) {
-                Assert.assertTrue(lhs.Done != null);
-                Assert.assertTrue(rhs.Done != null);
-
                 return lhs.Done.compareTo(rhs.Done);
+            }
+        };
+
+        private final static Comparator<Data> sNotDoneComparator = new Comparator<Data>() {
+            @Override
+            public int compare(Data lhs, Data rhs) {
+                return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
             }
         };
 
@@ -90,7 +94,20 @@ public class InstanceListFragment extends Fragment {
         }
 
         private void sort() {
-            Collections.sort(mDoneInstances, sComparator);
+            Collections.sort(mDoneInstances, sDoneComparator);
+            Collections.sort(mNotDoneInstances, sNotDoneComparator);
+        }
+
+        private int indexOf(Data data) {
+            Assert.assertTrue(data != null);
+
+            if (mDoneInstances.contains(data)) {
+                Assert.assertTrue(!mNotDoneInstances.contains(data));
+                return mDoneInstances.indexOf(data);
+            } else {
+                Assert.assertTrue(mNotDoneInstances.contains(data));
+                return mDoneInstances.size() + mNotDoneInstances.indexOf(data);
+            }
         }
 
         private Data getData(int position) {
@@ -152,17 +169,6 @@ public class InstanceListFragment extends Fragment {
             return mDoneInstances.size() + mNotDoneInstances.size();
         }
 
-        private int indexOf(Data data) {
-            Assert.assertTrue(data != null);
-
-            if (mDoneInstances.contains(data)) {
-                return mDoneInstances.indexOf(data);
-            } else {
-                Assert.assertTrue(mNotDoneInstances.contains(data));
-                return mDoneInstances.size() + mNotDoneInstances.indexOf(data);
-            }
-        }
-
         public class InstanceHolder extends RecyclerView.ViewHolder {
             public final TableLayout mInstanceRow;
             public final TextView mInstanceRowName;
@@ -217,6 +223,7 @@ public class InstanceListFragment extends Fragment {
 
                     mDoneInstances.remove(data);
                     mNotDoneInstances.add(data);
+                    sort();
 
                     int newPosition = indexOf(data);
 
@@ -276,7 +283,7 @@ public class InstanceListFragment extends Fragment {
 
                 Data data = (Data) object;
 
-                return (((Done == null) && (data.Done == null)) || (((Done != null) && (data.Done != null)) && Done.equals(data.Done)) && Name.equals(data.Name) && (HasChildren == data.HasChildren) && InstanceKey.equals(data.InstanceKey) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))));
+                return ((((Done == null) && (data.Done == null)) || (((Done != null) && (data.Done != null)) && Done.equals(data.Done))) && Name.equals(data.Name) && (HasChildren == data.HasChildren) && InstanceKey.equals(data.InstanceKey) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))));
             }
         }
     }

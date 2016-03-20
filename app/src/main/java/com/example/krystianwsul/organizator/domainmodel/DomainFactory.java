@@ -1257,6 +1257,14 @@ public class DomainFactory {
         for (TaskHierarchy taskHierarchy : taskHierarchies)
             if (taskHierarchy.current(exactTimeStamp) && taskHierarchy.getChildTask().current(exactTimeStamp))
                 childTasks.add(taskHierarchy.getChildTask());
+
+        Collections.sort(childTasks, new Comparator<Task>() {
+            @Override
+            public int compare(Task lhs, Task rhs) {
+                return  new Integer(lhs.getId()).compareTo(rhs.getId());
+            }
+        });
+
         return childTasks;
     }
 

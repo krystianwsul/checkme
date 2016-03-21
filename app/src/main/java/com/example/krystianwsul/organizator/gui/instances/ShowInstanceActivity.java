@@ -7,7 +7,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -85,8 +84,6 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     public void onLoadFinished(Loader<ShowInstanceLoader.Data> loader, final ShowInstanceLoader.Data data) {
         Intent intent = getIntent();
 
-        Log.e("asdf", "onLoadFinished");
-
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
             DomainFactory.getDomainFactory(this).setInstanceNotified(data.DataId, data.InstanceKey);
@@ -111,10 +108,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 boolean isChecked = mCheckBox.isChecked();
 
                 DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, data.InstanceKey, isChecked);
+                data.Done = isChecked;
 
                 TickService.startService(ShowInstanceActivity.this);
-
-                data.Done = isChecked;
             }
         });
 

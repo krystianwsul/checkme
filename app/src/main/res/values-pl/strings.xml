@@ -19,4 +19,5 @@
     <string name="crash_toast_text">Błąd!</string>
     <string name="more">więcej</string>
     <string name="hour">Za godzinę</string>
+    <string name="delete">Usuń</string>
 </resources>

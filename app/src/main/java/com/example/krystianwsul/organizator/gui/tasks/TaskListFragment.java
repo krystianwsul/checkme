@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.loaders.TaskListLoader;
-import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -69,7 +68,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
         ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
-        TimeStamp timeStamp = TimeStamp.getNow();
 
         for (TaskListLoader.RootTaskData rootTaskData : data.RootTaskDatas)
             taskDatas.add(new TaskAdapter.Data(rootTaskData.TaskId, rootTaskData.Name, rootTaskData.ScheduleText, rootTaskData.HasChildTasks));
@@ -84,5 +82,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
+    }
+
+    public void removeSelected() {
+        TaskAdapter taskAdapter = (TaskAdapter) mTasksRecycler.getAdapter();
+        Assert.assertTrue(taskAdapter != null);
+
+        taskAdapter.removeSelected();
     }
 }

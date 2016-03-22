@@ -47,26 +47,12 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         mViewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
+        Assert.assertTrue(mViewPager != null);
+
         mMyFragmentStatePagerAdapter = new MyFragmentStatePagerAdapter();
         mViewPager.setAdapter(mMyFragmentStatePagerAdapter);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -200,12 +186,13 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
 
         @Override
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            ArrayList<Integer> taskIds = mTaskListFragment.getSelected();
+            Assert.assertTrue(taskIds != null);
+            Assert.assertTrue(!taskIds.isEmpty());
+
             switch (menuItem.getItemId()) {
                 case R.id.action_task_join:
-                    ArrayList<Integer> taskIds = mTaskListFragment.getSelected();
-                    Assert.assertTrue(taskIds != null);
-
-                    if (taskIds.size() < 2) {
+                    if (taskIds.size() == 1) {
                         MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.two_tasks_message));
                         messageDialogFragment.show(getSupportFragmentManager(), "two_tasks");
                     } else {
@@ -214,6 +201,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
                     }
 
                     return true;
+                case R.id.action_task_delete:
+                    mTaskListFragment.removeSelected();
                 default:
                     return false;
             }

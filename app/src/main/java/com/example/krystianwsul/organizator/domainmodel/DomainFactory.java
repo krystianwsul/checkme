@@ -871,6 +871,24 @@ public class DomainFactory {
         save(dataId);
     }
 
+    public synchronized void setTaskEndTimeStamps(int dataId, ArrayList<Integer> taskIds) {
+        Assert.assertTrue(taskIds != null);
+        Assert.assertTrue(!taskIds.isEmpty());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        for (int taskId : taskIds) {
+            Task task = mTasks.get(taskId);
+            Assert.assertTrue(task != null);
+
+            Assert.assertTrue(task.current(now));
+
+            task.setEndExactTimeStamp(now);
+        }
+
+        save(dataId);
+    }
+
     public synchronized void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);

@@ -123,6 +123,24 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         return taskIds;
     }
 
+    public void removeSelected() {
+        ArrayList<TaskWrapper> selectedTaskWrappers = new ArrayList<>();
+        for (TaskWrapper taskWrapper : mTaskWrappers)
+            if (taskWrapper.mSelected)
+                selectedTaskWrappers.add(taskWrapper);
+
+        ArrayList<Integer> taskIds = new ArrayList<>();
+        for (TaskWrapper selectedTaskWrapper : selectedTaskWrappers) {
+            taskIds.add(selectedTaskWrapper.mData.TaskId);
+
+            int position = mTaskWrappers.indexOf(selectedTaskWrapper);
+            mTaskWrappers.remove(position);
+            notifyItemRemoved(position);
+        }
+
+        DomainFactory.getDomainFactory(mActivity).setTaskEndTimeStamps(mDataId, taskIds);
+    }
+
     private static class TaskWrapper {
         public final Data mData;
         public boolean mSelected;

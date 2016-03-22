@@ -47,11 +47,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         getLoaderManager().initLoader(0, null, this);
     }
 
-    public void setEditing(boolean editing) {
+    public void uncheck() {
         TaskAdapter taskAdapter = (TaskAdapter) mTasksRecycler.getAdapter();
         Assert.assertTrue(taskAdapter != null);
 
-        taskAdapter.setEditing(editing);
+        taskAdapter.uncheck();
     }
 
     public ArrayList<Integer> getSelected() {
@@ -74,7 +74,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         for (TaskListLoader.RootTaskData rootTaskData : data.RootTaskDatas)
             taskDatas.add(new TaskAdapter.Data(rootTaskData.TaskId, rootTaskData.Name, rootTaskData.ScheduleText, rootTaskData.HasChildTasks));
 
-        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId));
+        mTasksRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, new TaskAdapter.OnCheckedChangedListener() {
+            @Override
+            public void OnCheckedChanged() {
+                ((TaskAdapter.OnCheckedChangedListener) getActivity()).OnCheckedChanged();
+            }
+        }));
     }
 
     @Override

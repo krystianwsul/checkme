@@ -18,6 +18,7 @@ import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActiv
 import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
 import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
 import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
+import com.example.krystianwsul.organizator.gui.tasks.TaskAdapter;
 import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
 import com.example.krystianwsul.organizator.notifications.TickService;
 
@@ -25,9 +26,11 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskAdapter.OnCheckedChangedListener {
     private ViewPager mViewPager;
     private MyFragmentStatePagerAdapter mMyFragmentStatePagerAdapter;
+
+    private ActionMode mActionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        Assert.assertTrue(tabLayout != null);
+
         tabLayout.addTab(tabLayout.newTab().setText(R.string.instances));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tasks));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
@@ -84,14 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_show_tasks, menu);
-
-        if (mViewPager.getCurrentItem() == 1) {
-            MenuItem menuItem = menu.findItem(R.id.action_task_edit);
-            menuItem.setVisible(true);
-        }
-
         return true;
     }
 
@@ -104,14 +102,19 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
-            case R.id.action_task_edit:
-                startSupportActionMode(new TaskEditCallback());
-                return true;
             case R.id.action_debug:
                 startActivity(DebugActivity.getIntent(this));
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mActionMode != null)
+            mActionMode.finish();
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
@@ -154,12 +157,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class TaskEditCallback implements ActionMode.Callback {
-        private ActionMode mActionMode;
-
         private TaskListFragment mTaskListFragment;
 
+        private ViewPager.OnPageChangeListener mOnPageChangeListener;
+
         @Override
-        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+        public boolean onCreateActionMode(final ActionMode actionMode, Menu menu) {
             mActionMode = actionMode;
 
             actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
@@ -167,9 +170,32 @@ public class MainActivity extends AppCompatActivity {
             mTaskListFragment = (TaskListFragment) mMyFragmentStatePagerAdapter.getFragment();
             Assert.assertTrue(mTaskListFragment != null);
 
-            mTaskListFragment.setEditing(true);
+            mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    actionMode.finish();
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            };
+            mViewPager.addOnPageChangeListener(mOnPageChangeListener);
+
+            actionMode.setTitle(getString(R.string.join));
 
             return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            return false;
         }
 
         @Override
@@ -184,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                         messageDialogFragment.show(getSupportFragmentManager(), "two_tasks");
                     } else {
                         startActivity(CreateRootTaskActivity.getJoinIntent(MainActivity.this, taskIds));
-                        mActionMode.finish();
+                        actionMode.finish();
                     }
 
                     return true;
@@ -194,15 +220,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            actionMode.setTitle(getString(R.string.join));
-            return false;
-        }
-
-        @Override
         public void onDestroyActionMode(ActionMode actionMode) {
             Assert.assertTrue(mTaskListFragment != null);
-            mTaskListFragment.setEditing(false);
+
+            mActionMode = null;
+            mViewPager.removeOnPageChangeListener(mOnPageChangeListener);
+
+            mTaskListFragment.uncheck();
+        }
+    }
+
+    @Override
+    public void OnCheckedChanged() {
+        TaskListFragment taskListFragment = (TaskListFragment) mMyFragmentStatePagerAdapter.getFragment();
+        Assert.assertTrue(taskListFragment != null);
+
+        ArrayList<Integer> taskIds = taskListFragment.getSelected();
+        if (taskIds.isEmpty()) {
+            if (mActionMode != null)
+                mActionMode.finish();
+        } else {
+            if (mActionMode == null)
+                startSupportActionMode(new TaskEditCallback());
         }
     }
 }

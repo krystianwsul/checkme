@@ -23,16 +23,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     private final Activity mActivity;
     private final ArrayList<TaskWrapper> mTaskWrappers;
 
-    private boolean mEditing = false;
-
     private final int mDataId;
 
-    public TaskAdapter(Activity activity, ArrayList<Data> datas, int dataId) {
+    private final OnCheckedChangedListener mOnCheckedChangedListener;
+
+    public TaskAdapter(Activity activity, ArrayList<Data> datas, int dataId, OnCheckedChangedListener onCheckedChangedListener) {
         Assert.assertTrue(activity != null);
         Assert.assertTrue(datas != null);
 
         mActivity = activity;
         mDataId = dataId;
+        mOnCheckedChangedListener = onCheckedChangedListener;
 
         mTaskWrappers = new ArrayList<>();
         for (Data data : datas)
@@ -62,6 +63,26 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
     public void onBindViewHolder(final TaskHolder taskHolder, int position) {
         TaskWrapper taskWrapper = mTaskWrappers.get(position);
 
+        taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(null);
+
+        if (mOnCheckedChangedListener != null) {
+            taskHolder.mTaskRowCheckBox.setVisibility(View.VISIBLE);
+            taskHolder.mTaskRowCheckBox.setChecked(taskWrapper.mSelected);
+
+            taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    taskHolder.onCheckedChanged(isChecked);
+                    mOnCheckedChangedListener.OnCheckedChanged();
+                }
+            });
+        }
+
+        if (!taskWrapper.mData.HasChildTasks)
+            taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_label_outline_black_24dp));
+        else
+            taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_list_black_24dp));
+
         taskHolder.mTaskRowName.setText(taskWrapper.mData.Name);
 
         String scheduleText = taskWrapper.mData.ScheduleText;
@@ -70,29 +91,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         else
             taskHolder.mTaskRowDetails.setText(scheduleText);
 
-        if (!taskWrapper.mData.HasChildTasks)
-            taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_label_outline_black_24dp));
-        else
-            taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_list_black_24dp));
-
         taskHolder.mShowTaskRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 taskHolder.onRowClick();
-            }
-        });
-
-        if (mEditing) {
-            taskHolder.mTaskRowCheckBox.setVisibility(View.VISIBLE);
-            taskHolder.mTaskRowCheckBox.setChecked(taskWrapper.mSelected);
-        } else {
-            taskHolder.mTaskRowCheckBox.setVisibility(View.GONE);
-        }
-
-        taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                taskHolder.onCheckedChanged(isChecked);
             }
         });
 
@@ -104,14 +106,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         });
     }
 
-    public void setEditing(boolean editing) {
-        mEditing = editing;
-
-        if (!mEditing)
-            for (TaskWrapper taskWrapper : mTaskWrappers)
+    public void uncheck() {
+        for (TaskWrapper taskWrapper : mTaskWrappers) {
+            if (taskWrapper.mSelected) {
                 taskWrapper.mSelected = false;
-
-        notifyItemRangeChanged(0, getItemCount());
+                notifyItemChanged(mTaskWrappers.indexOf(taskWrapper));
+            }
+        }
     }
 
     public ArrayList<Integer> getSelected() {
@@ -200,5 +201,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
             ScheduleText = scheduleText;
             HasChildTasks = hasChildTasks;
         }
+    }
+
+    public interface OnCheckedChangedListener {
+        void OnCheckedChanged();
     }
 }

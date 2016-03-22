@@ -90,7 +90,7 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
         for (ShowTaskLoader.ChildTaskData childTaskData : data.ChildTaskDatas)
             taskDatas.add(new TaskAdapter.Data(childTaskData.TaskId, childTaskData.Name, null, childTaskData.HasChildTasks));
 
-        mShowTaskRecycler.setAdapter(new TaskAdapter(this, taskDatas, data.DataId));
+        mShowTaskRecycler.setAdapter(new TaskAdapter(this, taskDatas, data.DataId, null));
 
         mTasksHeadingLabel.setText(data.Name);
         String scheduleText = data.ScheduleText;

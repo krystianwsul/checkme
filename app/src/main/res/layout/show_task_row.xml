@@ -4,12 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/show_task_row"
-    android:shrinkColumns="1"
-    android:stretchColumns="1">
+    android:shrinkColumns="2"
+    android:stretchColumns="2">
 
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/task_row_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/task_row_img"
@@ -34,12 +40,6 @@
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
-
-        <CheckBox
-            android:id="@+id/task_row_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/task_row_delete"

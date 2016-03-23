@@ -1,63 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.tasks.ShowTaskActivity"
-    android:orientation="vertical">
+    tools:context=".gui.tasks.ShowTaskActivity">
 
-    <TableLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:shrinkColumns="0"
-        android:stretchColumns="0"
-        android:id="@+id/show_task_table">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <TableRow
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/show_task_toolbar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent">
+            android:background="?attr/colorPrimary"
+            android:elevation="6dp"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/show_task_name"
+            android:singleLine="true"/>
 
-                <TextView
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:id="@+id/show_task_name"
-                    android:singleLine="true"/>
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/show_task_schedule"
+            android:singleLine="true"/>
 
-                <TextView
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:id="@+id/show_task_schedule"
-                    android:singleLine="true"/>
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/show_task_recycler"/>
 
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/show_task_edit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_mode_edit_black_24dp" />
-
-        </TableRow>
-
-    </TableLayout>
-
-    <android.support.v7.widget.RecyclerView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/show_task_recycler"
-        android:layout_below="@id/show_task_table"/>
+    </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/show_task_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_margin="@dimen/fab_margin"
         android:src="@android:drawable/ic_input_add"

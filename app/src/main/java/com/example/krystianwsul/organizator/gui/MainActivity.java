@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_activity_toolbar);
         setSupportActionBar(toolbar);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_show_tasks, menu);
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
         return true;
     }
 
@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
                 return true;
             case R.id.action_debug:
                 startActivity(DebugActivity.getIntent(this));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

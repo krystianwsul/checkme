@@ -9,9 +9,11 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
@@ -25,12 +27,13 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     private RecyclerView mShowTaskRecycler;
     private TextView mTasksHeadingLabel;
     private TextView mTasksRowSchedule;
-    private ImageView mShowTaskEdit;
     private FloatingActionButton mFloatingActionButton;
 
     private static final String INTENT_KEY = "taskId";
 
     private int mTaskId;
+
+    private ShowTaskLoader.Data mData;
 
     public static Intent getIntent(int taskId, Context context) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
@@ -42,6 +45,8 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.show_task_toolbar);
+        setSupportActionBar(toolbar);
 
         mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
 
@@ -49,8 +54,6 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
         mShowTaskRecycler = (RecyclerView) findViewById(R.id.show_task_recycler);
         mShowTaskRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-        mShowTaskEdit = (ImageView) findViewById(R.id.show_task_edit);
 
         mFloatingActionButton = (FloatingActionButton) findViewById(R.id.show_task_fab);
 
@@ -63,26 +66,38 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.show_task_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.task_menu_edit:
+                if (mData.IsRootTask)
+                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
+                else
+                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public Loader<ShowTaskLoader.Data> onCreateLoader(int id, Bundle args) {
         return new ShowTaskLoader(this, mTaskId);
     }
 
     @Override
     public void onLoadFinished(Loader<ShowTaskLoader.Data> loader, final ShowTaskLoader.Data data) {
+        mData = data;
+
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(CreateChildTaskActivity.getCreateIntent(ShowTaskActivity.this, data.TaskId));
-            }
-        });
-
-        mShowTaskEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (data.IsRootTask)
-                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, data.TaskId));
-                else
-                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, data.TaskId));
             }
         });
 

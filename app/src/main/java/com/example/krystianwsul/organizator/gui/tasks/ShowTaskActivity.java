@@ -3,12 +3,9 @@ package com.example.krystianwsul.organizator.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -24,10 +21,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data> {
-    private RecyclerView mShowTaskRecycler;
     private TextView mTasksHeadingLabel;
     private TextView mTasksRowSchedule;
-    private FloatingActionButton mFloatingActionButton;
 
     private static final String INTENT_KEY = "taskId";
 
@@ -51,11 +46,6 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
         mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
 
         mTasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
-
-        mShowTaskRecycler = (RecyclerView) findViewById(R.id.show_task_recycler);
-        mShowTaskRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-        mFloatingActionButton = (FloatingActionButton) findViewById(R.id.show_task_fab);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
@@ -94,18 +84,9 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     public void onLoadFinished(Loader<ShowTaskLoader.Data> loader, final ShowTaskLoader.Data data) {
         mData = data;
 
-        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(CreateChildTaskActivity.getCreateIntent(ShowTaskActivity.this, data.TaskId));
-            }
-        });
-
         ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
         for (ShowTaskLoader.ChildTaskData childTaskData : data.ChildTaskDatas)
             taskDatas.add(new TaskAdapter.Data(childTaskData.TaskId, childTaskData.Name, null, childTaskData.HasChildTasks));
-
-        mShowTaskRecycler.setAdapter(new TaskAdapter(this, taskDatas, data.DataId, null));
 
         mTasksHeadingLabel.setText(data.Name);
         String scheduleText = data.ScheduleText;

@@ -16,6 +16,7 @@ import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.ShowNotificationGroupLoader;
+import com.example.krystianwsul.organizator.loaders.ShowTaskFragmentLoader;
 import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 import com.example.krystianwsul.organizator.loaders.SingleScheduleLoader;
 import com.example.krystianwsul.organizator.loaders.TaskListLoader;
@@ -453,6 +454,22 @@ public class DomainFactory {
             childTaskDatas.add(new ShowTaskLoader.ChildTaskData(childTask.getId(), childTask.getName(), !childTask.getChildTasks(now).isEmpty()));
 
         return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId(), childTaskDatas);
+    }
+
+    public synchronized ShowTaskFragmentLoader.Data getShowTaskFragmentData(int taskId, Context context) {
+        Assert.assertTrue(context != null);
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        ArrayList<Task> childTasks = task.getChildTasks(now);
+        ArrayList<ShowTaskFragmentLoader.ChildTaskData> childTaskDatas = new ArrayList<>();
+        for (Task childTask : childTasks)
+            childTaskDatas.add(new ShowTaskFragmentLoader.ChildTaskData(childTask.getId(), childTask.getName(), !childTask.getChildTasks(now).isEmpty()));
+
+        return new ShowTaskFragmentLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId(), childTaskDatas);
     }
 
     public synchronized TaskListLoader.Data getTaskListData(Context context) {

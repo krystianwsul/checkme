@@ -1,16 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context="com.example.krystianwsul.organizator.gui.tasks.ShowTaskFragment">
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/task_list_fragment_recycler" />
+        android:id="@+id/fragment_show_task_recycler"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/task_list_fragment_fab"
+        android:id="@+id/fragment_show_task_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"

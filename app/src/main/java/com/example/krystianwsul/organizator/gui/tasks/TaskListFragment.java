@@ -21,6 +21,7 @@ import java.util.ArrayList;
 public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
     private RecyclerView mTasksRecycler;
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.task_list_fragment, container, false);
     }
@@ -32,7 +33,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         View view = getView();
         Assert.assertTrue(view != null);
 
-        mTasksRecycler = (RecyclerView) view.findViewById(R.id.tasks_recycler);
+        mTasksRecycler = (RecyclerView) view.findViewById(R.id.task_list_fragment_recycler);
         mTasksRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) getView().findViewById(R.id.task_list_fragment_fab);

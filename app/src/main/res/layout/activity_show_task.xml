@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.tasks.ShowTaskActivity">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    tools:context=".gui.tasks.ShowTaskActivity"
+    android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/show_task_toolbar"
@@ -34,21 +30,10 @@
             android:id="@+id/show_task_schedule"
             android:singleLine="true"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/show_task_recycler"/>
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.example.krystianwsul.organizator.gui.tasks.ShowTaskFragment"
+        android:id="@+id/show_task_fragment"/>
 
-    </LinearLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/show_task_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_input_add"
-        android:tint="@android:color/white"/>
-
-</RelativeLayout>
+</LinearLayout>

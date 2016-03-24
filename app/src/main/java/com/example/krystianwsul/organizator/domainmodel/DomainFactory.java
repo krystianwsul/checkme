@@ -448,12 +448,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Task> childTasks = task.getChildTasks(now);
-        ArrayList<ShowTaskLoader.ChildTaskData> childTaskDatas = new ArrayList<>();
-        for (Task childTask : childTasks)
-            childTaskDatas.add(new ShowTaskLoader.ChildTaskData(childTask.getId(), childTask.getName(), !childTask.getChildTasks(now).isEmpty()));
-
-        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId(), childTaskDatas);
+        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId());
     }
 
     public synchronized ShowTaskFragmentLoader.Data getShowTaskFragmentData(int taskId, Context context) {
@@ -469,7 +464,7 @@ public class DomainFactory {
         for (Task childTask : childTasks)
             childTaskDatas.add(new ShowTaskFragmentLoader.ChildTaskData(childTask.getId(), childTask.getName(), !childTask.getChildTasks(now).isEmpty()));
 
-        return new ShowTaskFragmentLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId(), childTaskDatas);
+        return new ShowTaskFragmentLoader.Data(task.getId(), childTaskDatas);
     }
 
     public synchronized TaskListLoader.Data getTaskListData(Context context) {

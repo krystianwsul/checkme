@@ -7,8 +7,6 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
     private final int mTaskId;
 
@@ -28,17 +26,14 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
         public final String Name;
         public final String ScheduleText;
         public final int TaskId;
-        public final ArrayList<ChildTaskData> ChildTaskDatas;
 
-        public Data(boolean isRootTask, String name, String scheduleText, int taskId, ArrayList<ChildTaskData> childTaskDatas) {
+        public Data(boolean isRootTask, String name, String scheduleText, int taskId) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(childTaskDatas != null);
 
             IsRootTask = isRootTask;
             Name = name;
             ScheduleText = scheduleText;
             TaskId = taskId;
-            ChildTaskDatas = childTaskDatas;
         }
 
         @Override
@@ -48,9 +43,7 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
-            hashCode += TaskId;
-            hashCode += ChildTaskDatas.hashCode();
-            return hashCode;
+            hashCode += TaskId;return hashCode;
         }
 
         @Override
@@ -66,42 +59,7 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
 
             Data data = (Data) object;
 
-            return ((IsRootTask == data.IsRootTask) && Name.equals(data.Name) && ((TextUtils.isEmpty(ScheduleText) && TextUtils.isEmpty(data.ScheduleText)) || ((!TextUtils.isEmpty(ScheduleText) && !TextUtils.isEmpty(data.ScheduleText)) && ScheduleText.equals(data.ScheduleText))) && (TaskId == data.TaskId) && ChildTaskDatas.equals(data.ChildTaskDatas));
-        }
-    }
-
-    public static class ChildTaskData {
-        public final int TaskId;
-        public final String Name;
-        public final boolean HasChildTasks;
-
-        public ChildTaskData(int taskId, String name, boolean hasChildTasks) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-
-            TaskId = taskId;
-            Name = name;
-            HasChildTasks = hasChildTasks;
-        }
-
-        @Override
-        public int hashCode() {
-            return (TaskId + Name.hashCode() + (HasChildTasks ? 1 : 0));
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (object == null)
-                return false;
-
-            if (object == this)
-                return true;
-
-            if (!(object instanceof ChildTaskData))
-                return false;
-
-            ChildTaskData childTaskData = (ChildTaskData) object;
-
-            return ((TaskId == childTaskData.TaskId) && Name.equals(childTaskData.Name) && (HasChildTasks == childTaskData.HasChildTasks));
+            return ((IsRootTask == data.IsRootTask) && Name.equals(data.Name) && ((TextUtils.isEmpty(ScheduleText) && TextUtils.isEmpty(data.ScheduleText)) || ((!TextUtils.isEmpty(ScheduleText) && !TextUtils.isEmpty(data.ScheduleText)) && ScheduleText.equals(data.ScheduleText))) && (TaskId == data.TaskId));
         }
     }
 }

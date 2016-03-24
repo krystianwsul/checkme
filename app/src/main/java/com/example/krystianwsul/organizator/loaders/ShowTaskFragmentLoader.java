@@ -24,33 +24,19 @@ public class ShowTaskFragmentLoader extends DomainLoader<ShowTaskFragmentLoader.
     }
 
     public static class Data extends DomainLoader.Data {
-        public final boolean IsRootTask;
-        public final String Name;
-        public final String ScheduleText;
         public final int TaskId;
         public final ArrayList<ChildTaskData> ChildTaskDatas;
 
-        public Data(boolean isRootTask, String name, String scheduleText, int taskId, ArrayList<ChildTaskData> childTaskDatas) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
+        public Data(int taskId, ArrayList<ChildTaskData> childTaskDatas) {
             Assert.assertTrue(childTaskDatas != null);
 
-            IsRootTask = isRootTask;
-            Name = name;
-            ScheduleText = scheduleText;
             TaskId = taskId;
             ChildTaskDatas = childTaskDatas;
         }
 
         @Override
         public int hashCode() {
-            int hashCode = 0;
-            hashCode += (IsRootTask ? 1 : 0);
-            hashCode += Name.hashCode();
-            if (!TextUtils.isEmpty(ScheduleText))
-                hashCode += ScheduleText.hashCode();
-            hashCode += TaskId;
-            hashCode += ChildTaskDatas.hashCode();
-            return hashCode;
+            return TaskId + ChildTaskDatas.hashCode();
         }
 
         @Override
@@ -66,7 +52,7 @@ public class ShowTaskFragmentLoader extends DomainLoader<ShowTaskFragmentLoader.
 
             Data data = (Data) object;
 
-            return ((IsRootTask == data.IsRootTask) && Name.equals(data.Name) && ((TextUtils.isEmpty(ScheduleText) && TextUtils.isEmpty(data.ScheduleText)) || ((!TextUtils.isEmpty(ScheduleText) && !TextUtils.isEmpty(data.ScheduleText)) && ScheduleText.equals(data.ScheduleText))) && (TaskId == data.TaskId) && ChildTaskDatas.equals(data.ChildTaskDatas));
+            return ((TaskId == data.TaskId) && ChildTaskDatas.equals(data.ChildTaskDatas));
         }
     }
 

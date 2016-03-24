@@ -18,8 +18,6 @@ import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data> {
     private TextView mTasksHeadingLabel;
     private TextView mTasksRowSchedule;
@@ -83,10 +81,6 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onLoadFinished(Loader<ShowTaskLoader.Data> loader, final ShowTaskLoader.Data data) {
         mData = data;
-
-        ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
-        for (ShowTaskLoader.ChildTaskData childTaskData : data.ChildTaskDatas)
-            taskDatas.add(new TaskAdapter.Data(childTaskData.TaskId, childTaskData.Name, null, childTaskData.HasChildTasks));
 
         mTasksHeadingLabel.setText(data.Name);
         String scheduleText = data.ScheduleText;

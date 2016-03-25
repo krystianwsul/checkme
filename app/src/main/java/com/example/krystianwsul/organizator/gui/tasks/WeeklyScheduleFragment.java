@@ -255,7 +255,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         @Override
         public DayOfWeekTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View weeklyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.weekly_schedule_row, parent, false);
+            View weeklyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.row_weekly_schedule, parent, false);
 
             Spinner weeklyScheduleDay = (Spinner) weeklyScheduleRow.findViewById(R.id.weekly_schedule_day);
 

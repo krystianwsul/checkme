@@ -72,7 +72,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.task_list_fragment, container, false);
+        return inflater.inflate(R.layout.fragment_task_list, container, false);
     }
 
     @Override
@@ -239,7 +239,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         @Override
         public TaskHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(mActivity);
-            View showTaskRow = inflater.inflate(R.layout.show_task_row, parent, false);
+            View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
             TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
             TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);

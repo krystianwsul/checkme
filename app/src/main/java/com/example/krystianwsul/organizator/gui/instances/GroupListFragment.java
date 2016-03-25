@@ -49,7 +49,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.group_list_fragment, container, false);
+        return inflater.inflate(R.layout.fragment_group_list, container, false);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         @Override
         public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.show_group_row, parent, false);
+            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_show_group, parent, false);
 
             TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
             TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
@@ -380,7 +380,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         @Override
         public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.show_group_row, parent, false);
+            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_show_group, parent, false);
 
             TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
             TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);

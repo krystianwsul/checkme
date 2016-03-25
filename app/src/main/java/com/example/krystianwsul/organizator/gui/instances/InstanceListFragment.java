@@ -122,7 +122,7 @@ public class InstanceListFragment extends Fragment {
 
         @Override
         public InstanceHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            TableLayout instanceRow = (TableLayout) LayoutInflater.from(mContext).inflate(R.layout.show_instance_row, parent, false);
+            TableLayout instanceRow = (TableLayout) LayoutInflater.from(mContext).inflate(R.layout.row_show_instance, parent, false);
 
             TextView instanceRowName = (TextView) instanceRow.findViewById(R.id.instance_row_name);
             TextView instanceRowDetails = (TextView) instanceRow.findViewById(R.id.instance_row_details);

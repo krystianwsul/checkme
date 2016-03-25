@@ -38,6 +38,8 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
         mShowTimesList.setLayoutManager(new LinearLayoutManager(this));
 
         FloatingActionButton showTimesFab = (FloatingActionButton) findViewById(R.id.show_times_fab);
+        Assert.assertTrue(showTimesFab != null);
+
         showTimesFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,7 +84,7 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
         @Override
         public CustomTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(mActivity);
-            View showCustomTimesRow = layoutInflater.inflate(R.layout.show_custom_times_row, parent, false);
+            View showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false);
 
             TextView timesRowName = (TextView) showCustomTimesRow.findViewById(R.id.times_row_name);
             ImageView timesRowDelete = (ImageView) showCustomTimesRow.findViewById(R.id.times_row_delete);

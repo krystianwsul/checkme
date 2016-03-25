@@ -254,7 +254,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         @Override
         public TimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View dailyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.daily_schedule_row, parent, false);
+            View dailyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.row_daily_schedule, parent, false);
 
             TimePickerView dailyScheduleTime = (TimePickerView) dailyScheduleRow.findViewById(R.id.daily_schedule_time);
             Assert.assertTrue(dailyScheduleTime != null);

@@ -1179,46 +1179,46 @@ public class DomainFactory {
         }
     }
 
-    private void joinRootTasks(Task rootTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp exactTimeStamp) {
+    private void joinRootTasks(Task rootTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp now) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.current(exactTimeStamp));
-        Assert.assertTrue(rootTask.isRootTask(exactTimeStamp));
+        Assert.assertTrue(rootTask.current(now));
+        Assert.assertTrue(rootTask.isRootTask(now));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         for (int joinTaskId : joinTaskIds) {
             Task joinTask = mTasks.get(joinTaskId);
             Assert.assertTrue(joinTask != null);
-            Assert.assertTrue(joinTask.current(exactTimeStamp));
-            Assert.assertTrue(joinTask.isRootTask(exactTimeStamp));
+            Assert.assertTrue(joinTask.current(now));
+            Assert.assertTrue(joinTask.isRootTask(now));
 
-            joinTask.setScheduleEndExactTimeStamp(exactTimeStamp);
+            joinTask.setScheduleEndExactTimeStamp(now);
 
-            createTaskHierarchy(rootTask, joinTask, exactTimeStamp);
+            createTaskHierarchy(rootTask, joinTask, now);
         }
     }
 
-    private void joinChildTasks(Task oldParentTask, Task newParentTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp exactTimeStamp) {
+    private void joinChildTasks(Task oldParentTask, Task newParentTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp now) {
         Assert.assertTrue(oldParentTask != null);
-        Assert.assertTrue(oldParentTask.current(exactTimeStamp));
+        Assert.assertTrue(oldParentTask.current(now));
         Assert.assertTrue(newParentTask != null);
-        Assert.assertTrue(newParentTask.current(exactTimeStamp));
-        Assert.assertTrue(!newParentTask.isRootTask(exactTimeStamp));
+        Assert.assertTrue(newParentTask.current(now));
+        Assert.assertTrue(!newParentTask.isRootTask(now));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         for (int joinTaskId : joinTaskIds) {
             Task joinTask = mTasks.get(joinTaskId);
             Assert.assertTrue(joinTask != null);
-            Assert.assertTrue(joinTask.current(exactTimeStamp));
-            Assert.assertTrue(!joinTask.isRootTask(exactTimeStamp));
+            Assert.assertTrue(joinTask.current(now));
+            Assert.assertTrue(!joinTask.isRootTask(now));
 
-            TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, exactTimeStamp);
+            TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, now);
             Assert.assertTrue(taskHierarchy != null);
 
-            taskHierarchy.setEndExactTimeStamp(exactTimeStamp);
+            taskHierarchy.setEndExactTimeStamp(now);
 
-            createTaskHierarchy(newParentTask, joinTask, exactTimeStamp);
+            createTaskHierarchy(newParentTask, joinTask, now);
         }
     }
 

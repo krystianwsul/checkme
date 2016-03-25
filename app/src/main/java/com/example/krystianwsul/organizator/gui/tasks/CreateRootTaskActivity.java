@@ -50,7 +50,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
-
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
         return intent;
     }
@@ -76,7 +75,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
 
         Intent intent = getIntent();
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
-            Assert.assertTrue(!intent.hasCategory(TASK_IDS_KEY));
+            Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
 
             mRootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(mRootTaskId != -1);

@@ -785,7 +785,7 @@ public class DomainFactory {
 
         rootTask.addSchedule(schedule);
 
-        joinTasks(rootTask, joinTaskIds, now);
+        joinRootTasks(rootTask, joinTaskIds, now);
 
         save(dataId);
     }
@@ -809,7 +809,7 @@ public class DomainFactory {
 
         rootTask.addSchedule(schedule);
 
-        joinTasks(rootTask, joinTaskIds, now);
+        joinRootTasks(rootTask, joinTaskIds, now);
 
         save(dataId);
     }
@@ -831,7 +831,7 @@ public class DomainFactory {
 
         rootTask.addSchedule(schedule);
 
-        joinTasks(rootTask, joinTaskIds, now);
+        joinRootTasks(rootTask, joinTaskIds, now);
 
         save(dataId);
     }
@@ -857,6 +857,31 @@ public class DomainFactory {
         save(0);
     }
 
+    public synchronized void createJoinChildTask(int parentTaskId, String name, ArrayList<Integer> joinTaskIds) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        Task parentTask = mTasks.get(parentTaskId);
+        Assert.assertTrue(parentTask != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+        Assert.assertTrue(parentTask.current(now));
+
+        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now);
+        Assert.assertTrue(childTaskRecord != null);
+
+        Task childTask = new Task(this, childTaskRecord);
+        Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
+        mTasks.put(childTask.getId(), childTask);
+
+        createTaskHierarchy(parentTask, childTask, now);
+
+        joinChildTasks(parentTask, childTask, joinTaskIds, now);
+
+        save(0);
+    }
+
     public synchronized void updateChildTask(int dataId, int childTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -864,18 +889,6 @@ public class DomainFactory {
         Assert.assertTrue(childTask != null);
 
         childTask.setName(name);
-
-        save(dataId);
-    }
-
-    public synchronized void setTaskEndTimeStamp(int dataId, int taskId) {
-        Task task = mTasks.get(taskId);
-        Assert.assertTrue(task != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-        Assert.assertTrue(task.current(now));
-
-        task.setEndExactTimeStamp(now);
 
         save(dataId);
     }
@@ -1166,7 +1179,7 @@ public class DomainFactory {
         }
     }
 
-    private void joinTasks(Task rootTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp exactTimeStamp) {
+    private void joinRootTasks(Task rootTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(rootTask.current(exactTimeStamp));
         Assert.assertTrue(rootTask.isRootTask(exactTimeStamp));
@@ -1182,6 +1195,30 @@ public class DomainFactory {
             joinTask.setScheduleEndExactTimeStamp(exactTimeStamp);
 
             createTaskHierarchy(rootTask, joinTask, exactTimeStamp);
+        }
+    }
+
+    private void joinChildTasks(Task oldParentTask, Task newParentTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(oldParentTask != null);
+        Assert.assertTrue(oldParentTask.current(exactTimeStamp));
+        Assert.assertTrue(newParentTask != null);
+        Assert.assertTrue(newParentTask.current(exactTimeStamp));
+        Assert.assertTrue(!newParentTask.isRootTask(exactTimeStamp));
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        for (int joinTaskId : joinTaskIds) {
+            Task joinTask = mTasks.get(joinTaskId);
+            Assert.assertTrue(joinTask != null);
+            Assert.assertTrue(joinTask.current(exactTimeStamp));
+            Assert.assertTrue(!joinTask.isRootTask(exactTimeStamp));
+
+            TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, exactTimeStamp);
+            Assert.assertTrue(taskHierarchy != null);
+
+            taskHierarchy.setEndExactTimeStamp(exactTimeStamp);
+
+            createTaskHierarchy(newParentTask, joinTask, exactTimeStamp);
         }
     }
 

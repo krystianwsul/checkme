@@ -140,7 +140,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     if (mActionMode == null)
                         ((AppCompatActivity) getActivity()).startSupportActionMode(new TaskEditCallback());
                     else {
-                        mActionMode.getMenu().findItem(R.id.action_task_join).setVisible((mTaskId == null) && (taskIds.size() > 1));
+                        mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
                     }
                 }
             }
@@ -158,7 +158,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mActionMode = actionMode;
 
             actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
-            actionMode.setTitle(getString(R.string.join));
 
             ((TaskListListener) getActivity()).onCreateTaskActionMode(actionMode);
 
@@ -178,20 +177,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             switch (menuItem.getItemId()) {
                 case R.id.action_task_join:
-                    if (taskIds.size() == 1) {
-                        MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.two_tasks_message));
-                        messageDialogFragment.show(getChildFragmentManager(), "two_tasks");
-                    } else {
+                    if (mTaskId == null)
                         startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
-                        actionMode.finish();
-                    }
-
-                    return true;
+                    else
+                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mTaskId, taskIds));
+                    break;
                 case R.id.action_task_delete:
                     mTaskAdapter.removeSelected();
+                    break;
                 default:
-                    return false;
+                    throw new UnsupportedOperationException();
             }
+
+            actionMode.finish();
+            return true;
         }
 
         @Override
@@ -317,8 +316,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             DomainFactory.getDomainFactory(mActivity).setTaskEndTimeStamps(mDataId, taskIds);
-
-            mOnCheckedChangedListener.OnCheckedChanged();
         }
 
         private static class TaskWrapper {

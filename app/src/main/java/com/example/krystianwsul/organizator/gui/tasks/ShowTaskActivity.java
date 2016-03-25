@@ -50,8 +50,8 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
         mTaskId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(mTaskId != -1);
 
-        ShowTaskFragment showTaskFragment = ShowTaskFragment.getInstance(mTaskId);
-        getSupportFragmentManager().beginTransaction().add(R.id.show_task_fragment, showTaskFragment).commit();
+        TaskListFragment taskListFragment = TaskListFragment.getInstance(mTaskId);
+        getSupportFragmentManager().beginTransaction().add(R.id.show_task_fragment, taskListFragment).commit();
 
         getSupportLoaderManager().initLoader(0, null, this);
     }

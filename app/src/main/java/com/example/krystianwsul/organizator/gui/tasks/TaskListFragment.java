@@ -221,6 +221,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         public TaskAdapter(Activity activity, ArrayList<Data> datas, int dataId, OnCheckedChangedListener onCheckedChangedListener) {
             Assert.assertTrue(activity != null);
             Assert.assertTrue(datas != null);
+            Assert.assertTrue(onCheckedChangedListener != null);
 
             mActivity = activity;
             mDataId = dataId;
@@ -245,29 +246,22 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
             ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
             CheckBox taskRowCheckBox = (CheckBox) showTaskRow.findViewById(R.id.task_row_checkbox);
-            ImageView taskRowDelete = (ImageView) showTaskRow.findViewById(R.id.task_row_delete);
 
-            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage, taskRowCheckBox, taskRowDelete);
+            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage, taskRowCheckBox);
         }
 
         @Override
         public void onBindViewHolder(final TaskHolder taskHolder, int position) {
             TaskWrapper taskWrapper = mTaskWrappers.get(position);
 
-            taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(null);
-
-            if (mOnCheckedChangedListener != null) {
-                taskHolder.mTaskRowCheckBox.setVisibility(View.VISIBLE);
-                taskHolder.mTaskRowCheckBox.setChecked(taskWrapper.mSelected);
-
-                taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        taskHolder.onCheckedChanged(isChecked);
-                        mOnCheckedChangedListener.OnCheckedChanged();
-                    }
-                });
-            }
+            taskHolder.mTaskRowCheckBox.setChecked(taskWrapper.mSelected);
+            taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    taskHolder.onCheckedChanged(isChecked);
+                    mOnCheckedChangedListener.OnCheckedChanged();
+                }
+            });
 
             if (!taskWrapper.mData.HasChildTasks)
                 taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_label_outline_black_24dp));
@@ -286,13 +280,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 @Override
                 public void onClick(View v) {
                     taskHolder.onRowClick();
-                }
-            });
-
-            taskHolder.mTaskRowDelete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    taskHolder.onDeleteClick();
                 }
             });
         }
@@ -330,6 +317,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             DomainFactory.getDomainFactory(mActivity).setTaskEndTimeStamps(mDataId, taskIds);
+
+            mOnCheckedChangedListener.OnCheckedChanged();
         }
 
         private static class TaskWrapper {
@@ -348,23 +337,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             public final TextView mTaskRowDetails;
             public final ImageView mTaskRowImg;
             public final CheckBox mTaskRowCheckBox;
-            public final ImageView mTaskRowDelete;
 
-            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg, CheckBox taskRowCheckBox, ImageView taskRowDelete) {
+            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg, CheckBox taskRowCheckBox) {
                 super(showTaskRow);
 
                 Assert.assertTrue(taskRowName != null);
                 Assert.assertTrue(taskRowDetails != null);
                 Assert.assertTrue(taskRowImg != null);
                 Assert.assertTrue(taskRowCheckBox != null);
-                Assert.assertTrue(taskRowDelete != null);
 
                 mShowTaskRow = showTaskRow;
                 mTaskRowName = taskRowName;
                 mTaskRowDetails = taskRowDetails;
                 mTaskRowImg = taskRowImg;
                 mTaskRowCheckBox = taskRowCheckBox;
-                mTaskRowDelete = taskRowDelete;
             }
 
             public void onRowClick() {
@@ -372,18 +358,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 Assert.assertTrue(taskWrapper != null);
 
                 mActivity.startActivity(ShowTaskActivity.getIntent(taskWrapper.mData.TaskId, mActivity));
-            }
-
-            public void onDeleteClick() {
-                int position = getAdapterPosition();
-
-                TaskWrapper taskWrapper = mTaskWrappers.get(position);
-                Assert.assertTrue(taskWrapper != null);
-
-                DomainFactory.getDomainFactory(mActivity).setTaskEndTimeStamp(mDataId, taskWrapper.mData.TaskId);
-
-                mTaskWrappers.remove(position);
-                notifyItemRemoved(position);
             }
 
             public void onCheckedChanged(boolean checked) {

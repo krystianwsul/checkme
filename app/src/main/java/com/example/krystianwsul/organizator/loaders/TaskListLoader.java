@@ -12,12 +12,7 @@ import java.util.ArrayList;
 public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     private final Integer mTaskId;
 
-    public TaskListLoader(Context context) {
-        super(context);
-        mTaskId = null;
-    }
-
-    public TaskListLoader(Context context, int taskId) {
+    public TaskListLoader(Context context, Integer taskId) {
         super(context);
         mTaskId = taskId;
     }

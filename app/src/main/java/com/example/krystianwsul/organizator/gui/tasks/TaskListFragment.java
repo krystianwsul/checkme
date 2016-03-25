@@ -79,7 +79,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<TaskListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new TaskListLoader(getActivity());
+        return new TaskListLoader(getActivity(), mTaskId);
     }
 
     @Override
@@ -87,7 +87,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         mTaskListFragmentFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
+                if (mTaskId == null)
+                    startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
+                else
+                    startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
             }
         });
 
@@ -95,12 +98,16 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         for (TaskListLoader.TaskData taskData : data.taskDatas)
             taskDatas.add(new TaskAdapter.Data(taskData.TaskId, taskData.Name, taskData.ScheduleText, taskData.HasChildTasks));
 
-        mTaskListFragmentRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, new TaskAdapter.OnCheckedChangedListener() {
-            @Override
-            public void OnCheckedChanged() {
-                ((TaskAdapter.OnCheckedChangedListener) getActivity()).OnCheckedChanged();
-            }
-        }));
+        TaskAdapter.OnCheckedChangedListener listener = null;
+        if (mTaskId == null) {
+            listener = new TaskAdapter.OnCheckedChangedListener() {
+                @Override
+                public void OnCheckedChanged() {
+                    ((TaskAdapter.OnCheckedChangedListener) getActivity()).OnCheckedChanged();
+                }
+            };
+        }
+        mTaskListFragmentRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, listener));
     }
 
     @Override

@@ -83,23 +83,49 @@ public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onLoadFinished(Loader<TaskListLoader.Data> loader, final TaskListLoader.Data data) {
+    public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
         mTaskListFragmentFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
+                if (mTaskId == null)
+                    startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
+                else
+                    startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
             }
         });
 
         ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
         for (TaskListLoader.TaskData taskData : data.taskDatas)
-            taskDatas.add(new TaskAdapter.Data(taskData.TaskId, taskData.Name, null, taskData.HasChildTasks));
+            taskDatas.add(new TaskAdapter.Data(taskData.TaskId, taskData.Name, taskData.ScheduleText, taskData.HasChildTasks));
 
-        mTaskListFragmentRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, null));
+        TaskAdapter.OnCheckedChangedListener listener = null;
+        if (mTaskId == null) {
+            listener = new TaskAdapter.OnCheckedChangedListener() {
+                @Override
+                public void OnCheckedChanged() {
+                    ((TaskAdapter.OnCheckedChangedListener) getActivity()).OnCheckedChanged();
+                }
+            };
+        }
+        mTaskListFragmentRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, listener));
     }
 
     @Override
     public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
+    }
+
+    public void uncheck() {
+        TaskAdapter taskAdapter = (TaskAdapter) mTaskListFragmentRecycler.getAdapter();
+        Assert.assertTrue(taskAdapter != null);
+
+        taskAdapter.uncheck();
+    }
+
+    public ArrayList<Integer> getSelected() {
+        TaskAdapter taskAdapter = (TaskAdapter) mTaskListFragmentRecycler.getAdapter();
+        Assert.assertTrue(taskAdapter != null);
+
+        return taskAdapter.getSelected();
     }
 
     public void removeSelected() {

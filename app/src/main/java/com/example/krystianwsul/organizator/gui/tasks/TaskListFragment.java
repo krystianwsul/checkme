@@ -1,13 +1,18 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -27,6 +32,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private Integer mTaskId;
 
+    private TaskAdapter mTaskAdapter;
+
+    private ActionMode mActionMode;
+
     public static TaskListFragment getInstance() {
         TaskListFragment taskListFragment = new TaskListFragment();
 
@@ -45,6 +54,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         taskListFragment.setArguments(args);
 
         return taskListFragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Assert.assertTrue(context instanceof TaskListListener);
     }
 
     @Override
@@ -78,6 +93,14 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mActionMode != null)
+            mActionMode.finish();
+    }
+
+    @Override
     public Loader<TaskListLoader.Data> onCreateLoader(int id, Bundle args) {
         return new TaskListLoader(getActivity(), mTaskId);
     }
@@ -103,35 +126,83 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             listener = new TaskAdapter.OnCheckedChangedListener() {
                 @Override
                 public void OnCheckedChanged() {
-                    ((TaskAdapter.OnCheckedChangedListener) getActivity()).OnCheckedChanged();
+                    TaskAdapter taskAdapter = (TaskAdapter) mTaskListFragmentRecycler.getAdapter();
+                    Assert.assertTrue(taskAdapter != null);
+
+                    ArrayList<Integer> taskIds = taskAdapter.getSelected();
+                    if (taskIds.isEmpty()) {
+                        if (mActionMode != null)
+                            mActionMode.finish();
+                    } else {
+                        if (mActionMode == null)
+                            ((AppCompatActivity) getActivity()).startSupportActionMode(new TaskEditCallback());
+                    }
                 }
             };
         }
-        mTaskListFragmentRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, listener));
+        mTaskAdapter = new TaskAdapter(getActivity(), taskDatas, data.DataId, listener);
+        mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
     }
 
     @Override
     public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
     }
 
-    public void uncheck() {
-        TaskAdapter taskAdapter = (TaskAdapter) mTaskListFragmentRecycler.getAdapter();
-        Assert.assertTrue(taskAdapter != null);
+    private class TaskEditCallback implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(final ActionMode actionMode, Menu menu) {
+            mActionMode = actionMode;
 
-        taskAdapter.uncheck();
+            actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
+            actionMode.setTitle(getString(R.string.join));
+
+            ((TaskListListener) getActivity()).onCreateTaskActionMode(actionMode);
+
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            ArrayList<Integer> taskIds = mTaskAdapter.getSelected();
+            Assert.assertTrue(taskIds != null);
+            Assert.assertTrue(!taskIds.isEmpty());
+
+            switch (menuItem.getItemId()) {
+                case R.id.action_task_join:
+                    if (taskIds.size() == 1) {
+                        MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.two_tasks_message));
+                        messageDialogFragment.show(getChildFragmentManager(), "two_tasks");
+                    } else {
+                        startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
+                        actionMode.finish();
+                    }
+
+                    return true;
+                case R.id.action_task_delete:
+                    mTaskAdapter.removeSelected();
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            Assert.assertTrue(mActionMode != null);
+            mActionMode = null;
+
+            mTaskAdapter.uncheck();
+
+            ((TaskListListener) getActivity()).onDestroyTaskActionMode();
+        }
     }
 
-    public ArrayList<Integer> getSelected() {
-        TaskAdapter taskAdapter = (TaskAdapter) mTaskListFragmentRecycler.getAdapter();
-        Assert.assertTrue(taskAdapter != null);
-
-        return taskAdapter.getSelected();
-    }
-
-    public void removeSelected() {
-        TaskAdapter taskAdapter = (TaskAdapter) mTaskListFragmentRecycler.getAdapter();
-        Assert.assertTrue(taskAdapter != null);
-
-        taskAdapter.removeSelected();
+    public interface TaskListListener {
+        void onCreateTaskActionMode(ActionMode actionMode);
+        void onDestroyTaskActionMode();
     }
 }

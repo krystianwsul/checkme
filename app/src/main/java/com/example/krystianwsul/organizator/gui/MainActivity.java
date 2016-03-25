@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
@@ -16,21 +16,16 @@ import android.view.ViewGroup;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
 import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
-import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
-import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
-import com.example.krystianwsul.organizator.gui.tasks.TaskAdapter;
 import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
 import com.example.krystianwsul.organizator.notifications.TickService;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity implements TaskAdapter.OnCheckedChangedListener {
+public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener {
     private ViewPager mViewPager;
-    private MyFragmentStatePagerAdapter mMyFragmentStatePagerAdapter;
+    private MyFragmentPagerAdapter mMyFragmentPagerAdapter;
 
-    private ActionMode mActionMode;
+    private ViewPager.OnPageChangeListener mOnPageChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +44,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
         mViewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
         Assert.assertTrue(mViewPager != null);
 
-        mMyFragmentStatePagerAdapter = new MyFragmentStatePagerAdapter();
-        mViewPager.setAdapter(mMyFragmentStatePagerAdapter);
+        mMyFragmentPagerAdapter = new MyFragmentPagerAdapter();
+        mViewPager.setAdapter(mMyFragmentPagerAdapter);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -96,18 +91,10 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
         }
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if (mActionMode != null)
-            mActionMode.finish();
-    }
-
-    private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+    private class MyFragmentPagerAdapter extends FragmentPagerAdapter {
         private Fragment mFragment;
 
-        public MyFragmentStatePagerAdapter() {
+        public MyFragmentPagerAdapter() {
             super(MainActivity.this.getSupportFragmentManager());
         }
 
@@ -143,95 +130,32 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
         }
     }
 
-    private class TaskEditCallback implements ActionMode.Callback {
-        private TaskListFragment mTaskListFragment;
+    @Override
+    public void onCreateTaskActionMode(final ActionMode actionMode) {
+        mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-        private ViewPager.OnPageChangeListener mOnPageChangeListener;
-
-        @Override
-        public boolean onCreateActionMode(final ActionMode actionMode, Menu menu) {
-            mActionMode = actionMode;
-
-            actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
-
-            mTaskListFragment = (TaskListFragment) mMyFragmentStatePagerAdapter.getFragment();
-            Assert.assertTrue(mTaskListFragment != null);
-
-            mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-                    actionMode.finish();
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                }
-            };
-            mViewPager.addOnPageChangeListener(mOnPageChangeListener);
-
-            actionMode.setTitle(getString(R.string.join));
-
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            ArrayList<Integer> taskIds = mTaskListFragment.getSelected();
-            Assert.assertTrue(taskIds != null);
-            Assert.assertTrue(!taskIds.isEmpty());
-
-            switch (menuItem.getItemId()) {
-                case R.id.action_task_join:
-                    if (taskIds.size() == 1) {
-                        MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.two_tasks_message));
-                        messageDialogFragment.show(getSupportFragmentManager(), "two_tasks");
-                    } else {
-                        startActivity(CreateRootTaskActivity.getJoinIntent(MainActivity.this, taskIds));
-                        actionMode.finish();
-                    }
-
-                    return true;
-                case R.id.action_task_delete:
-                    mTaskListFragment.removeSelected();
-                default:
-                    return false;
             }
-        }
 
-        @Override
-        public void onDestroyActionMode(ActionMode actionMode) {
-            Assert.assertTrue(mTaskListFragment != null);
+            @Override
+            public void onPageSelected(int position) {
+                actionMode.finish();
+            }
 
-            mActionMode = null;
-            mViewPager.removeOnPageChangeListener(mOnPageChangeListener);
+            @Override
+            public void onPageScrollStateChanged(int state) {
 
-            mTaskListFragment.uncheck();
-        }
+            }
+        };
+        mViewPager.addOnPageChangeListener(mOnPageChangeListener);
     }
 
     @Override
-    public void OnCheckedChanged() {
-        TaskListFragment taskListFragment = (TaskListFragment) mMyFragmentStatePagerAdapter.getFragment();
-        Assert.assertTrue(taskListFragment != null);
+    public void onDestroyTaskActionMode() {
+        Assert.assertTrue(mOnPageChangeListener != null);
 
-        ArrayList<Integer> taskIds = taskListFragment.getSelected();
-        if (taskIds.isEmpty()) {
-            if (mActionMode != null)
-                mActionMode.finish();
-        } else {
-            if (mActionMode == null)
-                startSupportActionMode(new TaskEditCallback());
-        }
+        mViewPager.removeOnPageChangeListener(mOnPageChangeListener);
+        mOnPageChangeListener = null;
     }
 }

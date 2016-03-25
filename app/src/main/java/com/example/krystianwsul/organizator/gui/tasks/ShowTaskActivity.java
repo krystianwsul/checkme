@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -18,7 +19,7 @@ import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 
 import junit.framework.Assert;
 
-public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data> {
+public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
     private TextView mTasksHeadingLabel;
     private TextView mTasksRowSchedule;
 
@@ -95,5 +96,15 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
     @Override
     public void onLoaderReset(Loader<ShowTaskLoader.Data> loader) {
+    }
+
+    @Override
+    public void onCreateTaskActionMode(ActionMode actionMode) {
+
+    }
+
+    @Override
+    public void onDestroyTaskActionMode() {
+
     }
 }

@@ -470,6 +470,14 @@ public class DomainFactory {
                     tasks.add(rootTask);
         }
 
+        Collections.sort(tasks, new Comparator<Task>() {
+            @Override
+            public int compare(Task lhs, Task rhs) {
+                return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
+            }
+        });
+        Collections.reverse(tasks);
+
         ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
         for (Task task : tasks)
             taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty()));

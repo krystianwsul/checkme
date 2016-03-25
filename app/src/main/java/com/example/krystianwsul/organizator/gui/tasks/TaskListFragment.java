@@ -1,6 +1,5 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -125,26 +124,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
         });
 
-        ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
-        for (TaskListLoader.TaskData taskData : data.taskDatas)
-            taskDatas.add(new TaskAdapter.Data(taskData.TaskId, taskData.Name, taskData.ScheduleText, taskData.HasChildTasks));
-
-        mTaskAdapter = new TaskAdapter(getActivity(), taskDatas, data.DataId, new TaskAdapter.OnCheckedChangedListener() {
-            @Override
-            public void OnCheckedChanged() {
-                ArrayList<Integer> taskIds = mTaskAdapter.getSelected();
-                if (taskIds.isEmpty()) {
-                    if (mActionMode != null)
-                        mActionMode.finish();
-                } else {
-                    if (mActionMode == null)
-                        ((AppCompatActivity) getActivity()).startSupportActionMode(new TaskEditCallback());
-                    else {
-                        mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
-                    }
-                }
-            }
-        });
+        mTaskAdapter = new TaskAdapter(data);
         mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
     }
 
@@ -209,26 +189,19 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         void onDestroyTaskActionMode();
     }
 
-    public static class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
-        private final Activity mActivity;
+    public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
         private final ArrayList<TaskWrapper> mTaskWrappers;
 
-        private final int mDataId;
+        private final TaskListLoader.Data mData;
 
-        private final OnCheckedChangedListener mOnCheckedChangedListener;
+        public TaskAdapter(TaskListLoader.Data data) {
+            Assert.assertTrue(data != null);
 
-        public TaskAdapter(Activity activity, ArrayList<Data> datas, int dataId, OnCheckedChangedListener onCheckedChangedListener) {
-            Assert.assertTrue(activity != null);
-            Assert.assertTrue(datas != null);
-            Assert.assertTrue(onCheckedChangedListener != null);
-
-            mActivity = activity;
-            mDataId = dataId;
-            mOnCheckedChangedListener = onCheckedChangedListener;
+            mData = data;
 
             mTaskWrappers = new ArrayList<>();
-            for (Data data : datas)
-                mTaskWrappers.add(new TaskWrapper(data));
+            for (TaskListLoader.TaskData taskData : data.TaskDatas)
+                mTaskWrappers.add(new TaskWrapper(taskData));
         }
 
         @Override
@@ -238,7 +211,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         public TaskHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater inflater = LayoutInflater.from(mActivity);
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
             TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
@@ -258,18 +231,29 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     taskHolder.onCheckedChanged(isChecked);
-                    mOnCheckedChangedListener.OnCheckedChanged();
+
+                    ArrayList<Integer> taskIds = getSelected();
+                    if (taskIds.isEmpty()) {
+                        if (mActionMode != null)
+                            mActionMode.finish();
+                    } else {
+                        if (mActionMode == null)
+                            ((AppCompatActivity) getActivity()).startSupportActionMode(new TaskEditCallback());
+                        else {
+                            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
+                        }
+                    }
                 }
             });
 
-            if (!taskWrapper.mData.HasChildTasks)
-                taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_label_outline_black_24dp));
+            if (!taskWrapper.mTaskData.HasChildTasks)
+                taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.ic_label_outline_black_24dp));
             else
-                taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(mActivity, R.drawable.ic_list_black_24dp));
+                taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.ic_list_black_24dp));
 
-            taskHolder.mTaskRowName.setText(taskWrapper.mData.Name);
+            taskHolder.mTaskRowName.setText(taskWrapper.mTaskData.Name);
 
-            String scheduleText = taskWrapper.mData.ScheduleText;
+            String scheduleText = taskWrapper.mTaskData.ScheduleText;
             if (TextUtils.isEmpty(scheduleText))
                 taskHolder.mTaskRowDetails.setVisibility(View.GONE);
             else
@@ -296,7 +280,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             ArrayList<Integer> taskIds = new ArrayList<>();
             for (TaskWrapper taskWrapper : mTaskWrappers)
                 if (taskWrapper.mSelected)
-                    taskIds.add(taskWrapper.mData.TaskId);
+                    taskIds.add(taskWrapper.mTaskData.TaskId);
             return taskIds;
         }
 
@@ -308,23 +292,23 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             ArrayList<Integer> taskIds = new ArrayList<>();
             for (TaskWrapper selectedTaskWrapper : selectedTaskWrappers) {
-                taskIds.add(selectedTaskWrapper.mData.TaskId);
+                taskIds.add(selectedTaskWrapper.mTaskData.TaskId);
 
                 int position = mTaskWrappers.indexOf(selectedTaskWrapper);
                 mTaskWrappers.remove(position);
                 notifyItemRemoved(position);
             }
 
-            DomainFactory.getDomainFactory(mActivity).setTaskEndTimeStamps(mDataId, taskIds);
+            DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
         }
 
-        private static class TaskWrapper {
-            public final Data mData;
+        private class TaskWrapper {
+            public final TaskListLoader.TaskData mTaskData;
             public boolean mSelected;
 
-            public TaskWrapper(Data data) {
-                Assert.assertTrue(data != null);
-                mData = data;
+            public TaskWrapper(TaskListLoader.TaskData taskData) {
+                Assert.assertTrue(taskData != null);
+                mTaskData = taskData;
             }
         }
 
@@ -354,7 +338,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 TaskWrapper taskWrapper = mTaskWrappers.get(getAdapterPosition());
                 Assert.assertTrue(taskWrapper != null);
 
-                mActivity.startActivity(ShowTaskActivity.getIntent(taskWrapper.mData.TaskId, mActivity));
+                getActivity().startActivity(ShowTaskActivity.getIntent(taskWrapper.mTaskData.TaskId, getActivity()));
             }
 
             public void onCheckedChanged(boolean checked) {
@@ -365,26 +349,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                 taskWrapper.mSelected = checked;
             }
-        }
-
-        public static class Data {
-            public final int TaskId;
-            public final String Name;
-            public final String ScheduleText;
-            public final boolean HasChildTasks;
-
-            public Data(int taskId, String name, String scheduleText, boolean hasChildTasks) {
-                Assert.assertTrue(!TextUtils.isEmpty(name));
-
-                TaskId = taskId;
-                Name = name;
-                ScheduleText = scheduleText;
-                HasChildTasks = hasChildTasks;
-            }
-        }
-
-        public interface OnCheckedChangedListener {
-            void OnCheckedChanged();
         }
     }
 }

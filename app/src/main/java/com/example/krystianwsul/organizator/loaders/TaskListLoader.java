@@ -23,16 +23,16 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<TaskData> taskDatas;
+        public final ArrayList<TaskData> TaskDatas;
 
         public Data(ArrayList<TaskData> taskDatas) {
             Assert.assertTrue(taskDatas != null);
-            this.taskDatas = taskDatas;
+            TaskDatas = taskDatas;
         }
 
         @Override
         public int hashCode() {
-            return taskDatas.hashCode();
+            return TaskDatas.hashCode();
         }
 
         @Override
@@ -48,7 +48,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
             Data data = (Data) object;
 
-            return taskDatas.equals(data.taskDatas);
+            return TaskDatas.equals(data.TaskDatas);
         }
     }
 

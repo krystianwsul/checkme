@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnChe
                 case 0:
                     return new GroupListFragment();
                 case 1:
-                    return new TaskListFragment();
+                    return TaskListFragment.getInstance();
                 default:
                     throw new IndexOutOfBoundsException();
             }

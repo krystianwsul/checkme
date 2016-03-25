@@ -10,8 +10,16 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
+    private final Integer mTaskId;
+
     public TaskListLoader(Context context) {
         super(context);
+        mTaskId = null;
+    }
+
+    public TaskListLoader(Context context, int taskId) {
+        super(context);
+        mTaskId = taskId;
     }
 
     @Override
@@ -20,16 +28,16 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<RootTaskData> RootTaskDatas;
+        public final ArrayList<TaskData> taskDatas;
 
-        public Data(ArrayList<RootTaskData> rootTaskDatas) {
-            Assert.assertTrue(rootTaskDatas != null);
-            RootTaskDatas = rootTaskDatas;
+        public Data(ArrayList<TaskData> taskDatas) {
+            Assert.assertTrue(taskDatas != null);
+            this.taskDatas = taskDatas;
         }
 
         @Override
         public int hashCode() {
-            return RootTaskDatas.hashCode();
+            return taskDatas.hashCode();
         }
 
         @Override
@@ -45,19 +53,18 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
             Data data = (Data) object;
 
-            return RootTaskDatas.equals(data.RootTaskDatas);
+            return taskDatas.equals(data.taskDatas);
         }
     }
 
-    public static class RootTaskData {
+    public static class TaskData {
         public final int TaskId;
         public final String Name;
         public final String ScheduleText;
         public final boolean HasChildTasks;
 
-        public RootTaskData(int taskId, String name, String scheduleText, boolean hasChildTasks) {
+        public TaskData(int taskId, String name, String scheduleText, boolean hasChildTasks) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(!TextUtils.isEmpty(scheduleText));
 
             TaskId = taskId;
             Name = name;
@@ -67,7 +74,13 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
         @Override
         public int hashCode() {
-            return (TaskId + Name.hashCode() + ScheduleText.hashCode() + (HasChildTasks ? 1 : 0));
+            int hashCode = 0;
+            hashCode += TaskId;
+            hashCode += Name.hashCode();
+            if (!TextUtils.isEmpty(ScheduleText))
+                hashCode += ScheduleText.hashCode();
+            hashCode += (HasChildTasks ? 1 : 0);
+            return hashCode;
         }
 
         @Override
@@ -78,12 +91,12 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (object == this)
                 return true;
 
-            if (!(object instanceof RootTaskData))
+            if (!(object instanceof TaskData))
                 return false;
 
-            RootTaskData rootTaskData = (RootTaskData) object;
+            TaskData taskData = (TaskData) object;
 
-            return ((TaskId == rootTaskData.TaskId) && Name.equals(rootTaskData.Name) && ScheduleText.equals(rootTaskData.ScheduleText) && (HasChildTasks == rootTaskData.HasChildTasks));
+            return ((TaskId == taskData.TaskId) && Name.equals(taskData.Name) && ((TextUtils.isEmpty(ScheduleText) && TextUtils.isEmpty(taskData.ScheduleText)) || ((!TextUtils.isEmpty(ScheduleText) && !TextUtils.isEmpty(taskData.ScheduleText)) && ScheduleText.equals(taskData.ScheduleText))) && (HasChildTasks == taskData.HasChildTasks));
         }
     }
 }

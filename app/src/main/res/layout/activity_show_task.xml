@@ -30,10 +30,9 @@
             android:id="@+id/show_task_schedule"
             android:singleLine="true"/>
 
-    <fragment
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.example.krystianwsul.organizator.gui.tasks.ShowTaskFragment"
         android:id="@+id/show_task_fragment"/>
 
 </LinearLayout>

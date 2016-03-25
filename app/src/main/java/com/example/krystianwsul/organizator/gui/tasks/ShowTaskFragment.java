@@ -1,7 +1,5 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
-
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -21,14 +19,33 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCallbacks<ShowTaskFragmentLoader.Data> {
-    private static final String INTENT_KEY = "taskId";
+    private static final String ALL_TASKS_KEY = "allTasks";
+    private static final String TASK_ID_KEY = "taskId";
 
-    private RecyclerView mFragmentShowTaskRecycler;
-    private FloatingActionButton mFragmentShowTaskFab;
+    private RecyclerView mTaskListFragmentRecycler;
+    private FloatingActionButton mTaskListFragmentFab;
 
-    private int mTaskId;
+    private Integer mTaskId;
 
-    private ShowTaskFragmentLoader.Data mData;
+    public static ShowTaskFragment getInstance() {
+        ShowTaskFragment taskListFragment = new ShowTaskFragment();
+
+        Bundle args = new Bundle();
+        args.putBoolean(ALL_TASKS_KEY, true);
+        taskListFragment.setArguments(args);
+
+        return taskListFragment;
+    }
+
+    public static ShowTaskFragment getInstance(int taskId) {
+        ShowTaskFragment taskListFragment = new ShowTaskFragment();
+
+        Bundle args = new Bundle();
+        args.putInt(TASK_ID_KEY, taskId);
+        taskListFragment.setArguments(args);
+
+        return taskListFragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,18 +56,23 @@ public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCa
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        boolean allTasks = getArguments().getBoolean(ALL_TASKS_KEY, false);
+        int taskId = getArguments().getInt(TASK_ID_KEY, -1);
+        if (taskId != -1) {
+            Assert.assertTrue(!allTasks);
+            mTaskId = taskId;
+        } else {
+            Assert.assertTrue(allTasks);
+            mTaskId = null;
+        }
+
         View view = getView();
         Assert.assertTrue(view != null);
 
-        mFragmentShowTaskRecycler = (RecyclerView) view.findViewById(R.id.fragment_show_task_recycler);
-        mFragmentShowTaskRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.fragment_show_task_recycler);
+        mTaskListFragmentRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mFragmentShowTaskFab = (FloatingActionButton) getView().findViewById(R.id.fragment_show_task_fab);
-
-        Intent intent = getActivity().getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        mTaskId = intent.getIntExtra(INTENT_KEY, -1);
-        Assert.assertTrue(mTaskId != -1);
+        mTaskListFragmentFab = (FloatingActionButton) getView().findViewById(R.id.fragment_show_task_fab);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -62,23 +84,28 @@ public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<ShowTaskFragmentLoader.Data> loader, final ShowTaskFragmentLoader.Data data) {
-        mData = data;
-
-        mFragmentShowTaskFab.setOnClickListener(new View.OnClickListener() {
+        mTaskListFragmentFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), data.TaskId));
+                startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
             }
         });
 
         ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
-        for (ShowTaskFragmentLoader.ChildTaskData childTaskData : data.ChildTaskDatas)
-            taskDatas.add(new TaskAdapter.Data(childTaskData.TaskId, childTaskData.Name, null, childTaskData.HasChildTasks));
+        for (ShowTaskFragmentLoader.TaskData taskData : data.taskDatas)
+            taskDatas.add(new TaskAdapter.Data(taskData.TaskId, taskData.Name, null, taskData.HasChildTasks));
 
-        mFragmentShowTaskRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, null));
+        mTaskListFragmentRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, null));
     }
 
     @Override
     public void onLoaderReset(Loader<ShowTaskFragmentLoader.Data> loader) {
+    }
+
+    public void removeSelected() {
+        TaskAdapter taskAdapter = (TaskAdapter) mTaskListFragmentRecycler.getAdapter();
+        Assert.assertTrue(taskAdapter != null);
+
+        taskAdapter.removeSelected();
     }
 }

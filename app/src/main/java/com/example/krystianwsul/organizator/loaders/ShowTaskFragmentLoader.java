@@ -10,11 +10,15 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTaskFragmentLoader extends DomainLoader<ShowTaskFragmentLoader.Data> {
-    private final int mTaskId;
+    private final Integer mTaskId;
+
+    public ShowTaskFragmentLoader(Context context) {
+        super(context);
+        mTaskId = null;
+    }
 
     public ShowTaskFragmentLoader(Context context, int taskId) {
         super(context);
-
         mTaskId = taskId;
     }
 
@@ -24,19 +28,16 @@ public class ShowTaskFragmentLoader extends DomainLoader<ShowTaskFragmentLoader.
     }
 
     public static class Data extends DomainLoader.Data {
-        public final int TaskId;
-        public final ArrayList<ChildTaskData> ChildTaskDatas;
+        public final ArrayList<TaskData> taskDatas;
 
-        public Data(int taskId, ArrayList<ChildTaskData> childTaskDatas) {
-            Assert.assertTrue(childTaskDatas != null);
-
-            TaskId = taskId;
-            ChildTaskDatas = childTaskDatas;
+        public Data(ArrayList<TaskData> taskDatas) {
+            Assert.assertTrue(taskDatas != null);
+            this.taskDatas = taskDatas;
         }
 
         @Override
         public int hashCode() {
-            return TaskId + ChildTaskDatas.hashCode();
+            return taskDatas.hashCode();
         }
 
         @Override
@@ -52,26 +53,34 @@ public class ShowTaskFragmentLoader extends DomainLoader<ShowTaskFragmentLoader.
 
             Data data = (Data) object;
 
-            return ((TaskId == data.TaskId) && ChildTaskDatas.equals(data.ChildTaskDatas));
+            return taskDatas.equals(data.taskDatas);
         }
     }
 
-    public static class ChildTaskData {
+    public static class TaskData {
         public final int TaskId;
         public final String Name;
+        public final String ScheduleText;
         public final boolean HasChildTasks;
 
-        public ChildTaskData(int taskId, String name, boolean hasChildTasks) {
+        public TaskData(int taskId, String name, String scheduleText, boolean hasChildTasks) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             TaskId = taskId;
             Name = name;
+            ScheduleText = scheduleText;
             HasChildTasks = hasChildTasks;
         }
 
         @Override
         public int hashCode() {
-            return (TaskId + Name.hashCode() + (HasChildTasks ? 1 : 0));
+            int hashCode = 0;
+            hashCode += TaskId;
+            hashCode += Name.hashCode();
+            if (!TextUtils.isEmpty(ScheduleText))
+                hashCode += ScheduleText.hashCode();
+            hashCode += (HasChildTasks ? 1 : 0);
+            return hashCode;
         }
 
         @Override
@@ -82,12 +91,12 @@ public class ShowTaskFragmentLoader extends DomainLoader<ShowTaskFragmentLoader.
             if (object == this)
                 return true;
 
-            if (!(object instanceof ChildTaskData))
+            if (!(object instanceof TaskData))
                 return false;
 
-            ChildTaskData childTaskData = (ChildTaskData) object;
+            TaskData taskData = (TaskData) object;
 
-            return ((TaskId == childTaskData.TaskId) && Name.equals(childTaskData.Name) && (HasChildTasks == childTaskData.HasChildTasks));
+            return ((TaskId == taskData.TaskId) && Name.equals(taskData.Name) && ((TextUtils.isEmpty(ScheduleText) && TextUtils.isEmpty(taskData.ScheduleText)) || ((!TextUtils.isEmpty(ScheduleText) && !TextUtils.isEmpty(taskData.ScheduleText)) && ScheduleText.equals(taskData.ScheduleText))) && (HasChildTasks == taskData.HasChildTasks));
         }
     }
 }

@@ -460,11 +460,11 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         ArrayList<Task> childTasks = task.getChildTasks(now);
-        ArrayList<ShowTaskFragmentLoader.ChildTaskData> childTaskDatas = new ArrayList<>();
+        ArrayList<ShowTaskFragmentLoader.TaskData> taskDatas = new ArrayList<>();
         for (Task childTask : childTasks)
-            childTaskDatas.add(new ShowTaskFragmentLoader.ChildTaskData(childTask.getId(), childTask.getName(), !childTask.getChildTasks(now).isEmpty()));
+            taskDatas.add(new ShowTaskFragmentLoader.TaskData(childTask.getId(), childTask.getName(), null, !childTask.getChildTasks(now).isEmpty()));
 
-        return new ShowTaskFragmentLoader.Data(task.getId(), childTaskDatas);
+        return new ShowTaskFragmentLoader.Data(taskDatas);
     }
 
     public synchronized TaskListLoader.Data getTaskListData(Context context) {
@@ -472,12 +472,12 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<TaskListLoader.RootTaskData> rootTaskDatas = new ArrayList<>();
+        ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
         for (Task task : mTasks.values())
             if (task.current(now) && task.isRootTask(now))
-                rootTaskDatas.add(new TaskListLoader.RootTaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty()));
+                taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty()));
 
-        return new TaskListLoader.Data(rootTaskDatas);
+        return new TaskListLoader.Data(taskDatas);
     }
 
     public synchronized TickService.Data getTickServiceData(Context context) {

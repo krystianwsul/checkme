@@ -7,7 +7,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,7 +18,6 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
-import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -70,7 +71,27 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         mSavedInstanceState = savedInstanceState;
 
         mCustomTimeName = (EditText) findViewById(R.id.custom_time_name);
+        Assert.assertTrue(mCustomTimeName != null);
+
+        mCustomTimeName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mCustomTimeSave.setEnabled(!TextUtils.isEmpty(s.toString().trim()));
+            }
+        });
+
         mCustomTimeSave = (Button) findViewById(R.id.custom_time_save);
+        Assert.assertTrue(mCustomTimeSave != null);
 
         initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
         initializeDay(DayOfWeek.MONDAY, R.id.time_monday_name, R.id.time_monday_time);
@@ -127,9 +148,13 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         Assert.assertTrue(dayOfWeek != null);
 
         TextView timeName = (TextView) findViewById(nameId);
+        Assert.assertTrue(timeName != null);
+
         timeName.setText(dayOfWeek.toString());
 
         TextView timeView = (TextView) findViewById(timeId);
+        Assert.assertTrue(timeView != null);
+
         mTimeViews.put(dayOfWeek, timeView);
     }
 
@@ -186,16 +211,11 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
             });
         }
 
+        mCustomTimeSave.setEnabled(!TextUtils.isEmpty(mCustomTimeName.getText().toString().trim()));
         mCustomTimeSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String name = mCustomTimeName.getText().toString().trim();
-
-                if (TextUtils.isEmpty(name)) {
-                    MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.task_name_toast));
-                    messageDialogFragment.show(getSupportFragmentManager(), "empty_name");
-                    return;
-                }
 
                 if (mData != null)
                     DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);

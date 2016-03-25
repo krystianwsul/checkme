@@ -7,7 +7,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -70,8 +72,30 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         mSavedInstanceState = savedInstanceState;
 
         mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
+        Assert.assertTrue(mCreateRootTaskName != null);
+
+        mCreateRootTaskName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mCreateRootTaskSave.setEnabled(!TextUtils.isEmpty(s.toString().trim()));
+            }
+        });
+
         mCreateRootTaskSave = (Button) findViewById(R.id.create_root_task_save);
+        Assert.assertTrue(mCreateRootTaskSave != null);
+
         mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
+        Assert.assertTrue(mCreateRootTaskSpinner != null);
 
         Intent intent = getIntent();
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
@@ -189,16 +213,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
         }
         final int finalCount = count;
 
+        mCreateRootTaskSave.setEnabled(!TextUtils.isEmpty(mCreateRootTaskName.getText().toString().trim()));
         mCreateRootTaskSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String name = mCreateRootTaskName.getText().toString().trim();
-
-                if (TextUtils.isEmpty(name)) {
-                    MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.task_name_toast));
-                    messageDialogFragment.show(getSupportFragmentManager(), "empty_name");
-                    return;
-                }
 
                 ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
                 Assert.assertTrue(scheduleFragment != null);

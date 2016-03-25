@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -65,7 +67,27 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         mFirstLoad = (savedInstanceState == null);
 
         mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
+        Assert.assertTrue(mCreateChildTaskName != null);
+
+        mCreateChildTaskName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mCreateChildTaskSave.setEnabled(!TextUtils.isEmpty(s.toString().trim()));
+            }
+        });
+
         mCreateChildTaskSave = (Button) findViewById(R.id.create_child_task_save);
+        Assert.assertTrue(mCreateChildTaskSave != null);
 
         Intent intent = getIntent();
         if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
@@ -107,16 +129,11 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         if (mFirstLoad && data != null)
             mCreateChildTaskName.setText(data.Name);
 
+        mCreateChildTaskSave.setEnabled(!TextUtils.isEmpty(mCreateChildTaskName.getText().toString().trim()));
         mCreateChildTaskSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String name = mCreateChildTaskName.getText().toString().trim();
-
-                if (TextUtils.isEmpty(name)) {
-                    MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.task_name_toast));
-                    messageDialogFragment.show(getSupportFragmentManager(), "empty_name");
-                    return;
-                }
 
                 if (mParentTaskId != null) {
                     Assert.assertTrue(mChildTaskId == null);

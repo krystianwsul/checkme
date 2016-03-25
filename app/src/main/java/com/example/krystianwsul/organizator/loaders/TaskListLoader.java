@@ -24,7 +24,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext());
+        return DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext(), mTaskId);
     }
 
     public static class Data extends DomainLoader.Data {

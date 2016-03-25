@@ -12,13 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.loaders.ShowTaskFragmentLoader;
+import com.example.krystianwsul.organizator.loaders.TaskListLoader;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCallbacks<ShowTaskFragmentLoader.Data> {
+public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
     private static final String ALL_TASKS_KEY = "allTasks";
     private static final String TASK_ID_KEY = "taskId";
 
@@ -78,12 +78,12 @@ public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public Loader<ShowTaskFragmentLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new ShowTaskFragmentLoader(getActivity(), mTaskId);
+    public Loader<TaskListLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new TaskListLoader(getActivity(), mTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<ShowTaskFragmentLoader.Data> loader, final ShowTaskFragmentLoader.Data data) {
+    public void onLoadFinished(Loader<TaskListLoader.Data> loader, final TaskListLoader.Data data) {
         mTaskListFragmentFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,14 +92,14 @@ public class ShowTaskFragment extends Fragment implements LoaderManager.LoaderCa
         });
 
         ArrayList<TaskAdapter.Data> taskDatas = new ArrayList<>();
-        for (ShowTaskFragmentLoader.TaskData taskData : data.taskDatas)
+        for (TaskListLoader.TaskData taskData : data.taskDatas)
             taskDatas.add(new TaskAdapter.Data(taskData.TaskId, taskData.Name, null, taskData.HasChildTasks));
 
         mTaskListFragmentRecycler.setAdapter(new TaskAdapter(getActivity(), taskDatas, data.DataId, null));
     }
 
     @Override
-    public void onLoaderReset(Loader<ShowTaskFragmentLoader.Data> loader) {
+    public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
     }
 
     public void removeSelected() {

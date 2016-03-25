@@ -16,7 +16,6 @@ import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.ShowNotificationGroupLoader;
-import com.example.krystianwsul.organizator.loaders.ShowTaskFragmentLoader;
 import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 import com.example.krystianwsul.organizator.loaders.SingleScheduleLoader;
 import com.example.krystianwsul.organizator.loaders.TaskListLoader;
@@ -451,31 +450,29 @@ public class DomainFactory {
         return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId());
     }
 
-    public synchronized ShowTaskFragmentLoader.Data getShowTaskFragmentData(int taskId, Context context) {
-        Assert.assertTrue(context != null);
-
-        Task task = mTasks.get(taskId);
-        Assert.assertTrue(task != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        ArrayList<Task> childTasks = task.getChildTasks(now);
-        ArrayList<ShowTaskFragmentLoader.TaskData> taskDatas = new ArrayList<>();
-        for (Task childTask : childTasks)
-            taskDatas.add(new ShowTaskFragmentLoader.TaskData(childTask.getId(), childTask.getName(), null, !childTask.getChildTasks(now).isEmpty()));
-
-        return new ShowTaskFragmentLoader.Data(taskDatas);
-    }
-
-    public synchronized TaskListLoader.Data getTaskListData(Context context) {
+    public synchronized TaskListLoader.Data getTaskListData(Context context, Integer taskId) {
         Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        ArrayList<Task> tasks;
+
+        if (taskId != null) {
+            Task parentTask = mTasks.get(taskId);
+            Assert.assertTrue(parentTask != null);
+
+            tasks = parentTask.getChildTasks(now);
+            Assert.assertTrue(tasks != null);
+        } else {
+            tasks = new ArrayList<>();
+            for (Task rootTask : mTasks.values())
+                if (rootTask.current(now) && rootTask.isRootTask(now))
+                    tasks.add(rootTask);
+        }
 
         ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
-        for (Task task : mTasks.values())
-            if (task.current(now) && task.isRootTask(now))
-                taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty()));
+        for (Task task : tasks)
+            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty()));
 
         return new TaskListLoader.Data(taskDatas);
     }

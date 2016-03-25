@@ -85,10 +85,6 @@ public class WeeklySchedule extends Schedule {
 
         Date today = Date.today();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, 7);
-        Date nextWeek = new Date(calendar);
-
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         HourMinute nowHourMinute = new HourMinute(now.getCalendar());
 

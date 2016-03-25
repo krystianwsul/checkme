@@ -195,7 +195,7 @@ public class TickService extends IntentService {
                 if (timeStampComparison != 0)
                     return timeStampComparison;
 
-                return new Integer(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
+                return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
             }
         });
 

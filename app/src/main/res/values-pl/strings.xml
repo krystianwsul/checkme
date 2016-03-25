@@ -10,11 +10,9 @@
     <string name="action_times">Czasy</string>
     <string name="other">Inny</string>
     <string name="save">Zapisz</string>
-    <string name="task_name_toast">Proszę podać imię.</string>
     <string name="invalid_time_message">Czas musi być w przyszłości.</string>
     <string name="multiple_reminders">przypomnienia</string>
     <string name="join">Połącz</string>
-    <string name="two_tasks_message">Proszę wybrać co najmniej dwa zadania.</string>
     <string name="done">Zrobione</string>
     <string name="crash_toast_text">Błąd!</string>
     <string name="more">więcej</string>

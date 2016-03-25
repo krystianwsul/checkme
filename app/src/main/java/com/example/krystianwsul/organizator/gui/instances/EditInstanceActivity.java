@@ -122,7 +122,7 @@ public class EditInstanceActivity extends AppCompatActivity implements DatePicke
 
         HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
         for (EditInstanceLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
-            customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name, customTimeData.HourMinutes));
+            customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name));
         mEditInstanceTimePickerView.setCustomTimeDatas(customTimeDatas);
 
         if (mSavedInstanceState != null) {

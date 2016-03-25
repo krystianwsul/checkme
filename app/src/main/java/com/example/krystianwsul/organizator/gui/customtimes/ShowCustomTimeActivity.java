@@ -186,7 +186,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         return new ShowCustomTimeLoader(this, mCustomTimeId);
     }
 
-    public void updateGui() {
+    private void updateGui() {
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
             TextView timeView = mTimeViews.get(dayOfWeek);
             Assert.assertTrue(timeView != null);

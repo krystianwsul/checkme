@@ -21,7 +21,6 @@ public class CustomTime implements Time {
         mCustomTimeRecord = customTimeRecord;
     }
 
-    @Override
     public String getName() {
         return mCustomTimeRecord.getName();
     }

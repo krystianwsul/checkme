@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizator.domainmodel;
 import com.example.krystianwsul.organizator.persistencemodel.SingleScheduleDateTimeRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.NormalTime;
 import com.example.krystianwsul.organizator.utils.time.Time;
 
@@ -40,21 +39,6 @@ class SingleScheduleDateTime {
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
         }
-    }
-
-    Integer getCustomTimeId() {
-        return mSingleScheduleDateTimeRecord.getCustomTimeId();
-    }
-
-    HourMinute getHourMinute() {
-        Integer hour = mSingleScheduleDateTimeRecord.getHour();
-        Integer minute = mSingleScheduleDateTimeRecord.getMinute();
-
-        Assert.assertTrue((hour == null) == (minute == null));
-        if (hour == null)
-            return null;
-        else
-            return new HourMinute(hour, minute);
     }
 
     Date getDate() {

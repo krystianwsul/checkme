@@ -14,7 +14,7 @@
         android:id="@+id/create_root_task_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:text="@string/save"/>
 
     <EditText
@@ -22,7 +22,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/create_root_task_save"
-        android:singleLine="true" />
+        android:singleLine="true"
+        android:inputType="text"/>
 
     <Spinner
         android:id="@+id/create_root_task_spinner"

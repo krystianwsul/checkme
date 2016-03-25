@@ -5,7 +5,6 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
@@ -101,21 +100,17 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
     public static class CustomTimeData {
         public final int Id;
         public final String Name;
-        public final HashMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(int id, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        public CustomTimeData(int id, String name) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
-            Assert.assertTrue(hourMinutes.size() == 7);
 
             Id = id;
             Name = name;
-            HourMinutes = hourMinutes;
         }
 
         @Override
         public int hashCode() {
-            return (Id + Name.hashCode() + HourMinutes.hashCode());
+            return (Id + Name.hashCode());
         }
 
         @Override
@@ -131,7 +126,7 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
 
             CustomTimeData customTimeData = (CustomTimeData) object;
 
-            return (Id == customTimeData.Id && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
+            return (Id == customTimeData.Id && Name.equals(customTimeData.Name));
         }
     }
 }

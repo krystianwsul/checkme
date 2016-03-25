@@ -6,16 +6,16 @@ import android.text.TextUtils;
 import junit.framework.Assert;
 
 abstract class Record {
-    boolean mCreated;
+    private boolean mCreated;
     boolean mChanged = false;
 
     abstract ContentValues getContentValues();
 
-    protected Record(boolean created) {
+    Record(boolean created) {
         mCreated = created;
     }
 
-    protected InsertCommand getInsertCommand(String tableName) {
+    InsertCommand getInsertCommand(String tableName) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
 
         Assert.assertTrue(!mCreated);
@@ -26,7 +26,7 @@ abstract class Record {
         return new InsertCommand(tableName, getContentValues());
     }
 
-    protected UpdateCommand getUpdateCommand(String tableName, String idColumn, int id) {
+    UpdateCommand getUpdateCommand(String tableName, String idColumn, int id) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
         Assert.assertTrue(!TextUtils.isEmpty(idColumn));
 

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class Instance {
+class Instance {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
 
     private final WeakReference<Task> mTaskReference;
@@ -68,7 +68,7 @@ public class Instance {
         return task.getName();
     }
 
-    public Date getScheduleDate() {
+    private Date getScheduleDate() {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
 
         if (mInstanceRecord != null)
@@ -77,7 +77,7 @@ public class Instance {
             return mScheduleDateTime.getDate();
     }
 
-    public Time getScheduleTime() {
+    private Time getScheduleTime() {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
 
         if (mInstanceRecord != null) {
@@ -120,7 +120,7 @@ public class Instance {
         }
     }
 
-    public Time getInstanceTime() {
+    private Time getInstanceTime() {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
 
         if (mInstanceRecord != null) {
@@ -436,16 +436,7 @@ public class Instance {
         mInstanceRecord.setNotificationShown(notificationShown);
     }
 
-    private void resetNotification(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
-        Assert.assertTrue(mInstanceRecord != null);
-        Assert.assertTrue(isRootInstance(now));
-
-        mInstanceRecord.setNotified(false);
-    }
-
-    public Integer getScheduleCustomTimeId() {
+    private Integer getScheduleCustomTimeId() {
         Time scheduleTime = getScheduleTime();
         if (scheduleTime instanceof CustomTime)
             return ((CustomTime) scheduleTime).getId();
@@ -453,7 +444,7 @@ public class Instance {
             return null;
     }
 
-    public  HourMinute getScheduleHourMinute() {
+    private HourMinute getScheduleHourMinute() {
         Time scheduleTime = getScheduleTime();
         if (scheduleTime instanceof NormalTime)
             return ((NormalTime) scheduleTime).getHourMinute();
@@ -461,7 +452,7 @@ public class Instance {
             return null;
     }
 
-    Integer getInstanceCustomTimeId() {
+    private Integer getInstanceCustomTimeId() {
         Time instanceTime = getInstanceTime();
         if (instanceTime instanceof CustomTime)
             return ((CustomTime) instanceTime).getId();
@@ -469,7 +460,7 @@ public class Instance {
             return null;
     }
 
-    HourMinute getInstanceHourMinute() {
+    private HourMinute getInstanceHourMinute() {
         Time instanceTime = getInstanceTime();
         if (instanceTime instanceof NormalTime)
             return ((NormalTime) instanceTime).getHourMinute();

@@ -21,13 +21,11 @@ class InsertCommand implements Parcelable {
         mContentValues = contentValues;
     }
 
-    public long execute(SQLiteDatabase sqLiteDatabase) {
+    public void execute(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
         long id = sqLiteDatabase.insert(mTableName, null, mContentValues);
         Assert.assertTrue(id != -1);
-
-        return id;
     }
 
     @Override

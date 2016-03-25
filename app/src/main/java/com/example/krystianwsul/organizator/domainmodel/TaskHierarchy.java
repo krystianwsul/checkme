@@ -39,7 +39,7 @@ class TaskHierarchy {
         return mChildTask;
     }
 
-    public ExactTimeStamp getStartExactTimeStamp() {
+    private ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mTaskHierarchyRecord.getStartTime());
     }
 

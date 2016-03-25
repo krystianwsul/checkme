@@ -8,10 +8,10 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import junit.framework.Assert;
 
 public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTaskLoader<D> {
-    protected D mData;
-    protected Observer mObserver;
+    private D mData;
+    private Observer mObserver;
 
-    public DomainLoader(Context context) {
+    DomainLoader(Context context) {
         super(context);
     }
 

@@ -15,10 +15,6 @@ public class NormalTime implements Time {
         mHourMinute = new HourMinute(hour, minute);
     }
 
-    public String getName() {
-        return mHourMinute.getHour() + ":" + mHourMinute.getMinute();
-    }
-
     public HourMinute getHourMinute(DayOfWeek dayOfWeek) {
         return mHourMinute;
     }

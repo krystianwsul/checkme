@@ -264,7 +264,7 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
             HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
             for (WeeklyScheduleLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
-                customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name, customTimeData.HourMinutes));
+                customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name));
             weeklyScheduleTime.setCustomTimeDatas(customTimeDatas);
 
             ImageView weeklyScheduleImage = (ImageView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_image);

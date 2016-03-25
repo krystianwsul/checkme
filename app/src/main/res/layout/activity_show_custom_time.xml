@@ -14,7 +14,7 @@
         android:id="@+id/custom_time_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:text="@string/save"/>
 
     <EditText
@@ -22,7 +22,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:layout_below="@id/custom_time_save"/>
+        android:layout_below="@id/custom_time_save"
+        android:inputType="text"/>
 
     <GridLayout
         android:layout_width="fill_parent"

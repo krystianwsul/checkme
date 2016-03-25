@@ -11,7 +11,6 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
@@ -23,7 +22,6 @@ import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener {
     private ViewPager mViewPager;
-    private MyFragmentPagerAdapter mMyFragmentPagerAdapter;
 
     private ViewPager.OnPageChangeListener mOnPageChangeListener;
 
@@ -44,8 +42,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         mViewPager = (ViewPager) findViewById(R.id.list_fragment_pager);
         Assert.assertTrue(mViewPager != null);
 
-        mMyFragmentPagerAdapter = new MyFragmentPagerAdapter();
-        mViewPager.setAdapter(mMyFragmentPagerAdapter);
+        MyFragmentPagerAdapter myFragmentPagerAdapter = new MyFragmentPagerAdapter();
+        mViewPager.setAdapter(myFragmentPagerAdapter);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -92,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     private class MyFragmentPagerAdapter extends FragmentPagerAdapter {
-        private Fragment mFragment;
-
         public MyFragmentPagerAdapter() {
             super(MainActivity.this.getSupportFragmentManager());
         }
@@ -116,17 +112,6 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         @Override
         public int getCount() {
             return 2;
-        }
-
-        @Override
-        public void setPrimaryItem(ViewGroup viewGroup, int position, Object object) {
-            mFragment = (Fragment) object;
-            super.setPrimaryItem(viewGroup, position, object);
-        }
-
-        public Fragment getFragment() {
-            Assert.assertTrue(mFragment != null);
-            return mFragment;
         }
     }
 

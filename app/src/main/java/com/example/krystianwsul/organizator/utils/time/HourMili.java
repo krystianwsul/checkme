@@ -43,22 +43,22 @@ public class HourMili implements Comparable<HourMili>, Parcelable {
     }
 
     public int compareTo(@NonNull HourMili hourMili) {
-        int comparisonHour = (new Integer(mHour)).compareTo(hourMili.getHour());
+        int comparisonHour = Integer.valueOf(mHour).compareTo(hourMili.getHour());
 
         if (comparisonHour != 0)
             return comparisonHour;
 
-        int comparisonMinute = (new Integer(mMinute)).compareTo(hourMili.getMinute());
+        int comparisonMinute = Integer.valueOf(mMinute).compareTo(hourMili.getMinute());
 
         if (comparisonMinute != 0)
             return comparisonMinute;
 
-        int comparisonSecond = (new Integer(mSecond)).compareTo(hourMili.getSecond());
+        int comparisonSecond = Integer.valueOf(mSecond).compareTo(hourMili.getSecond());
 
         if (comparisonSecond != 0)
             return comparisonSecond;
 
-        return (new Integer(mMili)).compareTo(hourMili.getMili());
+        return Integer.valueOf(mMili).compareTo(hourMili.getMili());
     }
 
     @Override

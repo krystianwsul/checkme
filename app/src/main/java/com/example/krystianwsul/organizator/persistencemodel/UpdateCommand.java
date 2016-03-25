@@ -9,9 +9,9 @@ import android.text.TextUtils;
 import junit.framework.Assert;
 
 public class UpdateCommand implements Parcelable {
-    public final String mTableName;
-    public final ContentValues mContentValues;
-    public final String mWhereClause;
+    private final String mTableName;
+    private final ContentValues mContentValues;
+    private final String mWhereClause;
 
     public UpdateCommand(String tableName, ContentValues contentValues, String whereClause) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));

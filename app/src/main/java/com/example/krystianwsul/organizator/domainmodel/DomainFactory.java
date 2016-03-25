@@ -66,8 +66,8 @@ public class DomainFactory {
 
     private final ArrayList<WeakReference<DomainLoader.Observer>> mObservers = new ArrayList<>();
 
-    private ExactTimeStamp mStart;
-    private ExactTimeStamp mRead;
+    private final ExactTimeStamp mStart;
+    private final ExactTimeStamp mRead;
     private ExactTimeStamp mStop;
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
@@ -407,7 +407,7 @@ public class DomainFactory {
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
         HashMap<Integer, DailyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes)
-            customTimeDatas.put(customTime.getId(), new DailyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getId(), new DailyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName()));
 
         return new DailyScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
@@ -434,7 +434,7 @@ public class DomainFactory {
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
         HashMap<Integer, WeeklyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes)
-            customTimeDatas.put(customTime.getId(), new WeeklyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getId(), new WeeklyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName()));
 
         return new WeeklyScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
@@ -1333,7 +1333,7 @@ public class DomainFactory {
         Collections.sort(childTasks, new Comparator<Task>() {
             @Override
             public int compare(Task lhs, Task rhs) {
-                return  new Integer(lhs.getId()).compareTo(rhs.getId());
+                return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
             }
         });
 

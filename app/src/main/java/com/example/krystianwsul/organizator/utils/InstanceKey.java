@@ -23,15 +23,6 @@ public class InstanceKey implements Parcelable {
         ScheduleTimePair = new TimePair(scheduleCustomTimeId, scheduleHourMinute);
     }
 
-    public InstanceKey(int taskId, Date scheduleDate, TimePair scheduleTimePair) {
-        Assert.assertTrue(scheduleDate != null);
-        Assert.assertTrue(scheduleTimePair != null);
-
-        TaskId = taskId;
-        ScheduleDate = scheduleDate;
-        ScheduleTimePair = scheduleTimePair;
-    }
-
     @Override
     public int hashCode() {
         return TaskId + ScheduleDate.hashCode() + (ScheduleTimePair.CustomTimeId != null ? ScheduleTimePair.CustomTimeId : 0) + (ScheduleTimePair.HourMinute != null ? ScheduleTimePair.HourMinute.hashCode() : 0);

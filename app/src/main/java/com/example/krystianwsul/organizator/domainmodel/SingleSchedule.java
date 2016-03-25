@@ -4,12 +4,10 @@ import android.content.Context;
 
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMili;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.TimePair;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -52,14 +50,13 @@ public class SingleSchedule extends Schedule {
     }
 
     Instance getInstance(Task task) {
-        Assert.assertTrue(task != null);
-
         Assert.assertTrue(mSingleScheduleDateTime != null);
+        Assert.assertTrue(task != null);
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        Instance instance = domainFactory.getInstance(task, getDateTime());
+        Instance instance = domainFactory.getInstance(task, mSingleScheduleDateTime.getDateTime());
         Assert.assertTrue(instance != null);
 
         return instance;
@@ -94,28 +91,12 @@ public class SingleSchedule extends Schedule {
         return instances;
     }
 
-    public DateTime getDateTime() {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
-        return mSingleScheduleDateTime.getDateTime();
-    }
-
-    public Integer getCustomTimeId() {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
-        return mSingleScheduleDateTime.getCustomTimeId();
-    }
-
-    public HourMinute getHourMinute() {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
-        return mSingleScheduleDateTime.getHourMinute();
-    }
-
-    public TimePair getTimePair() {
-        return new TimePair(getCustomTimeId(), getHourMinute());
-    }
-
     @Override
     protected TimeStamp getNextAlarm(ExactTimeStamp now) {
-        TimeStamp timeStamp = getDateTime().getTimeStamp();
+        Assert.assertTrue(mSingleScheduleDateTime != null);
+        Assert.assertTrue(now != null);
+
+        TimeStamp timeStamp = mSingleScheduleDateTime.getDateTime().getTimeStamp();
         if (timeStamp.toExactTimeStamp().compareTo(now) > 0)
             return timeStamp;
         else

@@ -261,7 +261,7 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
             HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
             for (DailyScheduleLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
-                customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name, customTimeData.HourMinutes));
+                customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name));
             dailyScheduleTime.setCustomTimeDatas(customTimeDatas);
 
             ImageView dailyScheduleImage = (ImageView) dailyScheduleRow.findViewById(R.id.daily_schedule_image);

@@ -226,7 +226,7 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
         HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
         for (SingleScheduleLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
-            customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name, customTimeData.HourMinutes));
+            customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name));
         mTimePickerView.setCustomTimeDatas(customTimeDatas);
 
         if (mSavedInstanceState == null && args != null) {

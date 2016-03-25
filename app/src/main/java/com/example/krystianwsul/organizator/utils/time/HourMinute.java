@@ -34,12 +34,12 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable {
     }
 
     public int compareTo(@NonNull HourMinute hourMinute) {
-        int comparisonHour = (new Integer(mHour)).compareTo(hourMinute.getHour());
+        int comparisonHour = Integer.valueOf(mHour).compareTo(hourMinute.getHour());
 
         if (comparisonHour != 0)
             return comparisonHour;
 
-        return (new Integer(mMinute)).compareTo(hourMinute.getMinute());
+        return Integer.valueOf(mMinute).compareTo(hourMinute.getMinute());
     }
 
     @Override

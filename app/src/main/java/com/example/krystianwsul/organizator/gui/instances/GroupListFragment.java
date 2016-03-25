@@ -39,7 +39,6 @@ import java.util.TreeMap;
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private final static String EXPANDED_KEY = "expanded";
 
-    private LinearLayout mGroupListToggle;
     private ImageView mGroupListExpand;
 
     private RecyclerView mGroupListNotDone;
@@ -64,13 +63,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mExpanded = savedInstanceState.getBoolean(EXPANDED_KEY);
         }
 
-        mGroupListToggle = (LinearLayout) view.findViewById(R.id.group_list_toggle);
-        Assert.assertTrue(mGroupListToggle != null);
+        LinearLayout groupListToggle = (LinearLayout) view.findViewById(R.id.group_list_toggle);
+        Assert.assertTrue(groupListToggle != null);
 
         mGroupListExpand = (ImageView) view.findViewById(R.id.group_list_expand);
         Assert.assertTrue(mGroupListExpand != null);
 
-        mGroupListToggle.setOnClickListener(new View.OnClickListener() {
+        groupListToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpanded = !mExpanded;

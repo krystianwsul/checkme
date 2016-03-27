@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizator.gui.customtimes;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -15,9 +14,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.tasks.HourMinutePickerFragment;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -26,7 +25,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowCustomTimeActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.Data> {
+public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.Data> {
     private static final String CUSTOM_TIME_ID_KEY = "customTimeId";
     private static final String NEW_KEY = "new";
 
@@ -37,6 +36,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
     private static final String HOUR_MINUTE_THURSDAY_KEY = "hourMinuteThursday";
     private static final String HOUR_MINUTE_FRIDAY_KEY = "hourMinuteFriday";
     private static final String HOUR_MINUTE_SATURDAY_KEY = "hourMinuteSaturday";
+
+    private static final String TIME_PICKER_TAG = "timePicker";
 
     public static Intent getEditIntent(int customTimeId, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
@@ -171,22 +172,25 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
         outState.putParcelable(HOUR_MINUTE_SATURDAY_KEY, mHourMinutes.get(DayOfWeek.SATURDAY));
     }
 
-    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-        Assert.assertTrue(editedDayOfWeek != null);
-        Assert.assertTrue(mTimeViews.containsKey(editedDayOfWeek));
-        Assert.assertTrue(mHourMinutes.containsKey(editedDayOfWeek));
-
-        mHourMinutes.put(editedDayOfWeek, hourMinute);
-        mTimeViews.get(editedDayOfWeek).setText(hourMinute.toString());
-    }
-
     @Override
     public Loader<ShowCustomTimeLoader.Data> onCreateLoader(int id, Bundle args) {
         return new ShowCustomTimeLoader(this, mCustomTimeId);
     }
 
     private void updateGui() {
+        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                Assert.assertTrue(editedDayOfWeek != null);
+                Assert.assertTrue(mTimeViews.containsKey(editedDayOfWeek));
+                Assert.assertTrue(mHourMinutes.containsKey(editedDayOfWeek));
+
+                HourMinute hourMinute = new HourMinute(hourOfDay, minute);
+                mHourMinutes.put(editedDayOfWeek, hourMinute);
+                mTimeViews.get(editedDayOfWeek).setText(hourMinute.toString());
+            }
+        };
+
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
             TextView timeView = mTimeViews.get(dayOfWeek);
             Assert.assertTrue(timeView != null);
@@ -204,12 +208,16 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements HourMin
 
                     HourMinute hourMinute = mHourMinutes.get(finalDayOfWeek);
 
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(ShowCustomTimeActivity.this, hourMinute);
-                    hourMinutePickerFragment.show(fragmentManager, "tag");
+                    RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
+                    radialTimePickerDialogFragment.setStartTime(hourMinute.getHour(), hourMinute.getMinute());
+                    radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
+                    radialTimePickerDialogFragment.show(getSupportFragmentManager(), TIME_PICKER_TAG);
                 }
             });
         }
+        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
+        if (radialTimePickerDialogFragment != null)
+            radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
 
         mCustomTimeSave.setEnabled(!TextUtils.isEmpty(mCustomTimeName.getText().toString().trim()));
         mCustomTimeSave.setOnClickListener(new View.OnClickListener() {

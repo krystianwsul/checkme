@@ -1,9 +1,7 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
@@ -12,6 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
+import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.SingleScheduleLoader;
@@ -23,12 +24,16 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
-public class SingleScheduleFragment extends Fragment implements DatePickerFragment.DatePickerFragmentListener, HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
+public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
     private static final String YEAR_KEY = "year";
     private static final String MONTH_KEY = "month";
     private static final String DAY_KEY = "day";
+
+    private static final String DATE_FRAGMENT_TAG = "dateFragment";
+    private static final String TIME_PICKER_TAG = "timePicker";
 
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
@@ -57,20 +62,12 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        Assert.assertTrue(context instanceof DatePickerFragment.DatePickerFragmentListener);
-        Assert.assertTrue(context instanceof HourMinutePickerFragment.HourMinutePickerFragmentListener);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_single_schedule, container, false);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         mSavedInstanceState = savedInstanceState;
@@ -86,6 +83,14 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         Assert.assertTrue(view != null);
 
         mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
+        Assert.assertTrue(mTimePickerView != null);
+
+        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                mTimePickerView.setHourMinute(new HourMinute(hourOfDay, minute));
+            }
+        };
         mTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
             public void onCustomTimeSelected(int customTimeId) {
@@ -97,21 +102,40 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
 
             @Override
             public void onHourMinuteClick() {
-                FragmentManager fragmentManager = getChildFragmentManager();
-                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(getActivity(), mTimePickerView.getHourMinute());
-                hourMinutePickerFragment.show(fragmentManager, "time");
+                RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
+                HourMinute startTime = mTimePickerView.getHourMinute();
+                radialTimePickerDialogFragment.setStartTime(startTime.getHour(), startTime.getMinute());
+                radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
+                radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
             }
         });
+        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
+        if (radialTimePickerDialogFragment != null)
+            radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
 
         mDateView = (TextView) view.findViewById(R.id.single_schedule_date);
+        Assert.assertTrue(mDateView != null);
+
+        final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = new CalendarDatePickerDialogFragment.OnDateSetListener() {
+            @Override
+            public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
+                mDate = new Date(year, monthOfYear + 1, dayOfMonth);
+                updateDateText();
+            }
+        };
         mDateView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fragmentManager = getChildFragmentManager();
-                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(getActivity(), mDate);
-                datePickerFragment.show(fragmentManager, "date");
+                CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = new CalendarDatePickerDialogFragment();
+                calendarDatePickerDialogFragment.setDateRange(new MonthAdapter.CalendarDay(Calendar.getInstance()), null);
+                calendarDatePickerDialogFragment.setPreselectedDate(mDate.getYear(), mDate.getMonth() - 1, mDate.getDay());
+                calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+                calendarDatePickerDialogFragment.show(getChildFragmentManager(), DATE_FRAGMENT_TAG);
             }
         });
+        CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = (CalendarDatePickerDialogFragment) getChildFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
+        if (calendarDatePickerDialogFragment != null)
+            calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -132,20 +156,6 @@ public class SingleScheduleFragment extends Fragment implements DatePickerFragme
         Assert.assertTrue(mDateView != null);
 
         mDateView.setText(mDate.getDisplayText(getContext()));
-    }
-
-    @Override
-    public void onDatePickerFragmentResult(Date date) {
-        Assert.assertTrue(date != null);
-
-        mDate = date;
-        updateDateText();
-    }
-
-    @Override
-    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-        mTimePickerView.setHourMinute(hourMinute);
     }
 
     @Override

@@ -21,14 +21,12 @@ import android.widget.Spinner;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.utils.ScheduleType;
-import com.example.krystianwsul.organizator.utils.time.Date;
-import com.example.krystianwsul.organizator.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class CreateRootTaskActivity extends AppCompatActivity implements HourMinutePickerFragment.HourMinutePickerFragmentListener, DatePickerFragment.DatePickerFragmentListener, LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
+public class CreateRootTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
@@ -116,26 +114,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements HourMin
             if (savedInstanceState == null)
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
-    }
-
-    @Override
-    public void onDatePickerFragmentResult(Date date) {
-        Assert.assertTrue(date != null);
-
-        DatePickerFragment.DatePickerFragmentListener datePickerFragmentListener = (DatePickerFragment.DatePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-        Assert.assertTrue(datePickerFragmentListener != null);
-
-        datePickerFragmentListener.onDatePickerFragmentResult(date);
-    }
-
-    @Override
-    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-
-        HourMinutePickerFragment.HourMinutePickerFragmentListener hourMinutePickerFragmentListener = (HourMinutePickerFragment.HourMinutePickerFragmentListener) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-        Assert.assertTrue(hourMinutePickerFragmentListener != null);
-
-        hourMinutePickerFragmentListener.onHourMinutePickerFragmentResult(hourMinute);
     }
 
     private void loadFragment(int position) {

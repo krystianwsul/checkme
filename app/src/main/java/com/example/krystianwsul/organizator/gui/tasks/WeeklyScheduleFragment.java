@@ -6,7 +6,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
@@ -21,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.WeeklyScheduleLoader;
@@ -35,10 +35,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class WeeklyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<WeeklyScheduleLoader.Data> {
+public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<WeeklyScheduleLoader.Data> {
     private static final String DATE_TIME_ENTRY_KEY = "dateTimeEntries";
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
+    private static final String TIME_PICKER_TAG = "timePicker";
 
     private int mHourMinutePickerPosition = -1;
 
@@ -49,6 +51,20 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
     private Integer mRootTaskId;
     private WeeklyScheduleLoader.Data mData;
+
+    private RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+            Assert.assertTrue(mHourMinutePickerPosition != -1);
+
+            DayOfWeekTimeEntry dayOfWeekTimeEntry = mDayOfWeekTimeEntryAdapter.getDateTimeEntry(mHourMinutePickerPosition);
+
+            dayOfWeekTimeEntry.setTimePair(new TimePair(new HourMinute(hourOfDay, minute)));
+            mDayOfWeekTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
+
+            mHourMinutePickerPosition = -1;
+        }
+    };
 
     public static WeeklyScheduleFragment newInstance() {
         return new WeeklyScheduleFragment();
@@ -62,13 +78,6 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         weeklyScheduleFragment.setArguments(args);
         return weeklyScheduleFragment;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        Assert.assertTrue(context instanceof HourMinutePickerFragment.HourMinutePickerFragmentListener);
     }
 
     @Override
@@ -87,8 +96,6 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
 
         mDailyScheduleTimes = (RecyclerView) view.findViewById(R.id.weekly_schedule_datetimes);
         mDailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
-
-
 
         Bundle args = getArguments();
         if (args != null) {
@@ -145,22 +152,14 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
             mHourMinutePickerPosition = -1;
         }
         mDailyScheduleTimes.setAdapter(mDayOfWeekTimeEntryAdapter);
+
+        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
+        if (radialTimePickerDialogFragment != null)
+            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
     }
 
     @Override
     public void onLoaderReset(Loader<WeeklyScheduleLoader.Data> loader) {
-    }
-
-    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-        Assert.assertTrue(mHourMinutePickerPosition != -1);
-
-        DayOfWeekTimeEntry dayOfWeekTimeEntry = mDayOfWeekTimeEntryAdapter.getDateTimeEntry(mHourMinutePickerPosition);
-
-        dayOfWeekTimeEntry.setTimePair(new TimePair(hourMinute));
-        mDayOfWeekTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
-
-        mHourMinutePickerPosition = -1;
     }
 
     @Override
@@ -394,9 +393,11 @@ public class WeeklyScheduleFragment extends Fragment implements HourMinutePicker
                 DayOfWeekTimeEntry dayOfWeekTimeEntry = mDateTimeEntries.get(mHourMinutePickerPosition);
                 Assert.assertTrue(dayOfWeekTimeEntry != null);
 
-                FragmentManager fragmentManager = getChildFragmentManager();
-                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(getActivity(), dayOfWeekTimeEntry.getHourMinute());
-                hourMinutePickerFragment.show(fragmentManager, "time");
+                RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
+                HourMinute startTime = dayOfWeekTimeEntry.getHourMinute();
+                radialTimePickerDialogFragment.setStartTime(startTime.getHour(), startTime.getMinute());
+                radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
+                radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
             }
 
             public void delete() {

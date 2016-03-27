@@ -6,7 +6,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
@@ -30,10 +30,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DailyScheduleFragment extends Fragment implements HourMinutePickerFragment.HourMinutePickerFragmentListener, ScheduleFragment, LoaderManager.LoaderCallbacks<DailyScheduleLoader.Data> {
+public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<DailyScheduleLoader.Data> {
     private static final String TIME_ENTRY_KEY = "timeEntries";
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
+    private static final String TIME_PICKER_TAG = "timePicker";
 
     private int mHourMinutePickerPosition = -1;
 
@@ -44,6 +46,21 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
     private Integer mRootTaskId;
     private DailyScheduleLoader.Data mData;
+
+    private RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+            Assert.assertTrue(mHourMinutePickerPosition != -1);
+
+            TimeEntry timeEntry = mTimeEntryAdapter.getTimeEntry(mHourMinutePickerPosition);
+            Assert.assertTrue(timeEntry != null);
+
+            timeEntry.setTimePair(new TimePair(new HourMinute(hourOfDay, minute)));
+            mTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
+
+            mHourMinutePickerPosition = -1;
+        }
+    };
 
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
@@ -57,13 +74,6 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
 
         dailyScheduleFragment.setArguments(args);
         return dailyScheduleFragment;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        Assert.assertTrue(context instanceof HourMinutePickerFragment.HourMinutePickerFragmentListener);
     }
 
     @Override
@@ -138,23 +148,14 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
             mHourMinutePickerPosition = -1;
         }
         mDailyScheduleTimes.setAdapter(mTimeEntryAdapter);
+
+        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
+        if (radialTimePickerDialogFragment != null)
+            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
     }
 
     @Override
     public void onLoaderReset(Loader<DailyScheduleLoader.Data> loader) {
-    }
-
-    public void onHourMinutePickerFragmentResult(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-        Assert.assertTrue(mHourMinutePickerPosition != -1);
-
-        TimeEntry timeEntry = mTimeEntryAdapter.getTimeEntry(mHourMinutePickerPosition);
-        Assert.assertTrue(timeEntry != null);
-
-        timeEntry.setTimePair(new TimePair(hourMinute));
-        mTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
-
-        mHourMinutePickerPosition = -1;
     }
 
     @Override
@@ -357,9 +358,11 @@ public class DailyScheduleFragment extends Fragment implements HourMinutePickerF
                 TimeEntry timeEntry = mTimeEntries.get(mHourMinutePickerPosition);
                 Assert.assertTrue(timeEntry != null);
 
-                FragmentManager fragmentManager = getChildFragmentManager();
-                HourMinutePickerFragment hourMinutePickerFragment = HourMinutePickerFragment.newInstance(getActivity(), timeEntry.getHourMinute());
-                hourMinutePickerFragment.show(fragmentManager, "time");
+                RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
+                HourMinute startTime = timeEntry.getHourMinute();
+                radialTimePickerDialogFragment.setStartTime(startTime.getHour(), startTime.getMinute());
+                radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
+                radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
             }
 
             public void delete() {

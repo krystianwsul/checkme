@@ -26,6 +26,8 @@ public class DebugActivity extends AppCompatActivity {
         setContentView(R.layout.activity_debug);
 
         Button debugException = (Button) findViewById(R.id.debug_exception);
+        Assert.assertTrue(debugException != null);
+
         debugException.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,5 +51,10 @@ public class DebugActivity extends AppCompatActivity {
                 TickService.startService(DebugActivity.this);
             }
         });
+
+        TextView debugRecords = (TextView) findViewById(R.id.debug_records);
+        Assert.assertTrue(debugRecords != null);
+
+        debugRecords.setText("tasks: " + domainFactory.getTaskCount() + ", instances: " + domainFactory.getInstanceCount());
     }
 }

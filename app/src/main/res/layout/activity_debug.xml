@@ -27,4 +27,9 @@
         android:text="tick"
         android:id="@+id/debug_tick"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/debug_records"/>
+
 </LinearLayout>

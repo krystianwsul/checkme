@@ -171,6 +171,14 @@ public class DomainFactory {
         return (mStop.getLong() - mStart.getLong());
     }
 
+    public int getTaskCount() {
+        return mTasks.size();
+    }
+
+    public int getInstanceCount() {
+        return mExistingInstances.size();
+    }
+
     private void save(int dataId) {
         mPersistenceManager.save();
         notifyDomainObservers(dataId);

@@ -39,6 +39,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private Integer mTaskId;
 
+    private TaskListLoader.Data mData;
+
     private TaskAdapter mTaskAdapter;
 
     private ActionMode mActionMode;
@@ -114,6 +116,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
+        mData = data;
+
         mTaskListFragmentFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,6 +134,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
+    }
+
+    public int getDataId() {
+        Assert.assertTrue(mData != null);
+        return mData.DataId;
     }
 
     private class TaskEditCallback implements ActionMode.Callback {

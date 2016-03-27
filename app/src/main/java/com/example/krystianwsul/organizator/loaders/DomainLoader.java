@@ -7,6 +7,8 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
+
 public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTaskLoader<D> {
     private D mData;
     private Observer mObserver;
@@ -63,8 +65,8 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     }
 
     public class Observer {
-        public void onDomainChanged(int dataId) {
-            if (mData != null && dataId == mData.DataId)
+        public void onDomainChanged(ArrayList<Integer> dataIds) {
+            if (mData != null && dataIds.contains(mData.DataId))
                 return;
 
             onContentChanged();

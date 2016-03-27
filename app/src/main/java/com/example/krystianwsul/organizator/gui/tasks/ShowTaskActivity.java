@@ -15,9 +15,12 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
+import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 
 import junit.framework.Assert;
+
+import java.util.ArrayList;
 
 public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
     private TextView mTasksHeadingLabel;
@@ -71,10 +74,18 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
                     startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
                 else
                     startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
-                return true;
+                break;
+            case R.id.task_menu_delete:
+                ArrayList<Integer> dataIds = new ArrayList<>();
+                dataIds.add(mData.DataId);
+                dataIds.add(((TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment)).getDataId());
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(dataIds, mData.TaskId);
+                finish();
+                break;
             default:
-                return super.onOptionsItemSelected(item);
+                throw new UnsupportedOperationException();
         }
+        return true;
     }
 
     @Override

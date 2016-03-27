@@ -89,7 +89,7 @@ public class DomainFactory {
         sDomainFactory = null;
         mPersistenceManager.reset();
 
-        notifyDomainObservers(0);
+        notifyDomainObservers(new ArrayList<Integer>());
 
         mObservers.clear();
     }
@@ -180,11 +180,21 @@ public class DomainFactory {
     }
 
     private void save(int dataId) {
-        mPersistenceManager.save();
-        notifyDomainObservers(dataId);
+        ArrayList<Integer> dataIds = new ArrayList<>();
+        dataIds.add(dataId);
+        save(dataIds);
     }
 
-    private void notifyDomainObservers(int dataId) {
+    private void save(ArrayList<Integer> dataIds) {
+        Assert.assertTrue(dataIds != null);
+
+        mPersistenceManager.save();
+        notifyDomainObservers(dataIds);
+    }
+
+    private void notifyDomainObservers(ArrayList<Integer> dataIds) {
+        Assert.assertTrue(dataIds != null);
+
         ArrayList<WeakReference<DomainLoader.Observer>> remove = new ArrayList<>();
 
         for (WeakReference<DomainLoader.Observer> reference : mObservers) {
@@ -194,7 +204,7 @@ public class DomainFactory {
             if (observer == null)
                 remove.add(reference);
             else
-                observer.onDomainChanged(dataId);
+                observer.onDomainChanged(dataIds);
         }
 
         for (WeakReference<DomainLoader.Observer> reference : remove)
@@ -908,6 +918,22 @@ public class DomainFactory {
         childTask.setName(name);
 
         save(dataId);
+    }
+
+    public synchronized void setTaskEndTimeStamp(ArrayList<Integer> dataIds, int taskId) {
+        Assert.assertTrue(dataIds != null);
+        Assert.assertTrue(!dataIds.isEmpty());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        Assert.assertTrue(task.current(now));
+
+        task.setEndExactTimeStamp(now);
+
+        save(dataIds);
     }
 
     public synchronized void setTaskEndTimeStamps(int dataId, ArrayList<Integer> taskIds) {

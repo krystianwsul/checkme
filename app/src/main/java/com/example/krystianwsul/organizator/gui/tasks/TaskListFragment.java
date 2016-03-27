@@ -17,8 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -226,32 +224,22 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
             TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
             ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
-            CheckBox taskRowCheckBox = (CheckBox) showTaskRow.findViewById(R.id.task_row_checkbox);
 
-            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage, taskRowCheckBox);
+            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage);
         }
 
         @Override
         public void onBindViewHolder(final TaskHolder taskHolder, int position) {
             TaskWrapper taskWrapper = mTaskWrappers.get(position);
 
-            taskHolder.mTaskRowCheckBox.setChecked(taskWrapper.mSelected);
-            taskHolder.mTaskRowCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    taskHolder.onCheckedChanged(isChecked);
+            if (taskWrapper.mSelected)
+                taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
 
-                    ArrayList<Integer> taskIds = getSelected();
-                    if (taskIds.isEmpty()) {
-                        if (mActionMode != null)
-                            mActionMode.finish();
-                    } else {
-                        if (mActionMode == null)
-                            ((AppCompatActivity) getActivity()).startSupportActionMode(new TaskEditCallback());
-                        else {
-                            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
-                        }
-                    }
+            taskHolder.mShowTaskRow.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    taskHolder.onLongClick();
+                    return true;
                 }
             });
 
@@ -271,7 +259,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             taskHolder.mShowTaskRow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    taskHolder.onRowClick();
+                    if (mActionMode != null)
+                        taskHolder.onLongClick();
+                    else
+                        taskHolder.onRowClick();
                 }
             });
         }
@@ -326,21 +317,18 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             public final TextView mTaskRowName;
             public final TextView mTaskRowDetails;
             public final ImageView mTaskRowImg;
-            public final CheckBox mTaskRowCheckBox;
 
-            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg, CheckBox taskRowCheckBox) {
+            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg) {
                 super(showTaskRow);
 
                 Assert.assertTrue(taskRowName != null);
                 Assert.assertTrue(taskRowDetails != null);
                 Assert.assertTrue(taskRowImg != null);
-                Assert.assertTrue(taskRowCheckBox != null);
 
                 mShowTaskRow = showTaskRow;
                 mTaskRowName = taskRowName;
                 mTaskRowDetails = taskRowDetails;
                 mTaskRowImg = taskRowImg;
-                mTaskRowCheckBox = taskRowCheckBox;
             }
 
             public void onRowClick() {
@@ -350,13 +338,29 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 getActivity().startActivity(ShowTaskActivity.getIntent(taskWrapper.mTaskData.TaskId, getActivity()));
             }
 
-            public void onCheckedChanged(boolean checked) {
+            public void onLongClick() {
                 int position = getAdapterPosition();
 
                 TaskWrapper taskWrapper = mTaskWrappers.get(position);
                 Assert.assertTrue(taskWrapper != null);
 
-                taskWrapper.mSelected = checked;
+                taskWrapper.mSelected = !taskWrapper.mSelected;
+
+                if (taskWrapper.mSelected)
+                    mShowTaskRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
+                else
+                    mShowTaskRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.bpTransparent));
+
+                ArrayList<Integer> taskIds = getSelected();
+                if (taskIds.isEmpty()) {
+                    if (mActionMode != null)
+                        mActionMode.finish();
+                } else {
+                    if (mActionMode == null)
+                        ((AppCompatActivity) getActivity()).startSupportActionMode(new TaskEditCallback());
+                    else
+                        mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
+                }
             }
         }
     }

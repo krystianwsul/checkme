@@ -35,7 +35,7 @@ public class TickService extends IntentService {
 
     // DON'T HOLD STATE IN STATIC VARIABLES
 
-    public static synchronized void register(Context context) {
+    public static void register(Context context) {
         context.startService(getIntent(context, true, true));
     }
 

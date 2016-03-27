@@ -476,7 +476,8 @@ public class DomainFactory {
                 return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
             }
         });
-        Collections.reverse(tasks);
+        if (taskId == null)
+            Collections.reverse(tasks);
 
         ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
         for (Task task : tasks)

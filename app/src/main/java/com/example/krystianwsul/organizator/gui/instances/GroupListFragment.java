@@ -525,7 +525,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 group.addInstanceData(instanceData);
                 mGroups.add(group);
 
-                notifyItemInserted(mGroups.size() - 1);
+                Collections.sort(mGroups, sComparator);
+
+                int position = mGroups.indexOf(group);
+
+                notifyItemInserted(mNotDoneGroupContainer.size() + 1 + position);
             }
 
             public void remove(Group group) {

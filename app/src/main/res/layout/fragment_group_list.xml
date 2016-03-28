@@ -1,27 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:id="@+id/group_list_recycler"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/group_list_not_done"
-            android:nestedScrollingEnabled="false"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/group_list_done"
-            android:nestedScrollingEnabled="false"
-            android:visibility="gone"/>
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

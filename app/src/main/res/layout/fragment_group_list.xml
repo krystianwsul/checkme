@@ -15,26 +15,6 @@
             android:id="@+id/group_list_not_done"
             android:nestedScrollingEnabled="false"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/group_list_toggle"
-            android:layout_marginBottom="6dp"
-            android:layout_marginTop="6dp">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_expand_more_black_24dp"
-                android:id="@+id/group_list_expand"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/done"/>
-
-        </LinearLayout>
-
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

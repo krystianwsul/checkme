@@ -40,8 +40,6 @@ import java.util.TreeMap;
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private final static String EXPANDED_KEY = "expanded";
 
-    private ImageView mGroupListExpand;
-
     private RecyclerView mGroupListNotDone;
     private RecyclerView mGroupListDone;
 
@@ -64,20 +62,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mExpanded = savedInstanceState.getBoolean(EXPANDED_KEY);
         }
 
-        LinearLayout groupListToggle = (LinearLayout) view.findViewById(R.id.group_list_toggle);
-        Assert.assertTrue(groupListToggle != null);
-
-        mGroupListExpand = (ImageView) view.findViewById(R.id.group_list_expand);
-        Assert.assertTrue(mGroupListExpand != null);
-
-        groupListToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mExpanded = !mExpanded;
-                toggle();
-            }
-        });
-
         mGroupListDone = (RecyclerView) view.findViewById(R.id.group_list_done);
         Assert.assertTrue(mGroupListDone != null);
 
@@ -88,19 +72,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         mGroupListNotDone.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        toggle();
+        if (mExpanded)
+            mGroupListDone.setVisibility(View.VISIBLE);
+        else
+            mGroupListDone.setVisibility(View.GONE);
 
         getLoaderManager().initLoader(0, null, this);
-    }
-
-    private void toggle() {
-        if (mExpanded) {
-            mGroupListDone.setVisibility(View.VISIBLE);
-            mGroupListExpand.setImageResource(R.drawable.ic_expand_less_black_24dp);
-        } else {
-            mGroupListDone.setVisibility(View.GONE);
-            mGroupListExpand.setImageResource(R.drawable.ic_expand_more_black_24dp);
-        }
     }
 
     @Override
@@ -127,7 +104,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 notDoneInstances.add(instanceData);
         }
 
-        mGroupListNotDone.setAdapter(new NotDoneGroupAdapter(getActivity(), data.DataId, data.CustomTimeDatas, notDoneInstances, new NotDoneGroupAdapter.OnCheckListner() {
+        mGroupListNotDone.setAdapter(new NotDoneGroupAdapter(getActivity(), data.DataId, data.CustomTimeDatas, notDoneInstances, new OnCheckListner() {
             @Override
             public void onChecked(GroupListLoader.InstanceData instanceData) {
                 ((DoneGroupAdapter) mGroupListDone.getAdapter()).add(instanceData);
@@ -145,7 +122,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public void onLoaderReset(Loader<GroupListLoader.Data> loader) {
     }
 
-    public static class NotDoneGroupAdapter extends RecyclerView.Adapter<NotDoneGroupAdapter.Holder> {
+    public interface OnCheckListner {
+        void onChecked(GroupListLoader.InstanceData instanceData);
+    }
+
+    public class NotDoneGroupAdapter extends RecyclerView.Adapter<NotDoneGroupAdapter.AbstractHolder> {
+        private static final int TYPE_GROUP = 0;
+        private static final int TYPE_DIVIDER = 1;
+
         private final Context mContext;
 
         private final int mDataId;
@@ -170,57 +154,104 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_show_group, parent, false);
+        public int getItemViewType(int position) {
+            Assert.assertTrue(position >= 0);
+            Assert.assertTrue(position <= mNotDoneGroupContainer.size());
 
-            TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
-            TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
-            ImageView groupRowImg = (ImageView) groupRow.findViewById(R.id.group_row_img);
-            CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
-
-            return new Holder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
+            if (position < mNotDoneGroupContainer.size()) {
+                return TYPE_GROUP;
+            } else {
+                Assert.assertTrue(position == mNotDoneGroupContainer.size());
+                return TYPE_DIVIDER;
+            }
         }
 
         @Override
-        public void onBindViewHolder(final Holder holder, int position) {
-            Group group = mNotDoneGroupContainer.get(position);
-            Assert.assertTrue(group != null);
+        public AbstractHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (viewType == TYPE_GROUP) {
+                TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
-            holder.mGroupRowName.setText(group.getNameText(mContext));
+                TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
+                TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
+                ImageView groupRowImg = (ImageView) groupRow.findViewById(R.id.group_row_img);
+                CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
 
-            holder.mGroupRowDetails.setText(group.getDetailsText());
+                return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
+            } else {
+                Assert.assertTrue(viewType == TYPE_DIVIDER);
 
-            if (group.singleInstance() && !group.getSingleInstanceData().HasChildren)
-                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
-            else
-                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
+                LinearLayout rowGroupListDivider = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list_divider, parent, false);
 
-            if (group.singleInstance()) {
-                holder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+                ImageView groupListDividerImage = (ImageView) rowGroupListDivider.findViewById(R.id.group_list_divider_image);
+                Assert.assertTrue(groupListDividerImage != null);
 
-                holder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
+                return new DividerHolder(rowGroupListDivider, groupListDividerImage);
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(AbstractHolder abstractHolder, int position) {
+            Assert.assertTrue(position >= 0);
+            Assert.assertTrue(position <= mNotDoneGroupContainer.size());
+
+            if (position < mNotDoneGroupContainer.size()) {
+                Group group = mNotDoneGroupContainer.get(position);
+                Assert.assertTrue(group != null);
+
+                final GroupHolder groupHolder = (GroupHolder) abstractHolder;
+
+                groupHolder.mGroupRowName.setText(group.getNameText(mContext));
+
+                groupHolder.mGroupRowDetails.setText(group.getDetailsText());
+
+                if (group.singleInstance() && !group.getSingleInstanceData().HasChildren)
+                    groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
+                else
+                    groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
+
+                if (group.singleInstance()) {
+                    groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+
+                    groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            groupHolder.onCheckBoxClick();
+                        }
+                    });
+
+                    groupHolder.mGroupRowCheckBox.setChecked(group.getSingleInstanceData().Done != null);
+                } else {
+                    groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
+                }
+
+                groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
-                        holder.onCheckBoxClick();
+                    public void onClick(View view) {
+                        groupHolder.onRowClick();
                     }
                 });
-
-                holder.mGroupRowCheckBox.setChecked(group.getSingleInstanceData().Done != null);
             } else {
-                holder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
-            }
+                Assert.assertTrue(position == mNotDoneGroupContainer.size());
 
-            holder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    holder.onRowClick();
-                }
-            });
+                final DividerHolder dividerHolder = (DividerHolder) abstractHolder;
+
+                if (mExpanded)
+                    dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_less_black_24dp);
+                else
+                    dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_24dp);
+
+                dividerHolder.RowGroupListDivider.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dividerHolder.onClick();
+                    }
+                });
+            }
         }
 
         @Override
         public int getItemCount() {
-            return mNotDoneGroupContainer.size();
+            return mNotDoneGroupContainer.size() + 1;
         }
 
         public void add(GroupListLoader.InstanceData instanceData) {
@@ -235,14 +266,20 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mNotDoneGroupContainer.remove(group);
         }
 
-        public class Holder extends RecyclerView.ViewHolder {
+        public abstract class AbstractHolder extends RecyclerView.ViewHolder {
+            public AbstractHolder(View view) {
+                super(view);
+            }
+        }
+
+        public class GroupHolder extends AbstractHolder {
             public final TableLayout mGroupRow;
             public final TextView mGroupRowName;
             public final TextView mGroupRowDetails;
             public final ImageView mGroupRowImg;
             public final CheckBox mGroupRowCheckBox;
 
-            public Holder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
+            public GroupHolder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
                 super(groupRow);
 
                 Assert.assertTrue(groupRowName != null);
@@ -297,8 +334,31 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
         }
 
-        public interface OnCheckListner {
-            void onChecked(GroupListLoader.InstanceData instanceData);
+        public class DividerHolder extends AbstractHolder {
+            public final LinearLayout RowGroupListDivider;
+            public final ImageView GroupListDividerImage;
+
+            DividerHolder(LinearLayout rowGroupListDivider, ImageView groupListDividerImage) {
+                super(rowGroupListDivider);
+
+                Assert.assertTrue(rowGroupListDivider != null);
+                Assert.assertTrue(groupListDividerImage != null);
+
+                RowGroupListDivider = rowGroupListDivider;
+                GroupListDividerImage = groupListDividerImage;
+            }
+
+            public void onClick() {
+                mExpanded = !mExpanded;
+
+                if (mExpanded) {
+                    mGroupListDone.setVisibility(View.VISIBLE);
+                    GroupListDividerImage.setImageResource(R.drawable.ic_expand_less_black_24dp);
+                } else {
+                    mGroupListDone.setVisibility(View.GONE);
+                    GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_24dp);
+                }
+            }
         }
 
         private class NotDoneGroupContainer {
@@ -370,7 +430,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
     }
 
-    public static class DoneGroupAdapter extends RecyclerView.Adapter<DoneGroupAdapter.Holder> {
+    public static class DoneGroupAdapter extends RecyclerView.Adapter<DoneGroupAdapter.AbstractHolder> {
         private final int mDataId;
         private final ArrayList<GroupListLoader.CustomTimeData> mCustomTimeDatas;
 
@@ -399,47 +459,49 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_show_group, parent, false);
+        public AbstractHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
             TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
             TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
             ImageView groupRowImg = (ImageView) groupRow.findViewById(R.id.group_row_img);
             CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
 
-            return new Holder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
+            return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
         }
 
         @Override
-        public void onBindViewHolder(final Holder holder, int position) {
+        public void onBindViewHolder(AbstractHolder abstractHolder, int position) {
             Group group = getGroup(position);
             Assert.assertTrue(group.singleInstance());
 
             GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
             Assert.assertTrue(instanceData != null);
 
-            holder.mGroupRowName.setText(group.getNameText(mContext));
+            final GroupHolder groupHolder = (GroupHolder) abstractHolder;
 
-            holder.mGroupRowDetails.setText(group.getDetailsText());
+            groupHolder.mGroupRowName.setText(group.getNameText(mContext));
+
+            groupHolder.mGroupRowDetails.setText(group.getDetailsText());
 
             if (!instanceData.HasChildren)
-                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
+                groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
             else
-                holder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
+                groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
 
-            holder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
-            holder.mGroupRowCheckBox.setChecked(true);
-            holder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
+            groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+            groupHolder.mGroupRowCheckBox.setChecked(true);
+            groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    holder.onCheckBoxClick();
+                    groupHolder.onCheckBoxClick();
                 }
             });
 
-            holder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
+            groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    holder.onRowClick();
+                    groupHolder.onRowClick();
                 }
             });
         }
@@ -454,14 +516,20 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mDoneGroupContainer.add(instanceData);
         }
 
-        public class Holder extends RecyclerView.ViewHolder {
+        public abstract class AbstractHolder extends RecyclerView.ViewHolder {
+            public AbstractHolder(View view) {
+                super(view);
+            }
+        }
+
+        public class GroupHolder extends AbstractHolder {
             public final TableLayout mGroupRow;
             public final TextView mGroupRowName;
             public final TextView mGroupRowDetails;
             public final ImageView mGroupRowImg;
             public final CheckBox mGroupRowCheckBox;
 
-            public Holder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
+            public GroupHolder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
                 super(groupRow);
 
                 Assert.assertTrue(groupRowName != null);

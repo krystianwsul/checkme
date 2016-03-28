@@ -1,6 +1,6 @@
 package com.example.krystianwsul.organizator.notifications;
 
-import android.content.BroadcastReceiver;
+import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
@@ -9,26 +9,31 @@ import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
 
-public class InstanceHourReceiver extends BroadcastReceiver {
+public class InstanceHourService extends IntentService {
     private static final String INSTANCE_KEY = "instanceKey";
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
-        Intent intent = new Intent(context, InstanceHourReceiver.class);
+        Intent intent = new Intent(context, InstanceHourService.class);
         intent.putExtra(INSTANCE_KEY, instanceKey);
         return intent;
     }
+
+    public InstanceHourService() {
+        super("InstanceHourService");
+    }
+
     @Override
-    public void onReceive(Context context, Intent intent) {
+    protected void onHandleIntent(Intent intent) {
         Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
 
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
         Assert.assertTrue(instanceKey != null);
 
-        DomainFactory.getDomainFactory(context).setInstanceAddHour(0, instanceKey);
+        DomainFactory.getDomainFactory(this).setInstanceAddHour(0, instanceKey);
 
-        TickService.startService(context);
+        TickService.startService(this);
     }
 }

@@ -51,25 +51,8 @@
             android:name=".persistencemodel.SaveService"
             android:exported="false" />
 
-        <receiver
-            android:name=".notifications.GroupNotificationDeleteReceiver"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
-            android:name=".notifications.InstanceNotificationDeleteReceiver"
-            android:enabled="true"
-            android:exported="true" />
-        <receiver
-            android:name=".notifications.InstanceDoneReceiver"
-            android:enabled="true"
-            android:exported="true" />
-
         <activity android:name=".gui.DebugActivity" />
 
-        <receiver
-            android:name=".notifications.InstanceHourReceiver"
-            android:enabled="true"
-            android:exported="true" />
         <receiver
             android:name=".notifications.TimeChangeReceiver"
             android:enabled="true"
@@ -79,6 +62,19 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".notifications.GroupNotificationDeleteService"
+            android:exported="false" />
+        <service
+            android:name=".notifications.InstanceDoneService"
+            android:exported="false" />
+        <service
+            android:name=".notifications.InstanceHourService"
+            android:exported="false" />
+        <service
+            android:name=".notifications.InstanceNotificationDeleteService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

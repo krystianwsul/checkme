@@ -83,14 +83,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<GroupListLoader.Data> loader, GroupListLoader.Data data) {
-        mGroupListRecycler.setAdapter(new NotDoneGroupAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values()));
+        mGroupListRecycler.setAdapter(new GroupAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values()));
     }
 
     @Override
     public void onLoaderReset(Loader<GroupListLoader.Data> loader) {
     }
 
-    public class NotDoneGroupAdapter extends RecyclerView.Adapter<NotDoneGroupAdapter.AbstractHolder> {
+    public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.AbstractHolder> {
         private static final int TYPE_GROUP = 0;
         private static final int TYPE_DIVIDER = 1;
 
@@ -102,7 +102,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         private final NotDoneGroupContainer mNotDoneGroupContainer;
         private final DoneGroupContainer mDoneGroupContainer;
 
-        public NotDoneGroupAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, Collection<GroupListLoader.InstanceData> instanceDatas) {
+        public GroupAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, Collection<GroupListLoader.InstanceData> instanceDatas) {
             Assert.assertTrue(context != null);
             Assert.assertTrue(customTimeDatas != null);
             Assert.assertTrue(instanceDatas != null);
@@ -272,20 +272,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 return mNotDoneGroupContainer.size() + 1;
         }
 
-        public void add(GroupListLoader.InstanceData instanceData) {
-            Assert.assertTrue(instanceData != null);
-
-            if (instanceData.Done == null)
-                mNotDoneGroupContainer.add(instanceData);
-            else
-                mDoneGroupContainer.add(instanceData);
-        }
-
-        public void remove(Group group) {
-            Assert.assertTrue(group != null);
-            mNotDoneGroupContainer.remove(group);
-        }
-
         public abstract class AbstractHolder extends RecyclerView.ViewHolder {
             public AbstractHolder(View view) {
                 super(view);
@@ -315,29 +301,36 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
 
             public void onCheckBoxClick() {
-                int position = getAdapterPosition();
-                Assert.assertTrue(position >= 0);
-                Assert.assertTrue(position != mNotDoneGroupContainer.size());
-                Assert.assertTrue(position <= mNotDoneGroupContainer.size() + mDoneGroupContainer.size());
+                int oldPosition = getAdapterPosition();
+                Assert.assertTrue(oldPosition >= 0);
+                Assert.assertTrue(oldPosition != mNotDoneGroupContainer.size());
+                Assert.assertTrue(oldPosition <= mNotDoneGroupContainer.size() + mDoneGroupContainer.size());
 
-                if (position < mNotDoneGroupContainer.size()) {
-                    Group group = getGroup(position);
+                if (oldPosition < mNotDoneGroupContainer.size()) {
+                    Group group = getGroup(oldPosition);
                     Assert.assertTrue(group != null);
                     Assert.assertTrue(group.singleInstance());
 
                     GroupListLoader.InstanceData instanceData = group.getSingleInstanceData();
+                    Assert.assertTrue(instanceData != null);
+
                     instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, instanceData.InstanceKey, true);
                     Assert.assertTrue(instanceData.Done != null);
 
                     TickService.startService(mContext);
 
-                    remove(group);
+                    mNotDoneGroupContainer.remove(group);
 
-                    notifyItemRemoved(position);
+                    notifyItemRemoved(oldPosition);
 
-                    add(instanceData);
+                    int newIndex = mDoneGroupContainer.add(instanceData);
+
+                    if (mExpanded)
+                        notifyItemInserted(mNotDoneGroupContainer.size() + 1 + newIndex);
                 } else {
-                    Group group = getGroup(position);
+                    Assert.assertTrue(mExpanded);
+
+                    Group group = getGroup(oldPosition);
                     Assert.assertTrue(group != null);
                     Assert.assertTrue(group.singleInstance());
 
@@ -351,9 +344,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     mDoneGroupContainer.remove(group);
 
-                    notifyItemRemoved(position);
+                    notifyItemRemoved(oldPosition);
 
-                    add(instanceData);
+                    Pair<Integer, Boolean> pair = mNotDoneGroupContainer.add(instanceData);
+                    int newIndex = pair.first;
+                    boolean inserted = pair.second;
+
+                    if (inserted)
+                        notifyItemInserted(newIndex);
+                    else
+                        notifyItemChanged(newIndex);
                 }
             }
 
@@ -460,7 +460,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 mGroupArray = new ArrayList<>(mGroupTree.values());
             }
 
-            public void add(GroupListLoader.InstanceData instanceData) {
+            public Pair<Integer, Boolean> add(GroupListLoader.InstanceData instanceData) {
                 Assert.assertTrue(instanceData != null);
                 Assert.assertTrue(instanceData.Done == null);
 
@@ -468,10 +468,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 makeArray();
 
                 int postition = mGroupArray.indexOf(pair.first);
-                if (pair.second)
-                    notifyItemInserted(postition);
-                else
-                    notifyItemChanged(postition);
+
+                return new Pair<>(postition, pair.second);
             }
 
             public void remove(Group group) {
@@ -518,7 +516,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 return mGroups.size();
             }
 
-            public void add(GroupListLoader.InstanceData instanceData) {
+            public int add(GroupListLoader.InstanceData instanceData) {
                 Assert.assertTrue(instanceData != null);
 
                 Group group = new Group(mCustomTimeDatas, instanceData.Done.toTimeStamp());
@@ -527,9 +525,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 Collections.sort(mGroups, sComparator);
 
-                int position = mGroups.indexOf(group);
-
-                notifyItemInserted(mNotDoneGroupContainer.size() + 1 + position);
+                return mGroups.indexOf(group);
             }
 
             public void remove(Group group) {

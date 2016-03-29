@@ -266,10 +266,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         @Override
         public int getItemCount() {
-            if (mExpanded)
-                return mNotDoneGroupContainer.size() + 1 + mDoneGroupContainer.size();
-            else
-                return mNotDoneGroupContainer.size() + 1;
+            if (mDoneGroupContainer.isEmpty()) {
+                return mNotDoneGroupContainer.size();
+            } else {
+                if (mExpanded)
+                    return mNotDoneGroupContainer.size() + 1 + mDoneGroupContainer.size();
+                else
+                    return mNotDoneGroupContainer.size() + 1;
+            }
         }
 
         public abstract class AbstractHolder extends RecyclerView.ViewHolder {
@@ -323,10 +327,22 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     notifyItemRemoved(oldPosition);
 
-                    int newIndex = mDoneGroupContainer.add(instanceData);
+                    boolean wasEmpty = mDoneGroupContainer.isEmpty();
 
-                    if (mExpanded)
-                        notifyItemInserted(mNotDoneGroupContainer.size() + 1 + newIndex);
+                    int newIndex = mDoneGroupContainer.add(instanceData);
+                    int newPosition = mNotDoneGroupContainer.size() + 1 + newIndex;
+
+                    if (wasEmpty) {
+                        Assert.assertTrue(newPosition == mNotDoneGroupContainer.size() + 1);
+                        if (mExpanded) {
+                            notifyItemRangeInserted(mNotDoneGroupContainer.size(), 2);
+                        } else {
+                            notifyItemInserted(mNotDoneGroupContainer.size());
+                        }
+                    } else {
+                        if (mExpanded)
+                            notifyItemInserted(newPosition);
+                    }
                 } else {
                     Assert.assertTrue(mExpanded);
 
@@ -344,7 +360,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     mDoneGroupContainer.remove(group);
 
-                    notifyItemRemoved(oldPosition);
+                    if (mDoneGroupContainer.isEmpty()) {
+                        Assert.assertTrue(oldPosition == mNotDoneGroupContainer.size() + 1);
+                        notifyItemRangeRemoved(mNotDoneGroupContainer.size(), 2);
+                    } else {
+                        notifyItemRemoved(oldPosition);
+                    }
 
                     Pair<Integer, Boolean> pair = mNotDoneGroupContainer.add(instanceData);
                     int newIndex = pair.first;
@@ -514,6 +535,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             public int size() {
                 return mGroups.size();
+            }
+
+            public boolean isEmpty() {
+                return mGroups.isEmpty();
             }
 
             public int add(GroupListLoader.InstanceData instanceData) {

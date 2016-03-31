@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
             switch (position) {
                 case 0:
-                    return new GroupListFragment();
+                    return GroupListFragment.getGroupInstance();
                 case 1:
                     return TaskListFragment.getInstance();
                 default:

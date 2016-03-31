@@ -24,6 +24,7 @@ import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
+import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
@@ -38,11 +39,30 @@ import java.util.Comparator;
 import java.util.TreeMap;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
+    private final static String GROUPS_KEY = "groups";
+
     private final static String EXPANDED_KEY = "expanded";
 
     private RecyclerView mGroupListRecycler;
 
+    private boolean mGroups = false;
+    private TimeStamp mTimeStamp;
+    private InstanceKey mInstanceKey;
+    private ArrayList<InstanceKey> mInstanceKeys;
+
     private boolean mExpanded = false;
+
+    public static GroupListFragment getGroupInstance() {
+        GroupListFragment groupListFragment = new GroupListFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(GROUPS_KEY, true);
+        groupListFragment.setArguments(args);
+        return groupListFragment;
+    }
+
+    public GroupListFragment() {
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,7 +86,60 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         mGroupListRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        Bundle args = getArguments();
+        if (args != null) {
+            Assert.assertTrue(args.containsKey(GROUPS_KEY));
+            mGroups = args.getBoolean(GROUPS_KEY, false);
+            Assert.assertTrue(mGroups);
+
+            setAll();
+        }
+    }
+
+    public void setAll() {
+        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
+
+        Assert.assertTrue(mGroups);
+
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    public void setTimeStamp(TimeStamp timeStamp) {
+        Assert.assertTrue(!mGroups);
+        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
+
+        Assert.assertTrue(timeStamp != null);
+        mTimeStamp = timeStamp;
+
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    public void setInstanceKey(InstanceKey instanceKey) {
+        Assert.assertTrue(!mGroups);
+        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
+
+        Assert.assertTrue(instanceKey != null);
+        mInstanceKey = instanceKey;
+
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    public void setInstanceKeys(ArrayList<InstanceKey> instanceKeys) {
+        Assert.assertTrue(!mGroups);
+        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
+
+        Assert.assertTrue(instanceKeys != null);
+        mInstanceKeys = instanceKeys;
+        if (!mInstanceKeys.isEmpty())
+            getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -78,7 +151,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new GroupListLoader(getActivity());
+        return new GroupListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys);
     }
 
     @Override

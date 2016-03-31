@@ -20,18 +20,10 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     private final InstanceKey mInstanceKey;
     private final ArrayList<InstanceKey> mInstanceKeys;
 
-    public GroupListLoader(Context context) {
-        super(context);
-
-        mTimeStamp = null;
-        mInstanceKey = null;
-        mInstanceKeys = null;
-    }
-
     public GroupListLoader(Context context, TimeStamp timeStamp, InstanceKey instanceKey, ArrayList<InstanceKey> instanceKeys) {
         super(context);
 
-        Assert.assertTrue((timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
+        Assert.assertTrue((timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) <= 1);
 
         mTimeStamp = timeStamp;
         mInstanceKey = instanceKey;

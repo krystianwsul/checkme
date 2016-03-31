@@ -4,13 +4,9 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.instances.InstanceListFragment;
-import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
-
-import java.util.HashMap;
 
 public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     private final TimeStamp mTimeStamp;
@@ -29,20 +25,18 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
 
     public static class Data extends DomainLoader.Data {
         public final String DisplayText;
-        public final HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> InstanceAdapterDatas;
+        public final boolean HasInstances;
 
-        public Data(String displayText, HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas) {
+        public Data(String displayText, boolean hasInstances) {
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
-            Assert.assertTrue(instanceAdapterDatas != null);
-            Assert.assertTrue(!instanceAdapterDatas.isEmpty());
 
             DisplayText = displayText;
-            InstanceAdapterDatas = instanceAdapterDatas;
+            HasInstances = hasInstances;
         }
 
         @Override
         public int hashCode() {
-            return (DisplayText.hashCode() + InstanceAdapterDatas.hashCode());
+            return (DisplayText.hashCode() + (HasInstances ? 1 : 0));
         }
 
         @Override
@@ -58,7 +52,7 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
 
             Data data = (Data) object;
 
-            return (DisplayText.equals(data.DisplayText) && InstanceAdapterDatas.equals(data.InstanceAdapterDatas));
+            return (DisplayText.equals(data.DisplayText) && (HasInstances == data.HasInstances));
         }
     }
 }

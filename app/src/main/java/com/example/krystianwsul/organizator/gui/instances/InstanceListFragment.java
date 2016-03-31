@@ -3,7 +3,9 @@ package com.example.krystianwsul.organizator.gui.instances;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -17,9 +19,11 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.loaders.InstanceListLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -28,8 +32,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class InstanceListFragment extends Fragment {
+public class InstanceListFragment extends Fragment implements LoaderManager.LoaderCallbacks<InstanceListLoader.Data> {
     private RecyclerView mInstanceListRecycler;
+
+    private TimeStamp mTimeStamp;
+    private InstanceKey mInstanceKey;
+    private ArrayList<InstanceKey> mInstanceKeys;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,8 +57,52 @@ public class InstanceListFragment extends Fragment {
         mInstanceListRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
-    public void setAdapter(int dataId, Collection<InstanceAdapter.Data> instanceDatas) {
-        mInstanceListRecycler.setAdapter(new InstanceAdapter(getActivity(), dataId, instanceDatas));
+    public void setTimeStamp(TimeStamp timeStamp) {
+        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
+
+        Assert.assertTrue(timeStamp != null);
+        mTimeStamp = timeStamp;
+
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    public void setInstanceKey(InstanceKey instanceKey) {
+        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
+
+        Assert.assertTrue(instanceKey != null);
+        mInstanceKey = instanceKey;
+
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    public void setInstanceKeys(ArrayList<InstanceKey> instanceKeys) {
+        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
+
+        Assert.assertTrue(instanceKeys != null);
+        mInstanceKeys = instanceKeys;
+        if (!mInstanceKeys.isEmpty())
+            getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<InstanceListLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new InstanceListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<InstanceListLoader.Data> loader, InstanceListLoader.Data data) {
+        mInstanceListRecycler.setAdapter(new InstanceAdapter(getActivity(), data.DataId, data.InstanceAdapterDatas.values()));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<InstanceListLoader.Data> loader) {
+
     }
 
     public static class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.InstanceHolder> {
@@ -78,7 +130,6 @@ public class InstanceListFragment extends Fragment {
         public InstanceAdapter(Context context, int dataId, Collection<Data> datas) {
             Assert.assertTrue(context != null);
             Assert.assertTrue(datas != null);
-            Assert.assertTrue(!datas.isEmpty());
 
             mContext = context;
             mDataId = dataId;

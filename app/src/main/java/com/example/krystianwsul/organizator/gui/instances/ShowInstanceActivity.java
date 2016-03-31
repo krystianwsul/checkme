@@ -28,8 +28,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     private InstanceListFragment mShowInstanceList;
     private TextView mShowInstanceDetails;
     private CheckBox mCheckBox;
-
     private ImageView mShowInstanceEdit;
+
+    private InstanceKey mInstanceKey;
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
@@ -58,11 +59,18 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         if (savedInstanceState == null)
             mFirst = true;
 
+        Intent intent = getIntent();
+        Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
+        mInstanceKey = intent.getParcelableExtra(INSTANCE_KEY);
+        Assert.assertTrue(mInstanceKey != null);
+
         mShowInstanceName = (TextView) findViewById(R.id.show_instance_name);
 
         mShowInstanceDetails = (TextView) findViewById(R.id.show_instance_details);
 
         mShowInstanceList = (InstanceListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
+        Assert.assertTrue(mShowInstanceList != null);
+        mShowInstanceList.setInstanceKey(mInstanceKey);
 
         mCheckBox = (CheckBox) findViewById(R.id.show_instance_checkbox);
 
@@ -73,11 +81,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public Loader<ShowInstanceLoader.Data> onCreateLoader(int id, Bundle args) {
-        Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
-        InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
-
-        return new ShowInstanceLoader(this, instanceKey);
+        return new ShowInstanceLoader(this, mInstanceKey);
     }
 
     @Override
@@ -98,9 +102,6 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
             mShowInstanceDetails.setVisibility(View.GONE);
         else
             mShowInstanceDetails.setText(scheduleText);
-
-        if (data.HasChildren)
-            mShowInstanceList.setAdapter(data.DataId, data.InstanceAdapterDatas.values());
 
         mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override

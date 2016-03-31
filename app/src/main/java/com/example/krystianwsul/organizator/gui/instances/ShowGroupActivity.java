@@ -42,6 +42,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
         mShowGroupList = (InstanceListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
         Assert.assertTrue(mShowGroupList != null);
+        mShowGroupList.setTimeStamp(mTimeStamp);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -55,10 +56,8 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
     public void onLoadFinished(Loader<ShowGroupLoader.Data> loader, ShowGroupLoader.Data data) {
         mShowGroupName.setText(data.DisplayText);
 
-        if (data.InstanceAdapterDatas.isEmpty())
+        if (!data.HasInstances)
             finish();
-        else
-            mShowGroupList.setAdapter(data.DataId, data.InstanceAdapterDatas.values());
     }
 
     @Override

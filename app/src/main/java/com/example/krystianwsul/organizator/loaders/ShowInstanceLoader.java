@@ -4,12 +4,9 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.instances.InstanceListFragment;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
-
-import java.util.HashMap;
 
 public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
@@ -32,10 +29,8 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final String Name;
         public final String DisplayText;
         public boolean Done;
-        public final boolean HasChildren;
-        public final HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> InstanceAdapterDatas;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean hasChildren, HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -43,8 +38,6 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             Name = name;
             DisplayText = displayText;
             Done = done;
-            HasChildren = hasChildren;
-            InstanceAdapterDatas = instanceAdapterDatas;
         }
 
         @Override
@@ -55,8 +48,6 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             if (!TextUtils.isEmpty(DisplayText))
                 hashCode += DisplayText.hashCode();
             hashCode += (Done ? 1 : 0);
-            hashCode += (HasChildren ? 1 : 0);
-            hashCode += InstanceAdapterDatas.hashCode();
             return hashCode;
         }
 
@@ -73,7 +64,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (HasChildren == data.HasChildren) && InstanceAdapterDatas.equals(data.InstanceAdapterDatas));
+            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done));
         }
     }
 }

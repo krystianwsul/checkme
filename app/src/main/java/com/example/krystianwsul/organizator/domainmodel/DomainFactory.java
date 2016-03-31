@@ -11,6 +11,7 @@ import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
 import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
+import com.example.krystianwsul.organizator.loaders.InstanceListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
@@ -307,11 +308,79 @@ public class DomainFactory {
 
         String displayText = new DateTime(date, time).getDisplayText(context);
 
+        return new ShowGroupLoader.Data(displayText, !currentInstances.isEmpty());
+    }
+
+    public synchronized InstanceListLoader.Data getInstanceListData(Context context, TimeStamp timeStamp) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(timeStamp != null);
+
+        Calendar endCalendar = timeStamp.getCalendar();
+        endCalendar.add(Calendar.MINUTE, 1);
+        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        ArrayList<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
+
+        ArrayList<Instance> currentInstances = new ArrayList<>();
+        for (Instance instance : rootInstances)
+            if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
+                currentInstances.add(instance);
+        Assert.assertTrue(!currentInstances.isEmpty());
+
         HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
         for (Instance instance : currentInstances)
             instanceAdapterDatas.put(instance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null));
 
-        return new ShowGroupLoader.Data(displayText, instanceAdapterDatas);
+        return new InstanceListLoader.Data(instanceAdapterDatas);
+    }
+
+    public synchronized InstanceListLoader.Data getInstanceListData(Context context, InstanceKey instanceKey) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(instanceKey != null);
+
+        Instance instance = getInstance(instanceKey);
+        Assert.assertTrue(instance != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
+
+        ArrayList<Instance> childInstances = instance.getChildInstances(now);
+        for (Instance childInstance : childInstances)
+            instanceAdapterDatas.put(childInstance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null));
+
+        return new InstanceListLoader.Data(instanceAdapterDatas);
+    }
+
+    public synchronized InstanceListLoader.Data getInstanceListData(Context context, ArrayList<InstanceKey> instanceKeys) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(!instanceKeys.isEmpty());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (InstanceKey instanceKey : instanceKeys) {
+            Instance instance = getInstance(instanceKey);
+            Assert.assertTrue(instance != null);
+
+            instances.add(instance);
+        }
+
+        Collections.sort(instances, new Comparator<Instance>() {
+            @Override
+            public int compare(Instance lhs, Instance rhs) {
+                return lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime());
+            }
+        });
+
+        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceDatas = new HashMap<>();
+        for (Instance instance : instances)
+            instanceDatas.put(instance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now)));
+
+        return new InstanceListLoader.Data(instanceDatas);
     }
 
     public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<InstanceKey> instanceKeys) {
@@ -352,13 +421,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
-
-        ArrayList<Instance> childInstances = instance.getChildInstances(now);
-        for (Instance childInstance : childInstances)
-            instanceAdapterDatas.put(childInstance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null));
-
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, !instance.getChildInstances(now).isEmpty(), instanceAdapterDatas);
+        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null);
     }
 
     public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {

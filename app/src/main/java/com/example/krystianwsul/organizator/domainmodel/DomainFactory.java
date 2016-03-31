@@ -4,19 +4,16 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
-import com.example.krystianwsul.organizator.gui.instances.InstanceListFragment;
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
 import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
-import com.example.krystianwsul.organizator.loaders.InstanceListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
-import com.example.krystianwsul.organizator.loaders.ShowNotificationGroupLoader;
 import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
 import com.example.krystianwsul.organizator.loaders.SingleScheduleLoader;
 import com.example.krystianwsul.organizator.loaders.TaskListLoader;
@@ -311,7 +308,7 @@ public class DomainFactory {
         return new ShowGroupLoader.Data(displayText, !currentInstances.isEmpty());
     }
 
-    public synchronized InstanceListLoader.Data getInstanceListData(Context context, TimeStamp timeStamp) {
+    public synchronized GroupListLoader.Data getInstanceListData(Context context, TimeStamp timeStamp) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
 
@@ -329,14 +326,19 @@ public class DomainFactory {
                 currentInstances.add(instance);
         Assert.assertTrue(!currentInstances.isEmpty());
 
-        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
+        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances)
-            instanceAdapterDatas.put(instance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
 
-        return new InstanceListLoader.Data(instanceAdapterDatas);
+        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
+        for (CustomTime customTime : currentCustomTimes)
+            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
+
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
     }
 
-    public synchronized InstanceListLoader.Data getInstanceListData(Context context, InstanceKey instanceKey) {
+    public synchronized GroupListLoader.Data getInstanceListData(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -345,16 +347,21 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceAdapterDatas = new HashMap<>();
+        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
         ArrayList<Instance> childInstances = instance.getChildInstances(now);
         for (Instance childInstance : childInstances)
-            instanceAdapterDatas.put(childInstance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(childInstance.getDone(), childInstance.getName(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null));
+            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null, childInstance.getName(), instance.getInstanceDateTime().getTimeStamp()));
 
-        return new InstanceListLoader.Data(instanceAdapterDatas);
+        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
+        for (CustomTime customTime : currentCustomTimes)
+            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
+
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
     }
 
-    public synchronized InstanceListLoader.Data getInstanceListData(Context context, ArrayList<InstanceKey> instanceKeys) {
+    public synchronized GroupListLoader.Data getInstanceListData(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
@@ -376,40 +383,16 @@ public class DomainFactory {
             }
         });
 
-        HashMap<InstanceKey, InstanceListFragment.InstanceAdapter.Data> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : instances)
-            instanceDatas.put(instance.getInstanceKey(), new InstanceListFragment.InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now)));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
 
-        return new InstanceListLoader.Data(instanceDatas);
-    }
+        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
+        for (CustomTime customTime : currentCustomTimes)
+            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
-    public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(Context context, ArrayList<InstanceKey> instanceKeys) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(instanceKeys != null);
-        Assert.assertTrue(!instanceKeys.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        ArrayList<Instance> instances = new ArrayList<>();
-        for (InstanceKey instanceKey : instanceKeys) {
-            Instance instance = getInstance(instanceKey);
-            Assert.assertTrue(instance != null);
-
-            instances.add(instance);
-        }
-
-        Collections.sort(instances, new Comparator<Instance>() {
-            @Override
-            public int compare(Instance lhs, Instance rhs) {
-                return lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime());
-            }
-        });
-
-        ArrayList<InstanceListFragment.InstanceAdapter.Data> instanceDatas = new ArrayList<>();
-        for (Instance instance : instances)
-            instanceDatas.add(new InstanceListFragment.InstanceAdapter.Data(instance.getDone(), instance.getName(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now)));
-
-        return new ShowNotificationGroupLoader.Data(instanceDatas);
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
     }
 
     public synchronized ShowInstanceLoader.Data getShowInstanceData(Context context, InstanceKey instanceKey) {

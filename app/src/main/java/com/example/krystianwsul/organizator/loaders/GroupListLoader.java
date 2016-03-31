@@ -16,13 +16,46 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
+    private final TimeStamp mTimeStamp;
+    private final InstanceKey mInstanceKey;
+    private final ArrayList<InstanceKey> mInstanceKeys;
+
     public GroupListLoader(Context context) {
         super(context);
+
+        mTimeStamp = null;
+        mInstanceKey = null;
+        mInstanceKeys = null;
+    }
+
+    public GroupListLoader(Context context, TimeStamp timeStamp, InstanceKey instanceKey, ArrayList<InstanceKey> instanceKeys) {
+        super(context);
+
+        Assert.assertTrue((timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
+
+        mTimeStamp = timeStamp;
+        mInstanceKey = instanceKey;
+        mInstanceKeys = instanceKeys;
     }
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext());
+        if (mTimeStamp != null) {
+            Assert.assertTrue(mInstanceKey == null);
+            Assert.assertTrue(mInstanceKeys == null);
+
+            return DomainFactory.getDomainFactory(getContext()).getInstanceListData(getContext(), mTimeStamp);
+        } else if (mInstanceKey != null) {
+            Assert.assertTrue(mInstanceKeys == null);
+
+            return DomainFactory.getDomainFactory(getContext()).getInstanceListData(getContext(), mInstanceKey);
+        } else if (mInstanceKeys != null) {
+            Assert.assertTrue(!mInstanceKeys.isEmpty());
+
+            return DomainFactory.getDomainFactory(getContext()).getInstanceListData(getContext(), mInstanceKeys);
+        } else {
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext());
+        }
     }
 
     public static class Data extends DomainLoader.Data {
@@ -69,7 +102,6 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
         public InstanceData(ExactTimeStamp done, boolean hasChildren, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp) {
             Assert.assertTrue(instanceKey != null);
-            Assert.assertTrue(!TextUtils.isEmpty(displayText));
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
 
@@ -83,7 +115,16 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
         @Override
         public int hashCode() {
-            return (Done.hashCode() + InstanceKey.hashCode() + (HasChildren ? 1 : 0) + DisplayText.hashCode() + Name.hashCode() + InstanceTimeStamp.hashCode());
+            int hashCode = 0;
+            if (Done != null)
+                hashCode += Done.hashCode();
+            hashCode += (HasChildren ? 1 : 0);
+            hashCode += InstanceKey.hashCode();
+            if (!TextUtils.isEmpty(DisplayText))
+                hashCode += DisplayText.hashCode();
+            hashCode += Name.hashCode();
+            hashCode += InstanceTimeStamp.hashCode();
+            return hashCode;
         }
 
         @Override

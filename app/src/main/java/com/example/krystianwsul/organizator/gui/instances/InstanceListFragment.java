@@ -19,10 +19,9 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.loaders.InstanceListLoader;
+import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
-import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -32,7 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class InstanceListFragment extends Fragment implements LoaderManager.LoaderCallbacks<InstanceListLoader.Data> {
+public class InstanceListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private RecyclerView mInstanceListRecycler;
 
     private TimeStamp mTimeStamp;
@@ -91,31 +90,31 @@ public class InstanceListFragment extends Fragment implements LoaderManager.Load
     }
 
     @Override
-    public Loader<InstanceListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new InstanceListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys);
+    public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new GroupListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys);
     }
 
     @Override
-    public void onLoadFinished(Loader<InstanceListLoader.Data> loader, InstanceListLoader.Data data) {
-        mInstanceListRecycler.setAdapter(new InstanceAdapter(getActivity(), data.DataId, data.InstanceAdapterDatas.values()));
+    public void onLoadFinished(Loader<GroupListLoader.Data> loader, GroupListLoader.Data data) {
+        mInstanceListRecycler.setAdapter(new InstanceAdapter(getActivity(), data.DataId, data.InstanceDatas.values()));
     }
 
     @Override
-    public void onLoaderReset(Loader<InstanceListLoader.Data> loader) {
+    public void onLoaderReset(Loader<GroupListLoader.Data> loader) {
 
     }
 
     public static class InstanceAdapter extends RecyclerView.Adapter<InstanceAdapter.InstanceHolder> {
-        private final static Comparator<Data> sDoneComparator = new Comparator<Data>() {
+        private final static Comparator<GroupListLoader.InstanceData> sDoneComparator = new Comparator<GroupListLoader.InstanceData>() {
             @Override
-            public int compare(Data lhs, Data rhs) {
+            public int compare(GroupListLoader.InstanceData lhs, GroupListLoader.InstanceData rhs) {
                 return lhs.Done.compareTo(rhs.Done);
             }
         };
 
-        private final static Comparator<Data> sNotDoneComparator = new Comparator<Data>() {
+        private final static Comparator<GroupListLoader.InstanceData> sNotDoneComparator = new Comparator<GroupListLoader.InstanceData>() {
             @Override
-            public int compare(Data lhs, Data rhs) {
+            public int compare(GroupListLoader.InstanceData lhs, GroupListLoader.InstanceData rhs) {
                 return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
             }
         };
@@ -124,21 +123,21 @@ public class InstanceListFragment extends Fragment implements LoaderManager.Load
 
         private final int mDataId;
 
-        private final ArrayList<Data> mDoneInstances = new ArrayList<>();
-        private final ArrayList<Data> mNotDoneInstances = new ArrayList<>();
+        private final ArrayList<GroupListLoader.InstanceData> mDoneInstances = new ArrayList<>();
+        private final ArrayList<GroupListLoader.InstanceData> mNotDoneInstances = new ArrayList<>();
 
-        public InstanceAdapter(Context context, int dataId, Collection<Data> datas) {
+        public InstanceAdapter(Context context, int dataId, Collection<GroupListLoader.InstanceData> instanceDatas) {
             Assert.assertTrue(context != null);
-            Assert.assertTrue(datas != null);
+            Assert.assertTrue(instanceDatas != null);
 
             mContext = context;
             mDataId = dataId;
 
-            for (Data data : datas) {
-                if (data.Done != null)
-                    mDoneInstances.add(data);
+            for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+                if (instanceData.Done != null)
+                    mDoneInstances.add(instanceData);
                 else
-                    mNotDoneInstances.add(data);
+                    mNotDoneInstances.add(instanceData);
             }
 
             sort();
@@ -149,19 +148,19 @@ public class InstanceListFragment extends Fragment implements LoaderManager.Load
             Collections.sort(mNotDoneInstances, sNotDoneComparator);
         }
 
-        private int indexOf(Data data) {
-            Assert.assertTrue(data != null);
+        private int indexOf(GroupListLoader.InstanceData instanceData) {
+            Assert.assertTrue(instanceData != null);
 
-            if (mDoneInstances.contains(data)) {
-                Assert.assertTrue(!mNotDoneInstances.contains(data));
-                return mDoneInstances.indexOf(data);
+            if (mDoneInstances.contains(instanceData)) {
+                Assert.assertTrue(!mNotDoneInstances.contains(instanceData));
+                return mDoneInstances.indexOf(instanceData);
             } else {
-                Assert.assertTrue(mNotDoneInstances.contains(data));
-                return mDoneInstances.size() + mNotDoneInstances.indexOf(data);
+                Assert.assertTrue(mNotDoneInstances.contains(instanceData));
+                return mDoneInstances.size() + mNotDoneInstances.indexOf(instanceData);
             }
         }
 
-        private Data getData(int position) {
+        private GroupListLoader.InstanceData getData(int position) {
             Assert.assertTrue(position >= 0);
             Assert.assertTrue(position < mDoneInstances.size() + mNotDoneInstances.size());
 
@@ -185,15 +184,15 @@ public class InstanceListFragment extends Fragment implements LoaderManager.Load
 
         @Override
         public void onBindViewHolder(final InstanceHolder instanceHolder, int position) {
-            Data data = getData(position);
+            GroupListLoader.InstanceData instanceData = getData(position);
 
-            instanceHolder.mInstanceRowName.setText(data.Name);
-            if (!TextUtils.isEmpty(data.DisplayText))
-                instanceHolder.mInstanceRowDetails.setText(data.DisplayText);
+            instanceHolder.mInstanceRowName.setText(instanceData.Name);
+            if (!TextUtils.isEmpty(instanceData.DisplayText))
+                instanceHolder.mInstanceRowDetails.setText(instanceData.DisplayText);
             else
                 instanceHolder.mInstanceRowDetails.setVisibility(View.GONE);
 
-            if (!data.HasChildren)
+            if (!instanceData.HasChildren)
                 instanceHolder.mInstanceRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
             else
                 instanceHolder.mInstanceRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
@@ -205,7 +204,7 @@ public class InstanceListFragment extends Fragment implements LoaderManager.Load
                 }
             });
 
-            instanceHolder.mInstanceRowCheckBox.setChecked(data.Done != null);
+            instanceHolder.mInstanceRowCheckBox.setChecked(instanceData.Done != null);
 
             instanceHolder.mInstanceRow.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -246,95 +245,47 @@ public class InstanceListFragment extends Fragment implements LoaderManager.Load
                 Assert.assertTrue(checkBox != null);
 
                 int position = getAdapterPosition();
-                Data data = getData(position);
-                Assert.assertTrue(data != null);
+                GroupListLoader.InstanceData instanceData = getData(position);
+                Assert.assertTrue(instanceData != null);
 
                 boolean isChecked = checkBox.isChecked();
 
-                data.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, data.InstanceKey, isChecked);
+                instanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, instanceData.InstanceKey, isChecked);
 
                 TickService.startService(mContext);
 
                 if (isChecked) {
-                    Assert.assertTrue(mNotDoneInstances.contains(data));
+                    Assert.assertTrue(mNotDoneInstances.contains(instanceData));
 
-                    int oldPosition = indexOf(data);
+                    int oldPosition = indexOf(instanceData);
 
-                    mNotDoneInstances.remove(data);
-                    mDoneInstances.add(data);
+                    mNotDoneInstances.remove(instanceData);
+                    mDoneInstances.add(instanceData);
                     sort();
 
-                    int newPosition = indexOf(data);
+                    int newPosition = indexOf(instanceData);
 
                     notifyItemMoved(oldPosition, newPosition);
                 } else {
-                    Assert.assertTrue(mDoneInstances.contains(data));
+                    Assert.assertTrue(mDoneInstances.contains(instanceData));
 
-                    int oldPosition = indexOf(data);
+                    int oldPosition = indexOf(instanceData);
 
-                    mDoneInstances.remove(data);
-                    mNotDoneInstances.add(data);
+                    mDoneInstances.remove(instanceData);
+                    mNotDoneInstances.add(instanceData);
                     sort();
 
-                    int newPosition = indexOf(data);
+                    int newPosition = indexOf(instanceData);
 
                     notifyItemMoved(oldPosition, newPosition);
                 }
             }
 
             public void onRowClick() {
-                Data data = getData(getAdapterPosition());
-                Assert.assertTrue(data != null);
+                GroupListLoader.InstanceData instanceData = getData(getAdapterPosition());
+                Assert.assertTrue(instanceData != null);
 
-                mContext.startActivity(ShowInstanceActivity.getIntent(mContext, data.InstanceKey));
-            }
-        }
-
-        public static class Data {
-            public ExactTimeStamp Done;
-            public final String Name;
-            public final boolean HasChildren;
-            public final com.example.krystianwsul.organizator.utils.InstanceKey InstanceKey;
-            public final String DisplayText;
-
-            public Data(ExactTimeStamp done, String name, boolean hasChildren, InstanceKey instanceKey, String displayText) {
-                Assert.assertTrue(!TextUtils.isEmpty(name));
-                Assert.assertTrue(instanceKey != null);
-
-                Done = done;
-                Name = name;
-                HasChildren = hasChildren;
-                InstanceKey = instanceKey;
-                DisplayText = displayText;
-            }
-
-            @Override
-            public int hashCode() {
-                int hashCode = 0;
-                if (Done != null)
-                    hashCode += Done.hashCode();
-                hashCode += Name.hashCode();
-                hashCode += (HasChildren ? 1 : 0);
-                hashCode += InstanceKey.hashCode();
-                if (!TextUtils.isEmpty(DisplayText))
-                    hashCode += DisplayText.hashCode();
-                return hashCode;
-            }
-
-            @Override
-            public boolean equals(Object object) {
-                if (object == null)
-                    return false;
-
-                if (object == this)
-                    return true;
-
-                if (!(object instanceof Data))
-                    return false;
-
-                Data data = (Data) object;
-
-                return ((((Done == null) && (data.Done == null)) || (((Done != null) && (data.Done != null)) && Done.equals(data.Done))) && Name.equals(data.Name) && (HasChildren == data.HasChildren) && InstanceKey.equals(data.InstanceKey) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))));
+                mContext.startActivity(ShowInstanceActivity.getIntent(mContext, instanceData.InstanceKey));
             }
         }
     }

@@ -15,7 +15,7 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data> {
-    private InstanceListFragment mShowGroupList;
+    private GroupListFragment mShowGroupList;
     private TimeStamp mTimeStamp;
     private TextView mShowGroupName;
 
@@ -40,7 +40,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
         mShowGroupName = (TextView) findViewById(R.id.show_group_name);
 
-        mShowGroupList = (InstanceListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
+        mShowGroupList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
         Assert.assertTrue(mShowGroupList != null);
         mShowGroupList.setTimeStamp(mTimeStamp);
 

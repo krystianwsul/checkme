@@ -18,7 +18,7 @@
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.example.krystianwsul.organizator.gui.instances.InstanceListFragment"
+        android:name="com.example.krystianwsul.organizator.gui.instances.GroupListFragment"
         android:id="@+id/show_group_list"/>
 
 </LinearLayout>

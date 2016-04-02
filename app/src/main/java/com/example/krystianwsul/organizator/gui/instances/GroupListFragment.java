@@ -27,6 +27,7 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
@@ -512,7 +513,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             private final Comparator<Group> sComparator = new Comparator<Group>() {
                 @Override
                 public int compare(Group lhs, Group rhs) {
-                    int timeStampComparison = lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
+                    int timeStampComparison = lhs.getExactTimeStamp().compareTo(rhs.getExactTimeStamp());
                     if (timeStampComparison != 0) {
                         Assert.assertTrue(mTimeStamp == null);
                         Assert.assertTrue(mInstanceKey == null);
@@ -542,16 +543,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(instanceData != null);
                 Assert.assertTrue(instanceData.Done == null);
 
-                TimeStamp timeStamp = instanceData.InstanceTimeStamp;
+                ExactTimeStamp exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
 
                 ArrayList<Group> timeStampGroups = new ArrayList<>();
                 if (mUseGroups)
                     for (Group currGroup : mGroups)
-                        if (currGroup.getTimeStamp().equals(timeStamp))
+                        if (currGroup.getExactTimeStamp().equals(exactTimeStamp))
                             timeStampGroups.add(currGroup);
 
                 if (timeStampGroups.isEmpty()) {
-                    Group group = new Group(mCustomTimeDatas, timeStamp);
+                    Group group = new Group(mCustomTimeDatas, exactTimeStamp);
                     group.addInstanceData(instanceData);
                     mGroups.add(group);
                     return new Pair<>(group, true);
@@ -602,7 +603,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             private final Comparator<Group> sComparator = new Comparator<Group>() {
                 @Override
                 public int compare(Group lhs, Group rhs) {
-                    return lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
+                    return -lhs.getExactTimeStamp().compareTo(rhs.getExactTimeStamp()); // negated
                 }
             };
 
@@ -614,7 +615,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 for (GroupListLoader.InstanceData instanceData : instanceDatas) {
                     Assert.assertTrue(instanceData.Done != null);
 
-                    Group group = new Group(mCustomTimeDatas, instanceData.Done.toTimeStamp());
+                    Group group = new Group(mCustomTimeDatas, instanceData.Done);
                     group.addInstanceData(instanceData);
                     mGroups.add(group);
                 }
@@ -640,7 +641,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             public int add(GroupListLoader.InstanceData instanceData) {
                 Assert.assertTrue(instanceData != null);
 
-                Group group = new Group(mCustomTimeDatas, instanceData.Done.toTimeStamp());
+                Group group = new Group(mCustomTimeDatas, instanceData.Done);
                 group.addInstanceData(instanceData);
                 mGroups.add(group);
 
@@ -661,16 +662,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     static class Group {
         private final ArrayList<GroupListLoader.CustomTimeData> mCustomTimeDatas;
 
-        private final TimeStamp mTimeStamp;
+        private final ExactTimeStamp mExactTimeStamp;
 
         private final ArrayList<GroupListLoader.InstanceData> mInstanceDatas = new ArrayList<>();
 
-        public Group(ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, TimeStamp timeStamp) {
+        public Group(ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, ExactTimeStamp exactTimeStamp) {
             Assert.assertTrue(customTimeDatas != null);
-            Assert.assertTrue(timeStamp != null);
+            Assert.assertTrue(exactTimeStamp != null);
 
             mCustomTimeDatas = customTimeDatas;
-            mTimeStamp = timeStamp;
+            mExactTimeStamp = exactTimeStamp;
         }
 
         public void addInstanceData(GroupListLoader.InstanceData instanceData) {
@@ -695,8 +696,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             if (singleInstance()) {
                 return getSingleInstanceData().DisplayText;
             } else {
-                Date date = mTimeStamp.getDate();
-                HourMinute hourMinute = mTimeStamp.getHourMinute();
+                Date date = mExactTimeStamp.getDate();
+                HourMinute hourMinute = mExactTimeStamp.toTimeStamp().getHourMinute();
 
                 String timeText;
 
@@ -721,8 +722,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             return null;
         }
 
-        public TimeStamp getTimeStamp() {
-            return mTimeStamp;
+        public ExactTimeStamp getExactTimeStamp() {
+            return mExactTimeStamp;
         }
 
         public boolean singleInstance() {

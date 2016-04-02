@@ -22,7 +22,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     public static Intent getIntent(GroupListFragment.Group group, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
-        intent.putExtra(TIME_KEY, group.getTimeStamp().getLong());
+        intent.putExtra(TIME_KEY, group.getExactTimeStamp().getLong());
         return intent;
     }
 

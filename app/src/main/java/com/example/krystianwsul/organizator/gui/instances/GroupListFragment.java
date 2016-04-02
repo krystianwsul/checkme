@@ -514,7 +514,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 public int compare(Group lhs, Group rhs) {
                     int timeStampComparison = lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
                     if (timeStampComparison != 0) {
-                        Assert.assertTrue(mUseGroups);
+                        Assert.assertTrue(mTimeStamp == null);
+                        Assert.assertTrue(mInstanceKey == null);
+
                         return timeStampComparison;
                     } else {
                         Assert.assertTrue(!mUseGroups);

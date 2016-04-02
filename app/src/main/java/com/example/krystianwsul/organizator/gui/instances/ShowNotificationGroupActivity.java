@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class ShowNotificationGroupActivity extends AppCompatActivity {
     private static final String INSTANCES_KEY = "instanceKeys";
 
-    private InstanceListFragment mShowNotificationGroupList;
+    private GroupListFragment mShowNotificationGroupList;
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
@@ -33,7 +33,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_group);
 
-        mShowNotificationGroupList = (InstanceListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
+        mShowNotificationGroupList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
         Assert.assertTrue(mShowNotificationGroupList != null);
 
         Intent intent = getIntent();

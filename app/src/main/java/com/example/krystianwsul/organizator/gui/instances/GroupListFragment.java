@@ -36,16 +36,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.TreeMap;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
-    private final static String GROUPS_KEY = "groups";
+    private final static String USE_GROUPS_KEY = "useGroups";
 
     private final static String EXPANDED_KEY = "expanded";
 
     private RecyclerView mGroupListRecycler;
 
-    private boolean mGroups = false;
+    private boolean mUseGroups = false;
     private TimeStamp mTimeStamp;
     private InstanceKey mInstanceKey;
     private ArrayList<InstanceKey> mInstanceKeys;
@@ -55,7 +54,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public static GroupListFragment getGroupInstance() {
         GroupListFragment groupListFragment = new GroupListFragment();
         Bundle args = new Bundle();
-        args.putBoolean(GROUPS_KEY, true);
+        args.putBoolean(USE_GROUPS_KEY, true);
         groupListFragment.setArguments(args);
         return groupListFragment;
     }
@@ -88,9 +87,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         Bundle args = getArguments();
         if (args != null) {
-            Assert.assertTrue(args.containsKey(GROUPS_KEY));
-            mGroups = args.getBoolean(GROUPS_KEY, false);
-            Assert.assertTrue(mGroups);
+            Assert.assertTrue(args.containsKey(USE_GROUPS_KEY));
+            mUseGroups = args.getBoolean(USE_GROUPS_KEY, false);
+            Assert.assertTrue(mUseGroups);
 
             setAll();
         }
@@ -101,13 +100,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
 
-        Assert.assertTrue(mGroups);
+        Assert.assertTrue(mUseGroups);
 
         getLoaderManager().initLoader(0, null, this);
     }
 
     public void setTimeStamp(TimeStamp timeStamp) {
-        Assert.assertTrue(!mGroups);
+        Assert.assertTrue(!mUseGroups);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -119,7 +118,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     public void setInstanceKey(InstanceKey instanceKey) {
-        Assert.assertTrue(!mGroups);
+        Assert.assertTrue(!mUseGroups);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -131,7 +130,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     public void setInstanceKeys(ArrayList<InstanceKey> instanceKeys) {
-        Assert.assertTrue(!mGroups);
+        Assert.assertTrue(!mUseGroups);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -257,9 +256,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 final GroupHolder groupHolder = (GroupHolder) abstractHolder;
 
-                groupHolder.mGroupRowName.setText(group.getNameText(mContext));
+                groupHolder.mGroupRowName.setText(group.getNameText());
 
-                groupHolder.mGroupRowDetails.setText(group.getDetailsText());
+                groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
 
                 if (group.singleInstance() && !group.getSingleInstanceData().HasChildren)
                     groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
@@ -310,9 +309,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 final GroupHolder groupHolder = (GroupHolder) abstractHolder;
 
-                groupHolder.mGroupRowName.setText(group.getNameText(mContext));
+                groupHolder.mGroupRowName.setText(group.getNameText());
 
-                groupHolder.mGroupRowDetails.setText(group.getDetailsText());
+                groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
 
                 if (!instanceData.HasChildren)
                     groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
@@ -510,15 +509,31 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         private class NotDoneGroupContainer {
-            private ArrayList<Group> mGroupArray = new ArrayList<>();
-            private final TreeMap<TimeStamp, Group> mGroupTree = new TreeMap<>();
+            private final Comparator<Group> sComparator = new Comparator<Group>() {
+                @Override
+                public int compare(Group lhs, Group rhs) {
+                    int timeStampComparison = lhs.getTimeStamp().compareTo(rhs.getTimeStamp());
+                    if (timeStampComparison != 0) {
+                        Assert.assertTrue(mUseGroups);
+                        return timeStampComparison;
+                    } else {
+                        Assert.assertTrue(!mUseGroups);
+                        Assert.assertTrue(lhs.singleInstance());
+                        Assert.assertTrue(rhs.singleInstance());
+
+                        return Integer.valueOf(lhs.getSingleInstanceData().InstanceKey.TaskId).compareTo(rhs.getSingleInstanceData().InstanceKey.TaskId);
+                    }
+                }
+            };
+
+            private ArrayList<Group> mGroups = new ArrayList<>();
 
             public NotDoneGroupContainer(Collection<GroupListLoader.InstanceData> instanceDatas) {
                 Assert.assertTrue(instanceDatas != null);
 
                 for (GroupListLoader.InstanceData instanceData : instanceDatas)
                     addInstanceHelper(instanceData);
-                makeArray();
+                sort();
             }
 
             private Pair<Group, Boolean> addInstanceHelper(GroupListLoader.InstanceData instanceData) {
@@ -527,31 +542,38 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 TimeStamp timeStamp = instanceData.InstanceTimeStamp;
 
-                if (mGroupTree.containsKey(timeStamp)) {
-                    Group group = mGroupTree.get(timeStamp);
-                    group.addInstanceData(instanceData);
-                    return new Pair<>(group, false);
-                } else {
+                ArrayList<Group> timeStampGroups = new ArrayList<>();
+                if (mUseGroups)
+                    for (Group currGroup : mGroups)
+                        if (currGroup.getTimeStamp().equals(timeStamp))
+                            timeStampGroups.add(currGroup);
+
+                if (timeStampGroups.isEmpty()) {
                     Group group = new Group(mCustomTimeDatas, timeStamp);
                     group.addInstanceData(instanceData);
-                    mGroupTree.put(timeStamp, group);
+                    mGroups.add(group);
                     return new Pair<>(group, true);
+                } else {
+                    Assert.assertTrue(timeStampGroups.size() == 1);
+                    Group group = timeStampGroups.get(0);
+                    group.addInstanceData(instanceData);
+                    return new Pair<>(group, false);
                 }
             }
 
             public Group get(int index) {
                 Assert.assertTrue(index >= 0);
-                Assert.assertTrue(index < mGroupArray.size());
+                Assert.assertTrue(index < mGroups.size());
 
-                return mGroupArray.get(index);
+                return mGroups.get(index);
             }
 
             public int size() {
-                return mGroupArray.size();
+                return mGroups.size();
             }
 
-            private void makeArray() {
-                mGroupArray = new ArrayList<>(mGroupTree.values());
+            private void sort() {
+                Collections.sort(mGroups, sComparator);
             }
 
             public Pair<Integer, Boolean> add(GroupListLoader.InstanceData instanceData) {
@@ -559,19 +581,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(instanceData.Done == null);
 
                 Pair<Group, Boolean> pair = addInstanceHelper(instanceData);
-                makeArray();
+                sort();
 
-                int postition = mGroupArray.indexOf(pair.first);
+                int postition = mGroups.indexOf(pair.first);
 
                 return new Pair<>(postition, pair.second);
             }
 
             public void remove(Group group) {
                 Assert.assertTrue(group != null);
-                Assert.assertTrue(mGroupArray.contains(group));
+                Assert.assertTrue(mGroups.contains(group));
 
-                mGroupTree.remove(group.getTimeStamp());
-                mGroupArray.remove(group);
+                mGroups.remove(group);
             }
         }
 
@@ -655,7 +676,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mInstanceDatas.add(instanceData);
         }
 
-        public String getNameText(Context context) {
+        public String getNameText() {
+            Assert.assertTrue(!mInstanceDatas.isEmpty());
+            if (singleInstance()) {
+                return getSingleInstanceData().Name;
+            } else {
+                ArrayList<String> names = new ArrayList<>();
+                for (GroupListLoader.InstanceData instanceData : mInstanceDatas)
+                    names.add(instanceData.Name);
+                return TextUtils.join(", ", names);
+            }
+        }
+
+        public String getDetailsText(Context context) {
             Assert.assertTrue(!mInstanceDatas.isEmpty());
             if (singleInstance()) {
                 return getSingleInstanceData().DisplayText;
@@ -684,18 +717,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return customTimeData;
 
             return null;
-        }
-
-        public String getDetailsText() {
-            Assert.assertTrue(!mInstanceDatas.isEmpty());
-            if (singleInstance()) {
-                return getSingleInstanceData().Name;
-            } else {
-                ArrayList<String> names = new ArrayList<>();
-                for (GroupListLoader.InstanceData instanceData : mInstanceDatas)
-                    names.add(instanceData.Name);
-                return TextUtils.join(", ", names);
-            }
         }
 
         public TimeStamp getTimeStamp() {

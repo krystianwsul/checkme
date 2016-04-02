@@ -95,7 +95,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
     }
 
-    public void setAll() {
+    private void setAll() {
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -528,7 +528,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
             };
 
-            private ArrayList<Group> mGroups = new ArrayList<>();
+            private final ArrayList<Group> mGroups = new ArrayList<>();
 
             public NotDoneGroupContainer(Collection<GroupListLoader.InstanceData> instanceDatas) {
                 Assert.assertTrue(instanceDatas != null);

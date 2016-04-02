@@ -25,7 +25,6 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     private static final String SET_NOTIFIED_KEY = "setNotified";
 
     private TextView mShowInstanceName;
-    private GroupListFragment mShowInstanceList;
     private TextView mShowInstanceDetails;
     private CheckBox mCheckBox;
     private ImageView mShowInstanceEdit;
@@ -68,9 +67,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         mShowInstanceDetails = (TextView) findViewById(R.id.show_instance_details);
 
-        mShowInstanceList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
-        Assert.assertTrue(mShowInstanceList != null);
-        mShowInstanceList.setInstanceKey(mInstanceKey);
+        GroupListFragment showInstanceList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
+        Assert.assertTrue(showInstanceList != null);
+        showInstanceList.setInstanceKey(mInstanceKey);
 
         mCheckBox = (CheckBox) findViewById(R.id.show_instance_checkbox);
 

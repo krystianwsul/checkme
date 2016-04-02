@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Organizator</string>
-    <string name="action_settings">Ustawienia</string>
     <string name="today">Dzisiaj</string>
     <string name="yesterday">Wczoraj</string>
     <string name="tomorrow">Jutro</string>

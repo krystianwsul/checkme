@@ -52,7 +52,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private Integer mRootTaskId;
     private WeeklyScheduleLoader.Data mData;
 
-    private RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
+    private final RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
         @Override
         public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
             Assert.assertTrue(mHourMinutePickerPosition != -1);

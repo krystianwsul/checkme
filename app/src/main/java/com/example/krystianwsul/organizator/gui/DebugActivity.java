@@ -15,8 +15,6 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 import junit.framework.Assert;
 
 public class DebugActivity extends AppCompatActivity {
-    private static final String PICKER_TAG = "picker";
-
     public static Intent getIntent(Context context) {
         return new Intent(context, DebugActivity.class);
     }

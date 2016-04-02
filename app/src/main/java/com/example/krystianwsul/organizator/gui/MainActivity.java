@@ -1,6 +1,5 @@
 package com.example.krystianwsul.organizator.gui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -78,14 +77,11 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             case R.id.action_times:
                 startActivity(ShowCustomTimesActivity.getIntent(this));
                 return true;
-            case R.id.action_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
             case R.id.action_debug:
                 startActivity(DebugActivity.getIntent(this));
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                throw new UnsupportedOperationException();
         }
     }
 

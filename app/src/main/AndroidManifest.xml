@@ -27,9 +27,6 @@
         <activity android:name=".gui.instances.ShowNotificationGroupActivity" />
         <activity android:name=".gui.instances.ShowInstanceActivity" />
         <activity android:name=".gui.customtimes.ShowCustomTimesActivity" />
-        <activity
-            android:name=".gui.SettingsActivity"
-            android:label="@string/title_activity_settings" />
         <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
         <activity android:name=".gui.tasks.CreateRootTaskActivity" />
         <activity android:name=".gui.tasks.CreateChildTaskActivity" />
@@ -74,7 +71,7 @@
             android:exported="false" />
         <service
             android:name=".notifications.InstanceNotificationDeleteService"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>

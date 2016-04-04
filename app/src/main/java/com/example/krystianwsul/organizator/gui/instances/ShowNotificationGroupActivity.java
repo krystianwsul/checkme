@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
@@ -30,6 +31,11 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_group);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.show_notification_group_toolbar);
+        Assert.assertTrue(toolbar != null);
+
+        setSupportActionBar(toolbar);
 
         GroupListFragment showNotificationGroupList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
         Assert.assertTrue(showNotificationGroupList != null);

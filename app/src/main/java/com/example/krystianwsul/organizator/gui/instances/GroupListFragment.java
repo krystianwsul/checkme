@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
@@ -230,10 +229,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
                 TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
-                ImageView groupRowImg = (ImageView) groupRow.findViewById(R.id.group_row_img);
+                ImageView groupRowExpand = (ImageView) groupRow.findViewById(R.id.group_row_expand);
                 CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
 
-                return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowImg, groupCheckBox);
+                return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowExpand, groupCheckBox);
             } else {
                 Assert.assertTrue(viewType == TYPE_DIVIDER);
 
@@ -262,9 +261,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
 
                 if (group.singleInstance() && !group.getSingleInstanceData().HasChildren)
-                    groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
+                    groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
                 else
-                    groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
+                    groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
 
                 if (group.singleInstance()) {
                     groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
@@ -314,10 +313,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
 
-                if (!instanceData.HasChildren)
-                    groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_label_outline_black_24dp));
+                if (instanceData.HasChildren)
+                    groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                 else
-                    groupHolder.mGroupRowImg.setBackground(ContextCompat.getDrawable(mContext, R.drawable.ic_list_black_24dp));
+                    groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
 
                 groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
                 groupHolder.mGroupRowCheckBox.setChecked(true);
@@ -359,21 +358,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             public final TableLayout mGroupRow;
             public final TextView mGroupRowName;
             public final TextView mGroupRowDetails;
-            public final ImageView mGroupRowImg;
+            public final ImageView mGroupRowExpand;
             public final CheckBox mGroupRowCheckBox;
 
-            public GroupHolder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowImg, CheckBox groupRowCheckBox) {
+            public GroupHolder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowExpand, CheckBox groupRowCheckBox) {
                 super(groupRow);
 
                 Assert.assertTrue(groupRowName != null);
                 Assert.assertTrue(groupRowDetails != null);
-                Assert.assertTrue(groupRowImg != null);
+                Assert.assertTrue(groupRowExpand != null);
                 Assert.assertTrue(groupRowCheckBox != null);
 
                 mGroupRow = groupRow;
                 mGroupRowName = groupRowName;
                 mGroupRowDetails = groupRowDetails;
-                mGroupRowImg = groupRowImg;
+                mGroupRowExpand = groupRowExpand;
                 mGroupRowCheckBox = groupRowCheckBox;
             }
 

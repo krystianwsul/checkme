@@ -13,9 +13,11 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/group_row_img"
+            android:id="@+id/group_row_expand"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_expand_more_black_24dp"
+            android:visibility="invisible"/>
 
         <LinearLayout
             android:layout_width="wrap_content"

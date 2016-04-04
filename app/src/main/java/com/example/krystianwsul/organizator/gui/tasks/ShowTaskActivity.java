@@ -42,7 +42,10 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.show_task_toolbar);
+        Assert.assertTrue(toolbar != null);
+
         setSupportActionBar(toolbar);
 
         mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);

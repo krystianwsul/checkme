@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
@@ -27,9 +29,10 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     private TextView mShowInstanceName;
     private TextView mShowInstanceDetails;
     private CheckBox mCheckBox;
-    private ImageView mShowInstanceEdit;
 
     private InstanceKey mInstanceKey;
+
+    private ShowInstanceLoader.Data mData;
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
@@ -51,9 +54,34 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     private boolean mFirst = false;
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.show_instance_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.instance_menu_edit:
+                Assert.assertTrue(mData != null);
+                Intent intent = EditInstanceActivity.getIntent(this, mData.InstanceKey);
+                startActivity(intent);
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_instance);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.show_instance_toolbar);
+        Assert.assertTrue(toolbar != null);
+
+        setSupportActionBar(toolbar);
 
         if (savedInstanceState == null)
             mFirst = true;
@@ -73,8 +101,6 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         mCheckBox = (CheckBox) findViewById(R.id.show_instance_checkbox);
 
-        mShowInstanceEdit = (ImageView) findViewById(R.id.show_instance_edit);
-
         getSupportLoaderManager().initLoader(0, null, this);
     }
 
@@ -85,6 +111,8 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public void onLoadFinished(Loader<ShowInstanceLoader.Data> loader, final ShowInstanceLoader.Data data) {
+        mData = data;
+
         Intent intent = getIntent();
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
@@ -111,14 +139,6 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 data.Done = isChecked;
 
                 TickService.startService(ShowInstanceActivity.this);
-            }
-        });
-
-        mShowInstanceEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = EditInstanceActivity.getIntent(ShowInstanceActivity.this, data.InstanceKey);
-                startActivity(intent);
             }
         });
     }

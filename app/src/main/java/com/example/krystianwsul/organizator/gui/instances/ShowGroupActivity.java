@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
@@ -30,6 +31,11 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_group);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.show_group_toolbar);
+        Assert.assertTrue(toolbar != null);
+
+        setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(TIME_KEY));

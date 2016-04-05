@@ -137,8 +137,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         Assert.assertTrue(instanceKeys != null);
         mInstanceKeys = instanceKeys;
-        if (!mInstanceKeys.isEmpty())
+        if (!mInstanceKeys.isEmpty()) {
             getLoaderManager().initLoader(0, null, this);
+        }
     }
 
     @Override
@@ -251,7 +252,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(position <= mNotDoneGroupContainer.size() + mDoneGroupContainer.size());
 
             if (position < mNotDoneGroupContainer.size()) {
-                Group group = getGroup(position);
+                final Group group = getGroup(position);
                 Assert.assertTrue(group != null);
 
                 final GroupHolder groupHolder = (GroupHolder) abstractHolder;
@@ -260,10 +261,23 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
 
-                if (group.singleInstance() && !group.getSingleInstanceData().HasChildren)
+                if (group.singleInstance() && !group.getSingleInstanceData().HasChildren) {
                     groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
-                else
+                } else {
                     groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
+
+                    if (group.getExpanded())
+                        groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_24dp);
+                    else
+                        groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_24dp);
+
+                    groupHolder.mGroupRowExpand.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            groupHolder.onExpandClick();
+                        }
+                    });
+                }
 
                 if (group.singleInstance()) {
                     groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
@@ -313,10 +327,24 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 groupHolder.mGroupRowDetails.setText(group.getDetailsText(mContext));
 
-                if (instanceData.HasChildren)
+                if (instanceData.HasChildren) {
                     groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
-                else
+
+                    if (group.getExpanded())
+                        groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_24dp);
+                    else
+                        groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_24dp);
+
+                    groupHolder.mGroupRowExpand.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            groupHolder.onExpandClick();
+                        }
+                    });
+
+                } else {
                     groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
+                }
 
                 groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
                 groupHolder.mGroupRowCheckBox.setChecked(true);
@@ -479,6 +507,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return ShowInstanceActivity.getIntent(context, instanceData.InstanceKey);
                 }
             }
+
+            public void onExpandClick() {
+                int position = getAdapterPosition();
+
+                Group group = getGroup(position);
+                Assert.assertTrue(group != null);
+
+                group.toggleExpanded();
+                notifyItemChanged(position);
+            }
         }
 
         public class DividerHolder extends AbstractHolder {
@@ -498,12 +536,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             public void onClick() {
                 mExpanded = !mExpanded;
 
+                notifyItemChanged(mNotDoneGroupContainer.size());
                 if (mExpanded) {
                     notifyItemRangeInserted(mNotDoneGroupContainer.size() + 1, mNotDoneGroupContainer.size() + mDoneGroupContainer.size());
-                    GroupListDividerImage.setImageResource(R.drawable.ic_expand_less_black_24dp);
                 } else {
                     notifyItemRangeRemoved(mNotDoneGroupContainer.size() + 1, mNotDoneGroupContainer.size() + mDoneGroupContainer.size());
-                    GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_24dp);
                 }
             }
         }
@@ -665,6 +702,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         private final ArrayList<GroupListLoader.InstanceData> mInstanceDatas = new ArrayList<>();
 
+        private boolean mExpanded = false;
+
         public Group(ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, ExactTimeStamp exactTimeStamp) {
             Assert.assertTrue(customTimeDatas != null);
             Assert.assertTrue(exactTimeStamp != null);
@@ -733,6 +772,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public GroupListLoader.InstanceData getSingleInstanceData() {
             Assert.assertTrue(mInstanceDatas.size() == 1);
             return mInstanceDatas.get(0);
+        }
+
+        public void toggleExpanded() {
+            mExpanded = !mExpanded;
+        }
+
+        public boolean getExpanded() {
+            return mExpanded;
         }
     }
 }

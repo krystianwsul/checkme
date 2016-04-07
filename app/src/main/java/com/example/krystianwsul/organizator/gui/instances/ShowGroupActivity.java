@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -21,9 +22,9 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     private static final String TIME_KEY = "time";
 
-    public static Intent getIntent(GroupListFragment.Group group, Context context) {
+    public static Intent getIntent(ExactTimeStamp exactTimeStamp, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
-        intent.putExtra(TIME_KEY, group.getExactTimeStamp().getLong());
+        intent.putExtra(TIME_KEY, exactTimeStamp.getLong());
         return intent;
     }
 

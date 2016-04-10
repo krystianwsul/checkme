@@ -1,5 +1,7 @@
 package com.example.krystianwsul.organizator.utils.time;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import junit.framework.Assert;
@@ -7,7 +9,7 @@ import junit.framework.Assert;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class TimeStamp implements Comparable<TimeStamp> {
+public class TimeStamp implements Comparable<TimeStamp>, Parcelable {
     private final Long mLong;
 
     public static TimeStamp getNow() {
@@ -83,4 +85,27 @@ public class TimeStamp implements Comparable<TimeStamp> {
     public ExactTimeStamp toExactTimeStamp() {
         return new ExactTimeStamp(mLong);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mLong);
+    }
+
+    public static Parcelable.Creator<TimeStamp> CREATOR = new Creator<TimeStamp>() {
+        @Override
+        public TimeStamp createFromParcel(Parcel source) {
+            long time = source.readLong();
+            return new TimeStamp(time);
+        }
+
+        @Override
+        public TimeStamp[] newArray(int size) {
+            return new TimeStamp[size];
+        }
+    };
 }

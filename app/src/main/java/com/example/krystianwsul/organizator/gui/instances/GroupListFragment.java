@@ -2,6 +2,8 @@ package com.example.krystianwsul.organizator.gui.instances;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -35,20 +37,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private final static String USE_GROUPS_KEY = "useGroups";
 
-    private final static String EXPANDED_KEY = "expanded";
+    private final static String EXPANSION_STATE_KEY = "expansionState";
 
     private RecyclerView mGroupListRecycler;
+    private GroupAdapter mGroupAdapter;
 
     private boolean mUseGroups = false;
     private TimeStamp mTimeStamp;
     private InstanceKey mInstanceKey;
     private ArrayList<InstanceKey> mInstanceKeys;
 
-    private boolean mDoneExpanded = false;
+    private ExpansionState mExpansionState;
 
     public static GroupListFragment getGroupInstance() {
         GroupListFragment groupListFragment = new GroupListFragment();
@@ -74,10 +79,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         View view = getView();
         Assert.assertTrue(view != null);
 
-        if (savedInstanceState != null) {
-            Assert.assertTrue(savedInstanceState.containsKey(EXPANDED_KEY));
-            mDoneExpanded = savedInstanceState.getBoolean(EXPANDED_KEY);
-        }
+        if (savedInstanceState != null && savedInstanceState.containsKey(EXPANSION_STATE_KEY))
+            mExpansionState = savedInstanceState.getParcelable(EXPANSION_STATE_KEY);
 
         mGroupListRecycler = (RecyclerView) view.findViewById(R.id.group_list_recycler);
         Assert.assertTrue(mGroupListRecycler != null);
@@ -145,7 +148,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putBoolean(EXPANDED_KEY, mDoneExpanded);
+        if (mGroupAdapter != null)
+            outState.putParcelable(EXPANSION_STATE_KEY, mGroupAdapter.getExpansionState());
     }
 
     @Override
@@ -155,7 +159,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<GroupListLoader.Data> loader, GroupListLoader.Data data) {
-        mGroupListRecycler.setAdapter(new GroupAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values()));
+        if (mGroupAdapter != null)
+            mExpansionState = mGroupAdapter.getExpansionState();
+
+        mGroupAdapter = new GroupAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState);
+        mGroupListRecycler.setAdapter(mGroupAdapter);
     }
 
     @Override
@@ -173,7 +181,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         private final NodeCollection mNodeCollection;
 
-        public GroupAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, Collection<GroupListLoader.InstanceData> instanceDatas) {
+        public GroupAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, Collection<GroupListLoader.InstanceData> instanceDatas, ExpansionState expansionState) {
             Assert.assertTrue(context != null);
             Assert.assertTrue(customTimeDatas != null);
             Assert.assertTrue(instanceDatas != null);
@@ -182,7 +190,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mDataId = dataId;
             mCustomTimeDatas = customTimeDatas;
 
-            mNodeCollection = new NodeCollection(instanceDatas);
+            mNodeCollection = new NodeCollection(instanceDatas, expansionState);
         }
 
         @Override
@@ -225,6 +233,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         @Override
         public int getItemCount() {
             return mNodeCollection.getItemCount();
+        }
+
+        public ExpansionState getExpansionState() {
+            return mNodeCollection.getExpansionState();
         }
 
         public abstract class AbstractHolder extends RecyclerView.ViewHolder {
@@ -275,7 +287,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             private final NotDoneGroupCollection mNotDoneGroupCollection;
             private final DividerNode mDividerNode;
 
-            public NodeCollection(Collection<GroupListLoader.InstanceData> instanceDatas) {
+            public NodeCollection(Collection<GroupListLoader.InstanceData> instanceDatas, ExpansionState expansionState) {
                 Assert.assertTrue(instanceDatas != null);
 
                 ArrayList<GroupListLoader.InstanceData> notDoneInstances = new ArrayList<>();
@@ -287,8 +299,15 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         doneInstances.add(instanceData);
                 }
 
-                mNotDoneGroupCollection = new NotDoneGroupCollection(notDoneInstances);
-                mDividerNode = new DividerNode(doneInstances);
+                boolean doneExpanded = false;
+                ArrayList<TimeStamp> expandedGroups = null;
+                if (expansionState != null) {
+                    doneExpanded = expansionState.DoneExpanded;
+                    expandedGroups = expansionState.ExpandedGroups;
+                }
+
+                mNotDoneGroupCollection = new NotDoneGroupCollection(notDoneInstances, expandedGroups);
+                mDividerNode = new DividerNode(doneInstances, doneExpanded);
             }
 
             public int getItemViewType(int position) {
@@ -306,9 +325,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 Assert.assertTrue(!mDividerNode.isEmpty());
 
-                position = position - mNotDoneGroupCollection.size();
-                Assert.assertTrue(position < mDividerNode.displayedSize());
-                return mDividerNode.getNode(position);
+                int newPosition = position - mNotDoneGroupCollection.displayedSize();
+                Assert.assertTrue(newPosition < mDividerNode.displayedSize());
+                return mDividerNode.getNode(newPosition);
             }
 
             public int getPosition(Node node) {
@@ -330,6 +349,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             public int getItemCount() {
                 return mNotDoneGroupCollection.displayedSize() + mDividerNode.displayedSize();
+            }
+
+            public ExpansionState getExpansionState() {
+                ArrayList<TimeStamp> expandedGroups = mNotDoneGroupCollection.getExpandedGroups();
+                return new ExpansionState(mDividerNode.expanded(), expandedGroups);
             }
 
             class NotDoneGroupCollection implements NodeContainer {
@@ -354,11 +378,33 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final ArrayList<NotDoneGroupNode> mNotDoneGroupNodes = new ArrayList<>();
 
-                public NotDoneGroupCollection(Collection<GroupListLoader.InstanceData> instanceDatas) {
+                public NotDoneGroupCollection(Collection<GroupListLoader.InstanceData> instanceDatas, ArrayList<TimeStamp> expandedGroups) {
                     Assert.assertTrue(instanceDatas != null);
 
-                    for (GroupListLoader.InstanceData instanceData : instanceDatas)
-                        addInstanceHelper(instanceData);
+                    if (mUseGroups) {
+                        HashMap<TimeStamp, ArrayList<GroupListLoader.InstanceData>> instanceDataHash = new HashMap<>();
+                        for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+                            if (!instanceDataHash.containsKey(instanceData.InstanceTimeStamp))
+                                instanceDataHash.put(instanceData.InstanceTimeStamp, new ArrayList<GroupListLoader.InstanceData>());
+                            instanceDataHash.get(instanceData.InstanceTimeStamp).add(instanceData);
+                        }
+
+                        for (Map.Entry<TimeStamp, ArrayList<GroupListLoader.InstanceData>> entry : instanceDataHash.entrySet()) {
+                            boolean expanded = false;
+                            if (entry.getValue().size() > 1 && expandedGroups != null && expandedGroups.contains(entry.getKey()))
+                                expanded = true;
+                            NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(entry.getValue(), expanded);
+                            mNotDoneGroupNodes.add(notDoneGroupNode);
+                        }
+                    } else {
+                        for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+                            ArrayList<GroupListLoader.InstanceData> dummyInstanceDatas = new ArrayList<>();
+                            dummyInstanceDatas.add(instanceData);
+                            NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(dummyInstanceDatas, false);
+                            mNotDoneGroupNodes.add(notDoneGroupNode);
+                        }
+                    }
+
                     sort();
                 }
 
@@ -416,7 +462,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                 timeStampNotDoneGroupNodes.add(notDoneGroupNode);
 
                     if (timeStampNotDoneGroupNodes.isEmpty()) {
-                        NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(instanceData);
+                        ArrayList<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>();
+                        instanceDatas.add(instanceData);
+                        NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(instanceDatas, false);
                         NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = notDoneGroupNode.mNotDoneInstanceNodes.get(0);
                         mNotDoneGroupNodes.add(notDoneGroupNode);
                         return new Pair<>(true, new Pair<>(notDoneGroupNode, notDoneInstanceNode));
@@ -433,10 +481,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(index < mNotDoneGroupNodes.size());
 
                     return mNotDoneGroupNodes.get(index);
-                }
-
-                public int size() {
-                    return mNotDoneGroupNodes.size();
                 }
 
                 private void sort() {
@@ -459,6 +503,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     mNotDoneGroupNodes.remove(notDoneGroupNode);
                 }
+
+                public ArrayList<TimeStamp> getExpandedGroups() {
+                    ArrayList<TimeStamp> expandedGroups = new ArrayList<>();
+                    for (NotDoneGroupNode notDoneGroupNode : mNotDoneGroupNodes)
+                        if (notDoneGroupNode.expanded())
+                            expandedGroups.add(notDoneGroupNode.getExactTimeStamp().toTimeStamp());
+                    return expandedGroups;
+                }
             }
 
             class NotDoneGroupNode implements Node, NodeContainer {
@@ -468,11 +520,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private boolean mNotDoneGroupNodeExpanded;
 
-                public NotDoneGroupNode(GroupListLoader.InstanceData instanceData) {
-                    Assert.assertTrue(instanceData != null);
+                public NotDoneGroupNode(ArrayList<GroupListLoader.InstanceData> instanceDatas, boolean expanded) {
+                    Assert.assertTrue(instanceDatas != null);
+                    Assert.assertTrue(!instanceDatas.isEmpty());
+                    Assert.assertTrue(instanceDatas.size() > 1 || !expanded);
 
-                    mExactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
-                    addInstanceData(instanceData);
+                    mNotDoneGroupNodeExpanded = expanded;
+
+                    mExactTimeStamp = instanceDatas.get(0).InstanceTimeStamp.toExactTimeStamp();
+                    for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+                        Assert.assertTrue(mExactTimeStamp.equals(instanceData.InstanceTimeStamp.toExactTimeStamp()));
+                        addInstanceData(instanceData);
+                    }
                 }
 
                 @Override
@@ -483,9 +542,15 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     groupHolder.mGroupRowDetails.setText(getDetailsText(getActivity()));
 
-                    if (singleInstance() && !getSingleInstanceData().HasChildren) {
-                        groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
-                        groupHolder.mGroupRowExpand.setOnClickListener(null);
+                    if (singleInstance()) {
+                        if (getSingleInstanceData().HasChildren) {
+                            groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_24dp);
+                            groupHolder.mGroupRowExpand.setOnClickListener(null);
+                        } else {
+                            groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
+                            groupHolder.mGroupRowExpand.setOnClickListener(null);
+                        }
                     } else {
                         groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
 
@@ -539,7 +604,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                 DoneInstanceNode doneInstanceNode = mDividerNode.add(instanceData);
 
                                 if (wasEmpty) {
-                                    if (mDoneExpanded) {
+                                    if (mDividerNode.expanded()) {
                                         int newPosition = NodeCollection.this.getPosition(doneInstanceNode);
                                         notifyItemRangeInserted(newPosition - 1, 2);
                                     } else {
@@ -547,7 +612,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                         notifyItemInserted(dividerPosition);
                                     }
                                 } else {
-                                    if (mDoneExpanded) {
+                                    if (mDividerNode.expanded()) {
                                         int newPosition = NodeCollection.this.getPosition(doneInstanceNode);
                                         notifyItemInserted(newPosition);
                                     }
@@ -692,8 +757,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 class NotDoneInstanceNode implements Node {
                     public final GroupListLoader.InstanceData mInstanceData;
 
-                    private boolean mNotDoneInstanceNodeExpanded = false;
-
                     public NotDoneInstanceNode(GroupListLoader.InstanceData instanceData) {
                         Assert.assertTrue(instanceData != null);
                         mInstanceData = instanceData;
@@ -708,24 +771,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         if (mInstanceData.HasChildren) {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
-
-                            if (mNotDoneInstanceNodeExpanded)
-                                groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_24dp);
-                            else
-                                groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_24dp);
-
-                            groupHolder.mGroupRowExpand.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    int position = NodeCollection.this.getPosition(NotDoneInstanceNode.this);
-                                    mNotDoneInstanceNodeExpanded = !mNotDoneInstanceNodeExpanded;
-                                    notifyItemChanged(position);
-                                }
-                            });
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_24dp);
                             groupHolder.mGroupRowExpand.setOnClickListener(null);
                         } else {
                             groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
-
                             groupHolder.mGroupRowExpand.setOnClickListener(null);
                         }
 
@@ -765,7 +814,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                                 DoneInstanceNode doneInstanceNode = mDividerNode.add(mInstanceData);
 
-                                if (mDoneExpanded) {
+                                if (mDividerNode.expanded()) {
                                     int newInstancePosition = NodeCollection.this.getPosition(doneInstanceNode);
                                     notifyItemInserted(newInstancePosition);
                                 }
@@ -788,6 +837,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
 
             class DividerNode implements Node, NodeContainer {
+                private boolean mDoneExpanded;
+
                 private final Comparator<DoneInstanceNode> sComparator = new Comparator<DoneInstanceNode>() {
                     @Override
                     public int compare(DoneInstanceNode lhs, DoneInstanceNode rhs) {
@@ -797,8 +848,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final ArrayList<NodeCollection.DoneInstanceNode> mDoneInstanceNodes = new ArrayList<>();
 
-                public DividerNode(ArrayList<GroupListLoader.InstanceData> instanceDatas) {
+                public DividerNode(ArrayList<GroupListLoader.InstanceData> instanceDatas, boolean doneExpanded) {
                     Assert.assertTrue(instanceDatas != null);
+
+                    mDoneExpanded = doneExpanded;
 
                     for (GroupListLoader.InstanceData instanceData : instanceDatas) {
                         Assert.assertTrue(instanceData.Done != null);
@@ -903,10 +956,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return mDoneInstanceNodes.get(index);
                 }
 
-                public int size() {
-                    return mDoneInstanceNodes.size();
-                }
-
                 public boolean isEmpty() {
                     return mDoneInstanceNodes.isEmpty();
                 }
@@ -976,7 +1025,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Assert.assertTrue(mDoneExpanded);
+                            Assert.assertTrue(mDividerNode.expanded());
 
                             mInstanceData.Done = DomainFactory.getDomainFactory(mContext).setInstanceDone(mDataId, mInstanceData.InstanceKey, false);
                             Assert.assertTrue(mInstanceData.Done == null);
@@ -1041,5 +1090,45 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         Node getNode(int position);
         int getPosition(Node node);
         boolean expanded();
+    }
+
+    static class ExpansionState implements Parcelable {
+        public final boolean DoneExpanded;
+        public final ArrayList<TimeStamp> ExpandedGroups;
+
+        public ExpansionState(boolean doneExpanded, ArrayList<TimeStamp> expandedGroups) {
+            Assert.assertTrue(expandedGroups != null);
+
+            DoneExpanded = doneExpanded;
+            ExpandedGroups = expandedGroups;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(DoneExpanded ? 1 : 0);
+            dest.writeTypedList(ExpandedGroups);
+        }
+
+        public static Parcelable.Creator<ExpansionState> CREATOR = new Creator<ExpansionState>() {
+            @Override
+            public ExpansionState createFromParcel(Parcel source) {
+                boolean doneExpanded = (source.readInt() == 1);
+
+                ArrayList<TimeStamp> expandedGroups = new ArrayList<>();
+                source.readTypedList(expandedGroups, TimeStamp.CREATOR);
+
+                return new ExpansionState(doneExpanded, expandedGroups);
+            }
+
+            @Override
+            public ExpansionState[] newArray(int size) {
+                return new ExpansionState[size];
+            }
+        };
     }
 }

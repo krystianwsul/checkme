@@ -243,7 +243,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 }
             });
 
-            if (!taskWrapper.mTaskData.HasChildTasks)
+            if (taskWrapper.mTaskData.HasChildTasks)
                 taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
             else
                 taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);

@@ -1014,7 +1014,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                 groupAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
                             } else { // showing
                                 mDoneExpanded = true;
-                                groupAdapter.notifyItemRangeRemoved(position + 1, DividerNode.this.displayedSize() - 1);
+                                groupAdapter.notifyItemRangeInserted(position + 1, DividerNode.this.displayedSize() - 1);
                             }
 
                             groupAdapter.notifyItemChanged(position);

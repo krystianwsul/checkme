@@ -628,7 +628,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (singleInstance()) {
                         if (getSingleInstanceData().HasChildren) {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_24dp);
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
                             groupHolder.mGroupRowExpand.setOnClickListener(null);
                         } else {
                             groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
@@ -638,9 +638,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
 
                         if (mNotDoneGroupNodeExpanded)
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_24dp);
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_36dp);
                         else
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_24dp);
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_36dp);
 
                         groupHolder.mGroupRowExpand.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -880,7 +880,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         if (mInstanceData.HasChildren) {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_24dp);
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
                             groupHolder.mGroupRowExpand.setOnClickListener(null);
                         } else {
                             groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
@@ -997,9 +997,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(groupAdapter != null);
 
                     if (mDoneExpanded)
-                        dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_less_black_24dp);
+                        dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_less_black_36dp);
                     else
-                        dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_24dp);
+                        dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_36dp);
 
                     dividerHolder.RowGroupListDivider.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -1146,9 +1146,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
 
                         if (mExpanded)
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_24dp);
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_36dp);
                         else
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_24dp);
+                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_36dp);
 
                         groupHolder.mGroupRowExpand.setOnClickListener(new View.OnClickListener() {
                             @Override

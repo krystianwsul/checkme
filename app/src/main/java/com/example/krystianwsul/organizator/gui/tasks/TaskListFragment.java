@@ -244,9 +244,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             });
 
             if (!taskWrapper.mTaskData.HasChildTasks)
-                taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.ic_label_outline_black_24dp));
+                taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
             else
-                taskHolder.mTaskRowImg.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.ic_list_black_24dp));
+                taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
 
             taskHolder.mTaskRowName.setText(taskWrapper.mTaskData.Name);
 

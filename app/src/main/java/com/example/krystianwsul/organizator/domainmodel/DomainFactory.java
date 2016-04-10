@@ -621,8 +621,26 @@ public class DomainFactory {
         HourMinute hourMinute = new HourMinute(calendar);
 
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
+        instance.setNotificationShown(false, now);
 
         save(dataId);
+    }
+
+    public synchronized ExactTimeStamp setInstanceNotificationDone(int dataId, InstanceKey instanceKey) {
+        Assert.assertTrue(instanceKey != null);
+
+        Instance instance = getInstance(instanceKey);
+        Assert.assertTrue(instance != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        instance.setDone(true, now);
+        instance.setNotificationShown(false, now);
+        instance.setNotified(true, now);
+
+        save(dataId);
+
+        return instance.getDone();
     }
 
     public synchronized ExactTimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done) {

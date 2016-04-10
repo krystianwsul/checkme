@@ -157,11 +157,11 @@ public class TickService extends IntentService {
 
         ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
 
-        Intent doneIntent = InstanceDoneService.getIntent(this, notificationInstanceData.InstanceKey);
+        Intent doneIntent = InstanceDoneService.getIntent(this, notificationInstanceData.InstanceKey, notificationInstanceData.NotificationId);
         PendingIntent pendingDoneIntent = PendingIntent.getService(this, notificationInstanceData.NotificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, getString(R.string.done), pendingDoneIntent).build());
 
-        Intent hourIntent = InstanceHourService.getIntent(this, notificationInstanceData.InstanceKey);
+        Intent hourIntent = InstanceHourService.getIntent(this, notificationInstanceData.InstanceKey, notificationInstanceData.NotificationId);
         PendingIntent pendingHourIntent = PendingIntent.getService(this, notificationInstanceData.NotificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, getString(R.string.hour), pendingHourIntent).build());
 

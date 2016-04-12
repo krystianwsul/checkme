@@ -18,4 +18,6 @@
     <string name="hour">In an hour</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
+    <string name="expand">Expand</string>
+    <string name="list">List</string>
 </resources>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/show_group_row"
@@ -9,19 +10,19 @@
     android:stretchColumns="1"
     android:paddingTop="5dp"
     android:paddingBottom="5dp"
-    android:paddingLeft="16dp">
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        tools:ignore="UselessParent">
 
-        <ImageView
-            android:id="@+id/group_row_expand"
+        <CheckBox
+            android:id="@+id/group_row_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_expand_more_black_36dp"
-            android:visibility="invisible"
-            android:layout_marginEnd="20dp"/>
+            android:layout_marginEnd="24dp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -44,10 +45,14 @@
 
         </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/group_row_checkbox"
+        <ImageView
+            android:id="@+id/group_row_expand"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_expand_more_black_36dp"
+            android:visibility="invisible"
+            android:layout_marginStart="16dp"
+            android:contentDescription="@string/expand"/>
 
     </TableRow>
 

@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -228,7 +228,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             } else {
                 Assert.assertTrue(viewType == TYPE_DIVIDER);
 
-                LinearLayout rowGroupListDivider = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list_divider, parent, false);
+                RelativeLayout rowGroupListDivider = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list_divider, parent, false);
 
                 ImageView groupListDividerImage = (ImageView) rowGroupListDivider.findViewById(R.id.group_list_divider_image);
                 Assert.assertTrue(groupListDividerImage != null);
@@ -285,10 +285,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         public static class DividerHolder extends AbstractHolder {
-            public final LinearLayout RowGroupListDivider;
+            public final RelativeLayout RowGroupListDivider;
             public final ImageView GroupListDividerImage;
 
-            DividerHolder(LinearLayout rowGroupListDivider, ImageView groupListDividerImage) {
+            DividerHolder(RelativeLayout rowGroupListDivider, ImageView groupListDividerImage) {
                 super(rowGroupListDivider);
 
                 Assert.assertTrue(rowGroupListDivider != null);
@@ -720,6 +720,22 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             }
                         }
                     });
+
+                    /*
+                    final View view = groupHolder.mGroupRowName;
+                    ViewTreeObserver viewTreeObserver = view.getViewTreeObserver();
+                    if (viewTreeObserver.isAlive()) {
+                        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                            @Override
+                            public void onGlobalLayout() {
+                                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                                int[] asdf = new int[2];
+                                view.getLocationInWindow(asdf);
+                                Log.e("asdf", asdf[0] + ":" + asdf[1] / 2);
+                            }
+                        });
+                    }
+                    */
                 }
 
                 @Override
@@ -919,7 +935,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                     groupAdapter.notifyItemChanged(groupPosition);
                                     groupAdapter.notifyItemRemoved(oldInstancePosition);
                                 }
-
 
                                 DoneInstanceNode doneInstanceNode = nodeCollection.mDividerNode.add(mInstanceData);
 

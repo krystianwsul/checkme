@@ -1237,24 +1237,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     if (mInstanceData.HasChildren) {
                         groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
-
-                        if (mExpanded)
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_36dp);
-                        else
-                            groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_36dp);
-
-                        groupHolder.mGroupRowExpand.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                int position = nodeCollection.getPosition(DoneInstanceNode.this);
-                                mExpanded = !mExpanded;
-                                groupAdapter.notifyItemChanged(position);
-                            }
-                        });
-
+                        groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
                     } else {
                         groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
-
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
                     }
 

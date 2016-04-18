@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
@@ -48,9 +50,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class DomainFactory {
     private static DomainFactory sDomainFactory;
@@ -87,7 +89,7 @@ public class DomainFactory {
         sDomainFactory = null;
         mPersistenceManager.reset();
 
-        notifyDomainObservers(new ArrayList<Integer>());
+        notifyDomainObservers(new ArrayList<>());
 
         mObservers.clear();
     }
@@ -308,7 +310,7 @@ public class DomainFactory {
         return new ShowGroupLoader.Data(displayText, !currentInstances.isEmpty());
     }
 
-    public synchronized GroupListLoader.Data getInstanceListData(Context context, TimeStamp timeStamp) {
+    public synchronized GroupListLoader.Data getGroupListData(Context context, TimeStamp timeStamp) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
 
@@ -320,10 +322,9 @@ public class DomainFactory {
 
         ArrayList<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
 
-        ArrayList<Instance> currentInstances = new ArrayList<>();
-        for (Instance instance : rootInstances)
-            if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
-                currentInstances.add(instance);
+        List<Instance> currentInstances = Stream.of(rootInstances)
+                .filter((Instance instance) -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
+                .collect(Collectors.toList());
         Assert.assertTrue(!currentInstances.isEmpty());
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
@@ -338,7 +339,7 @@ public class DomainFactory {
         return new GroupListLoader.Data(instanceDatas, customTimeDatas);
     }
 
-    public synchronized GroupListLoader.Data getInstanceListData(Context context, InstanceKey instanceKey) {
+    public synchronized GroupListLoader.Data getGroupListData(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -361,7 +362,7 @@ public class DomainFactory {
         return new GroupListLoader.Data(instanceDatas, customTimeDatas);
     }
 
-    public synchronized GroupListLoader.Data getInstanceListData(Context context, ArrayList<InstanceKey> instanceKeys) {
+    public synchronized GroupListLoader.Data getGroupListData(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
@@ -376,12 +377,7 @@ public class DomainFactory {
             instances.add(instance);
         }
 
-        Collections.sort(instances, new Comparator<Instance>() {
-            @Override
-            public int compare(Instance lhs, Instance rhs) {
-                return lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime());
-            }
-        });
+        Collections.sort(instances, (Instance lhs, Instance rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : instances)
@@ -534,12 +530,7 @@ public class DomainFactory {
                     tasks.add(rootTask);
         }
 
-        Collections.sort(tasks, new Comparator<Task>() {
-            @Override
-            public int compare(Task lhs, Task rhs) {
-                return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
-            }
-        });
+        Collections.sort(tasks, (Task lhs, Task rhs) -> Integer.valueOf(lhs.getId()).compareTo(rhs.getId()));
         if (taskId == null)
             Collections.reverse(tasks);
 
@@ -1429,12 +1420,7 @@ public class DomainFactory {
             if (taskHierarchy.current(exactTimeStamp) && taskHierarchy.getChildTask().current(exactTimeStamp))
                 childTasks.add(taskHierarchy.getChildTask());
 
-        Collections.sort(childTasks, new Comparator<Task>() {
-            @Override
-            public int compare(Task lhs, Task rhs) {
-                return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
-            }
-        });
+        Collections.sort(childTasks, (Task lhs, Task rhs) -> Integer.valueOf(lhs.getId()).compareTo(rhs.getId()));
 
         return childTasks;
     }

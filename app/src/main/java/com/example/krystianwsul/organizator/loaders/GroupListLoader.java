@@ -36,15 +36,15 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getInstanceListData(getContext(), mTimeStamp);
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mTimeStamp);
         } else if (mInstanceKey != null) {
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getInstanceListData(getContext(), mInstanceKey);
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mInstanceKey);
         } else if (mInstanceKeys != null) {
             Assert.assertTrue(!mInstanceKeys.isEmpty());
 
-            return DomainFactory.getDomainFactory(getContext()).getInstanceListData(getContext(), mInstanceKeys);
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mInstanceKeys);
         } else {
             return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext());
         }

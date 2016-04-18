@@ -398,9 +398,12 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
 
+        Task task = mTasks.get(instance.getTaskId());
+        Assert.assertTrue(task != null);
+
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null);
+        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), task.isRootTask(now));
     }
 
     public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {

@@ -29,8 +29,10 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final String Name;
         public final String DisplayText;
         public boolean Done;
+        public final boolean Editable;
+        public final boolean IsRoot;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean editable, boolean isRoot) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -38,6 +40,8 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             Name = name;
             DisplayText = displayText;
             Done = done;
+            Editable = editable;
+            IsRoot = isRoot;
         }
 
         @Override

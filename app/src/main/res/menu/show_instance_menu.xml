@@ -4,9 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".gui.MainActivity">
     <item
-        android:id="@+id/instance_menu_edit"
-        android:title="@string/edit"
+        android:id="@+id/instance_menu_edit_instance"
+        android:title="@string/edit_instance"
         android:orderInCategory="200"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_mode_edit_white_24dp"/>
+        android:icon="@drawable/ic_alarm_white_24dp"/>
+    <item
+        android:id="@+id/instance_menu_edit_task"
+        android:title="@string/edit_task"
+        android:orderInCategory="300"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_mode_edit_white_24dp"
+        android:visible="false"/>
 </menu>

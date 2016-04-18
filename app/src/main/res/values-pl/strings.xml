@@ -20,4 +20,6 @@
     <string name="edit">Edytuj</string>
     <string name="expand">Rozwiń</string>
     <string name="list">Lista</string>
+    <string name="edit_instance">Edytuj instancję</string>
+    <string name="edit_task">Edytuj zadanie</string>
 </resources>

@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity;
+import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
@@ -56,16 +58,25 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.show_instance_menu, menu);
+        boolean editable = (mData != null && mData.Editable);
+        menu.findItem(R.id.instance_menu_edit_task).setVisible(editable);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.instance_menu_edit:
+            case R.id.instance_menu_edit_instance:
                 Assert.assertTrue(mData != null);
                 Intent intent = EditInstanceActivity.getIntent(this, mData.InstanceKey);
                 startActivity(intent);
+                break;
+            case R.id.instance_menu_edit_task:
+                Assert.assertTrue(mData != null);
+                if (mData.IsRoot)
+                    startActivity(CreateRootTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                else
+                    startActivity(CreateChildTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -92,8 +103,10 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         Assert.assertTrue(mInstanceKey != null);
 
         mShowInstanceName = (TextView) findViewById(R.id.show_instance_name);
+        Assert.assertTrue(mShowInstanceName != null);
 
         mShowInstanceDetails = (TextView) findViewById(R.id.show_instance_details);
+        Assert.assertTrue(mShowInstanceDetails != null);
 
         GroupListFragment showInstanceList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
         Assert.assertTrue(showInstanceList != null);
@@ -130,17 +143,16 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         else
             mShowInstanceDetails.setText(scheduleText);
 
-        mCheckBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mCheckBox.setOnClickListener((View v) -> {
                 boolean isChecked = mCheckBox.isChecked();
 
                 DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, data.InstanceKey, isChecked);
                 data.Done = isChecked;
 
                 TickService.startService(ShowInstanceActivity.this);
-            }
-        });
+            });
+
+        invalidateOptionsMenu();
     }
 
     @Override

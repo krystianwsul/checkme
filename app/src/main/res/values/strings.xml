@@ -20,4 +20,6 @@
     <string name="edit">Edit</string>
     <string name="expand">Expand</string>
     <string name="list">List</string>
+    <string name="edit_instance">Edit instance</string>
+    <string name="edit_task">Edit task</string>
 </resources>

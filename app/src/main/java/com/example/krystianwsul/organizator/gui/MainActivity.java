@@ -2,11 +2,10 @@ package com.example.krystianwsul.organizator.gui;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +13,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
@@ -25,17 +25,22 @@ import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener {
     private DrawerLayout mMainActivityDrawer;
-    private ViewPager mViewPager;
+    //private ViewPager mViewPager;
+    private FrameLayout mMainActivityFrame;
 
-    private ViewPager.OnPageChangeListener mOnPageChangeListener;
+    //private ViewPager.OnPageChangeListener mOnPageChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_activity_toolbar);
+        Assert.assertTrue(toolbar != null);
+
         setSupportActionBar(toolbar);
 
+        /*
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         Assert.assertTrue(tabLayout != null);
 
@@ -66,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
             }
         });
+        */
 
         mMainActivityDrawer = (DrawerLayout) findViewById(R.id.main_activity_drawer);
         Assert.assertTrue(mMainActivityDrawer != null);
@@ -74,14 +80,21 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         mMainActivityDrawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+
         NavigationView mainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
         Assert.assertTrue(mainActivityNavigation != null);
 
-        mainActivityNavigation.setNavigationItemSelectedListener((MenuItem item) -> {
+        mainActivityNavigation.setNavigationItemSelectedListener(item -> {
+            Fragment oldFragment = fragmentManager.findFragmentById(R.id.main_activity_frame);
             switch (item.getItemId()) {
                 case R.id.main_drawer_instances:
+                    if (!(oldFragment instanceof GroupListFragment))
+                        fragmentManager.beginTransaction().replace(R.id.main_activity_frame, GroupListFragment.getGroupInstance()).commit();
                     break;
                 case R.id.main_drawer_tasks:
+                    if (!(oldFragment instanceof TaskListFragment))
+                    fragmentManager.beginTransaction().replace(R.id.main_activity_frame, TaskListFragment.getInstance()).commit();
                     break;
                 default:
                     throw new IndexOutOfBoundsException();
@@ -91,6 +104,13 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             mMainActivityDrawer.closeDrawer(GravityCompat.START);
             return true;
         });
+
+        mMainActivityFrame = (FrameLayout) findViewById(R.id.main_activity_frame);
+        Assert.assertTrue(mMainActivityFrame != null);
+
+        Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_frame);
+        if (fragment == null)
+            fragmentManager.beginTransaction().add(R.id.main_activity_frame, GroupListFragment.getGroupInstance()).commit();
 
         TickService.register(this);
     }
@@ -150,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     @Override
     public void onCreateTaskActionMode(final ActionMode actionMode) {
+    /*
         mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -167,13 +188,16 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             }
         };
         mViewPager.addOnPageChangeListener(mOnPageChangeListener);
+        */
     }
 
     @Override
     public void onDestroyTaskActionMode() {
+/*
         Assert.assertTrue(mOnPageChangeListener != null);
 
         mViewPager.removeOnPageChangeListener(mOnPageChangeListener);
         mOnPageChangeListener = null;
+    */
     }
 }

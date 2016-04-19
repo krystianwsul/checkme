@@ -13,6 +13,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.example.krystianwsul.organizator.R;
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     //private ViewPager mViewPager;
     private FrameLayout mMainActivityFrame;
 
-    //private ViewPager.OnPageChangeListener mOnPageChangeListener;
+    private DrawerLayout.DrawerListener mDrawerListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,12 +90,16 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             Fragment oldFragment = fragmentManager.findFragmentById(R.id.main_activity_frame);
             switch (item.getItemId()) {
                 case R.id.main_drawer_instances:
+                    if (mDrawerListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerListener);
+                        mDrawerListener = null;
+                    }
                     if (!(oldFragment instanceof GroupListFragment))
                         fragmentManager.beginTransaction().replace(R.id.main_activity_frame, GroupListFragment.getGroupInstance()).commit();
                     break;
                 case R.id.main_drawer_tasks:
                     if (!(oldFragment instanceof TaskListFragment))
-                    fragmentManager.beginTransaction().replace(R.id.main_activity_frame, TaskListFragment.getInstance()).commit();
+                        fragmentManager.beginTransaction().replace(R.id.main_activity_frame, TaskListFragment.getInstance()).commit();
                     break;
                 default:
                     throw new IndexOutOfBoundsException();
@@ -170,34 +175,36 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     @Override
     public void onCreateTaskActionMode(final ActionMode actionMode) {
-    /*
-        mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
+        Assert.assertTrue(mDrawerListener == null);
+        mDrawerListener = new DrawerLayout.DrawerListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onDrawerSlide(View drawerView, float slideOffset) {
 
             }
 
             @Override
-            public void onPageSelected(int position) {
-                actionMode.finish();
+            public void onDrawerOpened(View drawerView) {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onDrawerClosed(View drawerView) {
+            }
 
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (newState == DrawerLayout.STATE_DRAGGING) {
+                    actionMode.finish();
+                }
             }
         };
-        mViewPager.addOnPageChangeListener(mOnPageChangeListener);
-        */
+        mMainActivityDrawer.addDrawerListener(mDrawerListener);
     }
 
     @Override
     public void onDestroyTaskActionMode() {
-/*
-        Assert.assertTrue(mOnPageChangeListener != null);
+        Assert.assertTrue(mDrawerListener != null);
 
-        mViewPager.removeOnPageChangeListener(mOnPageChangeListener);
-        mOnPageChangeListener = null;
-    */
+        mMainActivityDrawer.removeDrawerListener(mDrawerListener);
+        mDrawerListener = null;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -116,14 +117,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
         mData = data;
 
-        mTaskListFragmentFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mTaskId == null)
-                    startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
-                else
-                    startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
-            }
+        mTaskListFragmentFab.setOnClickListener(v -> {
+            if (mTaskId == null)
+                startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
+            else
+                startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
         mTaskAdapter = new TaskAdapter(data);
@@ -139,7 +137,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         return mData.DataId;
     }
 
-    private class TaskEditCallback implements ActionMode.Callback {
+    public class TaskEditCallback implements ActionMode.Callback {
         @Override
         public boolean onCreateActionMode(final ActionMode actionMode, Menu menu) {
             mActionMode = actionMode;
@@ -234,13 +232,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             if (taskWrapper.mSelected)
                 taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
+            else
+                taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
 
-            taskHolder.mShowTaskRow.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    taskHolder.onLongClick();
-                    return true;
-                }
+            taskHolder.mShowTaskRow.setOnLongClickListener(v -> {
+                taskHolder.onLongClick();
+                return true;
             });
 
             if (taskWrapper.mTaskData.HasChildTasks)
@@ -256,14 +253,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             else
                 taskHolder.mTaskRowDetails.setText(scheduleText);
 
-            taskHolder.mShowTaskRow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mActionMode != null)
-                        taskHolder.onLongClick();
-                    else
-                        taskHolder.onRowClick();
-                }
+            taskHolder.mShowTaskRow.setOnClickListener(v -> {
+                if (mActionMode != null)
+                    taskHolder.onLongClick();
+                else
+                    taskHolder.onRowClick();
             });
         }
 

@@ -339,11 +339,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 Assert.assertTrue(taskWrapper != null);
 
                 taskWrapper.mSelected = !taskWrapper.mSelected;
-
-                if (taskWrapper.mSelected)
-                    mShowTaskRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
-                else
-                    mShowTaskRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.bpTransparent));
+                notifyItemChanged(position);
 
                 ArrayList<Integer> taskIds = getSelected();
                 if (taskIds.isEmpty()) {

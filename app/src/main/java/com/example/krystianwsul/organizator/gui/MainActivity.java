@@ -1,10 +1,14 @@
 package com.example.krystianwsul.organizator.gui;
 
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +24,7 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener {
+    private DrawerLayout mMainActivityDrawer;
     private ViewPager mViewPager;
 
     private ViewPager.OnPageChangeListener mOnPageChangeListener;
@@ -62,6 +67,31 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             }
         });
 
+        mMainActivityDrawer = (DrawerLayout) findViewById(R.id.main_activity_drawer);
+        Assert.assertTrue(mMainActivityDrawer != null);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mMainActivityDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mMainActivityDrawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView mainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
+        Assert.assertTrue(mainActivityNavigation != null);
+
+        mainActivityNavigation.setNavigationItemSelectedListener((MenuItem item) -> {
+            switch (item.getItemId()) {
+                case R.id.main_drawer_instances:
+                    break;
+                case R.id.main_drawer_tasks:
+                    break;
+                default:
+                    throw new IndexOutOfBoundsException();
+
+            }
+
+            mMainActivityDrawer.closeDrawer(GravityCompat.START);
+            return true;
+        });
+
         TickService.register(this);
     }
 
@@ -83,6 +113,13 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             default:
                 throw new UnsupportedOperationException();
         }
+    }
+    @Override
+    public void onBackPressed() {
+        if (mMainActivityDrawer.isDrawerOpen(GravityCompat.START))
+            mMainActivityDrawer.closeDrawer(GravityCompat.START);
+        else
+            super.onBackPressed();
     }
 
     private class MyFragmentPagerAdapter extends FragmentPagerAdapter {

@@ -254,14 +254,27 @@ public class DomainFactory {
         return new ShowCustomTimesLoader.Data(entries);
     }
 
-    public synchronized GroupListLoader.Data getGroupListData(Context context) {
+    public synchronized GroupListLoader.Data getGroupListData(Context context, int day) {
+        Assert.assertTrue(day >= 0);
+
+        ExactTimeStamp startExactTimeStamp;
+        ExactTimeStamp endExactTimeStamp;
+
+        if (day == 0) {
+            startExactTimeStamp = null;
+        } else {
+            Calendar startCalendar = Calendar.getInstance();
+            startCalendar.add(Calendar.DATE, day);
+            startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMili(0, 0, 0, 0));
+        }
+
         Calendar endCalendar = Calendar.getInstance();
-        endCalendar.add(Calendar.DATE, 2);
-        Date endDate = new Date(endCalendar);
+        endCalendar.add(Calendar.DATE, day + 1);
+        endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMili(0, 0, 0, 0));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Instance> currentInstances = getRootInstances(null, new ExactTimeStamp(endDate, new HourMili(0, 0, 0, 0)), now);
+        ArrayList<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances)
@@ -1104,7 +1117,17 @@ public class DomainFactory {
         Assert.assertTrue(now != null);
 
         HashSet<Instance> allInstances = new HashSet<>();
-        allInstances.addAll(mExistingInstances);
+        for (Instance instance : mExistingInstances) {
+            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
+
+            if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
+                continue;
+
+            if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
+                continue;
+
+            allInstances.add(instance);
+        }
 
         for (Task task : mTasks.values())
             allInstances.addAll(task.getInstances(startExactTimeStamp, endExactTimeStamp));

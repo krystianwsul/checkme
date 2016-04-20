@@ -29,30 +29,6 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <!--
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:orientation="vertical">
-
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tab_layout"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:elevation="6dp"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/list_fragment_pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-        </LinearLayout>
-            -->
-
         <FrameLayout
             android:id="@+id/main_activity_frame"
             android:layout_width="match_parent"

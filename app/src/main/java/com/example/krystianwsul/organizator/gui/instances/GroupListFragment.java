@@ -43,6 +43,7 @@ import java.util.Map;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private final static String USE_GROUPS_KEY = "useGroups";
+    private final static String DAY_KEY = "day";
 
     private final static String EXPANSION_STATE_KEY = "expansionState";
 
@@ -50,16 +51,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     private GroupAdapter mGroupAdapter;
 
     private boolean mUseGroups = false;
+    private Integer mDay = null;
+
     private TimeStamp mTimeStamp;
     private InstanceKey mInstanceKey;
     private ArrayList<InstanceKey> mInstanceKeys;
 
     private ExpansionState mExpansionState;
 
-    public static GroupListFragment getGroupInstance() {
+    public static GroupListFragment getGroupInstance(int day) {
+        Assert.assertTrue(day >= 0);
+
         GroupListFragment groupListFragment = new GroupListFragment();
         Bundle args = new Bundle();
         args.putBoolean(USE_GROUPS_KEY, true);
+        args.putInt(DAY_KEY, day);
         groupListFragment.setArguments(args);
         return groupListFragment;
     }
@@ -92,6 +98,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         if (args != null) {
             Assert.assertTrue(args.containsKey(USE_GROUPS_KEY));
             mUseGroups = args.getBoolean(USE_GROUPS_KEY, false);
+
+            Assert.assertTrue(args.containsKey(DAY_KEY));
+            mDay = args.getInt(DAY_KEY);
             Assert.assertTrue(mUseGroups);
 
             setAll();
@@ -155,7 +164,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new GroupListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys);
+        return new GroupListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys, mDay);
     }
 
     @Override
@@ -395,18 +404,15 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             static class NotDoneGroupCollection implements NodeContainer {
                 private final WeakReference<NodeCollection> mNodeCollectionReference;
 
-                private final Comparator<NotDoneGroupNode> sComparator = new Comparator<NotDoneGroupNode>() {
-                    @Override
-                    public int compare(NotDoneGroupNode lhs, NotDoneGroupNode rhs) {
-                        int timeStampComparison = lhs.getExactTimeStamp().compareTo(rhs.getExactTimeStamp());
-                        if (timeStampComparison != 0) {
-                            return timeStampComparison;
-                        } else {
-                            Assert.assertTrue(lhs.singleInstance());
-                            Assert.assertTrue(rhs.singleInstance());
+                private final Comparator<NotDoneGroupNode> sComparator = (NotDoneGroupNode lhs, NotDoneGroupNode rhs) -> {
+                    int timeStampComparison = lhs.getExactTimeStamp().compareTo(rhs.getExactTimeStamp());
+                    if (timeStampComparison != 0) {
+                        return timeStampComparison;
+                    } else {
+                        Assert.assertTrue(lhs.singleInstance());
+                        Assert.assertTrue(rhs.singleInstance());
 
-                            return Integer.valueOf(lhs.getSingleInstanceData().InstanceKey.TaskId).compareTo(rhs.getSingleInstanceData().InstanceKey.TaskId);
-                        }
+                        return Integer.valueOf(lhs.getSingleInstanceData().InstanceKey.TaskId).compareTo(rhs.getSingleInstanceData().InstanceKey.TaskId);
                     }
                 };
 
@@ -439,7 +445,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         HashMap<TimeStamp, ArrayList<GroupListLoader.InstanceData>> instanceDataHash = new HashMap<>();
                         for (GroupListLoader.InstanceData instanceData : instanceDatas) {
                             if (!instanceDataHash.containsKey(instanceData.InstanceTimeStamp))
-                                instanceDataHash.put(instanceData.InstanceTimeStamp, new ArrayList<GroupListLoader.InstanceData>());
+                                instanceDataHash.put(instanceData.InstanceTimeStamp, new ArrayList<>());
                             instanceDataHash.get(instanceData.InstanceTimeStamp).add(instanceData);
                         }
 
@@ -575,12 +581,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
 
             static class NotDoneGroupNode implements Node, NodeContainer {
-                private static final Comparator<NotDoneInstanceNode> sComparator = new Comparator<NotDoneInstanceNode>() {
-                    @Override
-                    public int compare(NotDoneInstanceNode lhs, NotDoneInstanceNode rhs) {
-                        return Integer.valueOf(lhs.mInstanceData.InstanceKey.TaskId).compareTo(rhs.mInstanceData.InstanceKey.TaskId);
-                    }
-                };
+                private static final Comparator<NotDoneInstanceNode> sComparator = (NotDoneInstanceNode lhs, NotDoneInstanceNode rhs) -> Integer.valueOf(lhs.mInstanceData.InstanceKey.TaskId).compareTo(rhs.mInstanceData.InstanceKey.TaskId);
 
                 private final WeakReference<NotDoneGroupCollection> mNotDoneGroupCollectionReference;
 
@@ -661,25 +662,22 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         else
                             groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_more_black_36dp);
 
-                        groupHolder.mGroupRowExpand.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                int position = nodeCollection.getPosition(NotDoneGroupNode.this);
+                        groupHolder.mGroupRowExpand.setOnClickListener(v -> {
+                            int position = nodeCollection.getPosition(NotDoneGroupNode.this);
 
-                                if (mNotDoneGroupNodeExpanded) { // hiding
-                                    int displayedSize = displayedSize();
-                                    mNotDoneGroupNodeExpanded = !mNotDoneGroupNodeExpanded;
-                                    groupAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
-                                } else { // showing
-                                    mNotDoneGroupNodeExpanded = !mNotDoneGroupNodeExpanded;
-                                    groupAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
-                                }
+                            if (mNotDoneGroupNodeExpanded) { // hiding
+                                int displayedSize = displayedSize();
+                                mNotDoneGroupNodeExpanded = !mNotDoneGroupNodeExpanded;
+                                groupAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
+                            } else { // showing
+                                mNotDoneGroupNodeExpanded = !mNotDoneGroupNodeExpanded;
+                                groupAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
+                            }
 
-                                if ((position) > 0 && (nodeCollection.getNode(position - 1) instanceof NotDoneGroupNode)) {
-                                    groupAdapter.notifyItemRangeChanged(position - 1, 2);
-                                } else {
-                                    groupAdapter.notifyItemChanged(position);
-                                }
+                            if ((position) > 0 && (nodeCollection.getNode(position - 1) instanceof NotDoneGroupNode)) {
+                                groupAdapter.notifyItemRangeChanged(position - 1, 2);
+                            } else {
+                                groupAdapter.notifyItemChanged(position);
                             }
                         });
                     }
@@ -687,26 +685,23 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (singleInstance()) {
                         groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
 
-                        groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Assert.assertTrue(singleInstance());
+                        groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
+                            Assert.assertTrue(singleInstance());
 
-                                GroupListLoader.InstanceData instanceData = getSingleInstanceData();
-                                Assert.assertTrue(instanceData != null);
+                            GroupListLoader.InstanceData instanceData = getSingleInstanceData();
+                            Assert.assertTrue(instanceData != null);
 
-                                instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
-                                Assert.assertTrue(instanceData.Done != null);
+                            instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
+                            Assert.assertTrue(instanceData.Done != null);
 
-                                TickService.startService(groupAdapter.mContext);
+                            TickService.startService(groupAdapter.mContext);
 
-                                int oldPosition = nodeCollection.getPosition(NotDoneGroupNode.this);
-                                notDoneGroupCollection.remove(NotDoneGroupNode.this);
+                            int oldPosition = nodeCollection.getPosition(NotDoneGroupNode.this);
+                            notDoneGroupCollection.remove(NotDoneGroupNode.this);
 
-                                groupAdapter.notifyItemRemoved(oldPosition);
+                            groupAdapter.notifyItemRemoved(oldPosition);
 
-                                nodeCollection.mDividerNode.add(instanceData, oldPosition);
-                            }
+                            nodeCollection.mDividerNode.add(instanceData, oldPosition);
                         });
 
                         groupHolder.mGroupRowCheckBox.setChecked(getSingleInstanceData().Done != null);
@@ -737,33 +732,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     else
                         groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
 
-                    groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if (singleInstance()) {
-                                GroupListLoader.InstanceData instanceData = getSingleInstanceData();
-                                groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, instanceData.InstanceKey));
-                            } else {
-                                groupAdapter.mContext.startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupAdapter.mContext));
-                            }
+                    groupHolder.mGroupRow.setOnClickListener(v -> {
+                        if (singleInstance()) {
+                            GroupListLoader.InstanceData instanceData = getSingleInstanceData();
+                            groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, instanceData.InstanceKey));
+                        } else {
+                            groupAdapter.mContext.startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupAdapter.mContext));
                         }
                     });
-
-                    /*
-                    final View view = groupHolder.mGroupRowName;
-                    ViewTreeObserver viewTreeObserver = view.getViewTreeObserver();
-                    if (viewTreeObserver.isAlive()) {
-                        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                            @Override
-                            public void onGlobalLayout() {
-                                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                                int[] asdf = new int[2];
-                                view.getLocationInWindow(asdf);
-                                Log.e("asdf", asdf[0] + ":" + asdf[1] / 2);
-                            }
-                        });
-                    }
-                    */
                 }
 
                 @Override
@@ -941,46 +917,43 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowCheckBox.setChecked(false);
-                        groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Assert.assertTrue(notDoneGroupNode.mNotDoneGroupNodeExpanded);
+                        groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
+                            Assert.assertTrue(notDoneGroupNode.mNotDoneGroupNodeExpanded);
 
-                                mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, true);
-                                Assert.assertTrue(mInstanceData.Done != null);
+                            mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, true);
+                            Assert.assertTrue(mInstanceData.Done != null);
 
-                                TickService.startService(groupAdapter.mContext);
+                            TickService.startService(groupAdapter.mContext);
 
-                                Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() >= 2);
-                                int groupPosition = nodeCollection.getPosition(notDoneGroupNode);
+                            Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() >= 2);
+                            int groupPosition = nodeCollection.getPosition(notDoneGroupNode);
 
-                                int oldInstancePosition = nodeCollection.getPosition(NotDoneInstanceNode.this);
+                            int oldInstancePosition = nodeCollection.getPosition(NotDoneInstanceNode.this);
 
-                                if (notDoneGroupNode.mNotDoneInstanceNodes.size() == 2) {
-                                    notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
+                            if (notDoneGroupNode.mNotDoneInstanceNodes.size() == 2) {
+                                notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
 
-                                    notDoneGroupNode.mNotDoneGroupNodeExpanded = false;
+                                notDoneGroupNode.mNotDoneGroupNodeExpanded = false;
 
-                                    if ((groupPosition > 0) && (nodeCollection.getNode(groupPosition - 1) instanceof NotDoneGroupNode))
-                                        groupAdapter.notifyItemRangeChanged(groupPosition - 1, 2);
-                                    else
-                                        groupAdapter.notifyItemChanged(groupPosition);
-
-                                    groupAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
-                                } else {
-                                    Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() > 2);
-
-                                    notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
-
+                                if ((groupPosition > 0) && (nodeCollection.getNode(groupPosition - 1) instanceof NotDoneGroupNode))
+                                    groupAdapter.notifyItemRangeChanged(groupPosition - 1, 2);
+                                else
                                     groupAdapter.notifyItemChanged(groupPosition);
-                                    groupAdapter.notifyItemRemoved(oldInstancePosition);
 
-                                    if (lastInGroup)
-                                        groupAdapter.notifyItemChanged(oldInstancePosition - 1);
-                                }
+                                groupAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
+                            } else {
+                                Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() > 2);
 
-                                nodeCollection.mDividerNode.add(mInstanceData, oldInstancePosition);
+                                notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
+
+                                groupAdapter.notifyItemChanged(groupPosition);
+                                groupAdapter.notifyItemRemoved(oldInstancePosition);
+
+                                if (lastInGroup)
+                                    groupAdapter.notifyItemChanged(oldInstancePosition - 1);
                             }
+
+                            nodeCollection.mDividerNode.add(mInstanceData, oldInstancePosition);
                         });
 
                         if (lastInGroup) {
@@ -989,12 +962,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
                         }
 
-                        groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, mInstanceData.InstanceKey));
-                            }
-                        });
+                        groupHolder.mGroupRow.setOnClickListener(v -> groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, mInstanceData.InstanceKey)));
                     }
 
                     @Override
@@ -1009,12 +977,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private boolean mDoneExpanded;
 
-                private final Comparator<DoneInstanceNode> sComparator = new Comparator<DoneInstanceNode>() {
-                    @Override
-                    public int compare(DoneInstanceNode lhs, DoneInstanceNode rhs) {
-                        return -lhs.mInstanceData.Done.compareTo(rhs.mInstanceData.Done); // negated
-                    }
-                };
+                private final Comparator<DoneInstanceNode> sComparator = (DoneInstanceNode lhs, DoneInstanceNode rhs) -> -lhs.mInstanceData.Done.compareTo(rhs.mInstanceData.Done); // negated
 
                 private final ArrayList<NodeCollection.DoneInstanceNode> mDoneInstanceNodes = new ArrayList<>();
 
@@ -1060,27 +1023,24 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     else
                         dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_36dp);
 
-                    dividerHolder.RowGroupListDivider.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Assert.assertTrue(!mDoneInstanceNodes.isEmpty());
+                    dividerHolder.RowGroupListDivider.setOnClickListener(v -> {
+                        Assert.assertTrue(!mDoneInstanceNodes.isEmpty());
 
-                            int position = nodeCollection.getPosition(DividerNode.this);
+                        int position = nodeCollection.getPosition(DividerNode.this);
 
-                            if (mDoneExpanded) { // hiding
-                                int displayedSize = DividerNode.this.displayedSize();
-                                mDoneExpanded = false;
-                                groupAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
-                            } else { // showing
-                                mDoneExpanded = true;
-                                groupAdapter.notifyItemRangeInserted(position + 1, DividerNode.this.displayedSize() - 1);
-                            }
+                        if (mDoneExpanded) { // hiding
+                            int displayedSize = DividerNode.this.displayedSize();
+                            mDoneExpanded = false;
+                            groupAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
+                        } else { // showing
+                            mDoneExpanded = true;
+                            groupAdapter.notifyItemRangeInserted(position + 1, DividerNode.this.displayedSize() - 1);
+                        }
 
-                            if (nodeCollection.mNotDoneGroupCollection.displayedSize() == 0) {
-                                groupAdapter.notifyItemChanged(position);
-                            } else {
-                                groupAdapter.notifyItemRangeChanged(position - 1, 2);
-                            }
+                        if (nodeCollection.mNotDoneGroupCollection.displayedSize() == 0) {
+                            groupAdapter.notifyItemChanged(position);
+                        } else {
+                            groupAdapter.notifyItemRangeChanged(position - 1, 2);
                         }
                     });
                 }
@@ -1298,54 +1258,46 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
                     groupHolder.mGroupRowCheckBox.setChecked(true);
-                    groupHolder.mGroupRowCheckBox.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Assert.assertTrue(dividerNode.expanded());
+                    groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
+                        Assert.assertTrue(dividerNode.expanded());
 
-                            mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, false);
-                            Assert.assertTrue(mInstanceData.Done == null);
+                        mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, false);
+                        Assert.assertTrue(mInstanceData.Done == null);
 
-                            TickService.startService(groupAdapter.mContext);
+                        TickService.startService(groupAdapter.mContext);
 
-                            dividerNode.remove(DoneInstanceNode.this);
+                        dividerNode.remove(DoneInstanceNode.this);
 
-                            Pair<Boolean, Pair<NotDoneGroupNode, NotDoneGroupNode.NotDoneInstanceNode>> pair = nodeCollection.mNotDoneGroupCollection.add(mInstanceData);
-                            boolean newNotDoneGroupNode = pair.first;
-                            NotDoneGroupNode notDoneGroupNode = pair.second.first;
-                            NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = pair.second.second;
+                        Pair<Boolean, Pair<NotDoneGroupNode, NotDoneGroupNode.NotDoneInstanceNode>> pair = nodeCollection.mNotDoneGroupCollection.add(mInstanceData);
+                        boolean newNotDoneGroupNode = pair.first;
+                        NotDoneGroupNode notDoneGroupNode = pair.second.first;
+                        NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = pair.second.second;
 
-                            if (newNotDoneGroupNode) {
+                        if (newNotDoneGroupNode) {
+                            int newGroupPosition = nodeCollection.getPosition(notDoneGroupNode);
+                            groupAdapter.notifyItemInserted(newGroupPosition);
+                        } else {
+                            if (notDoneGroupNode.expanded()) {
                                 int newGroupPosition = nodeCollection.getPosition(notDoneGroupNode);
-                                groupAdapter.notifyItemInserted(newGroupPosition);
+                                int newInstancePosition = nodeCollection.getPosition(notDoneInstanceNode);
+
+                                boolean last = (newGroupPosition + notDoneGroupNode.displayedSize() - 1 == newInstancePosition);
+
+                                groupAdapter.notifyItemChanged(newGroupPosition);
+                                groupAdapter.notifyItemInserted(newInstancePosition);
+
+                                if (last)
+                                    groupAdapter.notifyItemChanged(newInstancePosition - 1);
                             } else {
-                                if (notDoneGroupNode.expanded()) {
-                                    int newGroupPosition = nodeCollection.getPosition(notDoneGroupNode);
-                                    int newInstancePosition = nodeCollection.getPosition(notDoneInstanceNode);
-
-                                    boolean last = (newGroupPosition + notDoneGroupNode.displayedSize() - 1 == newInstancePosition);
-
-                                    groupAdapter.notifyItemChanged(newGroupPosition);
-                                    groupAdapter.notifyItemInserted(newInstancePosition);
-
-                                    if (last)
-                                        groupAdapter.notifyItemChanged(newInstancePosition - 1);
-                                } else {
-                                    int newGroupPosition = nodeCollection.getPosition(notDoneGroupNode);
-                                    groupAdapter.notifyItemChanged(newGroupPosition);
-                                }
+                                int newGroupPosition = nodeCollection.getPosition(notDoneGroupNode);
+                                groupAdapter.notifyItemChanged(newGroupPosition);
                             }
                         }
                     });
 
                     groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
 
-                    groupHolder.mGroupRow.setOnClickListener(new TableLayout.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, mInstanceData.InstanceKey));
-                        }
-                    });
+                    groupHolder.mGroupRow.setOnClickListener(v -> groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, mInstanceData.InstanceKey)));
                 }
 
                 @Override

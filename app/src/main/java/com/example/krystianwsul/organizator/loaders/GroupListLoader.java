@@ -16,15 +16,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
+    private final Integer mDay;
     private final TimeStamp mTimeStamp;
     private final InstanceKey mInstanceKey;
     private final ArrayList<InstanceKey> mInstanceKeys;
 
-    public GroupListLoader(Context context, TimeStamp timeStamp, InstanceKey instanceKey, ArrayList<InstanceKey> instanceKeys) {
+    public GroupListLoader(Context context, TimeStamp timeStamp, InstanceKey instanceKey, ArrayList<InstanceKey> instanceKeys, Integer day) {
         super(context);
 
-        Assert.assertTrue((timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) <= 1);
+        Assert.assertTrue((day != null ? 1 : 0) + (timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
 
+        mDay = day;
         mTimeStamp = timeStamp;
         mInstanceKey = instanceKey;
         mInstanceKeys = instanceKeys;
@@ -32,7 +34,13 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        if (mTimeStamp != null) {
+        if (mDay != null) {
+            Assert.assertTrue(mTimeStamp == null);
+            Assert.assertTrue(mInstanceKey == null);
+            Assert.assertTrue(mInstanceKeys == null);
+
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mDay);
+        } else if (mTimeStamp != null) {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
@@ -41,12 +49,11 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             Assert.assertTrue(mInstanceKeys == null);
 
             return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mInstanceKey);
-        } else if (mInstanceKeys != null) {
+        } else {
+            Assert.assertTrue(mInstanceKeys != null);
             Assert.assertTrue(!mInstanceKeys.isEmpty());
 
             return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mInstanceKeys);
-        } else {
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext());
         }
     }
 

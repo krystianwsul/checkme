@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +75,12 @@ public class DayFragment extends Fragment {
         dayTabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
         dayTabLayout.addTab(dayTabLayout.newTab().setText(title));
 
-        getChildFragmentManager().beginTransaction().add(R.id.day_frame, GroupListFragment.getGroupInstance(day)).commit();
+        FragmentManager fragmentManager = getChildFragmentManager();
+        GroupListFragment groupListFragment = (GroupListFragment) fragmentManager.findFragmentById(R.id.day_frame);
+
+        Assert.assertTrue((savedInstanceState == null) == (groupListFragment == null));
+
+        if (groupListFragment == null)
+            fragmentManager.beginTransaction().add(R.id.day_frame, GroupListFragment.getGroupInstance(day)).commit();
     }
 }

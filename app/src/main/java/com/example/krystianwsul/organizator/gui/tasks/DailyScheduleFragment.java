@@ -104,12 +104,9 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         FloatingActionButton dailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
         Assert.assertTrue(dailyScheduleFab != null);
 
-        dailyScheduleFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Assert.assertTrue(mTimeEntryAdapter != null);
-                mTimeEntryAdapter.addTimeEntry();
-            }
+        dailyScheduleFab.setOnClickListener(v -> {
+            Assert.assertTrue(mTimeEntryAdapter != null);
+            mTimeEntryAdapter.addTimeEntry();
         });
 
         getLoaderManager().initLoader(0, null, this);
@@ -302,16 +299,13 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
             timeHolder.mDailyScheduleImage.setVisibility(timeEntry.getShowDelete() ? View.VISIBLE : View.INVISIBLE);
 
-            timeHolder.mDailyScheduleImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Assert.assertTrue(mTimeEntries.size() > 1);
-                    timeHolder.delete();
+            timeHolder.mDailyScheduleImage.setOnClickListener(v -> {
+                Assert.assertTrue(mTimeEntries.size() > 1);
+                timeHolder.delete();
 
-                    if (mTimeEntries.size() == 1) {
-                        mTimeEntries.get(0).setShowDelete(false);
-                        notifyItemChanged(0);
-                    }
+                if (mTimeEntries.size() == 1) {
+                    mTimeEntries.get(0).setShowDelete(false);
+                    notifyItemChanged(0);
                 }
             });
         }
@@ -332,6 +326,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
             TimeEntry timeEntry = new TimeEntry(new TimePair(HourMinute.getNow()), true);
             mTimeEntries.add(position, timeEntry);
+
             notifyItemInserted(position);
         }
 

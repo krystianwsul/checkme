@@ -73,6 +73,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 break;
             case R.id.instance_menu_edit_task:
                 Assert.assertTrue(mData != null);
+                Assert.assertTrue(mData.IsRoot != null);
                 if (mData.IsRoot)
                     startActivity(CreateRootTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
                 else

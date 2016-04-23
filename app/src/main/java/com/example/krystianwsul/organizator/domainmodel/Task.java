@@ -3,6 +3,8 @@ package com.example.krystianwsul.organizator.domainmodel;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.annimon.stream.Optional;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
 import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 
@@ -16,6 +18,8 @@ public class Task {
 
     private final TaskRecord mTaskRecord;
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
+
+    private ExactTimeStamp mOldestRelevant; // 24 hack
 
     Task(DomainFactory domainFactory, TaskRecord taskRecord) {
         Assert.assertTrue(domainFactory != null);
@@ -166,9 +170,25 @@ public class Task {
     ArrayList<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(endExactTimeStamp != null);
 
+        ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : mOldestRelevant); // 24 hack
+
         ArrayList<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
-            instances.addAll(schedule.getInstances(startExactTimeStamp, endExactTimeStamp));
+            instances.addAll(schedule.getInstances(myStartExactTimeStamp, endExactTimeStamp));
+
+        if (startExactTimeStamp == null) {
+            Optional<Instance> optional = Stream.of(instances)
+                    .filter(Instance::isRelevant)
+                    .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
+
+            if (optional.isPresent()) {
+                mOldestRelevant = optional.get().getScheduleDateTime().getTimeStamp().toExactTimeStamp();
+
+                ExactTimeStamp now = ExactTimeStamp.getNow();
+                if (mOldestRelevant.compareTo(now) > 0)
+                    mOldestRelevant = now;
+            }
+        }
 
         return instances;
     }

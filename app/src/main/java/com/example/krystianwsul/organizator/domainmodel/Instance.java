@@ -17,6 +17,7 @@ import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -474,5 +475,14 @@ class Instance {
 
     public TimePair getInstanceTimePair() {
         return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
+    }
+
+    boolean isRelevant() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
+        ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
+
+        ExactTimeStamp done = getDone();
+        return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
     }
 }

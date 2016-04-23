@@ -562,7 +562,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Instance> rootInstances = getRootInstances(null, now.plusOne(), now);
+        ArrayList<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 
         HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
         for (Instance instance : rootInstances)
@@ -1132,13 +1132,9 @@ public class DomainFactory {
         for (Task task : mTasks.values())
             allInstances.addAll(task.getInstances(startExactTimeStamp, endExactTimeStamp));
 
-        Calendar calendar = now.getCalendar();
-        calendar.add(Calendar.DAY_OF_YEAR, -1);
-        ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
-
         ArrayList<Instance> rootInstances = new ArrayList<>();
         for (Instance instance : allInstances)
-            if (instance.isRootInstance(now) && (instance.getDone() == null || (instance.getDone().compareTo(twentyFourHoursAgo) > 0)))
+            if (instance.isRootInstance(now) && instance.isRelevant())
                 rootInstances.add(instance);
 
         return rootInstances;

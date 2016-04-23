@@ -14,7 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="throw uncaught Exception"
-        android:id="@+id/debug_exception"/>
+        android:id="@+id/debug_exception"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:layout_width="match_parent"
@@ -25,7 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="tick"
-        android:id="@+id/debug_tick"/>
+        android:id="@+id/debug_tick"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:layout_width="match_parent"

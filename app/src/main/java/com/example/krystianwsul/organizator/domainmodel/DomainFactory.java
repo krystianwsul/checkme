@@ -66,41 +66,30 @@ public class DomainFactory {
 
     private final ArrayList<WeakReference<DomainLoader.Observer>> mObservers = new ArrayList<>();
 
-    private final ExactTimeStamp mStart;
-    private final ExactTimeStamp mRead;
-    private ExactTimeStamp mStop;
+    private static ExactTimeStamp sStart;
+    private static ExactTimeStamp sRead;
+    private static ExactTimeStamp sStop;
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
 
         if (sDomainFactory == null) {
+            sStart = ExactTimeStamp.getNow();
+
             sDomainFactory = new DomainFactory(context);
+
+            sRead = ExactTimeStamp.getNow();
+
             sDomainFactory.initialize();
+
+            sStop = ExactTimeStamp.getNow();
         }
         return sDomainFactory;
     }
 
-    public synchronized void addDomainObserver(DomainLoader.Observer observer) {
-        Assert.assertTrue(observer != null);
-        mObservers.add(new WeakReference<>(observer));
-    }
-
-    public synchronized void reset() {
-        sDomainFactory = null;
-        mPersistenceManager.reset();
-
-        notifyDomainObservers(new ArrayList<>());
-
-        mObservers.clear();
-    }
-
     private DomainFactory(Context context) {
-        mStart = ExactTimeStamp.getNow();
-
         mPersistenceManager = PersistenceManger.getInstance(context);
         Assert.assertTrue(mPersistenceManager != null);
-
-        mRead = ExactTimeStamp.getNow();
     }
 
     private void initialize() {
@@ -159,16 +148,28 @@ public class DomainFactory {
             Instance instance = new Instance(this, task, instanceRecord);
             mExistingInstances.add(instance);
         }
-
-        mStop = ExactTimeStamp.getNow();
     }
 
     public long getReadMillis() {
-        return (mRead.getLong() - mStart.getLong());
+        return (sRead.getLong() - sStart.getLong());
     }
 
-    public long getTotalMillis() {
-        return (mStop.getLong() - mStart.getLong());
+    public long getInstantiateMilis() {
+        return (sStop.getLong() - sRead.getLong());
+    }
+
+    public synchronized void addDomainObserver(DomainLoader.Observer observer) {
+        Assert.assertTrue(observer != null);
+        mObservers.add(new WeakReference<>(observer));
+    }
+
+    public synchronized void reset() {
+        sDomainFactory = null;
+        mPersistenceManager.reset();
+
+        notifyDomainObservers(new ArrayList<>());
+
+        mObservers.clear();
     }
 
     public int getTaskCount() {

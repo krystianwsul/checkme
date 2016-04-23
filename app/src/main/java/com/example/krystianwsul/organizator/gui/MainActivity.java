@@ -2,7 +2,6 @@ package com.example.krystianwsul.organizator.gui;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -10,6 +9,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,8 +25,6 @@ import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener {
     private DrawerLayout mMainActivityDrawer;
-    //private ViewPager mViewPager;
-    private FrameLayout mMainActivityFrame;
 
     private DrawerLayout.DrawerListener mDrawerListener;
 
@@ -49,23 +47,44 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
+        DaysFragment daysFragment = (DaysFragment) fragmentManager.findFragmentById(R.id.main_activity_days_frame);
+        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_activity_task_list_frame);
+        Assert.assertTrue((daysFragment == null) == (taskListFragment == null));
+        if (daysFragment == null) {
+            Log.e("asdf", "fragments null");
+
+            fragmentManager.beginTransaction()
+                    .add(R.id.main_activity_days_frame, DaysFragment.newInstance())
+                    .add(R.id.main_activity_task_list_frame, TaskListFragment.getInstance())
+                    .commit();
+        }
+
+        final FrameLayout mainActivityDaysFrame = (FrameLayout) findViewById(R.id.main_activity_days_frame);
+        Assert.assertTrue(mainActivityDaysFrame != null);
+
+        final FrameLayout mainActivityTaskListFrame = (FrameLayout) findViewById(R.id.main_activity_task_list_frame);
+        Assert.assertTrue(mainActivityTaskListFrame != null);
+
         NavigationView mainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
         Assert.assertTrue(mainActivityNavigation != null);
 
         mainActivityNavigation.setNavigationItemSelectedListener(item -> {
-            Fragment oldFragment = fragmentManager.findFragmentById(R.id.main_activity_frame);
             switch (item.getItemId()) {
                 case R.id.main_drawer_instances:
                     if (mDrawerListener != null) {
                         mMainActivityDrawer.removeDrawerListener(mDrawerListener);
                         mDrawerListener = null;
                     }
-                    if (!(oldFragment instanceof DaysFragment))
-                        fragmentManager.beginTransaction().replace(R.id.main_activity_frame, DaysFragment.newInstance()).commit();
+
+                    mainActivityDaysFrame.setVisibility(View.VISIBLE);
+                    mainActivityTaskListFrame.setVisibility(View.GONE);
+
                     break;
                 case R.id.main_drawer_tasks:
-                    if (!(oldFragment instanceof TaskListFragment))
-                        fragmentManager.beginTransaction().replace(R.id.main_activity_frame, TaskListFragment.getInstance()).commit();
+
+                    mainActivityDaysFrame.setVisibility(View.GONE);
+                    mainActivityTaskListFrame.setVisibility(View.VISIBLE);
+
                     break;
                 default:
                     throw new IndexOutOfBoundsException();
@@ -75,13 +94,6 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             mMainActivityDrawer.closeDrawer(GravityCompat.START);
             return true;
         });
-
-        mMainActivityFrame = (FrameLayout) findViewById(R.id.main_activity_frame);
-        Assert.assertTrue(mMainActivityFrame != null);
-
-        Fragment fragment = fragmentManager.findFragmentById(R.id.main_activity_frame);
-        if (fragment == null)
-            fragmentManager.beginTransaction().add(R.id.main_activity_frame, DaysFragment.newInstance()).commit();
 
         TickService.register(this);
     }

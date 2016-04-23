@@ -81,7 +81,7 @@ public class TimePair implements Parcelable {
             if (source.readInt() == 1) {
                 return new TimePair(source.readInt(), null);
             } else {
-                return new TimePair(null, (HourMinute) source.readParcelable(com.example.krystianwsul.organizator.utils.time.HourMinute.class.getClassLoader()));
+                return new TimePair(null, source.readParcelable(com.example.krystianwsul.organizator.utils.time.HourMinute.class.getClassLoader()));
             }
         }
 

@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.loaders.ShowTaskLoader;
+import com.example.krystianwsul.organizator.notifications.TickService;
 
 import junit.framework.Assert;
 
@@ -83,6 +84,7 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
                 dataIds.add(mData.DataId);
                 dataIds.add(((TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment)).getDataId());
                 DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(dataIds, mData.TaskId);
+                TickService.startService(this);
                 finish();
                 break;
             default:

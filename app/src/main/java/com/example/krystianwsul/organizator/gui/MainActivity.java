@@ -18,7 +18,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.example.krystianwsul.organizator.R;
-import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
+import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesFragment;
 import com.example.krystianwsul.organizator.gui.instances.DayFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
 import com.example.krystianwsul.organizator.notifications.TickService;
@@ -26,9 +26,20 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener {
+    private static final String VISIBLE_TAB_KEY = "visibleTab";
+    private static final int INSTANCES_VISIBLE = 0;
+    private static final int TASKS_VISIBLE = 1;
+    private static final int CUSTOM_TIMES_VISIBLE = 2;
+
+    private ViewPager mDaysPager;
+    private FrameLayout mMainTaskListFrame;
+    private FrameLayout mMainCustomTimesFrame;
+
     private DrawerLayout mMainActivityDrawer;
 
     private DrawerLayout.DrawerListener mDrawerListener;
+
+    private int mVisibleTab = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +51,11 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         setSupportActionBar(toolbar);
 
+        if (savedInstanceState != null) {
+            Assert.assertTrue(savedInstanceState.containsKey(VISIBLE_TAB_KEY));
+            mVisibleTab = savedInstanceState.getInt(VISIBLE_TAB_KEY);
+        }
+
         mMainActivityDrawer = (DrawerLayout) findViewById(R.id.main_activity_drawer);
         Assert.assertTrue(mMainActivityDrawer != null);
 
@@ -49,14 +65,18 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_frame);
+        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_task_list_frame);
         if (taskListFragment == null)
-            fragmentManager.beginTransaction().add(R.id.main_frame, TaskListFragment.getInstance()).commit();
+            fragmentManager.beginTransaction().add(R.id.main_task_list_frame, TaskListFragment.getInstance()).commit();
 
-        ViewPager daysPager = (ViewPager) findViewById(R.id.main_pager);
-        Assert.assertTrue(daysPager != null);
+        ShowCustomTimesFragment showCustomTimesFragment = (ShowCustomTimesFragment) fragmentManager.findFragmentById(R.id.main_custom_times_frame);
+        if (showCustomTimesFragment == null)
+            fragmentManager.beginTransaction().add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance()).commit();
 
-        daysPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+        mDaysPager = (ViewPager) findViewById(R.id.main_pager);
+        Assert.assertTrue(mDaysPager != null);
+
+        mDaysPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
                 return DayFragment.newInstance(position);
@@ -68,8 +88,11 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             }
         });
 
-        final FrameLayout mainFrame = (FrameLayout) findViewById(R.id.main_frame);
-        Assert.assertTrue(mainFrame != null);
+        mMainTaskListFrame = (FrameLayout) findViewById(R.id.main_task_list_frame);
+        Assert.assertTrue(mMainTaskListFrame != null);
+
+        mMainCustomTimesFrame = (FrameLayout) findViewById(R.id.main_custom_times_frame);
+        Assert.assertTrue(mMainCustomTimesFrame != null);
 
         NavigationView mainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
         Assert.assertTrue(mainActivityNavigation != null);
@@ -82,24 +105,24 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                         mDrawerListener = null;
                     }
 
-                    daysPager.setVisibility(View.VISIBLE);
-                    mainFrame.setVisibility(View.GONE);
+                    showTab(INSTANCES_VISIBLE);
 
                     break;
                 case R.id.main_drawer_tasks:
-
-                    daysPager.setVisibility(View.GONE);
-                    mainFrame.setVisibility(View.VISIBLE);
-
+                    showTab(TASKS_VISIBLE);
+                    break;
+                case R.id.main_drawer_custom_times:
+                    showTab(CUSTOM_TIMES_VISIBLE);
                     break;
                 default:
                     throw new IndexOutOfBoundsException();
-
             }
 
             mMainActivityDrawer.closeDrawer(GravityCompat.START);
             return true;
         });
+
+        showTab(mVisibleTab);
 
         TickService.register(this);
     }
@@ -113,9 +136,6 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_times:
-                startActivity(ShowCustomTimesActivity.getIntent(this));
-                return true;
             case R.id.action_debug:
                 startActivity(DebugActivity.getIntent(this));
                 return true;
@@ -129,6 +149,36 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             mMainActivityDrawer.closeDrawer(GravityCompat.START);
         else
             super.onBackPressed();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(VISIBLE_TAB_KEY, mVisibleTab);
+    }
+
+    private void showTab(int tab) {
+        switch (tab) {
+            case INSTANCES_VISIBLE:
+                mDaysPager.setVisibility(View.VISIBLE);
+                mMainTaskListFrame.setVisibility(View.GONE);
+                mMainCustomTimesFrame.setVisibility(View.GONE);
+                break;
+            case TASKS_VISIBLE:
+                mDaysPager.setVisibility(View.GONE);
+                mMainTaskListFrame.setVisibility(View.VISIBLE);
+                mMainCustomTimesFrame.setVisibility(View.GONE);
+                break;
+            case CUSTOM_TIMES_VISIBLE:
+                mDaysPager.setVisibility(View.GONE);
+                mMainTaskListFrame.setVisibility(View.GONE);
+                mMainCustomTimesFrame.setVisibility(View.VISIBLE);
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+        mVisibleTab = tab;
     }
 
     @Override

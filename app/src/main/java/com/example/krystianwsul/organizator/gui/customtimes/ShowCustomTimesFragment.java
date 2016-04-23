@@ -1,13 +1,13 @@
 package com.example.krystianwsul.organizator.gui.customtimes;
 
+
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,42 +22,48 @@ import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 
 import junit.framework.Assert;
 
-public class ShowCustomTimesActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data> {
+public class ShowCustomTimesFragment extends Fragment implements LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data> {
     private RecyclerView mShowTimesList;
 
-    public static Intent getIntent(Context context) {
-        return new Intent(context, ShowCustomTimesActivity.class);
+    public static ShowCustomTimesFragment newInstance() {
+        return new ShowCustomTimesFragment();
+    }
+
+    public ShowCustomTimesFragment() {
+
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_show_custom_times);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_show_custom_times, container, false);
+    }
 
-        mShowTimesList = (RecyclerView) findViewById(R.id.show_times_list);
-        mShowTimesList.setLayoutManager(new LinearLayoutManager(this));
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        FloatingActionButton showTimesFab = (FloatingActionButton) findViewById(R.id.show_times_fab);
+        View view = getView();
+        Assert.assertTrue(view != null);
+
+        mShowTimesList = (RecyclerView) view.findViewById(R.id.show_times_list);
+        mShowTimesList.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        FloatingActionButton showTimesFab = (FloatingActionButton) view.findViewById(R.id.show_times_fab);
         Assert.assertTrue(showTimesFab != null);
 
-        showTimesFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(ShowCustomTimeActivity.getCreateIntent(ShowCustomTimesActivity.this));
-            }
-        });
+        showTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
 
-        getSupportLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     public Loader<ShowCustomTimesLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new ShowCustomTimesLoader(this);
+        return new ShowCustomTimesLoader(getActivity());
     }
 
     @Override
     public void onLoadFinished(Loader<ShowCustomTimesLoader.Data> loader, ShowCustomTimesLoader.Data data) {
-        mShowTimesList.setAdapter(new CustomTimesAdapter(data, this));
+        mShowTimesList.setAdapter(new CustomTimesAdapter(data, getActivity()));
     }
 
     @Override
@@ -99,19 +105,9 @@ public class ShowCustomTimesActivity extends AppCompatActivity implements Loader
 
             customTimeHolder.mTimesRowName.setText(customTimeData.Name);
 
-            customTimeHolder.mShowCustomTimeRow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    customTimeHolder.onRowClick();
-                }
-            });
+            customTimeHolder.mShowCustomTimeRow.setOnClickListener(v -> customTimeHolder.onRowClick());
 
-            customTimeHolder.mTimesRowDelete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    customTimeHolder.onDeleteClick();
-                }
-            });
+            customTimeHolder.mTimesRowDelete.setOnClickListener(v -> customTimeHolder.onDeleteClick());
         }
 
         public class CustomTimeHolder extends RecyclerView.ViewHolder {

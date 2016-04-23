@@ -28,7 +28,6 @@
         <activity android:name=".gui.instances.ShowGroupActivity" />
         <activity android:name=".gui.instances.ShowNotificationGroupActivity" />
         <activity android:name=".gui.instances.ShowInstanceActivity" />
-        <activity android:name=".gui.customtimes.ShowCustomTimesActivity" />
         <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
         <activity android:name=".gui.tasks.CreateRootTaskActivity" />
         <activity android:name=".gui.tasks.CreateChildTaskActivity" />

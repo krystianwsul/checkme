@@ -6,7 +6,7 @@
     <string name="daily">Codziennie</string>
     <string name="tasks">Zadania</string>
     <string name="instances">Instancje</string>
-    <string name="action_times">Czasy</string>
+    <string name="times">Czasy</string>
     <string name="other">Inny</string>
     <string name="save">Zapisz</string>
     <string name="invalid_time_message">Czas musi być w przyszłości.</string>

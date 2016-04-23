@@ -11,6 +11,7 @@
     android:id="@+id/main_activity_drawer">
 
     <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/main_coordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
@@ -36,7 +37,14 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <FrameLayout
-            android:id="@+id/main_frame"
+            android:id="@+id/main_task_list_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:visibility="gone"/>
+
+        <FrameLayout
+            android:id="@+id/main_custom_times_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"

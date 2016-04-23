@@ -12,5 +12,6 @@
         android:id="@+id/action_debug"
         android:title="Debug"
         android:orderInCategory="300"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        tools:ignore="HardcodedText" />
 </menu>

@@ -2,14 +2,16 @@ package com.example.krystianwsul.organizator.gui;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,7 +19,7 @@ import android.widget.FrameLayout;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesActivity;
-import com.example.krystianwsul.organizator.gui.instances.DaysFragment;
+import com.example.krystianwsul.organizator.gui.instances.DayFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
 import com.example.krystianwsul.organizator.notifications.TickService;
 
@@ -47,23 +49,27 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        DaysFragment daysFragment = (DaysFragment) fragmentManager.findFragmentById(R.id.main_activity_days_frame);
-        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_activity_task_list_frame);
-        Assert.assertTrue((daysFragment == null) == (taskListFragment == null));
-        if (daysFragment == null) {
-            Log.e("asdf", "fragments null");
+        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_frame);
+        if (taskListFragment == null)
+            fragmentManager.beginTransaction().add(R.id.main_frame, TaskListFragment.getInstance()).commit();
 
-            fragmentManager.beginTransaction()
-                    .add(R.id.main_activity_days_frame, DaysFragment.newInstance())
-                    .add(R.id.main_activity_task_list_frame, TaskListFragment.getInstance())
-                    .commit();
-        }
+        ViewPager daysPager = (ViewPager) findViewById(R.id.main_pager);
+        Assert.assertTrue(daysPager != null);
 
-        final FrameLayout mainActivityDaysFrame = (FrameLayout) findViewById(R.id.main_activity_days_frame);
-        Assert.assertTrue(mainActivityDaysFrame != null);
+        daysPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
+            @Override
+            public Fragment getItem(int position) {
+                return DayFragment.newInstance(position);
+            }
 
-        final FrameLayout mainActivityTaskListFrame = (FrameLayout) findViewById(R.id.main_activity_task_list_frame);
-        Assert.assertTrue(mainActivityTaskListFrame != null);
+            @Override
+            public int getCount() {
+                return Integer.MAX_VALUE;
+            }
+        });
+
+        final FrameLayout mainFrame = (FrameLayout) findViewById(R.id.main_frame);
+        Assert.assertTrue(mainFrame != null);
 
         NavigationView mainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
         Assert.assertTrue(mainActivityNavigation != null);
@@ -76,14 +82,14 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                         mDrawerListener = null;
                     }
 
-                    mainActivityDaysFrame.setVisibility(View.VISIBLE);
-                    mainActivityTaskListFrame.setVisibility(View.GONE);
+                    daysPager.setVisibility(View.VISIBLE);
+                    mainFrame.setVisibility(View.GONE);
 
                     break;
                 case R.id.main_drawer_tasks:
 
-                    mainActivityDaysFrame.setVisibility(View.GONE);
-                    mainActivityTaskListFrame.setVisibility(View.VISIBLE);
+                    daysPager.setVisibility(View.GONE);
+                    mainFrame.setVisibility(View.VISIBLE);
 
                     break;
                 default:

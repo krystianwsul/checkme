@@ -3,9 +3,11 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/main_drawer_instances"
-            android:title="@string/instances" />
+            android:title="@string/instances"
+            android:icon="@drawable/ic_alarm_black_24dp"/>
         <item
             android:id="@+id/main_drawer_tasks"
-            android:title="@string/tasks" />
+            android:title="@string/tasks"
+            android:icon="@drawable/ic_assignment_black_24dp"/>
     </group>
 </menu>

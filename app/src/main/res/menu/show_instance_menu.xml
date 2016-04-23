@@ -10,10 +10,10 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_alarm_white_24dp"/>
     <item
-        android:id="@+id/instance_menu_edit_task"
-        android:title="@string/edit_task"
+        android:id="@+id/instance_menu_show_task"
+        android:title="@string/show_task"
         android:orderInCategory="300"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_mode_edit_white_24dp"
+        android:icon="@drawable/ic_assignment_white_24dp"
         android:visible="false"/>
 </menu>

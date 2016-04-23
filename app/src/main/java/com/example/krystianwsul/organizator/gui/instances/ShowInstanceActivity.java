@@ -16,8 +16,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity;
-import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
+import com.example.krystianwsul.organizator.gui.tasks.ShowTaskActivity;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
@@ -58,8 +57,17 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.show_instance_menu, menu);
-        boolean editable = (mData != null && mData.Editable);
-        menu.findItem(R.id.instance_menu_edit_task).setVisible(editable);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean editInstance = (mData != null && !mData.Done);
+        menu.findItem(R.id.instance_menu_edit_instance).setVisible(editInstance);
+
+        boolean showTask = (mData != null && mData.Editable);
+        menu.findItem(R.id.instance_menu_show_task).setVisible(showTask);
+
         return true;
     }
 
@@ -71,13 +79,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 Intent intent = EditInstanceActivity.getIntent(this, mData.InstanceKey);
                 startActivity(intent);
                 break;
-            case R.id.instance_menu_edit_task:
+            case R.id.instance_menu_show_task:
                 Assert.assertTrue(mData != null);
-                Assert.assertTrue(mData.IsRoot != null);
-                if (mData.IsRoot)
-                    startActivity(CreateRootTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
-                else
-                    startActivity(CreateChildTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                startActivity(ShowTaskActivity.getIntent(mData.InstanceKey.TaskId, this));
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -144,14 +148,16 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         else
             mShowInstanceDetails.setText(scheduleText);
 
-        mCheckBox.setOnClickListener((View v) -> {
-                boolean isChecked = mCheckBox.isChecked();
+        mCheckBox.setOnClickListener(v -> {
+            boolean isChecked = mCheckBox.isChecked();
 
-                DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, data.InstanceKey, isChecked);
-                data.Done = isChecked;
+            DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(data.DataId, data.InstanceKey, isChecked);
+            data.Done = isChecked;
 
-                TickService.startService(ShowInstanceActivity.this);
-            });
+            TickService.startService(ShowInstanceActivity.this);
+
+            invalidateOptionsMenu();
+        });
 
         invalidateOptionsMenu();
     }

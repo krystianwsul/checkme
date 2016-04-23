@@ -21,7 +21,7 @@
     <string name="expand">Rozwiń</string>
     <string name="list">Lista</string>
     <string name="edit_instance">Edytuj instancję</string>
-    <string name="edit_task">Edytuj zadanie</string>
+    <string name="show_task">Pokaż zadanie</string>
     <string name="navigation_drawer_open">Otwórz navigation drawer</string>
     <string name="navigation_drawer_close">Zamknij navigation drawer</string>
 </resources>

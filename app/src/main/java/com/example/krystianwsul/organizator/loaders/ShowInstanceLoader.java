@@ -30,9 +30,8 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final String DisplayText;
         public boolean Done;
         public final boolean Editable;
-        public final Boolean IsRoot;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean editable, Boolean isRoot) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean editable) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -41,7 +40,6 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             DisplayText = displayText;
             Done = done;
             Editable = editable;
-            IsRoot = isRoot;
         }
 
         @Override
@@ -53,8 +51,6 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
                 hashCode += DisplayText.hashCode();
             hashCode += (Done ? 1 : 0);
             hashCode += (Editable ? 1 : 0);
-            if (IsRoot != null)
-                hashCode += (IsRoot ? 2 : 1);
             return hashCode;
         }
 
@@ -71,7 +67,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (Editable == data.Editable) && (IsRoot == data.IsRoot));
+            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (Editable == data.Editable));
         }
     }
 }

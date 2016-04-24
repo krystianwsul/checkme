@@ -286,7 +286,7 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes)
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
-        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
     }
 
     public synchronized ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
@@ -350,7 +350,7 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes)
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
-        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
     }
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, InstanceKey instanceKey) {
@@ -359,6 +359,9 @@ public class DomainFactory {
 
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
+
+        Task task = mTasks.get(instance.getTaskId());
+        Assert.assertTrue(task != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -373,7 +376,7 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes)
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
-        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas, task.current(now));
     }
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, ArrayList<InstanceKey> instanceKeys) {
@@ -402,7 +405,7 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes)
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
-        return new GroupListLoader.Data(instanceDatas, customTimeDatas);
+        return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
     }
 
     public synchronized ShowInstanceLoader.Data getShowInstanceData(Context context, InstanceKey instanceKey) {

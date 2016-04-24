@@ -21,15 +21,26 @@ import android.widget.Spinner;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.utils.ScheduleType;
+import com.example.krystianwsul.organizator.utils.time.Date;
+import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
+import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class CreateRootTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
+
+    private static final String DAY_KEY = "day";
+    private static final String TIME_STAMP_KEY = "timeStamp";
+
+    private Integer mDay;
+    private TimeStamp mTimeStamp;
 
     private Spinner mCreateRootTaskSpinner;
     private EditText mCreateRootTaskName;
@@ -42,6 +53,24 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
         return new Intent(context, CreateRootTaskActivity.class);
+    }
+
+    public static Intent getCreateIntent(Context context, int day) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(day >= 0);
+
+        Intent intent = new Intent(context, CreateRootTaskActivity.class);
+        intent.putExtra(DAY_KEY, day);
+        return intent;
+    }
+
+    public static Intent getCreateIntent(Context context, TimeStamp timeStamp) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(timeStamp != null);
+
+        Intent intent = new Intent(context, CreateRootTaskActivity.class);
+        intent.putExtra(TIME_STAMP_KEY, timeStamp);
+        return intent;
     }
 
     public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds) {
@@ -69,6 +98,17 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         mSavedInstanceState = savedInstanceState;
 
+        Intent intent = getIntent();
+        if (intent.hasExtra(DAY_KEY)) {
+            Assert.assertTrue(!intent.hasExtra(TIME_STAMP_KEY));
+
+            mDay = intent.getIntExtra(DAY_KEY, -1);
+            Assert.assertTrue(mDay >= 0);
+        } else if (intent.hasExtra(TIME_STAMP_KEY)) {
+            mTimeStamp = intent.getParcelableExtra(TIME_STAMP_KEY);
+            Assert.assertTrue(mTimeStamp != null);
+        }
+
         mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
         Assert.assertTrue(mCreateRootTaskName != null);
 
@@ -95,7 +135,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
         Assert.assertTrue(mCreateRootTaskSpinner != null);
 
-        Intent intent = getIntent();
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
 
@@ -132,11 +171,44 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         switch (position) {
             case 0:
-                return SingleScheduleFragment.newInstance();
+                if (mDay != null) {
+                    Assert.assertTrue(mTimeStamp == null);
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.DAY_OF_YEAR, mDay);
+                    Date date = new Date(calendar);
+                    return SingleScheduleFragment.newInstance(date);
+                } else if (mTimeStamp != null) {
+                    Date date = mTimeStamp.getDate();
+                    HourMinute hourMinute = mTimeStamp.getHourMinute();
+
+                    return SingleScheduleFragment.newInstance(date, hourMinute);
+                } else {
+                    return SingleScheduleFragment.newInstance();
+                }
             case 1:
-                return DailyScheduleFragment.newInstance();
+                if (mTimeStamp != null) {
+                    HourMinute hourMinute = mTimeStamp.getHourMinute();
+                    return DailyScheduleFragment.newInstance(hourMinute);
+                } else  {
+                    return DailyScheduleFragment.newInstance();
+                }
             case 2:
-                return WeeklyScheduleFragment.newInstance();
+                if (mDay != null) {
+                    Assert.assertTrue(mTimeStamp == null);
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.DAY_OF_YEAR, mDay);
+                    DayOfWeek dayOfWeek = DayOfWeek.getDayFromCalendar(calendar);
+                    return WeeklyScheduleFragment.newInstance(dayOfWeek);
+                } else if (mTimeStamp != null) {
+                    DayOfWeek dayOfWeek = mTimeStamp.getDate().getDayOfWeek();
+                    HourMinute hourMinute = mTimeStamp.getHourMinute();
+
+                    return WeeklyScheduleFragment.newInstance(dayOfWeek, hourMinute);
+                } else {
+                    return WeeklyScheduleFragment.newInstance();
+                }
             default:
                 return null;
         }
@@ -192,30 +264,27 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         final int finalCount = count;
 
         mCreateRootTaskSave.setEnabled(!TextUtils.isEmpty(mCreateRootTaskName.getText().toString().trim()));
-        mCreateRootTaskSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String name = mCreateRootTaskName.getText().toString().trim();
+        mCreateRootTaskSave.setOnClickListener(v -> {
+            String name = mCreateRootTaskName.getText().toString().trim();
 
-                ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-                Assert.assertTrue(scheduleFragment != null);
+            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
+            Assert.assertTrue(scheduleFragment != null);
 
-                if (!scheduleFragment.isValidTime()) {
-                    MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
-                    messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
-                    return;
-                }
-
-                if (mRootTaskId != null) {
-                    scheduleFragment.updateRootTask(mRootTaskId, name);
-                } else if (mTaskIds != null) {
-                    scheduleFragment.createRootJoinTask(name, mTaskIds);
-                } else {
-                    scheduleFragment.createRootTask(name);
-                }
-
-                finish();
+            if (!scheduleFragment.isValidTime()) {
+                MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
+                messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
+                return;
             }
+
+            if (mRootTaskId != null) {
+                scheduleFragment.updateRootTask(mRootTaskId, name);
+            } else if (mTaskIds != null) {
+                scheduleFragment.createRootJoinTask(name, mTaskIds);
+            } else {
+                scheduleFragment.createRootTask(name);
+            }
+
+            finish();
         });
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);

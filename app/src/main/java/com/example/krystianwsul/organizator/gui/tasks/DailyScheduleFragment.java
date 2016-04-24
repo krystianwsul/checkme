@@ -31,9 +31,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<DailyScheduleLoader.Data> {
+    private static final String HOUR_MINUTE_KEY = "hourMinute";
+    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
     private static final String TIME_ENTRY_KEY = "timeEntries";
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
-    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
     private static final String TIME_PICKER_TAG = "timePicker";
 
@@ -43,6 +45,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     private RecyclerView mDailyScheduleTimes;
 
     private Bundle mSavedInstanceState;
+
+    private HourMinute mHourMinute = HourMinute.getNow();
 
     private Integer mRootTaskId;
     private DailyScheduleLoader.Data mData;
@@ -64,6 +68,16 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
+    }
+
+    public static DailyScheduleFragment newInstance(HourMinute hourMinute) {
+        DailyScheduleFragment dailyScheduleFragment = new DailyScheduleFragment();
+
+        Bundle args = new Bundle();
+        args.putParcelable(HOUR_MINUTE_KEY, hourMinute);
+
+        dailyScheduleFragment.setArguments(args);
+        return dailyScheduleFragment;
     }
 
     public static DailyScheduleFragment newInstance(int rootTaskId) {
@@ -96,9 +110,17 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         Bundle args = getArguments();
         if (args != null)
         {
-            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
-            mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
-            Assert.assertTrue(mRootTaskId != -1);
+            if (args.containsKey(ROOT_TASK_ID_KEY)) {
+                Assert.assertTrue(!args.containsKey(HOUR_MINUTE_KEY));
+
+                mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+                Assert.assertTrue(mRootTaskId != -1);
+            } else {
+                Assert.assertTrue(args.containsKey(HOUR_MINUTE_KEY));
+
+                mHourMinute = args.getParcelable(HOUR_MINUTE_KEY);
+                Assert.assertTrue(mHourMinute != null);
+            }
         }
 
         FloatingActionButton dailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
@@ -128,7 +150,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
             mHourMinutePickerPosition = mSavedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
-        } else if (args != null) {
+        } else if (args != null && args.containsKey(ROOT_TASK_ID_KEY)) {
             Assert.assertTrue(mData.ScheduleDatas != null);
             Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
 
@@ -231,7 +253,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
             mContext = context;
             mTimeEntries = new ArrayList<>();
-            mTimeEntries.add(new TimeEntry(new TimePair(HourMinute.getNow()), false));
+            mTimeEntries.add(new TimeEntry(new TimePair(mHourMinute), false));
         }
 
         public TimeEntryAdapter(Context context, List<TimeEntry> timeEntries) {

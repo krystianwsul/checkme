@@ -60,18 +60,24 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     public static class Data extends DomainLoader.Data {
         public final HashMap<InstanceKey, InstanceData> InstanceDatas;
         public final ArrayList<CustomTimeData> CustomTimeDatas;
+        public final Boolean TaskEditable;
 
-        public Data(HashMap<InstanceKey, InstanceData> instanceDatas, ArrayList<CustomTimeData> customTimeDatas) {
+        public Data(HashMap<InstanceKey, InstanceData> instanceDatas, ArrayList<CustomTimeData> customTimeDatas, Boolean taskEditable) {
             Assert.assertTrue(instanceDatas != null);
             Assert.assertTrue(customTimeDatas != null);
 
             InstanceDatas = instanceDatas;
             CustomTimeDatas = customTimeDatas;
+            TaskEditable = taskEditable;
         }
 
         @Override
         public int hashCode() {
-            return (InstanceDatas.hashCode() + CustomTimeDatas.hashCode());
+            int hashCode = InstanceDatas.hashCode();
+            hashCode += CustomTimeDatas.hashCode();
+            if (TaskEditable != null)
+                hashCode += (TaskEditable ? 2 : 1);
+            return hashCode;
         }
 
         @Override
@@ -87,7 +93,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceDatas.equals(data.InstanceDatas) && CustomTimeDatas.equals(data.CustomTimeDatas));
+            return (InstanceDatas.equals(data.InstanceDatas) && CustomTimeDatas.equals(data.CustomTimeDatas) && (((TaskEditable == null) && (data.TaskEditable == null)) || ((TaskEditable != null) && (data.TaskEditable != null) && (TaskEditable.equals(data.TaskEditable)))));
         }
     }
 

@@ -36,9 +36,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<WeeklyScheduleLoader.Data> {
+    private static final String DAY_OF_WEEK_KEY = "dayOfWeek";
+    private static final String HOUR_MINUTE_KEY = "hourMinute";
+    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+
     private static final String DATE_TIME_ENTRY_KEY = "dateTimeEntries";
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
-    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
     private static final String TIME_PICKER_TAG = "timePicker";
 
@@ -48,6 +51,9 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private DayOfWeekTimeEntryAdapter mDayOfWeekTimeEntryAdapter;
 
     private Bundle mSavedInstanceState;
+
+    private DayOfWeek mDayOfWeek = DayOfWeek.today();
+    private HourMinute mHourMinute = HourMinute.getNow();
 
     private Integer mRootTaskId;
     private WeeklyScheduleLoader.Data mData;
@@ -68,6 +74,32 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
     public static WeeklyScheduleFragment newInstance() {
         return new WeeklyScheduleFragment();
+    }
+
+    public static WeeklyScheduleFragment newInstance(DayOfWeek dayOfWeek) {
+        Assert.assertTrue(dayOfWeek != null);
+
+        WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
+
+        Bundle args = new Bundle();
+        args.putSerializable(DAY_OF_WEEK_KEY, dayOfWeek);
+        weeklyScheduleFragment.setArguments(args);
+
+        return weeklyScheduleFragment;
+    }
+
+    public static WeeklyScheduleFragment newInstance(DayOfWeek dayOfWeek, HourMinute hourMinute) {
+        Assert.assertTrue(dayOfWeek != null);
+        Assert.assertTrue(hourMinute != null);
+
+        WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
+
+        Bundle args = new Bundle();
+        args.putSerializable(DAY_OF_WEEK_KEY, dayOfWeek);
+        args.putParcelable(HOUR_MINUTE_KEY, hourMinute);
+        weeklyScheduleFragment.setArguments(args);
+
+        return weeklyScheduleFragment;
     }
 
     public static WeeklyScheduleFragment newInstance(int rootTaskId) {
@@ -99,20 +131,30 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
         Bundle args = getArguments();
         if (args != null) {
-            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
-            mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
-            Assert.assertTrue(mRootTaskId != -1);
+            if (args.containsKey(ROOT_TASK_ID_KEY)) {
+                Assert.assertTrue(!args.containsKey(DAY_OF_WEEK_KEY));
+
+                mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+                Assert.assertTrue(mRootTaskId != -1);
+            } else {
+                Assert.assertTrue(args.containsKey(DAY_OF_WEEK_KEY));
+
+                mDayOfWeek = (DayOfWeek) args.getSerializable(DAY_OF_WEEK_KEY);
+                Assert.assertTrue(mDayOfWeek != null);
+
+                if (args.containsKey(HOUR_MINUTE_KEY)) {
+                    mHourMinute = args.getParcelable(HOUR_MINUTE_KEY);
+                    Assert.assertTrue(mHourMinute != null);
+                }
+            }
         }
 
         FloatingActionButton weeklyScheduleFab = (FloatingActionButton) view.findViewById(R.id.weekly_schedule_fab);
         Assert.assertTrue(weeklyScheduleFab != null);
 
-        weeklyScheduleFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
-                mDayOfWeekTimeEntryAdapter.addDayOfWeekTimeEntry();
-            }
+        weeklyScheduleFab.setOnClickListener(v -> {
+            Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
+            mDayOfWeekTimeEntryAdapter.addDayOfWeekTimeEntry();
         });
 
         getLoaderManager().initLoader(0, null, this);
@@ -134,8 +176,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
             mHourMinutePickerPosition = mSavedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
-        } else if (args != null) {
-            Assert.assertTrue(args.containsKey(ROOT_TASK_ID_KEY));
+        } else if (args != null && args.containsKey(ROOT_TASK_ID_KEY)) {
             int rootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(rootTaskId != -1);
 
@@ -233,7 +274,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
             mContext = context;
             mDateTimeEntries = new ArrayList<>();
-            mDateTimeEntries.add(new DayOfWeekTimeEntry(DayOfWeek.today(), new TimePair(HourMinute.getNow()), false));
+            mDateTimeEntries.add(new DayOfWeekTimeEntry(mDayOfWeek, new TimePair(mHourMinute), false));
         }
 
         public DayOfWeekTimeEntryAdapter(Context context, List<DayOfWeekTimeEntry> dateTimeEntries) {
@@ -325,16 +366,13 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
             dayOfWeekTimeHolder.mWeeklyScheduleImage.setVisibility(dayOfWeekTimeEntry.getShowDelete() ? View.VISIBLE : View.INVISIBLE);
 
-            dayOfWeekTimeHolder.mWeeklyScheduleImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Assert.assertTrue(mDateTimeEntries.size() > 1);
-                    dayOfWeekTimeHolder.delete();
+            dayOfWeekTimeHolder.mWeeklyScheduleImage.setOnClickListener(v -> {
+                Assert.assertTrue(mDateTimeEntries.size() > 1);
+                dayOfWeekTimeHolder.delete();
 
-                    if (mDateTimeEntries.size() == 1) {
-                        mDateTimeEntries.get(0).setShowDelete(false);
-                        notifyItemChanged(0);
-                    }
+                if (mDateTimeEntries.size() == 1) {
+                    mDateTimeEntries.get(0).setShowDelete(false);
+                    notifyItemChanged(0);
                 }
             });
         }

@@ -3,13 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <Spinner
         android:id="@+id/weekly_schedule_day"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/bpBlue"/>
+        android:layout_height="wrap_content"/>
 
     <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
         android:id="@+id/weekly_schedule_time"

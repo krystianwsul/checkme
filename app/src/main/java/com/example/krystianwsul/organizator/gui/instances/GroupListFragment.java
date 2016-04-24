@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.gui.instances;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -24,6 +25,8 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity;
+import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
@@ -50,6 +53,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     private RecyclerView mGroupListRecycler;
     private GroupAdapter mGroupAdapter;
+    private FloatingActionButton mFloatingActionButton;
 
     private Integer mDay;
     private TimeStamp mTimeStamp;
@@ -154,20 +158,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         return (mDay != null);
     }
 
-    private boolean showFab() {
-        return (mInstanceKeys == null);
-    }
-
     private void initialize() {
         getLoaderManager().initLoader(0, null, this);
 
         View view = getView();
         Assert.assertTrue(view != null);
 
-        FloatingActionButton floatingActionButton = (FloatingActionButton) view.findViewById(R.id.group_list_fab);
-        Assert.assertTrue(floatingActionButton != null);
-
-        floatingActionButton.setVisibility(showFab() ? View.VISIBLE : View.GONE);
+        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.group_list_fab);
+        Assert.assertTrue(mFloatingActionButton != null);
     }
 
     @Override
@@ -188,7 +186,53 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         if (mGroupAdapter != null)
             mExpansionState = mGroupAdapter.getExpansionState();
 
-        mGroupAdapter = GroupAdapter.getAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState, useGroups(), showFab());
+        boolean showFab;
+        Activity activity = getActivity();
+        if (mDay != null) {
+            Assert.assertTrue(mTimeStamp == null);
+            Assert.assertTrue(mInstanceKey == null);
+            Assert.assertTrue(mInstanceKeys == null);
+
+            Assert.assertTrue(data.TaskEditable == null);
+
+            showFab = true;
+            mFloatingActionButton.setVisibility(View.VISIBLE);
+            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, mDay)));
+        } else if (mTimeStamp != null) {
+            Assert.assertTrue(mInstanceKey == null);
+            Assert.assertTrue(mInstanceKeys == null);
+
+            Assert.assertTrue(data.TaskEditable == null);
+
+            if (mTimeStamp.compareTo(TimeStamp.getNow()) > 0) {
+                showFab = true;
+                mFloatingActionButton.setVisibility(View.VISIBLE);
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, mTimeStamp)));
+            } else {
+                showFab = false;
+                mFloatingActionButton.setVisibility(View.GONE);
+            }
+        } else if (mInstanceKey != null) {
+            Assert.assertTrue(mInstanceKeys == null);
+
+            Assert.assertTrue(data.TaskEditable != null);
+
+            if (data.TaskEditable) {
+                showFab = true;
+                mFloatingActionButton.setVisibility(View.VISIBLE);
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateChildTaskActivity.getCreateIntent(activity, mInstanceKey.TaskId)));
+            } else {
+                showFab = false;
+                mFloatingActionButton.setVisibility(View.GONE);
+            }
+        } else {
+            Assert.assertTrue(data.TaskEditable == null);
+
+            showFab = false;
+            mFloatingActionButton.setVisibility(View.GONE);
+        }
+
+        mGroupAdapter = GroupAdapter.getAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState, useGroups(), showFab);
         mGroupListRecycler.setAdapter(mGroupAdapter);
     }
 

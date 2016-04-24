@@ -12,8 +12,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -30,10 +28,12 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
     private static final int CUSTOM_TIMES_VISIBLE = 2;
+    private static final int DEBUG_VISIBLE = 3;
 
     private ViewPager mDaysPager;
     private FrameLayout mMainTaskListFrame;
     private FrameLayout mMainCustomTimesFrame;
+    private FrameLayout mMainDebugFrame;
 
     private DrawerLayout mMainActivityDrawer;
 
@@ -65,13 +65,17 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_task_list_frame);
+        Fragment taskListFragment = fragmentManager.findFragmentById(R.id.main_task_list_frame);
+        Fragment showCustomTimesFragment = fragmentManager.findFragmentById(R.id.main_custom_times_frame);
+        Fragment debugFragment = fragmentManager.findFragmentById(R.id.main_debug_frame);
+        Assert.assertTrue((taskListFragment == null) == (showCustomTimesFragment == null));
+        Assert.assertTrue((taskListFragment == null) == (debugFragment == null));
         if (taskListFragment == null)
-            fragmentManager.beginTransaction().add(R.id.main_task_list_frame, TaskListFragment.getInstance()).commit();
-
-        ShowCustomTimesFragment showCustomTimesFragment = (ShowCustomTimesFragment) fragmentManager.findFragmentById(R.id.main_custom_times_frame);
-        if (showCustomTimesFragment == null)
-            fragmentManager.beginTransaction().add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance()).commit();
+            fragmentManager.beginTransaction()
+                    .add(R.id.main_task_list_frame, TaskListFragment.getInstance())
+                    .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
+                    .add(R.id.main_debug_frame, DebugFragment.newInstance())
+                    .commit();
 
         mDaysPager = (ViewPager) findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);
@@ -94,6 +98,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         mMainCustomTimesFrame = (FrameLayout) findViewById(R.id.main_custom_times_frame);
         Assert.assertTrue(mMainCustomTimesFrame != null);
 
+        mMainDebugFrame = (FrameLayout) findViewById(R.id.main_debug_frame);
+        Assert.assertTrue(mMainDebugFrame != null);
+
         NavigationView mainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
         Assert.assertTrue(mainActivityNavigation != null);
 
@@ -114,6 +121,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 case R.id.main_drawer_custom_times:
                     showTab(CUSTOM_TIMES_VISIBLE);
                     break;
+                case R.id.main_drawer_debug:
+                    showTab(DEBUG_VISIBLE);
+                    break;
                 default:
                     throw new IndexOutOfBoundsException();
             }
@@ -127,22 +137,6 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         TickService.register(this);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_debug:
-                startActivity(DebugActivity.getIntent(this));
-                return true;
-            default:
-                throw new UnsupportedOperationException();
-        }
-    }
     @Override
     public void onBackPressed() {
         if (mMainActivityDrawer.isDrawerOpen(GravityCompat.START))
@@ -164,16 +158,25 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mDaysPager.setVisibility(View.VISIBLE);
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
+                mMainDebugFrame.setVisibility(View.GONE);
                 break;
             case TASKS_VISIBLE:
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.VISIBLE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
+                mMainDebugFrame.setVisibility(View.GONE);
                 break;
             case CUSTOM_TIMES_VISIBLE:
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.VISIBLE);
+                mMainDebugFrame.setVisibility(View.GONE);
+                break;
+            case DEBUG_VISIBLE:
+                mDaysPager.setVisibility(View.GONE);
+                mMainTaskListFrame.setVisibility(View.GONE);
+                mMainCustomTimesFrame.setVisibility(View.GONE);
+                mMainDebugFrame.setVisibility(View.VISIBLE);
                 break;
             default:
                 throw new IllegalArgumentException();

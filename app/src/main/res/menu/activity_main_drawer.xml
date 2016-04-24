@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/main_drawer_instances"
@@ -12,6 +14,11 @@
         <item
             android:id="@+id/main_drawer_custom_times"
             android:title="@string/times"
+            android:icon="@drawable/ic_alarm_black_24dp"/>
+        <item
+            tools:ignore="HardcodedText"
+            android:id="@+id/main_drawer_debug"
+            android:title="Debug"
             android:icon="@drawable/ic_alarm_black_24dp"/>
     </group>
 </menu>

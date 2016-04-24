@@ -49,8 +49,6 @@
             android:name=".persistencemodel.SaveService"
             android:exported="false" />
 
-        <activity android:name=".gui.DebugActivity" />
-
         <receiver
             android:name=".notifications.TimeChangeReceiver"
             android:enabled="true"

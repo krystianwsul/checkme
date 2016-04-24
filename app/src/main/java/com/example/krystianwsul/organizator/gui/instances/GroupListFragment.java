@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -108,10 +109,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         Assert.assertTrue(mInstanceKeys == null);
 
         Assert.assertTrue(day >= 0);
-
         mDay = day;
 
-        getLoaderManager().initLoader(0, null, this);
+        initialize();
     }
 
     public void setTimeStamp(TimeStamp timeStamp) {
@@ -123,7 +123,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         Assert.assertTrue(timeStamp != null);
         mTimeStamp = timeStamp;
 
-        getLoaderManager().initLoader(0, null, this);
+        initialize();
     }
 
     public void setInstanceKey(InstanceKey instanceKey) {
@@ -135,7 +135,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         Assert.assertTrue(instanceKey != null);
         mInstanceKey = instanceKey;
 
-        getLoaderManager().initLoader(0, null, this);
+        initialize();
     }
 
     public void setInstanceKeys(ArrayList<InstanceKey> instanceKeys) {
@@ -146,9 +146,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         Assert.assertTrue(instanceKeys != null);
         mInstanceKeys = instanceKeys;
-        if (!mInstanceKeys.isEmpty()) {
-            getLoaderManager().initLoader(0, null, this);
-        }
+
+        initialize();
     }
 
     private boolean useGroups() {
@@ -157,6 +156,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     private boolean showFab() {
         return (mInstanceKeys == null);
+    }
+
+    private void initialize() {
+        getLoaderManager().initLoader(0, null, this);
+
+        View view = getView();
+        Assert.assertTrue(view != null);
+
+        FloatingActionButton floatingActionButton = (FloatingActionButton) view.findViewById(R.id.group_list_fab);
+        Assert.assertTrue(floatingActionButton != null);
+
+        floatingActionButton.setVisibility(showFab() ? View.VISIBLE : View.GONE);
     }
 
     @Override

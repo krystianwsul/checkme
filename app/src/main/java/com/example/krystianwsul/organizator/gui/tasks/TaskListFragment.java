@@ -92,10 +92,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         View view = getView();
         Assert.assertTrue(view != null);
 
-        mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.task_list_fragment_recycler);
+        mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.task_list_recycler);
         mTaskListFragmentRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mTaskListFragmentFab = (FloatingActionButton) getView().findViewById(R.id.task_list_fragment_fab);
+        mTaskListFragmentFab = (FloatingActionButton) getView().findViewById(R.id.task_list_fab);
 
         getLoaderManager().initLoader(0, null, this);
     }

@@ -66,7 +66,8 @@ public class DayFragment extends Fragment {
             default:
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.DAY_OF_YEAR, day);
-                title = new Date(calendar).toString();
+                Date date = new Date(calendar);
+                title = date.getDayOfWeek().toString() + ", " + date.toString();
         }
 
         TabLayout dayTabLayout = (TabLayout) view.findViewById(R.id.day_tab_layout);

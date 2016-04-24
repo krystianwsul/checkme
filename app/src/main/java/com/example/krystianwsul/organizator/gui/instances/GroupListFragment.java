@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
@@ -42,7 +43,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
-    private final static String USE_GROUPS_KEY = "useGroups";
     private final static String DAY_KEY = "day";
 
     private final static String EXPANSION_STATE_KEY = "expansionState";
@@ -50,9 +50,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     private RecyclerView mGroupListRecycler;
     private GroupAdapter mGroupAdapter;
 
-    private boolean mUseGroups = false;
-    private Integer mDay = null;
-
+    private Integer mDay;
     private TimeStamp mTimeStamp;
     private InstanceKey mInstanceKey;
     private ArrayList<InstanceKey> mInstanceKeys;
@@ -64,7 +62,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         GroupListFragment groupListFragment = new GroupListFragment();
         Bundle args = new Bundle();
-        args.putBoolean(USE_GROUPS_KEY, true);
         args.putInt(DAY_KEY, day);
         groupListFragment.setArguments(args);
         return groupListFragment;
@@ -96,29 +93,29 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         Bundle args = getArguments();
         if (args != null) {
-            Assert.assertTrue(args.containsKey(USE_GROUPS_KEY));
-            mUseGroups = args.getBoolean(USE_GROUPS_KEY, false);
-
             Assert.assertTrue(args.containsKey(DAY_KEY));
-            mDay = args.getInt(DAY_KEY);
-            Assert.assertTrue(mUseGroups);
+            int day = args.getInt(DAY_KEY);
+            Assert.assertTrue(day >= 0);
 
-            setAll();
+            setAll(day);
         }
     }
 
-    private void setAll() {
+    private void setAll(int day) {
+        Assert.assertTrue(mDay == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
 
-        Assert.assertTrue(mUseGroups);
+        Assert.assertTrue(day >= 0);
+
+        mDay = day;
 
         getLoaderManager().initLoader(0, null, this);
     }
 
     public void setTimeStamp(TimeStamp timeStamp) {
-        Assert.assertTrue(!mUseGroups);
+        Assert.assertTrue(mDay == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -130,7 +127,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     public void setInstanceKey(InstanceKey instanceKey) {
-        Assert.assertTrue(!mUseGroups);
+        Assert.assertTrue(mDay == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -142,7 +139,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     public void setInstanceKeys(ArrayList<InstanceKey> instanceKeys) {
-        Assert.assertTrue(!mUseGroups);
+        Assert.assertTrue(mDay == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -152,6 +149,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         if (!mInstanceKeys.isEmpty()) {
             getLoaderManager().initLoader(0, null, this);
         }
+    }
+
+    private boolean useGroups() {
+        return (mDay != null);
+    }
+
+    private boolean showFab() {
+        return (mInstanceKeys == null);
     }
 
     @Override
@@ -172,7 +177,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         if (mGroupAdapter != null)
             mExpansionState = mGroupAdapter.getExpansionState();
 
-        mGroupAdapter = GroupAdapter.getAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState, mUseGroups);
+        mGroupAdapter = GroupAdapter.getAdapter(getActivity(), data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState, useGroups(), showFab());
         mGroupListRecycler.setAdapter(mGroupAdapter);
     }
 
@@ -183,26 +188,28 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public static class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.AbstractHolder> {
         private static final int TYPE_GROUP = 0;
         private static final int TYPE_DIVIDER = 1;
+        private static final int TYPE_FAB_PADDING = 2;
 
         private final Context mContext;
 
         private final int mDataId;
         private final ArrayList<GroupListLoader.CustomTimeData> mCustomTimeDatas;
         private final boolean mUseGroups;
+        private final boolean mShowFab;
 
         private NodeCollection mNodeCollection;
 
-        public static GroupAdapter getAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, Collection<GroupListLoader.InstanceData> instanceDatas, ExpansionState expansionState, boolean useGroups) {
+        public static GroupAdapter getAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, Collection<GroupListLoader.InstanceData> instanceDatas, ExpansionState expansionState, boolean useGroups, boolean showFab) {
             Assert.assertTrue(context != null);
             Assert.assertTrue(customTimeDatas != null);
             Assert.assertTrue(instanceDatas != null);
 
-            GroupAdapter groupAdapter = new GroupAdapter(context, dataId, customTimeDatas, useGroups);
+            GroupAdapter groupAdapter = new GroupAdapter(context, dataId, customTimeDatas, useGroups, showFab);
             groupAdapter.setInstanceDatas(instanceDatas, expansionState);
             return groupAdapter;
         }
 
-        private GroupAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, boolean useGroups) {
+        private GroupAdapter(Context context, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, boolean useGroups, boolean showFab) {
             Assert.assertTrue(context != null);
             Assert.assertTrue(customTimeDatas != null);
 
@@ -210,6 +217,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mDataId = dataId;
             mCustomTimeDatas = customTimeDatas;
             mUseGroups = useGroups;
+            mShowFab = showFab;
         }
 
         private void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, ExpansionState expansionState) {
@@ -220,7 +228,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         @Override
         public int getItemViewType(int position) {
-            return mNodeCollection.getItemViewType(position);
+            if (mShowFab && position == mNodeCollection.getItemCount())
+                return TYPE_FAB_PADDING;
+            else
+                return mNodeCollection.getItemViewType(position);
         }
 
         @Override
@@ -235,15 +246,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 View groupRowSeparator = groupRow.findViewById(R.id.group_row_separator);
 
                 return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowExpand, groupCheckBox, groupRowSeparator);
-            } else {
-                Assert.assertTrue(viewType == TYPE_DIVIDER);
-
+            } else if (viewType == TYPE_DIVIDER) {
                 RelativeLayout rowGroupListDivider = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list_divider, parent, false);
 
                 ImageView groupListDividerImage = (ImageView) rowGroupListDivider.findViewById(R.id.group_list_divider_image);
                 Assert.assertTrue(groupListDividerImage != null);
 
                 return new DividerHolder(rowGroupListDivider, groupListDividerImage);
+            } else {
+                Assert.assertTrue(viewType == TYPE_FAB_PADDING);
+
+                FrameLayout frameLayout = (FrameLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list_fab_padding, parent, false);
+                return new FabPaddingHolder(frameLayout);
             }
         }
 
@@ -252,13 +266,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(position >= 0);
             Assert.assertTrue(position < getItemCount());
 
-            Node node = mNodeCollection.getNode(position);
-            node.onBindViewHolder(abstractHolder);
+            if (position < mNodeCollection.getItemCount()) {
+                Node node = mNodeCollection.getNode(position);
+                node.onBindViewHolder(abstractHolder);
+            } else {
+                Assert.assertTrue(mShowFab);
+                Assert.assertTrue(position == mNodeCollection.getItemCount());
+            }
         }
 
         @Override
         public int getItemCount() {
-            return mNodeCollection.getItemCount();
+            return mNodeCollection.getItemCount() + (mShowFab ? 1 : 0);
         }
 
         public ExpansionState getExpansionState() {
@@ -309,6 +328,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 RowGroupListDivider = rowGroupListDivider;
                 GroupListDividerImage = groupListDividerImage;
+            }
+        }
+
+        public static class FabPaddingHolder extends AbstractHolder {
+            FabPaddingHolder(FrameLayout frameLayout) {
+                super(frameLayout);
             }
         }
 

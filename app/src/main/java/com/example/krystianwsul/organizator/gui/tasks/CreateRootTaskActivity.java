@@ -50,6 +50,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private Integer mRootTaskId;
     private ArrayList<Integer> mTaskIds;
 
+    private boolean mIsTimeValid = true;
+
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
         return new Intent(context, CreateRootTaskActivity.class);
@@ -125,7 +127,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             @Override
             public void afterTextChanged(Editable s) {
-                mCreateRootTaskSave.setEnabled(!TextUtils.isEmpty(s.toString().trim()));
+                updateSave();
             }
         });
 
@@ -263,18 +265,21 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         }
         final int finalCount = count;
 
-        mCreateRootTaskSave.setEnabled(!TextUtils.isEmpty(mCreateRootTaskName.getText().toString().trim()));
+        updateSave();
+
         mCreateRootTaskSave.setOnClickListener(v -> {
             String name = mCreateRootTaskName.getText().toString().trim();
 
             ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
             Assert.assertTrue(scheduleFragment != null);
 
+            /*
             if (!scheduleFragment.isValidTime()) {
                 MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
                 messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
                 return;
             }
+            */
 
             if (mRootTaskId != null) {
                 scheduleFragment.updateRootTask(mRootTaskId, name);
@@ -318,5 +323,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     @Override
     public void onLoaderReset(Loader<CreateRootTaskLoader.Data> loader) {
+    }
+
+    public void setTimeValid(boolean valid) {
+        mIsTimeValid = valid;
+        updateSave();
+    }
+
+    private void updateSave() {
+        boolean enabled = (mIsTimeValid && !TextUtils.isEmpty(mCreateRootTaskName.getText().toString().trim()));
+        mCreateRootTaskSave.setEnabled(enabled);
     }
 }

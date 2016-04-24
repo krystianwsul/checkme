@@ -131,6 +131,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             mTimeEntryAdapter.addTimeEntry();
         });
 
+        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
+
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -183,11 +185,6 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
         outState.putParcelableArrayList(TIME_ENTRY_KEY, mTimeEntryAdapter.getTimeEntries());
         outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
-    }
-
-    @Override
-    public boolean isValidTime() {
-        return true;
     }
 
     private ArrayList<TimePair> getTimePairs() {

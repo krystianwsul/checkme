@@ -21,6 +21,7 @@ import com.example.krystianwsul.organizator.utils.time.TimePair;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 public class TimePickerView extends LinearLayout {
@@ -40,7 +41,7 @@ public class TimePickerView extends LinearLayout {
     private static final String MINUTE_KEY = "minute";
 
     private Integer mCustomTimeId = null;
-    private HourMinute mHourMinute = HourMinute.getNow();
+    private HourMinute mHourMinute;
 
     private Integer mInternalSelection = null;
 
@@ -80,7 +81,11 @@ public class TimePickerView extends LinearLayout {
 
         //initial values
 
-        mHourMinute = HourMinute.getNow();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        calendar.set(Calendar.MINUTE, 0);
+        mHourMinute = new HourMinute(calendar);
+
         mHourMinuteView.setVisibility(View.VISIBLE);
         mHourMinuteView.setText(mHourMinute.toString());
 

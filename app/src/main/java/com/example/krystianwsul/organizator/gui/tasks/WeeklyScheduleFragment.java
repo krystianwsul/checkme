@@ -157,6 +157,8 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             mDayOfWeekTimeEntryAdapter.addDayOfWeekTimeEntry();
         });
 
+        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
+
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -209,11 +211,6 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
         outState.putParcelableArrayList(DATE_TIME_ENTRY_KEY, mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries());
         outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
-    }
-
-    @Override
-    public boolean isValidTime() {
-        return true;
     }
 
     private ArrayList<Pair<DayOfWeek, TimePair>> getDayOfWeekTimePairs() {

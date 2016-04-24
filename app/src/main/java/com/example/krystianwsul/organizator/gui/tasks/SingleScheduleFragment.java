@@ -1,5 +1,9 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -51,6 +55,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     private Date mDate;
     private HourMinute mHourMinute;
 
+    private BroadcastReceiver mBroadcastReceiver;
+
     public static SingleScheduleFragment newInstance() {
         return new SingleScheduleFragment();
     }
@@ -92,6 +98,11 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_single_schedule, container, false);
     }
@@ -128,7 +139,10 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         mTimePickerView = (TimePickerView) view.findViewById(R.id.single_schedule_timepickerview);
         Assert.assertTrue(mTimePickerView != null);
 
-        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> mTimePickerView.setHourMinute(new HourMinute(hourOfDay, minute));
+        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
+            mTimePickerView.setHourMinute(new HourMinute(hourOfDay, minute));
+            setValidTime();
+        };
         mTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
             public void onCustomTimeSelected(int customTimeId) {
@@ -170,6 +184,28 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
 
         getLoaderManager().initLoader(0, null, this);
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                setValidTime();
+            }
+        };
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        setValidTime();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        getActivity().unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -188,18 +224,25 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         Assert.assertTrue(mDateView != null);
 
         mDateView.setText(mDate.getDisplayText(getContext()));
+        setValidTime();
     }
 
-    @Override
-    public boolean isValidTime() {
-        HourMinute hourMinute = mTimePickerView.getHourMinute();
-        Integer customTimeId = mTimePickerView.getCustomTimeId();
-        Assert.assertTrue((hourMinute == null) != (customTimeId == null));
+    private void setValidTime() {
+        boolean valid;
 
-        if (hourMinute == null)
-            hourMinute = mData.CustomTimeDatas.get(customTimeId).HourMinutes.get(mDate.getDayOfWeek());
+        if (mData != null) {
+            HourMinute hourMinute = mTimePickerView.getHourMinute();
+            Integer customTimeId = mTimePickerView.getCustomTimeId();
+            Assert.assertTrue((hourMinute == null) != (customTimeId == null));
 
-        return (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+            if (hourMinute == null)
+                hourMinute = mData.CustomTimeDatas.get(customTimeId).HourMinutes.get(mDate.getDayOfWeek());
+
+            valid = (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+        } else {
+            valid = false;
+        }
+        ((CreateRootTaskActivity) getActivity()).setTimeValid(valid);
     }
 
     @Override
@@ -265,14 +308,10 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             } else {
                 Assert.assertTrue(args.containsKey(DATE_KEY));
                 Assert.assertTrue(mDate != null);
-
-
             }
         } else {
             mDate = Date.today();
         }
-
-        updateDateText();
 
         HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
         for (SingleScheduleLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
@@ -297,6 +336,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
                 }
             }
         }
+
+        updateDateText();
     }
 
     @Override

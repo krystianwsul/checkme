@@ -6,7 +6,7 @@
         <item
             android:id="@+id/main_drawer_instances"
             android:title="@string/instances"
-            android:icon="@drawable/ic_alarm_black_24dp"/>
+            android:icon="@drawable/ic_notifications_active_black_24dp"/>
         <item
             android:id="@+id/main_drawer_tasks"
             android:title="@string/tasks"
@@ -14,11 +14,11 @@
         <item
             android:id="@+id/main_drawer_custom_times"
             android:title="@string/times"
-            android:icon="@drawable/ic_alarm_black_24dp"/>
+            android:icon="@drawable/ic_access_time_black_24dp"/>
         <item
             tools:ignore="HardcodedText"
             android:id="@+id/main_drawer_debug"
             android:title="Debug"
-            android:icon="@drawable/ic_alarm_black_24dp"/>
+            android:icon="@drawable/ic_build_black_24dp"/>
     </group>
 </menu>

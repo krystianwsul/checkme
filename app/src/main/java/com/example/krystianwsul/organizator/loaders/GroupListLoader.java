@@ -104,8 +104,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public final String DisplayText;
         public final String Name;
         public final TimeStamp InstanceTimeStamp;
+        public final boolean TaskCurrent;
 
-        public InstanceData(ExactTimeStamp done, boolean hasChildren, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp) {
+        public InstanceData(ExactTimeStamp done, boolean hasChildren, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp, boolean taskCurrent) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
@@ -116,6 +117,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             DisplayText = displayText;
             Name = name;
             InstanceTimeStamp = instanceTimeStamp;
+            TaskCurrent = taskCurrent;
         }
 
         @Override
@@ -129,6 +131,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 hashCode += DisplayText.hashCode();
             hashCode += Name.hashCode();
             hashCode += InstanceTimeStamp.hashCode();
+            hashCode += (TaskCurrent ? 1 : 0);
             return hashCode;
         }
 
@@ -145,7 +148,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             InstanceData instanceData = (InstanceData) object;
 
-            return ((((Done == null) && (instanceData.Done == null)) || ((Done != null) && (instanceData.Done != null) && Done.equals(instanceData.Done))) && InstanceKey.equals(instanceData.InstanceKey) && (HasChildren == instanceData.HasChildren) && DisplayText.equals(instanceData.DisplayText) && Name.equals(instanceData.Name) && InstanceTimeStamp.equals(instanceData.InstanceTimeStamp));
+            return ((((Done == null) && (instanceData.Done == null)) || ((Done != null) && (instanceData.Done != null) && Done.equals(instanceData.Done))) && InstanceKey.equals(instanceData.InstanceKey) && (HasChildren == instanceData.HasChildren) && DisplayText.equals(instanceData.DisplayText) && Name.equals(instanceData.Name) && InstanceTimeStamp.equals(instanceData.InstanceTimeStamp) && (TaskCurrent == instanceData.TaskCurrent));
         }
     }
 

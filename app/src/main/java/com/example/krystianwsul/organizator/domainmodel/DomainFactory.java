@@ -278,8 +278,12 @@ public class DomainFactory {
         ArrayList<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
-        for (Instance instance : currentInstances)
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
+        for (Instance instance : currentInstances) {
+            Task task = mTasks.get(instance.getTaskId());
+            Assert.assertTrue(task != null);
+
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now)));
+        }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
@@ -342,8 +346,12 @@ public class DomainFactory {
         Assert.assertTrue(!currentInstances.isEmpty());
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
-        for (Instance instance : currentInstances)
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
+        for (Instance instance : currentInstances) {
+            Task task = mTasks.get(instance.getTaskId());
+            Assert.assertTrue(task != null);
+
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now)));
+        }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
@@ -368,8 +376,12 @@ public class DomainFactory {
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
         ArrayList<Instance> childInstances = instance.getChildInstances(now);
-        for (Instance childInstance : childInstances)
-            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null, childInstance.getName(), instance.getInstanceDateTime().getTimeStamp()));
+        for (Instance childInstance : childInstances) {
+            Task childTask = mTasks.get(childInstance.getTaskId());
+            Assert.assertTrue(childTask != null);
+
+            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null, childInstance.getName(), instance.getInstanceDateTime().getTimeStamp(), childTask.current(now)));
+        }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
@@ -397,8 +409,12 @@ public class DomainFactory {
         Collections.sort(instances, (Instance lhs, Instance rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
-        for (Instance instance : instances)
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp()));
+        for (Instance instance : instances) {
+            Task task = mTasks.get(instance.getTaskId());
+            Assert.assertTrue(task != null);
+
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now)));
+        }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();

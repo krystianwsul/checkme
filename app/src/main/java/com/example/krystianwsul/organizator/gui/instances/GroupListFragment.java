@@ -2,12 +2,14 @@ package com.example.krystianwsul.organizator.gui.instances;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
@@ -484,7 +486,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             static class NotDoneGroupCollection implements NodeContainer {
                 private final WeakReference<NodeCollection> mNodeCollectionReference;
 
-                private final Comparator<NotDoneGroupNode> sComparator = (NotDoneGroupNode lhs, NotDoneGroupNode rhs) -> {
+                private final Comparator<NotDoneGroupNode> sComparator = (lhs, rhs) -> {
                     int timeStampComparison = lhs.getExactTimeStamp().compareTo(rhs.getExactTimeStamp());
                     if (timeStampComparison != 0) {
                         return timeStampComparison;
@@ -811,6 +813,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowSeparator.setVisibility(View.VISIBLE);
                     else
                         groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
+
+                    if (singleInstance() && !getSingleInstanceData().TaskCurrent)
+                        groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupAdapter.mContext, R.color.disabled));
+                    else
+                        groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
 
                     groupHolder.mGroupRow.setOnClickListener(v -> {
                         if (singleInstance()) {

@@ -1049,6 +1049,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
                         }
 
+
+                        if (!mInstanceData.TaskCurrent)
+                            groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupAdapter.mContext, R.color.disabled));
+                        else
+                            groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
+
                         groupHolder.mGroupRow.setOnClickListener(v -> groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, mInstanceData.InstanceKey)));
                     }
 
@@ -1306,8 +1312,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final GroupListLoader.InstanceData mInstanceData;
 
-                private boolean mExpanded = false;
-
                 public DoneInstanceNode(GroupListLoader.InstanceData instanceData, WeakReference<DividerNode> dividerNodeReference) {
                     Assert.assertTrue(instanceData != null);
                     Assert.assertTrue(dividerNodeReference != null);
@@ -1383,6 +1387,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     });
 
                     groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
+
+                    if (!mInstanceData.TaskCurrent)
+                        groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupAdapter.mContext, R.color.disabled));
+                    else
+                        groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
 
                     groupHolder.mGroupRow.setOnClickListener(v -> groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, mInstanceData.InstanceKey)));
                 }

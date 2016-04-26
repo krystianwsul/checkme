@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
@@ -16,7 +17,7 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data> {
+public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data>, GroupListFragment.GroupListListener {
     private TimeStamp mTimeStamp;
     private TextView mShowGroupName;
 
@@ -68,5 +69,15 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoaderReset(Loader<ShowGroupLoader.Data> loader) {
+    }
+
+    @Override
+    public void onCreateGroupActionMode(ActionMode actionMode) {
+
+    }
+
+    @Override
+    public void onDestroyGroupActionMode() {
+
     }
 }

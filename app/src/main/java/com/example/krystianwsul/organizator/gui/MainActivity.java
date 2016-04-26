@@ -18,13 +18,15 @@ import android.widget.FrameLayout;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.gui.customtimes.ShowCustomTimesFragment;
 import com.example.krystianwsul.organizator.gui.instances.DayFragment;
+import com.example.krystianwsul.organizator.gui.instances.GroupListFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TaskListFragment;
 import com.example.krystianwsul.organizator.notifications.TickService;
 
 import junit.framework.Assert;
 
-public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener {
+public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
+
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
     private static final int CUSTOM_TIMES_VISIBLE = 2;
@@ -37,7 +39,10 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     private DrawerLayout mMainActivityDrawer;
 
-    private DrawerLayout.DrawerListener mDrawerListener;
+    private DrawerLayout.DrawerListener mDrawerTaskListener;
+
+    private DrawerLayout.DrawerListener mDrawerGroupListener;
+    private ViewPager.OnPageChangeListener mOnPageChangeListener;
 
     private int mVisibleTab = 0;
 
@@ -107,21 +112,44 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         mainActivityNavigation.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.main_drawer_instances:
-                    if (mDrawerListener != null) {
-                        mMainActivityDrawer.removeDrawerListener(mDrawerListener);
-                        mDrawerListener = null;
+                    if (mDrawerTaskListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerTaskListener);
+                        mDrawerTaskListener = null;
                     }
 
                     showTab(INSTANCES_VISIBLE);
 
                     break;
                 case R.id.main_drawer_tasks:
+                    if (mDrawerGroupListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerGroupListener);
+                        mDrawerGroupListener = null;
+                    }
+
                     showTab(TASKS_VISIBLE);
                     break;
                 case R.id.main_drawer_custom_times:
+                    if (mDrawerTaskListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerTaskListener);
+                        mDrawerTaskListener = null;
+                    }
+                    if (mDrawerGroupListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerGroupListener);
+                        mDrawerGroupListener = null;
+                    }
+
                     showTab(CUSTOM_TIMES_VISIBLE);
                     break;
                 case R.id.main_drawer_debug:
+                    if (mDrawerTaskListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerTaskListener);
+                        mDrawerTaskListener = null;
+                    }
+                    if (mDrawerGroupListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerGroupListener);
+                        mDrawerGroupListener = null;
+                    }
+
                     showTab(DEBUG_VISIBLE);
                     break;
                 default:
@@ -186,8 +214,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     @Override
     public void onCreateTaskActionMode(final ActionMode actionMode) {
-        Assert.assertTrue(mDrawerListener == null);
-        mDrawerListener = new DrawerLayout.DrawerListener() {
+        Assert.assertTrue(mDrawerTaskListener == null);
+        mDrawerTaskListener = new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
 
@@ -208,14 +236,72 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 }
             }
         };
-        mMainActivityDrawer.addDrawerListener(mDrawerListener);
+        mMainActivityDrawer.addDrawerListener(mDrawerTaskListener);
     }
 
     @Override
     public void onDestroyTaskActionMode() {
-        Assert.assertTrue(mDrawerListener != null);
+        Assert.assertTrue(mDrawerTaskListener != null);
 
-        mMainActivityDrawer.removeDrawerListener(mDrawerListener);
-        mDrawerListener = null;
+        mMainActivityDrawer.removeDrawerListener(mDrawerTaskListener);
+        mDrawerTaskListener = null;
+    }
+
+    @Override
+    public void onCreateGroupActionMode(final ActionMode actionMode) {
+        Assert.assertTrue(mDrawerGroupListener == null);
+        mDrawerGroupListener = new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (newState == DrawerLayout.STATE_DRAGGING) {
+                    actionMode.finish();
+                }
+            }
+        };
+        mMainActivityDrawer.addDrawerListener(mDrawerGroupListener);
+
+        Assert.assertTrue(mOnPageChangeListener == null);
+        mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                actionMode.finish();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        };
+        mDaysPager.addOnPageChangeListener(mOnPageChangeListener);
+    }
+
+    @Override
+    public void onDestroyGroupActionMode() {
+        Assert.assertTrue(mDrawerGroupListener != null);
+        Assert.assertTrue(mOnPageChangeListener != null);
+
+        mMainActivityDrawer.removeDrawerListener(mDrawerGroupListener);
+        mDrawerGroupListener = null;
+
+        mDaysPager.removeOnPageChangeListener(mOnPageChangeListener);
+        mOnPageChangeListener = null;
     }
 }

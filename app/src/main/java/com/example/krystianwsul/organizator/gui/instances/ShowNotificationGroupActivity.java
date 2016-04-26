@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 
 import com.example.krystianwsul.organizator.R;
@@ -13,7 +14,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowNotificationGroupActivity extends AppCompatActivity {
+public class ShowNotificationGroupActivity extends AppCompatActivity implements GroupListFragment.GroupListListener {
     private static final String INSTANCES_KEY = "instanceKeys";
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
@@ -47,5 +48,15 @@ public class ShowNotificationGroupActivity extends AppCompatActivity {
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         showNotificationGroupList.setInstanceKeys(instanceKeys);
+    }
+
+    @Override
+    public void onCreateGroupActionMode(ActionMode actionMode) {
+
+    }
+
+    @Override
+    public void onDestroyGroupActionMode() {
+
     }
 }

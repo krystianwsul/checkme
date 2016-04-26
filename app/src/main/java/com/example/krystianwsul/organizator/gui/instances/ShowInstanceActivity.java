@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -23,7 +24,7 @@ import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
 
-public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data> {
+public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data>, GroupListFragment.GroupListListener {
     private static final String INSTANCE_KEY = "instanceKey";
     private static final String SET_NOTIFIED_KEY = "setNotified";
 
@@ -164,5 +165,15 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public void onLoaderReset(Loader<ShowInstanceLoader.Data> loader) {
+    }
+
+    @Override
+    public void onCreateGroupActionMode(ActionMode actionMode) {
+
+    }
+
+    @Override
+    public void onDestroyGroupActionMode() {
+
     }
 }

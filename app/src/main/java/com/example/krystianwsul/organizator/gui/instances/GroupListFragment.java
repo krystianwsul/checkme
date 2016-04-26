@@ -14,7 +14,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,8 @@ import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity;
@@ -717,26 +718,79 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
                     Assert.assertTrue(groupAdapter != null);
 
-                    if (mNotDoneGroupNodeExpanded) {
-                        groupHolder.mGroupRowName.setVisibility(View.INVISIBLE);
-                    } else {
-                        groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
-                        groupHolder.mGroupRowName.setText(getNameText());
-                    }
-
-                    groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
-                    groupHolder.mGroupRowDetails.setText(getDetailsText(groupAdapter.mContext));
-
                     if (singleInstance()) {
+                        Assert.assertTrue(!mNotDoneGroupNodeExpanded);
+
+                        GroupListLoader.InstanceData instanceData = getSingleInstanceData();
+                        Assert.assertTrue(instanceData != null);
+
+                        groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
+                        groupHolder.mGroupRowName.setText(instanceData.Name);
+
+                        groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
+                        groupHolder.mGroupRowDetails.setText(instanceData.DisplayText);
+
                         if (getSingleInstanceData().HasChildren) {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                             groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
-                            groupHolder.mGroupRowExpand.setOnClickListener(null);
                         } else {
                             groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
-                            groupHolder.mGroupRowExpand.setOnClickListener(null);
                         }
+                        groupHolder.mGroupRowExpand.setOnClickListener(null);
+
+                        groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+
+                        groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
+                            instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
+                            Assert.assertTrue(instanceData.Done != null);
+
+                            TickService.startService(groupAdapter.mContext);
+
+                            int oldPosition = nodeCollection.getPosition(NotDoneGroupNode.this);
+                            notDoneGroupCollection.remove(NotDoneGroupNode.this);
+
+                            groupAdapter.notifyItemRemoved(oldPosition);
+
+                            nodeCollection.mDividerNode.add(instanceData, oldPosition);
+                        });
+
+                        groupHolder.mGroupRowCheckBox.setChecked(instanceData.Done != null);
+
+                        if (!instanceData.TaskCurrent)
+                            groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupAdapter.mContext, R.color.disabled));
+                        else
+                            groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
+
+                        groupHolder.mGroupRow.setOnClickListener(v -> groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, instanceData.InstanceKey)));
                     } else {
+                        if (mNotDoneGroupNodeExpanded) {
+                            groupHolder.mGroupRowName.setVisibility(View.INVISIBLE);
+                        } else {
+                            groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
+
+                            String nameText = Stream.of(mNotDoneInstanceNodes)
+                                    .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.Name)
+                                    .collect(Collectors.joining(", "));
+                            groupHolder.mGroupRowName.setText(nameText);
+                        }
+
+                        groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
+
+
+                        Date date = mExactTimeStamp.getDate();
+                        HourMinute hourMinute = mExactTimeStamp.toTimeStamp().getHourMinute();
+
+                        GroupListLoader.CustomTimeData customTimeData = getCustomTimeData(date.getDayOfWeek(), hourMinute);
+
+                        String timeText;
+                        if (customTimeData != null)
+                            timeText = customTimeData.Name;
+                        else
+                            timeText = hourMinute.toString();
+
+                        String detailsText = date.getDisplayText(groupAdapter.mContext) + ", " + timeText;
+                        groupHolder.mGroupRowDetails.setText(detailsText);
+
                         groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
 
                         if (mNotDoneGroupNodeExpanded)
@@ -762,38 +816,17 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                 groupAdapter.notifyItemChanged(position);
                             }
                         });
-                    }
 
-                    if (singleInstance()) {
-                        groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
-
-                        groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
-                            Assert.assertTrue(singleInstance());
-
-                            GroupListLoader.InstanceData instanceData = getSingleInstanceData();
-                            Assert.assertTrue(instanceData != null);
-
-                            instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
-                            Assert.assertTrue(instanceData.Done != null);
-
-                            TickService.startService(groupAdapter.mContext);
-
-                            int oldPosition = nodeCollection.getPosition(NotDoneGroupNode.this);
-                            notDoneGroupCollection.remove(NotDoneGroupNode.this);
-
-                            groupAdapter.notifyItemRemoved(oldPosition);
-
-                            nodeCollection.mDividerNode.add(instanceData, oldPosition);
-                        });
-
-                        groupHolder.mGroupRowCheckBox.setChecked(getSingleInstanceData().Done != null);
-                    } else {
                         if (mNotDoneGroupNodeExpanded) {
                             groupHolder.mGroupRowCheckBox.setVisibility(View.GONE);
                         } else {
                             groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
                         }
                         groupHolder.mGroupRowCheckBox.setOnClickListener(null);
+
+                        groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
+
+                        groupHolder.mGroupRow.setOnClickListener(v -> groupAdapter.mContext.startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupAdapter.mContext)));
                     }
 
                     boolean showSeparator = false;
@@ -813,20 +846,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowSeparator.setVisibility(View.VISIBLE);
                     else
                         groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
-
-                    if (singleInstance() && !getSingleInstanceData().TaskCurrent)
-                        groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupAdapter.mContext, R.color.disabled));
-                    else
-                        groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
-
-                    groupHolder.mGroupRow.setOnClickListener(v -> {
-                        if (singleInstance()) {
-                            GroupListLoader.InstanceData instanceData = getSingleInstanceData();
-                            groupAdapter.mContext.startActivity(ShowInstanceActivity.getIntent(groupAdapter.mContext, instanceData.InstanceKey));
-                        } else {
-                            groupAdapter.mContext.startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupAdapter.mContext));
-                        }
-                    });
                 }
 
                 @Override
@@ -864,7 +883,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (node == this)
                         return 0;
 
-                    if (!(node instanceof  NotDoneInstanceNode))
+                    if (!(node instanceof NotDoneInstanceNode))
                         return -1;
 
                     NotDoneInstanceNode notDoneInstanceNode = (NotDoneInstanceNode) node;
@@ -889,38 +908,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     NotDoneInstanceNode notDoneInstanceNode = new NotDoneInstanceNode(instanceData, new WeakReference<>(this));
                     mNotDoneInstanceNodes.add(notDoneInstanceNode);
                     return notDoneInstanceNode;
-                }
-
-                public String getNameText() {
-                    Assert.assertTrue(!mNotDoneInstanceNodes.isEmpty());
-                    if (singleInstance()) {
-                        return getSingleInstanceData().Name;
-                    } else {
-                        ArrayList<String> names = new ArrayList<>();
-                        for (NotDoneInstanceNode notDoneInstanceNode : mNotDoneInstanceNodes)
-                            names.add(notDoneInstanceNode.mInstanceData.Name);
-                        return TextUtils.join(", ", names);
-                    }
-                }
-
-                public String getDetailsText(Context context) {
-                    Assert.assertTrue(!mNotDoneInstanceNodes.isEmpty());
-                    if (singleInstance()) {
-                        return getSingleInstanceData().DisplayText;
-                    } else {
-                        Date date = mExactTimeStamp.getDate();
-                        HourMinute hourMinute = mExactTimeStamp.toTimeStamp().getHourMinute();
-
-                        String timeText;
-
-                        GroupListLoader.CustomTimeData customTimeData = getCustomTimeData(date.getDayOfWeek(), hourMinute);
-                        if (customTimeData != null)
-                            timeText = customTimeData.Name;
-                        else
-                            timeText = hourMinute.toString();
-
-                        return date.getDisplayText(context) + ", " + timeText;
-                    }
                 }
 
                 private GroupListLoader.CustomTimeData getCustomTimeData(DayOfWeek dayOfWeek, HourMinute hourMinute) {

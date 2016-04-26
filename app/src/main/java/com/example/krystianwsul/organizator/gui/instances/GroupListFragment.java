@@ -256,6 +256,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public void onLoaderReset(Loader<GroupListLoader.Data> loader) {
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mActionMode != null)
+            mActionMode.finish();
+    }
+
     private GroupEditCallback newGroupEditCallback() {
         return new GroupEditCallback();
     }
@@ -830,7 +838,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         String detailsText = date.getDisplayText(groupListFragment.getActivity()) + ", " + timeText;
                         groupHolder.mGroupRowDetails.setText(detailsText);
 
-                        groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
+                        if (groupListFragment.mActionMode != null && getSelected().count() > 0)
+                            groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
+                        else
+                            groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
 
                         if (mNotDoneGroupNodeExpanded)
                             groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_expand_less_black_36dp);
@@ -841,6 +852,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             int position = nodeCollection.getPosition(NotDoneGroupNode.this);
 
                             if (mNotDoneGroupNodeExpanded) { // hiding
+                                Assert.assertTrue(getSelected().count() == 0);
+
                                 int displayedSize = displayedSize();
                                 mNotDoneGroupNodeExpanded = !mNotDoneGroupNodeExpanded;
                                 groupAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
@@ -1053,10 +1066,25 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
                     Assert.assertTrue(groupAdapter != null);
 
-                    for (NotDoneInstanceNode notDoneInstanceNode : mNotDoneInstanceNodes) {
+                    if (singleInstance()) {
+                        NotDoneInstanceNode notDoneInstanceNode = mNotDoneInstanceNodes.get(0);
+                        Assert.assertTrue(notDoneInstanceNode != null);
+
                         if (notDoneInstanceNode.mSelected) {
-                            Assert.assertTrue(singleInstance());
                             notDoneInstanceNode.mSelected = false;
+                            groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                        }
+                    } else {
+                        List<NotDoneInstanceNode> selected = getSelected().collect(Collectors.toList());
+                        if (!selected.isEmpty()) {
+                            Assert.assertTrue(mNotDoneGroupNodeExpanded);
+
+                            for (NotDoneInstanceNode notDoneInstanceNode : selected) {
+                                if (notDoneInstanceNode.mSelected) {
+                                    notDoneInstanceNode.mSelected = false;
+                                    groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneInstanceNode));
+                                }
+                            }
                             groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                         }
                     }
@@ -1159,17 +1187,83 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         }
 
 
-                        if (!mInstanceData.TaskCurrent)
+                        if (mSelected)
+                            groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected));
+                        else if (!mInstanceData.TaskCurrent)
                             groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.disabled));
                         else
                             groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
 
-                        groupHolder.mGroupRow.setOnClickListener(v -> groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.InstanceKey)));
+                        groupHolder.mGroupRow.setOnLongClickListener(v -> {
+                            onInstanceLongClick();
+                            return false;
+                        });
+
+                        groupHolder.mGroupRow.setOnClickListener(v -> {
+                            if (groupListFragment.mActionMode != null)
+                                onInstanceLongClick();
+                            else
+                                onInstanceClick();
+                        });
                     }
 
                     @Override
                     public int getItemViewType() {
                         return TYPE_GROUP;
+                    }
+
+                    private void onInstanceLongClick() {
+                        NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        Assert.assertTrue(notDoneGroupNode.mNotDoneGroupNodeExpanded);
+
+                        final NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
+                        Assert.assertTrue(notDoneGroupCollection != null);
+
+                        final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                        Assert.assertTrue(nodeCollection != null);
+
+                        final GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                        Assert.assertTrue(groupAdapter != null);
+
+                        GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
+                        Assert.assertTrue(groupListFragment != null);
+
+                        mSelected = !mSelected;
+
+                        groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
+                        groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+
+                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
+                        if (selected.isEmpty()) {
+                            if (groupListFragment.mActionMode != null)
+                                groupListFragment.mActionMode.finish();
+                        } else {
+                            if (groupListFragment.mActionMode == null)
+                                ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
+                            else
+                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(selected.size() > 1);
+                        }
+                    }
+
+                    private void onInstanceClick() {
+                        final NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
+                        Assert.assertTrue(notDoneGroupCollection != null);
+
+                        final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                        Assert.assertTrue(nodeCollection != null);
+
+                        final GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                        Assert.assertTrue(groupAdapter != null);
+
+                        final GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
+                        Assert.assertTrue(groupListFragment != null);
+
+                        groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.InstanceKey));
                     }
                 }
             }

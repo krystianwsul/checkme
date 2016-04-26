@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
@@ -17,6 +18,7 @@ import com.example.krystianwsul.organizator.gui.instances.ShowInstanceActivity;
 import com.example.krystianwsul.organizator.gui.instances.ShowNotificationGroupActivity;
 import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -32,6 +34,9 @@ public class TickService extends IntentService {
 
     private static final String SILENT_KEY = "silent";
     private static final String REGISTERING_KEY = "registering";
+
+    public static final String TICK_PREFERENCES = "tickPreferences";
+    public static final String LAST_TICK_KEY = "lastTick";
 
     // DON'T HOLD STATE IN STATIC VARIABLES
 
@@ -62,6 +67,9 @@ public class TickService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
         Assert.assertTrue(intent.hasExtra(REGISTERING_KEY));
+
+        SharedPreferences sharedPreferences = getSharedPreferences(TICK_PREFERENCES, MODE_PRIVATE);
+        sharedPreferences.edit().putLong(LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
 
         boolean silent = intent.getBooleanExtra(SILENT_KEY, false);
         boolean registering = intent.getBooleanExtra(REGISTERING_KEY, false);

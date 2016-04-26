@@ -2,6 +2,8 @@ package com.example.krystianwsul.organizator.gui;
 
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.notifications.TickService;
+import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
@@ -62,5 +65,25 @@ public class DebugFragment extends Fragment {
         Assert.assertTrue(debugRecords != null);
 
         debugRecords.setText("tasks: " + domainFactory.getTaskCount() + ", instances: " + domainFactory.getInstanceCount());
+
+        TextView debugTickTime = (TextView) view.findViewById(R.id.debug_tick_time);
+        Assert.assertTrue(debugTickTime != null);
+
+        Button debugTickShow = (Button) view.findViewById(R.id.debug_tick_show);
+        Assert.assertTrue(debugTickShow != null);
+
+        debugTickShow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+
+                long lastTick = sharedPreferences.getLong(TickService.LAST_TICK_KEY, -1);
+                Assert.assertTrue(lastTick != -1);
+
+                ExactTimeStamp lastTickExactTimeStamp = new ExactTimeStamp(lastTick);
+
+                debugTickTime.setText(lastTickExactTimeStamp.toString());
+            }
+        });
     }
 }

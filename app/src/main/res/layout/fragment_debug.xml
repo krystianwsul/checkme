@@ -34,4 +34,16 @@
         android:layout_height="wrap_content"
         android:id="@+id/debug_records"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/debug_tick_show"
+        tools:ignore="HardcodedText"
+        android:text="show last tick time"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/debug_tick_time"/>
+
 </LinearLayout>

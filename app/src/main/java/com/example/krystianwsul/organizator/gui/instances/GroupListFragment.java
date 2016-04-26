@@ -739,7 +739,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
 
                         groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
-
+                        groupHolder.mGroupRowCheckBox.setChecked(false);
                         groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
                             instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mContext).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
                             Assert.assertTrue(instanceData.Done != null);
@@ -753,8 +753,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             nodeCollection.mDividerNode.add(instanceData, oldPosition);
                         });
-
-                        groupHolder.mGroupRowCheckBox.setChecked(instanceData.Done != null);
 
                         if (!instanceData.TaskCurrent)
                             groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupAdapter.mContext, R.color.disabled));
@@ -775,7 +773,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         }
 
                         groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
-
 
                         Date date = mExactTimeStamp.getDate();
                         HourMinute hourMinute = mExactTimeStamp.toTimeStamp().getHourMinute();
@@ -825,7 +822,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowCheckBox.setOnClickListener(null);
 
                         groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
-
                         groupHolder.mGroupRow.setOnClickListener(v -> groupAdapter.mContext.startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupAdapter.mContext)));
                     }
 
@@ -983,11 +979,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         if (mInstanceData.HasChildren) {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                             groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
-                            groupHolder.mGroupRowExpand.setOnClickListener(null);
                         } else {
                             groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
-                            groupHolder.mGroupRowExpand.setOnClickListener(null);
                         }
+                        groupHolder.mGroupRowExpand.setOnClickListener(null);
 
                         groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowCheckBox.setChecked(false);
@@ -1323,7 +1318,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
                     groupHolder.mGroupRowName.setText(mInstanceData.Name);
 
-                    groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
+                    groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
                     groupHolder.mGroupRowDetails.setText(mInstanceData.DisplayText);
 
                     if (mInstanceData.HasChildren) {

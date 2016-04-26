@@ -99,8 +99,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     public static class InstanceData {
         public ExactTimeStamp Done;
-        public final InstanceKey InstanceKey;
         public final boolean HasChildren;
+        public final InstanceKey InstanceKey;
         public final String DisplayText;
         public final String Name;
         public final TimeStamp InstanceTimeStamp;
@@ -135,6 +135,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             return hashCode;
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -148,7 +149,34 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             InstanceData instanceData = (InstanceData) object;
 
-            return ((((Done == null) && (instanceData.Done == null)) || ((Done != null) && (instanceData.Done != null) && Done.equals(instanceData.Done))) && InstanceKey.equals(instanceData.InstanceKey) && (HasChildren == instanceData.HasChildren) && DisplayText.equals(instanceData.DisplayText) && Name.equals(instanceData.Name) && InstanceTimeStamp.equals(instanceData.InstanceTimeStamp) && (TaskCurrent == instanceData.TaskCurrent));
+            if ((Done == null) != (instanceData.Done == null))
+                return false;
+
+            if ((Done != null) && !Done.equals(instanceData.Done))
+                return false;
+
+            if (HasChildren != instanceData.HasChildren)
+                return false;
+
+            if (!InstanceKey.equals(instanceData.InstanceKey))
+                return false;
+
+            if (TextUtils.isEmpty(DisplayText) != TextUtils.isEmpty(instanceData.DisplayText))
+                return false;
+
+            if (!TextUtils.isEmpty(DisplayText) && !DisplayText.equals(instanceData.DisplayText))
+                return false;
+
+            if (!Name.equals(instanceData.Name))
+                return false;
+
+            if (!InstanceTimeStamp.equals(instanceData.InstanceTimeStamp))
+                return false;
+
+            if (TaskCurrent != instanceData.TaskCurrent)
+                return false;
+
+            return true;
         }
     }
 

@@ -1344,8 +1344,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
                     } else {
                         groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
-                        groupHolder.mGroupRowExpand.setOnClickListener(null);
                     }
+
+                    groupHolder.mGroupRowExpand.setOnClickListener(null);
 
                     groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
                     groupHolder.mGroupRowCheckBox.setChecked(true);

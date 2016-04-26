@@ -65,7 +65,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         boolean editInstance = (mData != null && !mData.Done);
         menu.findItem(R.id.instance_menu_edit_instance).setVisible(editInstance);
 
-        boolean showTask = (mData != null && mData.Editable);
+        boolean showTask = (mData != null && !mData.Done && mData.TaskCurrent);
         menu.findItem(R.id.instance_menu_show_task).setVisible(showTask);
 
         return true;

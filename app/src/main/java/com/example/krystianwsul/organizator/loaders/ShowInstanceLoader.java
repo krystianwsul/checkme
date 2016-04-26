@@ -29,9 +29,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final String Name;
         public final String DisplayText;
         public boolean Done;
-        public final boolean Editable;
+        public final boolean TaskCurrent;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean editable) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -39,7 +39,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             Name = name;
             DisplayText = displayText;
             Done = done;
-            Editable = editable;
+            TaskCurrent = taskCurrent;
         }
 
         @Override
@@ -50,7 +50,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             if (!TextUtils.isEmpty(DisplayText))
                 hashCode += DisplayText.hashCode();
             hashCode += (Done ? 1 : 0);
-            hashCode += (Editable ? 1 : 0);
+            hashCode += (TaskCurrent ? 1 : 0);
             return hashCode;
         }
 
@@ -67,7 +67,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (Editable == data.Editable));
+            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (TaskCurrent == data.TaskCurrent));
         }
     }
 }

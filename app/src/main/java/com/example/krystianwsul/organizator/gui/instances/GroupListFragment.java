@@ -1760,21 +1760,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(selected != null);
             Assert.assertTrue(!selected.isEmpty());
 
-            /*
             switch (menuItem.getItemId()) {
-                case R.id.action_task_join:
-                    if (mTaskId == null)
-                        startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), selected));
+                case R.id.action_group_join:
+                    ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(selected)
+                            .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.InstanceKey.TaskId)
+                            .collect(Collectors.toList()));
+                    if (mInstanceKey == null)
+                        startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
                     else
-                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mTaskId, selected));
-                    break;
-                case R.id.action_task_delete:
-                    mTaskAdapter.removeSelected();
+                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mInstanceKey.TaskId, taskIds));
                     break;
                 default:
                     throw new UnsupportedOperationException();
             }
-            */
 
             actionMode.finish();
             return true;

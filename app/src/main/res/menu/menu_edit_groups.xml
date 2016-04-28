@@ -6,9 +6,4 @@
         android:orderInCategory="100"
         android:icon="@drawable/ic_merge_type_white_24dp"
         android:visible="false"/>
-    <item
-        android:id="@+id/action_group_delete"
-        android:title="@string/delete"
-        android:orderInCategory="200"
-        android:icon="@drawable/ic_delete_white_24dp" />
 </menu>

@@ -989,24 +989,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         if (selected.size() == 1) { // first
                             Assert.assertTrue(groupListFragment.mActionMode == null);
                             ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-
-                            notDoneGroupCollection.updateCheckBoxes();
                         } else if (selected.size() == 2) { // second
                             groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
-                            groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                         }
                     } else {
                         List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
                         if (selected.isEmpty()) { // last in list
                             Assert.assertTrue(groupListFragment.mActionMode != null);
                             groupListFragment.mActionMode.finish();
-
-                            notDoneGroupCollection.updateCheckBoxes();
                         } else if (selected.size() == 1) { // second to last in list
                             groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
-                            groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                         }
                     }
+                    groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                 }
 
                 private void onInstanceClick() {
@@ -1285,11 +1280,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             if (selected.size() == 1) { // first in list
                                 Assert.assertTrue(groupListFragment.mActionMode == null);
                                 ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-
-                                notDoneGroupCollection.updateCheckBoxes();
                             } else if (selected.size() == 2) { // second in list
                                 groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
-                                groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                             }
 
                             if (notDoneGroupNode.getSelected().count() == 1) // first in group
@@ -1299,16 +1291,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             if (selected.isEmpty()) { // last in list
                                 Assert.assertTrue(groupListFragment.mActionMode != null);
                                 groupListFragment.mActionMode.finish();
-
-                                notDoneGroupCollection.updateCheckBoxes();
                             } else if (selected.size() == 1) { // second to last in list
                                 groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
-                                groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                             }
 
                             if (notDoneGroupNode.getSelected().count() == 0) // last in group
                                 groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
                         }
+                        groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                     }
 
                     private void onInstanceClick() {
@@ -1388,13 +1378,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         int position = nodeCollection.getPosition(DividerNode.this);
 
+                        int displayedSize = DividerNode.this.displayedSize();
                         if (mDoneExpanded) { // hiding
-                            int displayedSize = DividerNode.this.displayedSize();
                             mDoneExpanded = false;
                             groupAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
                         } else { // showing
                             mDoneExpanded = true;
-                            groupAdapter.notifyItemRangeInserted(position + 1, DividerNode.this.displayedSize() - 1);
+                            groupAdapter.notifyItemRangeInserted(position + 1, displayedSize - 1);
                         }
 
                         if (nodeCollection.mNotDoneGroupCollection.displayedSize() == 0) {
@@ -1412,7 +1402,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 public int displayedSize() {
-                    if (mDoneInstanceNodes.isEmpty()) {
+                    final NodeCollection nodeCollection = mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    final GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
+                    Assert.assertTrue(groupListFragment != null);
+
+                    if (mDoneInstanceNodes.isEmpty() || groupListFragment.mActionMode != null) {
                         return 0;
                     } else {
                         if (mDoneExpanded) {
@@ -1730,11 +1729,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public class GroupEditCallback implements ActionMode.Callback {
         @Override
         public boolean onCreateActionMode(final ActionMode actionMode, Menu menu) {
+            if (mGroupAdapter.mNodeCollection.mDividerNode.displayedSize() > 0)
+                mGroupAdapter.notifyItemRangeRemoved(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode), mGroupAdapter.mNodeCollection.mDividerNode.displayedSize());
+
             mActionMode = actionMode;
 
             actionMode.getMenuInflater().inflate(R.menu.menu_edit_groups, menu);
 
             ((GroupListListener) getActivity()).onCreateGroupActionMode(actionMode);
+
+            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
 
             return true;
         }
@@ -1776,6 +1780,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mActionMode = null;
 
             mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.unselect();
+
+            if (mGroupAdapter.mNodeCollection.mDividerNode.displayedSize() > 0)
+                mGroupAdapter.notifyItemRangeInserted(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode), mGroupAdapter.mNodeCollection.mDividerNode.displayedSize());
+
+            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
 
             ((GroupListListener) getActivity()).onDestroyGroupActionMode();
         }

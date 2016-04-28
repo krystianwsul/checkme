@@ -275,17 +275,17 @@ public class InstanceRecord extends Record {
         mChanged = true;
     }
 
-    public void setInstanceCustomTimeId(int instanceCustomTimeId) {
+    public void setInstanceCustomTimeId(Integer instanceCustomTimeId) {
         mInstanceCustomTimeId = instanceCustomTimeId;
         mChanged = true;
     }
 
-    public void setInstanceHour(int instanceHour) {
+    public void setInstanceHour(Integer instanceHour) {
         mInstanceHour = instanceHour;
         mChanged = true;
     }
 
-    public void setInstanceMinute(int instanceMinute) {
+    public void setInstanceMinute(Integer instanceMinute) {
         mInstanceMinute = instanceMinute;
         mChanged = true;
     }

@@ -163,9 +163,12 @@ class Instance {
         if (timePair.CustomTimeId != null) {
             Assert.assertTrue(timePair.HourMinute == null);
             mInstanceRecord.setInstanceCustomTimeId(timePair.CustomTimeId);
+            mInstanceRecord.setInstanceHour(null);
+            mInstanceRecord.setInstanceMinute(null);
         } else {
             Assert.assertTrue(timePair.HourMinute != null);
 
+            mInstanceRecord.setInstanceCustomTimeId(null);
             mInstanceRecord.setInstanceHour(timePair.HourMinute.getHour());
             mInstanceRecord.setInstanceMinute(timePair.HourMinute.getMinute());
         }

@@ -982,26 +982,28 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     notDoneInstanceNode.mSelected = !notDoneInstanceNode.mSelected;
 
+                    List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
                     if (notDoneInstanceNode.mSelected) {
-                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
                         Assert.assertTrue(!selected.isEmpty());
 
                         if (selected.size() == 1) { // first
                             Assert.assertTrue(groupListFragment.mActionMode == null);
                             ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-                        } else if (selected.size() == 2) { // second
-                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
                         }
                     } else {
-                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
                         if (selected.isEmpty()) { // last in list
                             Assert.assertTrue(groupListFragment.mActionMode != null);
                             groupListFragment.mActionMode.finish();
-                        } else if (selected.size() == 1) { // second to last in list
-                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
                         }
                     }
                     groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+
+                    if (groupListFragment.mActionMode != null) {
+                        if (selected.size() > 1 && Stream.of(selected).allMatch(node -> node.mInstanceData.TaskCurrent))
+                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
+                        else
+                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
+                    }
                 }
 
                 private void onInstanceClick() {
@@ -1275,30 +1277,34 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         mSelected = !mSelected;
 
+                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
+
                         if (mSelected) {
-                            List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
                             if (selected.size() == 1) { // first in list
                                 Assert.assertTrue(groupListFragment.mActionMode == null);
                                 ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-                            } else if (selected.size() == 2) { // second in list
-                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
                             }
 
                             if (notDoneGroupNode.getSelected().count() == 1) // first in group
                                 groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
                         } else {
-                            List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
                             if (selected.isEmpty()) { // last in list
                                 Assert.assertTrue(groupListFragment.mActionMode != null);
                                 groupListFragment.mActionMode.finish();
-                            } else if (selected.size() == 1) { // second to last in list
-                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
                             }
 
                             if (notDoneGroupNode.getSelected().count() == 0) // last in group
                                 groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
                         }
+
                         groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+
+                        if (groupListFragment.mActionMode != null) {
+                            if (selected.size() > 1 && Stream.of(selected).allMatch(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.TaskCurrent))
+                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
+                            else
+                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
+                        }
                     }
 
                     private void onInstanceClick() {

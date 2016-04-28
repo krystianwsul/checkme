@@ -697,6 +697,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     for (NotDoneGroupNode notDoneGroupNode : mNotDoneGroupNodes)
                         notDoneGroupNode.unselect();
                 }
+
+                public void updateCheckBoxes() {
+                    for (NotDoneGroupNode notDoneGroupNode : mNotDoneGroupNodes)
+                        notDoneGroupNode.updateCheckBoxes();
+                }
             }
 
             static class NotDoneGroupNode implements Node, NodeContainer {
@@ -777,21 +782,26 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         }
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
 
-                        groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
-                        groupHolder.mGroupRowCheckBox.setChecked(false);
-                        groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
-                            notDoneInstanceNode.mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, notDoneInstanceNode.mInstanceData.InstanceKey, true);
-                            Assert.assertTrue(notDoneInstanceNode.mInstanceData.Done != null);
+                        if (groupListFragment.mActionMode != null) {
+                            groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
+                            groupHolder.mGroupRowCheckBox.setOnClickListener(null);
+                        } else {
+                            groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+                            groupHolder.mGroupRowCheckBox.setChecked(false);
+                            groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
+                                notDoneInstanceNode.mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, notDoneInstanceNode.mInstanceData.InstanceKey, true);
+                                Assert.assertTrue(notDoneInstanceNode.mInstanceData.Done != null);
 
-                            TickService.startService(groupListFragment.getActivity());
+                                TickService.startService(groupListFragment.getActivity());
 
-                            int oldPosition = nodeCollection.getPosition(NotDoneGroupNode.this);
-                            notDoneGroupCollection.remove(NotDoneGroupNode.this);
+                                int oldPosition = nodeCollection.getPosition(NotDoneGroupNode.this);
+                                notDoneGroupCollection.remove(NotDoneGroupNode.this);
 
-                            groupAdapter.notifyItemRemoved(oldPosition);
+                                groupAdapter.notifyItemRemoved(oldPosition);
 
-                            nodeCollection.mDividerNode.add(notDoneInstanceNode.mInstanceData, oldPosition);
-                        });
+                                nodeCollection.mDividerNode.add(notDoneInstanceNode.mInstanceData, oldPosition);
+                            });
+                        }
 
                         if (notDoneInstanceNode.mSelected)
                             groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected));
@@ -877,7 +887,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowCheckBox.setOnClickListener(null);
 
                         groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
-                        groupHolder.mGroupRow.setOnClickListener(v -> groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupListFragment.getActivity())));
+                        groupHolder.mGroupRow.setOnClickListener(v -> {
+                            if (groupListFragment.mActionMode == null)
+                                groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupListFragment.getActivity()));
+                        });
                     }
 
                     boolean showSeparator = false;
@@ -969,17 +982,30 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     notDoneInstanceNode.mSelected = !notDoneInstanceNode.mSelected;
 
-                    groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                    if (notDoneInstanceNode.mSelected) {
+                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
+                        Assert.assertTrue(!selected.isEmpty());
 
-                    List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
-                    if (selected.isEmpty()) {
-                        if (groupListFragment.mActionMode != null)
-                            groupListFragment.mActionMode.finish();
-                    } else {
-                        if (groupListFragment.mActionMode == null)
+                        if (selected.size() == 1) { // first
+                            Assert.assertTrue(groupListFragment.mActionMode == null);
                             ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-                        else
-                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(selected.size() > 1);
+
+                            notDoneGroupCollection.updateCheckBoxes();
+                        } else if (selected.size() == 2) { // second
+                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
+                            groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                        }
+                    } else {
+                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
+                        if (selected.isEmpty()) { // last in list
+                            Assert.assertTrue(groupListFragment.mActionMode != null);
+                            groupListFragment.mActionMode.finish();
+
+                            notDoneGroupCollection.updateCheckBoxes();
+                        } else if (selected.size() == 1) { // second to last in list
+                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
+                            groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                        }
                     }
                 }
 
@@ -1090,6 +1116,23 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     }
                 }
 
+                public void updateCheckBoxes() {
+                    final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
+                    Assert.assertTrue(notDoneGroupCollection != null);
+
+                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    final GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    if (singleInstance()) {
+                        groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                    } else {
+                        groupAdapter.notifyItemRangeChanged(nodeCollection.getPosition(this) + 1, displayedSize() - 1);
+                    }
+                }
+
                 static class NotDoneInstanceNode implements Node {
                     private final WeakReference<NotDoneGroupNode> mNotDoneGroupNodeReference;
 
@@ -1139,46 +1182,51 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         }
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
 
-                        groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
-                        groupHolder.mGroupRowCheckBox.setChecked(false);
-                        groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
-                            Assert.assertTrue(notDoneGroupNode.mNotDoneGroupNodeExpanded);
+                        if (groupListFragment.mActionMode != null) {
+                            groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
+                            groupHolder.mGroupRowCheckBox.setOnClickListener(null);
+                        } else {
+                            groupHolder.mGroupRowCheckBox.setVisibility(View.VISIBLE);
+                            groupHolder.mGroupRowCheckBox.setChecked(false);
+                            groupHolder.mGroupRowCheckBox.setOnClickListener(v -> {
+                                Assert.assertTrue(notDoneGroupNode.mNotDoneGroupNodeExpanded);
 
-                            mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, true);
-                            Assert.assertTrue(mInstanceData.Done != null);
+                                mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, true);
+                                Assert.assertTrue(mInstanceData.Done != null);
 
-                            TickService.startService(groupListFragment.getActivity());
+                                TickService.startService(groupListFragment.getActivity());
 
-                            Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() >= 2);
-                            int groupPosition = nodeCollection.getPosition(notDoneGroupNode);
+                                Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() >= 2);
+                                int groupPosition = nodeCollection.getPosition(notDoneGroupNode);
 
-                            int oldInstancePosition = nodeCollection.getPosition(NotDoneInstanceNode.this);
+                                int oldInstancePosition = nodeCollection.getPosition(NotDoneInstanceNode.this);
 
-                            if (notDoneGroupNode.mNotDoneInstanceNodes.size() == 2) {
-                                notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
+                                if (notDoneGroupNode.mNotDoneInstanceNodes.size() == 2) {
+                                    notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
 
-                                notDoneGroupNode.mNotDoneGroupNodeExpanded = false;
+                                    notDoneGroupNode.mNotDoneGroupNodeExpanded = false;
 
-                                if ((groupPosition > 0) && (nodeCollection.getNode(groupPosition - 1) instanceof NotDoneGroupNode))
-                                    groupAdapter.notifyItemRangeChanged(groupPosition - 1, 2);
-                                else
+                                    if ((groupPosition > 0) && (nodeCollection.getNode(groupPosition - 1) instanceof NotDoneGroupNode))
+                                        groupAdapter.notifyItemRangeChanged(groupPosition - 1, 2);
+                                    else
+                                        groupAdapter.notifyItemChanged(groupPosition);
+
+                                    groupAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
+                                } else {
+                                    Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() > 2);
+
+                                    notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
+
                                     groupAdapter.notifyItemChanged(groupPosition);
+                                    groupAdapter.notifyItemRemoved(oldInstancePosition);
 
-                                groupAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
-                            } else {
-                                Assert.assertTrue(notDoneGroupNode.mNotDoneInstanceNodes.size() > 2);
+                                    if (lastInGroup)
+                                        groupAdapter.notifyItemChanged(oldInstancePosition - 1);
+                                }
 
-                                notDoneGroupNode.mNotDoneInstanceNodes.remove(NotDoneInstanceNode.this);
-
-                                groupAdapter.notifyItemChanged(groupPosition);
-                                groupAdapter.notifyItemRemoved(oldInstancePosition);
-
-                                if (lastInGroup)
-                                    groupAdapter.notifyItemChanged(oldInstancePosition - 1);
-                            }
-
-                            nodeCollection.mDividerNode.add(mInstanceData, oldInstancePosition);
-                        });
+                                nodeCollection.mDividerNode.add(mInstanceData, oldInstancePosition);
+                            });
+                        }
 
                         if (lastInGroup) {
                             groupHolder.mGroupRowSeparator.setVisibility(View.VISIBLE);
@@ -1232,18 +1280,34 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         mSelected = !mSelected;
 
-                        groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
-                        groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
-
-                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
-                        if (selected.isEmpty()) {
-                            if (groupListFragment.mActionMode != null)
-                                groupListFragment.mActionMode.finish();
-                        } else {
-                            if (groupListFragment.mActionMode == null)
+                        if (mSelected) {
+                            List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
+                            if (selected.size() == 1) { // first in list
+                                Assert.assertTrue(groupListFragment.mActionMode == null);
                                 ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-                            else
-                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(selected.size() > 1);
+
+                                notDoneGroupCollection.updateCheckBoxes();
+                            } else if (selected.size() == 2) { // second in list
+                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
+                                groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                            }
+
+                            if (notDoneGroupNode.getSelected().count() == 1) // first in group
+                                groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
+                        } else {
+                            List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
+                            if (selected.isEmpty()) { // last in list
+                                Assert.assertTrue(groupListFragment.mActionMode != null);
+                                groupListFragment.mActionMode.finish();
+
+                                notDoneGroupCollection.updateCheckBoxes();
+                            } else if (selected.size() == 1) { // second to last in list
+                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
+                                groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                            }
+
+                            if (notDoneGroupNode.getSelected().count() == 0) // last in group
+                                groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
                         }
                     }
 
@@ -1662,7 +1726,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
         };
     }
-
 
     public class GroupEditCallback implements ActionMode.Callback {
         @Override

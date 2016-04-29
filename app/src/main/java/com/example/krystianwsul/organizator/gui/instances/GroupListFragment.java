@@ -1765,10 +1765,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(selected)
                             .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.InstanceKey.TaskId)
                             .collect(Collectors.toList()));
-                    if (mInstanceKey == null)
-                        startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
-                    else
+                    if (mInstanceKey == null) {
+                        if (mDay != null)
+                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, mDay));
+                        else
+                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
+                    } else {
                         startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mInstanceKey.TaskId, taskIds));
+                    }
                     break;
                 default:
                     throw new UnsupportedOperationException();

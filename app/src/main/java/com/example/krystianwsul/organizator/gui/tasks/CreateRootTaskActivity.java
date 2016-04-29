@@ -85,6 +85,18 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         return intent;
     }
 
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, int day) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+        Assert.assertTrue(day >= 0);
+
+        Intent intent = new Intent(context, CreateRootTaskActivity.class);
+        intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
+        intent.putExtra(DAY_KEY, day);
+        return intent;
+    }
+
     public static Intent getEditIntent(Context context, int rootTaskId) {
         Assert.assertTrue(context != null);
 
@@ -272,14 +284,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
             Assert.assertTrue(scheduleFragment != null);
-
-            /*
-            if (!scheduleFragment.isValidTime()) {
-                MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
-                messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
-                return;
-            }
-            */
 
             if (mRootTaskId != null) {
                 scheduleFragment.updateRootTask(mRootTaskId, name);

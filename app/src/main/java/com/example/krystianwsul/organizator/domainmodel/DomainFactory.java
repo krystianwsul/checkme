@@ -403,7 +403,8 @@ public class DomainFactory {
             Instance instance = getInstance(instanceKey);
             Assert.assertTrue(instance != null);
 
-            instances.add(instance);
+            if (instance.isRootInstance(now))
+                instances.add(instance);
         }
 
         Collections.sort(instances, (Instance lhs, Instance rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));

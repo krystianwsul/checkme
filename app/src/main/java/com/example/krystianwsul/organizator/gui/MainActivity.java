@@ -26,6 +26,7 @@ import junit.framework.Assert;
 
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
+    private static final String IGNORE_FIRST_KEY = "ignoreFirst";
 
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private ViewPager.OnPageChangeListener mOnPageChangeListener;
 
     private int mVisibleTab = 0;
+    private boolean mIgnoreFirst = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,11 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         if (savedInstanceState != null) {
             Assert.assertTrue(savedInstanceState.containsKey(VISIBLE_TAB_KEY));
             mVisibleTab = savedInstanceState.getInt(VISIBLE_TAB_KEY);
+
+            if (savedInstanceState.containsKey(IGNORE_FIRST_KEY)) {
+                Assert.assertTrue(mVisibleTab == 0);
+                mIgnoreFirst = true;
+            }
         }
 
         mMainActivityDrawer = (DrawerLayout) findViewById(R.id.main_activity_drawer);
@@ -178,6 +185,11 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         super.onSaveInstanceState(outState);
 
         outState.putInt(VISIBLE_TAB_KEY, mVisibleTab);
+        if (mVisibleTab == 0) {
+            Assert.assertTrue(mDaysPager.getVisibility() == View.VISIBLE);
+            if (mDaysPager.getCurrentItem() != 0 && mOnPageChangeListener != null)
+                outState.putInt(IGNORE_FIRST_KEY, 1);
+        }
     }
 
     private void showTab(int tab) {
@@ -282,7 +294,10 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
             @Override
             public void onPageSelected(int position) {
-                actionMode.finish();
+                if (mIgnoreFirst)
+                    mIgnoreFirst = false;
+                else
+                    actionMode.finish();
             }
 
             @Override

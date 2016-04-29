@@ -16,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -819,7 +818,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             });
                         }
 
-                        Log.e("asdf", "binding " + notDoneInstanceNode.mSelected);
                         if (notDoneInstanceNode.mSelected)
                             groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected));
                         else if (!notDoneInstanceNode.mInstanceData.TaskCurrent)
@@ -997,7 +995,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     NotDoneInstanceNode notDoneInstanceNode = mNotDoneInstanceNodes.get(0);
                     Assert.assertTrue(notDoneInstanceNode != null);
 
-                    Log.e("asdf", "toggling 2");
                     notDoneInstanceNode.mSelected = !notDoneInstanceNode.mSelected;
 
                     List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
@@ -1111,7 +1108,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         Assert.assertTrue(notDoneInstanceNode != null);
 
                         if (notDoneInstanceNode.mSelected) {
-                            Log.e("asdf", "unselecting");
                             notDoneInstanceNode.mSelected = false;
                             groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
                         }
@@ -1122,7 +1118,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             for (NotDoneInstanceNode notDoneInstanceNode : selected) {
                                 if (notDoneInstanceNode.mSelected) {
-                                    Log.e("asdf", "unselecting 2");
                                     notDoneInstanceNode.mSelected = false;
                                     groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneInstanceNode));
                                 }
@@ -1163,7 +1158,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         mInstanceData = instanceData;
                         mNotDoneGroupNodeReference = notDoneGroupNodeReference;
                         if (selectedNodes != null && selectedNodes.contains(mInstanceData.InstanceKey)) {
-                            Log.e("asdf", "setting selected");
                             mSelected = true;
                         }
                     }
@@ -1298,7 +1292,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                         Assert.assertTrue(groupListFragment != null);
 
-                        Log.e("asdf", "toggling 1");
                         mSelected = !mSelected;
 
                         List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();

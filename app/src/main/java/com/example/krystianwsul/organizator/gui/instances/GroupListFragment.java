@@ -17,7 +17,6 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +31,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.SelectionCallback;
 import com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity;
 import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
@@ -72,7 +72,110 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     private ExpansionState mExpansionState;
     private ArrayList<InstanceKey> mSelectedNodes;
 
-    private ActionMode mActionMode;
+    private SelectionCallback mSelectionCallback = new SelectionCallback() {
+        @Override
+        protected void unselect() {
+            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.unselect();
+        }
+
+        @Override
+        protected void onMenuClick(MenuItem menuItem) {
+            List<GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode> selected = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.getSelected();
+            Assert.assertTrue(selected != null);
+            Assert.assertTrue(!selected.isEmpty());
+
+            switch (menuItem.getItemId()) {
+                case R.id.action_group_join:
+                    ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(selected)
+                            .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.InstanceKey.TaskId)
+                            .collect(Collectors.toList()));
+                    if (mInstanceKey == null) {
+                        if (mDay != null)
+                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, mDay));
+                        else
+                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
+                    } else {
+                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mInstanceKey.TaskId, taskIds));
+                    }
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        protected void onFirstAdded() {
+            ((AppCompatActivity) getActivity()).startSupportActionMode(this);
+
+            if (mGroupAdapter.mNodeCollection.mDividerNode.mDoneInstanceNodes.size() > 0) {
+                if (mGroupAdapter.mNodeCollection.mDividerNode.mDoneExpanded)
+                    mGroupAdapter.notifyItemRangeRemoved(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode), mGroupAdapter.mNodeCollection.mDividerNode.mDoneInstanceNodes.size() + 1);
+                else
+                    mGroupAdapter.notifyItemRemoved(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode));
+            }
+
+            int last = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.displayedSize() - 1;
+            mGroupAdapter.notifyItemChanged(last);
+
+            mActionMode.getMenuInflater().inflate(R.menu.menu_edit_groups, mActionMode.getMenu());
+
+            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
+
+            mFloatingActionButton.setVisibility(View.GONE);
+
+            ((GroupListListener) getActivity()).onCreateGroupActionMode(mActionMode);
+
+            updateMenu();
+        }
+
+        @Override
+        protected void onSecondAdded() {
+            updateMenu();
+        }
+
+        @Override
+        protected void onOtherAdded() {
+            updateMenu();
+        }
+
+        @Override
+        protected void onLastRemoved() {
+            if (mGroupAdapter.mNodeCollection.mDividerNode.mDoneInstanceNodes.size() > 0) {
+                if (mGroupAdapter.mNodeCollection.mDividerNode.mDoneExpanded)
+                    mGroupAdapter.notifyItemRangeInserted(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode), mGroupAdapter.mNodeCollection.mDividerNode.mDoneInstanceNodes.size() + 1);
+                else
+                    mGroupAdapter.notifyItemInserted(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode));
+            }
+
+            int last = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.displayedSize() - 1;
+            mGroupAdapter.notifyItemChanged(last);
+
+            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
+
+            mFloatingActionButton.setVisibility(View.VISIBLE);
+
+            ((GroupListListener) getActivity()).onDestroyGroupActionMode();
+        }
+
+        @Override
+        protected void onSecondToLastRemoved() {
+            updateMenu();
+        }
+
+        @Override
+        protected void onOtherRemoved() {
+            updateMenu();
+        }
+
+        private void updateMenu() {
+            List<GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode> selected = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.getSelected();
+
+            if (selected.size() > 1 && Stream.of(selected).allMatch(node -> node.mInstanceData.TaskCurrent))
+                mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
+            else
+                mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
+        }
+    };
 
     public static GroupListFragment getGroupInstance(int day) {
         Assert.assertTrue(day >= 0);
@@ -193,8 +296,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         if (mGroupAdapter != null) {
             outState.putParcelable(EXPANSION_STATE_KEY, mGroupAdapter.getExpansionState());
 
-            if (mActionMode != null)
-                outState.putParcelableArrayList(SELECTED_NODES_KEY, mGroupAdapter.getSelected());
+            if (mSelectionCallback.hasActionMode()) {
+                ArrayList<InstanceKey> selected = mGroupAdapter.getSelected();
+                Assert.assertTrue(!selected.isEmpty());
+                outState.putParcelableArrayList(SELECTED_NODES_KEY, selected);
+            }
         }
     }
 
@@ -210,10 +316,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             ArrayList<InstanceKey> selected = mGroupAdapter.getSelected();
             if (selected.isEmpty()) {
-                Assert.assertTrue(mActionMode == null);
+                Assert.assertTrue(!mSelectionCallback.hasActionMode());
                 mSelectedNodes = null;
             } else {
-                Assert.assertTrue(mActionMode != null);
+                Assert.assertTrue(mSelectionCallback.hasActionMode());
                 mSelectedNodes = selected;
             }
         }
@@ -267,18 +373,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         mGroupAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState, useGroups(), showFab, mSelectedNodes);
         mGroupListRecycler.setAdapter(mGroupAdapter);
 
-        if (mSelectedNodes != null && mActionMode == null) {
-            ((AppCompatActivity) getActivity()).startSupportActionMode(newGroupEditCallback());
-            mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(mSelectedNodes.size() > 1);
-        }
+        mSelectionCallback.setSelected(mGroupAdapter.getSelected().size());
     }
 
     @Override
     public void onLoaderReset(Loader<GroupListLoader.Data> loader) {
-    }
-
-    private GroupEditCallback newGroupEditCallback() {
-        return new GroupEditCallback();
     }
 
     public static class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.AbstractHolder> {
@@ -801,7 +900,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         }
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
 
-                        if (groupListFragment.mActionMode != null) {
+                        if (groupListFragment.mSelectionCallback.hasActionMode()) {
                             groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
                             groupHolder.mGroupRowCheckBox.setOnClickListener(null);
                         } else {
@@ -834,7 +933,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             return false;
                         });
                         groupHolder.mGroupRow.setOnClickListener(v -> {
-                            if (groupListFragment.mActionMode != null)
+                            if (groupListFragment.mSelectionCallback.hasActionMode())
                                 onInstanceLongClick();
                             else
                                 onInstanceClick();
@@ -867,7 +966,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         String detailsText = date.getDisplayText(groupListFragment.getActivity()) + ", " + timeText;
                         groupHolder.mGroupRowDetails.setText(detailsText);
 
-                        if (groupListFragment.mActionMode != null && getSelected().count() > 0)
+                        if (groupListFragment.mSelectionCallback.hasActionMode() && getSelected().count() > 0)
                             groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
                         else
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
@@ -907,7 +1006,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
                         groupHolder.mGroupRow.setOnClickListener(v -> {
-                            if (groupListFragment.mActionMode == null)
+                            if (!groupListFragment.mSelectionCallback.hasActionMode())
                                 groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(mExactTimeStamp, groupListFragment.getActivity()));
                         });
                     }
@@ -1001,28 +1100,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     notDoneInstanceNode.mSelected = !notDoneInstanceNode.mSelected;
 
-                    List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
                     if (notDoneInstanceNode.mSelected) {
-                        Assert.assertTrue(!selected.isEmpty());
-
-                        if (selected.size() == 1) { // first
-                            Assert.assertTrue(groupListFragment.mActionMode == null);
-                            ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-                        }
+                        groupListFragment.mSelectionCallback.incrementSelected();
                     } else {
-                        if (selected.isEmpty()) { // last in list
-                            Assert.assertTrue(groupListFragment.mActionMode != null);
-                            groupListFragment.mActionMode.finish();
-                        }
+                        groupListFragment.mSelectionCallback.decrementSelected();
                     }
                     groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
-
-                    if (groupListFragment.mActionMode != null) {
-                        if (selected.size() > 1 && Stream.of(selected).allMatch(node -> node.mInstanceData.TaskCurrent))
-                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
-                        else
-                            groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
-                    }
                 }
 
                 private void onInstanceClick() {
@@ -1200,7 +1283,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         }
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
 
-                        if (groupListFragment.mActionMode != null) {
+                        if (groupListFragment.mSelectionCallback.hasActionMode()) {
                             groupHolder.mGroupRowCheckBox.setVisibility(View.INVISIBLE);
                             groupHolder.mGroupRowCheckBox.setOnClickListener(null);
                         } else {
@@ -1266,7 +1349,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         });
 
                         groupHolder.mGroupRow.setOnClickListener(v -> {
-                            if (groupListFragment.mActionMode != null)
+                            if (groupListFragment.mSelectionCallback.hasActionMode())
                                 onInstanceLongClick();
                             else
                                 onInstanceClick();
@@ -1298,34 +1381,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         mSelected = !mSelected;
 
-                        List<NotDoneInstanceNode> selected = notDoneGroupCollection.getSelected();
-
                         if (mSelected) {
-                            if (selected.size() == 1) { // first in list
-                                Assert.assertTrue(groupListFragment.mActionMode == null);
-                                ((AppCompatActivity) groupListFragment.getActivity()).startSupportActionMode(groupListFragment.newGroupEditCallback());
-                            }
+                            groupListFragment.mSelectionCallback.incrementSelected();
 
                             if (notDoneGroupNode.getSelected().count() == 1) // first in group
                                 groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
                         } else {
-                            if (selected.isEmpty()) { // last in list
-                                Assert.assertTrue(groupListFragment.mActionMode != null);
-                                groupListFragment.mActionMode.finish();
-                            }
+                            groupListFragment.mSelectionCallback.decrementSelected();
 
                             if (notDoneGroupNode.getSelected().count() == 0) // last in group
                                 groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneGroupNode));
                         }
 
                         groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
-
-                        if (groupListFragment.mActionMode != null) {
-                            if (selected.size() > 1 && Stream.of(selected).allMatch(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.TaskCurrent))
-                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
-                            else
-                                groupListFragment.mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
-                        }
                     }
 
                     private void onInstanceClick() {
@@ -1438,7 +1506,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
-                    if (mDoneInstanceNodes.isEmpty() || groupListFragment.mActionMode != null) {
+                    if (mDoneInstanceNodes.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode()) {
                         return 0;
                     } else {
                         if (mDoneExpanded) {
@@ -1486,7 +1554,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 public boolean expanded() {
-                    return mDoneExpanded;
+                    if (!mDoneExpanded)
+                        return false;
+
+                    final NodeCollection nodeCollection = mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    final GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
+                    Assert.assertTrue(groupListFragment != null);
+
+                    return !groupListFragment.mSelectionCallback.hasActionMode();
                 }
 
                 public DoneInstanceNode get(int index) {
@@ -1751,76 +1831,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 return new ExpansionState[size];
             }
         };
-    }
-
-    public class GroupEditCallback implements ActionMode.Callback {
-        @Override
-        public boolean onCreateActionMode(final ActionMode actionMode, Menu menu) {
-            if (mGroupAdapter.mNodeCollection.mDividerNode.displayedSize() > 0)
-                mGroupAdapter.notifyItemRangeRemoved(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode), mGroupAdapter.mNodeCollection.mDividerNode.displayedSize());
-
-            mActionMode = actionMode;
-
-            actionMode.getMenuInflater().inflate(R.menu.menu_edit_groups, menu);
-
-            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
-
-            mFloatingActionButton.setVisibility(View.GONE);
-
-            ((GroupListListener) getActivity()).onCreateGroupActionMode(actionMode);
-
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            List<GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode> selected = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.getSelected();
-            Assert.assertTrue(selected != null);
-            Assert.assertTrue(!selected.isEmpty());
-
-            switch (menuItem.getItemId()) {
-                case R.id.action_group_join:
-                    ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(selected)
-                            .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.InstanceKey.TaskId)
-                            .collect(Collectors.toList()));
-                    if (mInstanceKey == null) {
-                        if (mDay != null)
-                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, mDay));
-                        else
-                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
-                    } else {
-                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mInstanceKey.TaskId, taskIds));
-                    }
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
-            }
-
-            actionMode.finish();
-            return true;
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode actionMode) {
-            Assert.assertTrue(mActionMode != null);
-            mActionMode = null;
-
-            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.unselect();
-
-            if (mGroupAdapter.mNodeCollection.mDividerNode.displayedSize() > 0)
-                mGroupAdapter.notifyItemRangeInserted(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode), mGroupAdapter.mNodeCollection.mDividerNode.displayedSize());
-
-            mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
-
-            mFloatingActionButton.setVisibility(View.GONE);
-
-            ((GroupListListener) getActivity()).onDestroyGroupActionMode();
-        }
     }
 
     public interface GroupListListener {

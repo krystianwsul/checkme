@@ -27,9 +27,12 @@ import com.example.krystianwsul.organizator.loaders.TaskListLoader;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
+    private static final String SELECTED_TASKS_KEY = "selectedTasks";
+
     private static final String ALL_TASKS_KEY = "allTasks";
     private static final String TASK_ID_KEY = "taskId";
 
@@ -79,8 +82,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        boolean allTasks = getArguments().getBoolean(ALL_TASKS_KEY, false);
-        int taskId = getArguments().getInt(TASK_ID_KEY, -1);
+        Bundle args = getArguments();
+        Assert.assertTrue(args != null);
+
+        boolean allTasks = args.getBoolean(ALL_TASKS_KEY, false);
+        int taskId = args.getInt(TASK_ID_KEY, -1);
         if (taskId != -1) {
             Assert.assertTrue(!allTasks);
             mTaskId = taskId;
@@ -101,14 +107,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-
-        if (mActionMode != null)
-            mActionMode.finish();
-    }
-
-    @Override
     public Loader<TaskListLoader.Data> onCreateLoader(int id, Bundle args) {
         return new TaskListLoader(getActivity(), mTaskId);
     }
@@ -124,7 +122,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
-        mTaskAdapter = new TaskAdapter(data);
+        mTaskAdapter = new TaskAdapter(this, data);
         mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
     }
 
@@ -132,9 +130,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //asdf
+    }
+
     public int getDataId() {
         Assert.assertTrue(mData != null);
         return mData.DataId;
+    }
+
+    private TaskEditCallback newTaskEditCallback() {
+        return new TaskEditCallback();
     }
 
     public class TaskEditCallback implements ActionMode.Callback {
@@ -194,14 +203,18 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         void onDestroyTaskActionMode();
     }
 
-    public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
+    public static class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
+        private final WeakReference<TaskListFragment> mTaskListFragmentReference;
+
         private final ArrayList<TaskWrapper> mTaskWrappers;
 
         private final TaskListLoader.Data mData;
 
-        public TaskAdapter(TaskListLoader.Data data) {
+        public TaskAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data) {
+            Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
+            mTaskListFragmentReference = new WeakReference<>(taskListFragment);
             mData = data;
 
             mTaskWrappers = new ArrayList<>();
@@ -216,7 +229,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         public TaskHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            TaskListFragment taskListFragment = mTaskListFragmentReference.get();
+            Assert.assertTrue(taskListFragment != null);
+
+            LayoutInflater inflater = LayoutInflater.from(taskListFragment.getActivity());
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
             TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
@@ -228,10 +244,13 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         public void onBindViewHolder(final TaskHolder taskHolder, int position) {
+            TaskListFragment taskListFragment = mTaskListFragmentReference.get();
+            Assert.assertTrue(taskListFragment != null);
+
             TaskWrapper taskWrapper = mTaskWrappers.get(position);
 
             if (taskWrapper.mSelected)
-                taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
+                taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(taskListFragment.getActivity(), R.color.selected));
             else
                 taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
 
@@ -254,7 +273,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 taskHolder.mTaskRowDetails.setText(scheduleText);
 
             taskHolder.mShowTaskRow.setOnClickListener(v -> {
-                if (mActionMode != null)
+                if (taskListFragment.mActionMode != null)
                     taskHolder.onLongClick();
                 else
                     taskHolder.onRowClick();
@@ -279,6 +298,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         public void removeSelected() {
+            TaskListFragment taskListFragment = mTaskListFragmentReference.get();
+            Assert.assertTrue(taskListFragment != null);
+
             ArrayList<TaskWrapper> selectedTaskWrappers = new ArrayList<>();
             for (TaskWrapper taskWrapper : mTaskWrappers)
                 if (taskWrapper.mSelected)
@@ -293,10 +315,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 notifyItemRemoved(position);
             }
 
-            DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
+            DomainFactory.getDomainFactory(taskListFragment.getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
         }
 
-        private class TaskWrapper {
+        private static class TaskWrapper {
             public final TaskListLoader.TaskData mTaskData;
             public boolean mSelected;
 
@@ -326,13 +348,19 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             public void onRowClick() {
+                TaskListFragment taskListFragment = mTaskListFragmentReference.get();
+                Assert.assertTrue(taskListFragment != null);
+
                 TaskWrapper taskWrapper = mTaskWrappers.get(getAdapterPosition());
                 Assert.assertTrue(taskWrapper != null);
 
-                getActivity().startActivity(ShowTaskActivity.getIntent(taskWrapper.mTaskData.TaskId, getActivity()));
+                taskListFragment.getActivity().startActivity(ShowTaskActivity.getIntent(taskWrapper.mTaskData.TaskId, taskListFragment.getActivity()));
             }
 
             public void onLongClick() {
+                TaskListFragment taskListFragment = mTaskListFragmentReference.get();
+                Assert.assertTrue(taskListFragment != null);
+
                 int position = getAdapterPosition();
 
                 TaskWrapper taskWrapper = mTaskWrappers.get(position);
@@ -343,13 +371,13 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                 ArrayList<Integer> taskIds = getSelected();
                 if (taskIds.isEmpty()) {
-                    if (mActionMode != null)
-                        mActionMode.finish();
+                    if (taskListFragment.mActionMode != null)
+                        taskListFragment.mActionMode.finish();
                 } else {
-                    if (mActionMode == null)
-                        ((AppCompatActivity) getActivity()).startSupportActionMode(new TaskEditCallback());
+                    if (taskListFragment.mActionMode == null)
+                        ((AppCompatActivity) taskListFragment.getActivity()).startSupportActionMode(taskListFragment.newTaskEditCallback());
                     else
-                        mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
+                        taskListFragment.mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
                 }
             }
         }

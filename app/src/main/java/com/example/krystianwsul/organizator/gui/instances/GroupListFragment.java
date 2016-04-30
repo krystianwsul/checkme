@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -72,7 +73,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     private ExpansionState mExpansionState;
     private ArrayList<InstanceKey> mSelectedNodes;
 
+    private boolean mFirst = true;
+
     private SelectionCallback mSelectionCallback = new SelectionCallback() {
+        private Integer mOldVisibility = null;
+
         @Override
         protected void unselect() {
             mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.unselect();
@@ -121,7 +126,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
 
+            Assert.assertTrue(mOldVisibility == null);
+            mOldVisibility = mFloatingActionButton.getVisibility();
             mFloatingActionButton.setVisibility(View.GONE);
+            Log.e("asdf", "hiding fab");
 
             ((GroupListListener) getActivity()).onCreateGroupActionMode(mActionMode);
 
@@ -152,7 +160,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
 
-            mFloatingActionButton.setVisibility(View.VISIBLE);
+            mFloatingActionButton.setVisibility(mOldVisibility);
+            mOldVisibility = null;
 
             ((GroupListListener) getActivity()).onDestroyGroupActionMode();
         }
@@ -334,7 +343,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(data.TaskEditable == null);
 
             showFab = true;
-            mFloatingActionButton.setVisibility(View.VISIBLE);
             mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, mDay)));
         } else if (mTimeStamp != null) {
             Assert.assertTrue(mInstanceKey == null);
@@ -344,11 +352,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             if (mTimeStamp.compareTo(TimeStamp.getNow()) > 0) {
                 showFab = true;
-                mFloatingActionButton.setVisibility(View.VISIBLE);
                 mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, mTimeStamp)));
             } else {
                 showFab = false;
-                mFloatingActionButton.setVisibility(View.GONE);
             }
         } else if (mInstanceKey != null) {
             Assert.assertTrue(mInstanceKeys == null);
@@ -357,17 +363,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             if (data.TaskEditable) {
                 showFab = true;
-                mFloatingActionButton.setVisibility(View.VISIBLE);
                 mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateChildTaskActivity.getCreateIntent(activity, mInstanceKey.TaskId)));
             } else {
                 showFab = false;
-                mFloatingActionButton.setVisibility(View.GONE);
             }
         } else {
             Assert.assertTrue(data.TaskEditable == null);
 
             showFab = false;
-            mFloatingActionButton.setVisibility(View.GONE);
+        }
+
+        if (mFirst) {
+            mFloatingActionButton.setVisibility(showFab ? View.VISIBLE : View.GONE);
+            mFirst = false;
         }
 
         mGroupAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState, useGroups(), showFab, mSelectedNodes);

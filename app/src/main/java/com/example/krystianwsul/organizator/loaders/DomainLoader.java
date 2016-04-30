@@ -3,7 +3,7 @@ package com.example.krystianwsul.organizator.loaders;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.domainmodel.ObserverHolder;
 
 import junit.framework.Assert;
 
@@ -39,7 +39,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
 
         if (mObserver == null) {
             mObserver = new Observer();
-            DomainFactory.getDomainFactory(getContext()).addDomainObserver(mObserver);
+            ObserverHolder.getObserverHolder().addDomainObserver(mObserver);
         }
 
         if (takeContentChanged() || mData == null)

@@ -9,7 +9,6 @@ import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.loaders.CreateChildTaskLoader;
 import com.example.krystianwsul.organizator.loaders.CreateRootTaskLoader;
 import com.example.krystianwsul.organizator.loaders.DailyScheduleLoader;
-import com.example.krystianwsul.organizator.loaders.DomainLoader;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimeLoader;
@@ -45,7 +44,6 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -63,8 +61,6 @@ public class DomainFactory {
     private final HashMap<Integer, Task> mTasks = new HashMap<>();
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
-
-    private final ArrayList<WeakReference<DomainLoader.Observer>> mObservers = new ArrayList<>();
 
     private static ExactTimeStamp sStart;
     private static ExactTimeStamp sRead;
@@ -158,18 +154,13 @@ public class DomainFactory {
         return (sStop.getLong() - sRead.getLong());
     }
 
-    public synchronized void addDomainObserver(DomainLoader.Observer observer) {
-        Assert.assertTrue(observer != null);
-        mObservers.add(new WeakReference<>(observer));
-    }
-
     public synchronized void reset() {
         sDomainFactory = null;
         mPersistenceManager.reset();
 
-        notifyDomainObservers(new ArrayList<>());
+        ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
 
-        mObservers.clear();
+        ObserverHolder.getObserverHolder().clear();
     }
 
     public int getTaskCount() {
@@ -190,26 +181,7 @@ public class DomainFactory {
         Assert.assertTrue(dataIds != null);
 
         mPersistenceManager.save();
-        notifyDomainObservers(dataIds);
-    }
-
-    private void notifyDomainObservers(ArrayList<Integer> dataIds) {
-        Assert.assertTrue(dataIds != null);
-
-        ArrayList<WeakReference<DomainLoader.Observer>> remove = new ArrayList<>();
-
-        for (WeakReference<DomainLoader.Observer> reference : mObservers) {
-            Assert.assertTrue(reference != null);
-
-            DomainLoader.Observer observer = reference.get();
-            if (observer == null)
-                remove.add(reference);
-            else
-                observer.onDomainChanged(dataIds);
-        }
-
-        for (WeakReference<DomainLoader.Observer> reference : remove)
-            mObservers.remove(reference);
+        ObserverHolder.getObserverHolder().notifyDomainObservers(dataIds);
     }
 
     // gets

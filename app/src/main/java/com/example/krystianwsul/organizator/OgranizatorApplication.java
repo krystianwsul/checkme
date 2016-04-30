@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizator;
 import android.app.Application;
 import android.content.Context;
 
-import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
@@ -15,6 +14,6 @@ public class OgranizatorApplication extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
-        ACRA.init(this);
+        //ACRA.init(this);
     }
 }

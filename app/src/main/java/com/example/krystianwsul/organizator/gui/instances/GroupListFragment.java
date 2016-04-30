@@ -209,10 +209,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mExpansionState = mGroupAdapter.getExpansionState();
 
             ArrayList<InstanceKey> selected = mGroupAdapter.getSelected();
-            if (selected.isEmpty())
+            if (selected.isEmpty()) {
+                Assert.assertTrue(mActionMode == null);
                 mSelectedNodes = null;
-            else
+            } else {
+                Assert.assertTrue(mActionMode != null);
                 mSelectedNodes = selected;
+            }
         }
 
         boolean showFab;
@@ -266,6 +269,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         if (mSelectedNodes != null && mActionMode == null) {
             ((AppCompatActivity) getActivity()).startSupportActionMode(newGroupEditCallback());
+            mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(mSelectedNodes.size() > 1);
         }
     }
 
@@ -1759,9 +1763,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             actionMode.getMenuInflater().inflate(R.menu.menu_edit_groups, menu);
 
-            ((GroupListListener) getActivity()).onCreateGroupActionMode(actionMode);
-
             mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
+
+            mFloatingActionButton.setVisibility(View.GONE);
+
+            ((GroupListListener) getActivity()).onCreateGroupActionMode(actionMode);
 
             return true;
         }
@@ -1810,6 +1816,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 mGroupAdapter.notifyItemRangeInserted(mGroupAdapter.mNodeCollection.getPosition(mGroupAdapter.mNodeCollection.mDividerNode), mGroupAdapter.mNodeCollection.mDividerNode.displayedSize());
 
             mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.updateCheckBoxes();
+
+            mFloatingActionButton.setVisibility(View.GONE);
 
             ((GroupListListener) getActivity()).onDestroyGroupActionMode();
         }

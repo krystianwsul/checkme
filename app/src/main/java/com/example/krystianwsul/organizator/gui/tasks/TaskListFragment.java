@@ -47,6 +47,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private ActionMode mActionMode;
 
+    private ArrayList<Integer> mSelectedTasks;
+
     public static TaskListFragment getInstance() {
         TaskListFragment taskListFragment = new TaskListFragment();
 
@@ -95,13 +97,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mTaskId = null;
         }
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_TASKS_KEY)) {
+            mSelectedTasks = savedInstanceState.getIntegerArrayList(SELECTED_TASKS_KEY);
+            Assert.assertTrue(mSelectedTasks != null);
+            Assert.assertTrue(!mSelectedTasks.isEmpty());
+        }
+
         View view = getView();
         Assert.assertTrue(view != null);
 
         mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.task_list_recycler);
         mTaskListFragmentRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mTaskListFragmentFab = (FloatingActionButton) getView().findViewById(R.id.task_list_fab);
+        mTaskListFragmentFab = (FloatingActionButton) view.findViewById(R.id.task_list_fab);
+        Assert.assertTrue(mTaskListFragmentFab != null);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -115,6 +124,18 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
         mData = data;
 
+        if (mTaskAdapter != null) {
+            ArrayList<Integer> selected = mTaskAdapter.getSelected();
+
+            if (selected.isEmpty()) {
+                Assert.assertTrue(mActionMode == null);
+                mSelectedTasks = null;
+            } else {
+                Assert.assertTrue(mActionMode != null);
+                mSelectedTasks = selected;
+            }
+        }
+
         mTaskListFragmentFab.setOnClickListener(v -> {
             if (mTaskId == null)
                 startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
@@ -122,8 +143,13 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
-        mTaskAdapter = new TaskAdapter(this, data);
+        mTaskAdapter = new TaskAdapter(this, data, mSelectedTasks);
         mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
+
+        if (mSelectedTasks != null && mActionMode == null) {
+            ((AppCompatActivity) getActivity()).startSupportActionMode(newTaskEditCallback());
+            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(mSelectedTasks.size() > 1);
+        }
     }
 
     @Override
@@ -134,7 +160,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        //asdf
+        ArrayList<Integer> selected = mTaskAdapter.getSelected();
+        if (!selected.isEmpty()) {
+            Assert.assertTrue(mActionMode != null);
+            outState.putIntegerArrayList(SELECTED_TASKS_KEY, mTaskAdapter.getSelected());
+        }
     }
 
     public int getDataId() {
@@ -152,6 +182,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mActionMode = actionMode;
 
             actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
+
+            mTaskListFragmentFab.setVisibility(View.GONE);
 
             ((TaskListListener) getActivity()).onCreateTaskActionMode(actionMode);
 
@@ -194,6 +226,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             mTaskAdapter.uncheck();
 
+            mTaskListFragmentFab.setVisibility(View.VISIBLE);
+
             ((TaskListListener) getActivity()).onDestroyTaskActionMode();
         }
     }
@@ -210,7 +244,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         private final TaskListLoader.Data mData;
 
-        public TaskAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data) {
+        public TaskAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, ArrayList<Integer> selectedTasks) {
             Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
@@ -219,7 +253,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             mTaskWrappers = new ArrayList<>();
             for (TaskListLoader.TaskData taskData : data.TaskDatas)
-                mTaskWrappers.add(new TaskWrapper(taskData));
+                mTaskWrappers.add(new TaskWrapper(taskData, selectedTasks));
         }
 
         @Override
@@ -322,9 +356,14 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             public final TaskListLoader.TaskData mTaskData;
             public boolean mSelected;
 
-            public TaskWrapper(TaskListLoader.TaskData taskData) {
+            public TaskWrapper(TaskListLoader.TaskData taskData, ArrayList<Integer> selectedTasks) {
                 Assert.assertTrue(taskData != null);
                 mTaskData = taskData;
+
+                if (selectedTasks != null) {
+                    Assert.assertTrue(!selectedTasks.isEmpty());
+                    mSelected = selectedTasks.contains(mTaskData.TaskId);
+                }
             }
         }
 

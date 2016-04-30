@@ -14,7 +14,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +22,7 @@ import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.SelectionCallback;
 import com.example.krystianwsul.organizator.loaders.TaskListLoader;
 
 import junit.framework.Assert;
@@ -45,7 +45,71 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private TaskAdapter mTaskAdapter;
 
-    private ActionMode mActionMode;
+    private SelectionCallback mSelectionCallback = new SelectionCallback() {
+        @Override
+        protected void unselect() {
+            mTaskAdapter.uncheck();
+        }
+
+        @Override
+        protected void onMenuClick(MenuItem menuItem) {
+            ArrayList<Integer> taskIds = mTaskAdapter.getSelected();
+            Assert.assertTrue(taskIds != null);
+            Assert.assertTrue(!taskIds.isEmpty());
+
+            switch (menuItem.getItemId()) {
+                case R.id.action_task_join:
+                    if (mTaskId == null)
+                        startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
+                    else
+                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mTaskId, taskIds));
+                    break;
+                case R.id.action_task_delete:
+                    mTaskAdapter.removeSelected();
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        protected void onFirstAdded() {
+            ((AppCompatActivity) getActivity()).startSupportActionMode(this);
+
+            mActionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, mActionMode.getMenu());
+
+            mTaskListFragmentFab.setVisibility(View.GONE);
+
+            ((TaskListListener) getActivity()).onCreateTaskActionMode(mActionMode);
+        }
+
+        @Override
+        protected void onSecondAdded() {
+            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(true);
+        }
+
+        @Override
+        protected void onOtherAdded() {
+
+        }
+
+        @Override
+        protected void onLastRemoved() {
+            mTaskListFragmentFab.setVisibility(View.VISIBLE);
+
+            ((TaskListListener) getActivity()).onDestroyTaskActionMode();
+        }
+
+        @Override
+        protected void onSecondToLastRemoved() {
+            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(false);
+        }
+
+        @Override
+        protected void onOtherRemoved() {
+
+        }
+    };
 
     private ArrayList<Integer> mSelectedTasks;
 
@@ -128,10 +192,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             ArrayList<Integer> selected = mTaskAdapter.getSelected();
 
             if (selected.isEmpty()) {
-                Assert.assertTrue(mActionMode == null);
+                Assert.assertTrue(!mSelectionCallback.hasActionMode());
                 mSelectedTasks = null;
             } else {
-                Assert.assertTrue(mActionMode != null);
+                Assert.assertTrue(mSelectionCallback.hasActionMode());
                 mSelectedTasks = selected;
             }
         }
@@ -146,10 +210,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         mTaskAdapter = new TaskAdapter(this, data, mSelectedTasks);
         mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
 
-        if (mSelectedTasks != null && mActionMode == null) {
-            ((AppCompatActivity) getActivity()).startSupportActionMode(newTaskEditCallback());
-            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(mSelectedTasks.size() > 1);
-        }
+        mSelectionCallback.setSelected(mTaskAdapter.getSelected().size());
     }
 
     @Override
@@ -162,7 +223,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         ArrayList<Integer> selected = mTaskAdapter.getSelected();
         if (!selected.isEmpty()) {
-            Assert.assertTrue(mActionMode != null);
+            Assert.assertTrue(mSelectionCallback.hasActionMode());
             outState.putIntegerArrayList(SELECTED_TASKS_KEY, mTaskAdapter.getSelected());
         }
     }
@@ -170,66 +231,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public int getDataId() {
         Assert.assertTrue(mData != null);
         return mData.DataId;
-    }
-
-    private TaskEditCallback newTaskEditCallback() {
-        return new TaskEditCallback();
-    }
-
-    public class TaskEditCallback implements ActionMode.Callback {
-        @Override
-        public boolean onCreateActionMode(final ActionMode actionMode, Menu menu) {
-            mActionMode = actionMode;
-
-            actionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, menu);
-
-            mTaskListFragmentFab.setVisibility(View.GONE);
-
-            ((TaskListListener) getActivity()).onCreateTaskActionMode(actionMode);
-
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            ArrayList<Integer> taskIds = mTaskAdapter.getSelected();
-            Assert.assertTrue(taskIds != null);
-            Assert.assertTrue(!taskIds.isEmpty());
-
-            switch (menuItem.getItemId()) {
-                case R.id.action_task_join:
-                    if (mTaskId == null)
-                        startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
-                    else
-                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mTaskId, taskIds));
-                    break;
-                case R.id.action_task_delete:
-                    mTaskAdapter.removeSelected();
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
-            }
-
-            actionMode.finish();
-            return true;
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode actionMode) {
-            Assert.assertTrue(mActionMode != null);
-            mActionMode = null;
-
-            mTaskAdapter.uncheck();
-
-            mTaskListFragmentFab.setVisibility(View.VISIBLE);
-
-            ((TaskListListener) getActivity()).onDestroyTaskActionMode();
-        }
     }
 
     public interface TaskListListener {
@@ -307,7 +308,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 taskHolder.mTaskRowDetails.setText(scheduleText);
 
             taskHolder.mShowTaskRow.setOnClickListener(v -> {
-                if (taskListFragment.mActionMode != null)
+                if (taskListFragment.mSelectionCallback.hasActionMode())
                     taskHolder.onLongClick();
                 else
                     taskHolder.onRowClick();
@@ -406,18 +407,14 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 Assert.assertTrue(taskWrapper != null);
 
                 taskWrapper.mSelected = !taskWrapper.mSelected;
-                notifyItemChanged(position);
 
-                ArrayList<Integer> taskIds = getSelected();
-                if (taskIds.isEmpty()) {
-                    if (taskListFragment.mActionMode != null)
-                        taskListFragment.mActionMode.finish();
+                if (taskWrapper.mSelected) {
+                    taskListFragment.mSelectionCallback.incrementSelected();
                 } else {
-                    if (taskListFragment.mActionMode == null)
-                        ((AppCompatActivity) taskListFragment.getActivity()).startSupportActionMode(taskListFragment.newTaskEditCallback());
-                    else
-                        taskListFragment.mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(taskIds.size() > 1);
+                    taskListFragment.mSelectionCallback.decrementSelected();
                 }
+
+                notifyItemChanged(position);
             }
         }
     }

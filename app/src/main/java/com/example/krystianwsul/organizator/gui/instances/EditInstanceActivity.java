@@ -1,7 +1,9 @@
 package com.example.krystianwsul.organizator.gui.instances;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -14,14 +16,12 @@ import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
-import com.example.krystianwsul.organizator.gui.tasks.MessageDialogFragment;
 import com.example.krystianwsul.organizator.gui.tasks.TimePickerView;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.TimePair;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -44,6 +44,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private Bundle mSavedInstanceState;
     private TextView mEditInstanceName;
     private Button mEditInstanceSave;
+
+    private BroadcastReceiver mBroadcastReceiver;
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
@@ -87,6 +89,28 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         Assert.assertTrue(mEditInstanceSave != null);
 
         getSupportLoaderManager().initLoader(0, null, this);
+
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                setValidTime();
+            }
+        };
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        setValidTime();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     private void updateDateText() {
@@ -94,6 +118,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         Assert.assertTrue(mEditInstanceDate != null);
 
         mEditInstanceDate.setText(mDate.getDisplayText(this));
+        setValidTime();
     }
 
     @Override
@@ -140,6 +165,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
             Assert.assertTrue(mEditInstanceTimePickerView != null);
             mEditInstanceTimePickerView.setHourMinute(new HourMinute(hourOfDay, minute));
+            setValidTime();
         };
         mEditInstanceTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
@@ -168,24 +194,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             Assert.assertTrue(mEditInstanceTimePickerView != null);
             Assert.assertTrue(mData != null);
 
-            HourMinute hourMinute = mEditInstanceTimePickerView.getHourMinute();
-            Integer customTimeId = mEditInstanceTimePickerView.getCustomTimeId();
-            Assert.assertTrue((hourMinute == null) != (customTimeId == null));
-            if (hourMinute == null) {
-                EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(customTimeId);
-                Assert.assertTrue(customTimeData != null);
-
-                hourMinute = customTimeData.HourMinutes.get(mDate.getDayOfWeek());
-                Assert.assertTrue(hourMinute != null);
-            }
-
-            if ((new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) <= 0)) {
-                MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
-                messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
-                return;
-            }
-
-            DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, new TimePair(mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute()));
+            DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mEditInstanceTimePickerView.getTimePair());
 
             TickService.startService(EditInstanceActivity.this);
 
@@ -195,5 +204,23 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public void onLoaderReset(Loader<EditInstanceLoader.Data> loader) {
+    }
+
+    private void setValidTime() {
+        boolean valid;
+
+        if (mData != null) {
+            HourMinute hourMinute = mEditInstanceTimePickerView.getHourMinute();
+            Integer customTimeId = mEditInstanceTimePickerView.getCustomTimeId();
+            Assert.assertTrue((hourMinute == null) != (customTimeId == null));
+
+            if (hourMinute == null)
+                hourMinute = mData.CustomTimeDatas.get(customTimeId).HourMinutes.get(mDate.getDayOfWeek());
+
+            valid = (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+        } else {
+            valid = false;
+        }
+        mEditInstanceSave.setEnabled(valid);
     }
 }

@@ -1068,6 +1068,20 @@ public class DomainFactory {
         save(dataId);
     }
 
+    public synchronized void setCustomTimeCurrent(int dataId, List<Integer> customTimeIds) {
+        Assert.assertTrue(customTimeIds != null);
+        Assert.assertTrue(!customTimeIds.isEmpty());
+
+        for (int customTimeId : customTimeIds) {
+            CustomTime customTime = mCustomTimes.get(customTimeId);
+            Assert.assertTrue(customTime != null);
+
+            customTime.setCurrent();
+        }
+
+        save(dataId);
+    }
+
     // internal
 
     ArrayList<Instance> getExistingInstances(Task task) {

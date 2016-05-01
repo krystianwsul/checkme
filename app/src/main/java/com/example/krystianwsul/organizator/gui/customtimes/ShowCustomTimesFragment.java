@@ -1,29 +1,106 @@
 package com.example.krystianwsul.organizator.gui.customtimes;
 
 
-import android.app.Activity;
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.SelectionCallback;
 import com.example.krystianwsul.organizator.loaders.ShowCustomTimesLoader;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ShowCustomTimesFragment extends Fragment implements LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data> {
+    private static final String SELECTED_CUSTOM_TIME_IDS_KEY = "selectedCustomTimeIds";
+
+    private FloatingActionButton mShowTimesFab;
     private RecyclerView mShowTimesList;
+    private CustomTimesAdapter mCustomTimesAdapter;
+
+    private ArrayList<Integer> mSelectedCustomTimeIds;
+
+    private SelectionCallback mSelectionCallback = new SelectionCallback() {
+        @Override
+        protected void unselect() {
+            mCustomTimesAdapter.unselect();
+        }
+
+        @Override
+        protected void onMenuClick(MenuItem menuItem) {
+            ArrayList<Integer> customTimeIds = mCustomTimesAdapter.getSelected();
+            Assert.assertTrue(customTimeIds != null);
+            Assert.assertTrue(!customTimeIds.isEmpty());
+
+            switch (menuItem.getItemId()) {
+                case R.id.action_custom_times_delete:
+                    mCustomTimesAdapter.removeSelected();
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        protected void onFirstAdded() {
+            ((AppCompatActivity) getActivity()).startSupportActionMode(this);
+
+            mActionMode.getMenuInflater().inflate(R.menu.menu_custom_times, mActionMode.getMenu());
+
+            mShowTimesFab.setVisibility(View.GONE);
+
+            ((CustomTimesListListener) getActivity()).onCreateCustomTimesActionMode(mActionMode);
+        }
+
+        @Override
+        protected void onSecondAdded() {
+
+        }
+
+        @Override
+        protected void onOtherAdded() {
+
+        }
+
+        @Override
+        protected void onLastRemoved() {
+            mShowTimesFab.setVisibility(View.VISIBLE);
+
+            ((CustomTimesListListener) getActivity()).onDestroyCustomTimesActionMode();
+        }
+
+        @Override
+        protected void onSecondToLastRemoved() {
+
+        }
+
+        @Override
+        protected void onOtherRemoved() {
+
+        }
+    };
 
     public static ShowCustomTimesFragment newInstance() {
         return new ShowCustomTimesFragment();
@@ -31,6 +108,13 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
     public ShowCustomTimesFragment() {
 
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Assert.assertTrue(context instanceof CustomTimesListListener);
     }
 
     @Override
@@ -48,10 +132,18 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
         mShowTimesList = (RecyclerView) view.findViewById(R.id.show_times_list);
         mShowTimesList.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        FloatingActionButton showTimesFab = (FloatingActionButton) view.findViewById(R.id.show_times_fab);
-        Assert.assertTrue(showTimesFab != null);
+        mShowTimesFab = (FloatingActionButton) view.findViewById(R.id.show_times_fab);
+        Assert.assertTrue(mShowTimesFab != null);
 
-        showTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
+        mShowTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY)) {
+                mSelectedCustomTimeIds = savedInstanceState.getIntegerArrayList(SELECTED_CUSTOM_TIME_IDS_KEY);
+                Assert.assertTrue(mSelectedCustomTimeIds != null);
+                Assert.assertTrue(!mSelectedCustomTimeIds.isEmpty());
+            }
+        }
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -63,83 +155,213 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<ShowCustomTimesLoader.Data> loader, ShowCustomTimesLoader.Data data) {
-        mShowTimesList.setAdapter(new CustomTimesAdapter(data, getActivity()));
+        if (mCustomTimesAdapter != null) {
+            ArrayList<Integer> selectedCustomTimeIds = mCustomTimesAdapter.getSelected();
+            if (selectedCustomTimeIds.isEmpty())
+                mSelectedCustomTimeIds = null;
+            else
+                mSelectedCustomTimeIds = selectedCustomTimeIds;
+        }
+
+        mCustomTimesAdapter = new CustomTimesAdapter(data, this, mSelectedCustomTimeIds);
+        mShowTimesList.setAdapter(mCustomTimesAdapter);
+
+        mSelectionCallback.setSelected(mCustomTimesAdapter.getSelected().size());
     }
 
     @Override
     public void onLoaderReset(Loader<ShowCustomTimesLoader.Data> loader) {
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (mCustomTimesAdapter != null) {
+            ArrayList<Integer> selectedCustomTimeIds = mCustomTimesAdapter.getSelected();
+            if (!selectedCustomTimeIds.isEmpty())
+                outState.putIntegerArrayList(SELECTED_CUSTOM_TIME_IDS_KEY, selectedCustomTimeIds);
+        }
+    }
+
     public static class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
-        private final ShowCustomTimesLoader.Data mData;
-        private final Activity mActivity;
+        private final int mDataId;
+        private List<CustomTimeWrapper> mCustomTimeWrappers;
 
-        public CustomTimesAdapter(ShowCustomTimesLoader.Data data, Activity activity) {
+        private final WeakReference<ShowCustomTimesFragment> mShowCustomTimesFragmentReference;
+
+        public CustomTimesAdapter(ShowCustomTimesLoader.Data data, ShowCustomTimesFragment showCustomTimesFragment, ArrayList<Integer> selectedCustomTimeIds) {
             Assert.assertTrue(data != null);
-            Assert.assertTrue(activity != null);
+            Assert.assertTrue(showCustomTimesFragment != null);
 
-            mData = data;
-            mActivity = activity;
+            mDataId = data.DataId;
+            mCustomTimeWrappers = Stream.of(data.Entries)
+                    .map(customTimeData -> new CustomTimeWrapper(customTimeData, selectedCustomTimeIds))
+                    .collect(Collectors.toList());
+
+            mShowCustomTimesFragmentReference = new WeakReference<>(showCustomTimesFragment);
         }
 
         @Override
         public int getItemCount() {
-            return mData.Entries.size();
+            return mCustomTimeWrappers.size();
+        }
+
+        public void unselect() {
+            for (CustomTimeWrapper customTimeWrapper : mCustomTimeWrappers) {
+                if (customTimeWrapper.mSelected) {
+                    customTimeWrapper.mSelected = false;
+                    notifyItemChanged(mCustomTimeWrappers.indexOf(customTimeWrapper));
+                }
+            }
         }
 
         @Override
         public CustomTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(mActivity);
+            ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
+            Assert.assertTrue(showCustomTimesFragment != null);
+
+            LayoutInflater layoutInflater = LayoutInflater.from(showCustomTimesFragment.getActivity());
             View showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false);
 
             TextView timesRowName = (TextView) showCustomTimesRow.findViewById(R.id.times_row_name);
-            ImageView timesRowDelete = (ImageView) showCustomTimesRow.findViewById(R.id.times_row_delete);
 
-            return new CustomTimeHolder(showCustomTimesRow, timesRowName, timesRowDelete);
+            return new CustomTimeHolder(showCustomTimesRow, timesRowName);
         }
 
         @Override
         public void onBindViewHolder(final CustomTimeHolder customTimeHolder, int position) {
-            ShowCustomTimesLoader.CustomTimeData customTimeData = mData.Entries.get(position);
-            Assert.assertTrue(customTimeData != null);
+            ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
+            Assert.assertTrue(showCustomTimesFragment != null);
 
-            customTimeHolder.mTimesRowName.setText(customTimeData.Name);
+            CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
+            Assert.assertTrue(customTimeWrapper != null);
 
-            customTimeHolder.mShowCustomTimeRow.setOnClickListener(v -> customTimeHolder.onRowClick());
+            customTimeHolder.mTimesRowName.setText(customTimeWrapper.mCustomTimeData.Name);
 
-            customTimeHolder.mTimesRowDelete.setOnClickListener(v -> customTimeHolder.onDeleteClick());
+            if (customTimeWrapper.mSelected)
+                customTimeHolder.mShowCustomTimeRow.setBackgroundColor(ContextCompat.getColor(showCustomTimesFragment.getActivity(), R.color.selected));
+            else
+                customTimeHolder.mShowCustomTimeRow.setBackgroundColor(Color.TRANSPARENT);
+
+            customTimeHolder.mShowCustomTimeRow.setOnLongClickListener(v -> {
+                customTimeHolder.onLongClick();
+                return true;
+            });
+
+            customTimeHolder.mShowCustomTimeRow.setOnClickListener(v -> {
+                if (showCustomTimesFragment.mSelectionCallback.hasActionMode())
+                    customTimeHolder.onLongClick();
+                else
+                    customTimeHolder.onRowClick();
+            });
+        }
+
+        public ArrayList<Integer> getSelected() {
+            return new ArrayList<>(Stream.of(mCustomTimeWrappers)
+                .filter(customTimeWrapper -> customTimeWrapper.mSelected)
+                .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
+                .collect(Collectors.toList()));
+        }
+
+        public void removeSelected() {
+            ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
+            Assert.assertTrue(showCustomTimesFragment != null);
+
+            List<CustomTimeWrapper> selectedCustomTimeWrappers = Stream.of(mCustomTimeWrappers)
+                    .filter(customTimeWrapper -> customTimeWrapper.mSelected)
+                    .collect(Collectors.toList());
+
+            for (CustomTimeWrapper customTimeWrapper : selectedCustomTimeWrappers) {
+                int position = mCustomTimeWrappers.indexOf(customTimeWrapper);
+                mCustomTimeWrappers.remove(position);
+                notifyItemRemoved(position);
+            }
+
+            List<Integer> selectedCustomTimeIds = Stream.of(selectedCustomTimeWrappers)
+                    .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
+                    .collect(Collectors.toList());
+
+            DomainFactory.getDomainFactory(showCustomTimesFragment.getActivity()).setCustomTimeCurrent(mDataId, selectedCustomTimeIds);
         }
 
         public class CustomTimeHolder extends RecyclerView.ViewHolder {
             public final View mShowCustomTimeRow;
             public final TextView mTimesRowName;
-            public final ImageView mTimesRowDelete;
 
-            public CustomTimeHolder(View showCustomTimesRow, TextView timesRowName, ImageView timesRowDelete) {
+            public CustomTimeHolder(View showCustomTimesRow, TextView timesRowName) {
                 super(showCustomTimesRow);
 
                 Assert.assertTrue(timesRowName != null);
-                Assert.assertTrue(timesRowDelete != null);
 
                 mShowCustomTimeRow = showCustomTimesRow;
                 mTimesRowName = timesRowName;
-                mTimesRowDelete = timesRowDelete;
             }
 
             public void onRowClick() {
-                ShowCustomTimesLoader.CustomTimeData customTimeData = mData.Entries.get(getAdapterPosition());
-                mActivity.startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.Id, mActivity));
+                ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
+                Assert.assertTrue(showCustomTimesFragment != null);
+
+                CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(getAdapterPosition());
+                Assert.assertTrue(customTimeWrapper != null);
+
+                showCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.mCustomTimeData.Id, showCustomTimesFragment.getActivity()));
+            }
+
+            public void onLongClick() {
+                ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
+                Assert.assertTrue(showCustomTimesFragment != null);
+
+                int position = getAdapterPosition();
+
+                CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
+                Assert.assertTrue(customTimeWrapper != null);
+
+                customTimeWrapper.mSelected = !customTimeWrapper.mSelected;
+
+                if (customTimeWrapper.mSelected) {
+                    showCustomTimesFragment.mSelectionCallback.incrementSelected();
+                } else {
+                    showCustomTimesFragment.mSelectionCallback.decrementSelected();
+                }
+
+                notifyItemChanged(position);
             }
 
             public void onDeleteClick() {
+                ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
+                Assert.assertTrue(showCustomTimesFragment != null);
+
                 int position = getAdapterPosition();
-                ShowCustomTimesLoader.CustomTimeData customTimeData = mData.Entries.get(position);
+                CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(getAdapterPosition());
 
-                DomainFactory.getDomainFactory(mActivity).setCustomTimeCurrent(mData.DataId, customTimeData.Id);
+                DomainFactory.getDomainFactory(showCustomTimesFragment.getActivity()).setCustomTimeCurrent(mDataId, customTimeWrapper.mCustomTimeData.Id);
 
-                mData.Entries.remove(customTimeData);
+                mCustomTimeWrappers.remove(customTimeWrapper);
                 notifyItemRemoved(position);
             }
         }
+    }
+
+    private static class CustomTimeWrapper {
+        public final ShowCustomTimesLoader.CustomTimeData mCustomTimeData;
+        public boolean mSelected = false;
+
+        public CustomTimeWrapper(ShowCustomTimesLoader.CustomTimeData customTimeData, ArrayList<Integer> selectedCustomTimeIds) {
+            Assert.assertTrue(customTimeData != null);
+
+            mCustomTimeData = customTimeData;
+
+            if (selectedCustomTimeIds != null) {
+                Assert.assertTrue(!selectedCustomTimeIds.isEmpty());
+
+                mSelected = selectedCustomTimeIds.contains(mCustomTimeData.Id);
+            }
+        }
+    }
+
+    public interface CustomTimesListListener {
+        void onCreateCustomTimesActionMode(ActionMode actionMode);
+        void onDestroyCustomTimesActionMode();
     }
 }

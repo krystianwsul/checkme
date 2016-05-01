@@ -8,7 +8,7 @@
     android:descendantFocusability="blocksDescendants"
     android:shrinkColumns="1"
     android:stretchColumns="1"
-    android:paddingTop="4dp">
+    android:paddingTop="5dp">
 
     <TableRow
         android:layout_width="match_parent"

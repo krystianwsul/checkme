@@ -24,7 +24,7 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 
 import junit.framework.Assert;
 
-public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener {
+public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
 
@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     private DrawerLayout.DrawerListener mDrawerGroupListener;
     private ViewPager.OnPageChangeListener mOnPageChangeListener;
+
+    private DrawerLayout.DrawerListener mDrawerCustomTimesListener;
 
     private int mVisibleTab = 0;
     private boolean mIgnoreFirst = false;
@@ -319,5 +321,40 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         mDaysPager.removeOnPageChangeListener(mOnPageChangeListener);
         mOnPageChangeListener = null;
+    }
+
+    @Override
+    public void onCreateCustomTimesActionMode(ActionMode actionMode) {
+        Assert.assertTrue(mDrawerCustomTimesListener == null);
+        mDrawerCustomTimesListener = new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (newState == DrawerLayout.STATE_DRAGGING) {
+                    actionMode.finish();
+                }
+            }
+        };
+        mMainActivityDrawer.addDrawerListener(mDrawerCustomTimesListener);
+    }
+
+    @Override
+    public void onDestroyCustomTimesActionMode() {
+        Assert.assertTrue(mDrawerCustomTimesListener != null);
+
+        mMainActivityDrawer.removeDrawerListener(mDrawerCustomTimesListener);
+        mDrawerCustomTimesListener = null;
     }
 }

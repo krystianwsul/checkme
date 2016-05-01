@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_custom_times_delete"
+        android:title="@string/delete"
+        android:orderInCategory="200"
+        android:icon="@drawable/ic_delete_white_24dp" />
+</menu>

@@ -56,16 +56,16 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
         public final int TaskId;
         public final String Name;
         public final String ScheduleText;
-        public final boolean HasChildTasks;
+        public final String Children;
         public final boolean IsRootTask;
 
-        public TaskData(int taskId, String name, String scheduleText, boolean hasChildTasks, boolean isRootTask) {
+        public TaskData(int taskId, String name, String scheduleText, String children, boolean isRootTask) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             TaskId = taskId;
             Name = name;
             ScheduleText = scheduleText;
-            HasChildTasks = hasChildTasks;
+            Children = children;
             IsRootTask = isRootTask;
         }
 
@@ -76,7 +76,8 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
-            hashCode += (HasChildTasks ? 1 : 0);
+            if (!TextUtils.isEmpty(Children))
+                hashCode += Children.hashCode();
             hashCode += (IsRootTask ? 1 : 0);
             return hashCode;
         }
@@ -107,7 +108,10 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
                 return false;
 
-            if (HasChildTasks != taskData.HasChildTasks)
+            if (TextUtils.isEmpty(Children) != TextUtils.isEmpty(taskData.Children))
+                return false;
+
+            if (!TextUtils.isEmpty(Children) && !Children.equals(taskData.Children))
                 return false;
 
             if (IsRootTask != taskData.IsRootTask)

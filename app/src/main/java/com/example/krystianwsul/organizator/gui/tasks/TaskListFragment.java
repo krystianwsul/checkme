@@ -289,9 +289,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
             TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
+            TextView taskRowChildren = (TextView) showTaskRow.findViewById(R.id.task_row_children);
             ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
 
-            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowImage);
+            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowChildren, taskRowImage);
         }
 
         @Override
@@ -311,18 +312,26 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 return true;
             });
 
-            if (taskWrapper.mTaskData.HasChildTasks)
-                taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
-            else
+            if (TextUtils.isEmpty(taskWrapper.mTaskData.Children))
                 taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
+            else
+                taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
 
             taskHolder.mTaskRowName.setText(taskWrapper.mTaskData.Name);
 
-            String scheduleText = taskWrapper.mTaskData.ScheduleText;
-            if (TextUtils.isEmpty(scheduleText))
+            if (TextUtils.isEmpty(taskWrapper.mTaskData.ScheduleText)) {
                 taskHolder.mTaskRowDetails.setVisibility(View.GONE);
-            else
-                taskHolder.mTaskRowDetails.setText(scheduleText);
+            } else {
+                taskHolder.mTaskRowDetails.setVisibility(View.VISIBLE);
+                taskHolder.mTaskRowDetails.setText(taskWrapper.mTaskData.ScheduleText);
+            }
+
+            if (TextUtils.isEmpty(taskWrapper.mTaskData.Children)) {
+                taskHolder.mTaskRowChildren.setVisibility(View.GONE);
+            } else {
+                taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
+                taskHolder.mTaskRowChildren.setText(taskWrapper.mTaskData.Children);
+            }
 
             taskHolder.mShowTaskRow.setOnClickListener(v -> {
                 if (taskListFragment.mSelectionCallback.hasActionMode())
@@ -389,18 +398,21 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             public final View mShowTaskRow;
             public final TextView mTaskRowName;
             public final TextView mTaskRowDetails;
+            public final TextView mTaskRowChildren;
             public final ImageView mTaskRowImg;
 
-            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, ImageView taskRowImg) {
+            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, TextView taskRowChildren, ImageView taskRowImg) {
                 super(showTaskRow);
 
                 Assert.assertTrue(taskRowName != null);
                 Assert.assertTrue(taskRowDetails != null);
+                Assert.assertTrue(taskRowChildren != null);
                 Assert.assertTrue(taskRowImg != null);
 
                 mShowTaskRow = showTaskRow;
                 mTaskRowName = taskRowName;
                 mTaskRowDetails = taskRowDetails;
+                mTaskRowChildren = taskRowChildren;
                 mTaskRowImg = taskRowImg;
             }
 

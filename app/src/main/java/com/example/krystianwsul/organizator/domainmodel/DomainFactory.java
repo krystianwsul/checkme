@@ -549,8 +549,14 @@ public class DomainFactory {
             Collections.reverse(tasks);
 
         ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
-        for (Task task : tasks)
-            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty(), task.isRootTask(now)));
+        for (Task task : tasks) {
+            String children = Stream.of(task.getChildTasks(now))
+                    .sortBy(Task::getId)
+                    .map(Task::getName)
+                    .collect(Collectors.joining(", "));
+
+            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), children, task.isRootTask(now)));
+        }
 
         return new TaskListLoader.Data(taskDatas);
     }

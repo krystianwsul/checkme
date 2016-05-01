@@ -1,51 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/show_task_row"
-    android:shrinkColumns="0"
-    android:stretchColumns="0"
     android:paddingTop="5dp"
     android:paddingBottom="5dp"
     android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:paddingRight="16dp"
+    android:orientation="horizontal">
 
-    <TableRow
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        tools:ignore="UselessParent">
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/task_row_name"
+            android:singleLine="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:textSize="16sp"
+            android:textColor="@color/textPrimary"/>
 
-            <TextView
-                android:id="@+id/task_row_name"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/task_row_details"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"/>
-
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/task_row_img"
+        <TextView
+            android:id="@+id/task_row_details"
+            android:singleLine="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:src="@drawable/ic_list_black_36dp"
-            android:contentDescription="@string/list"/>
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"/>
 
-    </TableRow>
+        <TextView
+            android:id="@+id/task_row_children"
+            android:singleLine="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"/>
 
-</TableLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/task_row_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_list_black_36dp"
+        android:contentDescription="@string/list"
+        android:layout_gravity="center_vertical"/>
+
+</LinearLayout>

@@ -258,7 +258,7 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -326,7 +326,7 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -356,7 +356,7 @@ public class DomainFactory {
             Task childTask = mTasks.get(childInstance.getTaskId());
             Assert.assertTrue(childTask != null);
 
-            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now)));
+            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getChildInstanceNames(now), childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -390,7 +390,7 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();

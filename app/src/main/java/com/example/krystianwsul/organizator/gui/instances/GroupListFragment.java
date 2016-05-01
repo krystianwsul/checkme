@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,8 +26,8 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -481,15 +482,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         @Override
         public AbstractHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_GROUP) {
-                TableLayout groupRow = (TableLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
+                LinearLayout groupRow = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
                 TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
                 TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
+                TextView groupRowChildren = (TextView) groupRow.findViewById(R.id.group_row_children);
                 ImageView groupRowExpand = (ImageView) groupRow.findViewById(R.id.group_row_expand);
                 CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
                 View groupRowSeparator = groupRow.findViewById(R.id.group_row_separator);
 
-                return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowExpand, groupCheckBox, groupRowSeparator);
+                return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator);
             } else if (viewType == TYPE_DIVIDER) {
                 RelativeLayout rowGroupListDivider = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list_divider, parent, false);
 
@@ -541,18 +543,20 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         public static class GroupHolder extends AbstractHolder {
-            public final TableLayout mGroupRow;
+            public final LinearLayout mGroupRow;
             public final TextView mGroupRowName;
             public final TextView mGroupRowDetails;
+            public final TextView mGroupRowChildren;
             public final ImageView mGroupRowExpand;
             public final CheckBox mGroupRowCheckBox;
             public final View mGroupRowSeparator;
 
-            public GroupHolder(TableLayout groupRow, TextView groupRowName, TextView groupRowDetails, ImageView groupRowExpand, CheckBox groupRowCheckBox, View groupRowSeparator) {
+            public GroupHolder(LinearLayout groupRow, TextView groupRowName, TextView groupRowDetails, TextView groupRowChildren, ImageView groupRowExpand, CheckBox groupRowCheckBox, View groupRowSeparator) {
                 super(groupRow);
 
                 Assert.assertTrue(groupRowName != null);
                 Assert.assertTrue(groupRowDetails != null);
+                Assert.assertTrue(groupRowChildren != null);
                 Assert.assertTrue(groupRowExpand != null);
                 Assert.assertTrue(groupRowCheckBox != null);
                 Assert.assertTrue(groupRowSeparator != null);
@@ -560,6 +564,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 mGroupRow = groupRow;
                 mGroupRowName = groupRowName;
                 mGroupRowDetails = groupRowDetails;
+                mGroupRowChildren = groupRowChildren;
                 mGroupRowExpand = groupRowExpand;
                 mGroupRowCheckBox = groupRowCheckBox;
                 mGroupRowSeparator = groupRowSeparator;
@@ -938,22 +943,35 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowName.setText(notDoneInstanceNode.mInstanceData.Name);
 
-                        groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
-                        groupHolder.mGroupRowDetails.setText(notDoneInstanceNode.mInstanceData.DisplayText);
+                        if (TextUtils.isEmpty(notDoneInstanceNode.mInstanceData.DisplayText)) {
+                            groupHolder.mGroupRowDetails.setVisibility(View.GONE);
+                        } else {
+                            groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
+                            groupHolder.mGroupRowDetails.setText(notDoneInstanceNode.mInstanceData.DisplayText);
+                        }
+
+                        if (TextUtils.isEmpty(notDoneInstanceNode.mInstanceData.Children)) {
+                            groupHolder.mGroupRowChildren.setVisibility(View.GONE);
+                        } else {
+                            groupHolder.mGroupRowChildren.setVisibility(View.VISIBLE);
+                            groupHolder.mGroupRowChildren.setText(notDoneInstanceNode.mInstanceData.Children);
+                        }
 
                         if (!notDoneInstanceNode.mInstanceData.TaskCurrent) {
                             groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
                             groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                            groupHolder.mGroupRowChildren.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
                         } else {
                             groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
                             groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
+                            groupHolder.mGroupRowChildren.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
                         }
 
-                        if (notDoneInstanceNode.mInstanceData.HasChildren) {
+                        if (TextUtils.isEmpty(notDoneInstanceNode.mInstanceData.Children)) {
+                            groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
+                        } else {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                             groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
-                        } else {
-                            groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
                         }
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
 
@@ -1020,6 +1038,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         String detailsText = date.getDisplayText(groupListFragment.getActivity()) + ", " + timeText;
                         groupHolder.mGroupRowDetails.setText(detailsText);
+
+                        groupHolder.mGroupRowChildren.setVisibility(View.GONE);
 
                         groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
                         groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
@@ -1331,19 +1351,28 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowName.setText(mInstanceData.Name);
 
-                        if (!mInstanceData.TaskCurrent) {
-                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
-                        } else {
-                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
-                        }
-
                         groupHolder.mGroupRowDetails.setVisibility(View.GONE);
 
-                        if (mInstanceData.HasChildren) {
+                        if (TextUtils.isEmpty(mInstanceData.Children)) {
+                            groupHolder.mGroupRowChildren.setVisibility(View.GONE);
+                        } else {
+                            groupHolder.mGroupRowChildren.setVisibility(View.VISIBLE);
+                            groupHolder.mGroupRowChildren.setText(mInstanceData.Children);
+                        }
+
+                        if (!mInstanceData.TaskCurrent) {
+                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                            groupHolder.mGroupRowChildren.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                        } else {
+                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
+                            groupHolder.mGroupRowChildren.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
+                        }
+
+                        if (TextUtils.isEmpty(mInstanceData.Children)) {
+                            groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
+                        } else {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                             groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
-                        } else {
-                            groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
                         }
                         groupHolder.mGroupRowExpand.setOnClickListener(null);
 
@@ -1774,22 +1803,35 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
                     groupHolder.mGroupRowName.setText(mInstanceData.Name);
 
-                    groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
-                    groupHolder.mGroupRowDetails.setText(mInstanceData.DisplayText);
+                    if (TextUtils.isEmpty(mInstanceData.DisplayText)) {
+                        groupHolder.mGroupRowDetails.setVisibility(View.GONE);
+                    } else {
+                        groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
+                        groupHolder.mGroupRowDetails.setText(mInstanceData.DisplayText);
+                    }
+
+                    if (TextUtils.isEmpty(mInstanceData.Children)) {
+                        groupHolder.mGroupRowChildren.setVisibility(View.GONE);
+                    } else {
+                        groupHolder.mGroupRowChildren.setVisibility(View.VISIBLE);
+                        groupHolder.mGroupRowChildren.setText(mInstanceData.Children);
+                    }
 
                     if (!mInstanceData.TaskCurrent) {
                         groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
                         groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                        groupHolder.mGroupRowChildren.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
                     } else {
                         groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
                         groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
+                        groupHolder.mGroupRowChildren.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
                     }
 
-                    if (mInstanceData.HasChildren) {
+                    if (TextUtils.isEmpty(mInstanceData.Children)) {
+                        groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
+                    } else {
                         groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
-                    } else {
-                        groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
                     }
 
                     groupHolder.mGroupRowExpand.setOnClickListener(null);

@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/show_group_row"
     android:descendantFocusability="blocksDescendants"
-    android:shrinkColumns="1"
-    android:stretchColumns="1"
-    android:paddingTop="5dp">
+    android:paddingTop="5dp"
+    android:orientation="vertical">
 
-    <TableRow
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:ignore="UselessParent">
+        android:orientation="horizontal">
 
         <CheckBox
             android:id="@+id/group_row_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center_vertical"/>
 
         <LinearLayout
             android:layout_marginStart="16dp"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical">
 
             <TextView
                 android:id="@+id/group_row_name"
@@ -44,6 +44,14 @@
                 android:textSize="14sp"
                 android:textColor="@color/textSecondary"/>
 
+            <TextView
+                android:id="@+id/group_row_children"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/textSecondary"/>
+
         </LinearLayout>
 
         <ImageView
@@ -54,9 +62,10 @@
             android:visibility="invisible"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:contentDescription="@string/expand"/>
+            android:contentDescription="@string/expand"
+            android:layout_gravity="center_vertical"/>
 
-    </TableRow>
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
@@ -66,4 +75,4 @@
         android:id="@+id/group_row_separator"
         android:background="?android:attr/listDivider"/>
 
-</TableLayout>
+</LinearLayout>

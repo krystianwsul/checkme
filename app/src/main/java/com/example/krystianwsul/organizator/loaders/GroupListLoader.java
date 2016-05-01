@@ -99,23 +99,23 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     public static class InstanceData {
         public ExactTimeStamp Done;
-        public final boolean HasChildren;
         public final InstanceKey InstanceKey;
         public final String DisplayText;
+        public final String Children;
         public final String Name;
         public final TimeStamp InstanceTimeStamp;
         public final boolean TaskCurrent;
         public final boolean IsRootInstance;
 
-        public InstanceData(ExactTimeStamp done, boolean hasChildren, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance) {
+        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String children, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
 
             Done = done;
-            HasChildren = hasChildren;
             InstanceKey = instanceKey;
             DisplayText = displayText;
+            Children = children;
             Name = name;
             InstanceTimeStamp = instanceTimeStamp;
             TaskCurrent = taskCurrent;
@@ -127,10 +127,11 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             int hashCode = 0;
             if (Done != null)
                 hashCode += Done.hashCode();
-            hashCode += (HasChildren ? 1 : 0);
             hashCode += InstanceKey.hashCode();
             if (!TextUtils.isEmpty(DisplayText))
                 hashCode += DisplayText.hashCode();
+            if (!TextUtils.isEmpty(Children))
+                hashCode += Children.hashCode();
             hashCode += Name.hashCode();
             hashCode += InstanceTimeStamp.hashCode();
             hashCode += (TaskCurrent ? 1 : 0);
@@ -158,9 +159,6 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             if ((Done != null) && !Done.equals(instanceData.Done))
                 return false;
 
-            if (HasChildren != instanceData.HasChildren)
-                return false;
-
             if (!InstanceKey.equals(instanceData.InstanceKey))
                 return false;
 
@@ -168,6 +166,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if (!TextUtils.isEmpty(DisplayText) && !DisplayText.equals(instanceData.DisplayText))
+                return false;
+
+            if (TextUtils.isEmpty(Children) != TextUtils.isEmpty(instanceData.Children))
+                return false;
+
+            if (!TextUtils.isEmpty(Children) && !Children.equals(instanceData.Children))
                 return false;
 
             if (!Name.equals(instanceData.Name))

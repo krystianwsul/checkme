@@ -2,6 +2,8 @@ package com.example.krystianwsul.organizator.domainmodel;
 
 import android.content.Context;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.ScheduleType;
@@ -229,6 +231,15 @@ class Instance {
         }
 
         return new ArrayList<>(childInstances);
+    }
+
+    public String getChildInstanceNames(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        return Stream.of(getChildInstances(now))
+                .sortBy(Instance::getTaskId)
+                .map(Instance::getName)
+                .collect(Collectors.joining(", "));
     }
 
     private Instance getParentInstance(ExactTimeStamp now) {

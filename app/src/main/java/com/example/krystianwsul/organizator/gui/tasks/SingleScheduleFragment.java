@@ -231,14 +231,18 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         boolean valid;
 
         if (mData != null) {
-            HourMinute hourMinute = mTimePickerView.getHourMinute();
-            Integer customTimeId = mTimePickerView.getCustomTimeId();
-            Assert.assertTrue((hourMinute == null) != (customTimeId == null));
+            if (mData.ScheduleData != null && mData.ScheduleData.TimePair.equals(mTimePickerView.getTimePair())) {
+                valid = true;
+            } else {
+                HourMinute hourMinute = mTimePickerView.getHourMinute();
+                Integer customTimeId = mTimePickerView.getCustomTimeId();
+                Assert.assertTrue((hourMinute == null) != (customTimeId == null));
 
-            if (hourMinute == null)
-                hourMinute = mData.CustomTimeDatas.get(customTimeId).HourMinutes.get(mDate.getDayOfWeek());
+                if (hourMinute == null)
+                    hourMinute = mData.CustomTimeDatas.get(customTimeId).HourMinutes.get(mDate.getDayOfWeek());
 
-            valid = (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+                valid = (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+            }
         } else {
             valid = false;
         }

@@ -63,7 +63,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean editInstance = (mData != null && !mData.Done);
+        boolean editInstance = (mData != null && !mData.Done && mData.IsRootInstance);
         menu.findItem(R.id.instance_menu_edit_instance).setVisible(editInstance);
 
         boolean showTask = (mData != null && !mData.Done && mData.TaskCurrent);
@@ -77,11 +77,16 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         switch (item.getItemId()) {
             case R.id.instance_menu_edit_instance:
                 Assert.assertTrue(mData != null);
-                Intent intent = EditInstanceActivity.getIntent(this, mData.InstanceKey);
-                startActivity(intent);
+                Assert.assertTrue(!mData.Done);
+                Assert.assertTrue(mData.IsRootInstance);
+
+                startActivity(EditInstanceActivity.getIntent(this, mData.InstanceKey));
                 break;
             case R.id.instance_menu_show_task:
                 Assert.assertTrue(mData != null);
+                Assert.assertTrue(!mData.Done);
+                Assert.assertTrue(mData.TaskCurrent);
+
                 startActivity(ShowTaskActivity.getIntent(mData.InstanceKey.TaskId, this));
                 break;
             default:

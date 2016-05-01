@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -61,34 +60,31 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         mSavedInstanceState = savedInstanceState;
 
         mEditInstanceName = (TextView) findViewById(R.id.edit_instance_name);
+        Assert.assertTrue(mEditInstanceName != null);
 
         mEditInstanceDate = (TextView) findViewById(R.id.edit_instance_date);
         Assert.assertTrue(mEditInstanceDate != null);
 
-        final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = new CalendarDatePickerDialogFragment.OnDateSetListener() {
-            @Override
-            public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
-                mDate = new Date(year, monthOfYear + 1, dayOfMonth);
-                updateDateText();
-            }
+        final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = (dialog, year, monthOfYear, dayOfMonth) -> {
+            mDate = new Date(year, monthOfYear + 1, dayOfMonth);
+            updateDateText();
         };
-        mEditInstanceDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = new CalendarDatePickerDialogFragment();
-                calendarDatePickerDialogFragment.setDateRange(new MonthAdapter.CalendarDay(Calendar.getInstance()), null);
-                calendarDatePickerDialogFragment.setPreselectedDate(mDate.getYear(), mDate.getMonth() - 1, mDate.getDay());
-                calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
-                calendarDatePickerDialogFragment.show(getSupportFragmentManager(), DATE_FRAGMENT_TAG);
-            }
+        mEditInstanceDate.setOnClickListener(v -> {
+            CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = new CalendarDatePickerDialogFragment();
+            calendarDatePickerDialogFragment.setDateRange(new MonthAdapter.CalendarDay(Calendar.getInstance()), null);
+            calendarDatePickerDialogFragment.setPreselectedDate(mDate.getYear(), mDate.getMonth() - 1, mDate.getDay());
+            calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+            calendarDatePickerDialogFragment.show(getSupportFragmentManager(), DATE_FRAGMENT_TAG);
         });
         CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = (CalendarDatePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
         if (calendarDatePickerDialogFragment != null)
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
 
         mEditInstanceTimePickerView = (TimePickerView) findViewById(R.id.edit_instance_timepickerview);
+        Assert.assertTrue(mEditInstanceTimePickerView != null);
 
         mEditInstanceSave = (Button) findViewById(R.id.edit_instance_save);
+        Assert.assertTrue(mEditInstanceSave != null);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -141,12 +137,9 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         updateDateText();
 
-        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                Assert.assertTrue(mEditInstanceTimePickerView != null);
-                mEditInstanceTimePickerView.setHourMinute(new HourMinute(hourOfDay, minute));
-            }
+        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
+            Assert.assertTrue(mEditInstanceTimePickerView != null);
+            mEditInstanceTimePickerView.setHourMinute(new HourMinute(hourOfDay, minute));
         };
         mEditInstanceTimePickerView.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
             @Override
@@ -170,36 +163,33 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
 
-        mEditInstanceSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Assert.assertTrue(mDate != null);
-                Assert.assertTrue(mEditInstanceTimePickerView != null);
-                Assert.assertTrue(mData != null);
+        mEditInstanceSave.setOnClickListener(v -> {
+            Assert.assertTrue(mDate != null);
+            Assert.assertTrue(mEditInstanceTimePickerView != null);
+            Assert.assertTrue(mData != null);
 
-                HourMinute hourMinute = mEditInstanceTimePickerView.getHourMinute();
-                Integer customTimeId = mEditInstanceTimePickerView.getCustomTimeId();
-                Assert.assertTrue((hourMinute == null) != (customTimeId == null));
-                if (hourMinute == null) {
-                    EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(customTimeId);
-                    Assert.assertTrue(customTimeData != null);
+            HourMinute hourMinute = mEditInstanceTimePickerView.getHourMinute();
+            Integer customTimeId = mEditInstanceTimePickerView.getCustomTimeId();
+            Assert.assertTrue((hourMinute == null) != (customTimeId == null));
+            if (hourMinute == null) {
+                EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(customTimeId);
+                Assert.assertTrue(customTimeData != null);
 
-                    hourMinute = customTimeData.HourMinutes.get(mDate.getDayOfWeek());
-                    Assert.assertTrue(hourMinute != null);
-                }
-
-                if ((new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) <= 0)) {
-                    MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
-                    messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
-                    return;
-                }
-
-                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, new TimePair(mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute()));
-
-                TickService.startService(EditInstanceActivity.this);
-
-                finish();
+                hourMinute = customTimeData.HourMinutes.get(mDate.getDayOfWeek());
+                Assert.assertTrue(hourMinute != null);
             }
+
+            if ((new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) <= 0)) {
+                MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(getString(R.string.invalid_time_message));
+                messageDialogFragment.show(getSupportFragmentManager(), "invalid_time");
+                return;
+            }
+
+            DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, new TimePair(mEditInstanceTimePickerView.getCustomTimeId(), mEditInstanceTimePickerView.getHourMinute()));
+
+            TickService.startService(EditInstanceActivity.this);
+
+            finish();
         });
     }
 

@@ -189,8 +189,12 @@ public class DomainFactory {
     public synchronized EditInstanceLoader.Data getEditInstanceData(InstanceKey instanceKey) {
         Assert.assertTrue(instanceKey != null);
 
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
+        Assert.assertTrue(instance.isRootInstance(now));
+        Assert.assertTrue(instance.getDone() == null);
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         HashMap<Integer, EditInstanceLoader.CustomTimeData> customTimeDatas = new HashMap<>();
@@ -254,7 +258,7 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now)));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -322,7 +326,7 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now)));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -352,7 +356,7 @@ public class DomainFactory {
             Task childTask = mTasks.get(childInstance.getTaskId());
             Assert.assertTrue(childTask != null);
 
-            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null, childInstance.getName(), instance.getInstanceDateTime().getTimeStamp(), childTask.current(now)));
+            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), !childInstance.getChildInstances(now).isEmpty(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -386,7 +390,7 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now)));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), !instance.getChildInstances(now).isEmpty(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -409,7 +413,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now));
+        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now));
     }
 
     public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {
@@ -511,10 +515,11 @@ public class DomainFactory {
     public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {
         Assert.assertTrue(context != null);
 
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
         Task task = mTasks.get(taskId);
         Assert.assertTrue(task != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        Assert.assertTrue(task.current(now));
 
         return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId());
     }

@@ -18,6 +18,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.SelectionCallback;
 import com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity;
 import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
+import com.example.krystianwsul.organizator.gui.tasks.ShowTaskActivity;
 import com.example.krystianwsul.organizator.loaders.GroupListLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
@@ -90,10 +92,28 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(!selected.isEmpty());
 
             switch (menuItem.getItemId()) {
+                case R.id.action_group_edit_instance:
+                    Assert.assertTrue(selected.size() == 1);
+
+                    GroupListLoader.InstanceData instanceData = selected.get(0).mInstanceData;
+                    Assert.assertTrue(instanceData.IsRootInstance);
+
+                    startActivity(EditInstanceActivity.getIntent(getActivity(), instanceData.InstanceKey));
+                    break;
+                case R.id.action_group_show_task:
+                    Assert.assertTrue(selected.size() == 1);
+
+                    GroupListLoader.InstanceData instanceData2 = selected.get(0).mInstanceData;
+                    Assert.assertTrue(instanceData2.TaskCurrent);
+
+                    startActivity(ShowTaskActivity.getIntent(instanceData2.InstanceKey.TaskId, getActivity()));
+                    break;
                 case R.id.action_group_join:
                     ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(selected)
                             .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.InstanceKey.TaskId)
                             .collect(Collectors.toList()));
+                    Assert.assertTrue(taskIds.size() > 1);
+
                     if (mInstanceKey == null) {
                         if (mDay != null)
                             startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, mDay));
@@ -129,7 +149,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(mOldVisibility == null);
             mOldVisibility = mFloatingActionButton.getVisibility();
             mFloatingActionButton.setVisibility(View.GONE);
-            Log.e("asdf", "hiding fab");
 
             ((GroupListListener) getActivity()).onCreateGroupActionMode(mActionMode);
 
@@ -177,12 +196,34 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         private void updateMenu() {
-            List<GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode> selected = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.getSelected();
+            Assert.assertTrue(mActionMode != null);
 
-            if (selected.size() > 1 && Stream.of(selected).allMatch(node -> node.mInstanceData.TaskCurrent))
-                mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(true);
-            else
-                mActionMode.getMenu().findItem(R.id.action_group_join).setVisible(false);
+            Menu menu = mActionMode.getMenu();
+            Assert.assertTrue(menu != null);
+
+            List<GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode> selected = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.getSelected();
+            Assert.assertTrue(selected != null);
+            Assert.assertTrue(!selected.isEmpty());
+
+            if (selected.size() == 1) {
+                GroupListLoader.InstanceData instanceData = selected.get(0).mInstanceData;
+                Assert.assertTrue(instanceData != null);
+
+                Log.e("asdf", "IsRootInstance: " + instanceData.IsRootInstance);
+                menu.findItem(R.id.action_group_edit_instance).setVisible(instanceData.IsRootInstance);
+                menu.findItem(R.id.action_group_show_task).setVisible(instanceData.TaskCurrent);
+                menu.findItem(R.id.action_group_join).setVisible(false);
+            } else {
+                Assert.assertTrue(selected.size() > 1);
+
+                menu.findItem(R.id.action_group_edit_instance).setVisible(false);
+                menu.findItem(R.id.action_group_show_task).setVisible(false);
+
+                if (Stream.of(selected).allMatch(node -> node.mInstanceData.TaskCurrent))
+                    menu.findItem(R.id.action_group_join).setVisible(true);
+                else
+                    menu.findItem(R.id.action_group_join).setVisible(false);
+            }
         }
     };
 

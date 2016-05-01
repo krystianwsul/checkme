@@ -3,6 +3,7 @@ package com.example.krystianwsul.organizator.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -50,16 +51,19 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
         setSupportActionBar(toolbar);
 
         mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
+        Assert.assertTrue(mTasksHeadingLabel != null);
 
         mTasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
+        Assert.assertTrue(mTasksRowSchedule != null);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         mTaskId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(mTaskId != -1);
 
-        TaskListFragment taskListFragment = TaskListFragment.getInstance(mTaskId);
-        getSupportFragmentManager().beginTransaction().add(R.id.show_task_fragment, taskListFragment).commit();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentById(R.id.show_task_fragment) == null)
+            fragmentManager.beginTransaction().add(R.id.show_task_fragment, TaskListFragment.getInstance(mTaskId)).commit();
 
         getSupportLoaderManager().initLoader(0, null, this);
     }

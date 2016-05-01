@@ -30,8 +30,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final String DisplayText;
         public boolean Done;
         public final boolean TaskCurrent;
+        public final boolean IsRootInstance;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent, boolean isRootInstance) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -40,6 +41,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             DisplayText = displayText;
             Done = done;
             TaskCurrent = taskCurrent;
+            IsRootInstance = isRootInstance;
         }
 
         @Override
@@ -51,9 +53,11 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
                 hashCode += DisplayText.hashCode();
             hashCode += (Done ? 1 : 0);
             hashCode += (TaskCurrent ? 1 : 0);
+            hashCode += (IsRootInstance ? 1 : 0);
             return hashCode;
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -67,7 +71,28 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceKey.equals(data.InstanceKey) && Name.equals(data.Name) && ((TextUtils.isEmpty(DisplayText) && TextUtils.isEmpty(data.DisplayText)) || ((!TextUtils.isEmpty(DisplayText) && !TextUtils.isEmpty(data.DisplayText)) && DisplayText.equals(data.DisplayText))) && (Done == data.Done) && (TaskCurrent == data.TaskCurrent));
+            if (!InstanceKey.equals(data.InstanceKey))
+                return false;
+
+            if (!Name.equals(data.Name))
+                return false;
+
+            if (TextUtils.isEmpty(DisplayText) != TextUtils.isEmpty(data.DisplayText))
+                return false;
+
+            if (!TextUtils.isEmpty(data.DisplayText) && !DisplayText.equals(data.DisplayText))
+                return false;
+
+            if (Done != data.Done)
+                return false;
+
+            if (TaskCurrent != data.TaskCurrent)
+                return false;
+
+            if (IsRootInstance != data.IsRootInstance)
+                return false;
+
+            return true;
         }
     }
 }

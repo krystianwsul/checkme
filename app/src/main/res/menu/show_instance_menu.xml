@@ -8,7 +8,8 @@
         android:title="@string/edit_instance"
         android:orderInCategory="200"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_alarm_white_24dp"/>
+        android:icon="@drawable/ic_alarm_white_24dp"
+        android:visible="false"/>
     <item
         android:id="@+id/instance_menu_show_task"
         android:title="@string/show_task"

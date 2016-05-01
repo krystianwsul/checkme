@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.gui.SelectionCallback;
@@ -58,6 +59,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             Assert.assertTrue(!taskIds.isEmpty());
 
             switch (menuItem.getItemId()) {
+                case R.id.action_task_edit:
+                    Assert.assertTrue(taskIds.size() == 1);
+
+                    TaskListLoader.TaskData taskData = Stream.of(mTaskAdapter.mTaskWrappers)
+                            .filter(taskWrapper -> taskWrapper.mSelected)
+                            .findFirst()
+                            .get()
+                            .mTaskData;
+
+                    if (taskData.IsRootTask)
+                        startActivity(CreateRootTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
+                    else
+                        startActivity(CreateChildTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
+                    break;
                 case R.id.action_task_join:
                     if (mTaskId == null)
                         startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
@@ -86,6 +101,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         @Override
         protected void onSecondAdded() {
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(true);
+            mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(false);
         }
 
         @Override
@@ -103,6 +119,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         @Override
         protected void onSecondToLastRemoved() {
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(false);
+            mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(true);
         }
 
         @Override

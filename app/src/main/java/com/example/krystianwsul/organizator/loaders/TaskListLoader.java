@@ -57,14 +57,16 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
         public final String Name;
         public final String ScheduleText;
         public final boolean HasChildTasks;
+        public final boolean IsRootTask;
 
-        public TaskData(int taskId, String name, String scheduleText, boolean hasChildTasks) {
+        public TaskData(int taskId, String name, String scheduleText, boolean hasChildTasks, boolean isRootTask) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             TaskId = taskId;
             Name = name;
             ScheduleText = scheduleText;
             HasChildTasks = hasChildTasks;
+            IsRootTask = isRootTask;
         }
 
         @Override
@@ -75,9 +77,11 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
             hashCode += (HasChildTasks ? 1 : 0);
+            hashCode += (IsRootTask ? 1 : 0);
             return hashCode;
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -91,7 +95,25 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
             TaskData taskData = (TaskData) object;
 
-            return ((TaskId == taskData.TaskId) && Name.equals(taskData.Name) && ((TextUtils.isEmpty(ScheduleText) && TextUtils.isEmpty(taskData.ScheduleText)) || ((!TextUtils.isEmpty(ScheduleText) && !TextUtils.isEmpty(taskData.ScheduleText)) && ScheduleText.equals(taskData.ScheduleText))) && (HasChildTasks == taskData.HasChildTasks));
+            if (TaskId != taskData.TaskId)
+                return false;
+
+            if (!Name.equals(taskData.Name))
+                return false;
+
+            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskData.ScheduleText))
+                return false;
+
+            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
+                return false;
+
+            if (HasChildTasks != taskData.HasChildTasks)
+                return false;
+
+            if (IsRootTask != taskData.IsRootTask)
+                return false;
+
+            return true;
         }
     }
 }

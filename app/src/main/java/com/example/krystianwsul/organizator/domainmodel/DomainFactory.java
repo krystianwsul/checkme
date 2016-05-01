@@ -545,7 +545,7 @@ public class DomainFactory {
 
         ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
         for (Task task : tasks)
-            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty()));
+            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), !task.getChildTasks(now).isEmpty(), task.isRootTask(now)));
 
         return new TaskListLoader.Data(taskDatas);
     }

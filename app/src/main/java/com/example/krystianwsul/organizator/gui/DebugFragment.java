@@ -88,6 +88,14 @@ public class DebugFragment extends Fragment {
             stringBuilder.append(", instances: ");
             stringBuilder.append(domainFactory.getInstanceCount());
 
+            ExactTimeStamp t1 = ExactTimeStamp.getNow();
+            DomainFactory.getDomainFactory(getContext()).getGroupListData(getActivity(), 0);
+            ExactTimeStamp t2 = ExactTimeStamp.getNow();
+
+            stringBuilder.append("\ntoday: ");
+            stringBuilder.append((t2.getLong() - t1.getLong()));
+            stringBuilder.append(" ms");
+
             debugData.setText(stringBuilder);
         });
     }

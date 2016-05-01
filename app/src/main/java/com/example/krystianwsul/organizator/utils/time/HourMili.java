@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.utils.time;
 
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -71,8 +72,9 @@ public class HourMili implements Comparable<HourMili>, Parcelable {
         return ((object != null) && (object instanceof HourMili) && (object == this || compareTo((HourMili) object) == 0));
     }
 
+    @SuppressLint("DefaultLocale")
     public String toString() {
-        return mHour + ":" + mMinute + ":" + mSecond + ":" + mMili;
+        return String.format("%02d", mHour) + ":" + String.format("%02d", mMinute) + ":" + String.format("%02d", mSecond) + ":" + String.format("%03d", mMili);
     }
 
     @Override

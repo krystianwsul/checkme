@@ -1135,6 +1135,7 @@ public class DomainFactory {
         Assert.assertTrue(now != null);
 
         HashSet<Instance> allInstances = new HashSet<>();
+
         for (Instance instance : mExistingInstances) {
             ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
@@ -1146,6 +1147,8 @@ public class DomainFactory {
 
             allInstances.add(instance);
         }
+
+        ExactTimeStamp t2 = ExactTimeStamp.getNow();
 
         for (Task task : mTasks.values()) {
             for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp)) {
@@ -1160,6 +1163,8 @@ public class DomainFactory {
                 allInstances.add(instance);
             }
         }
+
+        ExactTimeStamp t3 = ExactTimeStamp.getNow();
 
         ArrayList<Instance> rootInstances = new ArrayList<>();
         for (Instance instance : allInstances)

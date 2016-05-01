@@ -5,11 +5,10 @@
     <string name="tomorrow">Tomorrow</string>
     <string name="daily">Daily</string>
     <string name="tasks">Tasks</string>
-    <string name="instances">Instances</string>
+    <string name="instances">Reminders</string>
     <string name="times">Times</string>
     <string name="other">Other</string>
     <string name="save">Save</string>
-    <string name="invalid_time_message">Time must be in the future.</string>
     <string name="multiple_reminders">reminders</string>
     <string name="join">Join</string>
     <string name="done">Done</string>
@@ -20,7 +19,7 @@
     <string name="edit">Edit</string>
     <string name="expand">Expand</string>
     <string name="list">List</string>
-    <string name="edit_instance">Edit instance</string>
+    <string name="edit_instance">Change reminder time</string>
     <string name="show_task">Show task</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

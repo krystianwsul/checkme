@@ -5,11 +5,10 @@
     <string name="tomorrow">Jutro</string>
     <string name="daily">Codziennie</string>
     <string name="tasks">Zadania</string>
-    <string name="instances">Instancje</string>
+    <string name="instances">Przypomnienia</string>
     <string name="times">Czasy</string>
     <string name="other">Inny</string>
     <string name="save">Zapisz</string>
-    <string name="invalid_time_message">Czas musi być w przyszłości.</string>
     <string name="multiple_reminders">przypomnienia</string>
     <string name="join">Połącz</string>
     <string name="done">Zrobione</string>
@@ -20,7 +19,7 @@
     <string name="edit">Edytuj</string>
     <string name="expand">Rozwiń</string>
     <string name="list">Lista</string>
-    <string name="edit_instance">Edytuj instancję</string>
+    <string name="edit_instance">Zmień czas przypomnienia</string>
     <string name="show_task">Pokaż zadanie</string>
     <string name="navigation_drawer_open">Otwórz navigation drawer</string>
     <string name="navigation_drawer_close">Zamknij navigation drawer</string>

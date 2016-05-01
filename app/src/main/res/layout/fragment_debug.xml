@@ -17,11 +17,6 @@
         android:id="@+id/debug_exception"
         tools:ignore="HardcodedText" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/debug_time"/>
-
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,21 +24,16 @@
         android:id="@+id/debug_tick"
         tools:ignore="HardcodedText" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/debug_records"/>
-
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/debug_tick_show"
+        android:id="@+id/debug_load"
         tools:ignore="HardcodedText"
-        android:text="show last tick time"/>
+        android:text="load debug data"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/debug_tick_time"/>
+        android:id="@+id/debug_data"/>
 
 </LinearLayout>

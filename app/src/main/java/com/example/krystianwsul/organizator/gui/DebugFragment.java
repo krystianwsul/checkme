@@ -50,40 +50,45 @@ public class DebugFragment extends Fragment {
             int j = 1 / i;
         });
 
-        TextView debugTime = (TextView) view.findViewById(R.id.debug_time);
-        Assert.assertTrue(debugTime != null);
-
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
-        debugTime.setText("data load time: " + (domainFactory.getReadMillis() + domainFactory.getInstantiateMilis()) + "ms (" + domainFactory.getReadMillis() + " + " + domainFactory.getInstantiateMilis() + ")");
-
         Button debugTick = (Button) view.findViewById(R.id.debug_tick);
         Assert.assertTrue(debugTick != null);
 
         debugTick.setOnClickListener(v -> TickService.startService(getActivity()));
 
-        final TextView debugRecords = (TextView) view.findViewById(R.id.debug_records);
-        Assert.assertTrue(debugRecords != null);
+        TextView debugData = (TextView) view.findViewById(R.id.debug_data);
+        Assert.assertTrue(debugData != null);
 
-        debugRecords.setText("tasks: " + domainFactory.getTaskCount() + ", instances: " + domainFactory.getInstanceCount());
+        Button debugLoad = (Button) view.findViewById(R.id.debug_load);
+        Assert.assertTrue(debugLoad != null);
 
-        TextView debugTickTime = (TextView) view.findViewById(R.id.debug_tick_time);
-        Assert.assertTrue(debugTickTime != null);
+        debugLoad.setOnClickListener(v -> {
+            StringBuilder stringBuilder = new StringBuilder();
 
-        Button debugTickShow = (Button) view.findViewById(R.id.debug_tick_show);
-        Assert.assertTrue(debugTickShow != null);
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+            long lastTick = sharedPreferences.getLong(TickService.LAST_TICK_KEY, -1);
+            Assert.assertTrue(lastTick != -1);
 
-        debugTickShow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+            ExactTimeStamp lastTickExactTimeStamp = new ExactTimeStamp(lastTick);
 
-                long lastTick = sharedPreferences.getLong(TickService.LAST_TICK_KEY, -1);
-                Assert.assertTrue(lastTick != -1);
+            stringBuilder.append("last beeping tick: ");
+            stringBuilder.append(lastTickExactTimeStamp.toString());
 
-                ExactTimeStamp lastTickExactTimeStamp = new ExactTimeStamp(lastTick);
+            DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
 
-                debugTickTime.setText(lastTickExactTimeStamp.toString());
-            }
+            stringBuilder.append("\ndata load time: ");
+            stringBuilder.append((domainFactory.getReadMillis() + domainFactory.getInstantiateMilis()));
+            stringBuilder.append("ms (");
+            stringBuilder.append(domainFactory.getReadMillis());
+            stringBuilder.append(" + ");
+            stringBuilder.append(domainFactory.getInstantiateMilis());
+            stringBuilder.append(")");
+
+            stringBuilder.append("\ntasks: ");
+            stringBuilder.append(domainFactory.getTaskCount());
+            stringBuilder.append(", instances: ");
+            stringBuilder.append(domainFactory.getInstanceCount());
+
+            debugData.setText(stringBuilder);
         });
     }
 }

@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private static final int CUSTOM_TIMES_VISIBLE = 2;
     private static final int DEBUG_VISIBLE = 3;
 
+    private ActionBar mActionBar;
     private ViewPager mDaysPager;
     private FrameLayout mMainTaskListFrame;
     private FrameLayout mMainCustomTimesFrame;
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     private DrawerLayout.DrawerListener mDrawerCustomTimesListener;
 
-    private int mVisibleTab = 0;
+    private int mVisibleTab = INSTANCES_VISIBLE;
     private boolean mIgnoreFirst = false;
 
     @Override
@@ -60,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
+
+        mActionBar = getSupportActionBar();
+        Assert.assertTrue(mActionBar != null);
 
         if (savedInstanceState != null) {
             Assert.assertTrue(savedInstanceState.containsKey(VISIBLE_TAB_KEY));
@@ -198,24 +203,27 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private void showTab(int tab) {
         switch (tab) {
             case INSTANCES_VISIBLE:
+                mActionBar.setTitle(getString(R.string.instances));
                 mDaysPager.setVisibility(View.VISIBLE);
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
-                mMainDebugFrame.setVisibility(View.GONE);
-                break;
+                mMainDebugFrame.setVisibility(View.GONE);break;
             case TASKS_VISIBLE:
+                mActionBar.setTitle(getString(R.string.tasks));
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.VISIBLE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 break;
             case CUSTOM_TIMES_VISIBLE:
+                mActionBar.setTitle(getString(R.string.times));
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.VISIBLE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 break;
             case DEBUG_VISIBLE:
+                mActionBar.setTitle("Debug");
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);

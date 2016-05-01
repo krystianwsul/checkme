@@ -941,6 +941,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowDetails.setText(notDoneInstanceNode.mInstanceData.DisplayText);
 
+                        if (!notDoneInstanceNode.mInstanceData.TaskCurrent) {
+                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                            groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                        } else {
+                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
+                            groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
+                        }
+
                         if (notDoneInstanceNode.mInstanceData.HasChildren) {
                             groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                             groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
@@ -972,8 +980,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         if (notDoneInstanceNode.mSelected)
                             groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected));
-                        else if (!notDoneInstanceNode.mInstanceData.TaskCurrent)
-                            groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.disabled));
                         else
                             groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
 
@@ -1014,6 +1020,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         String detailsText = date.getDisplayText(groupListFragment.getActivity()) + ", " + timeText;
                         groupHolder.mGroupRowDetails.setText(detailsText);
+
+                        groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
+                        groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
 
                         if (groupListFragment.mSelectionCallback.hasActionMode() && getSelected().count() > 0)
                             groupHolder.mGroupRowExpand.setVisibility(View.INVISIBLE);
@@ -1322,6 +1331,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         groupHolder.mGroupRowName.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowName.setText(mInstanceData.Name);
 
+                        if (!mInstanceData.TaskCurrent) {
+                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                        } else {
+                            groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
+                        }
+
                         groupHolder.mGroupRowDetails.setVisibility(View.GONE);
 
                         if (mInstanceData.HasChildren) {
@@ -1387,8 +1402,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         if (mSelected)
                             groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected));
-                        else if (!mInstanceData.TaskCurrent)
-                            groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.disabled));
                         else
                             groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
 
@@ -1764,6 +1777,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     groupHolder.mGroupRowDetails.setVisibility(View.VISIBLE);
                     groupHolder.mGroupRowDetails.setText(mInstanceData.DisplayText);
 
+                    if (!mInstanceData.TaskCurrent) {
+                        groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                        groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled));
+                    } else {
+                        groupHolder.mGroupRowName.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary));
+                        groupHolder.mGroupRowDetails.setTextColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary));
+                    }
+
                     if (mInstanceData.HasChildren) {
                         groupHolder.mGroupRowExpand.setVisibility(View.VISIBLE);
                         groupHolder.mGroupRowExpand.setImageResource(R.drawable.ic_list_black_36dp);
@@ -1814,10 +1835,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     groupHolder.mGroupRowSeparator.setVisibility(View.INVISIBLE);
 
-                    if (!mInstanceData.TaskCurrent)
-                        groupHolder.mGroupRow.setBackgroundColor(ContextCompat.getColor(groupListFragment.getActivity(), R.color.disabled));
-                    else
-                        groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
+                    groupHolder.mGroupRow.setBackgroundColor(Color.TRANSPARENT);
 
                     groupHolder.mGroupRow.setOnClickListener(v -> groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.InstanceKey)));
                 }

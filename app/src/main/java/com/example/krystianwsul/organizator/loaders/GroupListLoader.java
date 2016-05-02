@@ -14,6 +14,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     private final Integer mDay;
@@ -192,9 +193,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     public static class CustomTimeData {
         public final String Name;
-        public final HashMap<DayOfWeek, HourMinute> HourMinutes;
+        public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        public CustomTimeData(String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(hourMinutes != null);
             Assert.assertTrue(hourMinutes.size() == 7);

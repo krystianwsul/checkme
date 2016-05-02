@@ -11,7 +11,7 @@ import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 
 public class CustomTime implements Time {
     private final CustomTimeRecord mCustomTimeRecord;
@@ -54,8 +54,8 @@ public class CustomTime implements Time {
         }
     }
 
-    public HashMap<DayOfWeek, HourMinute> getHourMinutes() {
-        HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
+    public TreeMap<DayOfWeek, HourMinute> getHourMinutes() {
+        TreeMap<DayOfWeek, HourMinute> hourMinutes = new TreeMap<>();
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
             hourMinutes.put(dayOfWeek, getHourMinute(dayOfWeek));
         return hourMinutes;

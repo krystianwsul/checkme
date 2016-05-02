@@ -225,6 +225,7 @@ public class DomainFactory {
         ArrayList<ShowCustomTimesLoader.CustomTimeData> entries = new ArrayList<>();
         for (CustomTime customTime : currentCustomTimes) {
             Assert.assertTrue(customTime != null);
+
             entries.add(new ShowCustomTimesLoader.CustomTimeData(customTime.getId(), customTime.getName()));
         }
 

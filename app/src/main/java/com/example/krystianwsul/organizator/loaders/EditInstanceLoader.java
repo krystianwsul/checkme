@@ -13,6 +13,7 @@ import com.example.krystianwsul.organizator.utils.time.TimePair;
 import junit.framework.Assert;
 
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
@@ -76,9 +77,9 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     public static class CustomTimeData {
         public final int Id;
         public final String Name;
-        public final HashMap<DayOfWeek, HourMinute> HourMinutes;
+        public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(int id, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        public CustomTimeData(int id, String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(hourMinutes != null);
             Assert.assertTrue(hourMinutes.size() == 7);

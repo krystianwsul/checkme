@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -88,6 +87,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                 Assert.assertTrue(!mHourMinutes.isEmpty());
 
                 String name = mCustomTimeName.getText().toString().trim();
+                Assert.assertTrue(!TextUtils.isEmpty(name));
 
                 if (mData != null)
                     DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
@@ -111,9 +111,6 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        Assert.assertTrue(actionBar != null);
 
         mSavedInstanceState = savedInstanceState;
 

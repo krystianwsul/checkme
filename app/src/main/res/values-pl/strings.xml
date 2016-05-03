@@ -23,4 +23,6 @@
     <string name="show_task">Pokaż zadanie</string>
     <string name="navigation_drawer_open">Otwórz navigation drawer</string>
     <string name="navigation_drawer_close">Zamknij navigation drawer</string>
+    <string name="mark_done">Oznacz jako zrobione</string>
+    <string name="mark_not_done">Oznacz jako nie zrobione</string>
 </resources>

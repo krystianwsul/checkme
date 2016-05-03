@@ -17,7 +17,6 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -210,7 +209,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 GroupListLoader.InstanceData instanceData = selected.get(0).mInstanceData;
                 Assert.assertTrue(instanceData != null);
 
-                Log.e("asdf", "IsRootInstance: " + instanceData.IsRootInstance);
                 menu.findItem(R.id.action_group_edit_instance).setVisible(instanceData.IsRootInstance);
                 menu.findItem(R.id.action_group_show_task).setVisible(instanceData.TaskCurrent);
                 menu.findItem(R.id.action_group_join).setVisible(false);

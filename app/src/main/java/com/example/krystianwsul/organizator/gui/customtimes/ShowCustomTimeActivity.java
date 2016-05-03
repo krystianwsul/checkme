@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.View;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -39,6 +41,18 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     private static final String TIME_PICKER_TAG = "timePicker";
 
+    private Integer mCustomTimeId;
+    private ShowCustomTimeLoader.Data mData;
+
+    private final HashMap<DayOfWeek, TextView> mTimeViews = new HashMap<>();
+    private final HashMap<DayOfWeek, HourMinute> mHourMinutes = new HashMap<>();
+
+    private DayOfWeek editedDayOfWeek = null;
+
+    private EditText mCustomTimeName;
+
+    private Bundle mSavedInstanceState;
+
     public static Intent getEditIntent(int customTimeId, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
         intent.putExtra(CUSTOM_TIME_ID_KEY, customTimeId);
@@ -51,23 +65,55 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         return intent;
     }
 
-    private Integer mCustomTimeId;
-    private ShowCustomTimeLoader.Data mData;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_custom_time, menu);
+        return true;
+    }
 
-    private final HashMap<DayOfWeek, TextView> mTimeViews = new HashMap<>();
-    private final HashMap<DayOfWeek, HourMinute> mHourMinutes = new HashMap<>();
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Assert.assertTrue(mCustomTimeName != null);
 
-    private DayOfWeek editedDayOfWeek = null;
+        boolean save = !TextUtils.isEmpty(mCustomTimeName.getText().toString().trim());
+        menu.findItem(R.id.action_custom_time_save).setVisible(save);
 
-    private EditText mCustomTimeName;
-    private Button mCustomTimeSave;
+        return true;
+    }
 
-    private Bundle mSavedInstanceState;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_custom_time_save:
+                Assert.assertTrue(!mHourMinutes.isEmpty());
+
+                String name = mCustomTimeName.getText().toString().trim();
+
+                if (mData != null)
+                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
+                else
+                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(name, mHourMinutes);
+
+                finish();
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_custom_time);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.custom_time_toolbar);
+        Assert.assertTrue(toolbar != null);
+
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        Assert.assertTrue(actionBar != null);
 
         mSavedInstanceState = savedInstanceState;
 
@@ -87,12 +133,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
             @Override
             public void afterTextChanged(Editable s) {
-                mCustomTimeSave.setEnabled(!TextUtils.isEmpty(s.toString().trim()));
+                invalidateOptionsMenu();
             }
         });
-
-        mCustomTimeSave = (Button) findViewById(R.id.custom_time_save);
-        Assert.assertTrue(mCustomTimeSave != null);
 
         initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
         initializeDay(DayOfWeek.MONDAY, R.id.time_monday_name, R.id.time_monday_time);
@@ -178,17 +221,14 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     }
 
     private void updateGui() {
-        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                Assert.assertTrue(editedDayOfWeek != null);
-                Assert.assertTrue(mTimeViews.containsKey(editedDayOfWeek));
-                Assert.assertTrue(mHourMinutes.containsKey(editedDayOfWeek));
+        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
+            Assert.assertTrue(editedDayOfWeek != null);
+            Assert.assertTrue(mTimeViews.containsKey(editedDayOfWeek));
+            Assert.assertTrue(mHourMinutes.containsKey(editedDayOfWeek));
 
-                HourMinute hourMinute = new HourMinute(hourOfDay, minute);
-                mHourMinutes.put(editedDayOfWeek, hourMinute);
-                mTimeViews.get(editedDayOfWeek).setText(hourMinute.toString());
-            }
+            HourMinute hourMinute = new HourMinute(hourOfDay, minute);
+            mHourMinutes.put(editedDayOfWeek, hourMinute);
+            mTimeViews.get(editedDayOfWeek).setText(hourMinute.toString());
         };
 
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
@@ -201,38 +241,20 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             timeView.setText(hourMinute.toString());
 
             final DayOfWeek finalDayOfWeek = dayOfWeek;
-            timeView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editedDayOfWeek = finalDayOfWeek;
+            timeView.setOnClickListener(v -> {
+                editedDayOfWeek = finalDayOfWeek;
 
-                    HourMinute hourMinute = mHourMinutes.get(finalDayOfWeek);
+                HourMinute currHourMinute = mHourMinutes.get(finalDayOfWeek);
 
-                    RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
-                    radialTimePickerDialogFragment.setStartTime(hourMinute.getHour(), hourMinute.getMinute());
-                    radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
-                    radialTimePickerDialogFragment.show(getSupportFragmentManager(), TIME_PICKER_TAG);
-                }
+                RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
+                radialTimePickerDialogFragment.setStartTime(currHourMinute.getHour(), currHourMinute.getMinute());
+                radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
+                radialTimePickerDialogFragment.show(getSupportFragmentManager(), TIME_PICKER_TAG);
             });
         }
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
-
-        mCustomTimeSave.setEnabled(!TextUtils.isEmpty(mCustomTimeName.getText().toString().trim()));
-        mCustomTimeSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String name = mCustomTimeName.getText().toString().trim();
-
-                if (mData != null)
-                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
-                else
-                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(name, mHourMinutes);
-
-                finish();
-            }
-        });
     }
 
     @Override
@@ -245,6 +267,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             mHourMinutes.put(dayOfWeek, mData.HourMinutes.get(dayOfWeek));
 
         updateGui();
+
+        invalidateOptionsMenu();
     }
 
     @Override

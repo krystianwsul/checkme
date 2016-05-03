@@ -2,8 +2,9 @@ package com.example.krystianwsul.organizator.domainmodel;
 
 import android.content.Context;
 import android.support.v4.util.Pair;
-import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
@@ -18,6 +19,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Map;
 
 public class WeeklySchedule extends Schedule {
     private final ArrayList<WeeklyScheduleDayOfWeekTime> mWeeklyScheduleDayOfWeekTimes = new ArrayList<>();
@@ -33,10 +35,15 @@ public class WeeklySchedule extends Schedule {
 
     @Override
     String getTaskText(Context context) {
-        ArrayList<String> dayOfWeekTimes = new ArrayList<>();
-        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
-            dayOfWeekTimes.add(weeklyScheduleDayOfWeekTime.getDayOfWeek().toString() + ", " + weeklyScheduleDayOfWeekTime.getTime().toString());
-        return TextUtils.join("; ", dayOfWeekTimes);
+        return Stream.of(mWeeklyScheduleDayOfWeekTimes)
+                .groupBy(weeklyScheduleDayOfWeekTimes -> weeklyScheduleDayOfWeekTimes.getTime().toString())
+                .sortBy(Map.Entry::getKey)
+                .map(entry -> Stream.of(entry.getValue())
+                    .map(WeeklyScheduleDayOfWeekTime::getDayOfWeek)
+                    .sortBy(dayOfWeek -> dayOfWeek)
+                    .map(DayOfWeek::toString)
+                    .collect(Collectors.joining(", ")) + ": " + entry.getKey())
+                .collect(Collectors.joining("; "));
     }
 
     @Override

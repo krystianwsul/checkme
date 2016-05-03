@@ -6,14 +6,13 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
@@ -25,12 +24,11 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
-    private TextView mTasksHeadingLabel;
-    private TextView mTasksRowSchedule;
-
     private static final String INTENT_KEY = "taskId";
 
     private int mTaskId;
+
+    private ActionBar mActionBar;
 
     private ShowTaskLoader.Data mData;
 
@@ -50,11 +48,8 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
         setSupportActionBar(toolbar);
 
-        mTasksHeadingLabel = (TextView) findViewById(R.id.show_task_name);
-        Assert.assertTrue(mTasksHeadingLabel != null);
-
-        mTasksRowSchedule = (TextView) findViewById(R.id.show_task_schedule);
-        Assert.assertTrue(mTasksRowSchedule != null);
+        mActionBar = getSupportActionBar();
+        Assert.assertTrue(mActionBar != null);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
@@ -106,12 +101,12 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     public void onLoadFinished(Loader<ShowTaskLoader.Data> loader, final ShowTaskLoader.Data data) {
         mData = data;
 
-        mTasksHeadingLabel.setText(data.Name);
-        String scheduleText = data.ScheduleText;
-        if (TextUtils.isEmpty(scheduleText))
-            mTasksRowSchedule.setVisibility(View.GONE);
+        mActionBar.setTitle(data.Name);
+
+        if (TextUtils.isEmpty(data.ScheduleText))
+            mActionBar.setSubtitle(null);
         else
-            mTasksRowSchedule.setText(scheduleText);
+            mActionBar.setSubtitle(data.ScheduleText);
     }
 
     @Override

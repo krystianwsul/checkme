@@ -8,28 +8,16 @@
     tools:context=".gui.tasks.ShowTaskActivity"
     android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/show_task_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
-            android:elevation="6dp"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            tools:ignore="UnusedAttribute" />
-
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:id="@+id/show_task_name"
-            android:singleLine="true"/>
-
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:id="@+id/show_task_schedule"
-            android:singleLine="true"/>
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/show_task_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="6dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        tools:ignore="UnusedAttribute" />
 
     <FrameLayout
         android:layout_width="match_parent"

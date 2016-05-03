@@ -32,6 +32,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
     compile 'com.android.support:support-v4:23.3.0'
+    compile 'com.android.support:gridlayout-v7:23.3.0'
     compile 'ch.acra:acra:4.8.2'
     compile 'com.code-troopers.betterpickers:library:2.5.2'
     compile 'com.annimon:stream:1.0.9'

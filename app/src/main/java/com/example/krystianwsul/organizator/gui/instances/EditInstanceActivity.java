@@ -125,9 +125,10 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Assert.assertTrue(mDate != null);
-
-        outState.putParcelable(DATE_KEY, mDate);
+        if (mData != null) {
+            Assert.assertTrue(mDate != null);
+            outState.putParcelable(DATE_KEY, mDate);
+        }
     }
 
     @Override
@@ -148,9 +149,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name));
         mEditInstanceTimePickerView.setCustomTimeDatas(customTimeDatas);
 
-        if (mSavedInstanceState != null) {
-            Assert.assertTrue(mSavedInstanceState.containsKey(DATE_KEY));
-
+        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(DATE_KEY)) {
             mDate = mSavedInstanceState.getParcelable(DATE_KEY);
             Assert.assertTrue(mDate != null);
         } else {

@@ -53,6 +53,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     private boolean mIsTimeValid = true;
 
+    private boolean mLoaded = false;
+
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
         return new Intent(context, CreateRootTaskActivity.class);
@@ -277,7 +279,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
+        if (mLoaded)
+            outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
     }
 
     @Override
@@ -291,9 +294,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     }
 
     private void updateGui(final CreateRootTaskLoader.Data data) {
+        mLoaded = true;
+
         int spinnerPosition = 0;
         int count = 1;
-        if (mSavedInstanceState != null) {
+        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(POSITION_KEY)) {
             int position = mSavedInstanceState.getInt(POSITION_KEY, -1);
             Assert.assertTrue(position != -1);
             if (position > 0)

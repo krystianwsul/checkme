@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.notifications;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -8,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
@@ -26,7 +28,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 
 public class TickService extends IntentService {
@@ -150,9 +151,19 @@ public class TickService extends IntentService {
 
             PendingIntent pendingIntent = PendingIntent.getService(this, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            setExact(data.NextAlarm.getLong(), pendingIntent);
+        }
+    }
 
-            alarmManager.set(AlarmManager.RTC_WAKEUP, data.NextAlarm.getLong(), pendingIntent);
+    @SuppressLint("NewApi")
+    private void setExact(long time, PendingIntent pendingIntent) {
+        Assert.assertTrue(pendingIntent != null);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
         }
     }
 
@@ -198,15 +209,12 @@ public class TickService extends IntentService {
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
         ArrayList<NotificationInstanceData> notificationInstanceDataArray = new ArrayList<>(notificationInstanceDatas);
-        Collections.sort(notificationInstanceDataArray, new Comparator<NotificationInstanceData>() {
-            @Override
-            public int compare(NotificationInstanceData lhs, NotificationInstanceData rhs) {
-                int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
-                if (timeStampComparison != 0)
-                    return timeStampComparison;
+        Collections.sort(notificationInstanceDataArray, (lhs, rhs) -> {
+            int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
+            if (timeStampComparison != 0)
+                return timeStampComparison;
 
-                return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
-            }
+            return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
         });
 
         int lineCount = Math.min(5, notificationInstanceDataArray.size());

@@ -238,10 +238,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        ArrayList<Integer> selected = mTaskAdapter.getSelected();
-        if (!selected.isEmpty()) {
-            Assert.assertTrue(mSelectionCallback.hasActionMode());
-            outState.putIntegerArrayList(SELECTED_TASKS_KEY, mTaskAdapter.getSelected());
+        if (mTaskAdapter != null) {
+            ArrayList<Integer> selected = mTaskAdapter.getSelected();
+            if (!selected.isEmpty()) {
+                Assert.assertTrue(mSelectionCallback.hasActionMode());
+                outState.putIntegerArrayList(SELECTED_TASKS_KEY, mTaskAdapter.getSelected());
+            }
         }
     }
 

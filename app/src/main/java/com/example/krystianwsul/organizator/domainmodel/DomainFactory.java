@@ -3,7 +3,6 @@ package com.example.krystianwsul.organizator.domainmodel;
 import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -1138,8 +1137,6 @@ public class DomainFactory {
 
         HashSet<Instance> allInstances = new HashSet<>();
 
-        ExactTimeStamp t1 = ExactTimeStamp.getNow();
-
         for (Instance instance : mExistingInstances) {
             ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
@@ -1151,9 +1148,6 @@ public class DomainFactory {
 
             allInstances.add(instance);
         }
-
-        ExactTimeStamp t2 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d1: " + (t2.getLong() - t1.getLong()));
 
         for (Task task : mTasks.values()) {
             for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp)) {
@@ -1168,9 +1162,6 @@ public class DomainFactory {
                 allInstances.add(instance);
             }
         }
-
-        ExactTimeStamp t3 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d2: " + (t3.getLong() - t2.getLong()));
 
         ArrayList<Instance> rootInstances = new ArrayList<>();
         for (Instance instance : allInstances)

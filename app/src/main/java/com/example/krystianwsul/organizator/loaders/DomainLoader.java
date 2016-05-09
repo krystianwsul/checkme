@@ -17,6 +17,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         super(context);
     }
 
+    // main thread
     @Override
     public void deliverResult(D data) {
         Assert.assertTrue(data != null);
@@ -32,6 +33,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         }
     }
 
+    // main thread
     @Override
     protected void onStartLoading() {
         if (mData != null)

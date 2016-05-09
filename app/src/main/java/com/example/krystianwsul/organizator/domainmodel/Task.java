@@ -2,7 +2,6 @@ package com.example.krystianwsul.organizator.domainmodel;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
@@ -172,8 +171,6 @@ public class Task {
         Assert.assertTrue(endExactTimeStamp != null);
 
         ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : mOldestRelevant); // 24 hack
-
-        Log.e("asdf", "start: " + myStartExactTimeStamp);
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)

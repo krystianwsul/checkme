@@ -243,7 +243,8 @@ public class TickService extends IntentService {
                 .setSmallIcon(R.drawable.ic_label_outline_white_24dp)
                 .setDeleteIntent(deleteIntent)
                 .setContentIntent(contentIntent)
-                .setCategory(NotificationCompat.CATEGORY_ALARM);
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
 
         if (!silent)
             builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);

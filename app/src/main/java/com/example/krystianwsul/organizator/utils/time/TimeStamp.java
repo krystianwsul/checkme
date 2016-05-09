@@ -96,7 +96,7 @@ public class TimeStamp implements Comparable<TimeStamp>, Parcelable {
         dest.writeLong(mLong);
     }
 
-    public static Parcelable.Creator<TimeStamp> CREATOR = new Creator<TimeStamp>() {
+    public static final Parcelable.Creator<TimeStamp> CREATOR = new Creator<TimeStamp>() {
         @Override
         public TimeStamp createFromParcel(Parcel source) {
             long time = source.readLong();

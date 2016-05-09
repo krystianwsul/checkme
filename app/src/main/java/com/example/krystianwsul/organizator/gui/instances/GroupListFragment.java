@@ -77,7 +77,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     private boolean mFirst = true;
 
-    private SelectionCallback mSelectionCallback = new SelectionCallback() {
+    private final SelectionCallback mSelectionCallback = new SelectionCallback() {
         private Integer mOldVisibility = null;
 
         @Override

@@ -46,7 +46,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private TaskAdapter mTaskAdapter;
 
-    private SelectionCallback mSelectionCallback = new SelectionCallback() {
+    private final SelectionCallback mSelectionCallback = new SelectionCallback() {
         @Override
         protected void unselect() {
             mTaskAdapter.uncheck();

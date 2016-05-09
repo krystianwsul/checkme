@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
@@ -156,10 +158,10 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             Assert.assertTrue(mData.ScheduleDatas != null);
             Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
 
-            ArrayList<TimeEntry> timeEntries = new ArrayList<>();
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
-            for (DailyScheduleLoader.ScheduleData scheduleData : mData.ScheduleDatas)
-                timeEntries.add(new TimeEntry(scheduleData.TimePair, showDelete));
+            List<TimeEntry> timeEntries = Stream.of(mData.ScheduleDatas)
+                    .map(scheduleData -> new TimeEntry(scheduleData.TimePair, showDelete))
+                    .collect(Collectors.toList());
 
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
 
@@ -187,16 +189,13 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
     }
 
-    private ArrayList<TimePair> getTimePairs() {
+    private List<TimePair> getTimePairs() {
         ArrayList<TimeEntry> timeEntries = mTimeEntryAdapter.getTimeEntries();
         Assert.assertTrue(!timeEntries.isEmpty());
 
-        ArrayList<TimePair> timePairs = new ArrayList<>();
-        for (TimeEntry timeEntry : timeEntries)
-            timePairs.add(new TimePair(timeEntry.getCustomTimeId(), timeEntry.getHourMinute()));
-        Assert.assertTrue(!timePairs.isEmpty());
-
-        return timePairs;
+        return Stream.of(timeEntries)
+                .map(timeEntry -> new TimePair(timeEntry.getCustomTimeId(), timeEntry.getHourMinute()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -205,7 +204,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
         Assert.assertTrue(mRootTaskId == null);
 
-        ArrayList<TimePair> timePairs = getTimePairs();
+        List<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).createDailyScheduleRootTask(mData.DataId, name, timePairs);
@@ -217,7 +216,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     public void updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        ArrayList<TimePair> timePairs = getTimePairs();
+        List<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleRootTask(mData.DataId, rootTaskId, name, timePairs);
@@ -233,7 +232,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
         Assert.assertTrue(mRootTaskId == null);
 
-        ArrayList<TimePair> timePairs = getTimePairs();
+        List<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
         DomainFactory.getDomainFactory(getActivity()).createDailyScheduleJoinRootTask(mData.DataId, name, timePairs, joinTaskIds);

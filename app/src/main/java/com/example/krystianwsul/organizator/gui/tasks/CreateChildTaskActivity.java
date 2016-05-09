@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -130,29 +129,26 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             mCreateChildTaskName.setText(data.Name);
 
         mCreateChildTaskSave.setEnabled(!TextUtils.isEmpty(mCreateChildTaskName.getText().toString().trim()));
-        mCreateChildTaskSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String name = mCreateChildTaskName.getText().toString().trim();
+        mCreateChildTaskSave.setOnClickListener(v -> {
+            String name = mCreateChildTaskName.getText().toString().trim();
 
-                if (mParentTaskId != null) {
-                    Assert.assertTrue(mChildTaskId == null);
-                    Assert.assertTrue(data == null);
+            if (mParentTaskId != null) {
+                Assert.assertTrue(mChildTaskId == null);
+                Assert.assertTrue(data == null);
 
-                    if (mTaskIds != null)
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mParentTaskId, name, mTaskIds);
-                    else
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mParentTaskId, name);
-                } else {
-                    Assert.assertTrue(mChildTaskId != null);
-                    Assert.assertTrue(data != null);
-                    Assert.assertTrue(mTaskIds == null);
+                if (mTaskIds != null)
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mParentTaskId, name, mTaskIds);
+                else
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mParentTaskId, name);
+            } else {
+                Assert.assertTrue(mChildTaskId != null);
+                Assert.assertTrue(data != null);
+                Assert.assertTrue(mTaskIds == null);
 
-                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(data.DataId, mChildTaskId, name);
-                }
-
-                finish();
+                DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(data.DataId, mChildTaskId, name);
             }
+
+            finish();
         });
     }
 

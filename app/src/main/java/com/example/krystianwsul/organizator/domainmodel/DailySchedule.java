@@ -1,8 +1,9 @@
 package com.example.krystianwsul.organizator.domainmodel;
 
 import android.content.Context;
-import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.persistencemodel.ScheduleRecord;
 import com.example.krystianwsul.organizator.utils.time.Date;
@@ -18,6 +19,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class DailySchedule extends Schedule {
     private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
@@ -33,10 +35,10 @@ public class DailySchedule extends Schedule {
 
     @Override
     String getTaskText(Context context) {
-        ArrayList<String> times = new ArrayList<>();
-        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes)
-            times.add(dailyScheduleTime.getTime().toString());
-        return context.getString(R.string.daily) + " " + TextUtils.join(", ", times);
+        return context.getString(R.string.daily) + " " + Stream.of(mDailyScheduleTimes)
+                .map(DailyScheduleTime::getTime)
+                .map(Time::toString)
+                .collect(Collectors.joining(", "));
     }
 
     @Override
@@ -66,14 +68,12 @@ public class DailySchedule extends Schedule {
         return instances;
     }
 
-    public ArrayList<Time> getTimes() {
+    public List<Time> getTimes() {
         Assert.assertTrue(!mDailyScheduleTimes.isEmpty());
 
-        ArrayList<Time> times = new ArrayList<>();
-        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes)
-            times.add(dailyScheduleTime.getTime());
-
-        return times;
+        return Stream.of(mDailyScheduleTimes)
+                .map(DailyScheduleTime::getTime)
+                .collect(Collectors.toList());
     }
 
     @Override

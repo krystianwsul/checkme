@@ -42,7 +42,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
     private ArrayList<Integer> mSelectedCustomTimeIds;
 
-    private SelectionCallback mSelectionCallback = new SelectionCallback() {
+    private final SelectionCallback mSelectionCallback = new SelectionCallback() {
         @Override
         protected void unselect() {
             mCustomTimesAdapter.unselect();
@@ -186,7 +186,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
     public static class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
         private final int mDataId;
-        private List<CustomTimeWrapper> mCustomTimeWrappers;
+        private final List<CustomTimeWrapper> mCustomTimeWrappers;
 
         private final WeakReference<ShowCustomTimesFragment> mShowCustomTimesFragmentReference;
 

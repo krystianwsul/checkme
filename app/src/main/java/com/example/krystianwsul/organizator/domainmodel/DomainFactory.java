@@ -472,7 +472,7 @@ public class DomainFactory {
             Assert.assertTrue(dailySchedule != null);
             Assert.assertTrue(dailySchedule.current(now));
 
-            ArrayList<Time> times = dailySchedule.getTimes();
+            List<Time> times = dailySchedule.getTimes();
             scheduleDatas = new ArrayList<>();
             for (Time time : times)
                 scheduleDatas.add(new DailyScheduleLoader.ScheduleData(time.getTimePair()));
@@ -638,7 +638,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized ExactTimeStamp setInstanceNotificationDone(int dataId, InstanceKey instanceKey) {
+    public synchronized void setInstanceNotificationDone(int dataId, InstanceKey instanceKey) {
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);
@@ -651,8 +651,6 @@ public class DomainFactory {
         instance.setNotified(true, now);
 
         save(dataId);
-
-        return instance.getDone();
     }
 
     public synchronized ExactTimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done) {
@@ -749,7 +747,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createDailyScheduleRootTask(int dataId, String name, ArrayList<TimePair> timePairs) {
+    public synchronized void createDailyScheduleRootTask(int dataId, String name, List<TimePair> timePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -820,7 +818,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateDailyScheduleRootTask(int dataId, int rootTaskId, String name, ArrayList<TimePair> timePairs) {
+    public synchronized void updateDailyScheduleRootTask(int dataId, int rootTaskId, String name, List<TimePair> timePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -893,7 +891,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createDailyScheduleJoinRootTask(int dataId, String name, ArrayList<TimePair> timePairs, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createDailyScheduleJoinRootTask(int dataId, String name, List<TimePair> timePairs, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -1303,7 +1301,7 @@ public class DomainFactory {
         return rootTask;
     }
 
-    private ArrayList<Time> getTimes(ArrayList<TimePair> timePairs) {
+    private ArrayList<Time> getTimes(List<TimePair> timePairs) {
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
 

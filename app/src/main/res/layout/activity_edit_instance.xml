@@ -27,18 +27,22 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/edit_instance_name">
+        android:layout_below="@id/edit_instance_name"
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/edit_instance_date"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
-            android:id="@+id/edit_instance_timepickerview"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"/>
+            style="@style/Widget.AppCompat.Spinner.Underlined"/>
+
+        <TextView
+            android:id="@+id/edit_instance_time"
+            android:maxLines="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            style="@style/Widget.AppCompat.Spinner.Underlined"/>
 
     </LinearLayout>
 

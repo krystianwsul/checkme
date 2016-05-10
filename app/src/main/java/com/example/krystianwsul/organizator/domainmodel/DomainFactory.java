@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeMap;
 
 public class DomainFactory {
     private static DomainFactory sDomainFactory;
@@ -197,7 +198,7 @@ public class DomainFactory {
         Assert.assertTrue(instance.getDone() == null);
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        HashMap<Integer, EditInstanceLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        TreeMap<Integer, EditInstanceLoader.CustomTimeData> customTimeDatas = new TreeMap<>();
         for (CustomTime customTime : currentCustomTimes)
             customTimeDatas.put(customTime.getId(), new EditInstanceLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 

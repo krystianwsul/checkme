@@ -12,7 +12,6 @@ import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
 import java.util.TreeMap;
 
 public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
@@ -36,9 +35,9 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
         public final Date InstanceDate;
         public final TimePair InstanceTimePair;
         public final String Name;
-        public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
+        public final TreeMap<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair, String name, HashMap<Integer, CustomTimeData> customTimeDatas) {
+        public Data(InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair, String name, TreeMap<Integer, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(instanceDate != null);
             Assert.assertTrue(instanceTimePair != null);

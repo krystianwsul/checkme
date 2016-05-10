@@ -26,4 +26,5 @@
     <string name="mark_done">Mark done</string>
     <string name="mark_not_done">Mark not done</string>
     <string name="name_hint">Enter a name</string>
+    <string name="time_dialog_title">Pick a time</string>
 </resources>

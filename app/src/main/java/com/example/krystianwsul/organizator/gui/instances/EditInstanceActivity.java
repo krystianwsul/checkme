@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.gui.instances;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -157,29 +158,6 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         unregisterReceiver(mBroadcastReceiver);
     }
 
-    private void updateDateText() {
-        Assert.assertTrue(mDate != null);
-        Assert.assertTrue(mEditInstanceDate != null);
-
-        mEditInstanceDate.setText(mDate.getDisplayText(this));
-        setValidTime();
-    }
-
-    private void updateTimeText() {
-        Assert.assertTrue(mHourMinute != null);
-        Assert.assertTrue(mEditInstanceTime != null);
-        Assert.assertTrue(mData != null);
-
-        if (mCustomTimeId != null) {
-            EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mCustomTimeId);
-            Assert.assertTrue(customTimeData != null);
-
-            mEditInstanceTime.setText(customTimeData.Name);
-        } else {
-            mEditInstanceTime.setText(mHourMinute.toString());
-        }
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -239,7 +217,6 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         mEditInstanceName.setText(mData.Name);
 
         updateDateText();
-        updateTimeText();
 
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_FRAGMENT_TAG);
         if (radialTimePickerDialogFragment != null)
@@ -263,11 +240,12 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         });
 
         mEditInstanceTime.setOnClickListener(v -> {
-            ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas1 = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
-                    .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name))
+            Assert.assertTrue(mDate != null);
+            ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
+                    .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
                     .collect(Collectors.toList()));
 
-            TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas1);
+            TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas);
             Assert.assertTrue(timeDialogFragment != null);
 
             timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
@@ -280,7 +258,36 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
     }
 
+    @Override
     public void onLoaderReset(Loader<EditInstanceLoader.Data> loader) {
+    }
+
+    private void updateDateText() {
+        Assert.assertTrue(mDate != null);
+        Assert.assertTrue(mEditInstanceDate != null);
+
+        mEditInstanceDate.setText(mDate.getDisplayText(this));
+
+        updateTimeText();
+
+        setValidTime();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateTimeText() {
+        Assert.assertTrue(mHourMinute != null);
+        Assert.assertTrue(mEditInstanceTime != null);
+        Assert.assertTrue(mData != null);
+        Assert.assertTrue(mDate != null);
+
+        if (mCustomTimeId != null) {
+            EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mCustomTimeId);
+            Assert.assertTrue(customTimeData != null);
+
+            mEditInstanceTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
+        } else {
+            mEditInstanceTime.setText(mHourMinute.toString());
+        }
     }
 
     private void setValidTime() {

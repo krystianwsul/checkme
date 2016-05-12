@@ -1,5 +1,6 @@
 package com.example.krystianwsul.organizator.gui.tasks;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -19,20 +20,24 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.TimeDialogFragment;
 import com.example.krystianwsul.organizator.loaders.WeeklyScheduleLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimePair;
+import com.example.krystianwsul.organizator.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<WeeklyScheduleLoader.Data> {
@@ -44,6 +49,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
 
     private static final String TIME_PICKER_TAG = "timePicker";
+    private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
 
     private int mHourMinutePickerPosition = -1;
 
@@ -53,19 +59,51 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private Bundle mSavedInstanceState;
 
     private DayOfWeek mDayOfWeek = DayOfWeek.today();
-    private HourMinute mHourMinute = HourMinute.getNow();
+    private HourMinute mHourMinute = null;
 
     private Integer mRootTaskId;
     private WeeklyScheduleLoader.Data mData;
+
+    private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
+        @Override
+        public void onCustomTimeSelected(int customTimeId) {
+            Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mData != null);
+
+            DayOfWeekTimeEntry dayOfWeekTimeEntry = mDayOfWeekTimeEntryAdapter.getDateTimeEntry(mHourMinutePickerPosition);
+            Assert.assertTrue(dayOfWeekTimeEntry != null);
+
+            dayOfWeekTimeEntry.mTimePairPersist.setCustomTimeId(customTimeId);
+            mDayOfWeekTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
+
+            mHourMinutePickerPosition = -1;
+        }
+
+        @Override
+        public void onHourMinuteSelected() {
+            Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mData != null);
+
+            DayOfWeekTimeEntry dayOfWeekTimeEntry = mDayOfWeekTimeEntryAdapter.getDateTimeEntry(mHourMinutePickerPosition);
+            Assert.assertTrue(dayOfWeekTimeEntry != null);
+
+            RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
+            radialTimePickerDialogFragment.setStartTime(dayOfWeekTimeEntry.mTimePairPersist.getHourMinute().getHour(), dayOfWeekTimeEntry.mTimePairPersist.getHourMinute().getMinute());
+            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
+            radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
+        }
+    };
 
     private final RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
         @Override
         public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
             Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mData != null);
 
             DayOfWeekTimeEntry dayOfWeekTimeEntry = mDayOfWeekTimeEntryAdapter.getDateTimeEntry(mHourMinutePickerPosition);
+            Assert.assertTrue(dayOfWeekTimeEntry != null);
 
-            dayOfWeekTimeEntry.setTimePair(new TimePair(new HourMinute(hourOfDay, minute)));
+            dayOfWeekTimeEntry.mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
             mDayOfWeekTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
             mHourMinutePickerPosition = -1;
@@ -199,6 +237,10 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
+
+        TimeDialogFragment timeDialogFragment = (TimeDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_LIST_FRAGMENT_TAG);
+        if (timeDialogFragment != null)
+            timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
     }
 
     @Override
@@ -218,7 +260,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
         ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = new ArrayList<>();
         for (DayOfWeekTimeEntry dayOfWeekTimeEntry : mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
-            dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.getDayOfWeek(), new TimePair(dayOfWeekTimeEntry.getCustomTimeId(), dayOfWeekTimeEntry.getHourMinute())));
+            dayOfWeekTimePairs.add(new Pair<>(dayOfWeekTimeEntry.mDayOfWeek, dayOfWeekTimeEntry.mTimePairPersist.getTimePair()));
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
         return dayOfWeekTimePairs;
@@ -271,7 +313,10 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
             mContext = context;
             mDateTimeEntries = new ArrayList<>();
-            mDateTimeEntries.add(new DayOfWeekTimeEntry(mDayOfWeek, new TimePair(mHourMinute), false));
+            if (mHourMinute != null)
+                mDateTimeEntries.add(new DayOfWeekTimeEntry(mDayOfWeek, new TimePair(mHourMinute), false));
+            else
+                mDateTimeEntries.add(new DayOfWeekTimeEntry(mDayOfWeek, false));
         }
 
         public DayOfWeekTimeEntryAdapter(Context context, List<DayOfWeekTimeEntry> dateTimeEntries) {
@@ -295,20 +340,18 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             View weeklyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.row_weekly_schedule, parent, false);
 
             Spinner weeklyScheduleDay = (Spinner) weeklyScheduleRow.findViewById(R.id.weekly_schedule_day);
+            Assert.assertTrue(weeklyScheduleDay != null);
 
-            TimePickerView weeklyScheduleTime = (TimePickerView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_time);
+            TextView weeklyScheduleTime = (TextView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_time);
             Assert.assertTrue(weeklyScheduleTime != null);
 
-            HashMap<Integer, TimePickerView.CustomTimeData> customTimeDatas = new HashMap<>();
-            for (WeeklyScheduleLoader.CustomTimeData customTimeData : mData.CustomTimeDatas.values())
-                customTimeDatas.put(customTimeData.Id, new TimePickerView.CustomTimeData(customTimeData.Id, customTimeData.Name));
-            weeklyScheduleTime.setCustomTimeDatas(customTimeDatas);
-
             ImageView weeklyScheduleImage = (ImageView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_image);
+            Assert.assertTrue(weeklyScheduleImage != null);
 
             return new DayOfWeekTimeHolder(weeklyScheduleRow, weeklyScheduleDay, weeklyScheduleTime, weeklyScheduleImage);
         }
 
+        @SuppressLint("SetTextI18n")
         @Override
         public void onBindViewHolder(final DayOfWeekTimeHolder dayOfWeekTimeHolder, int position) {
             final DayOfWeekTimeEntry dayOfWeekTimeEntry = mDateTimeEntries.get(position);
@@ -318,7 +361,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             dayOfWeekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             dayOfWeekTimeHolder.mWeeklyScheduleDay.setAdapter(dayOfWeekAdapter);
-            dayOfWeekTimeHolder.mWeeklyScheduleDay.setSelection(dayOfWeekAdapter.getPosition(dayOfWeekTimeEntry.getDayOfWeek()));
+            dayOfWeekTimeHolder.mWeeklyScheduleDay.setSelection(dayOfWeekAdapter.getPosition(dayOfWeekTimeEntry.mDayOfWeek));
 
             dayOfWeekTimeHolder.mWeeklyScheduleDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -335,31 +378,16 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
                 }
             });
 
-            if (dayOfWeekTimeEntry.getCustomTimeId() != null) {
-                Assert.assertTrue(dayOfWeekTimeEntry.getHourMinute() == null);
-                dayOfWeekTimeHolder.mWeeklyScheduleTime.setCustomTimeId(dayOfWeekTimeEntry.getCustomTimeId());
+            if (dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId() != null) {
+                WeeklyScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId());
+                Assert.assertTrue(customTimeData != null);
+
+                dayOfWeekTimeHolder.mWeeklyScheduleTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(dayOfWeekTimeEntry.mDayOfWeek) + ")");
             } else {
-                Assert.assertTrue(dayOfWeekTimeEntry.getHourMinute() != null);
-                dayOfWeekTimeHolder.mWeeklyScheduleTime.setHourMinute(dayOfWeekTimeEntry.getHourMinute());
+                dayOfWeekTimeHolder.mWeeklyScheduleTime.setText(dayOfWeekTimeEntry.mTimePairPersist.getHourMinute().toString());
             }
 
-            dayOfWeekTimeHolder.mWeeklyScheduleTime.setOnTimeSelectedListener(new TimePickerView.OnTimeSelectedListener() {
-                @Override
-                public void onCustomTimeSelected(int customTimeId) {
-                    dayOfWeekTimeEntry.setTimePair(new TimePair(customTimeId));
-                }
-
-                @Override
-                public void onHourMinuteSelected(HourMinute hourMinute) {
-                    Assert.assertTrue(hourMinute != null);
-                    dayOfWeekTimeEntry.setTimePair(new TimePair(hourMinute));
-                }
-
-                @Override
-                public void onHourMinuteClick() {
-                    dayOfWeekTimeHolder.onHourMinuteClick();
-                }
-            });
+            dayOfWeekTimeHolder.mWeeklyScheduleTime.setOnClickListener(v -> dayOfWeekTimeHolder.onTimeClick());
 
             dayOfWeekTimeHolder.mWeeklyScheduleImage.setVisibility(dayOfWeekTimeEntry.getShowDelete() ? View.VISIBLE : View.INVISIBLE);
 
@@ -388,7 +416,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
                 notifyItemChanged(0);
             }
 
-            DayOfWeekTimeEntry dayOfWeekTimeEntry = new DayOfWeekTimeEntry(DayOfWeek.today(), new TimePair(HourMinute.getNow()), true);
+            DayOfWeekTimeEntry dayOfWeekTimeEntry = new DayOfWeekTimeEntry(DayOfWeek.today(), true);
             mDateTimeEntries.add(position, dayOfWeekTimeEntry);
             notifyItemInserted(position);
         }
@@ -399,10 +427,10 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
         public class DayOfWeekTimeHolder extends RecyclerView.ViewHolder {
             public final Spinner mWeeklyScheduleDay;
-            public final TimePickerView mWeeklyScheduleTime;
+            public final TextView mWeeklyScheduleTime;
             public final ImageView mWeeklyScheduleImage;
 
-            public DayOfWeekTimeHolder(View weeklyScheduleRow, Spinner weeklyScheduleDay, TimePickerView weeklyScheduleTime, ImageView weeklyScheduleImage) {
+            public DayOfWeekTimeHolder(View weeklyScheduleRow, Spinner weeklyScheduleDay, TextView weeklyScheduleTime, ImageView weeklyScheduleImage) {
                 super(weeklyScheduleRow);
 
                 Assert.assertTrue(weeklyScheduleDay != null);
@@ -414,25 +442,40 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
                 mWeeklyScheduleImage = weeklyScheduleImage;
             }
 
+            @SuppressLint("SetTextI18n")
             public void onDayOfWeekSelected(DayOfWeek dayOfWeek) {
                 Assert.assertTrue(dayOfWeek != null);
 
                 DayOfWeekTimeEntry dayOfWeekTimeEntry = mDateTimeEntries.get(getAdapterPosition());
                 Assert.assertTrue(dayOfWeekTimeEntry != null);
 
-                dayOfWeekTimeEntry.setDayOfWeek(dayOfWeek);
+                dayOfWeekTimeEntry.mDayOfWeek = dayOfWeek;
+
+                if (dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId() != null) {
+                    WeeklyScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId());
+                    Assert.assertTrue(customTimeData != null);
+
+                    mWeeklyScheduleTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(dayOfWeekTimeEntry.mDayOfWeek) + ")");
+                } else {
+                    mWeeklyScheduleTime.setText(dayOfWeekTimeEntry.mTimePairPersist.getHourMinute().toString());
+                }
             }
 
-            public void onHourMinuteClick() {
-                mHourMinutePickerPosition = getAdapterPosition();
-                DayOfWeekTimeEntry dayOfWeekTimeEntry = mDateTimeEntries.get(mHourMinutePickerPosition);
-                Assert.assertTrue(dayOfWeekTimeEntry != null);
+            public void onTimeClick() {
+                Assert.assertTrue(mData != null);
 
-                RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
-                HourMinute startTime = dayOfWeekTimeEntry.getHourMinute();
-                radialTimePickerDialogFragment.setStartTime(startTime.getHour(), startTime.getMinute());
-                radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
-                radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
+                mHourMinutePickerPosition = getAdapterPosition();
+
+                ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
+                        .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")"))
+                        .collect(Collectors.toList()));
+
+                TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas);
+                Assert.assertTrue(timeDialogFragment != null);
+
+                timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
+
+                timeDialogFragment.show(getChildFragmentManager(), TIME_LIST_FRAGMENT_TAG);
             }
 
             public void delete() {
@@ -444,39 +487,34 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     public static class DayOfWeekTimeEntry implements Parcelable {
-        private DayOfWeek mDayOfWeek;
-        private TimePair mTimePair;
+        public DayOfWeek mDayOfWeek;
+        public TimePairPersist mTimePairPersist;
         private boolean mShowDelete = false;
 
-        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, TimePair timePair, boolean showDelete) {
+        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, boolean showDelete) {
             Assert.assertTrue(dayOfWeek != null);
-            Assert.assertTrue(timePair != null);
 
             mDayOfWeek = dayOfWeek;
-            mTimePair = timePair;
+            mTimePairPersist = new TimePairPersist();
             mShowDelete = showDelete;
         }
 
-        public DayOfWeek getDayOfWeek() {
-            return mDayOfWeek;
-        }
-
-        public Integer getCustomTimeId() {
-            return mTimePair.CustomTimeId;
-        }
-
-        public HourMinute getHourMinute() {
-            return mTimePair.HourMinute;
-        }
-
-        public void setDayOfWeek(DayOfWeek dayOfWeek) {
+        private DayOfWeekTimeEntry(DayOfWeek dayOfWeek, TimePair timePair, boolean showDelete) {
             Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(timePair != null);
+
             mDayOfWeek = dayOfWeek;
+            mTimePairPersist = new TimePairPersist(timePair);
+            mShowDelete = showDelete;
         }
 
-        public void setTimePair(TimePair timePair) {
-            Assert.assertTrue(timePair != null);
-            mTimePair = timePair;
+        private DayOfWeekTimeEntry(DayOfWeek dayOfWeek, TimePairPersist timePairPersist, boolean showDelete) {
+            Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(timePairPersist != null);
+
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = timePairPersist;
+            mShowDelete = showDelete;
         }
 
         @Override
@@ -487,19 +525,19 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         @Override
         public void writeToParcel(Parcel out, int flags) {
             out.writeSerializable(mDayOfWeek);
-            out.writeParcelable(mTimePair, 0);
+            out.writeParcelable(mTimePairPersist, 0);
             out.writeInt(mShowDelete ? 1 : 0);
         }
 
         public static final Parcelable.Creator<DayOfWeekTimeEntry> CREATOR = new Creator<DayOfWeekTimeEntry>() {
             public DayOfWeekTimeEntry createFromParcel(Parcel in) {
                 DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
-                TimePair timePair = in.readParcelable(TimePair.class.getClassLoader());
+                TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
                 int showDeleteInt = in.readInt();
                 Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
                 boolean showDelete = (showDeleteInt == 1);
 
-                return new DayOfWeekTimeEntry(dayOfWeek, timePair, showDelete);
+                return new DayOfWeekTimeEntry(dayOfWeek, timePairPersist, showDelete);
             }
 
             public DayOfWeekTimeEntry[] newArray(int size) {

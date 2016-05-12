@@ -5,12 +5,14 @@ import android.text.TextUtils;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 import com.example.krystianwsul.organizator.utils.time.DayOfWeek;
+import com.example.krystianwsul.organizator.utils.time.HourMinute;
 import com.example.krystianwsul.organizator.utils.time.TimePair;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data> {
     private final Integer mRootTaskId; // possibly null
@@ -100,19 +102,24 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
     public static class CustomTimeData {
         public final int Id;
         public final String Name;
+        public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(int id, String name) {
+        public CustomTimeData(int id, String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(hourMinutes != null);
+            Assert.assertTrue(hourMinutes.size() == 7);
 
             Id = id;
             Name = name;
+            HourMinutes = hourMinutes;
         }
 
         @Override
         public int hashCode() {
-            return (Id + Name.hashCode());
+            return (Id + Name.hashCode() + HourMinutes.hashCode());
         }
 
+        @SuppressWarnings("SimplifiableIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -126,7 +133,13 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
 
             CustomTimeData customTimeData = (CustomTimeData) object;
 
-            return (Id == customTimeData.Id && Name.equals(customTimeData.Name));
+            if (Id != customTimeData.Id)
+                return false;
+
+            if (!Name.equals(customTimeData.Name))
+                return false;
+
+            return (HourMinutes.equals(customTimeData.HourMinutes));
         }
     }
 }

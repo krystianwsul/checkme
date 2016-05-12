@@ -119,6 +119,7 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
             return (Id + Name.hashCode() + HourMinutes.hashCode());
         }
 
+        @SuppressWarnings("SimplifiableIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -132,7 +133,13 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
 
             CustomTimeData customTimeData = (CustomTimeData) object;
 
-            return (Id == customTimeData.Id && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
+            if (Id != customTimeData.Id)
+                return false;
+
+            if (!Name.equals(customTimeData.Name))
+                return false;
+
+            return (HourMinutes.equals(customTimeData.HourMinutes));
         }
     }
 }

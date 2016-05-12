@@ -509,7 +509,7 @@ public class DomainFactory {
         ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
         HashMap<Integer, WeeklyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes)
-            customTimeDatas.put(customTime.getId(), new WeeklyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName()));
+            customTimeDatas.put(customTime.getId(), new WeeklyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
         return new WeeklyScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }

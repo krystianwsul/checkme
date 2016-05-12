@@ -211,7 +211,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         });
 
         mEditInstanceTime.setOnClickListener(v -> {
-            Assert.assertTrue(mDate != null);
+            Assert.assertTrue(mData != null);
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
                     .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
                     .collect(Collectors.toList()));

@@ -67,9 +67,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             Assert.assertTrue(mData != null);
 
             mTimePairPersist.setCustomTimeId(customTimeId);
-
             updateTimeText();
-
             setValidTime();
         }
 
@@ -162,7 +160,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         Assert.assertTrue(mTimeView != null);
 
         mTimeView.setOnClickListener(v -> {
-            Assert.assertTrue(mDate != null);
+            Assert.assertTrue(mData != null);
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
                     .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
                     .collect(Collectors.toList()));
@@ -174,6 +172,10 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
             timeDialogFragment.show(getChildFragmentManager(), TIME_LIST_FRAGMENT_TAG);
         });
+
+        TimeDialogFragment timeDialogFragment = (TimeDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_LIST_FRAGMENT_TAG);
+        if (timeDialogFragment != null)
+            timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
 
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
         if (radialTimePickerDialogFragment != null)

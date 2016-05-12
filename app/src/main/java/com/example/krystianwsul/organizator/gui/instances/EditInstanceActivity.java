@@ -25,7 +25,7 @@ import com.example.krystianwsul.organizator.notifications.TickService;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.HourMinute;
-import com.example.krystianwsul.organizator.utils.time.TimePair;
+import com.example.krystianwsul.organizator.utils.time.TimePairPersist;
 import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -37,8 +37,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private static final String INSTANCE_KEY = "instanceKey";
 
     private static final String DATE_KEY = "date";
-    private static final String CUSTOM_TIME_ID_KEY = "customTimeId";
-    private static final String HOUR_MINUTE_KEY = "hourMinute";
+    private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
 
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_FRAGMENT_TAG = "timeFragment";
@@ -55,15 +54,14 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     private BroadcastReceiver mBroadcastReceiver;
 
-    private Integer mCustomTimeId;
-    private HourMinute mHourMinute = HourMinute.getNextHour();
+    private TimePairPersist mTimePairPersist;
 
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
         public void onCustomTimeSelected(int customTimeId) {
             Assert.assertTrue(mData != null);
 
-            mCustomTimeId = customTimeId;
+            mTimePairPersist.setCustomTimeId(customTimeId);
 
             updateTimeText();
 
@@ -75,7 +73,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             Assert.assertTrue(mData != null);
 
             RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
-            radialTimePickerDialogFragment.setStartTime(mHourMinute.getHour(), mHourMinute.getMinute());
+            radialTimePickerDialogFragment.setStartTime(mTimePairPersist.getHourMinute().getHour(), mTimePairPersist.getHourMinute().getMinute());
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
             radialTimePickerDialogFragment.show(getSupportFragmentManager(), TIME_FRAGMENT_TAG);
         }
@@ -84,8 +82,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private final RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = (dialog, hourOfDay, minute) -> {
         Assert.assertTrue(mData != null);
 
-        mCustomTimeId = null;
-        mHourMinute = new HourMinute(hourOfDay, minute);
+
+        mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
 
         updateTimeText();
 
@@ -166,11 +164,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             Assert.assertTrue(mDate != null);
             outState.putParcelable(DATE_KEY, mDate);
 
-            if (mCustomTimeId != null)
-                outState.putInt(CUSTOM_TIME_ID_KEY, mCustomTimeId);
-
-            Assert.assertTrue(mHourMinute != null);
-            outState.putParcelable(HOUR_MINUTE_KEY, mHourMinute);
+            Assert.assertTrue(mTimePairPersist != null);
+            outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist);
         }
     }
 
@@ -191,27 +186,12 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             mDate = mSavedInstanceState.getParcelable(DATE_KEY);
             Assert.assertTrue(mDate != null);
 
-            Assert.assertTrue(mSavedInstanceState.containsKey(HOUR_MINUTE_KEY));
-            mHourMinute = mSavedInstanceState.getParcelable(HOUR_MINUTE_KEY);
-            Assert.assertTrue(mHourMinute != null);
-
-            if (mSavedInstanceState.containsKey(CUSTOM_TIME_ID_KEY)) {
-                mCustomTimeId = mSavedInstanceState.getInt(CUSTOM_TIME_ID_KEY, -1);
-                Assert.assertTrue(mCustomTimeId != -1);
-            }
+            Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
+            mTimePairPersist = mSavedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
+            Assert.assertTrue(mTimePairPersist != null);
         } else {
             mDate = mData.InstanceDate;
-
-            if (mData.InstanceTimePair.CustomTimeId != null) {
-                Assert.assertTrue(mData.InstanceTimePair.HourMinute == null);
-
-                mCustomTimeId = mData.InstanceTimePair.CustomTimeId;
-            } else {
-                Assert.assertTrue(mData.InstanceTimePair.HourMinute != null);
-                Assert.assertTrue(mCustomTimeId == null);
-
-                mHourMinute = mData.InstanceTimePair.HourMinute;
-            }
+            mTimePairPersist = new TimePairPersist(mData.InstanceTimePair);
         }
 
         mEditInstanceName.setText(mData.Name);
@@ -226,13 +206,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             Assert.assertTrue(mDate != null);
             Assert.assertTrue(mData != null);
 
-            TimePair timePair;
-            if (mCustomTimeId != null)
-                timePair = new TimePair(mCustomTimeId);
-            else
-                timePair = new TimePair(mHourMinute);
-
-            DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, timePair);
+            DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
 
             TickService.startService(EditInstanceActivity.this);
 
@@ -275,18 +249,18 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @SuppressLint("SetTextI18n")
     private void updateTimeText() {
-        Assert.assertTrue(mHourMinute != null);
+        Assert.assertTrue(mTimePairPersist != null);
         Assert.assertTrue(mEditInstanceTime != null);
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mDate != null);
 
-        if (mCustomTimeId != null) {
-            EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mCustomTimeId);
+        if (mTimePairPersist.getCustomTimeId() != null) {
+            EditInstanceLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
             mEditInstanceTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
         } else {
-            mEditInstanceTime.setText(mHourMinute.toString());
+            mEditInstanceTime.setText(mTimePairPersist.getHourMinute().toString());
         }
     }
 
@@ -295,11 +269,10 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         if (mData != null) {
             HourMinute hourMinute;
-
-            if (mCustomTimeId != null)
-                hourMinute = mData.CustomTimeDatas.get(mCustomTimeId).HourMinutes.get(mDate.getDayOfWeek());
+            if (mTimePairPersist.getCustomTimeId() != null)
+                hourMinute = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId()).HourMinutes.get(mDate.getDayOfWeek());
             else
-                hourMinute = mHourMinute;
+                hourMinute = mTimePairPersist.getHourMinute();
 
             valid = (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
         } else {

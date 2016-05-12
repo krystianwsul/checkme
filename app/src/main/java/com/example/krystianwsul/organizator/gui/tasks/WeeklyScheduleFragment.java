@@ -416,7 +416,11 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
                 notifyItemChanged(0);
             }
 
-            DayOfWeekTimeEntry dayOfWeekTimeEntry = new DayOfWeekTimeEntry(DayOfWeek.today(), true);
+            DayOfWeekTimeEntry dayOfWeekTimeEntry;
+            if (mHourMinute != null)
+                dayOfWeekTimeEntry = new DayOfWeekTimeEntry(mDayOfWeek, mHourMinute, true);
+            else
+                dayOfWeekTimeEntry = new DayOfWeekTimeEntry(mDayOfWeek, true);
             mDateTimeEntries.add(position, dayOfWeekTimeEntry);
             notifyItemInserted(position);
         }
@@ -488,7 +492,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
     public static class DayOfWeekTimeEntry implements Parcelable {
         public DayOfWeek mDayOfWeek;
-        public TimePairPersist mTimePairPersist;
+        public final TimePairPersist mTimePairPersist;
         private boolean mShowDelete = false;
 
         public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, boolean showDelete) {
@@ -496,6 +500,15 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
             mDayOfWeek = dayOfWeek;
             mTimePairPersist = new TimePairPersist();
+            mShowDelete = showDelete;
+        }
+
+        public DayOfWeekTimeEntry(DayOfWeek dayOfWeek, HourMinute hourMinute, boolean showDelete) {
+            Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(hourMinute != null);
+
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = new TimePairPersist(hourMinute);
             mShowDelete = showDelete;
         }
 

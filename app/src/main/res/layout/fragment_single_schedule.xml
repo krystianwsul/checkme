@@ -13,13 +13,15 @@
     <TextView
         android:id="@+id/single_schedule_date"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.Spinner.Underlined"/>
 
-    <com.example.krystianwsul.organizator.gui.tasks.TimePickerView
-        android:id="@+id/single_schedule_timepickerview"
+    <TextView
+        android:id="@+id/single_schedule_time"
+        android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"/>
+        style="@style/Widget.AppCompat.Spinner.Underlined"/>
 
     <ImageView
         android:id="@+id/weekly_schedule_image"

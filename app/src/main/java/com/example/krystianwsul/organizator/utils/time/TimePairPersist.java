@@ -9,6 +9,10 @@ public class TimePairPersist implements Parcelable {
     private Integer mCustomTimeId;
     private HourMinute mHourMinute = HourMinute.getNextHour();
 
+    public TimePairPersist() {
+
+    }
+
     private TimePairPersist(Integer customTimeId, HourMinute hourMinute) {
         Assert.assertTrue(hourMinute != null);
 
@@ -20,6 +24,11 @@ public class TimePairPersist implements Parcelable {
         mCustomTimeId = timePair.CustomTimeId;
         if (timePair.HourMinute != null)
             mHourMinute = timePair.HourMinute;
+    }
+
+    public TimePairPersist(HourMinute hourMinute) {
+        Assert.assertTrue(hourMinute != null);
+        mHourMinute = hourMinute;
     }
 
     public void setCustomTimeId(int customTimeId) {

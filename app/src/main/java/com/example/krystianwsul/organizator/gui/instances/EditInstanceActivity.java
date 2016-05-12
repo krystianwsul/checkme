@@ -82,11 +82,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private final RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = (dialog, hourOfDay, minute) -> {
         Assert.assertTrue(mData != null);
 
-
         mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
-
         updateTimeText();
-
         setValidTime();
     };
 

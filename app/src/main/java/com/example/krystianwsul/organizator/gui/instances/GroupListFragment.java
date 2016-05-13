@@ -108,6 +108,17 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     startActivity(ShowTaskActivity.getIntent(instanceData2.InstanceKey.TaskId, getActivity()));
                     break;
+                case R.id.action_group_edit_task:
+                    Assert.assertTrue(selected.size() == 1);
+
+                    GroupListLoader.InstanceData instanceData3 = selected.get(0).mInstanceData;
+                    Assert.assertTrue(instanceData3.TaskCurrent);
+
+                    if (instanceData3.IsRootTask)
+                        startActivity(CreateRootTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
+                    else
+                        startActivity(CreateChildTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
+                    break;
                 case R.id.action_group_join:
                     ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(selected)
                             .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.InstanceKey.TaskId)
@@ -204,6 +215,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             List<GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode> selected = mGroupAdapter.mNodeCollection.mNotDoneGroupCollection.getSelected();
             Assert.assertTrue(selected != null);
             Assert.assertTrue(!selected.isEmpty());
+            Assert.assertTrue(Stream.of(selected).allMatch(node -> (node.mInstanceData.Done == null)));
 
             if (selected.size() == 1) {
                 GroupListLoader.InstanceData instanceData = selected.get(0).mInstanceData;
@@ -211,6 +223,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 menu.findItem(R.id.action_group_edit_instance).setVisible(instanceData.IsRootInstance);
                 menu.findItem(R.id.action_group_show_task).setVisible(instanceData.TaskCurrent);
+                menu.findItem(R.id.action_group_edit_task).setVisible(instanceData.TaskCurrent);
                 menu.findItem(R.id.action_group_join).setVisible(false);
             } else {
                 Assert.assertTrue(selected.size() > 1);

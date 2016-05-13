@@ -15,6 +15,8 @@ import android.view.MenuItem;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.tasks.CreateChildTaskActivity;
+import com.example.krystianwsul.organizator.gui.tasks.CreateRootTaskActivity;
 import com.example.krystianwsul.organizator.gui.tasks.ShowTaskActivity;
 import com.example.krystianwsul.organizator.loaders.ShowInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
@@ -71,6 +73,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         boolean showTask = (mData != null && !mData.Done && mData.TaskCurrent);
         menu.findItem(R.id.instance_menu_show_task).setVisible(showTask);
 
+        boolean editTask = (mData != null && !mData.Done && mData.TaskCurrent);
+        menu.findItem(R.id.instance_menu_edit_task).setVisible(editTask);
+
         return true;
     }
 
@@ -102,6 +107,16 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 Assert.assertTrue(mData.TaskCurrent);
 
                 startActivity(ShowTaskActivity.getIntent(mData.InstanceKey.TaskId, this));
+                break;
+            case R.id.instance_menu_edit_task:
+                Assert.assertTrue(mData != null);
+                Assert.assertTrue(!mData.Done);
+                Assert.assertTrue(mData.TaskCurrent);
+
+                if (mData.IsRootTask)
+                    startActivity(CreateRootTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                else
+                    startActivity(CreateChildTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
                 break;
             default:
                 throw new UnsupportedOperationException();

@@ -27,4 +27,5 @@
     <string name="mark_not_done">Oznacz jako nie zrobione</string>
     <string name="name_hint">Wpisz nazwę</string>
     <string name="time_dialog_title">Wybierz czas</string>
+    <string name="edit_task">Edytuj zadanie</string>
 </resources>

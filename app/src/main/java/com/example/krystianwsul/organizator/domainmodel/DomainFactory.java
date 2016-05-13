@@ -260,7 +260,8 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
+            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -328,7 +329,8 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
+            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -358,7 +360,8 @@ public class DomainFactory {
             Task childTask = mTasks.get(childInstance.getTaskId());
             Assert.assertTrue(childTask != null);
 
-            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getChildInstanceNames(now), childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now)));
+            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getChildInstanceNames(now), childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -392,7 +395,8 @@ public class DomainFactory {
             Task task = mTasks.get(instance.getTaskId());
             Assert.assertTrue(task != null);
 
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now)));
+            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -415,7 +419,8 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now));
+        Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask);
     }
 
     public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {

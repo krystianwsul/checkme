@@ -107,8 +107,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public final TimeStamp InstanceTimeStamp;
         public final boolean TaskCurrent;
         public final boolean IsRootInstance;
+        public final Boolean IsRootTask;
 
-        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String children, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance) {
+        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String children, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
@@ -121,6 +122,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             InstanceTimeStamp = instanceTimeStamp;
             TaskCurrent = taskCurrent;
             IsRootInstance = isRootInstance;
+            IsRootTask = isRootTask;
         }
 
         @Override
@@ -137,6 +139,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             hashCode += InstanceTimeStamp.hashCode();
             hashCode += (TaskCurrent ? 1 : 0);
             hashCode += (IsRootInstance ? 1 : 0);
+            if (IsRootTask != null)
+                hashCode += (IsRootTask ? 2 : 1);
             return hashCode;
         }
 
@@ -185,6 +189,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if (IsRootInstance != instanceData.IsRootInstance)
+                return false;
+
+            if ((IsRootTask == null) != (instanceData.IsRootTask == null))
+                return false;
+
+            if ((IsRootTask != null) && !IsRootTask.equals(instanceData.IsRootTask))
                 return false;
 
             return true;

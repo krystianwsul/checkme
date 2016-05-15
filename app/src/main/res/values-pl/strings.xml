@@ -28,4 +28,5 @@
     <string name="name_hint">Wpisz nazwę</string>
     <string name="time_dialog_title">Wybierz czas</string>
     <string name="edit_task">Edytuj zadanie</string>
+    <string name="delete_task">Usuń zadanie</string>
 </resources>

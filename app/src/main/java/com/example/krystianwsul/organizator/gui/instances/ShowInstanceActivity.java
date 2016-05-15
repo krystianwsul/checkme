@@ -24,6 +24,8 @@ import com.example.krystianwsul.organizator.utils.InstanceKey;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
+
 public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data>, GroupListFragment.GroupListListener {
     private static final String INSTANCE_KEY = "instanceKey";
     private static final String SET_NOTIFIED_KEY = "setNotified";
@@ -76,6 +78,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         boolean editTask = (mData != null && !mData.Done && mData.TaskCurrent);
         menu.findItem(R.id.instance_menu_edit_task).setVisible(editTask);
 
+        boolean deleteTask = (mData != null && !mData.Done && mData.TaskCurrent);
+        menu.findItem(R.id.instance_menu_delete_task).setVisible(deleteTask);
+
         return true;
     }
 
@@ -117,6 +122,17 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                     startActivity(CreateRootTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
                 else
                     startActivity(CreateChildTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                break;
+            case R.id.instance_menu_delete_task:
+                Assert.assertTrue(mData != null);
+                Assert.assertTrue(!mData.Done);
+                Assert.assertTrue(mData.TaskCurrent);
+
+                ArrayList<Integer> dataIds = new ArrayList<>();
+                dataIds.add(mData.DataId);
+
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(dataIds, mData.InstanceKey.TaskId);
+                finish();
                 break;
             default:
                 throw new UnsupportedOperationException();

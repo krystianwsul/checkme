@@ -132,6 +132,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 dataIds.add(mData.DataId);
 
                 DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(dataIds, mData.InstanceKey.TaskId);
+
+                TickService.startService(this);
+
                 finish();
                 break;
             default:

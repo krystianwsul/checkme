@@ -212,11 +212,8 @@ class Instance {
             Task childTask = taskHierarchy.getChildTask();
             Assert.assertTrue(childTask != null);
 
-            Instance childInstance = domainFactory.getInstance(childTask, scheduleDateTime);
-            Assert.assertTrue(childInstance != null);
-
-            ExactTimeStamp done = childInstance.getDone();
-            if (done != null && taskHierarchy.current(done))
+            Instance childInstance = domainFactory.getExistingInstance(childTask, scheduleDateTime);
+            if (childInstance != null)
                 childInstances.add(childInstance);
         }
 
@@ -224,7 +221,7 @@ class Instance {
         for (Task childTask : childTasks) {
             Assert.assertTrue(childTask.current(hierarchyExactTimeStamp));
 
-            Instance childInstance = domainFactory.getInstance(childTask, getScheduleDateTime());
+            Instance childInstance = domainFactory.getInstance(childTask, scheduleDateTime);
             Assert.assertTrue(childInstance != null);
 
             childInstances.add(childInstance);

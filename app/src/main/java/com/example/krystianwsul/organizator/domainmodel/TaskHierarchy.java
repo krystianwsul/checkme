@@ -51,6 +51,8 @@ class TaskHierarchy {
     }
 
     boolean current(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 

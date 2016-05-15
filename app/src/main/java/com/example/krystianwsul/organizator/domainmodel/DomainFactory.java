@@ -1113,7 +1113,7 @@ public class DomainFactory {
         return instances;
     }
 
-    Instance getInstance(Task task, DateTime scheduleDateTime) {
+    Instance getExistingInstance(Task task, DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);
 
@@ -1129,6 +1129,19 @@ public class DomainFactory {
         if (!instances.isEmpty()) {
             Assert.assertTrue(instances.size() == 1);
             return instances.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    Instance getInstance(Task task, DateTime scheduleDateTime) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(scheduleDateTime != null);
+
+        Instance existingInstance = getExistingInstance(task, scheduleDateTime);
+
+        if (existingInstance != null) {
+            return existingInstance;
         } else {
             return new Instance(this, task, scheduleDateTime);
         }

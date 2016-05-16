@@ -30,7 +30,8 @@ public abstract class SelectionCallback implements ActionMode.Callback {
 
         Assert.assertTrue(!mFinishing);
 
-        mActionMode.finish();
+        if (mActionMode != null)
+            mActionMode.finish();
 
         return true;
     }

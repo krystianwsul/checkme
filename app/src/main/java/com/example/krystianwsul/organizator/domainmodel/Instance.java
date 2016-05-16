@@ -496,4 +496,9 @@ class Instance {
         ExactTimeStamp done = getDone();
         return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
     }
+
+    boolean exists() {
+        Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
+        return (mInstanceRecord != null);
+    }
 }

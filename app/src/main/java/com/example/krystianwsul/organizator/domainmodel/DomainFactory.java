@@ -261,7 +261,7 @@ public class DomainFactory {
             Assert.assertTrue(task != null);
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists()));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -330,7 +330,7 @@ public class DomainFactory {
             Assert.assertTrue(task != null);
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists()));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -361,7 +361,7 @@ public class DomainFactory {
             Assert.assertTrue(childTask != null);
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getChildInstanceNames(now), childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask));
+            instanceDatas.put(childInstance.getInstanceKey(), new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getChildInstanceNames(now), childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists()));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -396,7 +396,7 @@ public class DomainFactory {
             Assert.assertTrue(task != null);
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask));
+            instanceDatas.put(instance.getInstanceKey(), new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getChildInstanceNames(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists()));
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
@@ -1016,7 +1016,7 @@ public class DomainFactory {
         save(dataIds);
     }
 
-    public synchronized void setTaskEndTimeStamps(int dataId, ArrayList<Integer> taskIds) {
+    public synchronized ExactTimeStamp setTaskEndTimeStamps(int dataId, ArrayList<Integer> taskIds) {
         Assert.assertTrue(taskIds != null);
         Assert.assertTrue(!taskIds.isEmpty());
 
@@ -1032,6 +1032,8 @@ public class DomainFactory {
         }
 
         save(dataId);
+
+        return now;
     }
 
     public synchronized void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {

@@ -8,8 +8,11 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Button;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -46,10 +49,10 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private Date mDate;
     private EditInstanceLoader.Data mData;
 
+    private ActionBar mActionBar;
+
     private TextView mEditInstanceDate;
     private Bundle mSavedInstanceState;
-    private TextView mEditInstanceName;
-    private Button mEditInstanceSave;
     private TextView mEditInstanceTime;
 
     private BroadcastReceiver mBroadcastReceiver;
@@ -65,7 +68,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
             updateTimeText();
 
-            setValidTime();
+            invalidateOptionsMenu();
         }
 
         @Override
@@ -84,7 +87,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
         updateTimeText();
-        setValidTime();
+        invalidateOptionsMenu();
     };
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
@@ -94,15 +97,50 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_edit_instance, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_edit_instance_save).setVisible(isValidTime());
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_edit_instance_save:
+                Assert.assertTrue(mDate != null);
+                Assert.assertTrue(mData != null);
+
+                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
+
+                TickService.startService(EditInstanceActivity.this);
+
+                finish();
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_edit_instance);
 
-        mSavedInstanceState = savedInstanceState;
+        Toolbar toolbar = (Toolbar) findViewById(R.id.edit_instance_toolbar);
+        Assert.assertTrue(toolbar != null);
 
-        mEditInstanceName = (TextView) findViewById(R.id.edit_instance_name);
-        Assert.assertTrue(mEditInstanceName != null);
+        setSupportActionBar(toolbar);
+
+        mActionBar = getSupportActionBar();
+        Assert.assertTrue(mActionBar != null);
+
+        mSavedInstanceState = savedInstanceState;
 
         mEditInstanceDate = (TextView) findViewById(R.id.edit_instance_date);
         Assert.assertTrue(mEditInstanceDate != null);
@@ -122,9 +160,6 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         if (calendarDatePickerDialogFragment != null)
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
 
-        mEditInstanceSave = (Button) findViewById(R.id.edit_instance_save);
-        Assert.assertTrue(mEditInstanceSave != null);
-
         mEditInstanceTime = (TextView) findViewById(R.id.edit_instance_time);
         Assert.assertTrue(mEditInstanceTime != null);
 
@@ -133,7 +168,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                setValidTime();
+                invalidateOptionsMenu();
             }
         };
     }
@@ -143,7 +178,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         super.onResume();
 
         registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        setValidTime();
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -191,24 +226,13 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             mTimePairPersist = new TimePairPersist(mData.InstanceTimePair);
         }
 
-        mEditInstanceName.setText(mData.Name);
+        mActionBar.setTitle(data.Name);
 
         updateDateText();
 
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_FRAGMENT_TAG);
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
-
-        mEditInstanceSave.setOnClickListener(v -> {
-            Assert.assertTrue(mDate != null);
-            Assert.assertTrue(mData != null);
-
-            DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
-
-            TickService.startService(EditInstanceActivity.this);
-
-            finish();
-        });
 
         mEditInstanceTime.setOnClickListener(v -> {
             Assert.assertTrue(mData != null);
@@ -241,7 +265,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         updateTimeText();
 
-        setValidTime();
+        invalidateOptionsMenu();
     }
 
     @SuppressLint("SetTextI18n")
@@ -261,9 +285,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         }
     }
 
-    private void setValidTime() {
-        boolean valid;
-
+    private boolean isValidTime() {
         if (mData != null) {
             HourMinute hourMinute;
             if (mTimePairPersist.getCustomTimeId() != null)
@@ -271,10 +293,9 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             else
                 hourMinute = mTimePairPersist.getHourMinute();
 
-            valid = (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+            return (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
         } else {
-            valid = false;
+            return false;
         }
-        mEditInstanceSave.setEnabled(valid);
     }
 }

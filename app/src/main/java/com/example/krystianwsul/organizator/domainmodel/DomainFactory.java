@@ -187,7 +187,21 @@ public class DomainFactory {
 
     // gets
 
+    private void fakeDelay() {
+        /*
+        if (false) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+
+            }
+        }
+        */
+    }
+
     public synchronized EditInstanceLoader.Data getEditInstanceData(InstanceKey instanceKey) {
+        fakeDelay();
+
         Assert.assertTrue(instanceKey != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -206,6 +220,8 @@ public class DomainFactory {
     }
 
     public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
+        fakeDelay();
+
         CustomTime customTime = mCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
 
@@ -221,6 +237,8 @@ public class DomainFactory {
     }
 
     public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
+        fakeDelay();
+
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
 
         ArrayList<ShowCustomTimesLoader.CustomTimeData> entries = new ArrayList<>();
@@ -234,6 +252,8 @@ public class DomainFactory {
     }
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, int day) {
+        fakeDelay();
+
         Assert.assertTrue(day >= 0);
 
         ExactTimeStamp startExactTimeStamp;
@@ -273,6 +293,8 @@ public class DomainFactory {
     }
 
     public synchronized ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
+        fakeDelay();
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
 
@@ -308,6 +330,8 @@ public class DomainFactory {
     }
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, TimeStamp timeStamp) {
+        fakeDelay();
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
 
@@ -342,6 +366,8 @@ public class DomainFactory {
     }
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, InstanceKey instanceKey) {
+        fakeDelay();
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -373,6 +399,8 @@ public class DomainFactory {
     }
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, ArrayList<InstanceKey> instanceKeys) {
+        fakeDelay();
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
@@ -408,6 +436,8 @@ public class DomainFactory {
     }
 
     public synchronized ShowInstanceLoader.Data getShowInstanceData(Context context, InstanceKey instanceKey) {
+        fakeDelay();
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -424,6 +454,8 @@ public class DomainFactory {
     }
 
     public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {
+        fakeDelay();
+
         Task childTask = mTasks.get(childTaskId);
         Assert.assertTrue(childTask != null);
 
@@ -431,6 +463,8 @@ public class DomainFactory {
     }
 
     public synchronized CreateRootTaskLoader.Data getCreateRootTaskData(int rootTaskId) {
+        fakeDelay();
+
         Task rootTask = mTasks.get(rootTaskId);
         Assert.assertTrue(rootTask != null);
 
@@ -440,6 +474,8 @@ public class DomainFactory {
     }
 
     public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
+        fakeDelay();
+
         SingleScheduleLoader.ScheduleData scheduleData = null;
 
         if (rootTaskId != null) {
@@ -466,6 +502,8 @@ public class DomainFactory {
     }
 
     public synchronized DailyScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
+        fakeDelay();
+
         ArrayList<DailyScheduleLoader.ScheduleData> scheduleDatas = null;
 
         if (rootTaskId != null) {
@@ -493,6 +531,8 @@ public class DomainFactory {
     }
 
     public synchronized WeeklyScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
+        fakeDelay();
+
         ArrayList<WeeklyScheduleLoader.ScheduleData> scheduleDatas = null;
 
         if (rootTaskId != null) {
@@ -520,6 +560,8 @@ public class DomainFactory {
     }
 
     public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {
+        fakeDelay();
+
         Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -532,6 +574,8 @@ public class DomainFactory {
     }
 
     public synchronized TaskListLoader.Data getTaskListData(Context context, Integer taskId) {
+        fakeDelay();
+
         Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();

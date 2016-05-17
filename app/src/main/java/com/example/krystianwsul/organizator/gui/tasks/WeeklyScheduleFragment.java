@@ -64,6 +64,8 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private Integer mRootTaskId;
     private WeeklyScheduleLoader.Data mData;
 
+    private FloatingActionButton mWeeklyScheduleFab;
+
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
         public void onCustomTimeSelected(int customTimeId) {
@@ -187,15 +189,10 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             }
         }
 
-        FloatingActionButton weeklyScheduleFab = (FloatingActionButton) view.findViewById(R.id.weekly_schedule_fab);
-        Assert.assertTrue(weeklyScheduleFab != null);
+        mWeeklyScheduleFab = (FloatingActionButton) view.findViewById(R.id.weekly_schedule_fab);
+        Assert.assertTrue(mWeeklyScheduleFab != null);
 
-        weeklyScheduleFab.setOnClickListener(v -> {
-            Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
-            mDayOfWeekTimeEntryAdapter.addDayOfWeekTimeEntry();
-        });
-
-        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
+        ((CreateRootTaskActivity) getActivity()).setTimeValid(false);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -210,7 +207,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         mData = data;
 
         Bundle args = getArguments();
-        if (mSavedInstanceState != null) {
+        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(DATE_TIME_ENTRY_KEY)) {
             List<DayOfWeekTimeEntry> dateTimeEntries = mSavedInstanceState.getParcelableArrayList(DATE_TIME_ENTRY_KEY);
             mDayOfWeekTimeEntryAdapter = new DayOfWeekTimeEntryAdapter(getContext(), dateTimeEntries);
 
@@ -241,6 +238,14 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         TimeDialogFragment timeDialogFragment = (TimeDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_LIST_FRAGMENT_TAG);
         if (timeDialogFragment != null)
             timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
+
+        mWeeklyScheduleFab.setOnClickListener(v -> {
+            Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
+            mDayOfWeekTimeEntryAdapter.addDayOfWeekTimeEntry();
+        });
+        mWeeklyScheduleFab.setVisibility(View.VISIBLE);
+
+        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
     }
 
     @Override
@@ -251,8 +256,12 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelableArrayList(DATE_TIME_ENTRY_KEY, mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries());
-        outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
+        if (mData != null) {
+            Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
+
+            outState.putParcelableArrayList(DATE_TIME_ENTRY_KEY, mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries());
+            outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
+        }
     }
 
     private ArrayList<Pair<DayOfWeek, TimePair>> getDayOfWeekTimePairs() {

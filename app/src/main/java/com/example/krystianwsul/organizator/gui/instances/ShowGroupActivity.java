@@ -5,10 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.widget.TextView;
 
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.loaders.ShowGroupLoader;
@@ -19,9 +19,10 @@ import junit.framework.Assert;
 
 public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data>, GroupListFragment.GroupListListener {
     private TimeStamp mTimeStamp;
-    private TextView mShowGroupName;
 
     private static final String TIME_KEY = "time";
+
+    private ActionBar mActionBar;
 
     public static Intent getIntent(ExactTimeStamp exactTimeStamp, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
@@ -39,13 +40,14 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
         setSupportActionBar(toolbar);
 
+        mActionBar = getSupportActionBar();
+        Assert.assertTrue(mActionBar != null);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(TIME_KEY));
         long time = intent.getLongExtra(TIME_KEY, -1);
         Assert.assertTrue(time != -1);
         mTimeStamp = new TimeStamp(time);
-
-        mShowGroupName = (TextView) findViewById(R.id.show_group_name);
 
         GroupListFragment showGroupList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
         Assert.assertTrue(showGroupList != null);
@@ -61,7 +63,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<ShowGroupLoader.Data> loader, ShowGroupLoader.Data data) {
-        mShowGroupName.setText(data.DisplayText);
+        mActionBar.setTitle(data.DisplayText);
 
         if (!data.HasInstances)
             finish();

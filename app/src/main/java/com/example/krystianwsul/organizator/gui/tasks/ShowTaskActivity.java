@@ -70,6 +70,14 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.task_menu_edit).setVisible(mData != null);
+        menu.findItem(R.id.task_menu_delete).setVisible(mData != null);
+
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.task_menu_edit:
@@ -107,6 +115,8 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
             mActionBar.setSubtitle(null);
         else
             mActionBar.setSubtitle(data.ScheduleText);
+
+        invalidateOptionsMenu();
     }
 
     @Override

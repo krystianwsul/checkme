@@ -51,7 +51,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private Integer mRootTaskId;
     private ArrayList<Integer> mTaskIds;
 
-    private boolean mIsTimeValid = true;
+    private boolean mIsTimeValid = false;
 
     private boolean mLoaded = false;
 

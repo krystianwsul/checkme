@@ -228,6 +228,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
 
         mSelectionCallback.setSelected(mTaskAdapter.getSelected().size());
+
+        mTaskListFragmentFab.setVisibility(View.VISIBLE);
     }
 
     @Override

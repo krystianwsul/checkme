@@ -56,6 +56,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     private Integer mRootTaskId;
     private DailyScheduleLoader.Data mData;
 
+    private FloatingActionButton mDailyScheduleFab;
+
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
         public void onCustomTimeSelected(int customTimeId) {
@@ -159,15 +161,10 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             }
         }
 
-        FloatingActionButton dailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
-        Assert.assertTrue(dailyScheduleFab != null);
+        mDailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
+        Assert.assertTrue(mDailyScheduleFab != null);
 
-        dailyScheduleFab.setOnClickListener(v -> {
-            Assert.assertTrue(mTimeEntryAdapter != null);
-            mTimeEntryAdapter.addTimeEntry();
-        });
-
-        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
+        ((CreateRootTaskActivity) getActivity()).setTimeValid(false);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -182,7 +179,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         mData = data;
 
         Bundle args = getArguments();
-        if (mSavedInstanceState != null) {
+        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(TIME_ENTRY_KEY)) {
             List<TimeEntry> timeEntries = mSavedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
             mTimeEntryAdapter = new TimeEntryAdapter(getContext(), timeEntries);
 
@@ -213,6 +210,14 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         TimeDialogFragment timeDialogFragment = (TimeDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_LIST_FRAGMENT_TAG);
         if (timeDialogFragment != null)
             timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
+
+        mDailyScheduleFab.setOnClickListener(v -> {
+            Assert.assertTrue(mTimeEntryAdapter != null);
+            mTimeEntryAdapter.addTimeEntry();
+        });
+        mDailyScheduleFab.setVisibility(View.VISIBLE);
+
+        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
     }
 
     @Override
@@ -223,8 +228,12 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelableArrayList(TIME_ENTRY_KEY, mTimeEntryAdapter.getTimeEntries());
-        outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
+        if (mData != null) {
+            Assert.assertTrue(mTimeEntryAdapter != null);
+
+            outState.putParcelableArrayList(TIME_ENTRY_KEY, mTimeEntryAdapter.getTimeEntries());
+            outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
+        }
     }
 
     private List<TimePair> getTimePairs() {

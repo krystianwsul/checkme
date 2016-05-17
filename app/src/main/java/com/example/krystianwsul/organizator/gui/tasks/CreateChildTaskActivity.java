@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.krystianwsul.organizator.R;
@@ -29,11 +31,12 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private boolean mFirstLoad;
 
     private EditText mCreateChildTaskName;
-    private Button mCreateChildTaskSave;
 
     private Integer mParentTaskId = null;
     private ArrayList<Integer> mTaskIds;
     private Integer mChildTaskId = null;
+
+    private CreateChildTaskLoader.Data mData;
 
     public static Intent getCreateIntent(Context context, int parentTaskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
@@ -59,9 +62,60 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_create_child_task, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Assert.assertTrue(mCreateChildTaskName != null);
+
+        boolean save = !TextUtils.isEmpty(mCreateChildTaskName.getText().toString().trim());
+        menu.findItem(R.id.action_create_child_task_save).setVisible(save);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_create_child_task_save:
+                String name = mCreateChildTaskName.getText().toString().trim();
+
+                if (mParentTaskId != null) {
+                    Assert.assertTrue(mChildTaskId == null);
+                    Assert.assertTrue(mData == null);
+
+                    if (mTaskIds != null)
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mParentTaskId, name, mTaskIds);
+                    else
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mParentTaskId, name);
+                } else {
+                    Assert.assertTrue(mChildTaskId != null);
+                    Assert.assertTrue(mData != null);
+                    Assert.assertTrue(mTaskIds == null);
+
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mChildTaskId, name);
+                }
+
+                finish();
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_child_task);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.create_child_task_toolbar);
+        Assert.assertTrue(toolbar != null);
+
+        setSupportActionBar(toolbar);
 
         mFirstLoad = (savedInstanceState == null);
 
@@ -81,12 +135,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
             @Override
             public void afterTextChanged(Editable s) {
-                mCreateChildTaskSave.setEnabled(!TextUtils.isEmpty(s.toString().trim()));
+                invalidateOptionsMenu();
             }
         });
-
-        mCreateChildTaskSave = (Button) findViewById(R.id.create_child_task_save);
-        Assert.assertTrue(mCreateChildTaskSave != null);
 
         Intent intent = getIntent();
         if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
@@ -123,33 +174,13 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         updateGui(data);
     }
 
-    private void updateGui(final CreateChildTaskLoader.Data data)
-    {
+    private void updateGui(final CreateChildTaskLoader.Data data) {
         if (mFirstLoad && data != null)
             mCreateChildTaskName.setText(data.Name);
 
-        mCreateChildTaskSave.setEnabled(!TextUtils.isEmpty(mCreateChildTaskName.getText().toString().trim()));
-        mCreateChildTaskSave.setOnClickListener(v -> {
-            String name = mCreateChildTaskName.getText().toString().trim();
+        mData = data;
 
-            if (mParentTaskId != null) {
-                Assert.assertTrue(mChildTaskId == null);
-                Assert.assertTrue(data == null);
-
-                if (mTaskIds != null)
-                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mParentTaskId, name, mTaskIds);
-                else
-                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mParentTaskId, name);
-            } else {
-                Assert.assertTrue(mChildTaskId != null);
-                Assert.assertTrue(data != null);
-                Assert.assertTrue(mTaskIds == null);
-
-                DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(data.DataId, mChildTaskId, name);
-            }
-
-            finish();
-        });
+        invalidateOptionsMenu();
     }
 
     @Override

@@ -228,11 +228,13 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Assert.assertTrue(mDate != null);
-        Assert.assertTrue(mTimePairPersist != null);
+        if (mData != null) {
+            Assert.assertTrue(mDate != null);
+            Assert.assertTrue(mTimePairPersist != null);
 
-        outState.putParcelable(PARCEL_DATE_KEY, mDate);
-        outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist);
+            outState.putParcelable(PARCEL_DATE_KEY, mDate);
+            outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist);
+        }
     }
 
     private void updateDateText() {
@@ -328,8 +330,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
         Bundle args = getArguments();
 
-        if (mSavedInstanceState != null) {
-            Assert.assertTrue(mSavedInstanceState.containsKey(PARCEL_DATE_KEY));
+        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(PARCEL_DATE_KEY)) {
             Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
 
             mDate = mSavedInstanceState.getParcelable(PARCEL_DATE_KEY);

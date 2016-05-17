@@ -167,6 +167,8 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
         mShowTimesList.setAdapter(mCustomTimesAdapter);
 
         mSelectionCallback.setSelected(mCustomTimesAdapter.getSelected().size());
+
+        mShowTimesFab.setVisibility(View.VISIBLE);
     }
 
     @Override

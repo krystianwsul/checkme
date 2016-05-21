@@ -305,7 +305,7 @@ class Instance {
                     Assert.assertTrue(domainFactory != null);
 
                     ArrayList<Instance> allInstances = domainFactory.getExistingInstances(rootTask);
-                    allInstances.addAll(rootTask.getInstances(null, now.plusOne()));
+                    allInstances.addAll(rootTask.getInstances(null, now.plusOne(), now));
 
                     ArrayList<Instance> notDoneInstances = new ArrayList<>();
                     for (Instance taskInstance : allInstances)
@@ -491,8 +491,8 @@ class Instance {
         return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
     }
 
-    boolean isRelevant() {
-        Calendar calendar = Calendar.getInstance();
+    boolean isRelevant(ExactTimeStamp now) {
+        Calendar calendar = now.getCalendar();
         calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
         ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
 

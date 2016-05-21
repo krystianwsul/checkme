@@ -167,8 +167,9 @@ public class Task {
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    ArrayList<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp) {
+    ArrayList<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
         Assert.assertTrue(endExactTimeStamp != null);
+        Assert.assertTrue(now != null);
 
         ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : mOldestRelevant); // 24 hack
 
@@ -178,13 +179,12 @@ public class Task {
 
         if (startExactTimeStamp == null) {
             Optional<Instance> optional = Stream.of(instances)
-                    .filter(Instance::isRelevant)
+                    .filter(instance -> instance.isRelevant(now))
                     .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
 
             if (optional.isPresent()) {
                 mOldestRelevant = optional.get().getScheduleDateTime().getTimeStamp().toExactTimeStamp();
 
-                ExactTimeStamp now = ExactTimeStamp.getNow();
                 if (mOldestRelevant.compareTo(now) > 0)
                     mOldestRelevant = now;
             } else {

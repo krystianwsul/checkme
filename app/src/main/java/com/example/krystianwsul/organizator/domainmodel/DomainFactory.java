@@ -1213,7 +1213,7 @@ public class DomainFactory {
         }
 
         for (Task task : mTasks.values()) {
-            for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp)) {
+            for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
                 ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
                 if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
@@ -1228,7 +1228,7 @@ public class DomainFactory {
 
         ArrayList<Instance> rootInstances = new ArrayList<>();
         for (Instance instance : allInstances)
-            if (instance.isRootInstance(now) && instance.isRelevant())
+            if (instance.isRootInstance(now) && instance.isRelevant(now))
                 rootInstances.add(instance);
 
         return rootInstances;

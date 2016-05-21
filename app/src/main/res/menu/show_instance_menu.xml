@@ -11,13 +11,6 @@
         android:icon="@drawable/ic_alarm_white_24dp"
         android:visible="false"/>
     <item
-        android:id="@+id/instance_menu_show_task"
-        android:title="@string/show_task"
-        android:orderInCategory="300"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_assignment_white_24dp"
-        android:visible="false"/>
-    <item
         android:id="@+id/instance_menu_edit_task"
         android:title="@string/edit_task"
         android:orderInCategory="350"
@@ -30,6 +23,13 @@
         android:orderInCategory="370"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_delete_white_24dp"
+        android:visible="false"/>
+    <item
+        android:id="@+id/instance_menu_show_task"
+        android:title="@string/show_task"
+        android:orderInCategory="380"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_assignment_white_24dp"
         android:visible="false"/>
     <item
         android:id="@+id/instance_menu_check"

@@ -18,10 +18,10 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
-import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.MyCalendarFragment;
 import com.example.krystianwsul.organizator.gui.TimeDialogFragment;
 import com.example.krystianwsul.organizator.loaders.SingleScheduleLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
@@ -33,7 +33,6 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
     private static final String ARGUMENT_DATE_KEY = "date";
@@ -189,9 +188,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             updateDateText();
         };
         mDateView.setOnClickListener(v -> {
-            CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = new CalendarDatePickerDialogFragment();
-            calendarDatePickerDialogFragment.setDateRange(new MonthAdapter.CalendarDay(Calendar.getInstance()), null);
-            calendarDatePickerDialogFragment.setPreselectedDate(mDate.getYear(), mDate.getMonth() - 1, mDate.getDay());
+            MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
+            calendarDatePickerDialogFragment.setDate(mDate);
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
             calendarDatePickerDialogFragment.show(getChildFragmentManager(), DATE_FRAGMENT_TAG);
         });

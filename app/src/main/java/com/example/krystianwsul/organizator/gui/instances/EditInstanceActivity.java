@@ -18,10 +18,10 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
-import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.example.krystianwsul.organizator.R;
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
+import com.example.krystianwsul.organizator.gui.MyCalendarFragment;
 import com.example.krystianwsul.organizator.gui.TimeDialogFragment;
 import com.example.krystianwsul.organizator.loaders.EditInstanceLoader;
 import com.example.krystianwsul.organizator.notifications.TickService;
@@ -34,7 +34,6 @@ import com.example.krystianwsul.organizator.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class EditInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<EditInstanceLoader.Data> {
     private static final String INSTANCE_KEY = "instanceKey";
@@ -150,9 +149,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             updateDateText();
         };
         mEditInstanceDate.setOnClickListener(v -> {
-            CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = new CalendarDatePickerDialogFragment();
-            calendarDatePickerDialogFragment.setDateRange(new MonthAdapter.CalendarDay(Calendar.getInstance()), null);
-            calendarDatePickerDialogFragment.setPreselectedDate(mDate.getYear(), mDate.getMonth() - 1, mDate.getDay());
+            MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
+            calendarDatePickerDialogFragment.setDate(mDate);
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
             calendarDatePickerDialogFragment.show(getSupportFragmentManager(), DATE_FRAGMENT_TAG);
         });

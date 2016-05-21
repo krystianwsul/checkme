@@ -288,6 +288,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 menu.findItem(R.id.action_group_edit_instance).setVisible(false);
                 menu.findItem(R.id.action_group_show_task).setVisible(false);
+                menu.findItem(R.id.action_group_edit_task).setVisible(false);
 
                 if (Stream.of(selected).allMatch(node -> node.mInstanceData.TaskCurrent)) {
                     menu.findItem(R.id.action_group_join).setVisible(true);

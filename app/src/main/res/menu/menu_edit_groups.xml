@@ -10,13 +10,6 @@
         android:icon="@drawable/ic_alarm_white_24dp"
         android:visible="false"/>
     <item
-        android:id="@+id/action_group_show_task"
-        android:title="@string/show_task"
-        android:orderInCategory="300"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_assignment_white_24dp"
-        android:visible="false"/>
-    <item
         android:id="@+id/action_group_edit_task"
         android:title="@string/edit_task"
         android:orderInCategory="350"
@@ -36,5 +29,12 @@
         android:orderInCategory="400"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_merge_type_white_24dp"
+        android:visible="false"/>
+    <item
+        android:id="@+id/action_group_show_task"
+        android:title="@string/show_task"
+        android:orderInCategory="500"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_assignment_white_24dp"
         android:visible="false"/>
 </menu>

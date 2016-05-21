@@ -379,6 +379,9 @@ class Instance {
         if (done != null)
             exactTimeStamps.add(done.minusOne());
 
+        if (mInstanceRecord != null)
+            exactTimeStamps.add(new ExactTimeStamp(mInstanceRecord.getHierarchyTime()));
+
         return Collections.min(exactTimeStamps);
     }
 

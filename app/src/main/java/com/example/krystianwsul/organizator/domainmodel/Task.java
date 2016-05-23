@@ -19,7 +19,7 @@ public class Task {
     private final TaskRecord mTaskRecord;
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
 
-    private ExactTimeStamp mOldestRelevant; // 24 hack
+    private ExactTimeStamp mOldestVisible; // 24 hack
 
     Task(DomainFactory domainFactory, TaskRecord taskRecord) {
         Assert.assertTrue(domainFactory != null);
@@ -171,7 +171,7 @@ public class Task {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(now != null);
 
-        ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : mOldestRelevant); // 24 hack
+        ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : mOldestVisible); // 24 hack
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
@@ -179,16 +179,16 @@ public class Task {
 
         if (startExactTimeStamp == null) {
             Optional<Instance> optional = Stream.of(instances)
-                    .filter(instance -> instance.isRelevant(now))
+                    .filter(instance -> instance.isVisible(now))
                     .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
 
             if (optional.isPresent()) {
-                mOldestRelevant = optional.get().getScheduleDateTime().getTimeStamp().toExactTimeStamp();
+                mOldestVisible = optional.get().getScheduleDateTime().getTimeStamp().toExactTimeStamp();
 
-                if (mOldestRelevant.compareTo(now) > 0)
-                    mOldestRelevant = now;
+                if (mOldestVisible.compareTo(now) > 0)
+                    mOldestVisible = now;
             } else {
-                mOldestRelevant = ExactTimeStamp.getNow();
+                mOldestVisible = ExactTimeStamp.getNow();
             }
         }
 
@@ -231,5 +231,9 @@ public class Task {
             return true;
 
         return false;
+    }
+
+    public ExactTimeStamp getOldestVisible() {
+        return mOldestVisible;
     }
 }

@@ -492,7 +492,7 @@ class Instance {
         return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
     }
 
-    boolean isRelevant(ExactTimeStamp now) {
+    boolean isVisible(ExactTimeStamp now) {
         Calendar calendar = now.getCalendar();
         calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
         ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
@@ -502,8 +502,29 @@ class Instance {
             ExactTimeStamp done = getDone();
             return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
         } else {
-            return parentInstance.isRelevant(now);
+            return parentInstance.isVisible(now);
         }
+    }
+
+    boolean isRelevant(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        if (isVisible(now))
+            return true;
+
+        Task task = mTaskReference.get();
+        Assert.assertTrue(task != null);
+
+        ExactTimeStamp oldestRelevant = task.getOldestVisible();
+
+        if (oldestRelevant == null)
+            return true;
+
+        //noinspection RedundantIfStatement
+        if (getScheduleDateTime().getTimeStamp().toExactTimeStamp().compareTo(oldestRelevant) >= 0)
+            return true;
+
+        return false;
     }
 
     boolean exists() {

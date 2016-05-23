@@ -289,6 +289,30 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes)
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
+        if (day == 0) {
+            // relevant hack
+            List<Task> irrelevantTasks = Stream.of(mTasks.values())
+                    .filter(task -> !task.isRelevant(now))
+                    .collect(Collectors.toList());
+
+            List<TaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values())
+                    .filter(taskHierarchy -> !taskHierarchy.isRelevant(now))
+                    .collect(Collectors.toList());
+
+            List<Instance> irrelevantInstances = Stream.of(mExistingInstances)
+                    .filter(instance -> !instance.isRelevant(now))
+                    .collect(Collectors.toList());
+
+            for (Task task : irrelevantTasks)
+                mTasks.remove(task.getId());
+
+            for (TaskHierarchy taskHierarchy : irrelevantTaskHierarchies)
+                mTaskHierarchies.remove(taskHierarchy.getId());
+
+            for (Instance instance : irrelevantInstances)
+                mExistingInstances.remove(instance);
+        }
+
         return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
     }
 
@@ -1228,7 +1252,7 @@ public class DomainFactory {
 
         ArrayList<Instance> rootInstances = new ArrayList<>();
         for (Instance instance : allInstances)
-            if (instance.isRootInstance(now) && instance.isRelevant(now))
+            if (instance.isRootInstance(now) && instance.isVisible(now))
                 rootInstances.add(instance);
 
         return rootInstances;

@@ -53,7 +53,7 @@ public class DebugFragment extends Fragment {
         Button debugTick = (Button) view.findViewById(R.id.debug_tick);
         Assert.assertTrue(debugTick != null);
 
-        debugTick.setOnClickListener(v -> TickService.startService(getActivity()));
+        debugTick.setOnClickListener(v -> TickService.startServiceDebug(getActivity()));
 
         TextView debugData = (TextView) view.findViewById(R.id.debug_data);
         Assert.assertTrue(debugData != null);

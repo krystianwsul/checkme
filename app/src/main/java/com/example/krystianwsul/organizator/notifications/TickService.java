@@ -51,6 +51,12 @@ public class TickService extends IntentService {
         context.startService(getIntent(context, true, false));
     }
 
+    public static void startServiceDebug(Context context) {
+        Assert.assertTrue(context != null);
+
+        context.startService(getIntent(context, false, false));
+    }
+
     private static Intent getIntent(Context context, boolean silent, boolean registering) {
         Assert.assertTrue(context != null);
 

@@ -252,6 +252,7 @@ class Instance {
         Assert.assertTrue(domainFactory != null);
 
         Task parentTask = task.getParentTask(hierarchyExactTimeStamp);
+
         if (parentTask == null)
             return null;
 
@@ -496,8 +497,13 @@ class Instance {
         calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
         ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
 
-        ExactTimeStamp done = getDone();
-        return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
+        Instance parentInstance = getParentInstance(now);
+        if (parentInstance == null) {
+            ExactTimeStamp done = getDone();
+            return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
+        } else {
+            return parentInstance.isRelevant(now);
+        }
     }
 
     boolean exists() {

@@ -194,4 +194,42 @@ public class Task {
 
         return instances;
     }
+
+    public boolean isVisible(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        if (getEndExactTimeStamp() == null)
+            return true;
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        if (Stream.of(domainFactory.getExistingInstances(this))
+                .anyMatch(instance -> instance.isRelevant(now)))
+            return true;
+
+        //noinspection RedundantIfStatement
+        if (Stream.of(getInstances(null, now.plusOne(), now))
+                .anyMatch(instance -> instance.isRelevant(now)))
+            return true;
+
+        return false;
+    }
+
+    public boolean isRelevant(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        if (isVisible(now))
+            return true;
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        //noinspection RedundantIfStatement
+        if (Stream.of(domainFactory.getTaskHierarchies(this))
+                .anyMatch(taskHierarchy -> taskHierarchy.getChildTask().isRelevant(now)))
+            return true;
+
+        return false;
+    }
 }

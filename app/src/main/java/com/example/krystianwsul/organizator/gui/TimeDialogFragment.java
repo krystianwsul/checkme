@@ -26,7 +26,6 @@ public class TimeDialogFragment extends DialogFragment {
 
     public static TimeDialogFragment newInstance(ArrayList<CustomTimeData> customTimeDatas) {
         Assert.assertTrue(customTimeDatas != null);
-        Assert.assertTrue(!customTimeDatas.isEmpty());
 
         TimeDialogFragment timeDialogFragment = new TimeDialogFragment();
 
@@ -50,7 +49,6 @@ public class TimeDialogFragment extends DialogFragment {
 
         ArrayList<CustomTimeData> customTimeDatas = args.getParcelableArrayList(CUSTOM_TIMES_KEY);
         Assert.assertTrue(customTimeDatas != null);
-        Assert.assertTrue(!customTimeDatas.isEmpty());
 
         Collections.sort(customTimeDatas, (lhs, rhs) -> Integer.valueOf(lhs.Id).compareTo(rhs.Id));
 

@@ -1545,9 +1545,10 @@ public class DomainFactory {
         Assert.assertTrue(parentTask != null);
 
         ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
-        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values())
+        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values()) {
             if (taskHierarchy.getParentTask() == parentTask)
                 taskHierarchies.add(taskHierarchy);
+        }
         return taskHierarchies;
     }
 

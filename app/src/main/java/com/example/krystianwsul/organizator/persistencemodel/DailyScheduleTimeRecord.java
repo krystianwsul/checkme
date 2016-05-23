@@ -35,8 +35,8 @@ public class DailyScheduleTimeRecord extends Record {
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_DAILY_SCHEDULE_TIMES);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_DAILY_SCHEDULE_TIMES);
+        //onCreate(sqLiteDatabase);
     }
 
     public static ArrayList<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(SQLiteDatabase sqLiteDatabase) {

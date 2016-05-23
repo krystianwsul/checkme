@@ -16,6 +16,8 @@ public class TaskRecord extends Record {
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_START_TIME = "startTime";
     private static final String COLUMN_END_TIME = "endTime";
+    private static final String COLUMN_RELEVANT = "relevant";
+    private static final String COLUMN_OLDEST_VISIBLE = "oldestVisible";
 
     private final int mId;
     private String mName;
@@ -23,17 +25,30 @@ public class TaskRecord extends Record {
     private final long mStartTime;
     private Long mEndTime;
 
+    private boolean mRelevant;
+    private Long mOldestVisible;
+
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_TASKS
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_NAME + " TEXT NOT NULL, "
                 + COLUMN_START_TIME + " TEXT NOT NULL, "
-                + COLUMN_END_TIME + " TEXT);");
+                + COLUMN_END_TIME + " TEXT, "
+                + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1, "
+                + COLUMN_OLDEST_VISIBLE + " INTEGER);");
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
+        //onCreate(sqLiteDatabase);
+
+        Assert.assertTrue(oldVersion == 5 && newVersion == 6);
+
+        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
+                + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
+
+        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
+                + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE + " INTEGER");
     }
 
     public static ArrayList<TaskRecord> getTaskRecords(SQLiteDatabase sqLiteDatabase) {
@@ -59,14 +74,16 @@ public class TaskRecord extends Record {
         String name = cursor.getString(1);
         long startTime = cursor.getLong(2);
         Long endTime = (cursor.isNull(3) ? null : cursor.getLong(3));
+        boolean relevant = (cursor.getInt(4) == 1);
+        Long oldestVisible = (cursor.isNull(5) ? null : cursor.getLong(5));
 
         Assert.assertTrue(name != null);
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
-        return new TaskRecord(true, id, name, startTime, endTime);
+        return new TaskRecord(true, id, name, startTime, endTime, relevant, oldestVisible);
     }
 
-    TaskRecord(boolean created, int id, String name, long startTime, Long endTime) {
+    TaskRecord(boolean created, int id, String name, long startTime, Long endTime, boolean relevant, Long oldestVisible) {
         super(created);
 
         Assert.assertTrue(name != null);
@@ -76,6 +93,9 @@ public class TaskRecord extends Record {
         mName = name;
         mStartTime = startTime;
         mEndTime = endTime;
+
+        mRelevant = relevant;
+        mOldestVisible = oldestVisible;
     }
 
     public int getId() {
@@ -109,12 +129,24 @@ public class TaskRecord extends Record {
         mChanged = true;
     }
 
+    public void setRelevant(boolean relevant) {
+        mRelevant = relevant;
+        mChanged = true;
+    }
+
+    public void setOldestVisible(long oldestVisible) {
+        mOldestVisible = oldestVisible;
+        mChanged = true;
+    }
+
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_NAME, mName);
         contentValues.put(COLUMN_START_TIME, mStartTime);
         contentValues.put(COLUMN_END_TIME, mEndTime);
+        contentValues.put(COLUMN_RELEVANT, mRelevant);
+        contentValues.put(COLUMN_OLDEST_VISIBLE, mOldestVisible);
         return contentValues;
     }
 

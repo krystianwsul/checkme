@@ -29,6 +29,7 @@ public class InstanceRecord extends Record {
     private static final String COLUMN_HIERARCHY_TIME = "hierarchyTime";
     private static final String COLUMN_NOTIFIED = "notified";
     private static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
+    private static final String COLUMN_RELEVANT = "relevant";
 
     private final int mId;
     private final int mTaskId;
@@ -58,6 +59,8 @@ public class InstanceRecord extends Record {
     private boolean mNotified;
     private boolean mNotificationShown;
 
+    private boolean mRelevant;
+
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_INSTANCES
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -77,12 +80,19 @@ public class InstanceRecord extends Record {
                 + COLUMN_INSTANCE_MINUTE + " INTEGER, "
                 + COLUMN_HIERARCHY_TIME + " INTEGER NOT NULL, "
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
-                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0);");
+                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
+                + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1);");
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_INSTANCES);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_INSTANCES);
+        //onCreate(sqLiteDatabase);
+
+        Assert.assertTrue(oldVersion == 5 && newVersion == 6);
+        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_INSTANCES
+                + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
+
+        sqLiteDatabase.execSQL("UPDATE " + TABLE_INSTANCES + " SET " + COLUMN_RELEVANT + " = 1");
     }
 
     public static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {
@@ -122,6 +132,7 @@ public class InstanceRecord extends Record {
         long hierarchyTime = cursor.getLong(15);
         boolean notified = (cursor.getInt(16) == 1);
         boolean notificationShown = (cursor.getInt(17) == 1);
+        boolean relevant = (cursor.getInt(18) == 1);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
@@ -135,10 +146,10 @@ public class InstanceRecord extends Record {
         boolean hasInstanceTime = ((instanceHour != null) || (instanceCustomTimeId != null));
         Assert.assertTrue(hasInstanceDate == hasInstanceTime);
 
-        return new InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown);
+        return new InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown, relevant);
     }
 
-    InstanceRecord(boolean created, int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
+    InstanceRecord(boolean created, int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown, boolean relevant) {
         super(created);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
@@ -181,6 +192,8 @@ public class InstanceRecord extends Record {
         mNotified = notified;
 
         mNotificationShown = notificationShown;
+
+        mRelevant = relevant;
     }
 
     public int getId() {
@@ -300,6 +313,11 @@ public class InstanceRecord extends Record {
         mChanged = true;
     }
 
+    public void setRelevant(boolean relevant) {
+        mRelevant = relevant;
+        mChanged = true;
+    }
+
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
@@ -320,6 +338,7 @@ public class InstanceRecord extends Record {
         contentValues.put(COLUMN_HIERARCHY_TIME, mHierarchyTime);
         contentValues.put(COLUMN_NOTIFIED, mNotified);
         contentValues.put(COLUMN_NOTIFICATION_SHOWN, mNotificationShown);
+        contentValues.put(COLUMN_RELEVANT, mRelevant);
         return contentValues;
     }
 

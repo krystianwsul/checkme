@@ -35,8 +35,8 @@ public class TaskHierarchyRecord extends Record {
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASK_HIERARCHIES);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASK_HIERARCHIES);
+        //onCreate(sqLiteDatabase);
     }
 
     public static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {

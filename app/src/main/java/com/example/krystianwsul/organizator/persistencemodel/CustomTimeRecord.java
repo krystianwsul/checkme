@@ -82,8 +82,8 @@ public class CustomTimeRecord extends Record {
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Assert.assertTrue(sqLiteDatabase != null);
 
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CUSTOM_TIMES);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CUSTOM_TIMES);
+        //onCreate(sqLiteDatabase);
     }
 
     public static ArrayList<CustomTimeRecord> getCustomTimeRecords(SQLiteDatabase sqLiteDatabase) {

@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
@@ -37,16 +37,16 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        //CustomTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        CustomTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
-        //TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        //TaskHierarchyRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        TaskHierarchyRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
-        //ScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        //DailyScheduleTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        //SingleScheduleDateTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        //WeeklyScheduleDayOfWeekTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        ScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        DailyScheduleTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        SingleScheduleDateTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        WeeklyScheduleDayOfWeekTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
-        //InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
     }
 }

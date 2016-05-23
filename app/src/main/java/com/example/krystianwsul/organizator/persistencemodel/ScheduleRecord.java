@@ -35,8 +35,8 @@ public class ScheduleRecord extends Record {
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SCHEDULES);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SCHEDULES);
+        //onCreate(sqLiteDatabase);
     }
 
     public static ArrayList<ScheduleRecord> getScheduleRecords(SQLiteDatabase sqLiteDatabase) {

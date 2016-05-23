@@ -39,8 +39,8 @@ public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES);
+        //onCreate(sqLiteDatabase);
     }
 
     public static ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(SQLiteDatabase sqLiteDatabase) {

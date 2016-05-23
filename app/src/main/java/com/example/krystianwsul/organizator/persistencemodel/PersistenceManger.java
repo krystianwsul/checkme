@@ -188,7 +188,7 @@ public class PersistenceManger {
 
         int id = getNextId(mTaskRecords);
 
-        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null);
+        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, true, null);
         mTaskRecords.put(taskRecord.getId(), taskRecord);
 
         return taskRecord;
@@ -316,7 +316,7 @@ public class PersistenceManger {
 
         int id = getNextId(mInstanceRecords);
 
-        InstanceRecord instanceRecord = new InstanceRecord(false, id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false);
+        InstanceRecord instanceRecord = new InstanceRecord(false, id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false, true);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
         return instanceRecord;
     }

@@ -42,8 +42,8 @@ public class SingleScheduleDateTimeRecord extends Record {
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SINGLE_SCHEDULE_DATE_TIMES);
-        onCreate(sqLiteDatabase);
+        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SINGLE_SCHEDULE_DATE_TIMES);
+        //onCreate(sqLiteDatabase);
     }
 
     public static ArrayList<SingleScheduleDateTimeRecord> getSingleScheduleDateTimeRecords(SQLiteDatabase sqLiteDatabase) {

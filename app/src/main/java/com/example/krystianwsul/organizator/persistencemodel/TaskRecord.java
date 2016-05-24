@@ -42,13 +42,13 @@ public class TaskRecord extends Record {
         //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
         //onCreate(sqLiteDatabase);
 
-        Assert.assertTrue(oldVersion == 5 && newVersion == 6);
+        if (oldVersion <= 5) {
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
+                    + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
 
-        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
-
-        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE + " INTEGER");
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
+                    + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE + " INTEGER");
+        }
     }
 
     public static ArrayList<TaskRecord> getTaskRecords(SQLiteDatabase sqLiteDatabase) {

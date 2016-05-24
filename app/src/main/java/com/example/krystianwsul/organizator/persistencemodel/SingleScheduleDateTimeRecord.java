@@ -32,7 +32,7 @@ public class SingleScheduleDateTimeRecord extends Record {
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_SINGLE_SCHEDULE_DATE_TIMES
-                + " (" + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
+                + " (" + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL UNIQUE REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
                 + COLUMN_YEAR + " INTEGER NOT NULL, "
                 + COLUMN_MONTH + " INTEGER NOT NULL, "
                 + COLUMN_DAY + " INTEGER NOT NULL, "
@@ -44,6 +44,10 @@ public class SingleScheduleDateTimeRecord extends Record {
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SINGLE_SCHEDULE_DATE_TIMES);
         //onCreate(sqLiteDatabase);
+
+        if (oldVersion <= 6) {
+            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + TABLE_SINGLE_SCHEDULE_DATE_TIMES + "X1 ON " + TABLE_SINGLE_SCHEDULE_DATE_TIMES + "(" + COLUMN_SCHEDULE_ID + ")");
+        }
     }
 
     public static ArrayList<SingleScheduleDateTimeRecord> getSingleScheduleDateTimeRecords(SQLiteDatabase sqLiteDatabase) {

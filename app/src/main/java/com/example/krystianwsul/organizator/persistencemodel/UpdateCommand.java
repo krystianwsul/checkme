@@ -28,7 +28,8 @@ public class UpdateCommand implements Parcelable {
         Assert.assertTrue(sqLiteDatabase != null);
 
         int updated = sqLiteDatabase.update(mTableName, mContentValues, mWhereClause, null);
-        Assert.assertTrue(updated == 1);
+        if (updated != 1)
+            throw new IllegalStateException("mTableName == " + mTableName + ", mWhereClause == " + mWhereClause + ", updated == " + updated);
     }
 
     @Override

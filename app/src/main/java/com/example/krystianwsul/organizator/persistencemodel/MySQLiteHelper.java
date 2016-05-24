@@ -3,10 +3,11 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
@@ -37,16 +38,29 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        CustomTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        Log.e("asdf", "upgrading");
 
-        TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        TaskHierarchyRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        sqLiteDatabase.beginTransaction();
 
-        ScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        DailyScheduleTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        SingleScheduleDateTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-        WeeklyScheduleDayOfWeekTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+        try
+        {
+            CustomTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
-        InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+            TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+            TaskHierarchyRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+
+            ScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+            DailyScheduleTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+            SingleScheduleDateTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+            WeeklyScheduleDayOfWeekTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+
+            InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+
+            sqLiteDatabase.setTransactionSuccessful();
+        } finally {
+            sqLiteDatabase.endTransaction();
+        }
+
+        Log.e("asdf", "upgraded");
     }
 }

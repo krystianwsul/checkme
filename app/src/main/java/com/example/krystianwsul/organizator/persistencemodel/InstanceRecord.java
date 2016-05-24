@@ -31,6 +31,8 @@ public class InstanceRecord extends Record {
     private static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
     private static final String COLUMN_RELEVANT = "relevant";
 
+    public static final String INDEX_TASK_SCHEDULE = "instanceIndexTaskSchedule";
+
     private final int mId;
     private final int mTaskId;
 
@@ -82,17 +84,41 @@ public class InstanceRecord extends Record {
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
                 + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
                 + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1);");
+        sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE + " ON " + TABLE_INSTANCES
+                + "("
+                + COLUMN_TASK_ID + ", "
+                + COLUMN_SCHEDULE_YEAR + ", "
+                + COLUMN_SCHEDULE_MONTH + ", "
+                + COLUMN_SCHEDULE_DAY + ", "
+                + COLUMN_SCHEDULE_HOUR + ", "
+                + COLUMN_SCHEDULE_MINUTE + ", "
+                + COLUMN_SCHEDULE_CUSTOM_TIME_ID
+                + ")");
     }
 
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_INSTANCES);
         //onCreate(sqLiteDatabase);
 
-        Assert.assertTrue(oldVersion == 5 && newVersion == 6);
-        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_INSTANCES
-                + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
+        if (oldVersion <= 5) {
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_INSTANCES
+                    + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
 
-        sqLiteDatabase.execSQL("UPDATE " + TABLE_INSTANCES + " SET " + COLUMN_RELEVANT + " = 1");
+            sqLiteDatabase.execSQL("UPDATE " + TABLE_INSTANCES + " SET " + COLUMN_RELEVANT + " = 1");
+        }
+
+        if (oldVersion <= 6) {
+            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE + " ON " + TABLE_INSTANCES
+                    + "("
+                    + COLUMN_TASK_ID + ", "
+                    + COLUMN_SCHEDULE_YEAR + ", "
+                    + COLUMN_SCHEDULE_MONTH + ", "
+                    + COLUMN_SCHEDULE_DAY + ", "
+                    + COLUMN_SCHEDULE_HOUR + ", "
+                    + COLUMN_SCHEDULE_MINUTE + ", "
+                    + COLUMN_SCHEDULE_CUSTOM_TIME_ID
+                    + ")");
+        }
     }
 
     public static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {

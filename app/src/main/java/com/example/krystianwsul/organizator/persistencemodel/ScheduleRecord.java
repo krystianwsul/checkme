@@ -3,10 +3,12 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ScheduleRecord extends Record {
     static final String TABLE_SCHEDULES = "schedules";
@@ -39,12 +41,14 @@ public class ScheduleRecord extends Record {
         //onCreate(sqLiteDatabase);
     }
 
-    public static ArrayList<ScheduleRecord> getScheduleRecords(SQLiteDatabase sqLiteDatabase) {
+    public static ArrayList<ScheduleRecord> getScheduleRecords(SQLiteDatabase sqLiteDatabase, List<Integer> taskIds) {
         Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue(taskIds != null);
+        Assert.assertTrue(!taskIds.isEmpty());
 
         ArrayList<ScheduleRecord> scheduleRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_SCHEDULES, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_SCHEDULES, null, COLUMN_ROOT_TASK_ID + " IN (" + TextUtils.join(", ", taskIds) + ")", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             scheduleRecords.add(cursorToScheduleRecord(cursor));

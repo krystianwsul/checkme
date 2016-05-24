@@ -3,10 +3,12 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskHierarchyRecord extends Record {
     private static final String TABLE_TASK_HIERARCHIES = "taskHierarchies";
@@ -39,12 +41,14 @@ public class TaskHierarchyRecord extends Record {
         //onCreate(sqLiteDatabase);
     }
 
-    public static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {
+    public static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase, List<Integer> childTaskIds) {
         Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue(childTaskIds != null);
+        Assert.assertTrue(!childTaskIds.isEmpty());
 
         ArrayList<TaskHierarchyRecord> taskHierarchyRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_TASK_HIERARCHIES, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_TASK_HIERARCHIES, null, COLUMN_CHILD_TASK_ID + " IN (" + TextUtils.join(", ", childTaskIds) + ")", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             taskHierarchyRecords.add(cursorToTaskHierarchyRecord(cursor));

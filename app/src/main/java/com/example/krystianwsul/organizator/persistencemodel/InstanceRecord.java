@@ -126,7 +126,7 @@ public class InstanceRecord extends Record {
 
         ArrayList<InstanceRecord> instanceRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, COLUMN_RELEVANT + " = 1", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             instanceRecords.add(cursorToInstanceRecord(cursor));

@@ -65,10 +65,4 @@ class TaskHierarchy {
 
         mTaskHierarchyRecord.setEndTime(endExactTimeStamp.getLong());
     }
-
-    public boolean isRelevant(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
-        return mChildTask.isRelevant(now);
-    }
 }

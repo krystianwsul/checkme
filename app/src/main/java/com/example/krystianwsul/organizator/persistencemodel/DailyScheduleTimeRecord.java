@@ -3,10 +3,12 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DailyScheduleTimeRecord extends Record {
     private static final String TABLE_DAILY_SCHEDULE_TIMES = "dailyScheduleTimes";
@@ -39,12 +41,14 @@ public class DailyScheduleTimeRecord extends Record {
         //onCreate(sqLiteDatabase);
     }
 
-    public static ArrayList<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(SQLiteDatabase sqLiteDatabase) {
+    public static ArrayList<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(SQLiteDatabase sqLiteDatabase, List<Integer> scheduleIds) {
         Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue(scheduleIds != null);
+        Assert.assertTrue(!scheduleIds.isEmpty());
 
         ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_DAILY_SCHEDULE_TIMES, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_DAILY_SCHEDULE_TIMES, null, COLUMN_SCHEDULE_ID + " IN (" + TextUtils.join(", ", scheduleIds) + ")", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             dailyScheduleTimeRecords.add(cursorToDailyScheduleTimeRecord(cursor));

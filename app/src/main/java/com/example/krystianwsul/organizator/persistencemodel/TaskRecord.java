@@ -56,7 +56,7 @@ public class TaskRecord extends Record {
 
         ArrayList<TaskRecord> taskRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_TASKS, null, COLUMN_RELEVANT + " = 1", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             taskRecords.add(cursorToTaskRecord(cursor));

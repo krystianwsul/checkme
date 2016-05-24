@@ -3,10 +3,12 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SingleScheduleDateTimeRecord extends Record {
     private static final String TABLE_SINGLE_SCHEDULE_DATE_TIMES = "singleScheduleDateTimes";
@@ -50,12 +52,14 @@ public class SingleScheduleDateTimeRecord extends Record {
         }
     }
 
-    public static ArrayList<SingleScheduleDateTimeRecord> getSingleScheduleDateTimeRecords(SQLiteDatabase sqLiteDatabase) {
+    public static ArrayList<SingleScheduleDateTimeRecord> getSingleScheduleDateTimeRecords(SQLiteDatabase sqLiteDatabase, List<Integer> scheduleIds) {
         Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue(scheduleIds != null);
+        Assert.assertTrue(!scheduleIds.isEmpty());
 
         ArrayList<SingleScheduleDateTimeRecord> singleScheduleDateTimeRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_SINGLE_SCHEDULE_DATE_TIMES, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_SINGLE_SCHEDULE_DATE_TIMES, null, COLUMN_SCHEDULE_ID + " IN (" + TextUtils.join(", ", scheduleIds) + ")", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             singleScheduleDateTimeRecords.add(cursorToSingleScheduleDateTimeRecord(cursor));

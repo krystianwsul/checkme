@@ -3,10 +3,12 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
     private static final String TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES = "weeklyScheduleDayOfWeekTimes";
@@ -43,12 +45,14 @@ public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
         //onCreate(sqLiteDatabase);
     }
 
-    public static ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(SQLiteDatabase sqLiteDatabase) {
+    public static ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(SQLiteDatabase sqLiteDatabase, List<Integer> scheduleIds) {
         Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue(scheduleIds != null);
+        Assert.assertTrue(!scheduleIds.isEmpty());
 
         ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, null, COLUMN_SCHEDULE_ID + " IN (" + TextUtils.join(", ", scheduleIds) + ")", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             weeklyScheduleDayOfWeekTimeRecords.add(cursorToWeeklyScheduleDayOfWeekTimeRecord(cursor));

@@ -531,4 +531,8 @@ class Instance {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
         return (mInstanceRecord != null);
     }
+
+    public void setRelevant() {
+        mInstanceRecord.setRelevant(false);
+    }
 }

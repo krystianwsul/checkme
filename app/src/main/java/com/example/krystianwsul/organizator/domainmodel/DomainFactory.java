@@ -289,34 +289,6 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes)
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
-        if (day == 0) {
-            /*
-
-            // relevant hack
-            List<Task> irrelevantTasks = Stream.of(mTasks.values())
-                    .filter(task -> !task.isRelevant(now))
-                    .collect(Collectors.toList());
-
-            List<TaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values())
-                    .filter(taskHierarchy -> !taskHierarchy.isRelevant(now))
-                    .collect(Collectors.toList());
-
-            List<Instance> irrelevantInstances = Stream.of(mExistingInstances)
-                    .filter(instance -> !instance.isRelevant(now))
-                    .collect(Collectors.toList());
-
-            for (Task task : irrelevantTasks)
-                mTasks.remove(task.getId());
-
-            for (TaskHierarchy taskHierarchy : irrelevantTaskHierarchies)
-                mTaskHierarchies.remove(taskHierarchy.getId());
-
-            for (Instance instance : irrelevantInstances)
-                mExistingInstances.remove(instance);
-
-            */
-        }
-
         return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
     }
 
@@ -1175,10 +1147,39 @@ public class DomainFactory {
     public synchronized void updateTaskOldestVisible(int dataId) {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        // relevant hack
+        List<Task> irrelevantTasks = Stream.of(mTasks.values())
+                .filter(task -> !task.isRelevant(now))
+                .collect(Collectors.toList());
+
+        List<Instance> irrelevantInstances = Stream.of(mExistingInstances)
+                .filter(instance -> !instance.isRelevant(now))
+                .collect(Collectors.toList());
+
+        for (Task task : irrelevantTasks)
+            task.setRelevant();
+
+        for (Instance instance : irrelevantInstances)
+            instance.setRelevant();
+
         for (Task task : mTasks.values())
             task.updateOldestVisible(now);
 
         save(dataId);
+
+        for (Task task : irrelevantTasks) {
+            mTasks.remove(task.getId());
+
+            List<TaskHierarchy> irrelevanTaskHierarchies = Stream.of(mTaskHierarchies.values())
+                    .filter(taskHierarchy -> irrelevantTasks.contains(taskHierarchy.getChildTask()))
+                    .collect(Collectors.toList());
+
+            for (TaskHierarchy irrelevanTaskHierarchy : irrelevanTaskHierarchies)
+                mTaskHierarchies.remove(irrelevanTaskHierarchy.getId());
+        }
+
+        for (Instance instance : irrelevantInstances)
+            mExistingInstances.remove(instance);
     }
 
     // internal

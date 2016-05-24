@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.domainmodel.CustomTime;
 import com.example.krystianwsul.organizator.domainmodel.DailySchedule;
 import com.example.krystianwsul.organizator.domainmodel.SingleSchedule;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 public class PersistenceManger {
@@ -68,25 +71,38 @@ public class PersistenceManger {
         for (TaskRecord taskRecord : TaskRecord.getTaskRecords(mSQLiteDatabase))
             mTaskRecords.put(taskRecord.getId(), taskRecord);
 
+        List<Integer> taskIds = Stream.of(mTaskRecords.values())
+                .map(TaskRecord::getId)
+                .collect(Collectors.toList());
+
         mTaskHierarchyRecords = new TreeMap<>();
-        for (TaskHierarchyRecord taskHierarchyRecord : TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase))
-            mTaskHierarchyRecords.put(taskHierarchyRecord.getId(), taskHierarchyRecord);
+        if (!mTaskRecords.isEmpty())
+            for (TaskHierarchyRecord taskHierarchyRecord : TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase, taskIds))
+                mTaskHierarchyRecords.put(taskHierarchyRecord.getId(), taskHierarchyRecord);
 
         mScheduleRecords = new TreeMap<>();
-        for (ScheduleRecord scheduleRecord : ScheduleRecord.getScheduleRecords(mSQLiteDatabase))
-            mScheduleRecords.put(scheduleRecord.getId(), scheduleRecord);
+        if (!mTaskRecords.isEmpty())
+            for (ScheduleRecord scheduleRecord : ScheduleRecord.getScheduleRecords(mSQLiteDatabase, taskIds))
+                mScheduleRecords.put(scheduleRecord.getId(), scheduleRecord);
+
+        List<Integer> scheduleIds = Stream.of(mScheduleRecords.values())
+                .map(ScheduleRecord::getId)
+                .collect(Collectors.toList());
 
         mSingleScheduleDateTimeRecords = new TreeMap<>();
-        for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : SingleScheduleDateTimeRecord.getSingleScheduleDateTimeRecords(mSQLiteDatabase))
-            mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
+        if (!scheduleIds.isEmpty())
+            for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : SingleScheduleDateTimeRecord.getSingleScheduleDateTimeRecords(mSQLiteDatabase, scheduleIds))
+                mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
 
         mDailyScheduleTimeRecords = new TreeMap<>();
-        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : DailyScheduleTimeRecord.getDailyScheduleTimeRecords(mSQLiteDatabase))
-            mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
+        if (!scheduleIds.isEmpty())
+            for (DailyScheduleTimeRecord dailyScheduleTimeRecord : DailyScheduleTimeRecord.getDailyScheduleTimeRecords(mSQLiteDatabase, scheduleIds))
+                mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
 
         mWeeklyScheduleDayOfWeekTimeRecords = new TreeMap<>();
-        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : WeeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleDayOfWeekTimeRecords(mSQLiteDatabase))
-            mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
+        if (!scheduleIds.isEmpty())
+            for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : WeeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleDayOfWeekTimeRecords(mSQLiteDatabase, scheduleIds))
+                mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
 
         mInstanceRecords = new TreeMap<>();
         for (InstanceRecord instanceRecord : InstanceRecord.getInstanceRecords(mSQLiteDatabase))

@@ -244,4 +244,8 @@ public class Task {
 
         return false;
     }
+
+    public void setRelevant() {
+        mTaskRecord.setRelevant(false);
+    }
 }

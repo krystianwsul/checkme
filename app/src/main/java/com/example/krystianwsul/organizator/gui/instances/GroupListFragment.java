@@ -17,6 +17,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -497,6 +498,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         mGroupListRecycler.setAdapter(mGroupAdapter);
 
         mSelectionCallback.setSelected(mGroupAdapter.getSelected().size());
+
+        if (mDay != null && mDay.equals(0)) { // 24 hack
+            // relevant hack
+            Log.e("asdf", "marking old");
+            DomainFactory.getDomainFactory(getActivity()).updateTaskOldestVisible(data.DataId);
+            Log.e("asdf", "marked old");
+        }
     }
 
     @Override

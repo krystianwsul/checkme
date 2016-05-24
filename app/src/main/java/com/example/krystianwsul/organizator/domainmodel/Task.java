@@ -19,8 +19,6 @@ public class Task {
     private final TaskRecord mTaskRecord;
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
 
-    private ExactTimeStamp mOldestVisible; // 24 hack
-
     Task(DomainFactory domainFactory, TaskRecord taskRecord) {
         Assert.assertTrue(domainFactory != null);
         Assert.assertTrue(taskRecord != null);
@@ -167,32 +165,46 @@ public class Task {
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
+    ExactTimeStamp getOldestVisible() {
+        if (mTaskRecord.getOldestVisible() != null)
+            return new ExactTimeStamp(mTaskRecord.getOldestVisible());
+        else
+            return null;
+    }
+
     ArrayList<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(now != null);
 
-        ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : mOldestVisible); // 24 hack
+        ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : getOldestVisible()); // 24 hack
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
             instances.addAll(schedule.getInstances(myStartExactTimeStamp, endExactTimeStamp));
 
-        if (startExactTimeStamp == null) {
-            Optional<Instance> optional = Stream.of(instances)
-                    .filter(instance -> instance.isVisible(now))
-                    .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
-
-            if (optional.isPresent()) {
-                mOldestVisible = optional.get().getScheduleDateTime().getTimeStamp().toExactTimeStamp();
-
-                if (mOldestVisible.compareTo(now) > 0)
-                    mOldestVisible = now;
-            } else {
-                mOldestVisible = ExactTimeStamp.getNow();
-            }
-        }
-
         return instances;
+    }
+
+    void updateOldestVisible(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        // 24 hack
+        ArrayList<Instance> instances = getInstances(null, now.plusOne(), now);
+
+        Optional<Instance> optional = Stream.of(instances)
+                .filter(instance -> instance.isVisible(now))
+                .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
+
+        if (optional.isPresent()) {
+            ExactTimeStamp oldestVisible = optional.get().getScheduleDateTime().getTimeStamp().toExactTimeStamp();
+
+            if (oldestVisible.compareTo(now) > 0)
+                oldestVisible = now;
+
+            mTaskRecord.setOldestVisible(oldestVisible.getLong());
+        } else {
+            mTaskRecord.setOldestVisible(now.getLong());
+        }
     }
 
     public boolean isVisible(ExactTimeStamp now) {
@@ -231,9 +243,5 @@ public class Task {
             return true;
 
         return false;
-    }
-
-    public ExactTimeStamp getOldestVisible() {
-        return mOldestVisible;
     }
 }

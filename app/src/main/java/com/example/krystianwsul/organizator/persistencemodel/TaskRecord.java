@@ -114,6 +114,10 @@ public class TaskRecord extends Record {
         return mEndTime;
     }
 
+    public Long getOldestVisible() {
+        return mOldestVisible;
+    }
+
     public void setName(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 

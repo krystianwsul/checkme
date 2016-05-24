@@ -290,6 +290,8 @@ public class DomainFactory {
             customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
 
         if (day == 0) {
+            /*
+
             // relevant hack
             List<Task> irrelevantTasks = Stream.of(mTasks.values())
                     .filter(task -> !task.isRelevant(now))
@@ -311,6 +313,8 @@ public class DomainFactory {
 
             for (Instance instance : irrelevantInstances)
                 mExistingInstances.remove(instance);
+
+            */
         }
 
         return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
@@ -1164,6 +1168,15 @@ public class DomainFactory {
 
             customTime.setCurrent();
         }
+
+        save(dataId);
+    }
+
+    public synchronized void updateTaskOldestVisible(int dataId) {
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        for (Task task : mTasks.values())
+            task.updateOldestVisible(now);
 
         save(dataId);
     }

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.krystianwsul.organizator.domainmodel.DomainFactory;
 
@@ -19,6 +20,7 @@ public class SaveService extends IntentService {
         Intent intent = new Intent(context, SaveService.class);
         intent.putParcelableArrayListExtra(INSERT_COMMAND_KEY, insertCommands);
         intent.putParcelableArrayListExtra(UPDATE_COMMAND_KEY, updateCommands);
+
         context.startService(intent);
     }
 
@@ -52,8 +54,8 @@ public class SaveService extends IntentService {
             } finally {
                 sqLiteDatabase.endTransaction();
             }
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
+            Log.e("Organizator SaveService", "save error", e);
             DomainFactory.getDomainFactory(this).reset();
             throw e;
         }

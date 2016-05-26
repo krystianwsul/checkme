@@ -31,7 +31,8 @@ public class InstanceRecord extends Record {
     private static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
     private static final String COLUMN_RELEVANT = "relevant";
 
-    public static final String INDEX_TASK_SCHEDULE = "instanceIndexTaskSchedule";
+    private static final String INDEX_TASK_SCHEDULE = "instanceIndexTaskSchedule";
+    private static final String INDEX_RELEVANT = "instancesIndexRelevant";
 
     private final int mId;
     private final int mTaskId;
@@ -119,6 +120,10 @@ public class InstanceRecord extends Record {
                     + COLUMN_SCHEDULE_CUSTOM_TIME_ID
                     + ")");
         }
+
+        if (oldVersion <= 7) {
+            sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_INSTANCES + "(" + COLUMN_RELEVANT + " DESC)");
+        }
     }
 
     public static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {
@@ -137,6 +142,7 @@ public class InstanceRecord extends Record {
         return instanceRecords;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private static InstanceRecord cursorToInstanceRecord(Cursor cursor) {
         Assert.assertTrue(cursor != null);
 
@@ -362,9 +368,9 @@ public class InstanceRecord extends Record {
         contentValues.put(COLUMN_INSTANCE_HOUR, mInstanceHour);
         contentValues.put(COLUMN_INSTANCE_MINUTE, mInstanceMinute);
         contentValues.put(COLUMN_HIERARCHY_TIME, mHierarchyTime);
-        contentValues.put(COLUMN_NOTIFIED, mNotified);
-        contentValues.put(COLUMN_NOTIFICATION_SHOWN, mNotificationShown);
-        contentValues.put(COLUMN_RELEVANT, mRelevant);
+        contentValues.put(COLUMN_NOTIFIED, mNotified ? 1 : 0);
+        contentValues.put(COLUMN_NOTIFICATION_SHOWN, mNotificationShown ? 1 : 0);
+        contentValues.put(COLUMN_RELEVANT, mRelevant ? 1 : 0);
         return contentValues;
     }
 

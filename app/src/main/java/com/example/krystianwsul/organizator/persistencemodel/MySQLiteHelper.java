@@ -3,11 +3,10 @@ package com.example.krystianwsul.organizator.persistencemodel;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
@@ -38,8 +37,6 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        Log.e("asdf", "upgrading");
-
         sqLiteDatabase.beginTransaction();
 
         try
@@ -60,7 +57,5 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         } finally {
             sqLiteDatabase.endTransaction();
         }
-
-        Log.e("asdf", "upgraded");
     }
 }

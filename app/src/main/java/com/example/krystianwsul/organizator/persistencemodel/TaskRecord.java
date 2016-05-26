@@ -19,6 +19,8 @@ public class TaskRecord extends Record {
     private static final String COLUMN_RELEVANT = "relevant";
     private static final String COLUMN_OLDEST_VISIBLE = "oldestVisible";
 
+    private static final String INDEX_RELEVANT = "tasksIndexRelevant";
+
     private final int mId;
     private String mName;
 
@@ -48,6 +50,10 @@ public class TaskRecord extends Record {
 
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
                     + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE + " INTEGER");
+        }
+
+        if (oldVersion <= 7) {
+            sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_TASKS + "(" + COLUMN_RELEVANT + " DESC)");
         }
     }
 
@@ -114,6 +120,10 @@ public class TaskRecord extends Record {
         return mEndTime;
     }
 
+    public boolean getRelevant() {
+        return mRelevant;
+    }
+
     public Long getOldestVisible() {
         return mOldestVisible;
     }
@@ -149,7 +159,7 @@ public class TaskRecord extends Record {
         contentValues.put(COLUMN_NAME, mName);
         contentValues.put(COLUMN_START_TIME, mStartTime);
         contentValues.put(COLUMN_END_TIME, mEndTime);
-        contentValues.put(COLUMN_RELEVANT, mRelevant);
+        contentValues.put(COLUMN_RELEVANT, mRelevant ? 1 : 0);
         contentValues.put(COLUMN_OLDEST_VISIBLE, mOldestVisible);
         return contentValues;
     }

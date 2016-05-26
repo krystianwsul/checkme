@@ -207,7 +207,7 @@ public class Task {
         }
     }
 
-    public boolean isVisible(ExactTimeStamp now) {
+    private boolean isVisible(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
         if (getEndExactTimeStamp() == null)

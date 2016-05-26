@@ -47,7 +47,7 @@
             android:exported="false" />
         <service
             android:name=".persistencemodel.SaveService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <receiver
             android:name=".notifications.TimeChangeReceiver"

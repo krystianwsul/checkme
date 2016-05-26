@@ -1060,7 +1060,7 @@ public class DomainFactory {
         save(dataIds);
     }
 
-    public synchronized ExactTimeStamp setTaskEndTimeStamps(int dataId, ArrayList<Integer> taskIds) {
+    public synchronized void setTaskEndTimeStamps(int dataId, ArrayList<Integer> taskIds) {
         Assert.assertTrue(taskIds != null);
         Assert.assertTrue(!taskIds.isEmpty());
 
@@ -1076,8 +1076,6 @@ public class DomainFactory {
         }
 
         save(dataId);
-
-        return now;
     }
 
     public synchronized void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {

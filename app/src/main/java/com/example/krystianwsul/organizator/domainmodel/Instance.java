@@ -6,7 +6,6 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.persistencemodel.InstanceRecord;
 import com.example.krystianwsul.organizator.utils.InstanceKey;
-import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.Date;
 import com.example.krystianwsul.organizator.utils.time.DateTime;
 import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
@@ -294,28 +293,6 @@ class Instance {
                 mInstanceRecord.setDone(now.getLong());
             } else {
                 mInstanceRecord.setDone(now.getLong());
-            }
-
-            if (isRootInstance(now)) {
-                Task rootTask = mTaskReference.get();
-                Assert.assertTrue(rootTask != null);
-                Assert.assertTrue(rootTask.isRootTask(getHierarchyExactTimeStamp(now)));
-
-                if (rootTask.current(now) && rootTask.getCurrentSchedule(now).getType() == ScheduleType.SINGLE) {
-                    DomainFactory domainFactory = mDomainFactoryReference.get();
-                    Assert.assertTrue(domainFactory != null);
-
-                    ArrayList<Instance> allInstances = domainFactory.getExistingInstances(rootTask);
-                    allInstances.addAll(rootTask.getInstances(null, now.plusOne(), now));
-
-                    ArrayList<Instance> notDoneInstances = new ArrayList<>();
-                    for (Instance taskInstance : allInstances)
-                        if (taskInstance.getDone() == null)
-                            notDoneInstances.add(taskInstance);
-
-                    if (notDoneInstances.isEmpty())
-                        rootTask.setEndExactTimeStamp(now.plusOne());
-                }
             }
         } else {
             Assert.assertTrue(mInstanceRecord != null);

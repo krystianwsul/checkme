@@ -590,9 +590,19 @@ public class DomainFactory {
             Assert.assertTrue(tasks != null);
         } else {
             tasks = new ArrayList<>();
-            for (Task rootTask : mTasks.values())
-                if (rootTask.current(now) && rootTask.isRootTask(now))
-                    tasks.add(rootTask);
+            for (Task rootTask : mTasks.values()) {
+                if (!rootTask.current(now)) {
+                    continue;
+                }
+
+                if (!rootTask.isVisible(now))
+                    continue;
+
+                if (!rootTask.isRootTask(now))
+                    continue;
+
+                tasks.add(rootTask);
+            }
         }
 
         Collections.sort(tasks, (Task lhs, Task rhs) -> Integer.valueOf(lhs.getId()).compareTo(rhs.getId()));

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.example.krystianwsul.organizator.persistencemodel.TaskRecord;
+import com.example.krystianwsul.organizator.utils.ScheduleType;
 import com.example.krystianwsul.organizator.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -207,11 +208,22 @@ public class Task {
         }
     }
 
-    private boolean isVisible(ExactTimeStamp now) {
+    boolean isVisible(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
-        if (getEndExactTimeStamp() == null)
-            return true;
+        if (current(now) && isRootTask(now)) {
+            Schedule schedule = getCurrentSchedule(now);
+            Assert.assertTrue(schedule != null);
+
+            if (schedule.getType() == ScheduleType.SINGLE) {
+                SingleSchedule singleSchedule = (SingleSchedule) schedule;
+
+                if (singleSchedule.getInstance(this).isVisible(now))
+                    return true;
+            } else {
+                return true;
+            }
+        }
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);

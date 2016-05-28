@@ -73,6 +73,11 @@ public class ScheduleRecord extends Record {
         return new ScheduleRecord(true, id, taskId, startTime, endTime, type);
     }
 
+    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        return getMaxId(sqLiteDatabase, TABLE_SCHEDULES, COLUMN_ID);
+    }
+
     ScheduleRecord(boolean current, int id, int rootTaskId, long startTime, Long endTime, int type) {
         super(current);
 

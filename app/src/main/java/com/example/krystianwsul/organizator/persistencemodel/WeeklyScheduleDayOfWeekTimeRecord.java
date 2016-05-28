@@ -80,6 +80,11 @@ public class WeeklyScheduleDayOfWeekTimeRecord extends Record {
         return new WeeklyScheduleDayOfWeekTimeRecord(true, id, scheduleId, dayOfWeek, customTimeId, hour, minute);
     }
 
+    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        return getMaxId(sqLiteDatabase, TABLE_WEEKLY_SCHEDULE_DAY_OF_WEEK_TIMES, COLUMN_ID);
+    }
+
     WeeklyScheduleDayOfWeekTimeRecord(boolean created, int id, int scheduleId, int dayOfWeek, Integer customTimeId, Integer hour, Integer minute) {
         super(created);
 

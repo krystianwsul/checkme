@@ -75,6 +75,11 @@ public class DailyScheduleTimeRecord extends Record {
         return new DailyScheduleTimeRecord(true, id, scheduleId, customTimeId, hour, minute);
     }
 
+    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        return getMaxId(sqLiteDatabase, TABLE_DAILY_SCHEDULE_TIMES, COLUMN_ID);
+    }
+
     DailyScheduleTimeRecord(boolean created, int id, int scheduleId, Integer customTimeId, Integer hour, Integer minute) {
         super(created);
 

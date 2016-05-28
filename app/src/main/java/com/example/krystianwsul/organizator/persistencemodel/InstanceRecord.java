@@ -181,6 +181,11 @@ public class InstanceRecord extends Record {
         return new InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown, relevant);
     }
 
+    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        return getMaxId(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID);
+    }
+
     InstanceRecord(boolean created, int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown, boolean relevant) {
         super(created);
 

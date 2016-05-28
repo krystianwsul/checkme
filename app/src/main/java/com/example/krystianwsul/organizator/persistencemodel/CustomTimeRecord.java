@@ -126,6 +126,11 @@ public class CustomTimeRecord extends Record {
         return new CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
     }
 
+    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        return getMaxId(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID);
+    }
+
     CustomTimeRecord(boolean created, int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
         super(created);
 

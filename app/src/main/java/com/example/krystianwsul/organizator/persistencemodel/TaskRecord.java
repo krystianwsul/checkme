@@ -89,6 +89,11 @@ public class TaskRecord extends Record {
         return new TaskRecord(true, id, name, startTime, endTime, relevant, oldestVisible);
     }
 
+    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        return getMaxId(sqLiteDatabase, TABLE_TASKS, COLUMN_ID);
+    }
+
     TaskRecord(boolean created, int id, String name, long startTime, Long endTime, boolean relevant, Long oldestVisible) {
         super(created);
 

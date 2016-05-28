@@ -74,6 +74,11 @@ public class TaskHierarchyRecord extends Record {
         return new TaskHierarchyRecord(true, id, parentTaskId, childTaskId, startTime, endTime);
     }
 
+    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        return getMaxId(sqLiteDatabase, TABLE_TASK_HIERARCHIES, COLUMN_ID);
+    }
+
     TaskHierarchyRecord(boolean created, int id, int parentTaskId, int childTaskId, long startTime, Long endTime) {
         super(created);
 

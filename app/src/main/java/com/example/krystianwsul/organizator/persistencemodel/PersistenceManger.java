@@ -25,7 +25,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -49,6 +48,14 @@ public class PersistenceManger {
 
     private final Context mApplicationContext;
 
+    private int mCustomTimeMaxId;
+    private int mTaskMaxId;
+    private int mTaskHierarchyMaxId;
+    private int mScheduleMaxId;
+    private int mDailyScheduleTimeMaxId;
+    private int mWeeklyScheduleDayOfWeekTimeMaxId;
+    private int mInstanceMaxId;
+
     public static synchronized PersistenceManger getInstance(Context context) {
         Assert.assertTrue(context != null);
         if (sInstance == null)
@@ -67,9 +74,13 @@ public class PersistenceManger {
         for (CustomTimeRecord customTimeRecord : CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase))
             mCustomTimeRecords.put(customTimeRecord.getId(), customTimeRecord);
 
+        mCustomTimeMaxId = CustomTimeRecord.getMaxId(mSQLiteDatabase);
+
         mTaskRecords = new TreeMap<>();
         for (TaskRecord taskRecord : TaskRecord.getTaskRecords(mSQLiteDatabase))
             mTaskRecords.put(taskRecord.getId(), taskRecord);
+
+        mTaskMaxId = TaskRecord.getMaxId(mSQLiteDatabase);
 
         List<Integer> taskIds = Stream.of(mTaskRecords.values())
                 .map(TaskRecord::getId)
@@ -80,10 +91,14 @@ public class PersistenceManger {
             for (TaskHierarchyRecord taskHierarchyRecord : TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase, taskIds))
                 mTaskHierarchyRecords.put(taskHierarchyRecord.getId(), taskHierarchyRecord);
 
+        mTaskHierarchyMaxId = TaskHierarchyRecord.getMaxId(mSQLiteDatabase);
+
         mScheduleRecords = new TreeMap<>();
         if (!mTaskRecords.isEmpty())
             for (ScheduleRecord scheduleRecord : ScheduleRecord.getScheduleRecords(mSQLiteDatabase, taskIds))
                 mScheduleRecords.put(scheduleRecord.getId(), scheduleRecord);
+
+        mScheduleMaxId = ScheduleRecord.getMaxId(mSQLiteDatabase);
 
         List<Integer> scheduleIds = Stream.of(mScheduleRecords.values())
                 .map(ScheduleRecord::getId)
@@ -99,14 +114,20 @@ public class PersistenceManger {
             for (DailyScheduleTimeRecord dailyScheduleTimeRecord : DailyScheduleTimeRecord.getDailyScheduleTimeRecords(mSQLiteDatabase, scheduleIds))
                 mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
 
+        mDailyScheduleTimeMaxId = DailyScheduleTimeRecord.getMaxId(mSQLiteDatabase);
+
         mWeeklyScheduleDayOfWeekTimeRecords = new TreeMap<>();
         if (!scheduleIds.isEmpty())
             for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : WeeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleDayOfWeekTimeRecords(mSQLiteDatabase, scheduleIds))
                 mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
 
+        mWeeklyScheduleDayOfWeekTimeMaxId = WeeklyScheduleDayOfWeekTimeRecord.getMaxId(mSQLiteDatabase);
+
         mInstanceRecords = new TreeMap<>();
         for (InstanceRecord instanceRecord : InstanceRecord.getInstanceRecords(mSQLiteDatabase))
             mInstanceRecords.put(instanceRecord.getId(), instanceRecord);
+
+        mInstanceMaxId = InstanceRecord.getMaxId(mSQLiteDatabase);
     }
 
     public synchronized void reset() {
@@ -164,13 +185,6 @@ public class PersistenceManger {
         return mInstanceRecords.values();
     }
 
-    private int getNextId(TreeMap<Integer, ? extends Record> hashMap) {
-        if (hashMap.isEmpty())
-            return 1;
-        else
-            return Collections.max(hashMap.keySet()) + 1;
-    }
-
     public CustomTimeRecord createCustomTimeRecord(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
@@ -191,7 +205,7 @@ public class PersistenceManger {
         HourMinute friday = hourMinutes.get(DayOfWeek.FRIDAY);
         HourMinute saturday = hourMinutes.get(DayOfWeek.SATURDAY);
 
-        int id = getNextId(mCustomTimeRecords);
+        int id = ++mCustomTimeMaxId;
 
         CustomTimeRecord customTimeRecord = new CustomTimeRecord(false, id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute(), true);
         mCustomTimeRecords.put(customTimeRecord.getId(), customTimeRecord);
@@ -202,7 +216,7 @@ public class PersistenceManger {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(startExactTimeStamp != null);
 
-        int id = getNextId(mTaskRecords);
+        int id = ++mTaskMaxId;
 
         TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, true, null);
         mTaskRecords.put(taskRecord.getId(), taskRecord);
@@ -217,7 +231,7 @@ public class PersistenceManger {
         Assert.assertTrue(childTask != null);
         Assert.assertTrue(childTask.current(startExactTimeStamp));
 
-        int id = getNextId(mTaskHierarchyRecords);
+        int id = ++mTaskHierarchyMaxId;
 
         TaskHierarchyRecord taskHierarchyRecord = new TaskHierarchyRecord(false, id, parentTask.getId(), childTask.getId(), startExactTimeStamp.getLong(), null);
         mTaskHierarchyRecords.put(taskHierarchyRecord.getId(), taskHierarchyRecord);
@@ -230,7 +244,7 @@ public class PersistenceManger {
         Assert.assertTrue(startExactTimeStamp != null);
         Assert.assertTrue(rootTask.current(startExactTimeStamp));
 
-        int id = getNextId(mScheduleRecords);
+        int id = ++mScheduleMaxId;
 
         ScheduleRecord scheduleRecord = new ScheduleRecord(false, id, rootTask.getId(), startExactTimeStamp.getLong(), null, scheduleType.ordinal());
         mScheduleRecords.put(scheduleRecord.getId(), scheduleRecord);
@@ -277,7 +291,7 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        int id = getNextId(mDailyScheduleTimeRecords);
+        int id = ++mDailyScheduleTimeMaxId;
 
         DailyScheduleTimeRecord dailyScheduleTimeRecord = new DailyScheduleTimeRecord(false, id, dailySchedule.getId(), customTimeId, hour, minute);
         mDailyScheduleTimeRecords.put(dailyScheduleTimeRecord.getId(), dailyScheduleTimeRecord);
@@ -301,7 +315,7 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        int id = getNextId(mWeeklyScheduleDayOfWeekTimeRecords);
+        int id = ++mWeeklyScheduleDayOfWeekTimeMaxId;
 
         WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = new WeeklyScheduleDayOfWeekTimeRecord(false, id, weeklySchedule.getId(), dayOfWeek.ordinal(), customTimeId, hour, minute);
         mWeeklyScheduleDayOfWeekTimeRecords.put(weeklyScheduleDayOfWeekTimeRecord.getId(), weeklyScheduleDayOfWeekTimeRecord);
@@ -330,7 +344,7 @@ public class PersistenceManger {
             scheduleMinute = hourMinute.getMinute();
         }
 
-        int id = getNextId(mInstanceRecords);
+        int id = ++mInstanceMaxId;
 
         InstanceRecord instanceRecord = new InstanceRecord(false, id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false, true);
         mInstanceRecords.put(instanceRecord.getId(), instanceRecord);

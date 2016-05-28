@@ -1,6 +1,8 @@
 package com.example.krystianwsul.organizator.persistencemodel;
 
 import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
@@ -8,6 +10,22 @@ import junit.framework.Assert;
 abstract class Record {
     private boolean mCreated;
     boolean mChanged = false;
+
+    static int getMaxId(SQLiteDatabase sqLiteDatabase, String tableName, String idColumn) {
+        Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue(!TextUtils.isEmpty(tableName));
+        Assert.assertTrue(!TextUtils.isEmpty(idColumn));
+
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT MAX(" + idColumn + ") FROM " + tableName, null);
+        Assert.assertTrue(cursor.getColumnCount() == 1);
+        cursor.moveToFirst();
+
+        int max = (cursor.isNull(0) ? 0 : cursor.getInt(0));
+
+        cursor.close();
+
+        return max;
+    }
 
     abstract ContentValues getContentValues();
 

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.krystianwsul.organizator.gui.instances.DayFragment"
+    tools:context="com.krystianwsul.checkme.gui.instances.DayFragment"
     android:orientation="vertical">
 
     <android.support.design.widget.TabLayout

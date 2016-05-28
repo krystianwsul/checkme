@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.krystianwsul.organizator">
+    package="com.krystianwsul.checkme">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name=".OrganizatorApplication"
+        android:name="com.krystianwsul.checkme.OrganizatorApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ikona_tlo"
         android:label="@string/app_name"
@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
-            android:name=".gui.MainActivity"
+            android:name="com.krystianwsul.checkme.gui.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -24,17 +24,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".gui.tasks.ShowTaskActivity" />
-        <activity android:name=".gui.instances.ShowGroupActivity" />
-        <activity android:name=".gui.instances.ShowNotificationGroupActivity" />
-        <activity android:name=".gui.instances.ShowInstanceActivity" />
-        <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
-        <activity android:name=".gui.tasks.CreateRootTaskActivity" />
-        <activity android:name=".gui.tasks.CreateChildTaskActivity" />
-        <activity android:name=".gui.instances.EditInstanceActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.tasks.ShowTaskActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.instances.ShowGroupActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.instances.ShowInstanceActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.tasks.CreateRootTaskActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.instances.EditInstanceActivity" />
 
         <receiver
-            android:name=".notifications.BootReceiver"
+            android:name="com.krystianwsul.checkme.notifications.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -43,14 +43,14 @@
         </receiver>
 
         <service
-            android:name=".notifications.TickService"
+            android:name="com.krystianwsul.checkme.notifications.TickService"
             android:exported="false" />
         <service
-            android:name=".persistencemodel.SaveService"
+            android:name="com.krystianwsul.checkme.persistencemodel.SaveService"
             android:exported="false"/>
 
         <receiver
-            android:name=".notifications.TimeChangeReceiver"
+            android:name="com.krystianwsul.checkme.notifications.TimeChangeReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -60,16 +60,16 @@
         </receiver>
 
         <service
-            android:name=".notifications.GroupNotificationDeleteService"
+            android:name="com.krystianwsul.checkme.notifications.GroupNotificationDeleteService"
             android:exported="false" />
         <service
-            android:name=".notifications.InstanceDoneService"
+            android:name="com.krystianwsul.checkme.notifications.InstanceDoneService"
             android:exported="false" />
         <service
-            android:name=".notifications.InstanceHourService"
+            android:name="com.krystianwsul.checkme.notifications.InstanceHourService"
             android:exported="false" />
         <service
-            android:name=".notifications.InstanceNotificationDeleteService"
+            android:name="com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService"
             android:exported="false" />
 
     </application>

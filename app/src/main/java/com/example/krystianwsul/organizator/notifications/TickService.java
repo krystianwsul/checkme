@@ -246,7 +246,7 @@ public class TickService extends IntentService {
         NotificationCompat.Builder builder = (new NotificationCompat.Builder(this))
                 .setContentTitle(title)
                 .setContentText(text)
-                .setSmallIcon(R.drawable.ic_label_outline_white_24dp)
+                .setSmallIcon(R.drawable.ikona_bez)
                 .setDeleteIntent(deleteIntent)
                 .setContentIntent(contentIntent)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)

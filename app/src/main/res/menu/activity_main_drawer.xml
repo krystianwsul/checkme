@@ -19,6 +19,7 @@
             tools:ignore="HardcodedText"
             android:id="@+id/main_drawer_debug"
             android:title="Debug"
-            android:icon="@drawable/ic_build_black_24dp"/>
+            android:icon="@drawable/ic_build_black_24dp"
+            android:visible="false"/>
     </group>
 </menu>

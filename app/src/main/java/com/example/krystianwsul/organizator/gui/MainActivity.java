@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private static final int CUSTOM_TIMES_VISIBLE = 2;
     private static final int DEBUG_VISIBLE = 3;
 
+    private static final String SHOW_DEBUG_KEY = "showDebug";
+
     private ActionBar mActionBar;
     private ViewPager mDaysPager;
     private FrameLayout mMainTaskListFrame;
@@ -172,6 +174,14 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             }
 
             mMainActivityDrawer.closeDrawer(GravityCompat.START);
+            return true;
+        });
+
+        View headerView = mainActivityNavigation.getHeaderView(0);
+        Assert.assertTrue(headerView != null);
+
+        headerView.setOnLongClickListener(v -> {
+            mainActivityNavigation.getMenu().findItem(R.id.main_drawer_debug).setVisible(true);
             return true;
         });
 

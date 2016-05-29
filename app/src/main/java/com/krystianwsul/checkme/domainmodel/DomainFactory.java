@@ -115,6 +115,8 @@ public class DomainFactory {
 
             Assert.assertTrue(!mTasks.containsKey(task.getId()));
             mTasks.put(task.getId(), task);
+
+            //Log.e("asdf", "task " + task.getName());
         }
 
         Collection<TaskHierarchyRecord> taskHierarchyRecords = mPersistenceManager.getTaskHierarchyRecords();
@@ -144,6 +146,8 @@ public class DomainFactory {
 
             Instance instance = new Instance(this, task, instanceRecord);
             mExistingInstances.add(instance);
+
+            //Log.e("asdf", "instance " + instance.getName() + " " + instance.getInstanceDateTime());
         }
     }
 

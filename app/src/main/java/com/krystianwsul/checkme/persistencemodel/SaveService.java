@@ -10,6 +10,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
+import org.acra.ACRA;
+
 import java.util.ArrayList;
 
 public class SaveService extends IntentService {
@@ -30,8 +32,7 @@ public class SaveService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        try
-        {
+        try {
             ArrayList<InsertCommand> insertCommands = intent.getParcelableArrayListExtra(INSERT_COMMAND_KEY);
             Assert.assertTrue(insertCommands != null);
 
@@ -42,8 +43,7 @@ public class SaveService extends IntentService {
 
             sqLiteDatabase.beginTransaction();
 
-            try
-            {
+            try {
                 for (InsertCommand insertCommand : insertCommands)
                     insertCommand.execute(sqLiteDatabase);
 
@@ -55,7 +55,10 @@ public class SaveService extends IntentService {
                 sqLiteDatabase.endTransaction();
             }
         } catch (Exception e) {
-            Log.e("Organizator SaveService", "save error", e);
+            Log.wtf("SaveService", e);
+
+            ACRA.getErrorReporter().handleException(e);
+
             DomainFactory.getDomainFactory(this).reset();
             throw e;
         }

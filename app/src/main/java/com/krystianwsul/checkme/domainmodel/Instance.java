@@ -202,28 +202,20 @@ class Instance {
         DateTime scheduleDateTime = getScheduleDateTime();
         Assert.assertTrue(scheduleDateTime != null);
 
-        HashSet<Instance> childInstances = new HashSet<>();
-
         ArrayList<TaskHierarchy> taskHierarchies = domainFactory.getTaskHierarchies(task);
+        HashSet<Instance> childInstances = new HashSet<>();
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
             Task childTask = taskHierarchy.getChildTask();
             Assert.assertTrue(childTask != null);
 
-            Instance childInstance = domainFactory.getExistingInstance(childTask, scheduleDateTime);
-            if (childInstance != null)
-                childInstances.add(childInstance);
-        }
-
-        ArrayList<Task> childTasks = task.getChildTasks(hierarchyExactTimeStamp);
-        for (Task childTask : childTasks) {
-            Assert.assertTrue(childTask.current(hierarchyExactTimeStamp));
-
-            Instance childInstance = domainFactory.getInstance(childTask, scheduleDateTime);
-            Assert.assertTrue(childInstance != null);
-
-            childInstances.add(childInstance);
+            Instance existingChildInstance = domainFactory.getExistingInstance(childTask, scheduleDateTime);
+            if (existingChildInstance != null) {
+                childInstances.add(existingChildInstance);
+            } else if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.getChildTask().notDeleted(hierarchyExactTimeStamp)) {
+                childInstances.add(domainFactory.getInstance(childTask, scheduleDateTime));
+            }
         }
 
         return new ArrayList<>(childInstances);

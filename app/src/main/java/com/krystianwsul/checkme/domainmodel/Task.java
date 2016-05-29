@@ -166,6 +166,14 @@ public class Task {
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
+    public boolean notDeleted(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
+
+        return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
+    }
+
     ExactTimeStamp getOldestVisible() {
         if (mTaskRecord.getOldestVisible() != null)
             return new ExactTimeStamp(mTaskRecord.getOldestVisible());

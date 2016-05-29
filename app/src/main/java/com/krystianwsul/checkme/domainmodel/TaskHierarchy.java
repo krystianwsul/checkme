@@ -59,6 +59,14 @@ class TaskHierarchy {
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
+    boolean notDeleted(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
+
+        return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
+    }
+
     void setEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(current(endExactTimeStamp));

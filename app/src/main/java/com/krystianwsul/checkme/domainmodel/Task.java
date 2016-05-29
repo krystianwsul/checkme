@@ -208,11 +208,23 @@ public class Task {
         }
     }
 
+    private Task getRootTask(ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(exactTimeStamp != null);
+
+        Task parentTask = getParentTask(exactTimeStamp);
+        if (parentTask == null)
+            return this;
+        else
+            return parentTask.getRootTask(exactTimeStamp);
+    }
+
     boolean isVisible(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
-        if (current(now) && isRootTask(now)) {
-            Schedule schedule = getCurrentSchedule(now);
+        if (current(now)) {
+            Task rootTask = getRootTask(now);
+
+            Schedule schedule = rootTask.getCurrentSchedule(now);
             Assert.assertTrue(schedule != null);
 
             if (schedule.getType() == ScheduleType.SINGLE) {

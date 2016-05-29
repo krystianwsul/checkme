@@ -288,8 +288,7 @@ class Instance {
 
         if (done) {
             if (mInstanceRecord == null) {
-                createInstanceRecord(now);
-                getRootInstance(now).createInstanceHierarchy(now);
+                createInstanceHierarchy(now);
                 mInstanceRecord.setDone(now.getLong());
             } else {
                 mInstanceRecord.setDone(now.getLong());
@@ -301,26 +300,16 @@ class Instance {
         }
     }
 
-    private Instance getRootInstance(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
-        Instance parentInstance = getParentInstance(now);
-
-        if (parentInstance != null)
-            return parentInstance.getRootInstance(now);
-        else
-            return this;
-    }
-
     private void createInstanceHierarchy(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
+        Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
+
+        Instance parentInstance = getParentInstance(now);
+        if (parentInstance != null)
+            parentInstance.createInstanceHierarchy(now);
 
         if (mInstanceRecord == null)
             createInstanceRecord(now);
-
-        ArrayList<Instance> childInstances = getChildInstances(now);
-        for (Instance childInstance : childInstances)
-            childInstance.createInstanceHierarchy(now);
     }
 
     private void createInstanceRecord(ExactTimeStamp now) {

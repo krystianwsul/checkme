@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -81,6 +82,9 @@ public class DomainFactory {
 
             sStop = ExactTimeStamp.getNow();
         }
+
+        Log.e("asdf", Stream.of(sDomainFactory.mTasks.values()).map(Task::getName).collect(Collectors.joining(", ")));
+
         return sDomainFactory;
     }
 

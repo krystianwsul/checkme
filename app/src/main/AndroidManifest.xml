@@ -32,6 +32,7 @@
         <activity android:name="com.krystianwsul.checkme.gui.tasks.CreateRootTaskActivity" />
         <activity android:name="com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity" />
         <activity android:name="com.krystianwsul.checkme.gui.instances.EditInstanceActivity" />
+        <activity android:name="com.krystianwsul.checkme.gui.instances.EditInstancesActivity" />
 
         <receiver
             android:name="com.krystianwsul.checkme.notifications.BootReceiver"

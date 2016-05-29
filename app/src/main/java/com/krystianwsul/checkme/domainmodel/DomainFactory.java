@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -11,6 +10,7 @@ import com.krystianwsul.checkme.loaders.CreateChildTaskLoader;
 import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
 import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
+import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class DomainFactory {
@@ -82,8 +83,6 @@ public class DomainFactory {
 
             sStop = ExactTimeStamp.getNow();
         }
-
-        Log.e("asdf", Stream.of(sDomainFactory.mTasks.values()).map(Task::getName).collect(Collectors.joining(", ")));
 
         return sDomainFactory;
     }
@@ -221,6 +220,33 @@ public class DomainFactory {
             customTimeDatas.put(customTime.getId(), new EditInstanceLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
         return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas);
+    }
+
+    public synchronized EditInstancesLoader.Data getEditInstancesData(ArrayList<InstanceKey> instanceKeys) {
+        fakeDelay();
+
+        Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(instanceKeys.size() > 1);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        HashMap<InstanceKey, EditInstancesLoader.InstanceData> instanceDatas = new HashMap<>();
+
+        for (InstanceKey instanceKey : instanceKeys) {
+            Instance instance = getInstance(instanceKey);
+            Assert.assertTrue(instance != null);
+            Assert.assertTrue(instance.isRootInstance(now));
+            Assert.assertTrue(instance.getDone() == null);
+
+            instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDate(), instance.getName()));
+        }
+
+        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+        TreeMap<Integer, EditInstancesLoader.CustomTimeData> customTimeDatas = new TreeMap<>();
+        for (CustomTime customTime : currentCustomTimes)
+            customTimeDatas.put(customTime.getId(), new EditInstancesLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+
+        return new EditInstancesLoader.Data(instanceDatas, customTimeDatas);
     }
 
     public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
@@ -679,6 +705,24 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
+
+        save(dataId);
+    }
+
+    public synchronized void setInstancesDateTime(int dataId, Set<InstanceKey> instanceKeys, Date instanceDate, TimePair instanceTimePair) {
+        Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(instanceKeys.size() > 1);
+        Assert.assertTrue(instanceDate != null);
+        Assert.assertTrue(instanceTimePair != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        for (InstanceKey instanceKey : instanceKeys) {
+            Instance instance = getInstance(instanceKey);
+            Assert.assertTrue(instance != null);
+
+            instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
+        }
 
         save(dataId);
     }

@@ -95,12 +95,25 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             switch (menuItem.getItemId()) {
                 case R.id.action_group_edit_instance:
-                    Assert.assertTrue(selected.size() == 1);
+                    Assert.assertTrue(!selected.isEmpty());
 
-                    GroupListLoader.InstanceData instanceData = selected.get(0).mInstanceData;
-                    Assert.assertTrue(instanceData.IsRootInstance);
+                    if (selected.size() == 1) {
+                        GroupListLoader.InstanceData instanceData = selected.get(0).mInstanceData;
+                        Assert.assertTrue(instanceData.IsRootInstance);
 
-                    startActivity(EditInstanceActivity.getIntent(getActivity(), instanceData.InstanceKey));
+                        startActivity(EditInstanceActivity.getIntent(getActivity(), instanceData.InstanceKey));
+                    } else {
+                        Assert.assertTrue(selected.size() > 1);
+
+                        Assert.assertTrue(Stream.of(selected)
+                            .allMatch(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.IsRootInstance));
+
+                        ArrayList<InstanceKey> instanceKeys = Stream.of(selected)
+                                .map(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.InstanceKey)
+                                .collect(Collectors.toCollection(ArrayList::new));
+
+                        startActivity(EditInstancesActivity.getIntent(getActivity(), instanceKeys));
+                    }
                     break;
                 case R.id.action_group_show_task:
                     Assert.assertTrue(selected.size() == 1);
@@ -286,7 +299,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             } else {
                 Assert.assertTrue(selected.size() > 1);
 
-                menu.findItem(R.id.action_group_edit_instance).setVisible(false);
+                boolean isRootInstance = selected.get(0).mInstanceData.IsRootInstance;
+                Assert.assertTrue(Stream.of(selected)
+                    .allMatch(notDoneInstanceNode -> notDoneInstanceNode.mInstanceData.IsRootInstance == isRootInstance));
+
+                menu.findItem(R.id.action_group_edit_instance).setVisible(isRootInstance);
                 menu.findItem(R.id.action_group_show_task).setVisible(false);
                 menu.findItem(R.id.action_group_edit_task).setVisible(false);
 

@@ -1,10 +1,8 @@
 package com.krystianwsul.checkme.gui.instances;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -21,6 +19,7 @@ import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialo
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.ErrorDialogFragment;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
@@ -44,6 +43,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_FRAGMENT_TAG = "timeFragment";
     private static final String TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment";
+    private static final String ERROR_DIALOG_FRAGMENT_TAG = "errorDialogFragment";
 
     private Date mDate;
     private EditInstanceLoader.Data mData;
@@ -54,7 +54,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private Bundle mSavedInstanceState;
     private TextView mEditInstanceTime;
 
-    private BroadcastReceiver mBroadcastReceiver;
+    //private BroadcastReceiver mBroadcastReceiver; error dialog hack
 
     private TimePairPersist mTimePairPersist;
 
@@ -67,7 +67,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
             updateTimeText();
 
-            invalidateOptionsMenu();
+            //invalidateOptionsMenu(); error dialog hack
         }
 
         @Override
@@ -86,7 +86,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
         updateTimeText();
-        invalidateOptionsMenu();
+        //invalidateOptionsMenu(); error dialog hack
     };
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
@@ -103,7 +103,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_edit_instance_save).setVisible(isValidTime());
+        //menu.findItem(R.id.action_edit_instance_save).setVisible(isValidTime()); error dialog hack
         return true;
     }
 
@@ -114,11 +114,19 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
                 Assert.assertTrue(mDate != null);
                 Assert.assertTrue(mData != null);
 
-                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
+                if (isValidTime()) {
+                    DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
 
-                TickService.startService(EditInstanceActivity.this);
+                    TickService.startService(EditInstanceActivity.this);
 
-                finish();
+                    finish();
+                } else {
+                    ArrayList<String> errors = new ArrayList<>();
+                    errors.add(getString(R.string.error_past_time));
+                    ErrorDialogFragment errorDialogFragment = ErrorDialogFragment.newInstance(errors);
+                    errorDialogFragment.show(getSupportFragmentManager(), ERROR_DIALOG_FRAGMENT_TAG);
+                }
+
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -163,14 +171,16 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         getSupportLoaderManager().initLoader(0, null, this);
 
+        /* error dialog hack
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 invalidateOptionsMenu();
             }
-        };
+        }; */
     }
 
+    /*  error dialog hack
     @Override
     public void onResume() {
         super.onResume();
@@ -185,6 +195,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         unregisterReceiver(mBroadcastReceiver);
     }
+    */
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -263,7 +274,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         updateTimeText();
 
-        invalidateOptionsMenu();
+        //invalidateOptionsMenu(); error dialog hack
     }
 
     @SuppressLint("SetTextI18n")

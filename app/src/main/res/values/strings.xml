@@ -29,4 +29,6 @@
     <string name="time_dialog_title">Pick a time</string>
     <string name="edit_task">Edit task</string>
     <string name="delete_task">Delete task</string>
+    <string name="error">Error</string>
+    <string name="error_past_time">The chosen time is in the past.</string>
 </resources>

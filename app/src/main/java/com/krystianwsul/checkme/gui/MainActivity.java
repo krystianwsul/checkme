@@ -1,11 +1,13 @@
 package com.krystianwsul.checkme.gui;
 
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -34,8 +36,10 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private static final int CUSTOM_TIMES_VISIBLE = 2;
     private static final int DEBUG_VISIBLE = 3;
 
-    private static final String SHOW_DEBUG_KEY = "showDebug";
+    private static final float NORMAL_ELEVATION = 6;
+    private static final float INSTANCES_ELEVATION = 0;
 
+    private AppBarLayout mMainActivityAppBarLayout;
     private ActionBar mActionBar;
     private ViewPager mDaysPager;
     private FrameLayout mMainTaskListFrame;
@@ -77,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mIgnoreFirst = true;
             }
         }
+
+        mMainActivityAppBarLayout = (AppBarLayout) findViewById(R.id.main_activity_app_bar_layout);
+        Assert.assertTrue(mMainActivityAppBarLayout != null);
 
         mMainActivityDrawer = (DrawerLayout) findViewById(R.id.main_activity_drawer);
         Assert.assertTrue(mMainActivityDrawer != null);
@@ -217,13 +224,16 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mDaysPager.setVisibility(View.VISIBLE);
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
-                mMainDebugFrame.setVisibility(View.GONE);break;
+                mMainDebugFrame.setVisibility(View.GONE);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION);
+                break;
             case TASKS_VISIBLE:
                 mActionBar.setTitle(getString(R.string.tasks));
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.VISIBLE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
                 break;
             case CUSTOM_TIMES_VISIBLE:
                 mActionBar.setTitle(getString(R.string.times));
@@ -231,6 +241,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.VISIBLE);
                 mMainDebugFrame.setVisibility(View.GONE);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
                 break;
             case DEBUG_VISIBLE:
                 mActionBar.setTitle("Debug");
@@ -238,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.VISIBLE);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
                 break;
             default:
                 throw new IllegalArgumentException();

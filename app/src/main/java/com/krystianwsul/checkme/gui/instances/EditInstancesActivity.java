@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -53,6 +54,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
     private TextView mEditInstanceDate;
     private Bundle mSavedInstanceState;
+    private TextInputLayout mEditInstanceTimeLayout;
     private TextView mEditInstanceTime;
 
     private BroadcastReceiver mBroadcastReceiver;
@@ -68,7 +70,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
             updateTimeText();
 
-            invalidateOptionsMenu();
+            updateError();
         }
 
         @Override
@@ -87,7 +89,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
         mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
         updateTimeText();
-        invalidateOptionsMenu();
+        updateError();
     };
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
@@ -162,6 +164,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         if (calendarDatePickerDialogFragment != null)
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
 
+        mEditInstanceTimeLayout = (TextInputLayout) findViewById(R.id.edit_instance_time_layout);
+        Assert.assertTrue(mEditInstanceTimeLayout != null);
+
         mEditInstanceTime = (TextView) findViewById(R.id.edit_instance_time);
         Assert.assertTrue(mEditInstanceTime != null);
 
@@ -170,7 +175,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                invalidateOptionsMenu();
+                updateError();
             }
         };
     }
@@ -180,7 +185,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         super.onResume();
 
         registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        invalidateOptionsMenu();
+        updateError();
     }
 
     @Override
@@ -279,7 +284,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
         updateTimeText();
 
-        invalidateOptionsMenu();
+        updateError();
     }
 
     @SuppressLint("SetTextI18n")
@@ -311,5 +316,10 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         } else {
             return false;
         }
+    }
+
+    private void updateError() {
+        invalidateOptionsMenu();
+        mEditInstanceTimeLayout.setError(isValidTime() ? null : getString(R.string.error_time));
     }
 }

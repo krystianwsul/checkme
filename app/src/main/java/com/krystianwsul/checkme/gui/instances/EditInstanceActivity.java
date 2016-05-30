@@ -1,9 +1,12 @@
 package com.krystianwsul.checkme.gui.instances;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -19,7 +22,6 @@ import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialo
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.gui.ErrorDialogFragment;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
@@ -43,7 +45,6 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_FRAGMENT_TAG = "timeFragment";
     private static final String TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment";
-    private static final String ERROR_DIALOG_FRAGMENT_TAG = "errorDialogFragment";
 
     private Date mDate;
     private EditInstanceLoader.Data mData;
@@ -52,9 +53,10 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     private TextView mEditInstanceDate;
     private Bundle mSavedInstanceState;
+    private TextInputLayout mEditInstanceTimeLayout;
     private TextView mEditInstanceTime;
 
-    //private BroadcastReceiver mBroadcastReceiver; error dialog hack
+    private BroadcastReceiver mBroadcastReceiver;
 
     private TimePairPersist mTimePairPersist;
 
@@ -67,7 +69,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
             updateTimeText();
 
-            //invalidateOptionsMenu(); error dialog hack
+            updateError();
         }
 
         @Override
@@ -86,7 +88,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
         updateTimeText();
-        //invalidateOptionsMenu(); error dialog hack
+        updateError();
     };
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
@@ -103,7 +105,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        //menu.findItem(R.id.action_edit_instance_save).setVisible(isValidTime()); error dialog hack
+        menu.findItem(R.id.action_edit_instance_save).setVisible(isValidTime());
         return true;
     }
 
@@ -113,20 +115,13 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             case R.id.action_edit_instance_save:
                 Assert.assertTrue(mDate != null);
                 Assert.assertTrue(mData != null);
+                Assert.assertTrue(isValidTime());
 
-                if (isValidTime()) {
-                    DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
+                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
 
-                    TickService.startService(EditInstanceActivity.this);
+                TickService.startService(EditInstanceActivity.this);
 
-                    finish();
-                } else {
-                    ArrayList<String> errors = new ArrayList<>();
-                    errors.add(getString(R.string.error_past_time));
-                    ErrorDialogFragment errorDialogFragment = ErrorDialogFragment.newInstance(errors);
-                    errorDialogFragment.show(getSupportFragmentManager(), ERROR_DIALOG_FRAGMENT_TAG);
-                }
-
+                finish();
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -166,27 +161,28 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         if (calendarDatePickerDialogFragment != null)
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
 
+        mEditInstanceTimeLayout = (TextInputLayout) findViewById(R.id.edit_instance_time_layout);
+        Assert.assertTrue(mEditInstanceTimeLayout != null);
+
         mEditInstanceTime = (TextView) findViewById(R.id.edit_instance_time);
         Assert.assertTrue(mEditInstanceTime != null);
 
         getSupportLoaderManager().initLoader(0, null, this);
 
-        /* error dialog hack
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                invalidateOptionsMenu();
+                updateError();
             }
-        }; */
+        };
     }
 
-    /*  error dialog hack
     @Override
     public void onResume() {
         super.onResume();
 
         registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        invalidateOptionsMenu();
+        updateError();
     }
 
     @Override
@@ -195,7 +191,6 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         unregisterReceiver(mBroadcastReceiver);
     }
-    */
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -274,7 +269,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         updateTimeText();
 
-        //invalidateOptionsMenu(); error dialog hack
+        updateError();
     }
 
     @SuppressLint("SetTextI18n")
@@ -306,5 +301,10 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         } else {
             return false;
         }
+    }
+
+    private void updateError() {
+        invalidateOptionsMenu();
+        mEditInstanceTimeLayout.setError(isValidTime() ? null : getString(R.string.error_time));
     }
 }

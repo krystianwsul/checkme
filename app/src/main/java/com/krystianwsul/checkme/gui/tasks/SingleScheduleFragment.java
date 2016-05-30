@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -53,6 +54,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     private Bundle mSavedInstanceState;
 
     private TextView mDateView;
+    private TextInputLayout mSingleScheduleTimeLayout;
     private TextView mTimeView;
 
     private Date mDate;
@@ -154,6 +156,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
         View view = getView();
         Assert.assertTrue(view != null);
+
+        mSingleScheduleTimeLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_time_layout);
+        Assert.assertTrue(mSingleScheduleTimeLayout != null);
 
         mTimeView = (TextView) view.findViewById(R.id.single_schedule_time);
         Assert.assertTrue(mTimeView != null);
@@ -282,6 +287,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             valid = false;
         }
         ((CreateRootTaskActivity) getActivity()).setTimeValid(valid);
+
+        mSingleScheduleTimeLayout.setError(valid ? null : getString(R.string.error_time));
     }
 
     @Override

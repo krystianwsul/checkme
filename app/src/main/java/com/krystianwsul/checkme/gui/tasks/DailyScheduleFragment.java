@@ -407,6 +407,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
                 mHourMinutePickerPosition = getAdapterPosition();
 
                 ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
+                        .sortBy(customTimeData -> customTimeData.Id)
                         .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name))
                         .collect(Collectors.toList()));
 

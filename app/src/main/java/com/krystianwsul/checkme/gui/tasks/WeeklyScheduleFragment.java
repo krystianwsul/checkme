@@ -479,7 +479,11 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
                 mHourMinutePickerPosition = getAdapterPosition();
 
+                DayOfWeekTimeEntry dayOfWeekTimeEntry = mDateTimeEntries.get(mHourMinutePickerPosition);
+                Assert.assertTrue(dayOfWeekTimeEntry != null);
+
                 ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
+                        .sortBy(customTimeData -> customTimeData.HourMinutes.get(dayOfWeekTimeEntry.mDayOfWeek))
                         .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")"))
                         .collect(Collectors.toList()));
 

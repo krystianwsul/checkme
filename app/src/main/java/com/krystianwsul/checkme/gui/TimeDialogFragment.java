@@ -16,7 +16,6 @@ import com.krystianwsul.checkme.R;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TimeDialogFragment extends DialogFragment {
@@ -49,8 +48,6 @@ public class TimeDialogFragment extends DialogFragment {
 
         ArrayList<CustomTimeData> customTimeDatas = args.getParcelableArrayList(CUSTOM_TIMES_KEY);
         Assert.assertTrue(customTimeDatas != null);
-
-        Collections.sort(customTimeDatas, (lhs, rhs) -> Integer.valueOf(lhs.Id).compareTo(rhs.Id));
 
         List<String> names = Stream.of(customTimeDatas)
                 .map(customTimeData -> customTimeData.Name)

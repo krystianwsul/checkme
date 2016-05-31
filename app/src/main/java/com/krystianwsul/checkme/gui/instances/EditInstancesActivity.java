@@ -256,6 +256,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         mEditInstanceTime.setOnClickListener(v -> {
             Assert.assertTrue(mData != null);
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
+                    .sortBy(customTimeData -> customTimeData.HourMinutes.get(mDate.getDayOfWeek()))
                     .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
                     .collect(Collectors.toList()));
 

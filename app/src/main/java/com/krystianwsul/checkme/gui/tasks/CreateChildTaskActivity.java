@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
@@ -175,6 +176,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     }
 
     private void updateGui(final CreateChildTaskLoader.Data data) {
+        mCreateChildTaskName.setVisibility(View.VISIBLE);
+
         if (mFirstLoad && data != null)
             mCreateChildTaskName.setText(data.Name);
 

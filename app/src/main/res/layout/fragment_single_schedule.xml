@@ -22,7 +22,8 @@
             android:cursorVisible="false"
             android:focusable="false"
             android:focusableInTouchMode="false"
-            tools:ignore="LabelFor,TextFields" />
+            tools:ignore="LabelFor,TextFields"
+            android:visibility="gone"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -30,7 +31,8 @@
         android:id="@+id/single_schedule_time_layout"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
 
         <EditText
             android:id="@+id/single_schedule_time"
@@ -41,7 +43,7 @@
             android:cursorVisible="false"
             android:focusable="false"
             android:focusableInTouchMode="false"
-            tools:ignore="LabelFor,TextFields" />
+            tools:ignore="LabelFor,TextFields"/>
 
     </android.support.design.widget.TextInputLayout>
 

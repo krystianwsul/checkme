@@ -26,7 +26,9 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:id="@+id/edit_instance_layout"
+        android:visibility="invisible">
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="wrap_content"

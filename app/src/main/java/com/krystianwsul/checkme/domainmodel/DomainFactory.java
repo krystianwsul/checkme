@@ -192,12 +192,10 @@ public class DomainFactory {
 
     private void fakeDelay() {
         /*
-        if (false) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
 
-            }
         }
         */
     }

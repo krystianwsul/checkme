@@ -53,9 +53,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private Bundle mSavedInstanceState;
 
-    private TextView mDateView;
+    private TextView mSingleScheduleDate;
     private TextInputLayout mSingleScheduleTimeLayout;
-    private TextView mTimeView;
+    private TextView mSingleScheduleTime;
 
     private Date mDate;
     private TimePairPersist mTimePairPersist;
@@ -160,10 +160,10 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         mSingleScheduleTimeLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_time_layout);
         Assert.assertTrue(mSingleScheduleTimeLayout != null);
 
-        mTimeView = (TextView) view.findViewById(R.id.single_schedule_time);
-        Assert.assertTrue(mTimeView != null);
+        mSingleScheduleTime = (TextView) view.findViewById(R.id.single_schedule_time);
+        Assert.assertTrue(mSingleScheduleTime != null);
 
-        mTimeView.setOnClickListener(v -> {
+        mSingleScheduleTime.setOnClickListener(v -> {
             Assert.assertTrue(mData != null);
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
                     .sortBy(customTimeData -> customTimeData.HourMinutes.get(mDate.getDayOfWeek()))
@@ -186,14 +186,14 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
 
-        mDateView = (TextView) view.findViewById(R.id.single_schedule_date);
-        Assert.assertTrue(mDateView != null);
+        mSingleScheduleDate = (TextView) view.findViewById(R.id.single_schedule_date);
+        Assert.assertTrue(mSingleScheduleDate != null);
 
         final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = (dialog, year, monthOfYear, dayOfMonth) -> {
             mDate = new Date(year, monthOfYear + 1, dayOfMonth);
             updateDateText();
         };
-        mDateView.setOnClickListener(v -> {
+        mSingleScheduleDate.setOnClickListener(v -> {
             MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
             calendarDatePickerDialogFragment.setDate(mDate);
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
@@ -243,9 +243,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private void updateDateText() {
         Assert.assertTrue(mDate != null);
-        Assert.assertTrue(mDateView != null);
+        Assert.assertTrue(mSingleScheduleDate != null);
 
-        mDateView.setText(mDate.getDisplayText(getContext()));
+        mSingleScheduleDate.setText(mDate.getDisplayText(getContext()));
 
         updateTimeText();
 
@@ -255,7 +255,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     @SuppressLint("SetTextI18n")
     private void updateTimeText() {
         Assert.assertTrue(mTimePairPersist != null);
-        Assert.assertTrue(mTimeView != null);
+        Assert.assertTrue(mSingleScheduleTime != null);
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mDate != null);
 
@@ -263,9 +263,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             SingleScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
-            mTimeView.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
+            mSingleScheduleTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
         } else {
-            mTimeView.setText(mTimePairPersist.getHourMinute().toString());
+            mSingleScheduleTime.setText(mTimePairPersist.getHourMinute().toString());
         }
     }
 
@@ -335,6 +335,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         mData = data;
 
         Bundle args = getArguments();
+
+        mSingleScheduleDate.setVisibility(View.VISIBLE);
+        mSingleScheduleTimeLayout.setVisibility(View.VISIBLE);
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(PARCEL_DATE_KEY)) {
             Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));

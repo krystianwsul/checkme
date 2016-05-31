@@ -14,6 +14,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -51,6 +53,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     private ActionBar mActionBar;
 
+    private LinearLayout mEditInstanceLayout;
     private TextView mEditInstanceDate;
     private Bundle mSavedInstanceState;
     private TextInputLayout mEditInstanceTimeLayout;
@@ -144,6 +147,9 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         mSavedInstanceState = savedInstanceState;
 
+        mEditInstanceLayout = (LinearLayout) findViewById(R.id.edit_instance_layout);
+        Assert.assertTrue(mEditInstanceLayout != null);
+
         mEditInstanceDate = (TextView) findViewById(R.id.edit_instance_date);
         Assert.assertTrue(mEditInstanceDate != null);
 
@@ -217,6 +223,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onLoadFinished(Loader<EditInstanceLoader.Data> loader, final EditInstanceLoader.Data data) {
         mData = data;
+
+        mEditInstanceLayout.setVisibility(View.VISIBLE);
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(DATE_KEY)) {
             mDate = mSavedInstanceState.getParcelable(DATE_KEY);

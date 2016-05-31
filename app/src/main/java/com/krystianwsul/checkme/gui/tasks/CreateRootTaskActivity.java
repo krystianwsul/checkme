@@ -296,6 +296,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private void updateGui(final CreateRootTaskLoader.Data data) {
         mLoaded = true;
 
+        mCreateRootTaskName.setVisibility(View.VISIBLE);
+        mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
+
         int spinnerPosition = 0;
         int count = 1;
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(POSITION_KEY)) {

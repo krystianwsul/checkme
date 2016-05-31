@@ -156,6 +156,8 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         mActionBar = getSupportActionBar();
         Assert.assertTrue(mActionBar != null);
 
+        mActionBar.setTitle(null);
+
         if (savedInstanceState == null)
             mFirst = true;
 

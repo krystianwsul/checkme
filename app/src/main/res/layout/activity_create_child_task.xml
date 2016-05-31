@@ -23,7 +23,8 @@
             android:inputType="text"
             android:textColor="@color/textPrimaryWhite"
             android:hint="@string/name_hint"
-            android:textColorHint="@color/textDisabledWhite"/>
+            android:textColorHint="@color/textDisabledWhite"
+            android:visibility="invisible"/>
 
     </android.support.v7.widget.Toolbar>
 

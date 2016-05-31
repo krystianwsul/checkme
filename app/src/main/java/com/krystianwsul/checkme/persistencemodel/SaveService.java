@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
@@ -55,9 +58,16 @@ public class SaveService extends IntentService {
                 sqLiteDatabase.endTransaction();
             }
         } catch (Exception e) {
-            Log.wtf("SaveService", e);
+            Log.e("SaveService", "błąd w zapisie danych", e);
 
             ACRA.getErrorReporter().handleException(e);
+
+            Tracker t = ((OrganizatorApplication) getApplication()).getDefaultTracker();
+
+            t.send(new HitBuilders.ExceptionBuilder()
+                    .setDescription(e.toString())
+                    .setFatal(false)
+                    .build());
 
             DomainFactory.getDomainFactory(this).reset();
             throw e;

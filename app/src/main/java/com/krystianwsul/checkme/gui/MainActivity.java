@@ -18,6 +18,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -61,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Tracker tracker = ((OrganizatorApplication) getApplication()).getDefaultTracker();
+        tracker.enableExceptionReporting(true);
+        tracker.setScreenName("asdf");
+        tracker.send(new HitBuilders.ScreenViewBuilder().build());
 
         setContentView(R.layout.activity_main);
 

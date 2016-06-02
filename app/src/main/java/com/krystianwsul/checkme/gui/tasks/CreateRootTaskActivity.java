@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
@@ -223,6 +224,13 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
             if (discardDialogFragment != null)
                 discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        EventBuffer.getInstance().add("CreateRootTaskActivity onResume");
+
+        super.onResume();
     }
 
     private void loadFragment(int position) {

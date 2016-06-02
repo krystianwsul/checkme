@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
@@ -376,6 +377,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             setAll(day);
         }
+    }
+
+    @Override
+    public void onResume() {
+        EventBuffer.getInstance().add("GroupListFragment onResume");
+
+        super.onResume();
     }
 
     private void setAll(int day) {

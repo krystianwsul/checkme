@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.utils.time.Date;
 
@@ -83,5 +84,12 @@ public class DayFragment extends Fragment {
 
         if (groupListFragment == null)
             fragmentManager.beginTransaction().add(R.id.day_frame, GroupListFragment.getGroupInstance(day)).commit();
+    }
+
+    @Override
+    public void onResume() {
+        EventBuffer.getInstance().add("DayFragment onResume");
+
+        super.onResume();
     }
 }

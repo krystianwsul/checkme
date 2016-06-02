@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
@@ -48,6 +49,13 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         showNotificationGroupList.setInstanceKeys(instanceKeys);
+    }
+
+    @Override
+    protected void onResume() {
+        EventBuffer.getInstance().add("ShowNotificationGroupActivity onResume");
+
+        super.onResume();
     }
 
     @Override

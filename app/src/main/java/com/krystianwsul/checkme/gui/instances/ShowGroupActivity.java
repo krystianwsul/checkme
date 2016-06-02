@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -54,6 +55,13 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         showGroupList.setTimeStamp(mTimeStamp);
 
         getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    protected void onResume() {
+        EventBuffer.getInstance().add("ShowGroupActivity onResume");
+
+        super.onResume();
     }
 
     @Override

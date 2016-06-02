@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui;
+package com.krystianwsul.checkme;
 
 import android.content.Context;
 
@@ -15,15 +15,18 @@ public class AnalyticsExceptionParser extends StandardExceptionParser {
     }
 
     @Override
-    protected String getDescription(Throwable cause,
-                                    StackTraceElement element, String threadName) {
-
+    protected String getDescription(Throwable cause, StackTraceElement element, String threadName) {
         StringBuilder descriptionBuilder = new StringBuilder();
         final Writer writer = new StringWriter();
         final PrintWriter printWriter = new PrintWriter(writer);
         cause.printStackTrace(printWriter);
         descriptionBuilder.append(writer.toString());
         printWriter.close();
+
+        for (String event : EventBuffer.getInstance().get()) {
+            descriptionBuilder.append("\n");
+            descriptionBuilder.append(event);
+        }
 
         return descriptionBuilder.toString();
     }

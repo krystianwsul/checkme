@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
@@ -98,6 +99,13 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
                 throw new UnsupportedOperationException();
         }
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        EventBuffer.getInstance().add("ShowTaskActivity onResume");
+
+        super.onResume();
     }
 
     @Override

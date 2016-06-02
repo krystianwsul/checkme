@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
@@ -194,6 +195,13 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         Assert.assertTrue(mTaskListFragmentFab != null);
 
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public void onResume() {
+        EventBuffer.getInstance().add("TaskListFragment onResume");
+
+        super.onResume();
     }
 
     @Override

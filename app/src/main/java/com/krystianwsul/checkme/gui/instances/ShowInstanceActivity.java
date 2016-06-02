@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity;
@@ -171,6 +172,13 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         showInstanceList.setInstanceKey(mInstanceKey);
 
         getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    protected void onResume() {
+        EventBuffer.getInstance().add("ShowInstanceActivity onResume");
+
+        super.onResume();
     }
 
     @Override

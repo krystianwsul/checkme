@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
@@ -146,6 +147,13 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
         }
 
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public void onResume() {
+        EventBuffer.getInstance().add("ShowCustomTimesFragment onResume");
+
+        super.onResume();
     }
 
     @Override

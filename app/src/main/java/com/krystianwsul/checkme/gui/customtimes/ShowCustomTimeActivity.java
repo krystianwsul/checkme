@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
@@ -173,6 +174,13 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+    }
+
+    @Override
+    protected void onResume() {
+        EventBuffer.getInstance().add("ShowCustomTimeActivity onResume");
+
+        super.onResume();
     }
 
     private void extractKey(String key, DayOfWeek dayOfWeek) {

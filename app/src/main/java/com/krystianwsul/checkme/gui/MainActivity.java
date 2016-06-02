@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -195,6 +196,13 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         showTab(mVisibleTab);
 
         TickService.register(this);
+    }
+
+    @Override
+    protected void onResume() {
+        EventBuffer.getInstance().add("MainActivity onResume");
+
+        super.onResume();
     }
 
     @Override

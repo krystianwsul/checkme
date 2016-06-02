@@ -6,7 +6,6 @@ import android.content.Context;
 import com.google.android.gms.analytics.ExceptionReporter;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
-import com.krystianwsul.checkme.gui.AnalyticsExceptionParser;
 
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;

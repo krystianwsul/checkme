@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.notifications.TickService;
@@ -98,5 +99,12 @@ public class DebugFragment extends Fragment {
 
             debugData.setText(stringBuilder);
         });
+    }
+
+    @Override
+    public void onResume() {
+        EventBuffer.getInstance().add("DebugFragment onResume");
+
+        super.onResume();
     }
 }

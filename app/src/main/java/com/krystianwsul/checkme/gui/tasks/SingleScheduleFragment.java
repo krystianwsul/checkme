@@ -38,6 +38,7 @@ import java.util.ArrayList;
 public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
     private static final String ARGUMENT_DATE_KEY = "date";
     private static final String HOUR_MINUTE_KEY = "hourMinute";
+    private static final String INITIAL_HOUR_MINUTE_KEY = "initialHourMinute";
 
     private static final String PARCEL_DATE_KEY = "date";
     private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
@@ -90,6 +91,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         updateTimeText();
         setValidTime();
     };
+
+    private HourMinute mInitialHourMinute;
 
     public static SingleScheduleFragment newInstance() {
         return new SingleScheduleFragment();
@@ -208,7 +211,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                setValidTime();
+                if (mData != null)
+                    setValidTime();
             }
         };
     }
@@ -218,7 +222,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         super.onResume();
 
         getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        setValidTime();
+
+        if (mData != null)
+            setValidTime();
     }
 
     @Override
@@ -238,6 +244,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
             outState.putParcelable(PARCEL_DATE_KEY, mDate);
             outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist);
+            outState.putParcelable(INITIAL_HOUR_MINUTE_KEY, mInitialHourMinute);
         }
     }
 
@@ -341,9 +348,15 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(PARCEL_DATE_KEY)) {
             Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
+            Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
 
             mDate = mSavedInstanceState.getParcelable(PARCEL_DATE_KEY);
+            Assert.assertTrue(mDate != null);
+
             mTimePairPersist = mSavedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
+            Assert.assertTrue(mTimePairPersist != null);
+
+            mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
         } else if (args != null) {
             if (args.containsKey(ROOT_TASK_ID_KEY)) {
                 Assert.assertTrue(!args.containsKey(ARGUMENT_DATE_KEY));
@@ -364,6 +377,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
                 } else {
                     mTimePairPersist = new TimePairPersist();
                 }
+                mInitialHourMinute = mTimePairPersist.getHourMinute();
             }
         } else {
             mDate = Date.today();
@@ -380,14 +394,40 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     @Override
     public boolean dataChanged() {
         if (mRootTaskId == null) {
+            if (mData == null)
+                return false;
+
             Assert.assertTrue(mData.ScheduleData == null);
 
-            return true;
+            Bundle args = getArguments();
+
+            Date initialDate;
+            if (args != null && args.containsKey(ARGUMENT_DATE_KEY)) {
+                initialDate = args.getParcelable(ARGUMENT_DATE_KEY);
+                Assert.assertTrue(initialDate != null);
+            } else {
+                initialDate = Date.today();
+            }
+
+            if (!mDate.equals(initialDate))
+                return true;
+
+            if (mTimePairPersist.getCustomTimeId() != null)
+                return true;
+
+            Assert.assertTrue(mInitialHourMinute != null);
+
+            if (!mInitialHourMinute.equals(mTimePairPersist.getHourMinute()))
+                return true;
+
+            return false;
         } else {
             if (mData == null)
                 return false;
 
-            if (mData.ScheduleData == null)
+            Assert.assertTrue(mData.ScheduleData != null);
+
+            if (!mData.ScheduleData.Date.equals(mDate))
                 return true;
 
             if (!mData.ScheduleData.TimePair.equals(mTimePairPersist.getTimePair()))

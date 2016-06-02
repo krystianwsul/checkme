@@ -191,7 +191,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateError();
+                if (mData != null)
+                    updateError();
             }
         };
 
@@ -205,7 +206,9 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         super.onResume();
 
         registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        updateError();
+
+        if (mData != null)
+            updateError();
     }
 
     @Override

@@ -302,7 +302,14 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         if (mCustomTimeId == null) {
             Assert.assertTrue(mData == null);
 
-            return true;
+            if (!TextUtils.isEmpty(mCustomTimeName.getText()))
+                return true;
+
+            for (DayOfWeek dayOfWeek : DayOfWeek.values())
+                if (!mHourMinutes.get(dayOfWeek).equals(sDefaultHourMinute))
+                    return true;
+
+            return false;
         } else {
             if (mData == null)
                 return false;

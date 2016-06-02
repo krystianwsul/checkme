@@ -45,6 +45,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
     private static final String DATE_KEY = "date";
     private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
+    private static final String INITIAL_HOUR_MINUTE_KEY = "initialHourMinute";
 
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_FRAGMENT_TAG = "timeFragment";
@@ -97,7 +98,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         updateError();
     };
 
-    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = EditInstancesActivity.this::finish;
+    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = EditInstancesActivity.this::finish;
+
+    private HourMinute mInitialHourMinute;
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(instanceKeys != null);
@@ -195,7 +198,8 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateError();
+                if (mData != null)
+                    updateError();
             }
         };
 
@@ -209,7 +213,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         super.onResume();
 
         registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        updateError();
+
+        if (mData != null)
+            updateError();
     }
 
     @Override
@@ -229,6 +235,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
             Assert.assertTrue(mTimePairPersist != null);
             outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist);
+
+            Assert.assertTrue(mInitialHourMinute != null);
+            outState.putParcelable(INITIAL_HOUR_MINUTE_KEY, mInitialHourMinute);
         }
     }
 
@@ -257,6 +266,10 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
             Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
             mTimePairPersist = mSavedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
             Assert.assertTrue(mTimePairPersist != null);
+
+            Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
+            mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
+            Assert.assertTrue(mInitialHourMinute != null);
         } else {
             List<Date> dates = Stream.of(mData.InstanceDatas.values())
                     .map(instanceData -> instanceData.InstanceDate)
@@ -267,6 +280,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
             mDate = dates.get(0);
             mTimePairPersist = new TimePairPersist();
+
+            mInitialHourMinute = mTimePairPersist.getHourMinute();
+            Assert.assertTrue(mInitialHourMinute != null);
         }
 
         mActionBar.setTitle(Stream.of(mData.InstanceDatas.values())
@@ -369,7 +385,33 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         }
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     private boolean dataChanged() {
-        return (mData != null);
+        if (mData == null)
+            return false;
+
+        List<Date> dates = Stream.of(mData.InstanceDatas.values())
+                .map(instanceData -> instanceData.InstanceDate)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(dates.size() == 1);
+
+        Date date = dates.get(0);
+        Assert.assertTrue(date != null);
+
+        if (!date.equals(mDate))
+            return true;
+
+        if (mTimePairPersist.getCustomTimeId() != null)
+            return true;
+
+        Assert.assertTrue(mInitialHourMinute != null);
+        Assert.assertTrue(mTimePairPersist.getHourMinute() != null);
+
+        if (!mTimePairPersist.getHourMinute().equals(mInitialHourMinute))
+            return true;
+
+        return false;
     }
 }

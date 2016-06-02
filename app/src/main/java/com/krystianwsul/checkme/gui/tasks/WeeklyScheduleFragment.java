@@ -583,33 +583,28 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean dataChanged() {
-        if (mRootTaskId == null) {
-            Assert.assertTrue(mData.ScheduleDatas == null);
+        Assert.assertTrue(mRootTaskId != null);
 
-            return true;
-        } else {
-            if (mData == null)
-                return false;
-
-            Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
-
-            if (mData.ScheduleDatas == null)
-                return true;
-
-            List<Pair<DayOfWeek, TimePair>> oldDayOfWeekTimePairs = Stream.of(mData.ScheduleDatas)
-                    .map(scheduleData -> new Pair<>(scheduleData.DayOfWeek, scheduleData.TimePair))
-                    .sortBy(Pair::hashCode)
-                    .collect(Collectors.toList());
-
-            List<Pair<DayOfWeek, TimePair>> newDayOfWeekTimePairs = Stream.of(mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
-                    .map(dayOfWeekTimeEntry -> new Pair<>(dayOfWeekTimeEntry.mDayOfWeek, dayOfWeekTimeEntry.mTimePairPersist.getTimePair()))
-                    .sortBy(Pair::hashCode)
-                    .collect(Collectors.toList());
-
-            if (!oldDayOfWeekTimePairs.equals(newDayOfWeekTimePairs))
-                return true;
-
+        if (mData == null)
             return false;
-        }
+
+        Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
+
+        Assert.assertTrue(mData.ScheduleDatas != null);
+
+        List<Pair<DayOfWeek, TimePair>> oldDayOfWeekTimePairs = Stream.of(mData.ScheduleDatas)
+                .map(scheduleData -> new Pair<>(scheduleData.DayOfWeek, scheduleData.TimePair))
+                .sortBy(Pair::hashCode)
+                .collect(Collectors.toList());
+
+        List<Pair<DayOfWeek, TimePair>> newDayOfWeekTimePairs = Stream.of(mDayOfWeekTimeEntryAdapter.getDayOfWeekTimeEntries())
+                .map(dayOfWeekTimeEntry -> new Pair<>(dayOfWeekTimeEntry.mDayOfWeek, dayOfWeekTimeEntry.mTimePairPersist.getTimePair()))
+                .sortBy(Pair::hashCode)
+                .collect(Collectors.toList());
+
+        if (!oldDayOfWeekTimePairs.equals(newDayOfWeekTimePairs))
+            return true;
+
+        return false;
     }
 }

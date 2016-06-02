@@ -403,7 +403,19 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         if (mRootTaskId == null) {
             Assert.assertTrue(mData == null);
 
-            return true;
+            if (!TextUtils.isEmpty(mCreateRootTaskName.getText()))
+                return true;
+
+            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
+            Assert.assertTrue(scheduleFragment != null);
+
+            if (!(scheduleFragment instanceof SingleScheduleFragment))
+                return true;
+
+            if (scheduleFragment.dataChanged())
+                return true;
+
+            return false;
         } else {
             if (mData == null)
                 return false;
@@ -413,6 +425,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
             Assert.assertTrue(scheduleFragment != null);
+
+            if ((mData.ScheduleType == ScheduleType.SINGLE) && !(scheduleFragment instanceof SingleScheduleFragment))
+                return true;
+
+            if ((mData.ScheduleType == ScheduleType.DAILY) && !(scheduleFragment instanceof DailyScheduleFragment))
+                return true;
+
+            if ((mData.ScheduleType == ScheduleType.WEEKLY) && !(scheduleFragment instanceof WeeklyScheduleFragment))
+                return true;
 
             if (scheduleFragment.dataChanged())
                 return true;

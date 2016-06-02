@@ -228,7 +228,10 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mData == null);
 
-            return true;
+            if (!TextUtils.isEmpty(mCreateChildTaskName.getText()))
+                return true;
+
+            return false;
         }
     }
 }

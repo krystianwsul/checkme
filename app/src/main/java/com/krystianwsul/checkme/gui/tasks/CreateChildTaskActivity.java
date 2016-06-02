@@ -8,9 +8,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -78,8 +76,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     public boolean onPrepareOptionsMenu(Menu menu) {
         Assert.assertTrue(mCreateChildTaskName != null);
 
-        boolean save = !TextUtils.isEmpty(mCreateChildTaskName.getText().toString().trim());
-        menu.findItem(R.id.action_create_child_task_save).setVisible(save);
+        menu.findItem(R.id.action_create_child_task_save).setVisible((mParentTaskId != null) || (mData != null));
 
         return true;
     }
@@ -89,6 +86,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         switch (item.getItemId()) {
             case R.id.action_create_child_task_save:
                 String name = mCreateChildTaskName.getText().toString().trim();
+
+                if (TextUtils.isEmpty(name))
+                    break;
 
                 if (mParentTaskId != null) {
                     Assert.assertTrue(mChildTaskId == null);
@@ -139,23 +139,6 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
         Assert.assertTrue(mCreateChildTaskName != null);
 
-        mCreateChildTaskName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                invalidateOptionsMenu();
-            }
-        });
-
         Intent intent = getIntent();
         if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
             mParentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
@@ -193,6 +176,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     @Override
     public void onLoadFinished(Loader<CreateChildTaskLoader.Data> loader, final CreateChildTaskLoader.Data data) {
         updateGui(data);
+
+        invalidateOptionsMenu();
     }
 
     private void updateGui(final CreateChildTaskLoader.Data data) {
@@ -202,8 +187,6 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             mCreateChildTaskName.setText(data.Name);
 
         mData = data;
-
-        invalidateOptionsMenu();
     }
 
     @Override

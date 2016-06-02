@@ -9,9 +9,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -126,8 +124,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public boolean onPrepareOptionsMenu(Menu menu) {
         Assert.assertTrue(mCreateRootTaskName != null);
 
-        boolean save = (mIsTimeValid && !TextUtils.isEmpty(mCreateRootTaskName.getText().toString().trim()));
-        menu.findItem(R.id.action_create_root_task_save).setVisible(save);
+        menu.findItem(R.id.action_create_root_task_save).setVisible((mRootTaskId == null) || (mData != null));
 
         return true;
     }
@@ -136,8 +133,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_create_root_task_save:
+                Assert.assertTrue(mCreateRootTaskName != null);
+
+                if (!mIsTimeValid)
+                    break;
+
                 String name = mCreateRootTaskName.getText().toString().trim();
-                Assert.assertTrue(!TextUtils.isEmpty(name));
+
+                if (TextUtils.isEmpty(name))
+                    break;
 
                 ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
                 Assert.assertTrue(scheduleFragment != null);
@@ -193,23 +197,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
         Assert.assertTrue(mCreateRootTaskName != null);
-
-        mCreateRootTaskName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                invalidateOptionsMenu();
-            }
-        });
 
         mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
         Assert.assertTrue(mCreateRootTaskSpinner != null);
@@ -391,7 +378,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     public void setTimeValid(boolean valid) {
         mIsTimeValid = valid;
-        invalidateOptionsMenu();
     }
 
     @Override

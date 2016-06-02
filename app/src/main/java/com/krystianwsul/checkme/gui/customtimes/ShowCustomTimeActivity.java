@@ -8,9 +8,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -82,8 +80,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     public boolean onPrepareOptionsMenu(Menu menu) {
         Assert.assertTrue(mCustomTimeName != null);
 
-        boolean save = !TextUtils.isEmpty(mCustomTimeName.getText().toString().trim());
-        menu.findItem(R.id.action_custom_time_save).setVisible(save);
+        menu.findItem(R.id.action_custom_time_save).setVisible((mCustomTimeId == null) || (mData != null));
 
         return true;
     }
@@ -95,7 +92,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                 Assert.assertTrue(!mHourMinutes.isEmpty());
 
                 String name = mCustomTimeName.getText().toString().trim();
-                Assert.assertTrue(!TextUtils.isEmpty(name));
+                if (TextUtils.isEmpty(name))
+                    break;
 
                 if (mData != null)
                     DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
@@ -134,23 +132,6 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
         mCustomTimeName = (EditText) findViewById(R.id.custom_time_name);
         Assert.assertTrue(mCustomTimeName != null);
-
-        mCustomTimeName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                invalidateOptionsMenu();
-            }
-        });
 
         initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
         initializeDay(DayOfWeek.MONDAY, R.id.time_monday_name, R.id.time_monday_time);

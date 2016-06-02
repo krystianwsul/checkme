@@ -116,7 +116,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_edit_instance_save).setVisible(isValidTime());
+        menu.findItem(R.id.action_edit_instance_save).setVisible(mData != null);
         return true;
     }
 
@@ -126,6 +126,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
             case R.id.action_edit_instance_save:
                 Assert.assertTrue(mDate != null);
                 Assert.assertTrue(mData != null);
+
+                if (!isValidTime())
+                    break;
 
                 DomainFactory.getDomainFactory(EditInstancesActivity.this).setInstancesDateTime(mData.DataId, mData.InstanceDatas.keySet(), mDate, mTimePairPersist.getTimePair());
 
@@ -270,6 +273,8 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
             .map(instanceData -> instanceData.Name)
             .collect(Collectors.joining(", ")));
 
+        invalidateOptionsMenu();
+
         updateDateText();
 
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_FRAGMENT_TAG);
@@ -343,7 +348,6 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
     }
 
     private void updateError() {
-        invalidateOptionsMenu();
         mEditInstanceTimeLayout.setError(isValidTime() ? null : getString(R.string.error_time));
     }
 

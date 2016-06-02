@@ -24,6 +24,7 @@ import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialo
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
@@ -47,6 +48,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_FRAGMENT_TAG = "timeFragment";
     private static final String TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment";
+    private static final String DISCARD_TAG = "discard";
 
     private Date mDate;
     private EditInstanceLoader.Data mData;
@@ -94,6 +96,8 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         updateError();
     };
 
+    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = EditInstanceActivity.this::finish;
+
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
         intent.putExtra(INSTANCE_KEY, instanceKey);
@@ -126,6 +130,10 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
                 finish();
                 break;
+            case android.R.id.home:
+                if (tryClose())
+                    finish();
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -144,6 +152,9 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
         mActionBar = getSupportActionBar();
         Assert.assertTrue(mActionBar != null);
+
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        mActionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
         mSavedInstanceState = savedInstanceState;
 
@@ -181,6 +192,10 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
                 updateError();
             }
         };
+
+        DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
+        if (discardDialogFragment != null)
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
     }
 
     @Override
@@ -315,5 +330,37 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private void updateError() {
         invalidateOptionsMenu();
         mEditInstanceTimeLayout.setError(isValidTime() ? null : getString(R.string.error_time));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (tryClose())
+            super.onBackPressed();
+    }
+
+    private boolean tryClose() {
+        if (dataChanged()) {
+            DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+            discardDialogFragment.show(getSupportFragmentManager(), DISCARD_TAG);
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean dataChanged() {
+        if (mData == null)
+            return false;
+
+        if (!mData.InstanceDate.equals(mDate))
+            return true;
+
+        if (!mData.InstanceTimePair.equals(mTimePairPersist.getTimePair()))
+            return true;
+
+        return false;
     }
 }

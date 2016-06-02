@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -18,6 +19,7 @@ import android.widget.EditText;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateChildTaskLoader;
 
 import junit.framework.Assert;
@@ -29,6 +31,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String CHILD_TASK_ID_KEY = "childTaskId";
 
+    private static final String DISCARD_TAG = "discard";
+
     private boolean mFirstLoad;
 
     private EditText mCreateChildTaskName;
@@ -38,6 +42,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private Integer mChildTaskId = null;
 
     private CreateChildTaskLoader.Data mData;
+
+    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
 
     public static Intent getCreateIntent(Context context, int parentTaskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
@@ -102,6 +108,10 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
                 finish();
                 break;
+            case android.R.id.home:
+                if (tryClose())
+                    finish();
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -117,6 +127,12 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        Assert.assertTrue(actionBar != null);
+
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
         mFirstLoad = (savedInstanceState == null);
 
@@ -163,6 +179,10 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
         if (mFirstLoad)
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
+        if (discardDialogFragment != null)
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
     }
 
     @Override
@@ -188,5 +208,44 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     @Override
     public void onLoaderReset(Loader<CreateChildTaskLoader.Data> loader) {
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (tryClose())
+            super.onBackPressed();
+    }
+
+    private boolean tryClose() {
+        if (dataChanged()) {
+            DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+            discardDialogFragment.show(getSupportFragmentManager(), DISCARD_TAG);
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean dataChanged() {
+        if (mParentTaskId == null) {
+            Assert.assertTrue((mChildTaskId != null) || (mTaskIds != null));
+
+            if (mData == null)
+                return false;
+
+            if (!mCreateChildTaskName.getText().toString().equals(mData.Name))
+                return true;
+
+            return false;
+        } else {
+            Assert.assertTrue(mChildTaskId == null);
+            Assert.assertTrue(mTaskIds == null);
+            Assert.assertTrue(mData == null);
+
+            return true;
+        }
     }
 }

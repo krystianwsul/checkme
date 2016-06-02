@@ -6,4 +6,5 @@ interface ScheduleFragment {
     void createRootTask(String name);
     void updateRootTask(int rootTaskId, String name);
     void createRootJoinTask(String name, ArrayList<Integer> joinTaskIds);
+    boolean dataChanged();
 }

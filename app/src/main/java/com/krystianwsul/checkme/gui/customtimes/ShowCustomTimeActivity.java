@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -41,6 +42,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private static final String HOUR_MINUTE_SATURDAY_KEY = "hourMinuteSaturday";
 
     private static final String TIME_PICKER_TAG = "timePicker";
+    private static final String DISCARD_TAG = "discard";
 
     private Integer mCustomTimeId;
     private ShowCustomTimeLoader.Data mData;
@@ -53,6 +55,10 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private EditText mCustomTimeName;
 
     private Bundle mSavedInstanceState;
+
+    private static final HourMinute sDefaultHourMinute = new HourMinute(9, 0);
+
+    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = ShowCustomTimeActivity.this::finish;
 
     public static Intent getEditIntent(int customTimeId, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
@@ -98,6 +104,10 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
                 finish();
                 break;
+            case android.R.id.home:
+                if (tryClose())
+                    finish();
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -116,6 +126,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
         ActionBar actionBar = getSupportActionBar();
         Assert.assertTrue(actionBar != null);
+
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
         mSavedInstanceState = savedInstanceState;
 
@@ -170,11 +183,15 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                 Assert.assertTrue(intent.hasExtra(NEW_KEY));
 
                 for (DayOfWeek dayOfWeek : DayOfWeek.values())
-                    mHourMinutes.put(dayOfWeek, new HourMinute(9, 0));
+                    mHourMinutes.put(dayOfWeek, sDefaultHourMinute);
 
                 updateGui();
             }
         }
+
+        DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
+        if (discardDialogFragment != null)
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
     }
 
     private void extractKey(String key, DayOfWeek dayOfWeek) {
@@ -225,6 +242,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     }
 
     private void updateGui() {
+        mCustomTimeName.setVisibility(View.VISIBLE);
+
         final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
             Assert.assertTrue(editedDayOfWeek != null);
             Assert.assertTrue(mTimeViews.containsKey(editedDayOfWeek));
@@ -256,6 +275,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                 radialTimePickerDialogFragment.show(getSupportFragmentManager(), TIME_PICKER_TAG);
             });
         }
+
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
@@ -265,7 +285,6 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     public void onLoadFinished(Loader<ShowCustomTimeLoader.Data> loader, ShowCustomTimeLoader.Data data) {
         mData = data;
 
-        mCustomTimeName.setVisibility(View.VISIBLE);
         mCustomTimeName.setText(mData.Name);
 
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
@@ -278,5 +297,43 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     @Override
     public void onLoaderReset(Loader<ShowCustomTimeLoader.Data> data) {
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (tryClose())
+            super.onBackPressed();
+    }
+
+    private boolean tryClose() {
+        if (dataChanged()) {
+            DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+            discardDialogFragment.show(getSupportFragmentManager(), DISCARD_TAG);
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean dataChanged() {
+        if (mCustomTimeId == null) {
+            Assert.assertTrue(mData == null);
+
+            return true;
+        } else {
+            if (mData == null)
+                return false;
+
+            if (!mCustomTimeName.getText().toString().equals(mData.Name))
+                return true;
+
+            for (DayOfWeek dayOfWeek : DayOfWeek.values())
+                if (!mHourMinutes.get(dayOfWeek).equals(mData.HourMinutes.get(dayOfWeek)))
+                    return true;
+
+            return false;
+        }
     }
 }

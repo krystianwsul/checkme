@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -21,6 +22,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -41,6 +43,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private static final String DAY_KEY = "day";
     private static final String TIME_STAMP_KEY = "timeStamp";
 
+    private static final String DISCARD_TAG = "discard";
+
     private Integer mDay;
     private TimeStamp mTimeStamp;
 
@@ -54,6 +58,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private boolean mIsTimeValid = false;
 
     private boolean mLoaded = false;
+
+    private CreateRootTaskLoader.Data mData;
+
+    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateRootTaskActivity.this::finish;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -144,6 +152,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
                 finish();
                 break;
+            case android.R.id.home:
+                if (tryClose())
+                    finish();
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -159,6 +171,12 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        Assert.assertTrue(actionBar != null);
+
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
         mSavedInstanceState = savedInstanceState;
 
@@ -213,6 +231,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             if (savedInstanceState == null)
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+            DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
+            if (discardDialogFragment != null)
+                discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
         }
     }
 
@@ -290,6 +312,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     @Override
     public void onLoadFinished(Loader<CreateRootTaskLoader.Data> loader, final CreateRootTaskLoader.Data data) {
+        mData = data;
+
         updateGui(data);
     }
 
@@ -368,5 +392,46 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public void setTimeValid(boolean valid) {
         mIsTimeValid = valid;
         invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (tryClose())
+            super.onBackPressed();
+    }
+
+    private boolean tryClose() {
+        if (dataChanged()) {
+            DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+            discardDialogFragment.show(getSupportFragmentManager(), DISCARD_TAG);
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean dataChanged() {
+        if (mRootTaskId == null) {
+            Assert.assertTrue(mData == null);
+
+            return true;
+        } else {
+            if (mData == null)
+                return false;
+
+            if (!mCreateRootTaskName.getText().toString().equals(mData.Name))
+                return true;
+
+            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
+            Assert.assertTrue(scheduleFragment != null);
+
+            if (scheduleFragment.dataChanged())
+                return true;
+
+            return false;
+        }
     }
 }

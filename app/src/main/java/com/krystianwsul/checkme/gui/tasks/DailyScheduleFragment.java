@@ -493,4 +493,37 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             mShowDelete = delete;
         }
     }
+
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
+    public boolean dataChanged() {
+        if (mRootTaskId == null) {
+            Assert.assertTrue(mData.ScheduleDatas == null);
+
+            return true;
+        } else {
+            if (mData == null)
+                return false;
+
+            Assert.assertTrue(mTimeEntryAdapter != null);
+
+            if (mData.ScheduleDatas == null)
+                return true;
+
+            List<TimePair> oldTimePairs = Stream.of(mData.ScheduleDatas)
+                    .map(scheduleData -> scheduleData.TimePair)
+                    .sortBy(TimePair::hashCode)
+                    .collect(Collectors.toList());
+
+            List<TimePair> newTimePairs = Stream.of(mTimeEntryAdapter.getTimeEntries())
+                    .map(timeEntry -> timeEntry.mTimePairPersist.getTimePair())
+                    .sortBy(TimePair::hashCode)
+                    .collect(Collectors.toList());
+
+            if (!oldTimePairs.equals(newTimePairs))
+                return true;
+
+            return false;
+        }
+    }
 }

@@ -375,4 +375,25 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     @Override
     public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {}
+
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
+    public boolean dataChanged() {
+        if (mRootTaskId == null) {
+            Assert.assertTrue(mData.ScheduleData == null);
+
+            return true;
+        } else {
+            if (mData == null)
+                return false;
+
+            if (mData.ScheduleData == null)
+                return true;
+
+            if (!mData.ScheduleData.TimePair.equals(mTimePairPersist.getTimePair()))
+                return true;
+
+            return false;
+        }
+    }
 }

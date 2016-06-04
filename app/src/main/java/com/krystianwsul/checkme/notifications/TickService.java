@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
@@ -159,6 +160,8 @@ public class TickService extends IntentService {
 
             setExact(data.NextAlarm.getLong(), pendingIntent);
         }
+
+        PruneService.startService(this);
     }
 
     @SuppressLint("NewApi")

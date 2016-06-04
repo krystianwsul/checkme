@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.EventBuffer;
+import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
@@ -553,7 +554,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         if (mDay != null && mDay.equals(0)) { // 24 hack
             // relevant hack
-            DomainFactory.getDomainFactory(getActivity()).updateTaskOldestVisible(data.DataId);
+            PruneService.startService(getActivity());
         }
     }
 

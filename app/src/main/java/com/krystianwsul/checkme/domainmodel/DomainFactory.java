@@ -1237,7 +1237,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateTaskOldestVisible(int dataId) {
+    public synchronized void updateTaskOldestVisible() {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         // relevant hack
@@ -1258,16 +1258,16 @@ public class DomainFactory {
         for (Task task : mTasks.values())
             task.updateOldestVisible(now);
 
-        save(dataId);
+        save(0);
 
         for (Task task : irrelevantTasks) {
             mTasks.remove(task.getId());
 
-            List<TaskHierarchy> irrelevanTaskHierarchies = Stream.of(mTaskHierarchies.values())
+            List<TaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values())
                     .filter(taskHierarchy -> irrelevantTasks.contains(taskHierarchy.getChildTask()))
                     .collect(Collectors.toList());
 
-            for (TaskHierarchy irrelevanTaskHierarchy : irrelevanTaskHierarchies)
+            for (TaskHierarchy irrelevanTaskHierarchy : irrelevantTaskHierarchies)
                 mTaskHierarchies.remove(irrelevanTaskHierarchy.getId());
         }
 

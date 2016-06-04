@@ -31,4 +31,10 @@
     <string name="delete_task">Usuń zadanie</string>
     <string name="error_time">Czas jest w przeszłości</string>
     <string name="discard_changes">Porzucić zmiany?</string>
+    <string name="discard">Porzuć</string>
+    <string name="custom_times_empty">Dodaj czas klikając w plusa na dole.</string>
+    <string name="instances_empty_root">Dodaj przypomnienie klikając w plusa na dole.</string>
+    <string name="tasks_empty_root">Dodaj zadanie klikając w plusa na dole.</string>
+    <string name="empty_child">Utwórz listę klikając w plusa na dole.</string>
+    <string name="empty_disabled">Nie możesz tu nic dodać, bo zadanie zostało usunięte.</string>
 </resources>

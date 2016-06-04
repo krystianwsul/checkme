@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -207,14 +208,23 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        Map<Integer, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
+
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
         Assert.assertTrue(instance.isRootInstance(now));
         Assert.assertTrue(instance.getDone() == null);
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+        if (instance.getInstanceTimePair().CustomTimeId != null) {
+            CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().CustomTimeId);
+            Assert.assertTrue(customTime != null);
+
+            currentCustomTimes.put(customTime.getId(), customTime);
+        }
+
         TreeMap<Integer, EditInstanceLoader.CustomTimeData> customTimeDatas = new TreeMap<>();
-        for (CustomTime customTime : currentCustomTimes)
+        for (CustomTime customTime : currentCustomTimes.values())
             customTimeDatas.put(customTime.getId(), new EditInstanceLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
         return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas);
@@ -228,6 +238,9 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        Map<Integer, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
+
         HashMap<InstanceKey, EditInstancesLoader.InstanceData> instanceDatas = new HashMap<>();
 
         for (InstanceKey instanceKey : instanceKeys) {
@@ -237,11 +250,17 @@ public class DomainFactory {
             Assert.assertTrue(instance.getDone() == null);
 
             instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDate(), instance.getName()));
+
+            if (instance.getInstanceTimePair().CustomTimeId != null) {
+                CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().CustomTimeId);
+                Assert.assertTrue(customTime != null);
+
+                currentCustomTimes.put(customTime.getId(), customTime);
+            }
         }
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         TreeMap<Integer, EditInstancesLoader.CustomTimeData> customTimeDatas = new TreeMap<>();
-        for (CustomTime customTime : currentCustomTimes)
+        for (CustomTime customTime : currentCustomTimes.values())
             customTimeDatas.put(customTime.getId(), new EditInstancesLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
         return new EditInstancesLoader.Data(instanceDatas, customTimeDatas);
@@ -506,6 +525,9 @@ public class DomainFactory {
 
         SingleScheduleLoader.ScheduleData scheduleData = null;
 
+        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
+
         if (rootTaskId != null) {
             Task rootTask = mTasks.get(rootTaskId);
             Assert.assertTrue(rootTask != null);
@@ -519,11 +541,14 @@ public class DomainFactory {
             Instance instance = singleSchedule.getInstance(rootTask);
 
             scheduleData = new SingleScheduleLoader.ScheduleData(instance.getInstanceDate(), instance.getInstanceTimePair());
+
+            CustomTime customTime = singleSchedule.getTime().getPair().first;
+            if (customTime != null)
+                customTimes.put(customTime.getId(), customTime);
         }
 
-        ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
         HashMap<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : customTimes)
+        for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getId(), new SingleScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
         return new SingleScheduleLoader.Data(scheduleData, customTimeDatas);
@@ -533,6 +558,9 @@ public class DomainFactory {
         fakeDelay();
 
         ArrayList<DailyScheduleLoader.ScheduleData> scheduleDatas = null;
+
+        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
 
         if (rootTaskId != null) {
             Task rootTask = mTasks.get(rootTaskId);
@@ -546,13 +574,17 @@ public class DomainFactory {
 
             List<Time> times = dailySchedule.getTimes();
             scheduleDatas = new ArrayList<>();
-            for (Time time : times)
+            for (Time time : times) {
                 scheduleDatas.add(new DailyScheduleLoader.ScheduleData(time.getTimePair()));
+
+                CustomTime customTime = time.getPair().first;
+                if (customTime != null)
+                    customTimes.put(customTime.getId(), customTime);
+            }
         }
 
-        ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
         HashMap<Integer, DailyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : customTimes)
+        for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getId(), new DailyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName()));
 
         return new DailyScheduleLoader.Data(scheduleDatas, customTimeDatas);
@@ -562,6 +594,9 @@ public class DomainFactory {
         fakeDelay();
 
         ArrayList<WeeklyScheduleLoader.ScheduleData> scheduleDatas = null;
+
+        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
 
         if (rootTaskId != null) {
             Task rootTask = mTasks.get(rootTaskId);
@@ -575,13 +610,17 @@ public class DomainFactory {
 
             ArrayList<Pair<DayOfWeek, Time>> pairs = weeklySchedule.getDayOfWeekTimes();
             scheduleDatas = new ArrayList<>();
-            for (Pair<DayOfWeek, Time> pair : pairs)
+            for (Pair<DayOfWeek, Time> pair : pairs) {
                 scheduleDatas.add(new WeeklyScheduleLoader.ScheduleData(pair.first, pair.second.getTimePair()));
+
+                CustomTime customTime = pair.second.getPair().first;
+                if (customTime != null)
+                    customTimes.put(customTime.getId(), customTime);
+            }
         }
 
-        ArrayList<CustomTime> customTimes = getCurrentCustomTimes();
         HashMap<Integer, WeeklyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : customTimes)
+        for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getId(), new WeeklyScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
         return new WeeklyScheduleLoader.Data(scheduleDatas, customTimeDatas);

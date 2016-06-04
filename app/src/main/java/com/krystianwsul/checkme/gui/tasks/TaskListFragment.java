@@ -40,6 +40,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private RecyclerView mTaskListFragmentRecycler;
     private FloatingActionButton mTaskListFragmentFab;
+    private TextView mEmptyText;
 
     private Integer mTaskId;
 
@@ -194,6 +195,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         mTaskListFragmentFab = (FloatingActionButton) view.findViewById(R.id.task_list_fab);
         Assert.assertTrue(mTaskListFragmentFab != null);
 
+        mEmptyText = (TextView) view.findViewById(R.id.empty_text);
+        Assert.assertTrue(mEmptyText != null);
+
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -238,6 +242,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         mSelectionCallback.setSelected(mTaskAdapter.getSelected().size());
 
         mTaskListFragmentFab.setVisibility(View.VISIBLE);
+
+        if (mData.TaskDatas.isEmpty()) {
+            mTaskListFragmentRecycler.setVisibility(View.GONE);
+            mEmptyText.setVisibility(View.VISIBLE);
+
+            if (mTaskId != null) {
+                mEmptyText.setText(R.string.empty_child);
+            } else {
+                mEmptyText.setText(R.string.tasks_empty_root);
+            }
+        } else {
+            mTaskListFragmentRecycler.setVisibility(View.VISIBLE);
+            mEmptyText.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -67,6 +67,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     private RecyclerView mGroupListRecycler;
     private GroupAdapter mGroupAdapter;
     private FloatingActionButton mFloatingActionButton;
+    private TextView mEmptyText;
 
     private Integer mDay;
     private TimeStamp mTimeStamp;
@@ -369,6 +370,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.group_list_fab);
         Assert.assertTrue(mFloatingActionButton != null);
 
+        mEmptyText = (TextView) view.findViewById(R.id.empty_text);
+        Assert.assertTrue(mEmptyText != null);
+
         Bundle args = getArguments();
         if (args != null) {
             Assert.assertTrue(args.containsKey(DAY_KEY));
@@ -475,6 +479,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         boolean showFab;
         Activity activity = getActivity();
+        Integer emptyTextId;
         if (mDay != null) {
             Assert.assertTrue(mTimeStamp == null);
             Assert.assertTrue(mInstanceKey == null);
@@ -484,6 +489,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             showFab = true;
             mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, mDay)));
+
+            emptyTextId = R.string.instances_empty_root;
         } else if (mTimeStamp != null) {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
@@ -496,6 +503,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             } else {
                 showFab = false;
             }
+
+            emptyTextId = null;
         } else if (mInstanceKey != null) {
             Assert.assertTrue(mInstanceKeys == null);
 
@@ -504,13 +513,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             if (data.TaskEditable) {
                 showFab = true;
                 mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateChildTaskActivity.getCreateIntent(activity, mInstanceKey.TaskId)));
+
+                emptyTextId = R.string.empty_child;
             } else {
                 showFab = false;
+
+                emptyTextId = R.string.empty_disabled;
             }
         } else {
+            Assert.assertTrue(mInstanceKeys != null);
+            Assert.assertTrue(!mInstanceKeys.isEmpty());
             Assert.assertTrue(data.TaskEditable == null);
 
             showFab = false;
+
+            emptyTextId = null;
         }
 
         if (mFirst) {
@@ -522,6 +539,17 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         mGroupListRecycler.setAdapter(mGroupAdapter);
 
         mSelectionCallback.setSelected(mGroupAdapter.getSelected().size());
+
+        if (data.InstanceDatas.isEmpty()) {
+            Assert.assertTrue(emptyTextId != null);
+
+            mGroupListRecycler.setVisibility(View.GONE);
+            mEmptyText.setVisibility(View.VISIBLE);
+            mEmptyText.setText(emptyTextId);
+        } else {
+            mGroupListRecycler.setVisibility(View.VISIBLE);
+            mEmptyText.setVisibility(View.GONE);
+        }
 
         if (mDay != null && mDay.equals(0)) { // 24 hack
             // relevant hack

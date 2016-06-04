@@ -8,7 +8,10 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/task_list_recycler" />
+        android:id="@+id/task_list_recycler"
+        android:visibility="gone"/>
+
+    <include layout="@layout/empty_text"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/task_list_fab"

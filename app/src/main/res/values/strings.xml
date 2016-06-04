@@ -31,4 +31,10 @@
     <string name="delete_task">Delete task</string>
     <string name="error_time">Time is in the past</string>
     <string name="discard_changes">Discard changes?</string>
+    <string name="discard">Discard</string>
+    <string name="custom_times_empty">Add a time by clicking the plus at the bottom.</string>
+    <string name="instances_empty_root">Add a reminder by clicking the plus at the bottom.</string>
+    <string name="tasks_empty_root">Add a task by clicking the plus at the bottom.</string>
+    <string name="empty_child">Make a list by clicking the plus at the bottom.</string>
+    <string name="empty_disabled">You can\'t add anything here, because the task has been removed.</string>
 </resources>

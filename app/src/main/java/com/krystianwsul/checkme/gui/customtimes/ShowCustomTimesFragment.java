@@ -40,6 +40,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
     private FloatingActionButton mShowTimesFab;
     private RecyclerView mShowTimesList;
     private CustomTimesAdapter mCustomTimesAdapter;
+    private TextView mEmptyText;
 
     private ArrayList<Integer> mSelectedCustomTimeIds;
 
@@ -138,6 +139,9 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
         mShowTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
 
+        mEmptyText = (TextView) view.findViewById(R.id.empty_text);
+        Assert.assertTrue(mEmptyText != null);
+
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY)) {
                 mSelectedCustomTimeIds = savedInstanceState.getIntegerArrayList(SELECTED_CUSTOM_TIME_IDS_KEY);
@@ -177,6 +181,15 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
         mSelectionCallback.setSelected(mCustomTimesAdapter.getSelected().size());
 
         mShowTimesFab.setVisibility(View.VISIBLE);
+
+        if (data.Entries.isEmpty()) {
+            mShowTimesList.setVisibility(View.GONE);
+            mEmptyText.setVisibility(View.VISIBLE);
+            mEmptyText.setText(R.string.custom_times_empty);
+        } else {
+            mShowTimesList.setVisibility(View.VISIBLE);
+            mEmptyText.setVisibility(View.GONE);
+        }
     }
 
     @Override

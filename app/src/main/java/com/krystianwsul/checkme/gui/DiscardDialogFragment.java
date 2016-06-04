@@ -27,7 +27,7 @@ public class DiscardDialogFragment extends DialogFragment {
         return new MaterialDialog.Builder(getActivity())
                 .content(R.string.discard_changes)
                 .negativeText(android.R.string.cancel)
-                .positiveText(android.R.string.yes)
+                .positiveText(R.string.discard)
                 .onPositive((dialog, which) -> {
                     Assert.assertTrue(mDiscardDialogListener != null);
                     mDiscardDialogListener.onYes();

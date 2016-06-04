@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMili;
 import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -89,6 +90,11 @@ public class SingleSchedule extends Schedule {
         instances.add(mSingleScheduleDateTime.getInstance(rootTask, date));
 
         return instances;
+    }
+
+    public Time getTime() {
+        Assert.assertTrue(mSingleScheduleDateTime != null);
+        return mSingleScheduleDateTime.getTime();
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateChildTaskLoader;
 import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
 import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
@@ -298,24 +299,57 @@ public class DomainFactory {
         return new ShowCustomTimesLoader.Data(entries);
     }
 
-    public synchronized GroupListLoader.Data getGroupListData(Context context, int day) {
+    public synchronized GroupListLoader.Data getGroupListData(Context context, int position, MainActivity.TimeRange timeRange) {
         fakeDelay();
 
-        Assert.assertTrue(day >= 0);
+        Assert.assertTrue(position >= 0);
+        Assert.assertTrue(timeRange != null);
 
         ExactTimeStamp startExactTimeStamp;
         ExactTimeStamp endExactTimeStamp;
 
-        if (day == 0) {
+        if (position == 0) {
             startExactTimeStamp = null;
         } else {
             Calendar startCalendar = Calendar.getInstance();
-            startCalendar.add(Calendar.DATE, day);
+
+            switch (timeRange) {
+                case DAY:
+                    startCalendar.add(Calendar.DATE, position);
+                    break;
+                case WEEK:
+                    startCalendar.add(Calendar.WEEK_OF_YEAR, position);
+                    startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.getFirstDayOfWeek());
+                    break;
+                case MONTH:
+                    startCalendar.add(Calendar.MONTH, position);
+                    startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+
             startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMili(0, 0, 0, 0));
         }
 
         Calendar endCalendar = Calendar.getInstance();
-        endCalendar.add(Calendar.DATE, day + 1);
+
+        switch (timeRange) {
+            case DAY:
+                endCalendar.add(Calendar.DATE, position + 1);
+                break;
+            case WEEK:
+                endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1);
+                endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.getFirstDayOfWeek());
+                break;
+            case MONTH:
+                endCalendar.add(Calendar.MONTH, position + 1);
+                endCalendar.set(Calendar.DAY_OF_MONTH, 1);
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+
         endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMili(0, 0, 0, 0));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();

@@ -32,19 +32,18 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class CreateRootTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
 
-    private static final String DAY_KEY = "day";
+    private static final String DATE_KEY = "day";
     private static final String TIME_STAMP_KEY = "timeStamp";
 
     private static final String DISCARD_TAG = "discard";
 
-    private Integer mDay;
+    private Date mDate;
     private TimeStamp mTimeStamp;
 
     private Spinner mCreateRootTaskSpinner;
@@ -67,12 +66,12 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         return new Intent(context, CreateRootTaskActivity.class);
     }
 
-    public static Intent getCreateIntent(Context context, int day) {
+    public static Intent getCreateIntent(Context context, Date date) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(day >= 0);
+        Assert.assertTrue(date != null);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
-        intent.putExtra(DAY_KEY, day);
+        intent.putExtra(DATE_KEY, date);
         return intent;
     }
 
@@ -95,15 +94,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         return intent;
     }
 
-    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, int day) {
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, Date date) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
-        Assert.assertTrue(day >= 0);
+        Assert.assertTrue(date != null);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
-        intent.putExtra(DAY_KEY, day);
+        intent.putExtra(DATE_KEY, date);
         return intent;
     }
 
@@ -186,11 +185,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mSavedInstanceState = savedInstanceState;
 
         Intent intent = getIntent();
-        if (intent.hasExtra(DAY_KEY)) {
+        if (intent.hasExtra(DATE_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TIME_STAMP_KEY));
 
-            mDay = intent.getIntExtra(DAY_KEY, -1);
-            Assert.assertTrue(mDay >= 0);
+            mDate = intent.getParcelableExtra(DATE_KEY);
+            Assert.assertTrue(mDate != null);
         } else if (intent.hasExtra(TIME_STAMP_KEY)) {
             mTimeStamp = intent.getParcelableExtra(TIME_STAMP_KEY);
             Assert.assertTrue(mTimeStamp != null);
@@ -249,13 +248,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         switch (position) {
             case 0:
-                if (mDay != null) {
+                if (mDate != null) {
                     Assert.assertTrue(mTimeStamp == null);
-
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.DAY_OF_YEAR, mDay);
-                    Date date = new Date(calendar);
-                    return SingleScheduleFragment.newInstance(date);
+                    return SingleScheduleFragment.newInstance(mDate);
                 } else if (mTimeStamp != null) {
                     Date date = mTimeStamp.getDate();
                     HourMinute hourMinute = mTimeStamp.getHourMinute();
@@ -272,13 +267,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
                     return DailyScheduleFragment.newInstance();
                 }
             case 2:
-                if (mDay != null) {
+                if (mDate != null) {
                     Assert.assertTrue(mTimeStamp == null);
 
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.DAY_OF_YEAR, mDay);
-                    DayOfWeek dayOfWeek = DayOfWeek.getDayFromCalendar(calendar);
-                    return WeeklyScheduleFragment.newInstance(dayOfWeek);
+                    return WeeklyScheduleFragment.newInstance(mDate.getDayOfWeek());
                 } else if (mTimeStamp != null) {
                     DayOfWeek dayOfWeek = mTimeStamp.getDate().getDayOfWeek();
                     HourMinute hourMinute = mTimeStamp.getHourMinute();

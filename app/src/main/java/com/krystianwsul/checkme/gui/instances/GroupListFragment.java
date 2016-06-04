@@ -35,6 +35,7 @@ import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateRootTaskActivity;
@@ -52,6 +53,7 @@ import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -60,7 +62,8 @@ import java.util.List;
 import java.util.Map;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
-    private final static String DAY_KEY = "day";
+    private final static String POSITION_KEY = "position";
+    private static final String TIME_RANGE_KEY = "timeRange";
 
     private final static String EXPANSION_STATE_KEY = "expansionState";
     private final static String SELECTED_NODES_KEY = "selectedNodes";
@@ -70,7 +73,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     private FloatingActionButton mFloatingActionButton;
     private TextView mEmptyText;
 
-    private Integer mDay;
+    private Integer mPosition;
+    private MainActivity.TimeRange mTimeRange;
     private TimeStamp mTimeStamp;
     private InstanceKey mInstanceKey;
     private ArrayList<InstanceKey> mInstanceKeys;
@@ -199,10 +203,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(taskIds.size() > 1);
 
                     if (mInstanceKey == null) {
-                        if (mDay != null)
-                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, mDay));
-                        else
+                        if (mPosition != null) {
+                            Assert.assertTrue(mTimeRange != null);
+
+                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, rangePositionToDate(mTimeRange, mPosition)));
+                        } else {
                             startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
+                        }
                     } else {
                         startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mInstanceKey.TaskId, taskIds));
                     }
@@ -321,12 +328,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
     };
 
-    public static GroupListFragment getGroupInstance(int day) {
-        Assert.assertTrue(day >= 0);
+    public static GroupListFragment getGroupInstance(MainActivity.TimeRange timeRange, int position) {
+        Assert.assertTrue(timeRange != null);
+        Assert.assertTrue(position >= 0);
 
         GroupListFragment groupListFragment = new GroupListFragment();
         Bundle args = new Bundle();
-        args.putInt(DAY_KEY, day);
+        args.putInt(POSITION_KEY, position);
+        args.putSerializable(TIME_RANGE_KEY, timeRange);
         groupListFragment.setArguments(args);
         return groupListFragment;
     }
@@ -376,11 +385,17 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         Bundle args = getArguments();
         if (args != null) {
-            Assert.assertTrue(args.containsKey(DAY_KEY));
-            int day = args.getInt(DAY_KEY);
-            Assert.assertTrue(day >= 0);
+            Assert.assertTrue(args.containsKey(POSITION_KEY));
+            Assert.assertTrue(args.containsKey(TIME_RANGE_KEY));
 
-            setAll(day);
+            int position = args.getInt(POSITION_KEY);
+
+            MainActivity.TimeRange timeRange = (MainActivity.TimeRange) args.getSerializable(TIME_RANGE_KEY);
+            Assert.assertTrue(timeRange != null);
+
+            Assert.assertTrue(position >= 0);
+
+            setAll(timeRange, position);
         }
     }
 
@@ -391,20 +406,26 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         super.onResume();
     }
 
-    private void setAll(int day) {
-        Assert.assertTrue(mDay == null);
+    private void setAll(MainActivity.TimeRange timeRange, int position) {
+        Assert.assertTrue(timeRange != null);
+
+        Assert.assertTrue(mPosition == null);
+        Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
 
-        Assert.assertTrue(day >= 0);
-        mDay = day;
+        Assert.assertTrue(position >= 0);
+
+        mPosition = position;
+        mTimeRange = timeRange;
 
         getLoaderManager().initLoader(0, null, this);
     }
 
     public void setTimeStamp(TimeStamp timeStamp) {
-        Assert.assertTrue(mDay == null);
+        Assert.assertTrue(mPosition == null);
+        Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -416,7 +437,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     public void setInstanceKey(InstanceKey instanceKey) {
-        Assert.assertTrue(mDay == null);
+        Assert.assertTrue(mPosition == null);
+        Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -428,7 +450,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     public void setInstanceKeys(ArrayList<InstanceKey> instanceKeys) {
-        Assert.assertTrue(mDay == null);
+        Assert.assertTrue(mPosition == null);
+        Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
@@ -440,7 +463,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private boolean useGroups() {
-        return (mDay != null);
+        Assert.assertTrue((mPosition == null) == (mTimeRange == null));
+        return (mPosition != null);
     }
 
     @Override
@@ -460,7 +484,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new GroupListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys, mDay);
+        return new GroupListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys, mPosition, mTimeRange);
     }
 
     @Override
@@ -481,7 +505,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         boolean showFab;
         Activity activity = getActivity();
         Integer emptyTextId;
-        if (mDay != null) {
+        if (mPosition != null) {
+            Assert.assertTrue(mTimeRange != null);
+
             Assert.assertTrue(mTimeStamp == null);
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
@@ -489,7 +515,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(data.TaskEditable == null);
 
             showFab = true;
-            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, mDay)));
+            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, rangePositionToDate(mTimeRange, mPosition))));
 
             emptyTextId = R.string.instances_empty_root;
         } else if (mTimeStamp != null) {
@@ -552,7 +578,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mEmptyText.setVisibility(View.GONE);
         }
 
-        if (mDay != null && mDay.equals(0)) { // 24 hack
+        if (mPosition != null && mPosition.equals(0)) { // 24 hack
+            Assert.assertTrue(mTimeRange != null);
             // relevant hack
             PruneService.startService(getActivity());
         }
@@ -2830,5 +2857,29 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public interface GroupListListener {
         void onCreateGroupActionMode(ActionMode actionMode);
         void onDestroyGroupActionMode();
+    }
+
+    private static Date rangePositionToDate(MainActivity.TimeRange timeRange, int position) {
+        Assert.assertTrue(timeRange != null);
+        Assert.assertTrue(position >= 0);
+
+        Calendar calendar = Calendar.getInstance();
+
+        if (position > 0) {
+            switch (timeRange) {
+                case DAY:
+                    calendar.add(Calendar.DATE, position);
+                    break;
+                case WEEK:
+                    calendar.add(Calendar.WEEK_OF_YEAR, position);
+                    calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+                    break;
+                case MONTH:
+                    calendar.add(Calendar.MONTH, position);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+            }
+        }
+
+        return new Date(calendar);
     }
 }

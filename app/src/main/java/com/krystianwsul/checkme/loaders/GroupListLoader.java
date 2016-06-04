@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -17,17 +18,20 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
-    private final Integer mDay;
+    private final Integer mPosition;
+    private final MainActivity.TimeRange mTimeRange;
     private final TimeStamp mTimeStamp;
     private final InstanceKey mInstanceKey;
     private final ArrayList<InstanceKey> mInstanceKeys;
 
-    public GroupListLoader(Context context, TimeStamp timeStamp, InstanceKey instanceKey, ArrayList<InstanceKey> instanceKeys, Integer day) {
+    public GroupListLoader(Context context, TimeStamp timeStamp, InstanceKey instanceKey, ArrayList<InstanceKey> instanceKeys, Integer position, MainActivity.TimeRange timeRange) {
         super(context);
 
-        Assert.assertTrue((day != null ? 1 : 0) + (timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
+        Assert.assertTrue((position == null) == (timeRange == null));
+        Assert.assertTrue((position != null ? 1 : 0) + (timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
 
-        mDay = day;
+        mPosition = position;
+        mTimeRange = timeRange;
         mTimeStamp = timeStamp;
         mInstanceKey = instanceKey;
         mInstanceKeys = instanceKeys;
@@ -35,12 +39,14 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        if (mDay != null) {
+        if (mPosition != null) {
+            Assert.assertTrue(mTimeRange != null);
+
             Assert.assertTrue(mTimeStamp == null);
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mDay);
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mPosition, mTimeRange);
         } else if (mTimeStamp != null) {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);

@@ -15,6 +15,8 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -31,6 +33,7 @@ import junit.framework.Assert;
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
+    private static final String TIME_RANGE_KEY = "timeRange";
 
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
@@ -59,6 +62,59 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private int mVisibleTab = INSTANCES_VISIBLE;
     private boolean mIgnoreFirst = false;
 
+    public enum TimeRange {
+        DAY,
+        WEEK,
+        MONTH
+    }
+
+    private TimeRange mTimeRange = TimeRange.DAY;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean show = (mVisibleTab == INSTANCES_VISIBLE);
+
+        menu.findItem(R.id.menu_main_day).setVisible(show);
+        menu.findItem(R.id.menu_main_week).setVisible(show);
+        menu.findItem(R.id.menu_main_month).setVisible(show);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Assert.assertTrue(mVisibleTab == INSTANCES_VISIBLE);
+
+        TimeRange newTimeRange;
+
+        switch (item.getItemId()) {
+            case R.id.menu_main_day:
+                newTimeRange = TimeRange.DAY;
+                break;
+            case R.id.menu_main_week:
+                newTimeRange = TimeRange.WEEK;
+                break;
+            case R.id.menu_main_month:
+                newTimeRange = TimeRange.MONTH;
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+
+        if (newTimeRange != mTimeRange) {
+            mTimeRange = newTimeRange;
+            mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
+        }
+
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 Assert.assertTrue(mVisibleTab == 0);
                 mIgnoreFirst = true;
             }
+
+            Assert.assertTrue(savedInstanceState.containsKey(TIME_RANGE_KEY));
+            mTimeRange = (TimeRange) savedInstanceState.getSerializable(TIME_RANGE_KEY);
         }
 
         mMainActivityAppBarLayout = (AppBarLayout) findViewById(R.id.main_activity_app_bar_layout);
@@ -110,17 +169,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         mDaysPager = (ViewPager) findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);
 
-        mDaysPager.setAdapter(new FragmentStatePagerAdapter(fragmentManager) {
-            @Override
-            public Fragment getItem(int position) {
-                return DayFragment.newInstance(position);
-            }
-
-            @Override
-            public int getCount() {
-                return Integer.MAX_VALUE;
-            }
-        });
+        mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
 
         mMainTaskListFrame = (FrameLayout) findViewById(R.id.main_task_list_frame);
         Assert.assertTrue(mMainTaskListFrame != null);
@@ -182,6 +231,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             }
 
             mMainActivityDrawer.closeDrawer(GravityCompat.START);
+
+            invalidateOptionsMenu();
+
             return true;
         });
 
@@ -218,11 +270,14 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         super.onSaveInstanceState(outState);
 
         outState.putInt(VISIBLE_TAB_KEY, mVisibleTab);
-        if (mVisibleTab == 0) {
+
+        if (mVisibleTab == INSTANCES_VISIBLE) {
             Assert.assertTrue(mDaysPager.getVisibility() == View.VISIBLE);
             if (mDaysPager.getCurrentItem() != 0 && mOnPageChangeListener != null)
                 outState.putInt(IGNORE_FIRST_KEY, 1);
         }
+
+        outState.putSerializable(TIME_RANGE_KEY, mTimeRange);
     }
 
     private void showTab(int tab) {
@@ -394,5 +449,21 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         mMainActivityDrawer.removeDrawerListener(mDrawerCustomTimesListener);
         mDrawerCustomTimesListener = null;
+    }
+
+    private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+        public MyFragmentStatePagerAdapter(FragmentManager fragmentManager) {
+            super(fragmentManager);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return DayFragment.newInstance(mTimeRange, position);
+        }
+
+        @Override
+        public int getCount() {
+            return Integer.MAX_VALUE;
+        }
     }
 }

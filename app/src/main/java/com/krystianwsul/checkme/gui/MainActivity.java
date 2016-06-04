@@ -15,10 +15,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.Spinner;
 
 import com.krystianwsul.checkme.EventBuffer;
 import com.krystianwsul.checkme.R;
@@ -45,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     private AppBarLayout mMainActivityAppBarLayout;
     private ActionBar mActionBar;
+    private Spinner mMainActivitySpinner;
+
     private ViewPager mDaysPager;
     private FrameLayout mMainTaskListFrame;
     private FrameLayout mMainCustomTimesFrame;
@@ -69,51 +72,6 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     private TimeRange mTimeRange = TimeRange.DAY;
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean show = (mVisibleTab == INSTANCES_VISIBLE);
-
-        menu.findItem(R.id.menu_main_day).setVisible(show);
-        menu.findItem(R.id.menu_main_week).setVisible(show);
-        menu.findItem(R.id.menu_main_month).setVisible(show);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Assert.assertTrue(mVisibleTab == INSTANCES_VISIBLE);
-
-        TimeRange newTimeRange;
-
-        switch (item.getItemId()) {
-            case R.id.menu_main_day:
-                newTimeRange = TimeRange.DAY;
-                break;
-            case R.id.menu_main_week:
-                newTimeRange = TimeRange.WEEK;
-                break;
-            case R.id.menu_main_month:
-                newTimeRange = TimeRange.MONTH;
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-
-        if (newTimeRange != mTimeRange) {
-            mTimeRange = newTimeRange;
-            mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
-        }
-
-        return true;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +105,36 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
         mMainActivityDrawer = (DrawerLayout) findViewById(R.id.main_activity_drawer);
         Assert.assertTrue(mMainActivityDrawer != null);
+
+        mMainActivitySpinner = (Spinner) findViewById(R.id.main_activity_spinner);
+        Assert.assertTrue(mMainActivitySpinner != null);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mActionBar.getThemedContext(), R.array.main_activity_spinner, R.layout.support_simple_spinner_dropdown_item);
+        mMainActivitySpinner.setAdapter(adapter);
+
+        mMainActivitySpinner.setSelection(mTimeRange.ordinal());
+
+        mMainActivitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Assert.assertTrue(mVisibleTab == INSTANCES_VISIBLE);
+
+                Assert.assertTrue(position >= 0);
+                Assert.assertTrue(position < 3);
+
+                TimeRange newTimeRange = TimeRange.values()[position];
+
+                if (newTimeRange != mTimeRange) {
+                    mTimeRange = newTimeRange;
+                    mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mMainActivityDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mMainActivityDrawer.addDrawerListener(toggle);
@@ -283,12 +271,13 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     private void showTab(int tab) {
         switch (tab) {
             case INSTANCES_VISIBLE:
-                mActionBar.setTitle(getString(R.string.instances));
+                mActionBar.setTitle(null);
                 mDaysPager.setVisibility(View.VISIBLE);
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION);
+                mMainActivitySpinner.setVisibility(View.VISIBLE);
                 break;
             case TASKS_VISIBLE:
                 mActionBar.setTitle(getString(R.string.tasks));
@@ -297,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
+                mMainActivitySpinner.setVisibility(View.GONE);
                 break;
             case CUSTOM_TIMES_VISIBLE:
                 mActionBar.setTitle(getString(R.string.times));
@@ -305,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainCustomTimesFrame.setVisibility(View.VISIBLE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
+                mMainActivitySpinner.setVisibility(View.GONE);
                 break;
             case DEBUG_VISIBLE:
                 mActionBar.setTitle("Debug");
@@ -313,6 +304,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.VISIBLE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
+                mMainActivitySpinner.setVisibility(View.GONE);
                 break;
             default:
                 throw new IllegalArgumentException();

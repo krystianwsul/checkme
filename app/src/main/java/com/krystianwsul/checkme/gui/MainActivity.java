@@ -109,7 +109,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         mMainActivitySpinner = (Spinner) findViewById(R.id.main_activity_spinner);
         Assert.assertTrue(mMainActivitySpinner != null);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mActionBar.getThemedContext(), R.array.main_activity_spinner, R.layout.support_simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mActionBar.getThemedContext(), R.array.main_activity_spinner, R.layout.custom_toolbar_spinner);
+        adapter.setDropDownViewResource(R.layout.custom_toolbar_spinner_dropdown);
         mMainActivitySpinner.setAdapter(adapter);
 
         mMainActivitySpinner.setSelection(mTimeRange.ordinal());

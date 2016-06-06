@@ -218,11 +218,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             if (savedInstanceState == null)
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-            DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
-            if (discardDialogFragment != null)
-                discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
         }
+
+        DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
+        if (discardDialogFragment != null)
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
     }
 
     @Override

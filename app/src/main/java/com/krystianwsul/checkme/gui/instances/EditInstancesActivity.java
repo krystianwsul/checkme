@@ -59,10 +59,12 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
     private ActionBar mActionBar;
 
     private LinearLayout mEditInstanceLayout;
+    private TextInputLayout mEditInstanceDateLayout;
     private TextView mEditInstanceDate;
-    private Bundle mSavedInstanceState;
     private TextInputLayout mEditInstanceTimeLayout;
     private TextView mEditInstanceTime;
+
+    private Bundle mSavedInstanceState;
 
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -131,7 +133,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
                 Assert.assertTrue(mDate != null);
                 Assert.assertTrue(mData != null);
 
-                if (!isValidTime())
+                if (!isValidDateTime())
                     break;
 
                 DomainFactory.getDomainFactory(EditInstancesActivity.this).setInstancesDateTime(mData.DataId, mData.InstanceDatas.keySet(), mDate, mTimePairPersist.getTimePair());
@@ -170,6 +172,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
         mEditInstanceLayout = (LinearLayout) findViewById(R.id.edit_instance_layout);
         Assert.assertTrue(mEditInstanceLayout != null);
+
+        mEditInstanceDateLayout = (TextInputLayout) findViewById(R.id.edit_instance_date_layout);
+        Assert.assertTrue(mEditInstanceDateLayout != null);
 
         mEditInstanceDate = (TextView) findViewById(R.id.edit_instance_date);
         Assert.assertTrue(mEditInstanceDate != null);
@@ -352,7 +357,16 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         }
     }
 
-    private boolean isValidTime() {
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean isValidDate() {
+        if (mData != null) {
+            return (mDate.compareTo(Date.today()) >= 0);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isValidDateTime() {
         if (mData != null) {
             HourMinute hourMinute;
             if (mTimePairPersist.getCustomTimeId() != null)
@@ -367,7 +381,13 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
     }
 
     private void updateError() {
-        mEditInstanceTimeLayout.setError(isValidTime() ? null : getString(R.string.error_time));
+        if (isValidDate()) {
+            mEditInstanceDateLayout.setError(null);
+            mEditInstanceTimeLayout.setError(isValidDateTime() ? null : getString(R.string.error_time));
+        } else {
+            mEditInstanceDateLayout.setError(getString(R.string.error_date));
+            mEditInstanceTimeLayout.setError(null);
+        }
     }
 
     @Override

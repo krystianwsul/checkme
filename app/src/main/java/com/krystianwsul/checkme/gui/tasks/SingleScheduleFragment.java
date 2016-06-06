@@ -55,6 +55,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private Bundle mSavedInstanceState;
 
+    private TextInputLayout mSingleScheduleDateLayout;
     private TextView mSingleScheduleDate;
     private TextInputLayout mSingleScheduleTimeLayout;
     private TextView mSingleScheduleTime;
@@ -161,6 +162,12 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         View view = getView();
         Assert.assertTrue(view != null);
 
+        mSingleScheduleDateLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_date_layout);
+        Assert.assertTrue(mSingleScheduleDateLayout != null);
+
+        mSingleScheduleDate = (TextView) view.findViewById(R.id.single_schedule_date);
+        Assert.assertTrue(mSingleScheduleDate != null);
+
         mSingleScheduleTimeLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_time_layout);
         Assert.assertTrue(mSingleScheduleTimeLayout != null);
 
@@ -189,9 +196,6 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
-
-        mSingleScheduleDate = (TextView) view.findViewById(R.id.single_schedule_date);
-        Assert.assertTrue(mSingleScheduleDate != null);
 
         final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = (dialog, year, monthOfYear, dayOfMonth) -> {
             mDate = new Date(year, monthOfYear + 1, dayOfMonth);
@@ -279,12 +283,19 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         }
     }
 
-    private void setValidTime() {
-        boolean valid;
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean isValidDate() {
+        if (mData != null) {
+            return (mDate.compareTo(Date.today()) >= 0);
+        } else {
+            return false;
+        }
+    }
 
+    private boolean isValidDateTime() {
         if (mData != null) {
             if (mData.ScheduleData != null && mData.ScheduleData.TimePair.equals(mTimePairPersist.getTimePair())) {
-                valid = true;
+                return true;
             } else {
                 HourMinute hourMinute;
                 if (mTimePairPersist.getCustomTimeId() != null)
@@ -292,14 +303,30 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
                 else
                     hourMinute = mTimePairPersist.getHourMinute();
 
-                valid = (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+                return (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
             }
         } else {
-            valid = false;
+            return false;
         }
-        ((CreateRootTaskActivity) getActivity()).setTimeValid(valid);
+    }
 
-        mSingleScheduleTimeLayout.setError(valid ? null : getString(R.string.error_time));
+    private void setValidTime() {
+        if (isValidDateTime()) {
+            ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
+
+            mSingleScheduleDateLayout.setError(null);
+            mSingleScheduleTimeLayout.setError(null);
+        } else {
+            ((CreateRootTaskActivity) getActivity()).setTimeValid(false);
+
+            if (isValidDate()) {
+                mSingleScheduleDateLayout.setError(null);
+                mSingleScheduleTimeLayout.setError(getString(R.string.error_time));
+            } else {
+                mSingleScheduleDateLayout.setError(getString(R.string.error_date));
+                mSingleScheduleTimeLayout.setError(null);
+            }
+        }
     }
 
     @Override

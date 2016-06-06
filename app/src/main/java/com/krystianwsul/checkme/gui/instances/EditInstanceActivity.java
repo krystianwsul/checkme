@@ -57,10 +57,12 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     private ActionBar mActionBar;
 
     private LinearLayout mEditInstanceLayout;
+    private TextInputLayout mEditInstanceDateLayout;
     private TextView mEditInstanceDate;
-    private Bundle mSavedInstanceState;
     private TextInputLayout mEditInstanceTimeLayout;
     private TextView mEditInstanceTime;
+
+    private Bundle mSavedInstanceState;
 
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -124,7 +126,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
                 Assert.assertTrue(mDate != null);
                 Assert.assertTrue(mData != null);
 
-                if (!isValidTime())
+                if (!isValidDateTime())
                     break;
 
                 DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
@@ -164,6 +166,9 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         mEditInstanceLayout = (LinearLayout) findViewById(R.id.edit_instance_layout);
         Assert.assertTrue(mEditInstanceLayout != null);
 
+        mEditInstanceDateLayout = (TextInputLayout) findViewById(R.id.edit_instance_date_layout);
+        Assert.assertTrue(mEditInstanceDateLayout != null);
+
         mEditInstanceDate = (TextView) findViewById(R.id.edit_instance_date);
         Assert.assertTrue(mEditInstanceDate != null);
 
@@ -171,6 +176,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
             mDate = new Date(year, monthOfYear + 1, dayOfMonth);
             updateDateText();
         };
+
         mEditInstanceDate.setOnClickListener(v -> {
             MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
             calendarDatePickerDialogFragment.setDate(mDate);
@@ -323,7 +329,16 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         }
     }
 
-    private boolean isValidTime() {
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean isValidDate() {
+        if (mData != null) {
+            return (mDate.compareTo(Date.today()) >= 0);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isValidDateTime() {
         if (mData != null) {
             HourMinute hourMinute;
             if (mTimePairPersist.getCustomTimeId() != null)
@@ -338,7 +353,13 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     }
 
     private void updateError() {
-        mEditInstanceTimeLayout.setError(isValidTime() ? null : getString(R.string.error_time));
+        if (isValidDate()) {
+            mEditInstanceDateLayout.setError(null);
+            mEditInstanceTimeLayout.setError(isValidDateTime() ? null : getString(R.string.error_time));
+        } else {
+            mEditInstanceDateLayout.setError(getString(R.string.error_date));
+            mEditInstanceTimeLayout.setError(null);
+        }
     }
 
     @Override

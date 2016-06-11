@@ -4,6 +4,7 @@ import android.view.View;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 
@@ -19,7 +20,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
     private List<DoneTreeNode> mDoneTreeNodes;
 
-    public boolean mDoneExpanded;
+    private boolean mDoneExpanded;
 
     private final WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
 
@@ -56,6 +57,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         return mDoneTreeNodes.size();
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isEmpty() {
         return mDoneTreeNodes.isEmpty();
     }
@@ -108,13 +110,24 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         return -1;
     }
 
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean visible() {
+        if (mDoneTreeNodes.isEmpty())
+            return false;
+
+        SelectionCallback selectionCallback = getSelectionCallback();
+        Assert.assertTrue(selectionCallback != null);
+
+        if (selectionCallback.hasActionMode())
+            return false;
+
+        return true;
+    }
+
     @SuppressWarnings("SimplifiableIfStatement")
     @Override
     public boolean expanded() {
-        if (!mDoneExpanded)
-            return false;
-
-        return !mDividerModelNode.hasActionMode();
+        return mDoneExpanded;
     }
 
     public void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
@@ -217,6 +230,26 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         Assert.assertTrue(treeNodeCollection != null);
 
         return treeNodeCollection;
+    }
+
+    private TreeViewAdapter getTreeViewAdapter() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter;
+    }
+
+    private SelectionCallback getSelectionCallback() {
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
+        Assert.assertTrue(selectionCallback != null);
+
+        return selectionCallback;
     }
 
     public View.OnClickListener getExpandListener() {

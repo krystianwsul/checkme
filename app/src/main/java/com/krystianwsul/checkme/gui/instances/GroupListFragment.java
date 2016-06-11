@@ -68,7 +68,6 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -235,7 +234,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             ((AppCompatActivity) getActivity()).startSupportActionMode(this);
 
             if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() > 0) {
-                if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.mDoneExpanded)
+                if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.expanded())
                     mTreeViewAdapter.notifyItemRangeRemoved(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode), mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() + 1);
                 else
                     mTreeViewAdapter.notifyItemRemoved(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode));
@@ -270,7 +269,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         @Override
         protected void onLastRemoved() {
             if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() > 0) {
-                if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.mDoneExpanded)
+                if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.expanded())
                     mTreeViewAdapter.notifyItemRangeInserted(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode), mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() + 1);
                 else
                     mTreeViewAdapter.notifyItemInserted(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode));
@@ -573,7 +572,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mFirst = false;
         }
 
-        GroupAdapter groupAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, data.InstanceDatas.values(), mExpansionState, useGroups(), showFab, mSelectedNodes);
+        GroupAdapter groupAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, useGroups(), showFab);
         mTreeViewAdapter = new TreeViewAdapter(showFab, groupAdapter.getTreeModelAdapter());
         groupAdapter.setTreeViewAdapterReference(new WeakReference<>(mTreeViewAdapter));
         mTreeViewAdapter.setInstanceDatas(data.InstanceDatas.values(), mExpansionState, mSelectedNodes);
@@ -616,10 +615,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         private WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
 
-        public static GroupAdapter getAdapter(GroupListFragment groupListFragment, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, Collection<GroupListLoader.InstanceData> instanceDatas, ExpansionState expansionState, boolean useGroups, boolean showFab, ArrayList<InstanceKey> selectedNodes) {
+        public static GroupAdapter getAdapter(GroupListFragment groupListFragment, int dataId, ArrayList<GroupListLoader.CustomTimeData> customTimeDatas, boolean useGroups, boolean showFab) {
             Assert.assertTrue(groupListFragment != null);
             Assert.assertTrue(customTimeDatas != null);
-            Assert.assertTrue(instanceDatas != null);
 
             return new GroupAdapter(groupListFragment, dataId, customTimeDatas, useGroups, showFab);
         }
@@ -746,16 +744,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         public static class DividerHolder extends AbstractHolder {
-            public final RelativeLayout RowGroupListDivider;
             public final ImageView GroupListDividerImage;
 
             DividerHolder(RelativeLayout rowGroupListDivider, ImageView groupListDividerImage) {
                 super(rowGroupListDivider);
 
-                Assert.assertTrue(rowGroupListDivider != null);
                 Assert.assertTrue(groupListDividerImage != null);
 
-                RowGroupListDivider = rowGroupListDivider;
                 GroupListDividerImage = groupListDividerImage;
             }
         }
@@ -1431,7 +1426,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             if (nextNode.expanded())
                                 showSeparator = true;
                         } else {
-                            if (treeNodeCollection.mDividerTreeNode.expanded())
+                            if (treeNodeCollection.mDividerTreeNode.visible() && treeNodeCollection.mDividerTreeNode.expanded())
                                 showSeparator = true;
                         }
                     }
@@ -1959,7 +1954,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     DividerTreeNode dividerTreeNode = mDividerTreeNodeReference.get();
                     Assert.assertTrue(dividerTreeNode != null);
 
-                    if (dividerTreeNode.mDoneExpanded)
+                    if (dividerTreeNode.expanded())
                         dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_less_black_36dp);
                     else
                         dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_36dp);

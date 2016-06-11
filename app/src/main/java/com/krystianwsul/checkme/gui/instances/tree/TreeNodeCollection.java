@@ -112,4 +112,8 @@ public class TreeNodeCollection {
 
         return treeViewAdapter;
     }
+
+    public int displayedSize() {
+        return mNotDoneGroupTreeCollection.displayedSize() + mDividerTreeNode.displayedSize();
+    }
 }

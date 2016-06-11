@@ -154,4 +154,20 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         }
     }
+
+    public boolean getSeparatorVisibility() {
+        NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+
+        Assert.assertTrue(notDoneGroupTreeNode.expanded());
+
+        TreeNodeCollection treeNodeCollection = notDoneGroupTreeNode.getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        boolean lastInGroup = (notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.indexOf(this) == notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.size() - 1);
+
+        boolean lastInAdapter = (treeNodeCollection.getPosition(this) == treeNodeCollection.displayedSize() - 1);
+
+        return (lastInGroup && !lastInAdapter);
+    }
 }

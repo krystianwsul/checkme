@@ -357,4 +357,24 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
             }
         };
     }
+
+    public boolean getSeparatorVisibility() {
+        if (expanded())
+            return false;
+
+        NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
+        Assert.assertTrue(notDoneGroupTreeCollection != null);
+
+        TreeNodeCollection treeNodeCollection = notDoneGroupTreeCollection.getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        int position = treeNodeCollection.getPosition(this);
+        boolean last = (position == notDoneGroupTreeCollection.displayedSize() - 1);
+        if (!last) {
+            NotDoneGroupTreeNode nextNode = (NotDoneGroupTreeNode) treeNodeCollection.getNode(position + 1);
+            return (nextNode.expanded());
+        } else {
+            return (treeNodeCollection.mDividerTreeNode.visible() && treeNodeCollection.mDividerTreeNode.expanded());
+        }
+    }
 }

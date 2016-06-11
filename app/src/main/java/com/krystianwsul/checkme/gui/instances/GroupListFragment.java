@@ -1386,33 +1386,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
-                    final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
-                    Assert.assertTrue(notDoneGroupCollection != null);
-
-                    NotDoneGroupTreeCollection notDoneGroupTreeCollection = notDoneGroupCollection.mNotDoneGroupTreeCollectionReference.get();
-                    Assert.assertTrue(notDoneGroupTreeCollection != null);
-
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
-
-                    boolean showSeparator = false;
-                    if (!notDoneGroupTreeNode.expanded()) {
-                        int position = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-                        boolean last = (position == notDoneGroupTreeCollection.displayedSize() - 1);
-                        if (!last) {
-                            NotDoneGroupTreeNode nextNode = (NotDoneGroupTreeNode) treeNodeCollection.getNode(position + 1);
-                            if (nextNode.expanded())
-                                showSeparator = true;
-                        } else {
-                            if (treeNodeCollection.mDividerTreeNode.visible() && treeNodeCollection.mDividerTreeNode.expanded())
-                                showSeparator = true;
-                        }
-                    }
-
-                    if (showSeparator)
-                        return View.VISIBLE;
-                    else
-                        return View.INVISIBLE;
+                    return (notDoneGroupTreeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
                 }
 
                 @Override
@@ -1771,24 +1745,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getSeparatorVisibility() {
-                        final NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
-                        Assert.assertTrue(notDoneGroupNode != null);
-
-                        final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
-                        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                        Assert.assertTrue(notDoneGroupTreeNode.expanded());
-
                         NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodeReference.get();
                         Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-                        final boolean lastInGroup = (notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.indexOf(notDoneInstanceTreeNode) == notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.size() - 1);
-
-                        if (lastInGroup) {
-                            return View.VISIBLE;
-                        } else {
-                            return View.INVISIBLE;
-                        }
+                        return (notDoneInstanceTreeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
                     }
 
                     @Override

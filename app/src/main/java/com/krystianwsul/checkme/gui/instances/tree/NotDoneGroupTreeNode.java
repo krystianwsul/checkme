@@ -323,4 +323,38 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     public boolean isSelected() {
         return mSelected;
     }
+
+    public View.OnClickListener getExpandListener() {
+        return v -> {
+            TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+            Assert.assertTrue(treeNodeCollection != null);
+
+            TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+            Assert.assertTrue(treeViewAdapter != null);
+
+            SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
+            Assert.assertTrue(selectionCallback != null);
+
+            Assert.assertTrue(!(selectionCallback.hasActionMode() && getSelectedNodes().count() > 0));
+
+            int position = treeNodeCollection.getPosition(this);
+
+            if (expanded()) { // hiding
+                Assert.assertTrue(getSelectedNodes().count() == 0);
+
+                int displayedSize = displayedSize();
+                mNotDoneGroupNodeExpanded = false;
+                treeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
+            } else { // showing
+                mNotDoneGroupNodeExpanded = true;
+                treeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
+            }
+
+            if ((position) > 0 && (treeNodeCollection.getNode(position - 1) instanceof NotDoneGroupTreeNode)) {
+                treeViewAdapter.notifyItemRangeChanged(position - 1, 2);
+            } else {
+                treeViewAdapter.notifyItemChanged(position);
+            }
+        };
+    }
 }

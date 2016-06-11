@@ -1274,46 +1274,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
-                    final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
-                    Assert.assertTrue(notDoneGroupCollection != null);
-
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
-
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
-                    Assert.assertTrue(groupListFragment != null);
-
-                    if (notDoneGroupTreeNode.singleInstance()) {
-                        Assert.assertTrue(!notDoneGroupTreeNode.expanded());
-
-                        return null;
-                    } else {
-                        Assert.assertTrue(!(groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedNodes().count() > 0));
-
-                        return (v -> {
-                            int position = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-
-                            if (notDoneGroupTreeNode.expanded()) { // hiding
-                                Assert.assertTrue(notDoneGroupTreeNode.getSelectedNodes().count() == 0);
-
-                                int displayedSize = notDoneGroupTreeNode.displayedSize();
-                                notDoneGroupTreeNode.mNotDoneGroupNodeExpanded = false;
-                                treeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
-                            } else { // showing
-                                notDoneGroupTreeNode.mNotDoneGroupNodeExpanded = true;
-                                treeViewAdapter.notifyItemRangeInserted(position + 1, notDoneGroupTreeNode.displayedSize() - 1);
-                            }
-
-                            if ((position) > 0 && (treeNodeCollection.getNode(position - 1) instanceof NotDoneGroupNode)) {
-                                treeViewAdapter.notifyItemRangeChanged(position - 1, 2);
-                            } else {
-                                treeViewAdapter.notifyItemChanged(position);
-                            }
-                        });
-                    }
+                    return notDoneGroupTreeNode.getExpandListener();
                 }
 
                 @Override

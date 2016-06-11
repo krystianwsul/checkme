@@ -17,7 +17,7 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
 
     public WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
 
-    public boolean mSelected = false;
+    boolean mSelected = false;
 
     public NotDoneInstanceTreeNode(NotDoneInstanceModelNode notDoneInstanceModelNode, ArrayList<InstanceKey> selectedNodes) {
         Assert.assertTrue(notDoneInstanceModelNode != null);
@@ -126,5 +126,9 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
     @Override
     public int compareTo(@NonNull NotDoneInstanceTreeNode another) {
         return mNotDoneInstanceModelNode.compareTo(another.mNotDoneInstanceModelNode);
+    }
+
+    public boolean isSelected() {
+        return mSelected;
     }
 }

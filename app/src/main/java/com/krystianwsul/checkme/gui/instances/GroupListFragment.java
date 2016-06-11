@@ -1465,7 +1465,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.get(0);
                         Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-                        if (notDoneInstanceTreeNode.mSelected)
+                        if (notDoneInstanceTreeNode.isSelected())
                             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected);
                         else
                             return Color.TRANSPARENT;
@@ -1846,7 +1846,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
                         Assert.assertTrue(groupListFragment != null);
 
-                        if (notDoneInstanceTreeNode.mSelected)
+                        if (notDoneInstanceTreeNode.isSelected())
                             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected);
                         else
                             return Color.TRANSPARENT;
@@ -1928,7 +1928,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(treeNodeCollectionReference != null);
 
                     DividerNode dividerNode = new DividerNode(treeNodeCollectionReference);
-                    DividerTreeNode dividerTreeNode = new DividerTreeNode(dividerNode.getDividerModelNode(), doneExpanded);
+                    DividerTreeNode dividerTreeNode = new DividerTreeNode(dividerNode.getDividerModelNode(), doneExpanded, treeNodeCollectionReference);
                     dividerNode.setDividerTreeNodeReference(new WeakReference<>(dividerTreeNode));
 
                     dividerTreeNode.setInstanceDatas(instanceDatas);
@@ -1964,26 +1964,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     else
                         dividerHolder.GroupListDividerImage.setImageResource(R.drawable.ic_expand_more_black_36dp);
 
-                    dividerHolder.RowGroupListDivider.setOnClickListener(v -> {
-                        Assert.assertTrue(!dividerTreeNode.isEmpty());
-
-                        int position = treeNodeCollection.getPosition(dividerTreeNode);
-
-                        int displayedSize = dividerTreeNode.displayedSize();
-                        if (dividerTreeNode.mDoneExpanded) { // hiding
-                            dividerTreeNode.mDoneExpanded = false;
-                            treeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
-                        } else { // showing
-                            dividerTreeNode.mDoneExpanded = true;
-                            treeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize - 1);
-                        }
-
-                        if (treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() == 0) {
-                            treeViewAdapter.notifyItemChanged(position);
-                        } else {
-                            treeViewAdapter.notifyItemRangeChanged(position - 1, 2);
-                        }
-                    });
+                    dividerHolder.GroupListDividerImage.setOnClickListener(dividerTreeNode.getExpandListener());
                 }
 
                 public int getItemViewType() {

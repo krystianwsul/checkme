@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
+import android.view.View;
+
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
@@ -7,6 +9,7 @@ import com.krystianwsul.checkme.loaders.GroupListLoader;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,12 +21,15 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
     public boolean mDoneExpanded;
 
-    public DividerTreeNode(DividerModelNode dividerModelNode, boolean expanded) {
+    private final WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
+
+    public DividerTreeNode(DividerModelNode dividerModelNode, boolean expanded, WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
         Assert.assertTrue(dividerModelNode != null);
+        Assert.assertTrue(treeNodeCollectionReference != null);
 
         mDividerModelNode = dividerModelNode;
-
         mDoneExpanded = expanded;
+        mTreeNodeCollectionReference = treeNodeCollectionReference;
     }
 
     public void setInstanceDatas(ArrayList<GroupListLoader.InstanceData> instanceDatas) {
@@ -204,5 +210,41 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
                 treeViewAdapter.notifyItemChanged(oldDividerPosition - 1);
             }
         }
+    }
+
+    private TreeNodeCollection getTreeNodeCollection() {
+        TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        return treeNodeCollection;
+    }
+
+    public View.OnClickListener getExpandListener() {
+        return v -> {
+            Assert.assertTrue(!isEmpty());
+
+            TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+            Assert.assertTrue(treeNodeCollection != null);
+
+            TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+            Assert.assertTrue(treeViewAdapter != null);
+
+            int position = treeNodeCollection.getPosition(this);
+
+            int displayedSize = displayedSize();
+            if (mDoneExpanded) { // hiding
+                mDoneExpanded = false;
+                treeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
+            } else { // showing
+                mDoneExpanded = true;
+                treeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize - 1);
+            }
+
+            if (treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() == 0) {
+                treeViewAdapter.notifyItemChanged(position);
+            } else {
+                treeViewAdapter.notifyItemRangeChanged(position - 1, 2);
+            }
+        };
     }
 }

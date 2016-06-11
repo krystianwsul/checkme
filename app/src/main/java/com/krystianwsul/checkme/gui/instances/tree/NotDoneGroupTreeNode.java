@@ -87,25 +87,25 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return mNotDoneGroupNodeExpanded;
     }
 
-    public void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode, GroupListFragment.GroupAdapter.NodeCollection nodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode, TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
         Assert.assertTrue(notDoneInstanceTreeNode != null);
-        Assert.assertTrue(nodeCollection != null);
+        Assert.assertTrue(treeNodeCollection != null);
         Assert.assertTrue(groupAdapter != null);
 
         Assert.assertTrue(mNotDoneInstanceTreeNodes.size() >= 2);
 
         final boolean lastInGroup = (mNotDoneInstanceTreeNodes.indexOf(notDoneInstanceTreeNode) == mNotDoneInstanceTreeNodes.size() - 1);
 
-        int groupPosition = nodeCollection.getPosition(this);
+        int groupPosition = treeNodeCollection.getPosition(this);
 
-        int oldInstancePosition = nodeCollection.getPosition(notDoneInstanceTreeNode);
+        int oldInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
 
         if (mNotDoneInstanceTreeNodes.size() == 2) {
             mNotDoneInstanceTreeNodes.remove(notDoneInstanceTreeNode);
 
             mNotDoneGroupNodeExpanded = false;
 
-            if ((groupPosition > 0) && (nodeCollection.getNode(groupPosition - 1) instanceof NotDoneGroupTreeNode))
+            if ((groupPosition > 0) && (treeNodeCollection.getNode(groupPosition - 1) instanceof NotDoneGroupTreeNode))
                 groupAdapter.notifyItemRangeChanged(groupPosition - 1, 2);
             else
                 groupAdapter.notifyItemChanged(groupPosition);
@@ -142,8 +142,8 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         }
     }
 
-    public void unselect(GroupListFragment.GroupAdapter.NodeCollection nodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
-        Assert.assertTrue(nodeCollection != null);
+    public void unselect(TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+        Assert.assertTrue(treeNodeCollection != null);
         Assert.assertTrue(groupAdapter != null);
 
         if (singleInstance()) {
@@ -152,7 +152,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
             if (notDoneInstanceNode.mSelected) {
                 notDoneInstanceNode.mSelected = false;
-                groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
             }
         } else {
             List<NotDoneInstanceTreeNode> selected = getSelected().collect(Collectors.toList());
@@ -161,10 +161,10 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
                 for (NotDoneInstanceTreeNode notDoneInstanceTreeNode : selected) {
                     notDoneInstanceTreeNode.getNotDoneInstanceNode().mSelected = false;
-                    groupAdapter.notifyItemChanged(nodeCollection.getPosition(notDoneInstanceTreeNode));
+                    groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneInstanceTreeNode));
                 }
 
-                groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+                groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
             }
         }
     }
@@ -174,14 +174,14 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return (mNotDoneInstanceTreeNodes.size() == 1);
     }
 
-    public void updateCheckBoxes(GroupListFragment.GroupAdapter.NodeCollection nodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
-        Assert.assertTrue(nodeCollection != null);
+    public void updateCheckBoxes(TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+        Assert.assertTrue(treeNodeCollection != null);
         Assert.assertTrue(groupAdapter != null);
 
         if (singleInstance()) {
-            groupAdapter.notifyItemChanged(nodeCollection.getPosition(this));
+            groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         } else {
-            groupAdapter.notifyItemRangeChanged(nodeCollection.getPosition(this) + 1, displayedSize() - 1);
+            groupAdapter.notifyItemRangeChanged(treeNodeCollection.getPosition(this) + 1, displayedSize() - 1);
         }
     }
 

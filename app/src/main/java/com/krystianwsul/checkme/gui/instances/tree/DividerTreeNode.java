@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class DividerTreeNode implements GroupListFragment.Node, GroupListFragment.NodeContainer {
-    public final DividerModelNode mDividerModelNode;
+    private final DividerModelNode mDividerModelNode;
 
     private List<DoneTreeNode> mDoneTreeNodes;
 
@@ -102,6 +102,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         return -1;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
     @Override
     public boolean expanded() {
         if (!mDoneExpanded)
@@ -128,7 +129,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
             Collections.sort(mDoneTreeNodes, mDividerModelNode.getComparator());
 
-            int newInstancePosition = nodeCollection.getPosition(doneTreeNode.mDoneModelNode.getDoneInstanceNode());
+            int newInstancePosition = nodeCollection.getPosition(doneTreeNode);
             groupAdapter.notifyItemInserted(newInstancePosition);
 
             if (bottomNotDone && nodeCollection.mNotDoneGroupCollection.displayedSize() > 0) {
@@ -151,7 +152,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
                 }
             } else {
                 if (mDoneExpanded) {
-                    int newInstancePosition = nodeCollection.getPosition(doneTreeNode.mDoneModelNode.getDoneInstanceNode());
+                    int newInstancePosition = nodeCollection.getPosition(doneTreeNode);
                     groupAdapter.notifyItemInserted(newInstancePosition);
                 }
             }

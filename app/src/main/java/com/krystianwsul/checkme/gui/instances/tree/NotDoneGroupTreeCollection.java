@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
-import android.support.v4.util.Pair;
-
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
@@ -142,19 +140,7 @@ public class NotDoneGroupTreeCollection {
         Collections.sort(mNotDoneGroupTreeNodes, mNotDoneGroupModelCollection.getComparator());
     }
 
-    public Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> add(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
-        Assert.assertTrue(instanceData != null);
-        Assert.assertTrue(instanceData.Done == null);
-        Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(treeViewAdapter != null);
-
-        Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> pair = addInstanceHelper(instanceData, treeNodeCollection, treeViewAdapter);
-        sort();
-
-        return pair;
-    }
-
-    private Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> addInstanceHelper(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void add(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(instanceData != null);
         Assert.assertTrue(instanceData.Done == null);
         Assert.assertTrue(treeNodeCollection != null);
@@ -174,10 +160,12 @@ public class NotDoneGroupTreeCollection {
             NotDoneGroupTreeNode notDoneGroupTreeNode = new NotDoneGroupTreeNode(notDoneGroupNode.getNotDoneGroupModelNode(), false, new WeakReference<>(this));
             notDoneGroupNode.setNotDoneGroupTreeNodeReference(new WeakReference<>(notDoneGroupTreeNode));
             notDoneGroupTreeNode.setInstanceDatas(instanceDatas, null);
-            NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.get(0);
 
             mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
-            return new Pair<>(true, new Pair<>(notDoneGroupTreeNode, notDoneInstanceTreeNode));
+
+            sort();
+
+            treeViewAdapter.notifyItemInserted(treeNodeCollection.getPosition(notDoneGroupTreeNode));
         } else {
             Assert.assertTrue(timeStampNotDoneGroupTreeNodes.size() == 1);
 
@@ -185,7 +173,22 @@ public class NotDoneGroupTreeCollection {
             NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupTreeNode.addInstanceData(instanceData, null);
 
             notDoneGroupTreeNode.sort();
-            return new Pair<>(false, new Pair<>(notDoneGroupTreeNode, notDoneInstanceTreeNode));
+
+            if (notDoneGroupTreeNode.expanded()) {
+                int newGroupPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
+                int newInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
+
+                boolean last = (newGroupPosition + notDoneGroupTreeNode.displayedSize() - 1 == newInstancePosition);
+
+                treeViewAdapter.notifyItemChanged(newGroupPosition);
+                treeViewAdapter.notifyItemInserted(newInstancePosition);
+
+                if (last)
+                    treeViewAdapter.notifyItemChanged(newInstancePosition - 1);
+            } else {
+                int newGroupPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
+                treeViewAdapter.notifyItemChanged(newGroupPosition);
+            }
         }
     }
 

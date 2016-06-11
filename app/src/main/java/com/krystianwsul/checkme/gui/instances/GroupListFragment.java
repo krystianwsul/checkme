@@ -12,7 +12,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -2143,31 +2142,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         dividerTreeNode.remove(doneTreeNode, treeNodeCollection, treeViewAdapter);
 
-                        Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> pair = treeNodeCollection.mNotDoneGroupTreeCollection.add(mInstanceData, treeNodeCollection, treeViewAdapter);
-                        boolean newNotDoneGroupNode = pair.first;
-                        NotDoneGroupTreeNode notDoneGroupTreeNode = pair.second.first;
-                        NotDoneInstanceTreeNode notDoneInstanceTreeNode = pair.second.second;
-
-                        if (newNotDoneGroupNode) {
-                            int newGroupPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-                            treeViewAdapter.notifyItemInserted(newGroupPosition);
-                        } else {
-                            if (notDoneGroupTreeNode.expanded()) {
-                                int newGroupPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-                                int newInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
-
-                                boolean last = (newGroupPosition + notDoneGroupTreeNode.displayedSize() - 1 == newInstancePosition);
-
-                                treeViewAdapter.notifyItemChanged(newGroupPosition);
-                                treeViewAdapter.notifyItemInserted(newInstancePosition);
-
-                                if (last)
-                                    treeViewAdapter.notifyItemChanged(newInstancePosition - 1);
-                            } else {
-                                int newGroupPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-                                treeViewAdapter.notifyItemChanged(newGroupPosition);
-                            }
-                        }
+                        treeNodeCollection.mNotDoneGroupTreeCollection.add(mInstanceData, treeNodeCollection, treeViewAdapter);
                     };
                 }
 

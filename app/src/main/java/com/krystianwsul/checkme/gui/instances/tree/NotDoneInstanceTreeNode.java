@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.krystianwsul.checkme.gui.SelectionCallback;
@@ -11,7 +12,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class NotDoneInstanceTreeNode implements GroupListFragment.Node {
+public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparable<NotDoneInstanceTreeNode> {
     private final NotDoneInstanceModelNode mNotDoneInstanceModelNode;
 
     public WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
@@ -120,5 +121,10 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node {
         }
 
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+    }
+
+    @Override
+    public int compareTo(@NonNull NotDoneInstanceTreeNode another) {
+        return mNotDoneInstanceModelNode.compareTo(another.mNotDoneInstanceModelNode);
     }
 }

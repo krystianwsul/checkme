@@ -699,6 +699,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 public GroupAdapter getGroupAdapter() {
                     return GroupAdapter.this;
                 }
+
+                @Override
+                public SelectionCallback getSelectionCallback() {
+                    GroupListFragment groupListFragment = mGroupListFragmentReference.get();
+                    Assert.assertTrue(groupListFragment != null);
+
+                    return groupListFragment.mSelectionCallback;
+                }
             };
         }
 
@@ -1912,81 +1920,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     View.OnLongClickListener getOnLongClickListener() {
-                        return v -> {
-                            onInstanceLongClick();
-                            return true;
-                        };
+                        NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodeReference.get();
+                        Assert.assertTrue(notDoneInstanceTreeNode != null);
+
+                        return notDoneInstanceTreeNode.getOnLongClickListener();
                     }
 
                     @Override
                     View.OnClickListener getOnClickListener() {
-                        final NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
-                        Assert.assertTrue(notDoneGroupNode != null);
-
-                        final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
-                        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                        Assert.assertTrue(notDoneGroupTreeNode.mNotDoneGroupNodeExpanded);
-
-                        NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
-                        Assert.assertTrue(notDoneGroupCollection != null);
-
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
-                        Assert.assertTrue(groupListFragment != null);
-
-                        return v -> {
-                            if (groupListFragment.mSelectionCallback.hasActionMode())
-                                onInstanceLongClick();
-                            else
-                                onInstanceClick();
-                        };
-                    }
-
-                    private void onInstanceLongClick() {
-                        NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
-                        Assert.assertTrue(notDoneGroupNode != null);
-
-                        final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
-                        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                        Assert.assertTrue(notDoneGroupTreeNode.mNotDoneGroupNodeExpanded);
-
-                        final NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
-                        Assert.assertTrue(notDoneGroupCollection != null);
-
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
-                        Assert.assertTrue(groupListFragment != null);
-
                         NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodeReference.get();
                         Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-                        notDoneInstanceTreeNode.mSelected = !notDoneInstanceTreeNode.mSelected;
-
-                        if (notDoneInstanceTreeNode.mSelected) {
-                            groupListFragment.mSelectionCallback.incrementSelected();
-
-                            if (notDoneGroupTreeNode.getSelected().count() == 1) // first in group
-                                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneGroupTreeNode));
-                        } else {
-                            groupListFragment.mSelectionCallback.decrementSelected();
-
-                            if (notDoneGroupTreeNode.getSelected().count() == 0) // last in group
-                                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneGroupTreeNode));
-                        }
-
-                        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneInstanceTreeNode));
+                        return notDoneInstanceTreeNode.getOnClickListener();
                     }
 
                     private void onInstanceClick() {
@@ -2023,6 +1968,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             @Override
                             public NotDoneInstanceNode getNotDoneInstanceNode() {
                                 return NotDoneInstanceNode.this;
+                            }
+
+                            @Override
+                            public void onClick() {
+                                NotDoneInstanceNode.this.onInstanceClick();
                             }
                         };
                     }

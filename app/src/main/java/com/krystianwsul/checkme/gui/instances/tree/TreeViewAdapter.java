@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -73,7 +74,11 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
 
         GroupListFragment.GroupAdapter.NodeCollection nodeCollection = GroupListFragment.GroupAdapter.NodeCollection.newNodeCollection(new WeakReference<>(this));
 
-        mTreeNodeCollection = new TreeNodeCollection(nodeCollection.getModelNodeCollection());
+        mTreeNodeCollection = new TreeNodeCollection(nodeCollection.getModelNodeCollection(), new WeakReference<>(this));
         mTreeNodeCollection.setInstanceDatas(instanceDatas, expansionState, selectedNodes, this);
+    }
+
+    public SelectionCallback getSelectionCallback() {
+        return mTreeModelAdapter.getSelectionCallback();
     }
 }

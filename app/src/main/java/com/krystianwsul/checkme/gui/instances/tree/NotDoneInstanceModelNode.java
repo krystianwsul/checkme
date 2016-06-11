@@ -4,4 +4,5 @@ import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 public interface NotDoneInstanceModelNode extends GroupListFragment.Node {
     GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode getNotDoneInstanceNode();
+    void onClick();
 }

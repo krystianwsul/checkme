@@ -18,10 +18,14 @@ public class TreeNodeCollection {
 
     private final ModelNodeCollection mModelNodeCollection;
 
-    public TreeNodeCollection(ModelNodeCollection modelNodeCollection) {
+    private final WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
+
+    public TreeNodeCollection(ModelNodeCollection modelNodeCollection, WeakReference<TreeViewAdapter> treeViewAdapterReference) {
         Assert.assertTrue(modelNodeCollection != null);
+        Assert.assertTrue(treeViewAdapterReference != null);
 
         mModelNodeCollection = modelNodeCollection;
+        mTreeViewAdapterReference = treeViewAdapterReference;
     }
 
     public GroupListFragment.Node getNode(int position) {
@@ -91,7 +95,7 @@ public class TreeNodeCollection {
         }
 
         GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection notDoneGroupCollection = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection.newNotDoneGroupCollection(new WeakReference<>(this));
-        mNotDoneGroupTreeCollection = new NotDoneGroupTreeCollection(notDoneGroupCollection.getNotDoneGroupModelCollection());
+        mNotDoneGroupTreeCollection = new NotDoneGroupTreeCollection(notDoneGroupCollection.getNotDoneGroupModelCollection(), new WeakReference<>(this));
         notDoneGroupCollection.setNotDoneGroupTreeCollectionReference(new WeakReference<>(mNotDoneGroupTreeCollection));
         mNotDoneGroupTreeCollection.setInstanceDatas(notDoneInstances, expandedGroups, selectedNodes, this, treeViewAdapter);
 
@@ -100,5 +104,12 @@ public class TreeNodeCollection {
 
     public GroupListFragment.GroupAdapter.NodeCollection getNodeCollection() {
         return mModelNodeCollection.getNodeCollection();
+    }
+
+    public TreeViewAdapter getTreeViewAdapter() {
+        TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter;
     }
 }

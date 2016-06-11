@@ -17,17 +17,21 @@ import java.util.List;
 public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFragment.NodeContainer {
     private final NotDoneGroupModelNode mNotDoneGroupModelNode;
 
+    private final WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
+
     public final ArrayList<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes = new ArrayList<>();
 
     public boolean mNotDoneGroupNodeExpanded;
 
     public ExactTimeStamp mExactTimeStamp;
 
-    public NotDoneGroupTreeNode(NotDoneGroupModelNode notDoneGroupModelNode, boolean expanded) {
+    public NotDoneGroupTreeNode(NotDoneGroupModelNode notDoneGroupModelNode, boolean expanded, WeakReference<NotDoneGroupTreeCollection> notDoneGroupTreeCollectionReference) {
         Assert.assertTrue(notDoneGroupModelNode != null);
+        Assert.assertTrue(notDoneGroupTreeCollectionReference != null);
 
         mNotDoneGroupModelNode = notDoneGroupModelNode;
         mNotDoneGroupNodeExpanded = expanded;
+        mNotDoneGroupTreeCollectionReference = notDoneGroupTreeCollectionReference;
     }
 
     @Override
@@ -217,5 +221,32 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
         mNotDoneInstanceTreeNodes.add(notDoneInstanceTreeNode);
         return notDoneInstanceTreeNode;
+    }
+
+    private NotDoneGroupTreeCollection getNotDoneGroupTreeCollection() {
+        NotDoneGroupTreeCollection notDoneGroupTreeCollection = mNotDoneGroupTreeCollectionReference.get();
+        Assert.assertTrue(notDoneGroupTreeCollection != null);
+
+        return notDoneGroupTreeCollection;
+    }
+
+    public TreeViewAdapter getTreeViewAdapter() {
+        NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
+        Assert.assertTrue(notDoneGroupTreeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = notDoneGroupTreeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter;
+    }
+
+    public TreeNodeCollection getTreeNodeCollection() {
+        NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
+        Assert.assertTrue(notDoneGroupTreeCollection != null);
+
+        TreeNodeCollection treeNodeCollection = notDoneGroupTreeCollection.getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        return treeNodeCollection;
     }
 }

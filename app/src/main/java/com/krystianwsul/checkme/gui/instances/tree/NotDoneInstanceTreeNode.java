@@ -1,5 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
+import android.view.View;
+
+import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
@@ -43,5 +46,79 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node {
 
     public GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode getNotDoneInstanceNode() {
         return mNotDoneInstanceModelNode.getNotDoneInstanceNode();
+    }
+
+    private TreeViewAdapter getTreeViewAdapter() {
+        NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+
+        TreeViewAdapter treeViewAdapter = notDoneGroupTreeNode.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter;
+    }
+
+    private NotDoneGroupTreeNode getNotDoneGroupTreeNode() {
+        NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+
+        return notDoneGroupTreeNode;
+    }
+
+    private SelectionCallback getSelectionCallback() {
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter.getSelectionCallback();
+    }
+
+    public View.OnLongClickListener getOnLongClickListener() {
+        return v -> {
+            onLongClick();
+            return true;
+        };
+    }
+
+    public View.OnClickListener getOnClickListener() {
+        SelectionCallback selectionCallback = getSelectionCallback();
+        Assert.assertTrue(selectionCallback != null);
+
+        return v -> {
+            if (selectionCallback.hasActionMode())
+                onLongClick();
+            else
+                mNotDoneInstanceModelNode.onClick();
+        };
+    }
+
+    private void onLongClick() {
+        NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+        Assert.assertTrue(notDoneGroupTreeNode.expanded());
+
+        TreeNodeCollection treeNodeCollection = notDoneGroupTreeNode.getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
+        Assert.assertTrue(selectionCallback != null);
+
+        mSelected = !mSelected;
+
+        if (mSelected) {
+            selectionCallback.incrementSelected();
+
+            if (notDoneGroupTreeNode.getSelected().count() == 1) // first in group
+                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneGroupTreeNode));
+        } else {
+            selectionCallback.decrementSelected();
+
+            if (notDoneGroupTreeNode.getSelected().count() == 0) // last in group
+                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneGroupTreeNode));
+        }
+
+        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 }

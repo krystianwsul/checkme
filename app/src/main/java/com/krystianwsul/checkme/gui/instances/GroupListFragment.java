@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -2136,11 +2137,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             return doneTreeNode;
                         }
-
-                        @Override
-                        public Comparator<DoneTreeNode> getComparator() {
-                            return (DoneTreeNode lhs, DoneTreeNode rhs) -> -lhs.mDoneModelNode.getDoneInstanceNode().mInstanceData.Done.compareTo(rhs.mDoneModelNode.getDoneInstanceNode().mInstanceData.Done); // negate
-                        }
                     };
                 }
             }
@@ -2422,6 +2418,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         @Override
                         public int getItemViewType() {
                             return DoneInstanceNode.this.getItemViewType();
+                        }
+
+                        @Override
+                        public int compareTo(@NonNull DoneModelNode another) {
+                            return -mInstanceData.Done.compareTo(another.getDoneInstanceNode().mInstanceData.Done); // negate
                         }
                     };
                 }

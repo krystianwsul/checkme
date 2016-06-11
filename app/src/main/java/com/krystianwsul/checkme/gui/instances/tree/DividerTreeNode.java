@@ -33,7 +33,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
                 .map(instanceData -> mDividerModelNode.newDoneTreeNode(instanceData, this))
                 .collect(Collectors.toList());
 
-        Collections.sort(mDoneTreeNodes, mDividerModelNode.getComparator());
+        Collections.sort(mDoneTreeNodes);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
             mDoneTreeNodes.add(doneTreeNode);
 
-            Collections.sort(mDoneTreeNodes, mDividerModelNode.getComparator());
+            Collections.sort(mDoneTreeNodes);
 
             int newInstancePosition = treeNodeCollection.getPosition(doneTreeNode);
             treeViewAdapter.notifyItemInserted(newInstancePosition);
@@ -140,7 +140,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
             DoneTreeNode doneTreeNode = mDividerModelNode.newDoneTreeNode(instanceData, this);
             mDoneTreeNodes.add(doneTreeNode);
 
-            Collections.sort(mDoneTreeNodes, mDividerModelNode.getComparator());
+            Collections.sort(mDoneTreeNodes);
 
             if (mDoneTreeNodes.size() == 1) {
                 Assert.assertTrue(!mDoneExpanded);

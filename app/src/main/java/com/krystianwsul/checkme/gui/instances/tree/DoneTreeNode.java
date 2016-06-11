@@ -1,11 +1,13 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
+import android.support.annotation.NonNull;
+
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
-public class DoneTreeNode implements GroupListFragment.Node {
-    public final DoneModelNode mDoneModelNode;
+public class DoneTreeNode implements GroupListFragment.Node, Comparable<DoneTreeNode> {
+    private final DoneModelNode mDoneModelNode;
 
     public DoneTreeNode(DoneModelNode doneModelNode) {
         Assert.assertTrue(doneModelNode != null);
@@ -20,5 +22,10 @@ public class DoneTreeNode implements GroupListFragment.Node {
     @Override
     public int getItemViewType() {
         return mDoneModelNode.getItemViewType();
+    }
+
+    @Override
+    public int compareTo(@NonNull DoneTreeNode another) {
+        return mDoneModelNode.compareTo(another.mDoneModelNode);
     }
 }

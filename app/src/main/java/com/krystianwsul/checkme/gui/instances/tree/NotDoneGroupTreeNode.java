@@ -24,7 +24,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
     public final ArrayList<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes = new ArrayList<>();
 
-    public boolean mNotDoneGroupNodeExpanded;
+    private boolean mNotDoneGroupNodeExpanded;
 
     public ExactTimeStamp mExactTimeStamp;
 

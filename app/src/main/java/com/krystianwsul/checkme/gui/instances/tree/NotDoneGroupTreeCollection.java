@@ -33,9 +33,9 @@ public class NotDoneGroupTreeCollection {
         mTreeNodeCollectionReference = treeNodeCollectionReference;
     }
 
-    public void unselect(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void unselect() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(notDoneGroupTreeNode -> notDoneGroupTreeNode.unselect(treeNodeCollection, treeViewAdapter));
+                .forEach(NotDoneGroupTreeNode::unselect);
     }
 
     public List<GroupListFragment.Node> getSelectedNodes() {
@@ -58,9 +58,9 @@ public class NotDoneGroupTreeCollection {
         return displayedSize;
     }
 
-    public void updateCheckBoxes(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void updateCheckBoxes() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(notDoneGroupTreeNode -> notDoneGroupTreeNode.updateCheckBoxes(treeNodeCollection, treeViewAdapter));
+                .forEach(NotDoneGroupTreeNode::updateCheckBoxes);
     }
 
     public GroupListFragment.Node getNode(int position) {
@@ -96,9 +96,13 @@ public class NotDoneGroupTreeCollection {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes) {
         Assert.assertTrue(instanceDatas != null);
+
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         if (treeViewAdapter.getGroupAdapter().mUseGroups) {
@@ -140,10 +144,14 @@ public class NotDoneGroupTreeCollection {
         Collections.sort(mNotDoneGroupTreeNodes, mNotDoneGroupModelCollection.getComparator());
     }
 
-    public void add(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void add(GroupListLoader.InstanceData instanceData) {
         Assert.assertTrue(instanceData != null);
         Assert.assertTrue(instanceData.Done == null);
+
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         ExactTimeStamp exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();

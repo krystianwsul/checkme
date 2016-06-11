@@ -96,9 +96,13 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return mNotDoneGroupNodeExpanded;
     }
 
-    public void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode) {
         Assert.assertTrue(notDoneInstanceTreeNode != null);
+
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         Assert.assertTrue(mNotDoneInstanceTreeNodes.size() >= 2);
@@ -148,8 +152,11 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         }
     }
 
-    public void unselect(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void unselect() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         if (singleInstance()) {
@@ -183,8 +190,11 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return (mNotDoneInstanceTreeNodes.size() == 1);
     }
 
-    public void updateCheckBoxes(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void updateCheckBoxes() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         if (singleInstance()) {

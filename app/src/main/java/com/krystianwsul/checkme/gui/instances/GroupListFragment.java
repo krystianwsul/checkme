@@ -98,7 +98,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         @Override
         protected void unselect() {
-            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.unselect(mTreeViewAdapter.mTreeNodeCollection, mTreeViewAdapter);
+            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.unselect();
         }
 
         @Override
@@ -196,7 +196,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             } else {
                                 Assert.assertTrue(node instanceof NotDoneInstanceTreeNode);
 
-                                notDoneGroupTreeNode.remove((NotDoneInstanceTreeNode) node, mTreeViewAdapter.mTreeNodeCollection, mTreeViewAdapter);
+                                notDoneGroupTreeNode.remove((NotDoneInstanceTreeNode) node);
                             }
 
                             decrementSelected();
@@ -244,7 +244,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_edit_groups, mActionMode.getMenu());
 
-            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.updateCheckBoxes(mTreeViewAdapter.mTreeNodeCollection, mTreeViewAdapter);
+            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.updateCheckBoxes();
 
             Assert.assertTrue(mOldVisibility == null);
             mOldVisibility = mFloatingActionButton.getVisibility();
@@ -277,7 +277,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             int last = mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() - 1;
             mTreeViewAdapter.notifyItemChanged(last);
 
-            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.updateCheckBoxes(mTreeViewAdapter.mTreeNodeCollection, mTreeViewAdapter);
+            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.updateCheckBoxes();
 
             mFloatingActionButton.setVisibility(mOldVisibility);
             mOldVisibility = null;
@@ -1376,7 +1376,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         treeViewAdapter.notifyItemRemoved(oldPosition);
 
-                        treeNodeCollection.mDividerTreeNode.add(notDoneInstanceNode.mInstanceData, oldPosition, treeNodeCollection, treeViewAdapter);
+                        treeNodeCollection.mDividerTreeNode.add(notDoneInstanceNode.mInstanceData, oldPosition);
                     };
                 }
 
@@ -1736,9 +1736,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             int oldInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
 
-                            notDoneGroupTreeNode.remove(notDoneInstanceTreeNode, treeNodeCollection, treeViewAdapter);
+                            notDoneGroupTreeNode.remove(notDoneInstanceTreeNode);
 
-                            treeNodeCollection.mDividerTreeNode.add(mInstanceData, oldInstancePosition, treeNodeCollection, treeViewAdapter);
+                            treeNodeCollection.mDividerTreeNode.add(mInstanceData, oldInstancePosition);
                         };
                     }
 
@@ -2140,9 +2140,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         TickService.startService(groupListFragment.getActivity());
 
-                        dividerTreeNode.remove(doneTreeNode, treeNodeCollection, treeViewAdapter);
+                        dividerTreeNode.remove(doneTreeNode);
 
-                        treeNodeCollection.mNotDoneGroupTreeCollection.add(mInstanceData, treeNodeCollection, treeViewAdapter);
+                        treeNodeCollection.mNotDoneGroupTreeCollection.add(mInstanceData);
                     };
                 }
 

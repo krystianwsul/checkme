@@ -130,9 +130,13 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         return mDoneExpanded;
     }
 
-    public void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition) {
         Assert.assertTrue(instanceData != null);
+
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         if (mDoneExpanded) {
@@ -178,9 +182,13 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         }
     }
 
-    public void remove(DoneTreeNode doneTreeNode, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
+    public void remove(DoneTreeNode doneTreeNode) {
         Assert.assertTrue(doneTreeNode != null);
+
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         Assert.assertTrue(mDoneTreeNodes.contains(doneTreeNode));

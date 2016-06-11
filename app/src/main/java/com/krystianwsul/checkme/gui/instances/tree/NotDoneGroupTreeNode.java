@@ -133,20 +133,6 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         }
     }
 
-    public Stream<NotDoneInstanceTreeNode> getSelected() {
-        if (mNotDoneInstanceTreeNodes.size() == 1) {
-            ArrayList<NotDoneInstanceTreeNode> selected = new ArrayList<>();
-            if (mSelected)
-                selected.add(mNotDoneInstanceTreeNodes.get(0));
-            return Stream.of(selected);
-        } else {
-            Assert.assertTrue(!mSelected);
-
-            return Stream.of(mNotDoneInstanceTreeNodes)
-                    .filter(NotDoneInstanceTreeNode::isSelected);
-        }
-    }
-
     public Stream<GroupListFragment.Node> getSelectedNodes() {
         if (mNotDoneInstanceTreeNodes.size() == 1) {
             ArrayList<GroupListFragment.Node> selectedNodes = new ArrayList<>();
@@ -177,7 +163,10 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         } else {
             Assert.assertTrue(!mSelected);
 
-            List<NotDoneInstanceTreeNode> selected = getSelected().collect(Collectors.toList());
+            List<NotDoneInstanceTreeNode> selected = getSelectedNodes()
+                    .map(node -> (NotDoneInstanceTreeNode) node)
+                    .collect(Collectors.toList());
+
             if (!selected.isEmpty()) {
                 Assert.assertTrue(mNotDoneGroupNodeExpanded);
 
@@ -219,12 +208,24 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         Assert.assertTrue(!instanceDatas.isEmpty());
         Assert.assertTrue(instanceDatas.size() > 1 || !mNotDoneGroupNodeExpanded);
 
-        mExactTimeStamp = instanceDatas.get(0).InstanceTimeStamp.toExactTimeStamp();
-        for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-            Assert.assertTrue(mExactTimeStamp.equals(instanceData.InstanceTimeStamp.toExactTimeStamp()));
-            addInstanceData(instanceData, selectedNodes);
+        if (instanceDatas.size() == 1) {
+            GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
+
+            mExactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
+            if (selectedNodes != null && selectedNodes.contains(instanceData.InstanceKey))
+                mSelected = true;
+
+            addInstanceData(instanceData, null);
+        } else {
+            mExactTimeStamp = instanceDatas.get(0).InstanceTimeStamp.toExactTimeStamp();
+
+            for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+                Assert.assertTrue(mExactTimeStamp.equals(instanceData.InstanceTimeStamp.toExactTimeStamp()));
+                addInstanceData(instanceData, selectedNodes);
+            }
+
+            sort();
         }
-        sort();
     }
 
     public NotDoneInstanceTreeNode addInstanceData(GroupListLoader.InstanceData instanceData, ArrayList<InstanceKey> selectedNodes) {

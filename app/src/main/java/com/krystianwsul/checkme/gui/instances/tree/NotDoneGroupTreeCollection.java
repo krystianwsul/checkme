@@ -40,12 +40,6 @@ public class NotDoneGroupTreeCollection {
                 .forEach(notDoneGroupTreeNode -> notDoneGroupTreeNode.unselect(treeNodeCollection, treeViewAdapter));
     }
 
-    public List<NotDoneInstanceTreeNode> getSelected() {
-        return Stream.of(mNotDoneGroupTreeNodes)
-                .flatMap(NotDoneGroupTreeNode::getSelected)
-                .collect(Collectors.toList());
-    }
-
     public List<GroupListFragment.Node> getSelectedNodes() {
         return Stream.of(mNotDoneGroupTreeNodes)
                 .flatMap(NotDoneGroupTreeNode::getSelectedNodes)

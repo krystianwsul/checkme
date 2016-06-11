@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.instances.tree;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
@@ -61,12 +59,6 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
 
     public GroupListFragment.ExpansionState getExpansionState() {
         return mTreeNodeCollection.getExpansionState();
-    }
-
-    public ArrayList<InstanceKey> getSelected() {
-        return Stream.of(mTreeNodeCollection.mNotDoneGroupTreeCollection.getSelected())
-                .map(notDoneInstanceTreeNode -> notDoneInstanceTreeNode.getNotDoneInstanceNode().mInstanceData.InstanceKey)
-                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes) {

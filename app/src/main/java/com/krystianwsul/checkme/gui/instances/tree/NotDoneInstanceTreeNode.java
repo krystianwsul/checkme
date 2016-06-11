@@ -121,12 +121,12 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
         if (mSelected) {
             selectionCallback.incrementSelected();
 
-            if (notDoneGroupTreeNode.getSelected().count() == 1) // first in group
+            if (notDoneGroupTreeNode.getSelectedNodes().count() == 1) // first in group
                 treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneGroupTreeNode));
         } else {
             selectionCallback.decrementSelected();
 
-            if (notDoneGroupTreeNode.getSelected().count() == 0) // last in group
+            if (notDoneGroupTreeNode.getSelectedNodes().count() == 0) // last in group
                 treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneGroupTreeNode));
         }
 

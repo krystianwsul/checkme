@@ -70,9 +70,9 @@ public class TreeNodeCollection {
         return node.getItemViewType();
     }
 
-    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, GroupListFragment.GroupAdapter groupAdapter) {
+    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(instanceDatas != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
         ArrayList<GroupListLoader.InstanceData> notDoneInstances = new ArrayList<>();
         ArrayList<GroupListLoader.InstanceData> doneInstances = new ArrayList<>();
@@ -93,7 +93,7 @@ public class TreeNodeCollection {
         GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection notDoneGroupCollection = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection.newNotDoneGroupCollection(new WeakReference<>(this));
         mNotDoneGroupTreeCollection = new NotDoneGroupTreeCollection(notDoneGroupCollection.getNotDoneGroupModelCollection());
         notDoneGroupCollection.setNotDoneGroupTreeCollectionReference(new WeakReference<>(mNotDoneGroupTreeCollection));
-        mNotDoneGroupTreeCollection.setInstanceDatas(notDoneInstances, expandedGroups, selectedNodes, this, groupAdapter);
+        mNotDoneGroupTreeCollection.setInstanceDatas(notDoneInstances, expandedGroups, selectedNodes, this, treeViewAdapter);
 
         mDividerTreeNode = GroupListFragment.GroupAdapter.NodeCollection.DividerNode.newDividerTreeNode(doneInstances, doneExpanded, new WeakReference<>(this));
     }

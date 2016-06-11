@@ -31,9 +31,9 @@ public class NotDoneGroupTreeCollection {
         mNotDoneGroupModelCollection = notDoneGroupModelCollection;
     }
 
-    public void unselect(TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void unselect(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(notDoneGroupTreeNode -> notDoneGroupTreeNode.unselect(treeNodeCollection, groupAdapter));
+                .forEach(notDoneGroupTreeNode -> notDoneGroupTreeNode.unselect(treeNodeCollection, treeViewAdapter));
     }
 
     public List<NotDoneInstanceTreeNode> getSelected() {
@@ -62,9 +62,9 @@ public class NotDoneGroupTreeCollection {
         return displayedSize;
     }
 
-    public void updateCheckBoxes(TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void updateCheckBoxes(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(notDoneGroupTreeNode -> notDoneGroupTreeNode.updateCheckBoxes(treeNodeCollection, groupAdapter));
+                .forEach(notDoneGroupTreeNode -> notDoneGroupTreeNode.updateCheckBoxes(treeNodeCollection, treeViewAdapter));
     }
 
     public GroupListFragment.Node getNode(int position) {
@@ -100,12 +100,12 @@ public class NotDoneGroupTreeCollection {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes, TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(instanceDatas != null);
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
-        if (groupAdapter.mUseGroups) {
+        if (treeViewAdapter.getGroupAdapter().mUseGroups) {
             HashMap<TimeStamp, ArrayList<GroupListLoader.InstanceData>> instanceDataHash = new HashMap<>();
             for (GroupListLoader.InstanceData instanceData : instanceDatas) {
                 if (!instanceDataHash.containsKey(instanceData.InstanceTimeStamp))
@@ -144,23 +144,23 @@ public class NotDoneGroupTreeCollection {
         Collections.sort(mNotDoneGroupTreeNodes, mNotDoneGroupModelCollection.getComparator());
     }
 
-    public Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> add(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> add(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(instanceData != null);
         Assert.assertTrue(instanceData.Done == null);
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
-        Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> pair = addInstanceHelper(instanceData, treeNodeCollection, groupAdapter);
+        Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> pair = addInstanceHelper(instanceData, treeNodeCollection, treeViewAdapter);
         sort();
 
         return pair;
     }
 
-    private Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> addInstanceHelper(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    private Pair<Boolean, Pair<NotDoneGroupTreeNode, NotDoneInstanceTreeNode>> addInstanceHelper(GroupListLoader.InstanceData instanceData, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(instanceData != null);
         Assert.assertTrue(instanceData.Done == null);
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
         ExactTimeStamp exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
 

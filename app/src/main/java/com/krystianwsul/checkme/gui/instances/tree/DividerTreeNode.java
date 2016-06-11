@@ -111,10 +111,10 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         return !mDividerModelNode.hasActionMode();
     }
 
-    public void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition, TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(instanceData != null);
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
         if (mDoneExpanded) {
             Assert.assertTrue(!isEmpty());
@@ -130,11 +130,11 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
             Collections.sort(mDoneTreeNodes, mDividerModelNode.getComparator());
 
             int newInstancePosition = treeNodeCollection.getPosition(doneTreeNode);
-            groupAdapter.notifyItemInserted(newInstancePosition);
+            treeViewAdapter.notifyItemInserted(newInstancePosition);
 
             if (bottomNotDone && treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0) {
                 int newDividerPosition = treeNodeCollection.getPosition(this);
-                groupAdapter.notifyItemChanged(newDividerPosition - 1);
+                treeViewAdapter.notifyItemChanged(newDividerPosition - 1);
             }
         } else {
             DoneTreeNode doneTreeNode = mDividerModelNode.newDoneTreeNode(instanceData, this);
@@ -145,24 +145,24 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
             if (mDoneTreeNodes.size() == 1) {
                 Assert.assertTrue(!mDoneExpanded);
                 int newDividerPosition = treeNodeCollection.getPosition(this);
-                groupAdapter.notifyItemInserted(newDividerPosition);
+                treeViewAdapter.notifyItemInserted(newDividerPosition);
 
                 if (treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() != 0) {
-                    groupAdapter.notifyItemChanged(newDividerPosition - 1);
+                    treeViewAdapter.notifyItemChanged(newDividerPosition - 1);
                 }
             } else {
                 if (mDoneExpanded) {
                     int newInstancePosition = treeNodeCollection.getPosition(doneTreeNode);
-                    groupAdapter.notifyItemInserted(newInstancePosition);
+                    treeViewAdapter.notifyItemInserted(newInstancePosition);
                 }
             }
         }
     }
 
-    public void remove(DoneTreeNode doneTreeNode, TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void remove(DoneTreeNode doneTreeNode, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(doneTreeNode != null);
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
         Assert.assertTrue(mDoneTreeNodes.contains(doneTreeNode));
 
@@ -179,9 +179,9 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
                 int dividerPosition = treeNodeCollection.getPosition(this);
                 Assert.assertTrue(dividerPosition == oldDoneTreePosition - 1);
 
-                groupAdapter.notifyItemRangeRemoved(dividerPosition, 2);
+                treeViewAdapter.notifyItemRangeRemoved(dividerPosition, 2);
             } else {
-                groupAdapter.notifyItemRemoved(oldDoneTreePosition);
+                treeViewAdapter.notifyItemRemoved(oldDoneTreePosition);
             }
         } else {
             int oldDoneTreePosition = treeNodeCollection.getPosition(doneTreeNode);
@@ -195,13 +195,13 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
                 int dividerPosition = treeNodeCollection.getPosition(this);
                 Assert.assertTrue(dividerPosition == oldDoneTreePosition - 1);
 
-                groupAdapter.notifyItemRangeRemoved(dividerPosition, 2);
+                treeViewAdapter.notifyItemRangeRemoved(dividerPosition, 2);
 
-                groupAdapter.notifyItemChanged(treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() - 1);
+                treeViewAdapter.notifyItemChanged(treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() - 1);
             } else {
-                groupAdapter.notifyItemRemoved(oldDoneTreePosition);
+                treeViewAdapter.notifyItemRemoved(oldDoneTreePosition);
 
-                groupAdapter.notifyItemChanged(oldDividerPosition - 1);
+                treeViewAdapter.notifyItemChanged(oldDividerPosition - 1);
             }
         }
     }

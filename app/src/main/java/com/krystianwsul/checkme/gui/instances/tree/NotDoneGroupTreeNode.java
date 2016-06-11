@@ -87,10 +87,10 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return mNotDoneGroupNodeExpanded;
     }
 
-    public void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode, TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode, TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(notDoneInstanceTreeNode != null);
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
         Assert.assertTrue(mNotDoneInstanceTreeNodes.size() >= 2);
 
@@ -106,21 +106,21 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
             mNotDoneGroupNodeExpanded = false;
 
             if ((groupPosition > 0) && (treeNodeCollection.getNode(groupPosition - 1) instanceof NotDoneGroupTreeNode))
-                groupAdapter.notifyItemRangeChanged(groupPosition - 1, 2);
+                treeViewAdapter.notifyItemRangeChanged(groupPosition - 1, 2);
             else
-                groupAdapter.notifyItemChanged(groupPosition);
+                treeViewAdapter.notifyItemChanged(groupPosition);
 
-            groupAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
+            treeViewAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
         } else {
             Assert.assertTrue(mNotDoneInstanceTreeNodes.size() > 2);
 
             mNotDoneInstanceTreeNodes.remove(notDoneInstanceTreeNode);
 
-            groupAdapter.notifyItemChanged(groupPosition);
-            groupAdapter.notifyItemRemoved(oldInstancePosition);
+            treeViewAdapter.notifyItemChanged(groupPosition);
+            treeViewAdapter.notifyItemRemoved(oldInstancePosition);
 
             if (lastInGroup)
-                groupAdapter.notifyItemChanged(oldInstancePosition - 1);
+                treeViewAdapter.notifyItemChanged(oldInstancePosition - 1);
         }
     }
 
@@ -142,9 +142,9 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         }
     }
 
-    public void unselect(TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void unselect(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
         if (singleInstance()) {
             NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodes.get(0);
@@ -152,7 +152,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
             if (notDoneInstanceTreeNode.mSelected) {
                 notDoneInstanceTreeNode.mSelected = false;
-                groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
             }
         } else {
             List<NotDoneInstanceTreeNode> selected = getSelected().collect(Collectors.toList());
@@ -161,10 +161,10 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
                 for (NotDoneInstanceTreeNode notDoneInstanceTreeNode : selected) {
                     notDoneInstanceTreeNode.mSelected = false;
-                    groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneInstanceTreeNode));
+                    treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneInstanceTreeNode));
                 }
 
-                groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
             }
         }
     }
@@ -174,14 +174,14 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return (mNotDoneInstanceTreeNodes.size() == 1);
     }
 
-    public void updateCheckBoxes(TreeNodeCollection treeNodeCollection, GroupListFragment.GroupAdapter groupAdapter) {
+    public void updateCheckBoxes(TreeNodeCollection treeNodeCollection, TreeViewAdapter treeViewAdapter) {
         Assert.assertTrue(treeNodeCollection != null);
-        Assert.assertTrue(groupAdapter != null);
+        Assert.assertTrue(treeViewAdapter != null);
 
         if (singleInstance()) {
-            groupAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         } else {
-            groupAdapter.notifyItemRangeChanged(treeNodeCollection.getPosition(this) + 1, displayedSize() - 1);
+            treeViewAdapter.notifyItemRangeChanged(treeNodeCollection.getPosition(this) + 1, displayedSize() - 1);
         }
     }
 

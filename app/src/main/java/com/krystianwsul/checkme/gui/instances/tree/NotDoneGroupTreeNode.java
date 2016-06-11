@@ -28,6 +28,8 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
     public ExactTimeStamp mExactTimeStamp;
 
+    private boolean mSelected = false;
+
     public NotDoneGroupTreeNode(NotDoneGroupModelNode notDoneGroupModelNode, boolean expanded, WeakReference<NotDoneGroupTreeCollection> notDoneGroupTreeCollectionReference) {
         Assert.assertTrue(notDoneGroupModelNode != null);
         Assert.assertTrue(notDoneGroupTreeCollectionReference != null);
@@ -132,19 +134,30 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     }
 
     public Stream<NotDoneInstanceTreeNode> getSelected() {
-        return Stream.of(mNotDoneInstanceTreeNodes)
-                .filter(notDoneInstanceTreeNode -> notDoneInstanceTreeNode.mSelected);
+        if (mNotDoneInstanceTreeNodes.size() == 1) {
+            ArrayList<NotDoneInstanceTreeNode> selected = new ArrayList<>();
+            if (mSelected)
+                selected.add(mNotDoneInstanceTreeNodes.get(0));
+            return Stream.of(selected);
+        } else {
+            Assert.assertTrue(!mSelected);
+
+            return Stream.of(mNotDoneInstanceTreeNodes)
+                    .filter(NotDoneInstanceTreeNode::isSelected);
+        }
     }
 
     public Stream<GroupListFragment.Node> getSelectedNodes() {
         if (mNotDoneInstanceTreeNodes.size() == 1) {
             ArrayList<GroupListFragment.Node> selectedNodes = new ArrayList<>();
-            if (mNotDoneInstanceTreeNodes.get(0).mSelected)
+            if (mSelected)
                 selectedNodes.add(this);
             return Stream.of(selectedNodes);
         } else {
+            Assert.assertTrue(!mSelected);
+
             return Stream.of(Stream.of(mNotDoneInstanceTreeNodes)
-                    .filter(notDoneInstanceTreeNode -> notDoneInstanceTreeNode.mSelected)
+                    .filter(NotDoneInstanceTreeNode::isSelected)
                     .collect(Collectors.toList()));
         }
     }
@@ -157,19 +170,19 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
             NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodes.get(0);
             Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-            if (notDoneInstanceTreeNode.mSelected) {
-                notDoneInstanceTreeNode.mSelected = false;
+            if (mSelected) {
+                mSelected = false;
                 treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
             }
         } else {
+            Assert.assertTrue(!mSelected);
+
             List<NotDoneInstanceTreeNode> selected = getSelected().collect(Collectors.toList());
             if (!selected.isEmpty()) {
                 Assert.assertTrue(mNotDoneGroupNodeExpanded);
 
-                for (NotDoneInstanceTreeNode notDoneInstanceTreeNode : selected) {
-                    notDoneInstanceTreeNode.mSelected = false;
-                    treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(notDoneInstanceTreeNode));
-                }
+                Stream.of(selected)
+                        .forEach(NotDoneInstanceTreeNode::unselect);
 
                 treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
             }
@@ -233,7 +246,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return notDoneGroupTreeCollection;
     }
 
-    public TreeViewAdapter getTreeViewAdapter() {
+    private TreeViewAdapter getTreeViewAdapter() {
         NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
         Assert.assertTrue(notDoneGroupTreeCollection != null);
 
@@ -296,13 +309,17 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodes.get(0);
         Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-        notDoneInstanceTreeNode.mSelected = !notDoneInstanceTreeNode.mSelected;
+        mSelected = !mSelected;
 
-        if (notDoneInstanceTreeNode.mSelected) {
+        if (mSelected) {
             selectionCallback.incrementSelected();
         } else {
             selectionCallback.decrementSelected();
         }
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+    }
+
+    public boolean isSelected() {
+        return mSelected;
     }
 }

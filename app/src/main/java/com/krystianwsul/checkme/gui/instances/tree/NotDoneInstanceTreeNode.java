@@ -17,7 +17,7 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
 
     public WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
 
-    boolean mSelected = false;
+    private boolean mSelected = false;
 
     public NotDoneInstanceTreeNode(NotDoneInstanceModelNode notDoneInstanceModelNode, ArrayList<InstanceKey> selectedNodes) {
         Assert.assertTrue(notDoneInstanceModelNode != null);
@@ -49,21 +49,31 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
         return mNotDoneInstanceModelNode.getNotDoneInstanceNode();
     }
 
-    private TreeViewAdapter getTreeViewAdapter() {
-        NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
-        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-        TreeViewAdapter treeViewAdapter = notDoneGroupTreeNode.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        return treeViewAdapter;
-    }
-
     private NotDoneGroupTreeNode getNotDoneGroupTreeNode() {
         NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
         Assert.assertTrue(notDoneGroupTreeNode != null);
 
         return notDoneGroupTreeNode;
+    }
+
+    private TreeNodeCollection getTreeNodeCollection() {
+        NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+
+        TreeNodeCollection treeNodeCollection = notDoneGroupTreeNode.getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        return treeNodeCollection;
+    }
+
+    private TreeViewAdapter getTreeViewAdapter() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter;
     }
 
     private SelectionCallback getSelectionCallback() {
@@ -130,5 +140,18 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
 
     public boolean isSelected() {
         return mSelected;
+    }
+
+    public void unselect() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        if (mSelected) {
+            mSelected = false;
+            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+        }
     }
 }

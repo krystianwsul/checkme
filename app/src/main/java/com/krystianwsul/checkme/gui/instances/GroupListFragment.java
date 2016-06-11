@@ -1457,10 +1457,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (notDoneGroupTreeNode.singleInstance()) {
                         Assert.assertTrue(!notDoneGroupTreeNode.mNotDoneGroupNodeExpanded);
 
-                        NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.get(0);
-                        Assert.assertTrue(notDoneInstanceTreeNode != null);
-
-                        if (notDoneInstanceTreeNode.isSelected())
+                        if (notDoneGroupTreeNode.isSelected())
                             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected);
                         else
                             return Color.TRANSPARENT;

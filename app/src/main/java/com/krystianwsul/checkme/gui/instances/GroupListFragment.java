@@ -1460,10 +1460,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (notDoneGroupTreeNode.singleInstance()) {
                         Assert.assertTrue(!notDoneGroupTreeNode.mNotDoneGroupNodeExpanded);
 
-                        NotDoneInstanceNode notDoneInstanceNode = notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.get(0).getNotDoneInstanceNode();
-                        Assert.assertTrue(notDoneInstanceNode != null);
+                        NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.get(0);
+                        Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-                        if (notDoneInstanceNode.mSelected)
+                        if (notDoneInstanceTreeNode.mSelected)
                             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected);
                         else
                             return Color.TRANSPARENT;
@@ -1541,12 +1541,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
-                    NotDoneInstanceNode notDoneInstanceNode = notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.get(0).getNotDoneInstanceNode();
-                    Assert.assertTrue(notDoneInstanceNode != null);
+                    NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.get(0);
+                    Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-                    notDoneInstanceNode.mSelected = !notDoneInstanceNode.mSelected;
+                    notDoneInstanceTreeNode.mSelected = !notDoneInstanceTreeNode.mSelected;
 
-                    if (notDoneInstanceNode.mSelected) {
+                    if (notDoneInstanceTreeNode.mSelected) {
                         groupListFragment.mSelectionCallback.incrementSelected();
                     } else {
                         groupListFragment.mSelectionCallback.decrementSelected();
@@ -1629,17 +1629,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     public final GroupListLoader.InstanceData mInstanceData;
 
-                    public boolean mSelected = false;
-
-                    public NotDoneInstanceNode(GroupListLoader.InstanceData instanceData, WeakReference<NotDoneGroupNode> notDoneGroupNodeReference, ArrayList<InstanceKey> selectedNodes) {
+                    public NotDoneInstanceNode(GroupListLoader.InstanceData instanceData, WeakReference<NotDoneGroupNode> notDoneGroupNodeReference) {
                         Assert.assertTrue(instanceData != null);
                         Assert.assertTrue(notDoneGroupNodeReference != null);
 
                         mInstanceData = instanceData;
                         mNotDoneGroupNodeReference = notDoneGroupNodeReference;
-                        if (selectedNodes != null && selectedNodes.contains(mInstanceData.InstanceKey)) {
-                            mSelected = true;
-                        }
                     }
 
                     public void setNotDoneInstanceTreeNodeReference(WeakReference<NotDoneInstanceTreeNode> notDoneInstanceTreeNodeReference) {
@@ -1896,6 +1891,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
                         Assert.assertTrue(notDoneGroupTreeNode != null);
 
+                        NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodeReference.get();
+                        Assert.assertTrue(notDoneInstanceTreeNode != null);
+
                         Assert.assertTrue(notDoneGroupTreeNode.mNotDoneGroupNodeExpanded);
 
                         NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
@@ -1910,7 +1908,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                         Assert.assertTrue(groupListFragment != null);
 
-                        if (mSelected)
+                        if (notDoneInstanceTreeNode.mSelected)
                             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.selected);
                         else
                             return Color.TRANSPARENT;
@@ -1978,9 +1976,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodeReference.get();
                         Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-                        mSelected = !mSelected;
+                        notDoneInstanceTreeNode.mSelected = !notDoneInstanceTreeNode.mSelected;
 
-                        if (mSelected) {
+                        if (notDoneInstanceTreeNode.mSelected) {
                             groupListFragment.mSelectionCallback.incrementSelected();
 
                             if (notDoneGroupTreeNode.getSelected().count() == 1) // first in group

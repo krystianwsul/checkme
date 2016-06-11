@@ -132,7 +132,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
             int newInstancePosition = nodeCollection.getPosition(doneTreeNode);
             groupAdapter.notifyItemInserted(newInstancePosition);
 
-            if (bottomNotDone && nodeCollection.mNotDoneGroupCollection.displayedSize() > 0) {
+            if (bottomNotDone && nodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0) {
                 int newDividerPosition = nodeCollection.getPosition(this);
                 groupAdapter.notifyItemChanged(newDividerPosition - 1);
             }
@@ -147,7 +147,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
                 int newDividerPosition = nodeCollection.getPosition(this);
                 groupAdapter.notifyItemInserted(newDividerPosition);
 
-                if (nodeCollection.mNotDoneGroupCollection.displayedSize() != 0) {
+                if (nodeCollection.mNotDoneGroupTreeCollection.displayedSize() != 0) {
                     groupAdapter.notifyItemChanged(newDividerPosition - 1);
                 }
             } else {
@@ -168,7 +168,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
         Assert.assertTrue(displayedSize() > 1);
 
-        if (nodeCollection.mNotDoneGroupCollection.displayedSize() == 0) {
+        if (nodeCollection.mNotDoneGroupTreeCollection.displayedSize() == 0) {
             int oldDoneTreePosition = nodeCollection.getPosition(doneTreeNode);
 
             mDoneTreeNodes.remove(doneTreeNode);
@@ -197,7 +197,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
                 groupAdapter.notifyItemRangeRemoved(dividerPosition, 2);
 
-                groupAdapter.notifyItemChanged(nodeCollection.mNotDoneGroupCollection.displayedSize() - 1);
+                groupAdapter.notifyItemChanged(nodeCollection.mNotDoneGroupTreeCollection.displayedSize() - 1);
             } else {
                 groupAdapter.notifyItemRemoved(oldDoneTreePosition);
 

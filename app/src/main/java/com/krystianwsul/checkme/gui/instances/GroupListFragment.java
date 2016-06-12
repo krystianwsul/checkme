@@ -1569,9 +1569,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(instanceData, new WeakReference<>(NotDoneGroupNode.this));
                             mInstanceDatas.add(instanceData);
 
-                            NotDoneInstanceTreeNode notDoneInstanceTreeNode = new NotDoneInstanceTreeNode(notDoneInstanceNode.getNotDoneInstanceModelNode(), selectedNodes);
+                            NotDoneInstanceTreeNode notDoneInstanceTreeNode = new NotDoneInstanceTreeNode(notDoneInstanceNode.getNotDoneInstanceModelNode(), selectedNodes, mNotDoneGroupTreeNodeReference);
                             notDoneInstanceNode.setNotDoneInstanceTreeNodeReference(new WeakReference<>(notDoneInstanceTreeNode));
-                            notDoneInstanceTreeNode.setNotDoneGroupTreeNodeReference(mNotDoneGroupTreeNodeReference);
 
                             return notDoneInstanceTreeNode;
                         }

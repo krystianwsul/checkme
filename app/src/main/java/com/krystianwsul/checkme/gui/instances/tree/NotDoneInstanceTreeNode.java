@@ -15,22 +15,19 @@ import java.util.ArrayList;
 public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparable<NotDoneInstanceTreeNode> {
     private final NotDoneInstanceModelNode mNotDoneInstanceModelNode;
 
-    private WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
+    private final WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
 
     private boolean mSelected = false;
 
-    public NotDoneInstanceTreeNode(NotDoneInstanceModelNode notDoneInstanceModelNode, ArrayList<InstanceKey> selectedNodes) {
+    public NotDoneInstanceTreeNode(NotDoneInstanceModelNode notDoneInstanceModelNode, ArrayList<InstanceKey> selectedNodes, WeakReference<NotDoneGroupTreeNode> notDoneGroupTreeNodeReference) {
         Assert.assertTrue(notDoneInstanceModelNode != null);
+        Assert.assertTrue(notDoneGroupTreeNodeReference != null);
 
         mNotDoneInstanceModelNode = notDoneInstanceModelNode;
 
         if (selectedNodes != null && selectedNodes.contains(mNotDoneInstanceModelNode.getNotDoneInstanceNode().mInstanceData.InstanceKey)) {
             mSelected = true;
         }
-    }
-
-    public void setNotDoneGroupTreeNodeReference(WeakReference<NotDoneGroupTreeNode> notDoneGroupTreeNodeReference) {
-        Assert.assertTrue(notDoneGroupTreeNodeReference != null);
 
         mNotDoneGroupTreeNodeReference = notDoneGroupTreeNodeReference;
     }

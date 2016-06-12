@@ -130,10 +130,9 @@ public class NotDoneGroupTreeCollection {
                 if (entry.getValue().size() > 1 && expandedGroups != null && expandedGroups.contains(entry.getKey()))
                     expanded = true;
 
-                GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()));
-                NotDoneGroupTreeNode notDoneGroupTreeNode = new NotDoneGroupTreeNode(notDoneGroupNode.getNotDoneGroupModelNode(), expanded, new WeakReference<>(this));
-                notDoneGroupNode.setNotDoneGroupTreeNodeReference(new WeakReference<>(notDoneGroupTreeNode));
-                notDoneGroupTreeNode.setInstanceDatas(entry.getValue(), selectedNodes);
+                NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupModelCollection.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()), entry.getValue(), expanded, selectedNodes);
+                Assert.assertTrue(notDoneGroupTreeNode != null);
+
                 mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
             }
         } else {
@@ -141,10 +140,9 @@ public class NotDoneGroupTreeCollection {
                 ArrayList<GroupListLoader.InstanceData> dummyInstanceDatas = new ArrayList<>();
                 dummyInstanceDatas.add(instanceData);
 
-                GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()));
-                NotDoneGroupTreeNode notDoneGroupTreeNode = new NotDoneGroupTreeNode(notDoneGroupNode.getNotDoneGroupModelNode(), false, new WeakReference<>(this));
-                notDoneGroupNode.setNotDoneGroupTreeNodeReference(new WeakReference<>(notDoneGroupTreeNode));
-                notDoneGroupTreeNode.setInstanceDatas(dummyInstanceDatas, selectedNodes);
+                NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupModelCollection.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()), dummyInstanceDatas, false, selectedNodes);
+                Assert.assertTrue(notDoneGroupTreeNode != null);
+
                 mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
             }
         }
@@ -176,11 +174,7 @@ public class NotDoneGroupTreeCollection {
             ArrayList<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>();
             instanceDatas.add(instanceData);
 
-            GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()));
-            NotDoneGroupTreeNode notDoneGroupTreeNode = new NotDoneGroupTreeNode(notDoneGroupNode.getNotDoneGroupModelNode(), false, new WeakReference<>(this));
-            notDoneGroupNode.setNotDoneGroupTreeNodeReference(new WeakReference<>(notDoneGroupTreeNode));
-            notDoneGroupTreeNode.setInstanceDatas(instanceDatas, null);
-
+            NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupModelCollection.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()), instanceDatas, false, null);
             mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
 
             sort();

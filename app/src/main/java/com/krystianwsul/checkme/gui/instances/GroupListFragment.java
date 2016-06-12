@@ -822,6 +822,20 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         public NotDoneGroupCollection getNotDoneGroupCollection() {
                             return NotDoneGroupCollection.this;
                         }
+
+                        @Override
+                        public NotDoneGroupTreeNode newNotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference, List<GroupListLoader.InstanceData> instanceDatas, boolean expanded, ArrayList<InstanceKey> selectedNodes) {
+                            Assert.assertTrue(notDoneGroupCollectionReference != null);
+
+                            NotDoneGroupNode notDoneGroupNode = NotDoneGroupNode.newNotDoneGroupNode(notDoneGroupCollectionReference);
+                            Assert.assertTrue(notDoneGroupNode != null);
+
+                            NotDoneGroupTreeNode notDoneGroupTreeNode = new NotDoneGroupTreeNode(notDoneGroupNode.getNotDoneGroupModelNode(), expanded, mNotDoneGroupTreeCollectionReference);
+                            notDoneGroupNode.setNotDoneGroupTreeNodeReference(new WeakReference<>(notDoneGroupTreeNode));
+                            notDoneGroupTreeNode.setInstanceDatas(instanceDatas, selectedNodes);
+
+                            return notDoneGroupTreeNode;
+                        }
                     };
                 }
             }
@@ -919,7 +933,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final ArrayList<GroupListLoader.InstanceData> mInstanceDatas = new ArrayList<>();
 
-                public static NotDoneGroupNode newNotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference) {
+                private static NotDoneGroupNode newNotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference) {
                     Assert.assertTrue(notDoneGroupCollectionReference != null);
 
                     return new NotDoneGroupNode(notDoneGroupCollectionReference);
@@ -1447,10 +1461,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
-                    GroupListLoader.InstanceData instanceData = getSingleInstanceData();
-                    Assert.assertTrue(instanceData != null);
-
                     if (singleInstance()) {
+                        GroupListLoader.InstanceData instanceData = getSingleInstanceData();
+                        Assert.assertTrue(instanceData != null);
+
                         groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), instanceData.InstanceKey));
                     } else {
                         groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(notDoneGroupTreeNode.mExactTimeStamp, groupListFragment.getActivity()));

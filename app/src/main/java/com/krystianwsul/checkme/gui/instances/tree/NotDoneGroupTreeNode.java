@@ -203,7 +203,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         Collections.sort(mNotDoneInstanceTreeNodes);
     }
 
-    public void setInstanceDatas(ArrayList<GroupListLoader.InstanceData> instanceDatas, ArrayList<InstanceKey> selectedNodes) {
+    public void setInstanceDatas(List<GroupListLoader.InstanceData> instanceDatas, ArrayList<InstanceKey> selectedNodes) {
         Assert.assertTrue(instanceDatas != null);
         Assert.assertTrue(!instanceDatas.isEmpty());
         Assert.assertTrue(instanceDatas.size() > 1 || !mNotDoneGroupNodeExpanded);

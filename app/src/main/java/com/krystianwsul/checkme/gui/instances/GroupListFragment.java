@@ -98,14 +98,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         @Override
         protected void unselect() {
-            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.unselect();
+            mTreeViewAdapter.unselect();
         }
 
         @Override
         protected void onMenuClick(MenuItem menuItem) {
             Assert.assertTrue(mTreeViewAdapter != null);
 
-            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.getSelectedNodes());
+            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.getSelectedNodes());
             Assert.assertTrue(instanceDatas != null);
             Assert.assertTrue(!instanceDatas.isEmpty());
 
@@ -262,7 +262,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Menu menu = mActionMode.getMenu();
             Assert.assertTrue(menu != null);
 
-            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.getSelectedNodes());
+            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.getSelectedNodes());
             Assert.assertTrue(instanceDatas != null);
             Assert.assertTrue(!instanceDatas.isEmpty());
 
@@ -446,7 +446,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             outState.putParcelable(EXPANSION_STATE_KEY, mTreeViewAdapter.getExpansionState());
 
             if (mSelectionCallback.hasActionMode()) {
-                List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.getSelectedNodes());
+                List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.getSelectedNodes());
                 Assert.assertTrue(instanceDatas != null);
                 Assert.assertTrue(!instanceDatas.isEmpty());
 
@@ -471,7 +471,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         if (mTreeViewAdapter != null) {
             mExpansionState = mTreeViewAdapter.getExpansionState();
 
-            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.getSelectedNodes());
+            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.getSelectedNodes());
             Assert.assertTrue(instanceDatas != null);
 
             ArrayList<InstanceKey> instanceKeys = Stream.of(instanceDatas)
@@ -555,7 +555,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         mTreeViewAdapter.setInstanceDatas(data.InstanceDatas.values(), mExpansionState, mSelectedNodes);
         mGroupListRecycler.setAdapter(mTreeViewAdapter);
 
-        mSelectionCallback.setSelected(mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.getSelectedNodes().size());
+        mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
         if (data.InstanceDatas.isEmpty()) {
             Assert.assertTrue(emptyTextId != null);

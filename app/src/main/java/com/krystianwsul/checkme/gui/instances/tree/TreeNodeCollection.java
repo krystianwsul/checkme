@@ -133,4 +133,8 @@ public class TreeNodeCollection {
         mNotDoneGroupTreeCollection.onDestroyActionMode();
         mDividerTreeNode.onDestroyActionMode();
     }
+
+    public void unselect() {
+        mNotDoneGroupTreeCollection.unselect();
+    }
 }

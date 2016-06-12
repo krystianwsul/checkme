@@ -8,4 +8,5 @@ public interface DividerModelNode {
     DoneTreeNode newDoneTreeNode(GroupListLoader.InstanceData instanceData, DividerTreeNode dividerTreeNode);
     void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);
     int getItemViewType();
+    void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition);
 }

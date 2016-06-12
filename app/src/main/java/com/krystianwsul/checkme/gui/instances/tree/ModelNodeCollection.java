@@ -4,4 +4,5 @@ import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 public interface ModelNodeCollection {
     GroupListFragment.GroupAdapter.NodeCollection getNodeCollection();
+    void setDividerModelNode(DividerModelNode dividerModelNode);
 }

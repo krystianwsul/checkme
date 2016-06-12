@@ -38,4 +38,8 @@ public class DoneTreeNode implements GroupListFragment.Node, Comparable<DoneTree
     public void removeFromParent() {
         throw new UnsupportedOperationException();
     }
+
+    public DoneModelNode getDoneModelNode() {
+        return mDoneModelNode;
+    }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 public class TreeNodeCollection {
     public NotDoneGroupTreeCollection mNotDoneGroupTreeCollection;
 
-    public DividerTreeNode mDividerTreeNode;
+    DividerTreeNode mDividerTreeNode;
 
     private final ModelNodeCollection mModelNodeCollection;
 
@@ -103,6 +103,7 @@ public class TreeNodeCollection {
         mNotDoneGroupTreeCollection.setInstanceDatas(notDoneInstances, expandedGroups, selectedNodes);
 
         mDividerTreeNode = GroupListFragment.GroupAdapter.NodeCollection.DividerNode.newDividerTreeNode(doneInstances, doneExpanded, new WeakReference<>(this));
+        mModelNodeCollection.setDividerModelNode(mDividerTreeNode.getDividerModelNode());
     }
 
     public GroupListFragment.GroupAdapter.NodeCollection getNodeCollection() {

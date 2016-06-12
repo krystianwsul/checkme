@@ -741,6 +741,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public static class NodeCollection {
             private final WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
 
+            private DividerModelNode mDividerModelNode;
+
             public static NodeCollection newNodeCollection(WeakReference<TreeViewAdapter> treeViewAdapterReference) {
                 Assert.assertTrue(treeViewAdapterReference != null);
 
@@ -757,6 +759,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     @Override
                     public NodeCollection getNodeCollection() {
                         return NodeCollection.this;
+                    }
+
+                    @Override
+                    public void setDividerModelNode(DividerModelNode dividerModelNode) {
+                        Assert.assertTrue(dividerModelNode != null);
+
+                        mDividerModelNode = dividerModelNode;
                     }
                 };
             }
@@ -1334,7 +1343,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         int oldPosition = notDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
 
-                        treeNodeCollection.mDividerTreeNode.add(notDoneInstanceNode.mInstanceData, oldPosition);
+                        treeNodeCollection.getNodeCollection().mDividerModelNode.add(notDoneInstanceNode.mInstanceData, oldPosition);
                     };
                 }
 
@@ -1696,7 +1705,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             notDoneGroupTreeNode.remove(notDoneInstanceTreeNode);
 
-                            treeNodeCollection.mDividerTreeNode.add(mInstanceData, oldInstancePosition);
+                            DividerModelNode dividerModelNode = treeNodeCollection.getNodeCollection().mDividerModelNode;
+                            Assert.assertTrue(dividerModelNode != null);
+
+                            dividerModelNode.add(mInstanceData, oldInstancePosition);
                         };
                     }
 
@@ -1810,6 +1822,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private WeakReference<DividerTreeNode> mDividerTreeNodeReference;
 
+                private final ArrayList<DoneModelNode> mDoneModelNodes = new ArrayList<>();
+
                 public static DividerTreeNode newDividerTreeNode(ArrayList<GroupListLoader.InstanceData> instanceDatas, boolean doneExpanded, WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
                     Assert.assertTrue(instanceDatas != null);
                     Assert.assertTrue(treeNodeCollectionReference != null);
@@ -1858,6 +1872,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return TYPE_DIVIDER;
                 }
 
+                public void remove(DoneTreeNode doneTreeNode) {
+                    Assert.assertTrue(doneTreeNode != null);
+
+                    DividerTreeNode dividerTreeNode = mDividerTreeNodeReference.get();
+                    Assert.assertTrue(dividerTreeNode != null);
+
+                    DoneModelNode doneModelNode = doneTreeNode.getDoneModelNode();
+                    Assert.assertTrue(doneModelNode != null);
+                    Assert.assertTrue(mDoneModelNodes.contains(doneModelNode));
+
+                    mDoneModelNodes.remove(doneModelNode);
+
+                    dividerTreeNode.remove(doneTreeNode);
+                }
+
                 public DividerModelNode getDividerModelNode() {
                     return new DividerModelNode() {
                         @Override
@@ -1889,10 +1918,27 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             Assert.assertTrue(dividerTreeNode != null);
 
                             DoneInstanceNode doneInstanceNode = new DoneInstanceNode(instanceData, new WeakReference<>(DividerNode.this));
-                            DoneTreeNode doneTreeNode = new DoneTreeNode(doneInstanceNode.getDoneModelNode());
+
+                            DoneModelNode doneModelNode = doneInstanceNode.getDoneModelNode();
+                            Assert.assertTrue(doneModelNode != null);
+
+                            mDoneModelNodes.add(doneModelNode);
+
+                            DoneTreeNode doneTreeNode = new DoneTreeNode(doneModelNode);
                             doneInstanceNode.setDoneTreeNodeReference(new WeakReference<>(doneTreeNode), new WeakReference<>(dividerTreeNode));
 
                             return doneTreeNode;
+                        }
+
+                        @Override
+                        public void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition) {
+                            DividerTreeNode dividerTreeNode = mDividerTreeNodeReference.get();
+                            Assert.assertTrue(dividerTreeNode != null);
+
+                            DoneTreeNode doneTreeNode = newDoneTreeNode(instanceData, dividerTreeNode);
+                            Assert.assertTrue(doneTreeNode != null);
+
+                            dividerTreeNode.add(doneTreeNode, oldInstancePosition);
                         }
                     };
                 }
@@ -2098,7 +2144,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         TickService.startService(groupListFragment.getActivity());
 
-                        dividerTreeNode.remove(doneTreeNode);
+                        dividerNode.remove(doneTreeNode);
 
                         treeNodeCollection.mNotDoneGroupTreeCollection.add(mInstanceData);
                     };

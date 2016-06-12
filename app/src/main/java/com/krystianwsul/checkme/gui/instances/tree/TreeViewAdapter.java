@@ -66,6 +66,7 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
         Assert.assertTrue(instanceDatas != null);
 
         GroupListFragment.GroupAdapter.NodeCollection nodeCollection = GroupListFragment.GroupAdapter.NodeCollection.newNodeCollection(new WeakReference<>(this));
+        mTreeModelAdapter.getGroupAdapter().setNodeCollection(nodeCollection);
 
         mTreeNodeCollection = new TreeNodeCollection(nodeCollection.getModelNodeCollection(), new WeakReference<>(this));
         mTreeNodeCollection.setInstanceDatas(instanceDatas, expansionState, selectedNodes);
@@ -89,5 +90,9 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
 
     public void unselect() {
         mTreeNodeCollection.unselect();
+    }
+
+    public GroupListFragment.Node getNode(int position) {
+        return mTreeNodeCollection.getNode(position);
     }
 }

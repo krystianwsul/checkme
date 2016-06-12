@@ -44,11 +44,23 @@ public class NotDoneGroupTreeCollection {
                 .collect(Collectors.toList());
     }
 
-    public void remove(NotDoneGroupTreeNode notDoneGroupTreeNode) {
+    public int remove(NotDoneGroupTreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
         Assert.assertTrue(mNotDoneGroupTreeNodes.contains(notDoneGroupTreeNode));
 
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        int oldPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
+
         mNotDoneGroupTreeNodes.remove(notDoneGroupTreeNode);
+
+        treeViewAdapter.notifyItemRemoved(oldPosition);
+
+        return oldPosition;
     }
 
     public int displayedSize() {

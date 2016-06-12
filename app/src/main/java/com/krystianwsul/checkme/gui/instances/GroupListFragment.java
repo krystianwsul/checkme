@@ -190,9 +190,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             Assert.assertTrue(!notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.isEmpty());
                             if (notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.size() == 1) {
-                                int position = mTreeViewAdapter.mTreeNodeCollection.getPosition(notDoneGroupTreeNode);
                                 mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
-                                mTreeViewAdapter.notifyItemRemoved(position);
                             } else {
                                 Assert.assertTrue(node instanceof NotDoneInstanceTreeNode);
 
@@ -1371,10 +1369,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         TickService.startService(groupListFragment.getActivity());
 
-                        int oldPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-                        notDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
-
-                        treeViewAdapter.notifyItemRemoved(oldPosition);
+                        int oldPosition = notDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
 
                         treeNodeCollection.mDividerTreeNode.add(notDoneInstanceNode.mInstanceData, oldPosition);
                     };

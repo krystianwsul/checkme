@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
@@ -25,8 +24,6 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     private final ArrayList<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes = new ArrayList<>();
 
     private boolean mNotDoneGroupNodeExpanded;
-
-    public ExactTimeStamp mExactTimeStamp;
 
     private boolean mSelected = false;
 
@@ -211,31 +208,29 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         if (instanceDatas.size() == 1) {
             GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
 
-            mExactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
             if (selectedNodes != null && selectedNodes.contains(instanceData.InstanceKey))
                 mSelected = true;
 
-            addInstanceData(instanceData, null);
-        } else {
-            mExactTimeStamp = instanceDatas.get(0).InstanceTimeStamp.toExactTimeStamp();
+            NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneGroupModelNode.newNotDoneInstanceTreeNode(instanceData, null);
+            Assert.assertTrue(notDoneInstanceTreeNode != null);
 
+            addNotDoneInstanceNode(notDoneInstanceTreeNode);
+        } else {
             for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-                Assert.assertTrue(mExactTimeStamp.equals(instanceData.InstanceTimeStamp.toExactTimeStamp()));
-                addInstanceData(instanceData, selectedNodes);
+                NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneGroupModelNode.newNotDoneInstanceTreeNode(instanceData, selectedNodes);
+                Assert.assertTrue(notDoneInstanceTreeNode != null);
+
+                addNotDoneInstanceNode(notDoneInstanceTreeNode);
             }
 
             sort();
         }
     }
 
-    public NotDoneInstanceTreeNode addInstanceData(GroupListLoader.InstanceData instanceData, ArrayList<InstanceKey> selectedNodes) {
-        Assert.assertTrue(instanceData != null);
-
-        NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneGroupModelNode.newNotDoneInstanceTreeNode(instanceData, selectedNodes);
+    public void addNotDoneInstanceNode(NotDoneInstanceTreeNode notDoneInstanceTreeNode) {
         Assert.assertTrue(notDoneInstanceTreeNode != null);
 
         mNotDoneInstanceTreeNodes.add(notDoneInstanceTreeNode);
-        return notDoneInstanceTreeNode;
     }
 
     private NotDoneGroupTreeCollection getNotDoneGroupTreeCollection() {

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import java.util.ArrayList;
 
@@ -15,4 +16,5 @@ public interface NotDoneGroupModelNode {
     void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode);
     boolean singleInstance();
     GroupListLoader.InstanceData getSingleInstanceData();
+    ExactTimeStamp getExactTimeStamp();
 }

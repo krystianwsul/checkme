@@ -104,7 +104,7 @@ public class NotDoneGroupTreeCollection {
     public ArrayList<TimeStamp> getExpandedGroups() {
         return Stream.of(mNotDoneGroupTreeNodes)
                 .filter(NotDoneGroupTreeNode::expanded)
-                .map(notDoneGroupTreeNode -> notDoneGroupTreeNode.mExactTimeStamp.toTimeStamp())
+                .map(notDoneGroupTreeNode -> notDoneGroupTreeNode.getNotDoneGroupModelNode().getExactTimeStamp().toTimeStamp())
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -167,7 +167,7 @@ public class NotDoneGroupTreeCollection {
         ExactTimeStamp exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
 
         List<NotDoneGroupTreeNode> timeStampNotDoneGroupTreeNodes = Stream.of(mNotDoneGroupTreeNodes)
-                .filter(notDoneGroupTreeNode -> notDoneGroupTreeNode.mExactTimeStamp.equals(exactTimeStamp))
+                .filter(notDoneGroupTreeNode -> notDoneGroupTreeNode.getNotDoneGroupModelNode().getExactTimeStamp().equals(exactTimeStamp))
                 .collect(Collectors.toList());
 
         if (timeStampNotDoneGroupTreeNodes.isEmpty()) {
@@ -186,7 +186,14 @@ public class NotDoneGroupTreeCollection {
             Assert.assertTrue(timeStampNotDoneGroupTreeNodes.size() == 1);
 
             NotDoneGroupTreeNode notDoneGroupTreeNode = timeStampNotDoneGroupTreeNodes.get(0);
-            NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupTreeNode.addInstanceData(instanceData, null);
+
+            NotDoneGroupModelNode notDoneGroupModelNode = notDoneGroupTreeNode.getNotDoneGroupModelNode();
+            Assert.assertTrue(notDoneGroupModelNode != null);
+
+            NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupModelNode.newNotDoneInstanceTreeNode(instanceData, null);
+            Assert.assertTrue(notDoneInstanceTreeNode != null);
+
+            notDoneGroupTreeNode.addNotDoneInstanceNode(notDoneInstanceTreeNode);
 
             notDoneGroupTreeNode.sort();
 

@@ -59,6 +59,7 @@ import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -791,7 +792,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 private final ArrayList<NotDoneGroupModelNode> mNotDoneGroupModelNodes = new ArrayList<>();
 
                 private final Comparator<NotDoneGroupTreeNode> sComparator = (lhs, rhs) -> {
-                    int timeStampComparison = lhs.mExactTimeStamp.compareTo(rhs.mExactTimeStamp);
+                    int timeStampComparison = lhs.getNotDoneGroupModelNode().getExactTimeStamp().compareTo(rhs.getNotDoneGroupModelNode().getExactTimeStamp());
                     if (timeStampComparison != 0) {
                         return timeStampComparison;
                     } else {
@@ -855,8 +856,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         @Override
                         public NotDoneGroupTreeNode newNotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference, List<GroupListLoader.InstanceData> instanceDatas, boolean expanded, ArrayList<InstanceKey> selectedNodes) {
                             Assert.assertTrue(notDoneGroupCollectionReference != null);
+                            Assert.assertTrue(instanceDatas != null);
+                            Assert.assertTrue(!instanceDatas.isEmpty());
 
-                            NotDoneGroupNode notDoneGroupNode = NotDoneGroupNode.newNotDoneGroupNode(notDoneGroupCollectionReference);
+                            ExactTimeStamp exactTimeStamp = instanceDatas.get(0).InstanceTimeStamp.toExactTimeStamp();
+                            Assert.assertTrue(Stream.of(instanceDatas)
+                                    .allMatch(instanceData -> instanceData.InstanceTimeStamp.toExactTimeStamp().equals(exactTimeStamp)));
+
+                            NotDoneGroupNode notDoneGroupNode = NotDoneGroupNode.newNotDoneGroupNode(notDoneGroupCollectionReference, exactTimeStamp);
                             Assert.assertTrue(notDoneGroupNode != null);
 
                             NotDoneGroupTreeNode notDoneGroupTreeNode = new NotDoneGroupTreeNode(notDoneGroupNode.getNotDoneGroupModelNode(), expanded, mNotDoneGroupTreeCollectionReference);
@@ -969,16 +976,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final ArrayList<GroupListLoader.InstanceData> mInstanceDatas = new ArrayList<>();
 
-                private static NotDoneGroupNode newNotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference) {
-                    Assert.assertTrue(notDoneGroupCollectionReference != null);
+                public final ExactTimeStamp mExactTimeStamp;
 
-                    return new NotDoneGroupNode(notDoneGroupCollectionReference);
+                private static NotDoneGroupNode newNotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference, ExactTimeStamp exactTimeStamp) {
+                    Assert.assertTrue(notDoneGroupCollectionReference != null);
+                    Assert.assertTrue(exactTimeStamp != null);
+
+                    return new NotDoneGroupNode(notDoneGroupCollectionReference, exactTimeStamp);
                 }
 
-                private NotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference) {
+                private NotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference, ExactTimeStamp exactTimeStamp) {
                     Assert.assertTrue(notDoneGroupCollectionReference != null);
+                    Assert.assertTrue(exactTimeStamp != null);
 
                     mNotDoneGroupCollectionReference = notDoneGroupCollectionReference;
+                    mExactTimeStamp = exactTimeStamp;
                 }
 
                 public void setNotDoneGroupTreeNodeReference(WeakReference<NotDoneGroupTreeNode> notDoneGroupTreeNodeReference) {
@@ -1128,8 +1140,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         return instanceData.DisplayText;
                     } else {
-                        Date date = notDoneGroupTreeNode.mExactTimeStamp.getDate();
-                        HourMinute hourMinute = notDoneGroupTreeNode.mExactTimeStamp.toTimeStamp().getHourMinute();
+                        Date date = notDoneGroupTreeNode.getNotDoneGroupModelNode().getExactTimeStamp().getDate();
+                        HourMinute hourMinute = notDoneGroupTreeNode.getNotDoneGroupModelNode().getExactTimeStamp().toTimeStamp().getHourMinute();
 
                         GroupListLoader.CustomTimeData customTimeData = getCustomTimeData(date.getDayOfWeek(), hourMinute);
 
@@ -1500,7 +1512,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), instanceData.InstanceKey));
                     } else {
-                        groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(notDoneGroupTreeNode.mExactTimeStamp, groupListFragment.getActivity()));
+                        groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(notDoneGroupTreeNode.getNotDoneGroupModelNode().getExactTimeStamp(), groupListFragment.getActivity()));
                     }
                 }
 
@@ -1588,6 +1600,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         @Override
                         public GroupListLoader.InstanceData getSingleInstanceData() {
                             return NotDoneGroupNode.this.getSingleInstanceData();
+                        }
+
+                        @Override
+                        public ExactTimeStamp getExactTimeStamp() {
+                            return NotDoneGroupNode.this.mExactTimeStamp;
                         }
                     };
                 }

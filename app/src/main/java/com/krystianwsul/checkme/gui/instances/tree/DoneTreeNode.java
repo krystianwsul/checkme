@@ -28,4 +28,14 @@ public class DoneTreeNode implements GroupListFragment.Node, Comparable<DoneTree
     public int compareTo(@NonNull DoneTreeNode another) {
         return mDoneModelNode.compareTo(another.mDoneModelNode);
     }
+
+    @Override
+    public void update() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeFromParent() {
+        throw new UnsupportedOperationException();
+    }
 }

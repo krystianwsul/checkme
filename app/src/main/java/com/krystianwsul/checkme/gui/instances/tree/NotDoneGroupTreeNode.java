@@ -387,4 +387,23 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
             return (treeNodeCollection.mDividerTreeNode.visible() && treeNodeCollection.mDividerTreeNode.expanded());
         }
     }
+
+    @Override
+    public void update() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+    }
+
+    @Override
+    public void removeFromParent() {
+        NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
+        Assert.assertTrue(notDoneGroupTreeCollection != null);
+
+        notDoneGroupTreeCollection.remove(this);
+    }
 }

@@ -288,4 +288,14 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
             }
         };
     }
+
+    @Override
+    public void update() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeFromParent() {
+        throw new UnsupportedOperationException();
+    }
 }

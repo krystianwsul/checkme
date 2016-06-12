@@ -13,6 +13,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.GroupAdapter.AbstractHolder> {
     public static final int TYPE_FAB_PADDING = 2;
@@ -72,5 +73,9 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
 
     public SelectionCallback getSelectionCallback() {
         return mTreeModelAdapter.getSelectionCallback();
+    }
+
+    public List<GroupListFragment.Node> getSelectedNodes() {
+        return mTreeNodeCollection.getSelectedNodes();
     }
 }

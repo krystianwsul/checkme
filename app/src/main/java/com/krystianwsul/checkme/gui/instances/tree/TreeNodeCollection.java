@@ -10,6 +10,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class TreeNodeCollection {
     public NotDoneGroupTreeCollection mNotDoneGroupTreeCollection;
@@ -117,5 +118,9 @@ public class TreeNodeCollection {
 
     public int displayedSize() {
         return mNotDoneGroupTreeCollection.displayedSize() + mDividerTreeNode.displayedSize();
+    }
+
+    public List<GroupListFragment.Node> getSelectedNodes() {
+        return mNotDoneGroupTreeCollection.getSelectedNodes();
     }
 }

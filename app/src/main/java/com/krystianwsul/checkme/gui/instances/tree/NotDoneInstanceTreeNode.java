@@ -170,4 +170,23 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
 
         return (lastInGroup && !lastInAdapter);
     }
+
+    @Override
+    public void update() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+    }
+
+    @Override
+    public void removeFromParent() {
+        NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+
+        notDoneGroupTreeNode.remove(this);
+    }
 }

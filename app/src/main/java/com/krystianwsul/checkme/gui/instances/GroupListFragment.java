@@ -158,7 +158,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(Stream.of(instanceDatas)
                             .allMatch(instanceData -> instanceData.TaskCurrent));
 
-                    List<Node> selectedNodes = mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.getSelectedNodes();
+                    List<Node> selectedNodes = mTreeViewAdapter.getSelectedNodes();
 
                     DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mTreeViewAdapter.getGroupAdapter().mDataId, taskIds);
                     for (GroupListLoader.InstanceData instanceData : instanceDatas)
@@ -176,26 +176,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         }
 
                         if (instanceData1.Exists) {
-                            mTreeViewAdapter.notifyItemChanged(mTreeViewAdapter.mTreeNodeCollection.getPosition(node));
+                            node.update();
                         } else {
-                            NotDoneGroupTreeNode notDoneGroupTreeNode;
-                            if (node instanceof NotDoneGroupTreeNode) {
-                                notDoneGroupTreeNode = (NotDoneGroupTreeNode) node;
-                            } else {
-                                NotDoneInstanceTreeNode notDoneInstanceTreeNode = (NotDoneInstanceTreeNode) node;
-
-                                notDoneGroupTreeNode = notDoneInstanceTreeNode.mNotDoneGroupTreeNodeReference.get();
-                                Assert.assertTrue(notDoneGroupTreeNode != null);
-                            }
-
-                            Assert.assertTrue(!notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.isEmpty());
-                            if (notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.size() == 1) {
-                                mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
-                            } else {
-                                Assert.assertTrue(node instanceof NotDoneInstanceTreeNode);
-
-                                notDoneGroupTreeNode.remove((NotDoneInstanceTreeNode) node);
-                            }
+                            node.removeFromParent();
 
                             decrementSelected();
                         }
@@ -2203,6 +2186,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public interface Node {
         void onBindViewHolder(GroupAdapter.AbstractHolder abstractHolder);
         int getItemViewType();
+        void update();
+        void removeFromParent();
     }
 
     public interface NodeContainer {

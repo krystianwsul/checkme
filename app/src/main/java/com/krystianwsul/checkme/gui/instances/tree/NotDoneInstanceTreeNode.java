@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparable<NotDoneInstanceTreeNode> {
     private final NotDoneInstanceModelNode mNotDoneInstanceModelNode;
 
-    public WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
+    private WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
 
     private boolean mSelected = false;
 

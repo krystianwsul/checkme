@@ -159,7 +159,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        if (singleInstance()) {
+        if (mNotDoneInstanceTreeNodes.size() == 1) {
             NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodes.get(0);
             Assert.assertTrue(notDoneInstanceTreeNode != null);
 
@@ -185,11 +185,6 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         }
     }
 
-    public boolean singleInstance() {
-        Assert.assertTrue(!mNotDoneInstanceTreeNodes.isEmpty());
-        return (mNotDoneInstanceTreeNodes.size() == 1);
-    }
-
     public void updateCheckBoxes() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -197,7 +192,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        if (singleInstance()) {
+        if (mNotDoneInstanceTreeNodes.size() == 1) {
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         } else {
             treeViewAdapter.notifyItemRangeChanged(treeNodeCollection.getPosition(this) + 1, displayedSize() - 1);
@@ -206,11 +201,6 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
     public void sort() {
         Collections.sort(mNotDoneInstanceTreeNodes);
-    }
-
-    public GroupListLoader.InstanceData getSingleInstanceData() {
-        Assert.assertTrue(mNotDoneInstanceTreeNodes.size() == 1);
-        return mNotDoneInstanceTreeNodes.get(0).getNotDoneInstanceNode().mInstanceData;
     }
 
     public void setInstanceDatas(ArrayList<GroupListLoader.InstanceData> instanceDatas, ArrayList<InstanceKey> selectedNodes) {
@@ -303,7 +293,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     }
 
     private void onLongClick() {
-        if (!singleInstance())
+        if (!(mNotDoneInstanceTreeNodes.size() == 1))
             return;
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();

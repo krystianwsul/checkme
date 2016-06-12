@@ -13,4 +13,6 @@ public interface NotDoneGroupModelNode {
     int getItemViewType();
     NotDoneInstanceTreeNode newNotDoneInstanceTreeNode(GroupListLoader.InstanceData instanceData, ArrayList<InstanceKey> selectedNodes);
     void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode);
+    boolean singleInstance();
+    GroupListLoader.InstanceData getSingleInstanceData();
 }

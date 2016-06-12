@@ -68,7 +68,6 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
 
 public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
@@ -791,18 +790,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final ArrayList<NotDoneGroupModelNode> mNotDoneGroupModelNodes = new ArrayList<>();
 
-                private final Comparator<NotDoneGroupTreeNode> sComparator = (lhs, rhs) -> {
-                    int timeStampComparison = lhs.getNotDoneGroupModelNode().getExactTimeStamp().compareTo(rhs.getNotDoneGroupModelNode().getExactTimeStamp());
-                    if (timeStampComparison != 0) {
-                        return timeStampComparison;
-                    } else {
-                        Assert.assertTrue(lhs.getNotDoneGroupModelNode().singleInstance());
-                        Assert.assertTrue(rhs.getNotDoneGroupModelNode().singleInstance());
-
-                        return Integer.valueOf(lhs.getNotDoneGroupModelNode().getSingleInstanceData().InstanceKey.TaskId).compareTo(rhs.getNotDoneGroupModelNode().getSingleInstanceData().InstanceKey.TaskId);
-                    }
-                };
-
                 public static NotDoneGroupCollection newNotDoneGroupCollection(WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
                     Assert.assertTrue(treeNodeCollectionReference != null);
 
@@ -843,11 +830,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 public NotDoneGroupModelCollection getNotDoneGroupModelCollection() {
                     return new NotDoneGroupModelCollection() {
-                        @Override
-                        public Comparator<NotDoneGroupTreeNode> getComparator() {
-                            return sComparator;
-                        }
-
                         @Override
                         public NotDoneGroupCollection getNotDoneGroupCollection() {
                             return NotDoneGroupCollection.this;
@@ -1628,6 +1610,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         @Override
                         public ExactTimeStamp getExactTimeStamp() {
                             return NotDoneGroupNode.this.mExactTimeStamp;
+                        }
+
+                        @Override
+                        public int compareTo(@NonNull NotDoneGroupModelNode another) {
+                            int timeStampComparison = getExactTimeStamp().compareTo(another.getExactTimeStamp());
+                            if (timeStampComparison != 0) {
+                                return timeStampComparison;
+                            } else {
+                                Assert.assertTrue(singleInstance());
+                                Assert.assertTrue(another.singleInstance());
+
+                                return Integer.valueOf(getSingleInstanceData().InstanceKey.TaskId).compareTo(another.getSingleInstanceData().InstanceKey.TaskId);
+                            }
                         }
                     };
                 }

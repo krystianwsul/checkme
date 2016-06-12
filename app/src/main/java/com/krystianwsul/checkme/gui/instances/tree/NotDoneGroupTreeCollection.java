@@ -151,7 +151,7 @@ public class NotDoneGroupTreeCollection {
     }
 
     private void sort() {
-        Collections.sort(mNotDoneGroupTreeNodes, mNotDoneGroupModelCollection.getComparator());
+        Collections.sort(mNotDoneGroupTreeNodes);
     }
 
     public void add(GroupListLoader.InstanceData instanceData) {

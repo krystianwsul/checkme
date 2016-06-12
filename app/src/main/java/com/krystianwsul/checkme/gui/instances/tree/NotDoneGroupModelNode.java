@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import java.util.ArrayList;
 
-public interface NotDoneGroupModelNode {
+public interface NotDoneGroupModelNode extends Comparable<NotDoneGroupModelNode> {
     GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode getNotDoneGroupNode();
     void onClick();
     void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFragment.NodeContainer {
+public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFragment.NodeContainer, Comparable<NotDoneGroupTreeNode> {
     private final NotDoneGroupModelNode mNotDoneGroupModelNode;
 
     private final WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
@@ -400,5 +401,10 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
     public NotDoneGroupModelNode getNotDoneGroupModelNode() {
         return mNotDoneGroupModelNode;
+    }
+
+    @Override
+    public int compareTo(@NonNull NotDoneGroupTreeNode another) {
+        return mNotDoneGroupModelNode.compareTo(another.mNotDoneGroupModelNode);
     }
 }

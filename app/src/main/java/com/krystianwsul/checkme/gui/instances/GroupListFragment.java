@@ -765,11 +765,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             public ModelNodeCollection getModelNodeCollection() {
                 return new ModelNodeCollection() {
                     @Override
-                    public NodeCollection getNodeCollection() {
-                        return NodeCollection.this;
-                    }
-
-                    @Override
                     public void setDividerModelNode(DividerModelNode dividerModelNode) {
                         Assert.assertTrue(dividerModelNode != null);
 

@@ -164,7 +164,7 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
         TreeNodeCollection treeNodeCollection = notDoneGroupTreeNode.getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
 
-        boolean lastInGroup = (notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.indexOf(this) == notDoneGroupTreeNode.mNotDoneInstanceTreeNodes.size() - 1);
+        boolean lastInGroup = (notDoneGroupTreeNode.getPosition(this) == notDoneGroupTreeNode.displayedSize() - 1);
 
         boolean lastInAdapter = (treeNodeCollection.getPosition(this) == treeNodeCollection.displayedSize() - 1);
 

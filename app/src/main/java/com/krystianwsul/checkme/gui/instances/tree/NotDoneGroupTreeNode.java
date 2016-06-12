@@ -22,7 +22,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
     private final WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
 
-    public final ArrayList<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes = new ArrayList<>();
+    private final ArrayList<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes = new ArrayList<>();
 
     private boolean mNotDoneGroupNodeExpanded;
 

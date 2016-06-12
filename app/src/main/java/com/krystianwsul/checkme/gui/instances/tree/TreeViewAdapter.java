@@ -78,4 +78,8 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
     public List<GroupListFragment.Node> getSelectedNodes() {
         return mTreeNodeCollection.getSelectedNodes();
     }
+
+    public void onCreateActionMode() {
+        mTreeNodeCollection.onCreateActionMode();
+    }
 }

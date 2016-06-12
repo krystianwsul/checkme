@@ -123,4 +123,9 @@ public class TreeNodeCollection {
     public List<GroupListFragment.Node> getSelectedNodes() {
         return mNotDoneGroupTreeCollection.getSelectedNodes();
     }
+
+    public void onCreateActionMode() {
+        mNotDoneGroupTreeCollection.onCreateActionMode();
+        mDividerTreeNode.onCreateActionMode();
+    }
 }

@@ -228,4 +228,8 @@ public class NotDoneGroupTreeCollection {
 
         return treeViewAdapter;
     }
+
+    public void onCreateActionMode() {
+        updateCheckBoxes();
+    }
 }

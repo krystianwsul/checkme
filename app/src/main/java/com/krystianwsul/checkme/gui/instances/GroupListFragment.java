@@ -213,19 +213,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         protected void onFirstAdded() {
             ((AppCompatActivity) getActivity()).startSupportActionMode(this);
 
-            if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() > 0) {
-                if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.expanded())
-                    mTreeViewAdapter.notifyItemRangeRemoved(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode), mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() + 1);
-                else
-                    mTreeViewAdapter.notifyItemRemoved(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode));
-            }
-
-            int last = mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() - 1;
-            mTreeViewAdapter.notifyItemChanged(last);
+            mTreeViewAdapter.onCreateActionMode();
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_edit_groups, mActionMode.getMenu());
-
-            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.updateCheckBoxes();
 
             Assert.assertTrue(mOldVisibility == null);
             mOldVisibility = mFloatingActionButton.getVisibility();

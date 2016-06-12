@@ -298,4 +298,26 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
     public void removeFromParent() {
         throw new UnsupportedOperationException();
     }
+
+    public void onCreateActionMode() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        int oldPosition = treeNodeCollection.getPosition(this);
+        Assert.assertTrue(oldPosition >= 0);
+
+        if (getTotalDoneCount() > 0) {
+            if (expanded())
+                treeViewAdapter.notifyItemRangeRemoved(oldPosition, getTotalDoneCount() + 1);
+            else
+                treeViewAdapter.notifyItemRemoved(oldPosition);
+        }
+
+        Assert.assertTrue((oldPosition > 0) == (treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0));
+        if (oldPosition > 0)
+            treeViewAdapter.notifyItemChanged(oldPosition - 1);
+    }
 }

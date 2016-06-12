@@ -102,7 +102,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        Assert.assertTrue(mNotDoneInstanceTreeNodes.size() >= 2);
+        Assert.assertTrue(mNotDoneInstanceTreeNodes.size() > 0);
 
         final boolean lastInGroup = (mNotDoneInstanceTreeNodes.indexOf(notDoneInstanceTreeNode) == mNotDoneInstanceTreeNodes.size() - 1);
 
@@ -110,7 +110,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
         int oldInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
 
-        if (mNotDoneInstanceTreeNodes.size() == 2) {
+        if (mNotDoneInstanceTreeNodes.size() == 1) {
             mNotDoneInstanceTreeNodes.remove(notDoneInstanceTreeNode);
 
             mNotDoneGroupNodeExpanded = false;
@@ -122,7 +122,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
             treeViewAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
         } else {
-            Assert.assertTrue(mNotDoneInstanceTreeNodes.size() > 2);
+            Assert.assertTrue(mNotDoneInstanceTreeNodes.size() > 1);
 
             mNotDoneInstanceTreeNodes.remove(notDoneInstanceTreeNode);
 
@@ -135,7 +135,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     }
 
     public Stream<GroupListFragment.Node> getSelectedNodes() {
-        if (mNotDoneInstanceTreeNodes.size() == 1) {
+        if (mNotDoneInstanceTreeNodes.isEmpty()) {
             ArrayList<GroupListFragment.Node> selectedNodes = new ArrayList<>();
             if (mSelected)
                 selectedNodes.add(this);
@@ -156,10 +156,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        if (mNotDoneInstanceTreeNodes.size() == 1) {
-            NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodes.get(0);
-            Assert.assertTrue(notDoneInstanceTreeNode != null);
-
+        if (mNotDoneInstanceTreeNodes.isEmpty()) {
             if (mSelected) {
                 mSelected = false;
                 treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
@@ -189,7 +186,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        if (mNotDoneInstanceTreeNodes.size() == 1) {
+        if (mNotDoneInstanceTreeNodes.isEmpty()) {
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         } else {
             treeViewAdapter.notifyItemRangeChanged(treeNodeCollection.getPosition(this) + 1, displayedSize() - 1);
@@ -202,7 +199,6 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
     public void setNotDoneInstanceTreeNodes(List<NotDoneInstanceTreeNode> notDoneInstanceTreeNodes) {
         Assert.assertTrue(notDoneInstanceTreeNodes != null);
-        Assert.assertTrue(!notDoneInstanceTreeNodes.isEmpty());
 
         mNotDoneInstanceTreeNodes = notDoneInstanceTreeNodes;
 
@@ -294,7 +290,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     }
 
     private void onLongClick() {
-        if (!(mNotDoneInstanceTreeNodes.size() == 1))
+        if (!mNotDoneInstanceTreeNodes.isEmpty())
             return;
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -305,9 +301,6 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
         SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
         Assert.assertTrue(selectionCallback != null);
-
-        NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodes.get(0);
-        Assert.assertTrue(notDoneInstanceTreeNode != null);
 
         mSelected = !mSelected;
 

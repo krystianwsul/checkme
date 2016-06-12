@@ -82,4 +82,8 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
     public void onCreateActionMode() {
         mTreeNodeCollection.onCreateActionMode();
     }
+
+    public void onDestroyActionMode() {
+        mTreeNodeCollection.onDestroyActionMode();
+    }
 }

@@ -238,17 +238,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         @Override
         protected void onLastRemoved() {
-            if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() > 0) {
-                if (mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.expanded())
-                    mTreeViewAdapter.notifyItemRangeInserted(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode), mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode.getTotalDoneCount() + 1);
-                else
-                    mTreeViewAdapter.notifyItemInserted(mTreeViewAdapter.mTreeNodeCollection.getPosition(mTreeViewAdapter.mTreeNodeCollection.mDividerTreeNode));
-            }
-
-            int last = mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() - 1;
-            mTreeViewAdapter.notifyItemChanged(last);
-
-            mTreeViewAdapter.mTreeNodeCollection.mNotDoneGroupTreeCollection.updateCheckBoxes();
+            mTreeViewAdapter.onDestroyActionMode();
 
             mFloatingActionButton.setVisibility(mOldVisibility);
             mOldVisibility = null;

@@ -128,4 +128,9 @@ public class TreeNodeCollection {
         mNotDoneGroupTreeCollection.onCreateActionMode();
         mDividerTreeNode.onCreateActionMode();
     }
+
+    public void onDestroyActionMode() {
+        mNotDoneGroupTreeCollection.onDestroyActionMode();
+        mDividerTreeNode.onDestroyActionMode();
+    }
 }

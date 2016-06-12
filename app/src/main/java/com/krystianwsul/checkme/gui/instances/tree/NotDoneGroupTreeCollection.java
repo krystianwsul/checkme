@@ -232,4 +232,8 @@ public class NotDoneGroupTreeCollection {
     public void onCreateActionMode() {
         updateCheckBoxes();
     }
+
+    public void onDestroyActionMode() {
+        updateCheckBoxes();
+    }
 }

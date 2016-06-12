@@ -307,7 +307,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         Assert.assertTrue(treeViewAdapter != null);
 
         int oldPosition = treeNodeCollection.getPosition(this);
-        Assert.assertTrue(oldPosition >= 0);
+        Assert.assertTrue(oldPosition > 0);
 
         if (getTotalDoneCount() > 0) {
             if (expanded())
@@ -316,8 +316,28 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
                 treeViewAdapter.notifyItemRemoved(oldPosition);
         }
 
-        Assert.assertTrue((oldPosition > 0) == (treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0));
-        if (oldPosition > 0)
-            treeViewAdapter.notifyItemChanged(oldPosition - 1);
+        Assert.assertTrue(treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0);
+        treeViewAdapter.notifyItemChanged(oldPosition - 1);
+    }
+
+    public void onDestroyActionMode() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        int position = treeNodeCollection.getPosition(this);
+        Assert.assertTrue(position > 0);
+
+        if (getTotalDoneCount() > 0) {
+            if (expanded())
+                treeViewAdapter.notifyItemRangeInserted(position, getTotalDoneCount() + 1);
+            else
+                treeViewAdapter.notifyItemInserted(position);
+        }
+
+        Assert.assertTrue(treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0);
+        treeViewAdapter.notifyItemChanged(position - 1);
     }
 }

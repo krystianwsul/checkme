@@ -6,8 +6,6 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.loaders.GroupListLoader;
-import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
 
@@ -21,19 +19,20 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
     private final WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
 
-    private final ArrayList<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes = new ArrayList<>();
+    private List<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes;
 
     private boolean mNotDoneGroupNodeExpanded;
 
     private boolean mSelected = false;
 
-    public NotDoneGroupTreeNode(NotDoneGroupModelNode notDoneGroupModelNode, boolean expanded, WeakReference<NotDoneGroupTreeCollection> notDoneGroupTreeCollectionReference) {
+    public NotDoneGroupTreeNode(NotDoneGroupModelNode notDoneGroupModelNode, boolean expanded, WeakReference<NotDoneGroupTreeCollection> notDoneGroupTreeCollectionReference, boolean selected) {
         Assert.assertTrue(notDoneGroupModelNode != null);
         Assert.assertTrue(notDoneGroupTreeCollectionReference != null);
 
         mNotDoneGroupModelNode = notDoneGroupModelNode;
         mNotDoneGroupNodeExpanded = expanded;
         mNotDoneGroupTreeCollectionReference = notDoneGroupTreeCollectionReference;
+        mSelected = selected;
     }
 
     @Override
@@ -200,31 +199,13 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         Collections.sort(mNotDoneInstanceTreeNodes);
     }
 
-    public void setInstanceDatas(List<GroupListLoader.InstanceData> instanceDatas, ArrayList<InstanceKey> selectedNodes) {
-        Assert.assertTrue(instanceDatas != null);
-        Assert.assertTrue(!instanceDatas.isEmpty());
-        Assert.assertTrue(instanceDatas.size() > 1 || !mNotDoneGroupNodeExpanded);
+    public void setNotDoneInstanceTreeNodes(List<NotDoneInstanceTreeNode> notDoneInstanceTreeNodes) {
+        Assert.assertTrue(notDoneInstanceTreeNodes != null);
+        Assert.assertTrue(!notDoneInstanceTreeNodes.isEmpty());
 
-        if (instanceDatas.size() == 1) {
-            GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
+        mNotDoneInstanceTreeNodes = notDoneInstanceTreeNodes;
 
-            if (selectedNodes != null && selectedNodes.contains(instanceData.InstanceKey))
-                mSelected = true;
-
-            NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneGroupModelNode.newNotDoneInstanceTreeNode(instanceData, null);
-            Assert.assertTrue(notDoneInstanceTreeNode != null);
-
-            addNotDoneInstanceNode(notDoneInstanceTreeNode);
-        } else {
-            for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-                NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneGroupModelNode.newNotDoneInstanceTreeNode(instanceData, selectedNodes);
-                Assert.assertTrue(notDoneInstanceTreeNode != null);
-
-                addNotDoneInstanceNode(notDoneInstanceTreeNode);
-            }
-
-            sort();
-        }
+        sort();
     }
 
     public void addNotDoneInstanceNode(NotDoneInstanceTreeNode notDoneInstanceTreeNode) {

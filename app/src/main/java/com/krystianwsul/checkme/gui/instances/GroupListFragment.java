@@ -1005,6 +1005,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 private WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;
 
                 private final ArrayList<GroupListLoader.InstanceData> mInstanceDatas = new ArrayList<>();
+                private final ArrayList<NotDoneInstanceNode> mNotDoneInstanceNodes = new ArrayList<>();
 
                 public final ExactTimeStamp mExactTimeStamp;
 
@@ -1578,6 +1579,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(mInstanceDatas.contains(notDoneInstanceNode.mInstanceData));
                     mInstanceDatas.remove(notDoneInstanceNode.mInstanceData);
 
+                    Assert.assertTrue(mNotDoneInstanceNodes.contains(notDoneInstanceNode));
+                    mNotDoneInstanceNodes.remove(notDoneInstanceNode);
+
                     notDoneGroupTreeNode.remove(notDoneInstanceTreeNode);
                 }
 
@@ -1587,6 +1591,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(instanceData, new WeakReference<>(this));
                     mInstanceDatas.add(instanceData);
+                    mNotDoneInstanceNodes.add(notDoneInstanceNode);
 
                     NotDoneInstanceTreeNode notDoneInstanceTreeNode = new NotDoneInstanceTreeNode(notDoneInstanceNode.getNotDoneInstanceModelNode(), selectedNodes, mNotDoneGroupTreeNodeReference);
                     notDoneInstanceNode.setNotDoneInstanceTreeNodeReference(new WeakReference<>(notDoneInstanceTreeNode));
@@ -2157,6 +2162,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     mInstanceData = instanceData;
                     mDividerNodeReference = dividerNodeReference;
+                    Assert.assertTrue(mDividerNodeReference.get() != null);
                 }
 
                 public void setDoneTreeNodeReference(WeakReference<DoneTreeNode> doneTreeNodeReference, WeakReference<DividerTreeNode> dividerTreeNodeReference) {

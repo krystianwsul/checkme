@@ -105,6 +105,7 @@ public class TreeNodeCollection {
         mDividerTreeNode = GroupListFragment.GroupAdapter.NodeCollection.DividerNode.newDividerTreeNode(doneInstances, doneExpanded, new WeakReference<>(this));
         Assert.assertTrue(mDividerTreeNode != null);
 
+        mModelNodeCollection.setNotDoneGroupCollection(notDoneGroupCollection);
         mModelNodeCollection.setDividerModelNode(mDividerTreeNode.getDividerModelNode());
     }
 

@@ -755,6 +755,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             private DividerModelNode mDividerModelNode;
 
+            private NotDoneGroupCollection mNotDoneGroupCollection;
+
             public static NodeCollection newNodeCollection(WeakReference<TreeViewAdapter> treeViewAdapterReference) {
                 Assert.assertTrue(treeViewAdapterReference != null);
 
@@ -774,6 +776,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         mDividerModelNode = dividerModelNode;
                     }
+
+                    @Override
+                    public void setNotDoneGroupCollection(NotDoneGroupCollection notDoneGroupCollection) {
+                        Assert.assertTrue(notDoneGroupCollection != null);
+
+                        mNotDoneGroupCollection = notDoneGroupCollection;
+                    }
                 };
             }
 
@@ -781,6 +790,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 private final WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
 
                 private WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
+
+                private ArrayList<NotDoneGroupModelNode> mNotDoneGroupModelNodes = new ArrayList<>();
 
                 private final Comparator<NotDoneGroupTreeNode> sComparator = (lhs, rhs) -> {
                     int timeStampComparison = lhs.mExactTimeStamp.compareTo(rhs.mExactTimeStamp);
@@ -811,6 +822,20 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mNotDoneGroupTreeCollectionReference = notDoneGroupTreeCollectionReference;
                 }
 
+                public int remove(NotDoneGroupTreeNode notDoneGroupTreeNode) {
+                    Assert.assertTrue(notDoneGroupTreeNode != null);
+
+                    NotDoneGroupModelNode notDoneGroupModelNode = notDoneGroupTreeNode.getNotDoneGroupModelNode();
+
+                    Assert.assertTrue(mNotDoneGroupModelNodes.contains(notDoneGroupModelNode));
+                    mNotDoneGroupModelNodes.remove(notDoneGroupModelNode);
+
+                    NotDoneGroupTreeCollection notDoneGroupTreeCollection = mNotDoneGroupTreeCollectionReference.get();
+                    Assert.assertTrue(notDoneGroupTreeCollection != null);
+
+                    return notDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
+                }
+
                 public NotDoneGroupModelCollection getNotDoneGroupModelCollection() {
                     return new NotDoneGroupModelCollection() {
                         @Override
@@ -834,7 +859,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             notDoneGroupNode.setNotDoneGroupTreeNodeReference(new WeakReference<>(notDoneGroupTreeNode));
                             notDoneGroupTreeNode.setInstanceDatas(instanceDatas, selectedNodes);
 
+                            mNotDoneGroupModelNodes.add(notDoneGroupTreeNode.getNotDoneGroupModelNode());
+
                             return notDoneGroupTreeNode;
+                        }
+
+                        @Override
+                        public int remove(NotDoneGroupTreeNode notDoneGroupTreeNode) {
+                            return NotDoneGroupCollection.this.remove(notDoneGroupTreeNode);
                         }
                     };
                 }
@@ -1378,15 +1410,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(!groupListFragment.mSelectionCallback.hasActionMode());
 
                     return v -> {
-                        NotDoneGroupTreeCollection notDoneGroupTreeCollection = notDoneGroupCollection.mNotDoneGroupTreeCollectionReference.get();
-                        Assert.assertTrue(notDoneGroupTreeCollection != null);
-
                         instanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(treeViewAdapter.getGroupAdapter().mDataId, instanceData.InstanceKey, true);
                         Assert.assertTrue(instanceData.Done != null);
 
                         TickService.startService(groupListFragment.getActivity());
 
-                        int oldPosition = notDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
+                        int oldPosition = notDoneGroupCollection.remove(notDoneGroupTreeNode);
 
                         groupAdapter.mNodeCollection.mDividerModelNode.add(instanceData, oldPosition);
                     };

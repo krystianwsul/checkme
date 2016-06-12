@@ -13,4 +13,5 @@ public interface NotDoneGroupModelCollection {
     Comparator<NotDoneGroupTreeNode> getComparator();
     GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection getNotDoneGroupCollection();
     NotDoneGroupTreeNode newNotDoneGroupNode(WeakReference<GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection> notDoneGroupCollectionReference, List<GroupListLoader.InstanceData> instanceDatas, boolean expanded, ArrayList<InstanceKey> selectedNodes);
+    int remove(NotDoneGroupTreeNode notDoneGroupTreeNode);
 }

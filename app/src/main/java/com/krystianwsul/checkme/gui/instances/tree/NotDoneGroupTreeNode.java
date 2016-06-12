@@ -392,7 +392,10 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
         Assert.assertTrue(notDoneGroupTreeCollection != null);
 
-        notDoneGroupTreeCollection.remove(this);
+        NotDoneGroupModelCollection notDoneGroupModelCollection = notDoneGroupTreeCollection.getNotDoneGroupModelCollection();
+        Assert.assertTrue(notDoneGroupModelCollection != null);
+
+        notDoneGroupModelCollection.remove(this);
     }
 
     public NotDoneGroupModelNode getNotDoneGroupModelNode() {

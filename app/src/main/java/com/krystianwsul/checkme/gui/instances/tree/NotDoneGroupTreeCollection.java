@@ -175,6 +175,8 @@ public class NotDoneGroupTreeCollection {
             instanceDatas.add(instanceData);
 
             NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupModelCollection.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()), instanceDatas, false, null);
+            Assert.assertTrue(notDoneGroupTreeNode != null);
+
             mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
 
             sort();
@@ -229,5 +231,9 @@ public class NotDoneGroupTreeCollection {
 
     public void onDestroyActionMode() {
         updateCheckBoxes();
+    }
+
+    public NotDoneGroupModelCollection getNotDoneGroupModelCollection() {
+        return mNotDoneGroupModelCollection;
     }
 }

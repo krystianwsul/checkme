@@ -5,7 +5,6 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -154,9 +153,12 @@ public class NotDoneGroupTreeCollection {
         Collections.sort(mNotDoneGroupTreeNodes);
     }
 
-    public void add(GroupListLoader.InstanceData instanceData) {
-        Assert.assertTrue(instanceData != null);
-        Assert.assertTrue(instanceData.Done == null);
+    public void addNotDoneGroupTreeNode(NotDoneGroupTreeNode notDoneGroupTreeNode) {
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+
+        mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
+
+        sort();
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -164,37 +166,7 @@ public class NotDoneGroupTreeCollection {
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        ExactTimeStamp exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
-
-        List<NotDoneGroupTreeNode> timeStampNotDoneGroupTreeNodes = Stream.of(mNotDoneGroupTreeNodes)
-                .filter(notDoneGroupTreeNode -> notDoneGroupTreeNode.getNotDoneGroupModelNode().getExactTimeStamp().equals(exactTimeStamp))
-                .collect(Collectors.toList());
-
-        if (timeStampNotDoneGroupTreeNodes.isEmpty()) {
-            ArrayList<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>();
-            instanceDatas.add(instanceData);
-
-            NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupModelCollection.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()), instanceDatas, false, null);
-            Assert.assertTrue(notDoneGroupTreeNode != null);
-
-            mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
-
-            sort();
-
-            treeViewAdapter.notifyItemInserted(treeNodeCollection.getPosition(notDoneGroupTreeNode));
-        } else {
-            Assert.assertTrue(timeStampNotDoneGroupTreeNodes.size() == 1);
-
-            NotDoneGroupTreeNode notDoneGroupTreeNode = timeStampNotDoneGroupTreeNodes.get(0);
-
-            NotDoneGroupModelNode notDoneGroupModelNode = notDoneGroupTreeNode.getNotDoneGroupModelNode();
-            Assert.assertTrue(notDoneGroupModelNode != null);
-
-            NotDoneInstanceTreeNode notDoneInstanceTreeNode = notDoneGroupModelNode.newNotDoneInstanceTreeNode(instanceData, null);
-            Assert.assertTrue(notDoneInstanceTreeNode != null);
-
-            notDoneGroupTreeNode.addNotDoneInstanceNode(notDoneInstanceTreeNode);
-        }
+        treeViewAdapter.notifyItemInserted(treeNodeCollection.getPosition(notDoneGroupTreeNode));
     }
 
     public TreeNodeCollection getTreeNodeCollection() {

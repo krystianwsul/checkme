@@ -549,9 +549,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mFirst = false;
         }
 
-        mTreeViewAdapter = null; // fuck you!
-        mGroupListRecycler.setAdapter(null);
-
         GroupAdapter groupAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, useGroups(), showFab);
         mTreeViewAdapter = new TreeViewAdapter(showFab, groupAdapter.getTreeModelAdapter());
         groupAdapter.setTreeViewAdapterReference(new WeakReference<>(mTreeViewAdapter));

@@ -106,10 +106,6 @@ public class TreeNodeCollection {
         mModelNodeCollection.setDividerModelNode(mDividerTreeNode.getDividerModelNode());
     }
 
-    public GroupListFragment.GroupAdapter.NodeCollection getNodeCollection() {
-        return mModelNodeCollection.getNodeCollection();
-    }
-
     public TreeViewAdapter getTreeViewAdapter() {
         TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
         Assert.assertTrue(treeViewAdapter != null);

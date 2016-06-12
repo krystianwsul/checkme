@@ -986,7 +986,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1042,7 +1042,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1084,7 +1084,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1155,7 +1155,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1186,7 +1186,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1222,7 +1222,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1265,7 +1265,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1299,7 +1299,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1325,7 +1325,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupAdapter groupAdapter = treeViewAdapter.getGroupAdapter();
@@ -1377,7 +1377,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1421,7 +1421,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1447,7 +1447,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     for (GroupListLoader.CustomTimeData customTimeData : treeViewAdapter.getGroupAdapter().mCustomTimeDatas)
@@ -1528,7 +1528,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                         Assert.assertTrue(treeNodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
                         GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1587,7 +1587,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                         Assert.assertTrue(treeNodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
                         GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1637,7 +1637,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                         Assert.assertTrue(treeNodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
                         GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1666,7 +1666,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                         Assert.assertTrue(treeNodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
                         GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1693,7 +1693,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                         Assert.assertTrue(treeNodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
                         GroupAdapter groupAdapter = treeViewAdapter.getGroupAdapter();
@@ -1750,7 +1750,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                         Assert.assertTrue(treeNodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
                         GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1788,7 +1788,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
                         Assert.assertTrue(treeNodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
                         GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1865,7 +1865,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     DividerTreeNode dividerTreeNode = mDividerTreeNodeReference.get();
@@ -1915,7 +1915,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             final TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
                             Assert.assertTrue(treeNodeCollection != null);
 
-                            final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                            final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                             Assert.assertTrue(treeViewAdapter != null);
 
                             GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -1997,7 +1997,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = dividerNode.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -2033,7 +2033,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = dividerNode.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -2070,7 +2070,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = dividerNode.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -2102,7 +2102,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = dividerNode.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -2137,7 +2137,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = dividerNode.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
@@ -2184,7 +2184,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final TreeNodeCollection treeNodeCollection = dividerNode.mTreeNodeCollectionReference.get();
                     Assert.assertTrue(treeNodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getNodeCollection().mTreeViewAdapterReference.get();
+                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
                     Assert.assertTrue(treeViewAdapter != null);
 
                     GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();

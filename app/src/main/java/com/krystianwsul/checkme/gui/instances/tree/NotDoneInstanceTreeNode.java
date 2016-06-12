@@ -187,6 +187,9 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
         NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
         Assert.assertTrue(notDoneGroupTreeNode != null);
 
-        notDoneGroupTreeNode.remove(this);
+        NotDoneGroupModelNode notDoneGroupModelNode = notDoneGroupTreeNode.getNotDoneGroupModelNode();
+        Assert.assertTrue(notDoneGroupModelNode != null);
+
+        notDoneGroupModelNode.remove(this);
     }
 }

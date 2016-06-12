@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class TreeNodeCollection {
-    public NotDoneGroupTreeCollection mNotDoneGroupTreeCollection;
+    NotDoneGroupTreeCollection mNotDoneGroupTreeCollection;
 
     DividerTreeNode mDividerTreeNode;
 

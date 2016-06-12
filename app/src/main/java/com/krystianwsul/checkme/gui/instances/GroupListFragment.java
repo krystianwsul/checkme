@@ -836,6 +836,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return notDoneGroupTreeCollection.remove(notDoneGroupTreeNode);
                 }
 
+                public void add(GroupListLoader.InstanceData instanceData) {
+                    NotDoneGroupTreeCollection notDoneGroupTreeCollection = mNotDoneGroupTreeCollectionReference.get();
+                    Assert.assertTrue(notDoneGroupTreeCollection != null);
+
+                    notDoneGroupTreeCollection.add(instanceData);
+                }
+
                 public NotDoneGroupModelCollection getNotDoneGroupModelCollection() {
                     return new NotDoneGroupModelCollection() {
                         @Override
@@ -2265,7 +2272,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         dividerNode.remove(doneTreeNode);
 
-                        treeNodeCollection.mNotDoneGroupTreeCollection.add(mInstanceData);
+                        treeViewAdapter.getGroupAdapter().mNodeCollection.mNotDoneGroupCollection.add(mInstanceData);
                     };
                 }
 

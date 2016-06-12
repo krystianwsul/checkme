@@ -194,24 +194,6 @@ public class NotDoneGroupTreeCollection {
             Assert.assertTrue(notDoneInstanceTreeNode != null);
 
             notDoneGroupTreeNode.addNotDoneInstanceNode(notDoneInstanceTreeNode);
-
-            notDoneGroupTreeNode.sort();
-
-            if (notDoneGroupTreeNode.expanded()) {
-                int newGroupPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-                int newInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
-
-                boolean last = (newGroupPosition + notDoneGroupTreeNode.displayedSize() - 1 == newInstancePosition);
-
-                treeViewAdapter.notifyItemChanged(newGroupPosition);
-                treeViewAdapter.notifyItemInserted(newInstancePosition);
-
-                if (last)
-                    treeViewAdapter.notifyItemChanged(newInstancePosition - 1);
-            } else {
-                int newGroupPosition = treeNodeCollection.getPosition(notDoneGroupTreeNode);
-                treeViewAdapter.notifyItemChanged(newGroupPosition);
-            }
         }
     }
 

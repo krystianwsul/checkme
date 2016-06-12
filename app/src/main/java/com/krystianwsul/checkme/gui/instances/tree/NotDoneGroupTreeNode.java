@@ -211,7 +211,31 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     public void addNotDoneInstanceNode(NotDoneInstanceTreeNode notDoneInstanceTreeNode) {
         Assert.assertTrue(notDoneInstanceTreeNode != null);
 
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
         mNotDoneInstanceTreeNodes.add(notDoneInstanceTreeNode);
+
+        sort();
+
+        if (expanded()) {
+            int newGroupPosition = treeNodeCollection.getPosition(this);
+            int newInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
+
+            boolean last = (newGroupPosition + displayedSize() - 1 == newInstancePosition);
+
+            treeViewAdapter.notifyItemChanged(newGroupPosition);
+            treeViewAdapter.notifyItemInserted(newInstancePosition);
+
+            if (last)
+                treeViewAdapter.notifyItemChanged(newInstancePosition - 1);
+        } else {
+            int newGroupPosition = treeNodeCollection.getPosition(this);
+            treeViewAdapter.notifyItemChanged(newGroupPosition);
+        }
     }
 
     private NotDoneGroupTreeCollection getNotDoneGroupTreeCollection() {

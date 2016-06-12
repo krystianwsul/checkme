@@ -2,16 +2,12 @@ package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.view.View;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.loaders.GroupListLoader;
 
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,12 +29,10 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         mTreeNodeCollectionReference = treeNodeCollectionReference;
     }
 
-    public void setInstanceDatas(ArrayList<GroupListLoader.InstanceData> instanceDatas) {
-        Assert.assertTrue(instanceDatas != null);
+    public void setDoneTreeNodes(List<DoneTreeNode> doneTreeNodes) {
+        Assert.assertTrue(doneTreeNodes != null);
 
-        mDoneTreeNodes = Stream.of(instanceDatas)
-                .map(instanceData -> mDividerModelNode.newDoneTreeNode(instanceData, this))
-                .collect(Collectors.toList());
+        mDoneTreeNodes = doneTreeNodes;
 
         Collections.sort(mDoneTreeNodes);
     }

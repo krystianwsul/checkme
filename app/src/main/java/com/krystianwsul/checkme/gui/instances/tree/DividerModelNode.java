@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.loaders.GroupListLoader;
 
 public interface DividerModelNode {
     boolean hasActionMode();
-    DoneTreeNode newDoneTreeNode(GroupListLoader.InstanceData instanceData, DividerTreeNode dividerTreeNode);
     void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);
     int getItemViewType();
     void add(GroupListLoader.InstanceData instanceData, int oldInstancePosition);

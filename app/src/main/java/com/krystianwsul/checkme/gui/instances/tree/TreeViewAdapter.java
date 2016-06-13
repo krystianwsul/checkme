@@ -5,14 +5,9 @@ import android.view.ViewGroup;
 
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.loaders.GroupListLoader;
-import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.GroupAdapter.AbstractHolder> {
@@ -62,14 +57,10 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
         return mTreeNodeCollection.getExpansionState();
     }
 
-    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes) {
-        Assert.assertTrue(instanceDatas != null);
+    public void setTreeNodeCollection(TreeNodeCollection treeNodeCollection) {
+        Assert.assertTrue(treeNodeCollection != null);
 
-        GroupListFragment.GroupAdapter.NodeCollection nodeCollection = GroupListFragment.GroupAdapter.NodeCollection.newNodeCollection(new WeakReference<>(this));
-        mTreeModelAdapter.getGroupAdapter().setNodeCollection(nodeCollection);
-
-        mTreeNodeCollection = new TreeNodeCollection(nodeCollection.getModelNodeCollection(), new WeakReference<>(this));
-        mTreeNodeCollection.setInstanceDatas(instanceDatas, expansionState, selectedNodes);
+        mTreeNodeCollection = treeNodeCollection;
     }
 
     public SelectionCallback getSelectionCallback() {

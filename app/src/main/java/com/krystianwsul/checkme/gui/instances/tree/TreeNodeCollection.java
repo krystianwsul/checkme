@@ -1,15 +1,12 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.loaders.GroupListLoader;
-import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class TreeNodeCollection {
@@ -75,37 +72,12 @@ public class TreeNodeCollection {
         return node.getItemViewType();
     }
 
-    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes) {
-        Assert.assertTrue(instanceDatas != null);
+    public void setNodes(NotDoneGroupTreeCollection notDoneGroupTreeCollection, DividerTreeNode dividerTreeNode) {
+        Assert.assertTrue(notDoneGroupTreeCollection != null);
+        Assert.assertTrue(dividerTreeNode != null);
 
-        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        ArrayList<GroupListLoader.InstanceData> notDoneInstances = new ArrayList<>();
-        ArrayList<GroupListLoader.InstanceData> doneInstances = new ArrayList<>();
-        for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-            if (instanceData.Done == null)
-                notDoneInstances.add(instanceData);
-            else
-                doneInstances.add(instanceData);
-        }
-
-        boolean doneExpanded = false;
-        ArrayList<TimeStamp> expandedGroups = null;
-        if (expansionState != null) {
-            doneExpanded = expansionState.DoneExpanded;
-            expandedGroups = expansionState.ExpandedGroups;
-        }
-
-        mNotDoneGroupTreeCollection = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection.newNotDoneGroupCollection(new WeakReference<>(this), notDoneInstances, expandedGroups, selectedNodes);
-        Assert.assertTrue(mNotDoneGroupTreeCollection != null);
-
-        mModelNodeCollection.setNotDoneGroupModelCollection(mNotDoneGroupTreeCollection.getNotDoneGroupModelCollection());
-
-        mDividerTreeNode = GroupListFragment.GroupAdapter.NodeCollection.DividerNode.newDividerTreeNode(doneInstances, doneExpanded, new WeakReference<>(this));
-        Assert.assertTrue(mDividerTreeNode != null);
-
-        mModelNodeCollection.setDividerModelNode(mDividerTreeNode.getDividerModelNode());
+        mNotDoneGroupTreeCollection = notDoneGroupTreeCollection;
+        mDividerTreeNode = dividerTreeNode;
     }
 
     public TreeViewAdapter getTreeViewAdapter() {

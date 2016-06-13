@@ -97,15 +97,14 @@ public class TreeNodeCollection {
             expandedGroups = expansionState.ExpandedGroups;
         }
 
-        GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection notDoneGroupCollection = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection.newNotDoneGroupCollection(new WeakReference<>(this));
-        mNotDoneGroupTreeCollection = new NotDoneGroupTreeCollection(notDoneGroupCollection.getNotDoneGroupModelCollection(), new WeakReference<>(this));
-        notDoneGroupCollection.setNotDoneGroupTreeCollectionReference(new WeakReference<>(mNotDoneGroupTreeCollection));
-        mNotDoneGroupTreeCollection.setInstanceDatas(notDoneInstances, expandedGroups, selectedNodes);
+        mNotDoneGroupTreeCollection = GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupCollection.newNotDoneGroupCollection(new WeakReference<>(this), notDoneInstances, expandedGroups, selectedNodes);
+        Assert.assertTrue(mNotDoneGroupTreeCollection != null);
+
+        mModelNodeCollection.setNotDoneGroupModelCollection(mNotDoneGroupTreeCollection.getNotDoneGroupModelCollection());
 
         mDividerTreeNode = GroupListFragment.GroupAdapter.NodeCollection.DividerNode.newDividerTreeNode(doneInstances, doneExpanded, new WeakReference<>(this));
         Assert.assertTrue(mDividerTreeNode != null);
 
-        mModelNodeCollection.setNotDoneGroupCollection(notDoneGroupCollection);
         mModelNodeCollection.setDividerModelNode(mDividerTreeNode.getDividerModelNode());
     }
 

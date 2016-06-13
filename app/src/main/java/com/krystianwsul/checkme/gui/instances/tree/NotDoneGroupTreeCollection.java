@@ -3,22 +3,17 @@ package com.krystianwsul.checkme.gui.instances.tree;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.loaders.GroupListLoader;
-import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class NotDoneGroupTreeCollection {
-    private final ArrayList<NotDoneGroupTreeNode> mNotDoneGroupTreeNodes = new ArrayList<>();
+    private List<NotDoneGroupTreeNode> mNotDoneGroupTreeNodes;
 
     private final NotDoneGroupModelCollection mNotDoneGroupModelCollection;
 
@@ -107,44 +102,10 @@ public class NotDoneGroupTreeCollection {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public void setInstanceDatas(Collection<GroupListLoader.InstanceData> instanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes) {
-        Assert.assertTrue(instanceDatas != null);
+    public void setNotDoneGroupTreeNodes(List<NotDoneGroupTreeNode> notDoneGroupTreeNodes) {
+        Assert.assertTrue(notDoneGroupTreeNodes != null);
 
-        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
-
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        if (treeViewAdapter.getGroupAdapter().mUseGroups) {
-            HashMap<TimeStamp, ArrayList<GroupListLoader.InstanceData>> instanceDataHash = new HashMap<>();
-            for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-                if (!instanceDataHash.containsKey(instanceData.InstanceTimeStamp))
-                    instanceDataHash.put(instanceData.InstanceTimeStamp, new ArrayList<>());
-                instanceDataHash.get(instanceData.InstanceTimeStamp).add(instanceData);
-            }
-
-            for (Map.Entry<TimeStamp, ArrayList<GroupListLoader.InstanceData>> entry : instanceDataHash.entrySet()) {
-                boolean expanded = false;
-                if (entry.getValue().size() > 1 && expandedGroups != null && expandedGroups.contains(entry.getKey()))
-                    expanded = true;
-
-                NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupModelCollection.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()), entry.getValue(), expanded, selectedNodes);
-                Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
-            }
-        } else {
-            for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-                ArrayList<GroupListLoader.InstanceData> dummyInstanceDatas = new ArrayList<>();
-                dummyInstanceDatas.add(instanceData);
-
-                NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupModelCollection.newNotDoneGroupNode(new WeakReference<>(mNotDoneGroupModelCollection.getNotDoneGroupCollection()), dummyInstanceDatas, false, selectedNodes);
-                Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
-            }
-        }
+        mNotDoneGroupTreeNodes = notDoneGroupTreeNodes;
 
         sort();
     }

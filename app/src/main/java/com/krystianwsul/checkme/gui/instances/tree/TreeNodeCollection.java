@@ -80,7 +80,7 @@ public class TreeNodeCollection {
         mDividerTreeNode = dividerTreeNode;
     }
 
-    public TreeViewAdapter getTreeViewAdapter() {
+    TreeViewAdapter getTreeViewAdapter() {
         TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
         Assert.assertTrue(treeViewAdapter != null);
 

@@ -252,7 +252,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         return treeViewAdapter;
     }
 
-    public TreeNodeCollection getTreeNodeCollection() {
+    TreeNodeCollection getTreeNodeCollection() {
         NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
         Assert.assertTrue(notDoneGroupTreeCollection != null);
 

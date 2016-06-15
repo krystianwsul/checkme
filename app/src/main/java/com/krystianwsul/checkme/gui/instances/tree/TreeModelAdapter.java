@@ -8,6 +8,5 @@ import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 public interface TreeModelAdapter {
     GroupListFragment.GroupAdapter.AbstractHolder onCreateViewHolder(ViewGroup parent, int viewType);
     void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder holder, int position);
-    GroupListFragment.GroupAdapter getGroupAdapter();
     SelectionCallback getSelectionCallback();
 }

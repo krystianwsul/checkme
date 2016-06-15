@@ -49,8 +49,8 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
             return mTreeNodeCollection.getItemViewType(position);
     }
 
-    public GroupListFragment.GroupAdapter getGroupAdapter() {
-        return mTreeModelAdapter.getGroupAdapter();
+    public TreeModelAdapter getTreeModelAdapter() {
+        return mTreeModelAdapter;
     }
 
     public GroupListFragment.ExpansionState getExpansionState() {

@@ -172,7 +172,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             mData.InstanceDatas.remove(instanceData.InstanceKey);
                     }
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mTreeViewAdapter.getGroupAdapter().mDataId, taskIds);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskIds);
 
                     TickService.startService(getActivity());
 
@@ -194,7 +194,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                 GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = (GroupAdapter.NodeCollection.NotDoneGroupNode) notDoneGroupTreeNode.getNotDoneGroupModelNode();
                                 Assert.assertTrue(notDoneGroupNode != null);
 
-                                mTreeViewAdapter.getGroupAdapter().mNodeCollection.mNotDoneGroupCollection.remove(notDoneGroupNode);
+                                ((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mNodeCollection.mNotDoneGroupCollection.remove(notDoneGroupNode);
                             } else {
                                 NotDoneInstanceTreeNode notDoneInstanceTreeNode = (NotDoneInstanceTreeNode) node;
 
@@ -701,16 +701,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public GroupAdapter getGroupAdapter() {
-            return GroupAdapter.this;
-        }
-
-        @Override
         public SelectionCallback getSelectionCallback() {
             GroupListFragment groupListFragment = mGroupListFragmentReference.get();
             Assert.assertTrue(groupListFragment != null);
 
             return groupListFragment.mSelectionCallback;
+        }
+
+        private GroupListFragment getGroupListFragment() {
+            GroupListFragment groupListFragment = mGroupListFragmentReference.get();
+            Assert.assertTrue(groupListFragment != null);
+
+            return groupListFragment;
         }
 
         public static abstract class AbstractHolder extends RecyclerView.ViewHolder {
@@ -769,6 +771,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public static class NodeCollection implements ModelNodeCollection {
             private final WeakReference<GroupAdapter> mGroupAdapterReference;
 
+            private WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
+
             private NotDoneGroupCollection mNotDoneGroupCollection;
             private DividerNode mDividerNode;
 
@@ -783,6 +787,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(instanceDatas != null);
 
                 TreeNodeCollection treeNodeCollection = new TreeNodeCollection(this, new WeakReference<>(treeViewAdapter));
+                mTreeNodeCollectionReference = new WeakReference<>(treeNodeCollection);
 
                 ArrayList<GroupListLoader.InstanceData> notDoneInstanceDatas = new ArrayList<>();
                 ArrayList<GroupListLoader.InstanceData> doneInstanceDatas = new ArrayList<>();
@@ -800,7 +805,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     expandedGroups = expansionState.ExpandedGroups;
                 }
 
-                mNotDoneGroupCollection = new NotDoneGroupCollection(new WeakReference<>(treeNodeCollection));
+                mNotDoneGroupCollection = new NotDoneGroupCollection(new WeakReference<>(this));
 
                 NotDoneGroupTreeCollection notDoneGroupTreeCollection = mNotDoneGroupCollection.initialize(useGroups, treeNodeCollection, notDoneInstanceDatas, expandedGroups, selectedNodes);
 
@@ -820,16 +825,26 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 return groupAdapter;
             }
 
+            private GroupListFragment getGroupListFragment() {
+                GroupAdapter groupAdapter = getGroupAdapter();
+                Assert.assertTrue(groupAdapter != null);
+
+                GroupListFragment groupListFragment = groupAdapter.getGroupListFragment();
+                Assert.assertTrue(groupListFragment != null);
+
+                return groupListFragment;
+            }
+
             public static class NotDoneGroupCollection implements NotDoneGroupModelCollection {
-                private final WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
+                private final WeakReference<NodeCollection> mNodeCollectionReference;
 
                 private WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
 
                 private final ArrayList<NotDoneGroupNode> mNotDoneGroupNodes = new ArrayList<>();
 
-                private NotDoneGroupCollection(WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
-                    Assert.assertTrue(treeNodeCollectionReference != null);
-                    mTreeNodeCollectionReference = treeNodeCollectionReference;
+                private NotDoneGroupCollection(WeakReference<NodeCollection> nodeCollectionReference) {
+                    Assert.assertTrue(nodeCollectionReference != null);
+                    mNodeCollectionReference = nodeCollectionReference;
                 }
 
                 private NotDoneGroupTreeCollection initialize(boolean useGroups, TreeNodeCollection treeNodeCollection, List<GroupListLoader.InstanceData> notDoneInstanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes) {
@@ -932,6 +947,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mNotDoneGroupNodes.add(notDoneGroupNode);
 
                     return notDoneGroupTreeNode;
+                }
+
+                private NodeCollection getNodeCollection() {
+                    NodeCollection nodeCollection = mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    return nodeCollection;
                 }
             }
 
@@ -1121,6 +1143,43 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     }
                 }
 
+                private NotDoneGroupCollection getNotDoneGroupCollection() {
+                    NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
+                    Assert.assertTrue(notDoneGroupCollection != null);
+
+                    return notDoneGroupCollection;
+                }
+
+                private NodeCollection getNodeCollection() {
+                    NotDoneGroupCollection notDoneGroupCollection = getNotDoneGroupCollection();
+                    Assert.assertTrue(notDoneGroupCollection != null);
+
+                    NodeCollection nodeCollection = notDoneGroupCollection.getNodeCollection();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    return nodeCollection;
+                }
+
+                private GroupAdapter getGroupAdapter() {
+                    NodeCollection nodeCollection = getNodeCollection();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    return groupAdapter;
+                }
+
+                private GroupListFragment getGroupListFragment() {
+                    GroupAdapter groupAdapter = getGroupAdapter();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    GroupListFragment groupListFragment = groupAdapter.getGroupListFragment();
+                    Assert.assertTrue(groupListFragment != null);
+
+                    return groupListFragment;
+                }
+
                 @Override
                 int getNameColor() {
                     NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
@@ -1129,13 +1188,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
+                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
+                    GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
 
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1185,13 +1244,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
+                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
+                    GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
 
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1227,13 +1286,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
+                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
+                    GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
 
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1298,13 +1357,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
+                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
+                    GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
 
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
                     Assert.assertTrue(singleInstance());
@@ -1329,13 +1388,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
+                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
+                    Assert.assertTrue(nodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
+                    GroupAdapter groupAdapter = nodeCollection.mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
 
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1365,13 +1424,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
-
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1408,13 +1461,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
-
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1442,13 +1489,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
-
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     Assert.assertTrue(singleInstance());
@@ -1468,16 +1509,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
+                    NodeCollection nodeCollection = getNodeCollection();
+                    Assert.assertTrue(nodeCollection != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    GroupAdapter groupAdapter = treeViewAdapter.getGroupAdapter();
+                    GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
                     Assert.assertTrue(groupAdapter != null);
 
-                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = groupAdapter.getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     Assert.assertTrue(singleInstance());
@@ -1490,14 +1528,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(!groupListFragment.mSelectionCallback.hasActionMode());
 
                     return v -> {
-                        instanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(treeViewAdapter.getGroupAdapter().mDataId, instanceData.InstanceKey, true);
+                        instanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
                         Assert.assertTrue(instanceData.Done != null);
 
                         TickService.startService(groupListFragment.getActivity());
 
                         int oldPosition = notDoneGroupCollection.remove(this);
 
-                        groupAdapter.mNodeCollection.mDividerNode.add(instanceData, oldPosition);
+                        nodeCollection.mDividerNode.add(instanceData, oldPosition);
                     };
                 }
 
@@ -1517,13 +1555,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
-
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1562,13 +1594,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
-
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
@@ -1588,13 +1614,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
-                    final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                    Assert.assertTrue(treeNodeCollection != null);
+                    GroupAdapter groupAdapter = getGroupAdapter();
+                    Assert.assertTrue(groupAdapter != null);
 
-                    final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                    Assert.assertTrue(treeViewAdapter != null);
-
-                    for (GroupListLoader.CustomTimeData customTimeData : treeViewAdapter.getGroupAdapter().mCustomTimeDatas)
+                    for (GroupListLoader.CustomTimeData customTimeData : groupAdapter.mCustomTimeDatas)
                         if (customTimeData.HourMinutes.get(dayOfWeek) == hourMinute)
                             return customTimeData;
 
@@ -1719,6 +1742,53 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         return notDoneInstanceTreeNode;
                     }
 
+                    private NotDoneGroupNode getNotDoneGroupNode() {
+                        NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        return notDoneGroupNode;
+                    }
+
+                    private NotDoneGroupCollection getNotDoneGroupCollection() {
+                        NotDoneGroupNode notDoneGroupNode = getNotDoneGroupNode();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.getNotDoneGroupCollection();
+                        Assert.assertTrue(notDoneGroupCollection != null);
+
+                        return notDoneGroupCollection;
+                    }
+
+                    private NodeCollection getNodeCollection() {
+                        NotDoneGroupNode notDoneGroupNode = getNotDoneGroupNode();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        NodeCollection nodeCollection = notDoneGroupNode.getNodeCollection();
+                        Assert.assertTrue(nodeCollection != null);
+
+                        return nodeCollection;
+                    }
+
+                    private GroupAdapter getGroupAdapter() {
+                        NotDoneGroupNode notDoneGroupNode = getNotDoneGroupNode();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        GroupAdapter groupAdapter = notDoneGroupNode.getGroupAdapter();
+                        Assert.assertTrue(groupAdapter != null);
+
+                        return groupAdapter;
+                    }
+
+                    private GroupListFragment getGroupListFragment() {
+                        NotDoneGroupNode notDoneGroupNode = getNotDoneGroupNode();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        GroupListFragment groupListFragment = notDoneGroupNode.getGroupListFragment();
+                        Assert.assertTrue(groupListFragment != null);
+
+                        return groupListFragment;
+                    }
+
                     @Override
                     int getNameVisibility() {
                         return View.VISIBLE;
@@ -1734,21 +1804,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         final NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
                         Assert.assertTrue(notDoneGroupNode != null);
 
-                        final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
-                        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                        Assert.assertTrue(notDoneGroupTreeNode.expanded());
-
-                        NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
-                        Assert.assertTrue(notDoneGroupCollection != null);
-
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                        GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
                         if (!mInstanceData.TaskCurrent) {
@@ -1790,24 +1846,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getChildrenColor() {
-                        final NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
-                        Assert.assertTrue(notDoneGroupNode != null);
-
-                        final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
-                        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                        Assert.assertTrue(notDoneGroupTreeNode.expanded());
-
-                        NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
-                        Assert.assertTrue(notDoneGroupCollection != null);
-
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                        GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
                         if (!mInstanceData.TaskCurrent) {
@@ -1840,24 +1879,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getCheckBoxVisibility() {
-                        final NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
-                        Assert.assertTrue(notDoneGroupNode != null);
-
-                        final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
-                        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                        Assert.assertTrue(notDoneGroupTreeNode.expanded());
-
-                        NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
-                        Assert.assertTrue(notDoneGroupCollection != null);
-
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                        GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
                         if (groupListFragment.mSelectionCallback.hasActionMode()) {
@@ -1869,28 +1891,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     boolean getCheckBoxChecked() {
-                        final NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
-                        Assert.assertTrue(notDoneGroupNode != null);
-
-                        final NotDoneGroupTreeNode notDoneGroupTreeNode = notDoneGroupNode.mNotDoneGroupTreeNodeReference.get();
-                        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                        Assert.assertTrue(notDoneGroupTreeNode.expanded());
-
-                        NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
-                        Assert.assertTrue(notDoneGroupCollection != null);
-
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
-                        Assert.assertTrue(groupListFragment != null);
-
-                        Assert.assertTrue(!groupListFragment.mSelectionCallback.hasActionMode());
-
                         return false;
                     }
 
@@ -1907,19 +1907,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
                         Assert.assertTrue(notDoneGroupCollection != null);
 
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
+                        NodeCollection nodeCollection = getNodeCollection();
+                        Assert.assertTrue(nodeCollection != null);
 
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupAdapter groupAdapter = treeViewAdapter.getGroupAdapter();
+                        GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
                         Assert.assertTrue(groupAdapter != null);
 
-                        GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
+                        GroupListFragment groupListFragment = groupAdapter.getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
                         Assert.assertTrue(!groupListFragment.mSelectionCallback.hasActionMode());
+
+                        TreeNodeCollection treeNodeCollection = nodeCollection.mTreeNodeCollectionReference.get();
+                        Assert.assertTrue(treeNodeCollection != null);
 
                         return v -> {
                             Assert.assertTrue(notDoneGroupTreeNode.expanded());
@@ -1927,7 +1927,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             NotDoneInstanceTreeNode notDoneInstanceTreeNode = mNotDoneInstanceTreeNodeReference.get();
                             Assert.assertTrue(notDoneInstanceTreeNode != null);
 
-                            mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(treeViewAdapter.getGroupAdapter().mDataId, mInstanceData.InstanceKey, true);
+                            mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, true);
                             Assert.assertTrue(mInstanceData.Done != null);
 
                             TickService.startService(groupListFragment.getActivity());
@@ -1936,7 +1936,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             notDoneGroupNode.remove(this);
 
-                            groupAdapter.mNodeCollection.mDividerNode.add(mInstanceData, oldInstancePosition);
+                            nodeCollection.mDividerNode.add(mInstanceData, oldInstancePosition);
                         };
                     }
 
@@ -1964,13 +1964,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
                         Assert.assertTrue(notDoneGroupCollection != null);
 
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                        GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
                         if (notDoneInstanceTreeNode.isSelected())
@@ -2003,13 +1997,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         NotDoneGroupCollection notDoneGroupCollection = notDoneGroupNode.mNotDoneGroupCollectionReference.get();
                         Assert.assertTrue(notDoneGroupCollection != null);
 
-                        final TreeNodeCollection treeNodeCollection = notDoneGroupCollection.mTreeNodeCollectionReference.get();
-                        Assert.assertTrue(treeNodeCollection != null);
-
-                        final TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-                        Assert.assertTrue(treeViewAdapter != null);
-
-                        GroupListFragment groupListFragment = treeViewAdapter.getGroupAdapter().mGroupListFragmentReference.get();
+                        GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
                         groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.InstanceKey));

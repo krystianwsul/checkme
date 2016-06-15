@@ -130,14 +130,14 @@ public class NotDoneGroupTreeCollection {
         treeViewAdapter.notifyItemInserted(treeNodeCollection.getPosition(notDoneGroupTreeNode));
     }
 
-    public TreeNodeCollection getTreeNodeCollection() {
+    TreeNodeCollection getTreeNodeCollection() {
         TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
         Assert.assertTrue(treeNodeCollection != null);
 
         return treeNodeCollection;
     }
 
-    public TreeViewAdapter getTreeViewAdapter() {
+    TreeViewAdapter getTreeViewAdapter() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
 

@@ -381,17 +381,6 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
-    @Override
-    public void removeFromParent() {
-        NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
-        Assert.assertTrue(notDoneGroupTreeCollection != null);
-
-        NotDoneGroupModelCollection notDoneGroupModelCollection = notDoneGroupTreeCollection.getNotDoneGroupModelCollection();
-        Assert.assertTrue(notDoneGroupModelCollection != null);
-
-        notDoneGroupModelCollection.remove(this);
-    }
-
     public NotDoneGroupModelNode getNotDoneGroupModelNode() {
         return mNotDoneGroupModelNode;
     }

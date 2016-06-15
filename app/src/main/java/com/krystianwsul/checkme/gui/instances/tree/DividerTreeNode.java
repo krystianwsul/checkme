@@ -284,11 +284,6 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void removeFromParent() {
-        throw new UnsupportedOperationException();
-    }
-
     public void onCreateActionMode() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -329,9 +324,5 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
         Assert.assertTrue(treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0);
         treeViewAdapter.notifyItemChanged(position - 1);
-    }
-
-    public DividerModelNode getDividerModelNode() {
-        return mDividerModelNode;
     }
 }

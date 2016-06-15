@@ -87,6 +87,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             return hashCode;
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -100,7 +101,19 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceDatas.equals(data.InstanceDatas) && CustomTimeDatas.equals(data.CustomTimeDatas) && (((TaskEditable == null) && (data.TaskEditable == null)) || ((TaskEditable != null) && (data.TaskEditable != null) && (TaskEditable.equals(data.TaskEditable)))));
+            if (!InstanceDatas.equals(data.InstanceDatas))
+                return false;
+
+            if (!CustomTimeDatas.equals(data.CustomTimeDatas))
+                return false;
+
+            if ((TaskEditable == null) != (data.TaskEditable == null))
+                return false;
+
+            if ((TaskEditable != null) && !TaskEditable.equals(data.TaskEditable))
+                return false;
+
+            return true;
         }
     }
 

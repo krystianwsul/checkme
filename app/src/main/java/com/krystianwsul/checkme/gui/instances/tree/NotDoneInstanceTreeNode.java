@@ -42,10 +42,6 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
         return mNotDoneInstanceModelNode.getItemViewType();
     }
 
-    public GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode getNotDoneInstanceNode() {
-        return mNotDoneInstanceModelNode.getNotDoneInstanceNode();
-    }
-
     private NotDoneGroupTreeNode getNotDoneGroupTreeNode() {
         NotDoneGroupTreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
         Assert.assertTrue(notDoneGroupTreeNode != null);
@@ -179,14 +175,7 @@ public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparab
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
-    @Override
-    public void removeFromParent() {
-        NotDoneGroupTreeNode notDoneGroupTreeNode = getNotDoneGroupTreeNode();
-        Assert.assertTrue(notDoneGroupTreeNode != null);
-
-        NotDoneGroupModelNode notDoneGroupModelNode = notDoneGroupTreeNode.getNotDoneGroupModelNode();
-        Assert.assertTrue(notDoneGroupModelNode != null);
-
-        notDoneGroupModelNode.remove(this);
+    public NotDoneInstanceModelNode getNotDoneInstanceModelNode() {
+        return mNotDoneInstanceModelNode;
     }
 }

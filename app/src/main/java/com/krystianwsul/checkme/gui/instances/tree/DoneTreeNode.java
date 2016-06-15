@@ -33,13 +33,4 @@ public class DoneTreeNode implements GroupListFragment.Node, Comparable<DoneTree
     public void update() {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public void removeFromParent() {
-        throw new UnsupportedOperationException();
-    }
-
-    public DoneModelNode getDoneModelNode() {
-        return mDoneModelNode;
-    }
 }

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -32,7 +31,7 @@ public class NotDoneGroupTreeCollection {
                 .forEach(NotDoneGroupTreeNode::unselect);
     }
 
-    public List<GroupListFragment.Node> getSelectedNodes() {
+    public List<Node> getSelectedNodes() {
         return Stream.of(mNotDoneGroupTreeNodes)
                 .flatMap(NotDoneGroupTreeNode::getSelectedNodes)
                 .collect(Collectors.toList());
@@ -69,7 +68,7 @@ public class NotDoneGroupTreeCollection {
                 .forEach(NotDoneGroupTreeNode::updateCheckBoxes);
     }
 
-    public GroupListFragment.Node getNode(int position) {
+    public Node getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
 
@@ -83,7 +82,7 @@ public class NotDoneGroupTreeCollection {
         throw new IndexOutOfBoundsException();
     }
 
-    public int getPosition(GroupListFragment.Node node) {
+    public int getPosition(Node node) {
         int offset = 0;
         for (NotDoneGroupTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
             int position = notDoneGroupTreeNode.getPosition(node);

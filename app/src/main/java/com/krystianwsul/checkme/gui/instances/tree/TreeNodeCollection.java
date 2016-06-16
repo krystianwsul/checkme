@@ -26,7 +26,7 @@ public class TreeNodeCollection {
         mTreeViewAdapterReference = treeViewAdapterReference;
     }
 
-    public GroupListFragment.Node getNode(int position) {
+    public Node getNode(int position) {
         Assert.assertTrue(position >= 0);
 
         if (position < mNotDoneGroupTreeCollection.displayedSize())
@@ -39,7 +39,7 @@ public class TreeNodeCollection {
         return mDividerTreeNode.getNode(newPosition);
     }
 
-    public int getPosition(GroupListFragment.Node node) {
+    public int getPosition(Node node) {
         Assert.assertTrue(node != null);
 
         int offset = 0;
@@ -66,7 +66,7 @@ public class TreeNodeCollection {
     }
 
     public int getItemViewType(int position) {
-        GroupListFragment.Node node = getNode(position);
+        Node node = getNode(position);
         Assert.assertTrue(node != null);
 
         return node.getItemViewType();
@@ -91,7 +91,7 @@ public class TreeNodeCollection {
         return mNotDoneGroupTreeCollection.displayedSize() + mDividerTreeNode.displayedSize();
     }
 
-    public List<GroupListFragment.Node> getSelectedNodes() {
+    public List<Node> getSelectedNodes() {
         return mNotDoneGroupTreeCollection.getSelectedNodes();
     }
 

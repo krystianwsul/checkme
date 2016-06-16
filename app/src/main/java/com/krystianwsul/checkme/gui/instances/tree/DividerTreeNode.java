@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
-public class DividerTreeNode implements GroupListFragment.Node, GroupListFragment.NodeContainer {
+public class DividerTreeNode implements Node, NodeContainer {
     private final DividerModelNode mDividerModelNode;
 
     private List<DoneTreeNode> mDoneTreeNodes;
@@ -70,7 +70,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
     }
 
     @Override
-    public GroupListFragment.Node getNode(int position) {
+    public Node getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(!mDoneTreeNodes.isEmpty());
 
@@ -80,7 +80,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
             Assert.assertTrue(mDoneExpanded);
             Assert.assertTrue(position <= mDoneTreeNodes.size());
 
-            GroupListFragment.Node node = mDoneTreeNodes.get(position - 1);
+            Node node = mDoneTreeNodes.get(position - 1);
             Assert.assertTrue(node != null);
 
             return node;
@@ -88,7 +88,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
     }
 
     @Override
-    public int getPosition(GroupListFragment.Node node) {
+    public int getPosition(Node node) {
         if (node == this)
             return 0;
 
@@ -327,7 +327,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
     }
 
     @Override
-    public List<GroupListFragment.Node> getSelectedChildren() {
+    public List<Node> getSelectedChildren() {
         throw new UnsupportedOperationException();
     }
 }

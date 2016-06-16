@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFragment.NodeContainer, Comparable<NotDoneGroupTreeNode> {
+public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<NotDoneGroupTreeNode> {
     private final NotDoneGroupModelNode mNotDoneGroupModelNode;
 
     private final WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
@@ -56,7 +56,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     }
 
     @Override
-    public GroupListFragment.Node getNode(int position) {
+    public Node getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
 
@@ -65,14 +65,14 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
 
         Assert.assertTrue(mNotDoneGroupNodeExpanded);
 
-        GroupListFragment.Node node = mNotDoneInstanceTreeNodes.get(position - 1);
+        Node node = mNotDoneInstanceTreeNodes.get(position - 1);
         Assert.assertTrue(node != null);
 
         return node;
     }
 
     @Override
-    public int getPosition(GroupListFragment.Node node) {
+    public int getPosition(Node node) {
         if (node == this)
             return 0;
 
@@ -134,9 +134,9 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
         }
     }
 
-    public Stream<GroupListFragment.Node> getSelectedNodes() {
+    public Stream<Node> getSelectedNodes() {
         if (mNotDoneInstanceTreeNodes.isEmpty()) {
-            ArrayList<GroupListFragment.Node> selectedNodes = new ArrayList<>();
+            ArrayList<Node> selectedNodes = new ArrayList<>();
             if (mSelected)
                 selectedNodes.add(this);
             return Stream.of(selectedNodes);
@@ -391,7 +391,7 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     }
 
     @Override
-    public List<GroupListFragment.Node> getSelectedChildren() {
+    public List<Node> getSelectedChildren() {
         Assert.assertTrue(!mNotDoneInstanceTreeNodes.isEmpty());
         Assert.assertTrue(!mSelected);
 

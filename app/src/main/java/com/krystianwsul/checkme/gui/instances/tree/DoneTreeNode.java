@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
@@ -42,12 +40,12 @@ public class DoneTreeNode extends ChildTreeNode {
     }
 
     @Override
-    protected GroupListFragment.Node getParent() {
+    protected Node getParent() {
         return getDividerTreeNode();
     }
 
     @Override
-    public List<GroupListFragment.Node> getSelectedChildren() {
+    public List<Node> getSelectedChildren() {
         throw new UnsupportedOperationException();
     }
 }

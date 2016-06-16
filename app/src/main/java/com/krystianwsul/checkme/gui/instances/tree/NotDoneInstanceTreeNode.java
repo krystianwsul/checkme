@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -84,12 +83,12 @@ public class NotDoneInstanceTreeNode extends ChildTreeNode {
     }
 
     @Override
-    protected GroupListFragment.Node getParent() {
+    protected Node getParent() {
         return getNotDoneGroupTreeNode();
     }
 
     @Override
-    public List<GroupListFragment.Node> getSelectedChildren() {
+    public List<Node> getSelectedChildren() {
         throw new UnsupportedOperationException();
     }
 }

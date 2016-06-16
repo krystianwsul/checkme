@@ -42,6 +42,7 @@ import com.krystianwsul.checkme.gui.instances.tree.DividerModelNode;
 import com.krystianwsul.checkme.gui.instances.tree.DividerTreeNode;
 import com.krystianwsul.checkme.gui.instances.tree.DoneTreeNode;
 import com.krystianwsul.checkme.gui.instances.tree.ModelNodeCollection;
+import com.krystianwsul.checkme.gui.instances.tree.Node;
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupModelCollection;
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupModelNode;
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupTreeCollection;
@@ -2366,21 +2367,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
             }
         }
-    }
-
-    public interface Node {
-        void onBindViewHolder(GroupAdapter.AbstractHolder abstractHolder);
-        int getItemViewType();
-        void update();
-
-        List<Node> getSelectedChildren();
-    }
-
-    public interface NodeContainer {
-        int displayedSize();
-        Node getNode(int position);
-        int getPosition(Node node);
-        boolean expanded();
     }
 
     public static class ExpansionState implements Parcelable {

@@ -11,7 +11,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public abstract class ChildTreeNode implements GroupListFragment.Node, Comparable<ChildTreeNode> {
+public abstract class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
     protected final ChildModelNode mChildModelNode;
 
     private boolean mSelected = false;
@@ -74,7 +74,7 @@ public abstract class ChildTreeNode implements GroupListFragment.Node, Comparabl
         SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
         Assert.assertTrue(selectionCallback != null);
 
-        GroupListFragment.Node parent = getParent();
+        Node parent = getParent();
         Assert.assertTrue(parent != null);
 
         mSelected = !mSelected;
@@ -96,7 +96,7 @@ public abstract class ChildTreeNode implements GroupListFragment.Node, Comparabl
 
     protected abstract TreeNodeCollection getTreeNodeCollection();
 
-    protected abstract GroupListFragment.Node getParent();
+    protected abstract Node getParent();
 
     private TreeViewAdapter getTreeViewAdapter() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();

@@ -1,36 +1,53 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
-import android.support.annotation.NonNull;
-
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
-public class DoneTreeNode extends ChildTreeNode implements GroupListFragment.Node, Comparable<DoneTreeNode> {
-    private final ChildModelNode mChildModelNode;
+import java.lang.ref.WeakReference;
+import java.util.List;
 
-    public DoneTreeNode(ChildModelNode childModelNode) {
-        Assert.assertTrue(childModelNode != null);
-        mChildModelNode = childModelNode;
-    }
+public class DoneTreeNode extends ChildTreeNode {
+    private final WeakReference<DividerTreeNode> mDividerTreeNodeReference;
 
-    @Override
-    public void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder) {
-        mChildModelNode.onBindViewHolder(abstractHolder);
-    }
+    public DoneTreeNode(ChildModelNode childModelNode, WeakReference<DividerTreeNode> dividerTreeNodeReference) {
+        super(childModelNode, null);
 
-    @Override
-    public int getItemViewType() {
-        return mChildModelNode.getItemViewType();
-    }
+        Assert.assertTrue(dividerTreeNodeReference != null);
 
-    @Override
-    public int compareTo(@NonNull DoneTreeNode another) {
-        return mChildModelNode.compareTo(another.mChildModelNode);
+        mDividerTreeNodeReference = dividerTreeNodeReference;
     }
 
     @Override
     public void update() {
+        throw new UnsupportedOperationException();
+    }
+
+    private DividerTreeNode getDividerTreeNode() {
+        DividerTreeNode dividerTreeNode = mDividerTreeNodeReference.get();
+        Assert.assertTrue(dividerTreeNode != null);
+
+        return dividerTreeNode;
+    }
+
+    @Override
+    protected TreeNodeCollection getTreeNodeCollection() {
+        DividerTreeNode dividerTreeNode = getDividerTreeNode();
+        Assert.assertTrue(dividerTreeNode != null);
+
+        TreeNodeCollection treeNodeCollection = dividerTreeNode.getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        return treeNodeCollection;
+    }
+
+    @Override
+    protected GroupListFragment.Node getParent() {
+        return getDividerTreeNode();
+    }
+
+    @Override
+    public List<GroupListFragment.Node> getSelectedChildren() {
         throw new UnsupportedOperationException();
     }
 }

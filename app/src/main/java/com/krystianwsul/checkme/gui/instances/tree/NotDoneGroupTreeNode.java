@@ -389,4 +389,14 @@ public class NotDoneGroupTreeNode implements GroupListFragment.Node, GroupListFr
     public int compareTo(@NonNull NotDoneGroupTreeNode another) {
         return mNotDoneGroupModelNode.compareTo(another.mNotDoneGroupModelNode);
     }
+
+    @Override
+    public List<GroupListFragment.Node> getSelectedChildren() {
+        Assert.assertTrue(!mNotDoneInstanceTreeNodes.isEmpty());
+        Assert.assertTrue(!mSelected);
+
+        return Stream.of(mNotDoneInstanceTreeNodes)
+                .filter(NotDoneInstanceTreeNode::isSelected)
+                .collect(Collectors.toList());
+    }
 }

@@ -223,7 +223,7 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
         }
     }
 
-    private TreeNodeCollection getTreeNodeCollection() {
+    TreeNodeCollection getTreeNodeCollection() {
         TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
         Assert.assertTrue(treeNodeCollection != null);
 
@@ -324,5 +324,10 @@ public class DividerTreeNode implements GroupListFragment.Node, GroupListFragmen
 
         Assert.assertTrue(treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0);
         treeViewAdapter.notifyItemChanged(position - 1);
+    }
+
+    @Override
+    public List<GroupListFragment.Node> getSelectedChildren() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -20,7 +20,7 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
 
     private final WeakReference<NotDoneGroupTreeCollection> mNotDoneGroupTreeCollectionReference;
 
-    private List<NotDoneInstanceTreeNode> mNotDoneInstanceTreeNodes;
+    private List<ChildTreeNode> mChildTreeNodes;
 
     private boolean mNotDoneGroupNodeExpanded;
 
@@ -49,7 +49,7 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
     @Override
     public int displayedSize() {
         if (mNotDoneGroupNodeExpanded) {
-            return 1 + mNotDoneInstanceTreeNodes.size();
+            return 1 + mChildTreeNodes.size();
         } else {
             return 1;
         }
@@ -65,7 +65,7 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
 
         Assert.assertTrue(mNotDoneGroupNodeExpanded);
 
-        Node node = mNotDoneInstanceTreeNodes.get(position - 1);
+        Node node = mChildTreeNodes.get(position - 1);
         Assert.assertTrue(node != null);
 
         return node;
@@ -76,13 +76,13 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         if (node == this)
             return 0;
 
-        if (!(node instanceof NotDoneInstanceTreeNode))
+        if (!(node instanceof ChildTreeNode))
             return -1;
 
-        NotDoneInstanceTreeNode notDoneInstanceTreeNode = (NotDoneInstanceTreeNode) node;
-        if (mNotDoneInstanceTreeNodes.contains(notDoneInstanceTreeNode)) {
+        ChildTreeNode childTreeNode = (ChildTreeNode) node;
+        if (mChildTreeNodes.contains(childTreeNode)) {
             Assert.assertTrue(mNotDoneGroupNodeExpanded);
-            return mNotDoneInstanceTreeNodes.indexOf(notDoneInstanceTreeNode) + 1;
+            return mChildTreeNodes.indexOf(childTreeNode) + 1;
         }
 
         return -1;
@@ -93,8 +93,8 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         return mNotDoneGroupNodeExpanded;
     }
 
-    public void remove(NotDoneInstanceTreeNode notDoneInstanceTreeNode) {
-        Assert.assertTrue(notDoneInstanceTreeNode != null);
+    public void remove(ChildTreeNode childTreeNode) {
+        Assert.assertTrue(childTreeNode != null);
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -102,16 +102,16 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        Assert.assertTrue(mNotDoneInstanceTreeNodes.size() > 0);
+        Assert.assertTrue(mChildTreeNodes.size() > 0);
 
-        final boolean lastInGroup = (mNotDoneInstanceTreeNodes.indexOf(notDoneInstanceTreeNode) == mNotDoneInstanceTreeNodes.size() - 1);
+        final boolean lastInGroup = (mChildTreeNodes.indexOf(childTreeNode) == mChildTreeNodes.size() - 1);
 
         int groupPosition = treeNodeCollection.getPosition(this);
 
-        int oldInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
+        int oldInstancePosition = treeNodeCollection.getPosition(childTreeNode);
 
-        if (mNotDoneInstanceTreeNodes.size() == 1) {
-            mNotDoneInstanceTreeNodes.remove(notDoneInstanceTreeNode);
+        if (mChildTreeNodes.size() == 1) {
+            mChildTreeNodes.remove(childTreeNode);
 
             mNotDoneGroupNodeExpanded = false;
 
@@ -122,9 +122,9 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
 
             treeViewAdapter.notifyItemRangeRemoved(groupPosition + 1, 2);
         } else {
-            Assert.assertTrue(mNotDoneInstanceTreeNodes.size() > 1);
+            Assert.assertTrue(mChildTreeNodes.size() > 1);
 
-            mNotDoneInstanceTreeNodes.remove(notDoneInstanceTreeNode);
+            mChildTreeNodes.remove(childTreeNode);
 
             treeViewAdapter.notifyItemChanged(groupPosition);
             treeViewAdapter.notifyItemRemoved(oldInstancePosition);
@@ -135,7 +135,7 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
     }
 
     public Stream<Node> getSelectedNodes() {
-        if (mNotDoneInstanceTreeNodes.isEmpty()) {
+        if (mChildTreeNodes.isEmpty()) {
             ArrayList<Node> selectedNodes = new ArrayList<>();
             if (mSelected)
                 selectedNodes.add(this);
@@ -143,8 +143,8 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         } else {
             Assert.assertTrue(!mSelected);
 
-            return Stream.of(Stream.of(mNotDoneInstanceTreeNodes)
-                    .filter(NotDoneInstanceTreeNode::isSelected)
+            return Stream.of(Stream.of(mChildTreeNodes)
+                    .filter(ChildTreeNode::isSelected)
                     .collect(Collectors.toList()));
         }
     }
@@ -156,7 +156,7 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        if (mNotDoneInstanceTreeNodes.isEmpty()) {
+        if (mChildTreeNodes.isEmpty()) {
             if (mSelected) {
                 mSelected = false;
                 treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
@@ -164,15 +164,15 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         } else {
             Assert.assertTrue(!mSelected);
 
-            List<NotDoneInstanceTreeNode> selected = getSelectedNodes()
-                    .map(node -> (NotDoneInstanceTreeNode) node)
+            List<ChildTreeNode> selected = getSelectedNodes()
+                    .map(node -> (ChildTreeNode) node)
                     .collect(Collectors.toList());
 
             if (!selected.isEmpty()) {
                 Assert.assertTrue(mNotDoneGroupNodeExpanded);
 
                 Stream.of(selected)
-                        .forEach(NotDoneInstanceTreeNode::unselect);
+                        .forEach(ChildTreeNode::unselect);
 
                 treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
             }
@@ -186,7 +186,7 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        if (mNotDoneInstanceTreeNodes.isEmpty()) {
+        if (mChildTreeNodes.isEmpty()) {
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         } else {
             treeViewAdapter.notifyItemRangeChanged(treeNodeCollection.getPosition(this) + 1, displayedSize() - 1);
@@ -194,19 +194,19 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
     }
 
     public void sort() {
-        Collections.sort(mNotDoneInstanceTreeNodes);
+        Collections.sort(mChildTreeNodes);
     }
 
-    public void setNotDoneInstanceTreeNodes(List<NotDoneInstanceTreeNode> notDoneInstanceTreeNodes) {
-        Assert.assertTrue(notDoneInstanceTreeNodes != null);
+    public void setNotDoneInstanceTreeNodes(List<ChildTreeNode> childTreeNodes) {
+        Assert.assertTrue(childTreeNodes != null);
 
-        mNotDoneInstanceTreeNodes = notDoneInstanceTreeNodes;
+        mChildTreeNodes = childTreeNodes;
 
         sort();
     }
 
-    public void addNotDoneInstanceNode(NotDoneInstanceTreeNode notDoneInstanceTreeNode) {
-        Assert.assertTrue(notDoneInstanceTreeNode != null);
+    public void addNotDoneInstanceNode(ChildTreeNode childTreeNode) {
+        Assert.assertTrue(childTreeNode != null);
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -214,13 +214,13 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        mNotDoneInstanceTreeNodes.add(notDoneInstanceTreeNode);
+        mChildTreeNodes.add(childTreeNode);
 
         sort();
 
         if (expanded()) {
             int newGroupPosition = treeNodeCollection.getPosition(this);
-            int newInstancePosition = treeNodeCollection.getPosition(notDoneInstanceTreeNode);
+            int newInstancePosition = treeNodeCollection.getPosition(childTreeNode);
 
             boolean last = (newGroupPosition + displayedSize() - 1 == newInstancePosition);
 
@@ -252,7 +252,8 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
         return treeViewAdapter;
     }
 
-    TreeNodeCollection getTreeNodeCollection() {
+    @Override
+    public TreeNodeCollection getTreeNodeCollection() {
         NotDoneGroupTreeCollection notDoneGroupTreeCollection = getNotDoneGroupTreeCollection();
         Assert.assertTrue(notDoneGroupTreeCollection != null);
 
@@ -290,7 +291,7 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
     }
 
     private void onLongClick() {
-        if (!mNotDoneInstanceTreeNodes.isEmpty())
+        if (!mChildTreeNodes.isEmpty())
             return;
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -392,11 +393,11 @@ public class NotDoneGroupTreeNode implements Node, NodeContainer, Comparable<Not
 
     @Override
     public List<Node> getSelectedChildren() {
-        Assert.assertTrue(!mNotDoneInstanceTreeNodes.isEmpty());
+        Assert.assertTrue(!mChildTreeNodes.isEmpty());
         Assert.assertTrue(!mSelected);
 
-        return Stream.of(mNotDoneInstanceTreeNodes)
-                .filter(NotDoneInstanceTreeNode::isSelected)
+        return Stream.of(mChildTreeNodes)
+                .filter(ChildTreeNode::isSelected)
                 .collect(Collectors.toList());
     }
 }

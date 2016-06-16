@@ -14,7 +14,7 @@ import java.util.List;
 public class DividerTreeNode implements Node, NodeContainer {
     private final DividerModelNode mDividerModelNode;
 
-    private List<DoneTreeNode> mDoneTreeNodes;
+    private List<ChildTreeNode> mChildTreeNodes;
 
     private boolean mDoneExpanded;
 
@@ -29,12 +29,12 @@ public class DividerTreeNode implements Node, NodeContainer {
         mTreeNodeCollectionReference = treeNodeCollectionReference;
     }
 
-    public void setDoneTreeNodes(List<DoneTreeNode> doneTreeNodes) {
-        Assert.assertTrue(doneTreeNodes != null);
+    public void setDoneTreeNodes(List<ChildTreeNode> childTreeNodes) {
+        Assert.assertTrue(childTreeNodes != null);
 
-        mDoneTreeNodes = doneTreeNodes;
+        mChildTreeNodes = childTreeNodes;
 
-        Collections.sort(mDoneTreeNodes);
+        Collections.sort(mChildTreeNodes);
     }
 
     @Override
@@ -48,21 +48,21 @@ public class DividerTreeNode implements Node, NodeContainer {
     }
 
     public int getTotalDoneCount() {
-        return mDoneTreeNodes.size();
+        return mChildTreeNodes.size();
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isEmpty() {
-        return mDoneTreeNodes.isEmpty();
+        return mChildTreeNodes.isEmpty();
     }
 
     @Override
     public int displayedSize() {
-        if (mDoneTreeNodes.isEmpty() || mDividerModelNode.hasActionMode()) {
+        if (mChildTreeNodes.isEmpty() || mDividerModelNode.hasActionMode()) {
             return 0;
         } else {
             if (mDoneExpanded) {
-                return 1 + mDoneTreeNodes.size();
+                return 1 + mChildTreeNodes.size();
             } else {
                 return 1;
             }
@@ -72,15 +72,15 @@ public class DividerTreeNode implements Node, NodeContainer {
     @Override
     public Node getNode(int position) {
         Assert.assertTrue(position >= 0);
-        Assert.assertTrue(!mDoneTreeNodes.isEmpty());
+        Assert.assertTrue(!mChildTreeNodes.isEmpty());
 
         if (position == 0) {
             return this;
         } else {
             Assert.assertTrue(mDoneExpanded);
-            Assert.assertTrue(position <= mDoneTreeNodes.size());
+            Assert.assertTrue(position <= mChildTreeNodes.size());
 
-            Node node = mDoneTreeNodes.get(position - 1);
+            Node node = mChildTreeNodes.get(position - 1);
             Assert.assertTrue(node != null);
 
             return node;
@@ -92,13 +92,13 @@ public class DividerTreeNode implements Node, NodeContainer {
         if (node == this)
             return 0;
 
-        if (!(node instanceof DoneTreeNode))
+        if (!(node instanceof ChildTreeNode))
             return -1;
 
-        DoneTreeNode doneTreeNode = (DoneTreeNode) node;
-        if (mDoneTreeNodes.contains(doneTreeNode)) {
+        ChildTreeNode childTreeNode = (ChildTreeNode) node;
+        if (mChildTreeNodes.contains(childTreeNode)) {
             Assert.assertTrue(mDoneExpanded);
-            return mDoneTreeNodes.indexOf(doneTreeNode) + 1;
+            return mChildTreeNodes.indexOf(childTreeNode) + 1;
         }
 
         return -1;
@@ -106,7 +106,7 @@ public class DividerTreeNode implements Node, NodeContainer {
 
     @SuppressWarnings("RedundantIfStatement")
     public boolean visible() {
-        if (mDoneTreeNodes.isEmpty())
+        if (mChildTreeNodes.isEmpty())
             return false;
 
         SelectionCallback selectionCallback = getSelectionCallback();
@@ -124,8 +124,8 @@ public class DividerTreeNode implements Node, NodeContainer {
         return mDoneExpanded;
     }
 
-    public void add(DoneTreeNode doneTreeNode, int oldInstancePosition) {
-        Assert.assertTrue(doneTreeNode != null);
+    public void add(ChildTreeNode childTreeNode, int oldInstancePosition) {
+        Assert.assertTrue(childTreeNode != null);
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -139,11 +139,11 @@ public class DividerTreeNode implements Node, NodeContainer {
             int oldDividerPosition = treeNodeCollection.getPosition(this);
             boolean bottomNotDone = (oldInstancePosition == oldDividerPosition);
 
-            mDoneTreeNodes.add(doneTreeNode);
+            mChildTreeNodes.add(childTreeNode);
 
-            Collections.sort(mDoneTreeNodes);
+            Collections.sort(mChildTreeNodes);
 
-            int newInstancePosition = treeNodeCollection.getPosition(doneTreeNode);
+            int newInstancePosition = treeNodeCollection.getPosition(childTreeNode);
             treeViewAdapter.notifyItemInserted(newInstancePosition);
 
             if (bottomNotDone && treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() > 0) {
@@ -151,11 +151,11 @@ public class DividerTreeNode implements Node, NodeContainer {
                 treeViewAdapter.notifyItemChanged(newDividerPosition - 1);
             }
         } else {
-            mDoneTreeNodes.add(doneTreeNode);
+            mChildTreeNodes.add(childTreeNode);
 
-            Collections.sort(mDoneTreeNodes);
+            Collections.sort(mChildTreeNodes);
 
-            if (mDoneTreeNodes.size() == 1) {
+            if (mChildTreeNodes.size() == 1) {
                 Assert.assertTrue(!mDoneExpanded);
                 int newDividerPosition = treeNodeCollection.getPosition(this);
                 treeViewAdapter.notifyItemInserted(newDividerPosition);
@@ -165,15 +165,15 @@ public class DividerTreeNode implements Node, NodeContainer {
                 }
             } else {
                 if (mDoneExpanded) {
-                    int newInstancePosition = treeNodeCollection.getPosition(doneTreeNode);
+                    int newInstancePosition = treeNodeCollection.getPosition(childTreeNode);
                     treeViewAdapter.notifyItemInserted(newInstancePosition);
                 }
             }
         }
     }
 
-    public void remove(DoneTreeNode doneTreeNode) {
-        Assert.assertTrue(doneTreeNode != null);
+    public void remove(ChildTreeNode childTreeNode) {
+        Assert.assertTrue(childTreeNode != null);
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -181,16 +181,16 @@ public class DividerTreeNode implements Node, NodeContainer {
         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        Assert.assertTrue(mDoneTreeNodes.contains(doneTreeNode));
+        Assert.assertTrue(mChildTreeNodes.contains(childTreeNode));
 
         Assert.assertTrue(displayedSize() > 1);
 
         if (treeNodeCollection.mNotDoneGroupTreeCollection.displayedSize() == 0) {
-            int oldDoneTreePosition = treeNodeCollection.getPosition(doneTreeNode);
+            int oldDoneTreePosition = treeNodeCollection.getPosition(childTreeNode);
 
-            mDoneTreeNodes.remove(doneTreeNode);
+            mChildTreeNodes.remove(childTreeNode);
 
-            if (mDoneTreeNodes.isEmpty()) {
+            if (mChildTreeNodes.isEmpty()) {
                 mDoneExpanded = false;
 
                 int dividerPosition = treeNodeCollection.getPosition(this);
@@ -201,12 +201,12 @@ public class DividerTreeNode implements Node, NodeContainer {
                 treeViewAdapter.notifyItemRemoved(oldDoneTreePosition);
             }
         } else {
-            int oldDoneTreePosition = treeNodeCollection.getPosition(doneTreeNode);
+            int oldDoneTreePosition = treeNodeCollection.getPosition(childTreeNode);
             int oldDividerPosition = treeNodeCollection.getPosition(this);
 
-            mDoneTreeNodes.remove(doneTreeNode);
+            mChildTreeNodes.remove(childTreeNode);
 
-            if (mDoneTreeNodes.isEmpty()) {
+            if (mChildTreeNodes.isEmpty()) {
                 mDoneExpanded = false;
 
                 int dividerPosition = treeNodeCollection.getPosition(this);
@@ -223,7 +223,8 @@ public class DividerTreeNode implements Node, NodeContainer {
         }
     }
 
-    TreeNodeCollection getTreeNodeCollection() {
+    @Override
+    public TreeNodeCollection getTreeNodeCollection() {
         TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
         Assert.assertTrue(treeNodeCollection != null);
 

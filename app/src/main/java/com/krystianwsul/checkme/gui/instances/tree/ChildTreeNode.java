@@ -9,17 +9,22 @@ import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
-public abstract class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
+public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
     protected final ChildModelNode mChildModelNode;
+    protected final WeakReference<Node> mParentReference;
 
     private boolean mSelected = false;
 
-    public ChildTreeNode(ChildModelNode childModelNode, ArrayList<InstanceKey> selectedNodes) {
+    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<Node> parentReference, ArrayList<InstanceKey> selectedNodes) {
         Assert.assertTrue(childModelNode != null);
+        Assert.assertTrue(parentReference != null);
 
         mChildModelNode = childModelNode;
+        mParentReference = parentReference;
 
         if (selectedNodes != null && mChildModelNode.isSelected(selectedNodes)) {
             Assert.assertTrue(mChildModelNode.selectable());
@@ -94,9 +99,22 @@ public abstract class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
-    protected abstract TreeNodeCollection getTreeNodeCollection();
+    public TreeNodeCollection getTreeNodeCollection() {
+        Node parent = getParent();
+        Assert.assertTrue(parent != null);
 
-    protected abstract Node getParent();
+        TreeNodeCollection treeNodeCollection = parent.getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        return treeNodeCollection;
+    }
+
+    private Node getParent() {
+        Node parent = mParentReference.get();
+        Assert.assertTrue(parent != null);
+
+        return parent;
+    }
 
     private TreeViewAdapter getTreeViewAdapter() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -141,5 +159,52 @@ public abstract class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
             mSelected = false;
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         }
+    }
+
+    @Override
+    public void update() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+    }
+
+    public boolean getSeparatorVisibility() {
+        Node parent = getParent();
+        Assert.assertTrue(parent != null);
+
+        Assert.assertTrue(parent.expanded());
+
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        boolean lastInGroup = (parent.getPosition(this) == parent.displayedSize() - 1);
+
+        boolean lastInAdapter = (treeNodeCollection.getPosition(this) == treeNodeCollection.displayedSize() - 1);
+
+        return (lastInGroup && !lastInAdapter);
+    }
+
+    @Override
+    public List<Node> getSelectedChildren() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean expanded() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int displayedSize() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getPosition(Node node) {
+        throw new UnsupportedOperationException();
     }
 }

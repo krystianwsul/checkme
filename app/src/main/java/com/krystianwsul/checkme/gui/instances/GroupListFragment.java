@@ -37,9 +37,9 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
+import com.krystianwsul.checkme.gui.instances.tree.ChildModelNode;
 import com.krystianwsul.checkme.gui.instances.tree.DividerModelNode;
 import com.krystianwsul.checkme.gui.instances.tree.DividerTreeNode;
-import com.krystianwsul.checkme.gui.instances.tree.DoneModelNode;
 import com.krystianwsul.checkme.gui.instances.tree.DoneTreeNode;
 import com.krystianwsul.checkme.gui.instances.tree.ModelNodeCollection;
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupModelCollection;
@@ -2009,7 +2009,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     }
 
                     @Override
-                    public int compareTo(@NonNull NotDoneInstanceModelNode another) {
+                    public int compareTo(@NonNull ChildModelNode another) {
                         return Integer.valueOf(mInstanceData.InstanceKey.TaskId).compareTo(((NotDoneInstanceNode) another).mInstanceData.InstanceKey.TaskId);
                     }
 
@@ -2129,7 +2129,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
             }
 
-            public static class DoneInstanceNode extends GroupHolderNode implements DoneModelNode {
+            public static class DoneInstanceNode extends GroupHolderNode implements ChildModelNode {
                 private final WeakReference<DividerNode> mDividerNodeReference;
 
                 private WeakReference<DoneTreeNode> mDoneTreeNodeReference;
@@ -2334,7 +2334,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
-                public int compareTo(@NonNull DoneModelNode another) {
+                public int compareTo(@NonNull ChildModelNode another) {
                     return -mInstanceData.Done.compareTo(((DoneInstanceNode) another).mInstanceData.Done); // negate
                 }
             }

@@ -12,7 +12,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class NotDoneInstanceTreeNode implements GroupListFragment.Node, Comparable<NotDoneInstanceTreeNode> {
+public class NotDoneInstanceTreeNode extends ChildTreeNode implements GroupListFragment.Node, Comparable<NotDoneInstanceTreeNode> {
     private final NotDoneInstanceModelNode mNotDoneInstanceModelNode;
 
     private final WeakReference<NotDoneGroupTreeNode> mNotDoneGroupTreeNodeReference;

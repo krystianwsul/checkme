@@ -6,27 +6,27 @@ import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
-public class DoneTreeNode implements GroupListFragment.Node, Comparable<DoneTreeNode> {
-    private final DoneModelNode mDoneModelNode;
+public class DoneTreeNode extends ChildTreeNode implements GroupListFragment.Node, Comparable<DoneTreeNode> {
+    private final ChildModelNode mChildModelNode;
 
-    public DoneTreeNode(DoneModelNode doneModelNode) {
-        Assert.assertTrue(doneModelNode != null);
-        mDoneModelNode = doneModelNode;
+    public DoneTreeNode(ChildModelNode childModelNode) {
+        Assert.assertTrue(childModelNode != null);
+        mChildModelNode = childModelNode;
     }
 
     @Override
     public void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder) {
-        mDoneModelNode.onBindViewHolder(abstractHolder);
+        mChildModelNode.onBindViewHolder(abstractHolder);
     }
 
     @Override
     public int getItemViewType() {
-        return mDoneModelNode.getItemViewType();
+        return mChildModelNode.getItemViewType();
     }
 
     @Override
     public int compareTo(@NonNull DoneTreeNode another) {
-        return mDoneModelNode.compareTo(another.mDoneModelNode);
+        return mChildModelNode.compareTo(another.mChildModelNode);
     }
 
     @Override

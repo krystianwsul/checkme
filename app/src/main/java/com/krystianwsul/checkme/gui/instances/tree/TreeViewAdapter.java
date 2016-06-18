@@ -53,10 +53,6 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
         return mTreeModelAdapter;
     }
 
-    public GroupListFragment.ExpansionState getExpansionState() {
-        return mTreeNodeCollection.getExpansionState();
-    }
-
     public void setTreeNodeCollection(TreeNodeCollection treeNodeCollection) {
         Assert.assertTrue(treeNodeCollection != null);
 

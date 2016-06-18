@@ -1,12 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.utils.time.TimeStamp;
-
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TreeNodeCollection {
@@ -58,11 +54,6 @@ public class TreeNodeCollection {
 
     public int getItemCount() {
         return mNotDoneGroupTreeCollection.displayedSize() + mDividerTreeNode.displayedSize();
-    }
-
-    public GroupListFragment.ExpansionState getExpansionState() {
-        ArrayList<TimeStamp> expandedGroups = mNotDoneGroupTreeCollection.getExpandedGroups();
-        return new GroupListFragment.ExpansionState(mDividerTreeNode.expanded(), expandedGroups);
     }
 
     public int getItemViewType(int position) {

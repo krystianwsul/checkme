@@ -126,8 +126,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public final TimeStamp InstanceTimeStamp;
         public boolean TaskCurrent;
         public final boolean IsRootInstance;
-        public final Boolean IsRootTask;
-        public final boolean Exists;
+        public Boolean IsRootTask;
+        public boolean Exists;
 
         public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String children, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists) {
             Assert.assertTrue(instanceKey != null);

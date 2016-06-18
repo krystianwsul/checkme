@@ -5,12 +5,10 @@ import android.view.View;
 
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
@@ -19,17 +17,15 @@ public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
 
     private boolean mSelected = false;
 
-    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<Node> parentReference, ArrayList<InstanceKey> selectedNodes) {
+    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<Node> parentReference, boolean selected) {
         Assert.assertTrue(childModelNode != null);
         Assert.assertTrue(parentReference != null);
 
         mChildModelNode = childModelNode;
         mParentReference = parentReference;
+        mSelected = selected;
 
-        if (selectedNodes != null && mChildModelNode.isSelected(selectedNodes)) {
-            Assert.assertTrue(mChildModelNode.selectable());
-            mSelected = true;
-        }
+        Assert.assertTrue(!mSelected || mChildModelNode.selectable());
     }
 
     @Override

@@ -2,12 +2,10 @@ package com.krystianwsul.checkme.gui.instances.tree;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,6 +51,9 @@ public class NotDoneGroupTreeCollection {
 
         treeViewAdapter.notifyItemRemoved(oldPosition);
 
+        if (oldPosition > 0)
+            treeViewAdapter.notifyItemChanged(oldPosition - 1);
+
         return oldPosition;
     }
 
@@ -61,11 +62,6 @@ public class NotDoneGroupTreeCollection {
         for (NotDoneGroupTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes)
             displayedSize += notDoneGroupTreeNode.displayedSize();
         return displayedSize;
-    }
-
-    public void updateCheckBoxes() {
-        Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(NotDoneGroupTreeNode::updateCheckBoxes);
     }
 
     public Node getNode(int position) {
@@ -92,13 +88,6 @@ public class NotDoneGroupTreeCollection {
         }
 
         return -1;
-    }
-
-    public ArrayList<TimeStamp> getExpandedGroups() {
-        return Stream.of(mNotDoneGroupTreeNodes)
-                .filter(NotDoneGroupTreeNode::expanded)
-                .map(notDoneGroupTreeNode -> notDoneGroupTreeNode.getNotDoneGroupModelNode().getExactTimeStamp().toTimeStamp())
-                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public void setNotDoneGroupTreeNodes(List<NotDoneGroupTreeNode> notDoneGroupTreeNodes) {
@@ -147,11 +136,13 @@ public class NotDoneGroupTreeCollection {
     }
 
     public void onCreateActionMode() {
-        updateCheckBoxes();
+        Stream.of(mNotDoneGroupTreeNodes)
+                .forEach(NotDoneGroupTreeNode::onCreateActionMode);
     }
 
     public void onDestroyActionMode() {
-        updateCheckBoxes();
+        Stream.of(mNotDoneGroupTreeNodes)
+                .forEach(NotDoneGroupTreeNode::onDestroyActionMode);
     }
 
     public NotDoneGroupModelCollection getNotDoneGroupModelCollection() {

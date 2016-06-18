@@ -10,11 +10,14 @@ import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNode> {
+public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNode> {
+    private final WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
+
     protected final RootModelNode mRootModelNode;
 
     protected List<ChildTreeNode> mChildTreeNodes;
@@ -23,12 +26,14 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
 
     protected boolean mSelected = false;
 
-    public RootTreeNode(RootModelNode rootModelNode, boolean expanded, boolean selected) {
+    public RootTreeNode(RootModelNode rootModelNode, boolean expanded, boolean selected, WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
         Assert.assertTrue(rootModelNode != null);
+        Assert.assertTrue(treeNodeCollectionReference != null);
 
         mRootModelNode = rootModelNode;
         mExpanded = expanded;
         mSelected = selected;
+        mTreeNodeCollectionReference = treeNodeCollectionReference;
     }
 
     @Override
@@ -54,7 +59,7 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
         SelectionCallback selectionCallback = getSelectionCallback();
         Assert.assertTrue(selectionCallback != null);
 
-        if ((!visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!visibleDuringActionMode() && selectionCallback.hasActionMode())) {
+        if ((!mRootModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mRootModelNode.visibleDuringActionMode() && selectionCallback.hasActionMode())) {
             return 0;
         } else {
             if (mExpanded) {
@@ -65,8 +70,6 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
         }
     }
 
-    protected abstract SelectionCallback getSelectionCallback();
-
     @Override
     public boolean expanded() {
         return mExpanded;
@@ -75,8 +78,8 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
     @Override
     public Node getNode(int position) {
         Assert.assertTrue(position >= 0);
-        Assert.assertTrue(!mChildTreeNodes.isEmpty() || visibleWhenEmpty());
-        Assert.assertTrue(!getSelectionCallback().hasActionMode() || visibleDuringActionMode());
+        Assert.assertTrue(!mChildTreeNodes.isEmpty() || mRootModelNode.visibleWhenEmpty());
+        Assert.assertTrue(!getSelectionCallback().hasActionMode() || mRootModelNode.visibleDuringActionMode());
         Assert.assertTrue(position < displayedSize());
 
         if (position == 0)
@@ -210,14 +213,14 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
             mExpanded = false;
 
             if (oldParentPosition == 0) {
-                if (visibleWhenEmpty()) {
+                if (mRootModelNode.visibleWhenEmpty()) {
                     treeViewAdapter.notifyItemChanged(oldParentPosition);
                     treeViewAdapter.notifyItemRemoved(oldParentPosition + 1);
                 } else {
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 2);
                 }
             } else {
-                if (visibleWhenEmpty()) {
+                if (mRootModelNode.visibleWhenEmpty()) {
                     treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
                     treeViewAdapter.notifyItemRemoved(oldParentPosition + 1);
                 } else {
@@ -252,10 +255,6 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
         return Stream.of(selectedNodes);
     }
 
-    protected abstract boolean visibleDuringActionMode();
-
-    protected abstract boolean visibleWhenEmpty();
-
     public void add(ChildTreeNode childTreeNode) {
         Assert.assertTrue(childTreeNode != null);
 
@@ -266,7 +265,7 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
         Assert.assertTrue(treeViewAdapter != null);
 
         if (mExpanded) {
-            if (visibleWhenEmpty()) {
+            if (mRootModelNode.visibleWhenEmpty()) {
                 int oldParentPosition = treeNodeCollection.getPosition(this);
 
                 mChildTreeNodes.add(childTreeNode);
@@ -325,7 +324,7 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
 
             int newParentPosition = treeNodeCollection.getPosition(this);
 
-            if (!visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
+            if (!mRootModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
                 treeViewAdapter.notifyItemInserted(newParentPosition);
 
                 if (newParentPosition > 0)
@@ -438,7 +437,7 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
         int oldPosition = treeNodeCollection.getPosition(this);
         Assert.assertTrue(oldPosition >= 0);
 
-        if (visibleDuringActionMode()) {
+        if (mRootModelNode.visibleDuringActionMode()) {
             treeViewAdapter.notifyItemRangeChanged(oldPosition, displayedSize());
         } else {
             if (mChildTreeNodes.size() > 0) {
@@ -463,7 +462,7 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
         int position = treeNodeCollection.getPosition(this);
         Assert.assertTrue(position >= 0);
 
-        if (visibleDuringActionMode()) {
+        if (mRootModelNode.visibleDuringActionMode()) {
             treeViewAdapter.notifyItemRangeChanged(position, displayedSize());
         } else {
             if (mChildTreeNodes.size() > 0) {
@@ -483,5 +482,30 @@ public abstract class RootTreeNode implements Node, NodeContainer, Comparable<Ro
         Assert.assertTrue(!mSelected);
 
         mSelected = true;
+    }
+
+    @Override
+    public TreeNodeCollection getTreeNodeCollection() {
+        TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        return treeNodeCollection;
+    }
+
+    protected TreeViewAdapter getTreeViewAdapter() {
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+        Assert.assertTrue(treeNodeCollection != null);
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter;
+    }
+
+    protected SelectionCallback getSelectionCallback() {
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        return treeViewAdapter.getSelectionCallback();
     }
 }

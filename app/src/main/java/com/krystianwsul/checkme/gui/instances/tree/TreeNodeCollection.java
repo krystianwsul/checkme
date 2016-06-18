@@ -8,7 +8,7 @@ import java.util.List;
 public class TreeNodeCollection {
     NotDoneGroupTreeCollection mNotDoneGroupTreeCollection;
 
-    DividerTreeNode mDividerTreeNode;
+    RootTreeNode mDividerTreeNode;
 
     private final ModelNodeCollection mModelNodeCollection;
 
@@ -63,7 +63,7 @@ public class TreeNodeCollection {
         return node.getItemViewType();
     }
 
-    public void setNodes(NotDoneGroupTreeCollection notDoneGroupTreeCollection, DividerTreeNode dividerTreeNode) {
+    public void setNodes(NotDoneGroupTreeCollection notDoneGroupTreeCollection, RootTreeNode dividerTreeNode) {
         Assert.assertTrue(notDoneGroupTreeCollection != null);
         Assert.assertTrue(dividerTreeNode != null);
 

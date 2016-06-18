@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class NotDoneGroupTreeCollection {
-    private List<NotDoneGroupTreeNode> mNotDoneGroupTreeNodes;
+    private List<RootTreeNode> mNotDoneGroupTreeNodes;
 
     private final NotDoneGroupModelCollection mNotDoneGroupModelCollection;
 
@@ -26,16 +26,16 @@ public class NotDoneGroupTreeCollection {
 
     public void unselect() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(NotDoneGroupTreeNode::unselect);
+                .forEach(RootTreeNode::unselect);
     }
 
     public List<Node> getSelectedNodes() {
         return Stream.of(mNotDoneGroupTreeNodes)
-                .flatMap(NotDoneGroupTreeNode::getSelectedNodes)
+                .flatMap(RootTreeNode::getSelectedNodes)
                 .collect(Collectors.toList());
     }
 
-    public int remove(NotDoneGroupTreeNode notDoneGroupTreeNode) {
+    public int remove(RootTreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
         Assert.assertTrue(mNotDoneGroupTreeNodes.contains(notDoneGroupTreeNode));
 
@@ -59,7 +59,7 @@ public class NotDoneGroupTreeCollection {
 
     public int displayedSize() {
         int displayedSize = 0;
-        for (NotDoneGroupTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes)
+        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes)
             displayedSize += notDoneGroupTreeNode.displayedSize();
         return displayedSize;
     }
@@ -68,7 +68,7 @@ public class NotDoneGroupTreeCollection {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
 
-        for (NotDoneGroupTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
+        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
             if (position < notDoneGroupTreeNode.displayedSize())
                 return notDoneGroupTreeNode.getNode(position);
 
@@ -80,7 +80,7 @@ public class NotDoneGroupTreeCollection {
 
     public int getPosition(Node node) {
         int offset = 0;
-        for (NotDoneGroupTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
+        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
             int position = notDoneGroupTreeNode.getPosition(node);
             if (position >= 0)
                 return offset + position;
@@ -90,7 +90,7 @@ public class NotDoneGroupTreeCollection {
         return -1;
     }
 
-    public void setNotDoneGroupTreeNodes(List<NotDoneGroupTreeNode> notDoneGroupTreeNodes) {
+    public void setNotDoneGroupTreeNodes(List<RootTreeNode> notDoneGroupTreeNodes) {
         Assert.assertTrue(notDoneGroupTreeNodes != null);
 
         mNotDoneGroupTreeNodes = notDoneGroupTreeNodes;
@@ -102,7 +102,7 @@ public class NotDoneGroupTreeCollection {
         Collections.sort(mNotDoneGroupTreeNodes);
     }
 
-    public void addNotDoneGroupTreeNode(NotDoneGroupTreeNode notDoneGroupTreeNode) {
+    public void addNotDoneGroupTreeNode(RootTreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
 
         mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
@@ -137,12 +137,12 @@ public class NotDoneGroupTreeCollection {
 
     public void onCreateActionMode() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(NotDoneGroupTreeNode::onCreateActionMode);
+                .forEach(RootTreeNode::onCreateActionMode);
     }
 
     public void onDestroyActionMode() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(NotDoneGroupTreeNode::onDestroyActionMode);
+                .forEach(RootTreeNode::onDestroyActionMode);
     }
 
     public NotDoneGroupModelCollection getNotDoneGroupModelCollection() {

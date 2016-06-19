@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TreeNodeCollection implements NodeContainer {
-    private List<RootTreeNode> mNotDoneGroupTreeNodes;
+    private List<TreeNode> mNotDoneGroupTreeNodes;
 
     private final ModelNodeCollection mModelNodeCollection;
 
@@ -28,7 +28,7 @@ public class TreeNodeCollection implements NodeContainer {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
 
-        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
+        for (TreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
             if (position < notDoneGroupTreeNode.displayedSize())
                 return notDoneGroupTreeNode.getNode(position);
 
@@ -40,7 +40,7 @@ public class TreeNodeCollection implements NodeContainer {
 
     public int getPosition(TreeNode treeNode) {
         int offset = 0;
-        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
+        for (TreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
             int position = notDoneGroupTreeNode.getPosition(treeNode);
             if (position >= 0)
                 return offset + position;
@@ -57,7 +57,7 @@ public class TreeNodeCollection implements NodeContainer {
         return treeNode.getItemViewType();
     }
 
-    public void setNodes(List<RootTreeNode> rootTreeNodes) {
+    public void setNodes(List<TreeNode> rootTreeNodes) {
         Assert.assertTrue(rootTreeNodes != null);
 
         mNotDoneGroupTreeNodes = rootTreeNodes;
@@ -74,33 +74,33 @@ public class TreeNodeCollection implements NodeContainer {
 
     public int displayedSize() {
         int displayedSize = 0;
-        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes)
+        for (TreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes)
             displayedSize += notDoneGroupTreeNode.displayedSize();
         return displayedSize;
     }
 
     public List<TreeNode> getSelectedNodes() {
         return Stream.of(mNotDoneGroupTreeNodes)
-                .flatMap(RootTreeNode::getSelectedNodes)
+                .flatMap(TreeNode::getSelectedNodes)
                 .collect(Collectors.toList());
     }
 
     public void onCreateActionMode() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(RootTreeNode::onCreateActionMode);
+                .forEach(TreeNode::onCreateActionMode);
     }
 
     public void onDestroyActionMode() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(RootTreeNode::onDestroyActionMode);
+                .forEach(TreeNode::onDestroyActionMode);
     }
 
     public void unselect() {
         Stream.of(mNotDoneGroupTreeNodes)
-                .forEach(RootTreeNode::unselect);
+                .forEach(TreeNode::unselect);
     }
 
-    public void addNotDoneGroupTreeNode(RootTreeNode notDoneGroupTreeNode) {
+    public void addNotDoneGroupTreeNode(TreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
 
         mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
@@ -113,7 +113,7 @@ public class TreeNodeCollection implements NodeContainer {
         treeViewAdapter.notifyItemInserted(getPosition(notDoneGroupTreeNode));
     }
 
-    public void remove(RootTreeNode notDoneGroupTreeNode) {
+    public void remove(TreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
         Assert.assertTrue(mNotDoneGroupTreeNodes.contains(notDoneGroupTreeNode));
 

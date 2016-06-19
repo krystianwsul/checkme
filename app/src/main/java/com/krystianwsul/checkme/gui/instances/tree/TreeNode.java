@@ -2,10 +2,24 @@ package com.krystianwsul.checkme.gui.instances.tree;
 
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
-public abstract class TreeNode {
-    public abstract void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);
+import junit.framework.Assert;
 
-    public abstract int getItemViewType();
+public abstract class TreeNode {
+    protected final ModelNode mModelNode;
+
+    public TreeNode(ModelNode modelNode) {
+        Assert.assertTrue(modelNode != null);
+
+        mModelNode = modelNode;
+    }
+
+    public void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder) {
+        mModelNode.onBindViewHolder(abstractHolder);
+    }
+
+    public int getItemViewType() {
+        return mModelNode.getItemViewType();
+    }
 
     public abstract void update();
 

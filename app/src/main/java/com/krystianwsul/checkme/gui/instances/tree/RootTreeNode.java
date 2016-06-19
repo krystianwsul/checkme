@@ -6,7 +6,6 @@ import android.view.View;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
@@ -17,7 +16,6 @@ import java.util.List;
 
 public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<RootTreeNode> {
     private final WeakReference<NodeContainer> mParentReference;
-    private final RootModelNode mRootModelNode;
 
     private List<ChildTreeNode> mChildTreeNodes;
 
@@ -25,26 +23,16 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
 
     private boolean mSelected = false;
 
-    public RootTreeNode(RootModelNode rootModelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
-        Assert.assertTrue(rootModelNode != null);
+    public RootTreeNode(ModelNode modelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
+        super(modelNode);
+
         Assert.assertTrue(parentReference != null);
 
-        mRootModelNode = rootModelNode;
         mParentReference = parentReference;
         mExpanded = expanded;
         mSelected = selected;
 
-        Assert.assertTrue(!mSelected || mRootModelNode.selectable());
-    }
-
-    @Override
-    public void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder) {
-        mRootModelNode.onBindViewHolder(abstractHolder);
-    }
-
-    @Override
-    public int getItemViewType() {
-        return mRootModelNode.getItemViewType();
+        Assert.assertTrue(!mSelected || mModelNode.selectable());
     }
 
     public void setChildTreeNodes(List<ChildTreeNode> childTreeNodes) {
@@ -60,7 +48,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
         SelectionCallback selectionCallback = getSelectionCallback();
         Assert.assertTrue(selectionCallback != null);
 
-        if ((!mRootModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mRootModelNode.visibleDuringActionMode() && selectionCallback.hasActionMode())) {
+        if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mModelNode.visibleDuringActionMode() && selectionCallback.hasActionMode())) {
             return 0;
         } else {
             if (mExpanded) {
@@ -79,8 +67,8 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
     @Override
     public TreeNode getNode(int position) {
         Assert.assertTrue(position >= 0);
-        Assert.assertTrue(!mChildTreeNodes.isEmpty() || mRootModelNode.visibleWhenEmpty());
-        Assert.assertTrue(!getSelectionCallback().hasActionMode() || mRootModelNode.visibleDuringActionMode());
+        Assert.assertTrue(!mChildTreeNodes.isEmpty() || mModelNode.visibleWhenEmpty());
+        Assert.assertTrue(!getSelectionCallback().hasActionMode() || mModelNode.visibleDuringActionMode());
         Assert.assertTrue(position < displayedSize());
 
         if (position == 0)
@@ -162,13 +150,13 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
             if (selectionCallback.hasActionMode()) {
                 onLongClick();
             } else {
-                mRootModelNode.onClick();
+                mModelNode.onClick();
             }
         };
     }
 
     private void onLongClick() {
-        if (!mRootModelNode.selectable())
+        if (!mModelNode.selectable())
             return;
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -214,14 +202,14 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
             mExpanded = false;
 
             if (oldParentPosition == 0) {
-                if (mRootModelNode.visibleWhenEmpty()) {
+                if (mModelNode.visibleWhenEmpty()) {
                     treeViewAdapter.notifyItemChanged(oldParentPosition);
                     treeViewAdapter.notifyItemRemoved(oldParentPosition + 1);
                 } else {
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 2);
                 }
             } else {
-                if (mRootModelNode.visibleWhenEmpty()) {
+                if (mModelNode.visibleWhenEmpty()) {
                     treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
                     treeViewAdapter.notifyItemRemoved(oldParentPosition + 1);
                 } else {
@@ -242,7 +230,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
     }
 
     public Stream<TreeNode> getSelectedNodes() {
-        Assert.assertTrue(!mSelected || mRootModelNode.selectable());
+        Assert.assertTrue(!mSelected || mModelNode.selectable());
 
         ArrayList<TreeNode> selectedTreeNodes = new ArrayList<>();
 
@@ -266,7 +254,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
         Assert.assertTrue(treeViewAdapter != null);
 
         if (mExpanded) {
-            if (mRootModelNode.visibleWhenEmpty()) {
+            if (mModelNode.visibleWhenEmpty()) {
                 int oldParentPosition = treeNodeCollection.getPosition(this);
 
                 mChildTreeNodes.add(childTreeNode);
@@ -325,7 +313,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
 
             int newParentPosition = treeNodeCollection.getPosition(this);
 
-            if (!mRootModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
+            if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
                 treeViewAdapter.notifyItemInserted(newParentPosition);
 
                 if (newParentPosition > 0)
@@ -370,8 +358,8 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
         return mSelected;
     }
 
-    public RootModelNode getRootModelNode() {
-        return mRootModelNode;
+    public ModelNode getModelNode() {
+        return mModelNode;
     }
 
     @Override
@@ -386,11 +374,11 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
 
     @Override
     public int compareTo(@NonNull RootTreeNode another) {
-        return mRootModelNode.compareTo(another.mRootModelNode);
+        return mModelNode.compareTo(another.mModelNode);
     }
 
     public void unselect() {
-        Assert.assertTrue(!mSelected || mRootModelNode.selectable());
+        Assert.assertTrue(!mSelected || mModelNode.selectable());
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
@@ -399,7 +387,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
         Assert.assertTrue(treeViewAdapter != null);
 
         if (mSelected) {
-            Assert.assertTrue(mRootModelNode.selectable());
+            Assert.assertTrue(mModelNode.selectable());
 
             mSelected = false;
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
@@ -429,7 +417,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
         int oldPosition = treeNodeCollection.getPosition(this);
         Assert.assertTrue(oldPosition >= 0);
 
-        if (mRootModelNode.visibleDuringActionMode()) {
+        if (mModelNode.visibleDuringActionMode()) {
             treeViewAdapter.notifyItemRangeChanged(oldPosition, displayedSize());
         } else {
             if (mChildTreeNodes.size() > 0) {
@@ -454,7 +442,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
         int position = treeNodeCollection.getPosition(this);
         Assert.assertTrue(position >= 0);
 
-        if (mRootModelNode.visibleDuringActionMode()) {
+        if (mModelNode.visibleDuringActionMode()) {
             treeViewAdapter.notifyItemRangeChanged(position, displayedSize());
         } else {
             if (mChildTreeNodes.size() > 0) {
@@ -470,7 +458,7 @@ public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<
     }
 
     public void select() {
-        Assert.assertTrue(mRootModelNode.selectable());
+        Assert.assertTrue(mModelNode.selectable());
         Assert.assertTrue(!mSelected);
 
         mSelected = true;

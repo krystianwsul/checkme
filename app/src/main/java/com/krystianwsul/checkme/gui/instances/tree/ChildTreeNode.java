@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
@@ -13,7 +12,6 @@ import java.util.List;
 
 public class ChildTreeNode extends TreeNode implements Comparable<ChildTreeNode> {
     private final WeakReference<NodeContainer> mParentReference;
-    private final ChildModelNode mChildModelNode;
 
     private List<ChildTreeNode> mChildTreeNodes;
 
@@ -21,31 +19,21 @@ public class ChildTreeNode extends TreeNode implements Comparable<ChildTreeNode>
 
     private boolean mSelected = false;
 
-    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
-        Assert.assertTrue(childModelNode != null);
+    public ChildTreeNode(ModelNode modelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
+        super(modelNode);
+
         Assert.assertTrue(parentReference != null);
 
-        mChildModelNode = childModelNode;
         mParentReference = parentReference;
         mExpanded = expanded;
         mSelected = selected;
 
-        Assert.assertTrue(!mSelected || mChildModelNode.selectable());
-    }
-
-    @Override
-    public void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder) {
-        mChildModelNode.onBindViewHolder(abstractHolder);
-    }
-
-    @Override
-    public int getItemViewType() {
-        return mChildModelNode.getItemViewType();
+        Assert.assertTrue(!mSelected || mModelNode.selectable());
     }
 
     @Override
     public int compareTo(@NonNull ChildTreeNode another) {
-        return mChildModelNode.compareTo(another.mChildModelNode);
+        return mModelNode.compareTo(another.mModelNode);
     }
 
     public View.OnLongClickListener getOnLongClickListener() {
@@ -63,12 +51,12 @@ public class ChildTreeNode extends TreeNode implements Comparable<ChildTreeNode>
             if (selectionCallback.hasActionMode())
                 onLongClick();
             else
-                mChildModelNode.onClick();
+                mModelNode.onClick();
         };
     }
 
     private void onLongClick() {
-        if (!mChildModelNode.selectable())
+        if (!mModelNode.selectable())
             return;
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -137,12 +125,12 @@ public class ChildTreeNode extends TreeNode implements Comparable<ChildTreeNode>
         return selectionCallback;
     }
 
-    public ChildModelNode getChildModelNode() {
-        return mChildModelNode;
+    public ModelNode getModelNode() {
+        return mModelNode;
     }
 
     public boolean isSelected() {
-        Assert.assertTrue(!mSelected || mChildModelNode.selectable());
+        Assert.assertTrue(!mSelected || mModelNode.selectable());
 
         return mSelected;
     }
@@ -155,7 +143,7 @@ public class ChildTreeNode extends TreeNode implements Comparable<ChildTreeNode>
         Assert.assertTrue(treeViewAdapter != null);
 
         if (mSelected) {
-            Assert.assertTrue(mChildModelNode.selectable());
+            Assert.assertTrue(mModelNode.selectable());
 
             mSelected = false;
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));

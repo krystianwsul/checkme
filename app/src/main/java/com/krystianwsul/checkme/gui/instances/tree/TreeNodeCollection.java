@@ -1,14 +1,16 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
+
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 
 public class TreeNodeCollection {
-    NotDoneGroupTreeCollection mNotDoneGroupTreeCollection;
-
-    RootTreeNode mDividerTreeNode;
+    private List<RootTreeNode> mNotDoneGroupTreeNodes;
 
     private final ModelNodeCollection mModelNodeCollection;
 
@@ -24,36 +26,28 @@ public class TreeNodeCollection {
 
     public Node getNode(int position) {
         Assert.assertTrue(position >= 0);
+        Assert.assertTrue(position < displayedSize());
 
-        if (position < mNotDoneGroupTreeCollection.displayedSize())
-            return mNotDoneGroupTreeCollection.getNode(position);
+        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
+            if (position < notDoneGroupTreeNode.displayedSize())
+                return notDoneGroupTreeNode.getNode(position);
 
-        Assert.assertTrue(!mDividerTreeNode.isEmpty());
+            position = position - notDoneGroupTreeNode.displayedSize();
+        }
 
-        int newPosition = position - mNotDoneGroupTreeCollection.displayedSize();
-        Assert.assertTrue(newPosition < mDividerTreeNode.displayedSize());
-        return mDividerTreeNode.getNode(newPosition);
+        throw new IndexOutOfBoundsException();
     }
 
     public int getPosition(Node node) {
-        Assert.assertTrue(node != null);
-
         int offset = 0;
+        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
+            int position = notDoneGroupTreeNode.getPosition(node);
+            if (position >= 0)
+                return offset + position;
+            offset += notDoneGroupTreeNode.displayedSize();
+        }
 
-        int position = mNotDoneGroupTreeCollection.getPosition(node);
-        if (position >= 0)
-            return position;
-
-        offset = offset + mNotDoneGroupTreeCollection.displayedSize();
-
-        position = mDividerTreeNode.getPosition(node);
-        Assert.assertTrue(position >= 0);
-
-        return offset + position;
-    }
-
-    public int getItemCount() {
-        return mNotDoneGroupTreeCollection.displayedSize() + mDividerTreeNode.displayedSize();
+        return -1;
     }
 
     public int getItemViewType(int position) {
@@ -63,12 +57,12 @@ public class TreeNodeCollection {
         return node.getItemViewType();
     }
 
-    public void setNodes(NotDoneGroupTreeCollection notDoneGroupTreeCollection, RootTreeNode dividerTreeNode) {
-        Assert.assertTrue(notDoneGroupTreeCollection != null);
-        Assert.assertTrue(dividerTreeNode != null);
+    public void setNodes(List<RootTreeNode> rootTreeNodes) {
+        Assert.assertTrue(rootTreeNodes != null);
 
-        mNotDoneGroupTreeCollection = notDoneGroupTreeCollection;
-        mDividerTreeNode = dividerTreeNode;
+        mNotDoneGroupTreeNodes = rootTreeNodes;
+
+        Collections.sort(mNotDoneGroupTreeNodes);
     }
 
     TreeViewAdapter getTreeViewAdapter() {
@@ -79,24 +73,62 @@ public class TreeNodeCollection {
     }
 
     public int displayedSize() {
-        return mNotDoneGroupTreeCollection.displayedSize() + mDividerTreeNode.displayedSize();
+        int displayedSize = 0;
+        for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes)
+            displayedSize += notDoneGroupTreeNode.displayedSize();
+        return displayedSize;
     }
 
     public List<Node> getSelectedNodes() {
-        return mNotDoneGroupTreeCollection.getSelectedNodes();
+        return Stream.of(mNotDoneGroupTreeNodes)
+                .flatMap(RootTreeNode::getSelectedNodes)
+                .collect(Collectors.toList());
     }
 
     public void onCreateActionMode() {
-        mNotDoneGroupTreeCollection.onCreateActionMode();
-        mDividerTreeNode.onCreateActionMode();
+        Stream.of(mNotDoneGroupTreeNodes)
+                .forEach(RootTreeNode::onCreateActionMode);
     }
 
     public void onDestroyActionMode() {
-        mNotDoneGroupTreeCollection.onDestroyActionMode();
-        mDividerTreeNode.onDestroyActionMode();
+        Stream.of(mNotDoneGroupTreeNodes)
+                .forEach(RootTreeNode::onDestroyActionMode);
     }
 
     public void unselect() {
-        mNotDoneGroupTreeCollection.unselect();
+        Stream.of(mNotDoneGroupTreeNodes)
+                .forEach(RootTreeNode::unselect);
+    }
+
+    public void addNotDoneGroupTreeNode(RootTreeNode notDoneGroupTreeNode) {
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+
+        mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
+
+        Collections.sort(mNotDoneGroupTreeNodes);
+
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        treeViewAdapter.notifyItemInserted(getPosition(notDoneGroupTreeNode));
+    }
+
+    public int remove(RootTreeNode notDoneGroupTreeNode) {
+        Assert.assertTrue(notDoneGroupTreeNode != null);
+        Assert.assertTrue(mNotDoneGroupTreeNodes.contains(notDoneGroupTreeNode));
+
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        int oldPosition = getPosition(notDoneGroupTreeNode);
+
+        mNotDoneGroupTreeNodes.remove(notDoneGroupTreeNode);
+
+        treeViewAdapter.notifyItemRemoved(oldPosition);
+
+        if (oldPosition > 0)
+            treeViewAdapter.notifyItemChanged(oldPosition - 1);
+
+        return oldPosition;
     }
 }

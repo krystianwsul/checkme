@@ -38,12 +38,12 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
 
     @Override
     public int getItemCount() {
-        return mTreeNodeCollection.getItemCount() + (mShowPadding ? 1 : 0);
+        return mTreeNodeCollection.displayedSize() + (mShowPadding ? 1 : 0);
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mShowPadding && position == mTreeNodeCollection.getItemCount())
+        if (mShowPadding && position == mTreeNodeCollection.displayedSize())
             return TYPE_FAB_PADDING;
         else
             return mTreeNodeCollection.getItemViewType(position);

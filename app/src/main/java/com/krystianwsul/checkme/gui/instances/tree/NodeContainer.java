@@ -13,4 +13,8 @@ public interface NodeContainer {
     List<TreeNode> getSelectedChildren();
 
     TreeNodeCollection getTreeNodeCollection();
+
+    void remove(TreeNode treeNode);
+
+    void add(TreeNode treeNode);
 }

@@ -12,15 +12,11 @@ import java.util.List;
 public class TreeNodeCollection implements NodeContainer {
     private List<TreeNode> mNotDoneGroupTreeNodes;
 
-    private final ModelNodeCollection mModelNodeCollection;
-
     private final WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
 
-    public TreeNodeCollection(ModelNodeCollection modelNodeCollection, WeakReference<TreeViewAdapter> treeViewAdapterReference) {
-        Assert.assertTrue(modelNodeCollection != null);
+    public TreeNodeCollection(WeakReference<TreeViewAdapter> treeViewAdapterReference) {
         Assert.assertTrue(treeViewAdapterReference != null);
 
-        mModelNodeCollection = modelNodeCollection;
         mTreeViewAdapterReference = treeViewAdapterReference;
     }
 
@@ -100,7 +96,8 @@ public class TreeNodeCollection implements NodeContainer {
                 .forEach(TreeNode::unselect);
     }
 
-    public void addNotDoneGroupTreeNode(TreeNode notDoneGroupTreeNode) {
+    @Override
+    public void add(TreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
 
         mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
@@ -110,9 +107,15 @@ public class TreeNodeCollection implements NodeContainer {
         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        treeViewAdapter.notifyItemInserted(getPosition(notDoneGroupTreeNode));
+        int newPosition = getPosition(notDoneGroupTreeNode);
+
+        treeViewAdapter.notifyItemInserted(newPosition);
+
+        if (newPosition > 0)
+            treeViewAdapter.notifyItemChanged(newPosition - 1);
     }
 
+    @Override
     public void remove(TreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
         Assert.assertTrue(mNotDoneGroupTreeNodes.contains(notDoneGroupTreeNode));
@@ -122,9 +125,11 @@ public class TreeNodeCollection implements NodeContainer {
 
         int oldPosition = getPosition(notDoneGroupTreeNode);
 
+        int displayedSize = notDoneGroupTreeNode.displayedSize();
+
         mNotDoneGroupTreeNodes.remove(notDoneGroupTreeNode);
 
-        treeViewAdapter.notifyItemRemoved(oldPosition);
+        treeViewAdapter.notifyItemRangeRemoved(oldPosition, displayedSize);
 
         if (oldPosition > 0)
             treeViewAdapter.notifyItemChanged(oldPosition - 1);

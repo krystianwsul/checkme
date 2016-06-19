@@ -86,4 +86,8 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
     public int displayedSize() {
         return mTreeNodeCollection.displayedSize();
     }
+
+    public TreeNodeCollection getTreeNodeCollection() {
+        return mTreeNodeCollection;
+    }
 }

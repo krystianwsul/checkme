@@ -164,7 +164,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             return 0;
         } else {
             if (mExpanded) {
-                return 1 + mChildTreeNodes.size();
+                return 1 + Stream.of(mChildTreeNodes)
+                        .map(TreeNode::displayedSize)
+                        .reduce(0, (lhs, rhs) -> lhs + rhs);
             } else {
                 return 1;
             }
@@ -182,10 +184,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         Assert.assertTrue(mExpanded);
 
-        TreeNode treeNode = mChildTreeNodes.get(position - 1);
-        Assert.assertTrue(treeNode != null);
+        position--;
 
-        return treeNode;
+        for (TreeNode notDoneGroupTreeNode : mChildTreeNodes) {
+            if (position < notDoneGroupTreeNode.displayedSize())
+                return notDoneGroupTreeNode.getNode(position);
+
+            position -= notDoneGroupTreeNode.displayedSize();
+        }
+
+        throw new IndexOutOfBoundsException();
     }
 
     public int getPosition(TreeNode treeNode) {
@@ -286,6 +294,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         };
     }
 
+    @Override
     public void remove(TreeNode childTreeNode) {
         Assert.assertTrue(childTreeNode != null);
 
@@ -299,6 +308,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
 
+        int childDisplayedSize = childTreeNode.displayedSize();
+
         boolean lastInParent = (mChildTreeNodes.indexOf(childTreeNode) == mChildTreeNodes.size() - 1);
 
         int oldParentPosition = treeNodeCollection.getPosition(this);
@@ -306,28 +317,28 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         mChildTreeNodes.remove(childTreeNode);
 
-        if (mChildTreeNodes.isEmpty()) {
+        if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
             mExpanded = false;
 
             if (oldParentPosition == 0) {
                 if (mModelNode.visibleWhenEmpty()) {
                     treeViewAdapter.notifyItemChanged(oldParentPosition);
-                    treeViewAdapter.notifyItemRemoved(oldParentPosition + 1);
+                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                 } else {
-                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 2);
+                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                 }
             } else {
                 if (mModelNode.visibleWhenEmpty()) {
                     treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
-                    treeViewAdapter.notifyItemRemoved(oldParentPosition + 1);
+                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                 } else {
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 2);
+                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                 }
             }
         } else {
             treeViewAdapter.notifyItemChanged(oldParentPosition);
-            treeViewAdapter.notifyItemRemoved(oldChildPosition);
+            treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
             if (lastInParent)
                 treeViewAdapter.notifyItemChanged(oldChildPosition - 1);
@@ -337,6 +348,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         }
     }
 
+    @Override
     public void add(TreeNode childTreeNode) {
         Assert.assertTrue(childTreeNode != null);
 

@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,18 +66,22 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         }
     }
 
-    public static class Data extends DomainLoader.Data {
-        public final HashMap<InstanceKey, InstanceData> InstanceDatas;
+    public static class Data extends DomainLoader.Data implements InstanceDataParent {
+        public HashMap<InstanceKey, InstanceData> InstanceDatas;
         public final List<CustomTimeData> CustomTimeDatas;
         public final Boolean TaskEditable;
 
-        public Data(HashMap<InstanceKey, InstanceData> instanceDatas, List<CustomTimeData> customTimeDatas, Boolean taskEditable) {
-            Assert.assertTrue(instanceDatas != null);
+        public Data(List<CustomTimeData> customTimeDatas, Boolean taskEditable) {
             Assert.assertTrue(customTimeDatas != null);
 
-            InstanceDatas = instanceDatas;
             CustomTimeDatas = customTimeDatas;
             TaskEditable = taskEditable;
+        }
+
+        public void setInstanceDatas(HashMap<InstanceKey, InstanceData> instanceDatas) {
+            Assert.assertTrue(instanceDatas != null);
+
+            InstanceDatas = instanceDatas;
         }
 
         @Override
@@ -116,13 +121,21 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             return true;
         }
+
+        @Override
+        public void remove(InstanceKey instanceKey) {
+            Assert.assertTrue(instanceKey != null);
+            Assert.assertTrue(InstanceDatas.containsKey(instanceKey));
+
+            InstanceDatas.remove(instanceKey);
+        }
     }
 
-    public static class InstanceData {
+    public static class InstanceData implements InstanceDataParent {
         public ExactTimeStamp Done;
         public final InstanceKey InstanceKey;
         public final String DisplayText;
-        public final HashMap<InstanceKey, InstanceData> Children;
+        public HashMap<InstanceKey, InstanceData> Children;
         public final String Name;
         public final TimeStamp InstanceTimeStamp;
         public boolean TaskCurrent;
@@ -130,21 +143,25 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public Boolean IsRootTask;
         public boolean Exists;
 
-        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, HashMap<InstanceKey, InstanceData> children, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists) {
+        public final WeakReference<InstanceDataParent> InstanceDataParentReference;
+
+        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists, WeakReference<InstanceDataParent> instanceDataParentReference) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
+            Assert.assertTrue(instanceDataParentReference != null);
 
             Done = done;
             InstanceKey = instanceKey;
             DisplayText = displayText;
-            Children = children;
             Name = name;
             InstanceTimeStamp = instanceTimeStamp;
             TaskCurrent = taskCurrent;
             IsRootInstance = isRootInstance;
             IsRootTask = isRootTask;
             Exists = exists;
+
+            InstanceDataParentReference = instanceDataParentReference;
         }
 
         @Override
@@ -164,6 +181,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 hashCode += (IsRootTask ? 2 : 1);
             hashCode += (Exists ? 1 : 0);
             return hashCode;
+        }
+
+        public void setChildren(HashMap<InstanceKey, InstanceData> children) {
+            Assert.assertTrue(children != null);
+
+            Children = children;
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -221,6 +244,14 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             return true;
         }
+
+        @Override
+        public void remove(InstanceKey instanceKey) {
+            Assert.assertTrue(instanceKey != null);
+            Assert.assertTrue(Children.containsKey(instanceKey));
+
+            Children.remove(instanceKey);
+        }
     }
 
     public static class CustomTimeData {
@@ -256,5 +287,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             return (Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
         }
+    }
+
+    public interface InstanceDataParent {
+        void remove(InstanceKey instanceKey);
     }
 }

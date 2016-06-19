@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNode> {
-    private final WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
+    private final WeakReference<NodeContainer> mParentReference;
 
     private final RootModelNode mRootModelNode;
 
@@ -26,14 +26,14 @@ public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNod
 
     private boolean mSelected = false;
 
-    public RootTreeNode(RootModelNode rootModelNode, boolean expanded, boolean selected, WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
+    public RootTreeNode(RootModelNode rootModelNode, boolean expanded, boolean selected, WeakReference<NodeContainer> nodeContainerReference) {
         Assert.assertTrue(rootModelNode != null);
-        Assert.assertTrue(treeNodeCollectionReference != null);
+        Assert.assertTrue(nodeContainerReference != null);
 
         mRootModelNode = rootModelNode;
         mExpanded = expanded;
         mSelected = selected;
-        mTreeNodeCollectionReference = treeNodeCollectionReference;
+        mParentReference = nodeContainerReference;
     }
 
     @Override
@@ -475,9 +475,19 @@ public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNod
         mSelected = true;
     }
 
+    private NodeContainer getParent() {
+        NodeContainer parent = mParentReference.get();
+        Assert.assertTrue(parent != null);
+
+        return parent;
+    }
+
     @Override
     public TreeNodeCollection getTreeNodeCollection() {
-        TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
+        NodeContainer parent = getParent();
+        Assert.assertTrue(parent != null);
+
+        TreeNodeCollection treeNodeCollection = parent.getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
 
         return treeNodeCollection;

@@ -9,15 +9,14 @@ import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
     private final ChildModelNode mChildModelNode;
-    private final WeakReference<Node> mParentReference;
+    private final WeakReference<NodeContainer> mParentReference;
 
     private boolean mSelected = false;
 
-    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<Node> parentReference, boolean selected) {
+    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<NodeContainer> parentReference, boolean selected) {
         Assert.assertTrue(childModelNode != null);
         Assert.assertTrue(parentReference != null);
 
@@ -75,7 +74,7 @@ public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
         SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
         Assert.assertTrue(selectionCallback != null);
 
-        Node parent = getParent();
+        NodeContainer parent = getParent();
         Assert.assertTrue(parent != null);
 
         mSelected = !mSelected;
@@ -84,19 +83,19 @@ public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
             selectionCallback.incrementSelected();
 
             if (parent.getSelectedChildren().size() == 1) // first in group
-                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(parent));
+                parent.update();
         } else {
             selectionCallback.decrementSelected();
 
             if (parent.getSelectedChildren().size() == 0) // last in group
-                treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(parent));
+                parent.update();
         }
 
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
     public TreeNodeCollection getTreeNodeCollection() {
-        Node parent = getParent();
+        NodeContainer parent = getParent();
         Assert.assertTrue(parent != null);
 
         TreeNodeCollection treeNodeCollection = parent.getTreeNodeCollection();
@@ -105,8 +104,8 @@ public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
         return treeNodeCollection;
     }
 
-    private Node getParent() {
-        Node parent = mParentReference.get();
+    private NodeContainer getParent() {
+        NodeContainer parent = mParentReference.get();
         Assert.assertTrue(parent != null);
 
         return parent;
@@ -169,7 +168,7 @@ public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
     }
 
     public boolean getSeparatorVisibility() {
-        Node parent = getParent();
+        NodeContainer parent = getParent();
         Assert.assertTrue(parent != null);
 
         Assert.assertTrue(parent.expanded());
@@ -182,11 +181,6 @@ public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
         boolean lastInAdapter = (treeNodeCollection.getPosition(this) == treeNodeCollection.displayedSize() - 1);
 
         return (lastInGroup && !lastInAdapter);
-    }
-
-    @Override
-    public List<Node> getSelectedChildren() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

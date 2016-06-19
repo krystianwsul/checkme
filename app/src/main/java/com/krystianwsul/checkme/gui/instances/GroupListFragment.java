@@ -983,7 +983,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     NodeCollection nodeCollection = mNodeCollectionReference.get();
                     Assert.assertTrue(nodeCollection != null);
 
-                    RootTreeNode notDoneGroupTreeNode = notDoneGroupNode.initialize(expanded, selectedNodes, nodeCollection.mTreeNodeCollectionReference);
+                    TreeNodeCollection treeNodeCollection = nodeCollection.mTreeNodeCollectionReference.get();
+                    Assert.assertTrue(treeNodeCollection != null);
+
+                    RootTreeNode notDoneGroupTreeNode = notDoneGroupNode.initialize(expanded, selectedNodes, treeNodeCollection);
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
                     mNotDoneGroupNodes.add(notDoneGroupNode);
@@ -1115,10 +1118,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             .allMatch(instanceData -> instanceData.InstanceTimeStamp.toExactTimeStamp().equals(mExactTimeStamp)));
                 }
 
-                public RootTreeNode initialize(boolean expanded, ArrayList<InstanceKey> selectedNodes, WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
+                public RootTreeNode initialize(boolean expanded, ArrayList<InstanceKey> selectedNodes, TreeNodeCollection treeNodeCollection) {
                     boolean selected = (mInstanceDatas.size() == 1 && selectedNodes != null && selectedNodes.contains(mInstanceDatas.get(0).InstanceKey));
 
-                    RootTreeNode notDoneGroupTreeNode = new RootTreeNode(this, expanded, selected, treeNodeCollectionReference);
+                    RootTreeNode notDoneGroupTreeNode = new RootTreeNode(this, expanded, selected, new WeakReference<>(treeNodeCollection));
                     mNotDoneGroupTreeNodeReference = new WeakReference<>(notDoneGroupTreeNode);
 
                     if (mInstanceDatas.size() == 1) {

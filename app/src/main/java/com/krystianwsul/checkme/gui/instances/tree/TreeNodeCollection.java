@@ -9,7 +9,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
-public class TreeNodeCollection {
+public class TreeNodeCollection implements NodeContainer {
     private List<RootTreeNode> mNotDoneGroupTreeNodes;
 
     private final ModelNodeCollection mModelNodeCollection;
@@ -128,5 +128,25 @@ public class TreeNodeCollection {
 
         if (oldPosition > 0)
             treeViewAdapter.notifyItemChanged(oldPosition - 1);
+    }
+
+    @Override
+    public boolean expanded() {
+        return true;
+    }
+
+    @Override
+    public void update() {
+
+    }
+
+    @Override
+    public List<Node> getSelectedChildren() {
+        return getSelectedNodes();
+    }
+
+    @Override
+    public TreeNodeCollection getTreeNodeCollection() {
+        return this;
     }
 }

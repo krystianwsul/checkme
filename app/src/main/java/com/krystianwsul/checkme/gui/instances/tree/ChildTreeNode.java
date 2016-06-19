@@ -9,19 +9,25 @@ import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
-public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
-    private final ChildModelNode mChildModelNode;
+public class ChildTreeNode extends Node implements Comparable<ChildTreeNode> {
     private final WeakReference<NodeContainer> mParentReference;
+    private final ChildModelNode mChildModelNode;
+
+    private List<ChildTreeNode> mChildTreeNodes;
+
+    private boolean mExpanded;
 
     private boolean mSelected = false;
 
-    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<NodeContainer> parentReference, boolean selected) {
+    public ChildTreeNode(ChildModelNode childModelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
         Assert.assertTrue(childModelNode != null);
         Assert.assertTrue(parentReference != null);
 
         mChildModelNode = childModelNode;
         mParentReference = parentReference;
+        mExpanded = expanded;
         mSelected = selected;
 
         Assert.assertTrue(!mSelected || mChildModelNode.selectable());

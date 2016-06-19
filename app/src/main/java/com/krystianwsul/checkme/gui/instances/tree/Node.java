@@ -2,12 +2,18 @@ package com.krystianwsul.checkme.gui.instances.tree;
 
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
-public interface Node {
-    void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);
-    int getItemViewType();
-    void update();
-    TreeNodeCollection getTreeNodeCollection();
-    boolean expanded();
-    int displayedSize();
-    int getPosition(Node node);
+public abstract class Node {
+    public abstract void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);
+
+    public abstract int getItemViewType();
+
+    public abstract void update();
+
+    public abstract TreeNodeCollection getTreeNodeCollection();
+
+    public abstract boolean expanded();
+
+    public abstract int displayedSize();
+
+    public abstract int getPosition(Node node);
 }

@@ -15,9 +15,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNode> {
+public class RootTreeNode extends Node implements NodeContainer, Comparable<RootTreeNode> {
     private final WeakReference<NodeContainer> mParentReference;
-
     private final RootModelNode mRootModelNode;
 
     private List<ChildTreeNode> mChildTreeNodes;
@@ -26,14 +25,16 @@ public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNod
 
     private boolean mSelected = false;
 
-    public RootTreeNode(RootModelNode rootModelNode, boolean expanded, boolean selected, WeakReference<NodeContainer> nodeContainerReference) {
+    public RootTreeNode(RootModelNode rootModelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
         Assert.assertTrue(rootModelNode != null);
-        Assert.assertTrue(nodeContainerReference != null);
+        Assert.assertTrue(parentReference != null);
 
         mRootModelNode = rootModelNode;
+        mParentReference = parentReference;
         mExpanded = expanded;
         mSelected = selected;
-        mParentReference = nodeContainerReference;
+
+        Assert.assertTrue(!mSelected || mRootModelNode.selectable());
     }
 
     @Override

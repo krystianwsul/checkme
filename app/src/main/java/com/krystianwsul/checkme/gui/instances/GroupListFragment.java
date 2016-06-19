@@ -1121,7 +1121,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 public RootTreeNode initialize(boolean expanded, ArrayList<InstanceKey> selectedNodes, TreeNodeCollection treeNodeCollection) {
                     boolean selected = (mInstanceDatas.size() == 1 && selectedNodes != null && selectedNodes.contains(mInstanceDatas.get(0).InstanceKey));
 
-                    RootTreeNode notDoneGroupTreeNode = new RootTreeNode(this, expanded, selected, new WeakReference<>(treeNodeCollection));
+                    RootTreeNode notDoneGroupTreeNode = new RootTreeNode(this, new WeakReference<>(treeNodeCollection), expanded, selected);
                     mNotDoneGroupTreeNodeReference = new WeakReference<>(notDoneGroupTreeNode);
 
                     if (mInstanceDatas.size() == 1) {
@@ -1819,7 +1819,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         RootTreeNode notDoneGroupTreeNode = notDoneGroupTreeNodeReference.get();
 
-                        ChildTreeNode childTreeNode = new ChildTreeNode(this, new WeakReference<>(notDoneGroupTreeNode), selectedNodes != null && selectedNodes.contains(mInstanceData.InstanceKey));
+                        ChildTreeNode childTreeNode = new ChildTreeNode(this, new WeakReference<>(notDoneGroupTreeNode), false, selectedNodes != null && selectedNodes.contains(mInstanceData.InstanceKey));
                         mChildTreeNodeReference = new WeakReference<>(childTreeNode);
 
                         return childTreeNode;
@@ -2116,7 +2116,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 private RootTreeNode initialize(boolean doneExpanded, TreeNodeCollection treeNodeCollection, List<GroupListLoader.InstanceData> doneInstanceDatas) {
-                    RootTreeNode dividerTreeNode = new RootTreeNode(this, doneExpanded, false, new WeakReference<>(treeNodeCollection));
+                    RootTreeNode dividerTreeNode = new RootTreeNode(this, new WeakReference<>(treeNodeCollection), doneExpanded, false);
                     mDividerTreeNodeReference = new WeakReference<>(dividerTreeNode);
 
                     List<ChildTreeNode> childTreeNodes = Stream.of(doneInstanceDatas)
@@ -2248,7 +2248,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     RootTreeNode dividerTreeNode = dividerTreeNodeReference.get();
 
-                    ChildTreeNode doneTreeNode = new ChildTreeNode(this, new WeakReference<>(dividerTreeNode), false);
+                    ChildTreeNode doneTreeNode = new ChildTreeNode(this, new WeakReference<>(dividerTreeNode), false, false);
                     mChildTreeNodeReference = new WeakReference<>(doneTreeNode);
 
                     return doneTreeNode;

@@ -1372,7 +1372,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                         Assert.assertTrue(instanceData != null);
 
-                        if (TextUtils.isEmpty(instanceData.Children)) {
+                        if (instanceData.Children.isEmpty()) {
                             return View.GONE;
                         } else {
                             return View.VISIBLE;
@@ -1394,9 +1394,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                     Assert.assertTrue(instanceData != null);
 
-                    Assert.assertTrue(!TextUtils.isEmpty(instanceData.Children));
+                    Assert.assertTrue(!instanceData.Children.isEmpty());
 
-                    return instanceData.Children;
+                    return Stream.of(instanceData.Children.values())
+                            .sortBy(child -> child.InstanceKey.TaskId)
+                            .map(child -> child.Name)
+                            .collect(Collectors.joining(", "));
                 }
 
                 @Override
@@ -1453,7 +1456,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                         Assert.assertTrue(instanceData != null);
 
-                        if (TextUtils.isEmpty(instanceData.Children)) {
+                        if (instanceData.Children.isEmpty()) {
                             return View.INVISIBLE;
                         } else {
                             return View.VISIBLE;
@@ -1483,7 +1486,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                         Assert.assertTrue(instanceData != null);
 
-                        Assert.assertTrue(!TextUtils.isEmpty(instanceData.Children));
+                        Assert.assertTrue(!instanceData.Children.isEmpty());
                         return R.drawable.ic_list_black_36dp;
                     } else {
                         Assert.assertTrue(!(groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedNodes().count() > 0));
@@ -1912,7 +1915,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getChildrenVisibility() {
-                        if (TextUtils.isEmpty(mInstanceData.Children)) {
+                        if (mInstanceData.Children.isEmpty()) {
                             return View.GONE;
                         } else {
                             return View.VISIBLE;
@@ -1921,8 +1924,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     String getChildren() {
-                        Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.Children));
-                        return mInstanceData.Children;
+                        Assert.assertTrue(!mInstanceData.Children.isEmpty());
+                        return Stream.of(mInstanceData.Children.values())
+                                .sortBy(child -> child.InstanceKey.TaskId)
+                                .map(child -> child.Name)
+                                .collect(Collectors.joining(", "));
                     }
 
                     @Override
@@ -1939,7 +1945,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getExpandVisibility() {
-                        if (TextUtils.isEmpty(mInstanceData.Children)) {
+                        if (mInstanceData.Children.isEmpty()) {
                             return View.INVISIBLE;
                         } else {
                             return View.VISIBLE;
@@ -1948,13 +1954,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getExpandImageResource() {
-                        Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.Children));
+                        Assert.assertTrue(!mInstanceData.Children.isEmpty());
                         return R.drawable.ic_list_black_36dp;
                     }
 
                     @Override
                     View.OnClickListener getExpandOnClickListener() {
-                        Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.Children));
+                        Assert.assertTrue(!mInstanceData.Children.isEmpty());
                         return null;
                     }
 
@@ -2322,7 +2328,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getChildrenVisibility() {
-                    if (TextUtils.isEmpty(mInstanceData.Children)) {
+                    if (mInstanceData.Children.isEmpty()) {
                         return View.GONE;
                     } else {
                         return View.VISIBLE;
@@ -2331,9 +2337,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 String getChildren() {
-                    Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.Children));
+                    Assert.assertTrue(!mInstanceData.Children.isEmpty());
 
-                    return mInstanceData.Children;
+                    return Stream.of(mInstanceData.Children.values())
+                            .sortBy(child -> child.InstanceKey.TaskId)
+                            .map(child -> child.Name)
+                            .collect(Collectors.joining(", "));
                 }
 
                 @Override
@@ -2344,7 +2353,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListFragment groupListFragment = dividerNode.getGroupAdapter().mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
-                    Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.Children));
+                    Assert.assertTrue(!mInstanceData.Children.isEmpty());
 
                     if (!mInstanceData.TaskCurrent) {
                         return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled);
@@ -2355,7 +2364,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getExpandVisibility() {
-                    if (TextUtils.isEmpty(mInstanceData.Children)) {
+                    if (mInstanceData.Children.isEmpty()) {
                         return View.INVISIBLE;
                     } else {
                         return View.VISIBLE;
@@ -2370,14 +2379,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListFragment groupListFragment = dividerNode.getGroupAdapter().mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
-                    Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.Children));
+                    Assert.assertTrue(!mInstanceData.Children.isEmpty());
 
                     return R.drawable.ic_list_black_36dp;
                 }
 
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
-                    Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.Children));
+                    Assert.assertTrue(!mInstanceData.Children.isEmpty());
                     return null;
                 }
 

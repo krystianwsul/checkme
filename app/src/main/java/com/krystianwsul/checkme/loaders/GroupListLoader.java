@@ -122,7 +122,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public ExactTimeStamp Done;
         public final InstanceKey InstanceKey;
         public final String DisplayText;
-        public final String Children;
+        public final HashMap<InstanceKey, InstanceData> Children;
         public final String Name;
         public final TimeStamp InstanceTimeStamp;
         public boolean TaskCurrent;
@@ -130,7 +130,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public Boolean IsRootTask;
         public boolean Exists;
 
-        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String children, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists) {
+        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, HashMap<InstanceKey, InstanceData> children, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
@@ -155,8 +155,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             hashCode += InstanceKey.hashCode();
             if (!TextUtils.isEmpty(DisplayText))
                 hashCode += DisplayText.hashCode();
-            if (!TextUtils.isEmpty(Children))
-                hashCode += Children.hashCode();
+            hashCode += Children.hashCode();
             hashCode += Name.hashCode();
             hashCode += InstanceTimeStamp.hashCode();
             hashCode += (TaskCurrent ? 1 : 0);
@@ -196,10 +195,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             if (!TextUtils.isEmpty(DisplayText) && !DisplayText.equals(instanceData.DisplayText))
                 return false;
 
-            if (TextUtils.isEmpty(Children) != TextUtils.isEmpty(instanceData.Children))
-                return false;
-
-            if (!TextUtils.isEmpty(Children) && !Children.equals(instanceData.Children))
+            if (!Children.equals(instanceData.Children))
                 return false;
 
             if (!Name.equals(instanceData.Name))

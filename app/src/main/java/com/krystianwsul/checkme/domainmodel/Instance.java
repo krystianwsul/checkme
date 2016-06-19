@@ -2,8 +2,6 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -219,15 +217,6 @@ class Instance {
         }
 
         return new ArrayList<>(childInstances);
-    }
-
-    public String getChildInstanceNames(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
-        return Stream.of(getChildInstances(now))
-                .sortBy(Instance::getTaskId)
-                .map(Instance::getName)
-                .collect(Collectors.joining(", "));
     }
 
     private Instance getParentInstance(ExactTimeStamp now) {

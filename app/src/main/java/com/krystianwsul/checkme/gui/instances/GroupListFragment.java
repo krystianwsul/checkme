@@ -831,7 +831,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 mNotDoneGroupCollection = new NotDoneGroupCollection(new WeakReference<>(this));
 
-                List<TreeNode> rootTreeNodes = mNotDoneGroupCollection.initialize(useGroups, notDoneInstanceDatas, expandedGroups, selectedNodes);
+                List<TreeNode> rootTreeNodes = mNotDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, selectedNodes);
                 Assert.assertTrue(rootTreeNodes != null);
 
                 mDividerNode = new DividerNode(new WeakReference<>(this));
@@ -882,12 +882,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mNodeCollectionReference = nodeCollectionReference;
                 }
 
-                private List<TreeNode> initialize(boolean useGroups, List<GroupListLoader.InstanceData> notDoneInstanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes) {
+                private List<TreeNode> initialize(List<GroupListLoader.InstanceData> notDoneInstanceDatas, ArrayList<TimeStamp> expandedGroups, ArrayList<InstanceKey> selectedNodes) {
                     Assert.assertTrue(notDoneInstanceDatas != null);
 
                     ArrayList<TreeNode> notDoneGroupTreeNodes = new ArrayList<>();
 
-                    if (useGroups) {
+                    GroupAdapter groupAdapter = getGroupAdapter();
+
+                    if (groupAdapter.mUseGroups) {
                         HashMap<TimeStamp, ArrayList<GroupListLoader.InstanceData>> instanceDataHash = new HashMap<>();
                         for (GroupListLoader.InstanceData instanceData : notDoneInstanceDatas) {
                             if (!instanceDataHash.containsKey(instanceData.InstanceTimeStamp))
@@ -951,7 +953,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             .filter(notDoneGroupNode -> notDoneGroupNode.mExactTimeStamp.equals(exactTimeStamp))
                             .collect(Collectors.toList());
 
-                    if (timeStampNotDoneGroupNodes.isEmpty()) {
+                    GroupAdapter groupAdapter = getGroupAdapter();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    if (timeStampNotDoneGroupNodes.isEmpty() || !groupAdapter.mUseGroups) {
                         ArrayList<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>();
                         instanceDatas.add(instanceData);
 
@@ -995,6 +1000,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(nodeCollection != null);
 
                     return nodeCollection;
+                }
+
+                private GroupAdapter getGroupAdapter() {
+                    NodeCollection nodeCollection = getNodeCollection();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    return groupAdapter;
                 }
 
                 public ArrayList<TimeStamp> getExpandedGroups() {

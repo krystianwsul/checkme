@@ -192,6 +192,7 @@ public class DomainFactory {
 
     // gets
 
+    @SuppressWarnings("EmptyMethod")
     private void fakeDelay() {
         /*
         try {
@@ -366,9 +367,9 @@ public class DomainFactory {
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
-        for (CustomTime customTime : currentCustomTimes)
-            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+                .collect(Collectors.toList());
 
         return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
     }
@@ -1244,15 +1245,6 @@ public class DomainFactory {
             if (hourMinute.compareTo(customTime.getHourMinute(dayOfWeek)) != 0)
                 customTime.setHourMinute(dayOfWeek, hourMinute);
         }
-
-        save(dataId);
-    }
-
-    public synchronized void setCustomTimeCurrent(int dataId, int customTimeId) {
-        CustomTime customTime = mCustomTimes.get(customTimeId);
-        Assert.assertTrue(customTime != null);
-
-        customTime.setCurrent();
 
         save(dataId);
     }

@@ -59,7 +59,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     private CreateRootTaskLoader.Data mData;
 
-    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateRootTaskActivity.this::finish;
+    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateRootTaskActivity.this::finish;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);

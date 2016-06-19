@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.loaders.DomainLoader;
 
 import junit.framework.Assert;
@@ -42,7 +43,7 @@ public class ObserverHolder {
                 observer.onDomainChanged(dataIds);
         }
 
-        for (WeakReference<DomainLoader.Observer> reference : remove)
-            mObservers.remove(reference);
+        Stream.of(remove)
+                .forEach(mObservers::remove);
     }
 }

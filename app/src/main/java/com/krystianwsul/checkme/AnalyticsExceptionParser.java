@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public class AnalyticsExceptionParser extends StandardExceptionParser {
+class AnalyticsExceptionParser extends StandardExceptionParser {
 
     public AnalyticsExceptionParser(Context context) {
         super(context, null);

@@ -113,7 +113,7 @@ public class TreeNodeCollection {
         treeViewAdapter.notifyItemInserted(getPosition(notDoneGroupTreeNode));
     }
 
-    public int remove(RootTreeNode notDoneGroupTreeNode) {
+    public void remove(RootTreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(notDoneGroupTreeNode != null);
         Assert.assertTrue(mNotDoneGroupTreeNodes.contains(notDoneGroupTreeNode));
 
@@ -128,7 +128,5 @@ public class TreeNodeCollection {
 
         if (oldPosition > 0)
             treeViewAdapter.notifyItemChanged(oldPosition - 1);
-
-        return oldPosition;
     }
 }

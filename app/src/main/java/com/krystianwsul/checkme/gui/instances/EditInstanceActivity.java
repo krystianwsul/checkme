@@ -99,7 +99,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
         updateError();
     };
 
-    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = EditInstanceActivity.this::finish;
+    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = EditInstanceActivity.this::finish;
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Intent intent = new Intent(context, EditInstanceActivity.class);

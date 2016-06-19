@@ -36,6 +36,7 @@ public class TaskHierarchyRecord extends Record {
                 + COLUMN_END_TIME + " INTEGER);");
     }
 
+    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASK_HIERARCHIES);
         //onCreate(sqLiteDatabase);

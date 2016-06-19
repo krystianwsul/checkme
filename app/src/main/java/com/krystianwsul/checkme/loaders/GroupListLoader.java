@@ -15,6 +15,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
@@ -66,10 +67,10 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     public static class Data extends DomainLoader.Data {
         public final HashMap<InstanceKey, InstanceData> InstanceDatas;
-        public final ArrayList<CustomTimeData> CustomTimeDatas;
+        public final List<CustomTimeData> CustomTimeDatas;
         public final Boolean TaskEditable;
 
-        public Data(HashMap<InstanceKey, InstanceData> instanceDatas, ArrayList<CustomTimeData> customTimeDatas, Boolean taskEditable) {
+        public Data(HashMap<InstanceKey, InstanceData> instanceDatas, List<CustomTimeData> customTimeDatas, Boolean taskEditable) {
             Assert.assertTrue(instanceDatas != null);
             Assert.assertTrue(customTimeDatas != null);
 

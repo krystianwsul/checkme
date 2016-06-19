@@ -350,19 +350,6 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
                 notifyItemChanged(position);
             }
-
-            public void onDeleteClick() {
-                ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
-                Assert.assertTrue(showCustomTimesFragment != null);
-
-                int position = getAdapterPosition();
-                CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(getAdapterPosition());
-
-                DomainFactory.getDomainFactory(showCustomTimesFragment.getActivity()).setCustomTimeCurrent(mDataId, customTimeWrapper.mCustomTimeData.Id);
-
-                mCustomTimeWrappers.remove(customTimeWrapper);
-                notifyItemRemoved(position);
-            }
         }
     }
 

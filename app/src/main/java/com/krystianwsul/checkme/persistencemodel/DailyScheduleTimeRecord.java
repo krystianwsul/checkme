@@ -36,6 +36,7 @@ public class DailyScheduleTimeRecord extends Record {
                 + COLUMN_MINUTE + " INTEGER);");
     }
 
+    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_DAILY_SCHEDULE_TIMES);
         //onCreate(sqLiteDatabase);

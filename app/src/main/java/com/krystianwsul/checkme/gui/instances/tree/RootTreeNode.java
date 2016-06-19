@@ -18,13 +18,13 @@ import java.util.List;
 public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNode> {
     private final WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
 
-    protected final RootModelNode mRootModelNode;
+    private final RootModelNode mRootModelNode;
 
-    protected List<ChildTreeNode> mChildTreeNodes;
+    private List<ChildTreeNode> mChildTreeNodes;
 
-    protected boolean mExpanded;
+    private boolean mExpanded;
 
-    protected boolean mSelected = false;
+    private boolean mSelected = false;
 
     public RootTreeNode(RootModelNode rootModelNode, boolean expanded, boolean selected, WeakReference<TreeNodeCollection> treeNodeCollectionReference) {
         Assert.assertTrue(rootModelNode != null);
@@ -383,15 +383,6 @@ public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNod
                 .collect(Collectors.toList());
     }
 
-    public int getTotalChildCount() {
-        return mChildTreeNodes.size();
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean isEmpty() {
-        return mChildTreeNodes.isEmpty();
-    }
-
     @Override
     public int compareTo(@NonNull RootTreeNode another) {
         return mRootModelNode.compareTo(another.mRootModelNode);
@@ -492,7 +483,7 @@ public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNod
         return treeNodeCollection;
     }
 
-    protected TreeViewAdapter getTreeViewAdapter() {
+    private TreeViewAdapter getTreeViewAdapter() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
 
@@ -502,7 +493,7 @@ public class RootTreeNode implements Node, NodeContainer, Comparable<RootTreeNod
         return treeViewAdapter;
     }
 
-    protected SelectionCallback getSelectionCallback() {
+    private SelectionCallback getSelectionCallback() {
         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 

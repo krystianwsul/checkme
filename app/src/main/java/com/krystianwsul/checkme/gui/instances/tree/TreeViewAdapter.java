@@ -15,9 +15,9 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
 
     private final boolean mShowPadding;
 
-    public TreeNodeCollection mTreeNodeCollection;
+    private TreeNodeCollection mTreeNodeCollection;
 
-    private TreeModelAdapter mTreeModelAdapter;
+    private final TreeModelAdapter mTreeModelAdapter;
 
     public TreeViewAdapter(boolean showPadding, TreeModelAdapter treeModelAdapter) {
         Assert.assertTrue(treeModelAdapter != null);

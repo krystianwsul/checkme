@@ -79,6 +79,7 @@ public class CustomTimeRecord extends Record {
                 + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);");
     }
 
+    @SuppressWarnings("UnusedParameters")
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Assert.assertTrue(sqLiteDatabase != null);
 

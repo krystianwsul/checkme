@@ -12,7 +12,7 @@ import java.util.LinkedList;
 public class EventBuffer {
     private static EventBuffer sInstance;
 
-    private LinkedList<String> mEvents = new LinkedList<>();
+    private final LinkedList<String> mEvents = new LinkedList<>();
 
     public synchronized static EventBuffer getInstance() {
         if (sInstance == null)

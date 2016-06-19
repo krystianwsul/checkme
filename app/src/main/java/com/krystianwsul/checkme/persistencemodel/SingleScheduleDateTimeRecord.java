@@ -43,6 +43,7 @@ public class SingleScheduleDateTimeRecord extends Record {
                 + COLUMN_MINUTE + " INTEGER);");
     }
 
+    @SuppressWarnings("UnusedParameters")
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SINGLE_SCHEDULE_DATE_TIMES);
         //onCreate(sqLiteDatabase);

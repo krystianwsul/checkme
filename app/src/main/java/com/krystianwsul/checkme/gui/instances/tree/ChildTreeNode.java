@@ -12,8 +12,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class ChildTreeNode implements Node, Comparable<ChildTreeNode> {
-    protected final ChildModelNode mChildModelNode;
-    protected final WeakReference<Node> mParentReference;
+    private final ChildModelNode mChildModelNode;
+    private final WeakReference<Node> mParentReference;
 
     private boolean mSelected = false;
 

@@ -57,7 +57,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     private static final HourMinute sDefaultHourMinute = new HourMinute(9, 0);
 
-    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = ShowCustomTimeActivity.this::finish;
+    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = ShowCustomTimeActivity.this::finish;
 
     public static Intent getEditIntent(int customTimeId, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);

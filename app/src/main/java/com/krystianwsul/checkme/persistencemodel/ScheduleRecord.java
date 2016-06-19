@@ -36,6 +36,7 @@ public class ScheduleRecord extends Record {
                 + COLUMN_TYPE + " INTEGER NOT NULL);");
     }
 
+    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SCHEDULES);
         //onCreate(sqLiteDatabase);

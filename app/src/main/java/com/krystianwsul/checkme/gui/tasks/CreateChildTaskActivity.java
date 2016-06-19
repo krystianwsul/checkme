@@ -42,7 +42,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     private CreateChildTaskLoader.Data mData;
 
-    private DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
+    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
 
     public static Intent getCreateIntent(Context context, int parentTaskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);

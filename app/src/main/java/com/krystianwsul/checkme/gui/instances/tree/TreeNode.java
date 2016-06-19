@@ -16,15 +16,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class TreeNode implements Comparable<TreeNode>, NodeContainer {
-    protected final ModelNode mModelNode;
+    private final ModelNode mModelNode;
 
-    protected List<TreeNode> mChildTreeNodes;
+    private List<TreeNode> mChildTreeNodes;
 
-    protected final WeakReference<NodeContainer> mParentReference;
+    private final WeakReference<NodeContainer> mParentReference;
 
-    protected boolean mExpanded;
+    private boolean mExpanded;
 
-    protected boolean mSelected = false;
+    private boolean mSelected = false;
 
     public TreeNode(ModelNode modelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
         Assert.assertTrue(modelNode != null);
@@ -132,21 +132,21 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
-    protected NodeContainer getParent() {
+    private NodeContainer getParent() {
         NodeContainer parent = mParentReference.get();
         Assert.assertTrue(parent != null);
 
         return parent;
     }
 
-    protected SelectionCallback getSelectionCallback() {
+    private SelectionCallback getSelectionCallback() {
         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
         return treeViewAdapter.getSelectionCallback();
     }
 
-    protected TreeViewAdapter getTreeViewAdapter() {
+    private TreeViewAdapter getTreeViewAdapter() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
         Assert.assertTrue(treeNodeCollection != null);
 

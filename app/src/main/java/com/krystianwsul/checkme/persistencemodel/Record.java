@@ -64,7 +64,9 @@ abstract class Record {
         return mChanged;
     }
 
+    @SuppressWarnings("unused")
     abstract InsertCommand getInsertCommand();
 
+    @SuppressWarnings("unused")
     abstract UpdateCommand getUpdateCommand();
 }

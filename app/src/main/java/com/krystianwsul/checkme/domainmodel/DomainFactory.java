@@ -388,10 +388,9 @@ public class DomainFactory {
 
         ArrayList<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
 
-        ArrayList<Instance> currentInstances = new ArrayList<>();
-        for (Instance instance : rootInstances)
-            if (instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
-                currentInstances.add(instance);
+        List<Instance> currentInstances = Stream.of(rootInstances)
+                .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
+                .collect(Collectors.toList());
         Assert.assertTrue(!currentInstances.isEmpty());
 
         Date date = timeStamp.getDate();
@@ -440,9 +439,9 @@ public class DomainFactory {
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
-        for (CustomTime customTime : currentCustomTimes)
-            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+                .collect(Collectors.toList());
 
         return new GroupListLoader.Data(instanceDatas, customTimeDatas, null);
     }
@@ -473,9 +472,9 @@ public class DomainFactory {
         }
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
-        for (CustomTime customTime : currentCustomTimes)
-            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+                .collect(Collectors.toList());
 
         return new GroupListLoader.Data(instanceDatas, customTimeDatas, task.current(now));
     }

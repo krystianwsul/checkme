@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree;
 
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
-public interface ChildModelNode extends Comparable<ChildModelNode> {
+public interface ChildModelNode extends ModelNode, Comparable<ChildModelNode> {
     void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);
     int getItemViewType();
     boolean selectable();

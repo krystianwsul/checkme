@@ -11,7 +11,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public class ChildTreeNode extends Node implements Comparable<ChildTreeNode> {
+public class ChildTreeNode extends TreeNode implements Comparable<ChildTreeNode> {
     private final WeakReference<NodeContainer> mParentReference;
     private final ChildModelNode mChildModelNode;
 
@@ -200,7 +200,7 @@ public class ChildTreeNode extends Node implements Comparable<ChildTreeNode> {
     }
 
     @Override
-    public int getPosition(Node node) {
+    public int getPosition(TreeNode treeNode) {
         throw new UnsupportedOperationException();
     }
 }

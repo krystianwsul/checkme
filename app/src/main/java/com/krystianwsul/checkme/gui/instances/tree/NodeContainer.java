@@ -4,13 +4,15 @@ import java.util.List;
 
 public interface NodeContainer {
     int displayedSize();
-    Node getNode(int position);
-    int getPosition(Node node);
+
+    TreeNode getNode(int position);
+
+    int getPosition(TreeNode treeNode);
     boolean expanded();
 
     void update();
 
-    List<Node> getSelectedChildren();
+    List<TreeNode> getSelectedChildren();
 
     TreeNodeCollection getTreeNodeCollection();
 }

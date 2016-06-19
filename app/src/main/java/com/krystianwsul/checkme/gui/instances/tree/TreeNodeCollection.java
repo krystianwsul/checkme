@@ -24,7 +24,7 @@ public class TreeNodeCollection implements NodeContainer {
         mTreeViewAdapterReference = treeViewAdapterReference;
     }
 
-    public Node getNode(int position) {
+    public TreeNode getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
 
@@ -38,10 +38,10 @@ public class TreeNodeCollection implements NodeContainer {
         throw new IndexOutOfBoundsException();
     }
 
-    public int getPosition(Node node) {
+    public int getPosition(TreeNode treeNode) {
         int offset = 0;
         for (RootTreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
-            int position = notDoneGroupTreeNode.getPosition(node);
+            int position = notDoneGroupTreeNode.getPosition(treeNode);
             if (position >= 0)
                 return offset + position;
             offset += notDoneGroupTreeNode.displayedSize();
@@ -51,10 +51,10 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     public int getItemViewType(int position) {
-        Node node = getNode(position);
-        Assert.assertTrue(node != null);
+        TreeNode treeNode = getNode(position);
+        Assert.assertTrue(treeNode != null);
 
-        return node.getItemViewType();
+        return treeNode.getItemViewType();
     }
 
     public void setNodes(List<RootTreeNode> rootTreeNodes) {
@@ -79,7 +79,7 @@ public class TreeNodeCollection implements NodeContainer {
         return displayedSize;
     }
 
-    public List<Node> getSelectedNodes() {
+    public List<TreeNode> getSelectedNodes() {
         return Stream.of(mNotDoneGroupTreeNodes)
                 .flatMap(RootTreeNode::getSelectedNodes)
                 .collect(Collectors.toList());
@@ -141,7 +141,7 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     @Override
-    public List<Node> getSelectedChildren() {
+    public List<TreeNode> getSelectedChildren() {
         return getSelectedNodes();
     }
 

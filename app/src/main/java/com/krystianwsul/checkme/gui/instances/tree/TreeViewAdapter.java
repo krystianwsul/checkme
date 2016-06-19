@@ -63,7 +63,7 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
         return mTreeModelAdapter.getSelectionCallback();
     }
 
-    public List<Node> getSelectedNodes() {
+    public List<TreeNode> getSelectedNodes() {
         return mTreeNodeCollection.getSelectedNodes();
     }
 
@@ -79,7 +79,7 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
         mTreeNodeCollection.unselect();
     }
 
-    public Node getNode(int position) {
+    public TreeNode getNode(int position) {
         return mTreeNodeCollection.getNode(position);
     }
 

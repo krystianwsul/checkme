@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RootTreeNode extends Node implements NodeContainer, Comparable<RootTreeNode> {
+public class RootTreeNode extends TreeNode implements NodeContainer, Comparable<RootTreeNode> {
     private final WeakReference<NodeContainer> mParentReference;
     private final RootModelNode mRootModelNode;
 
@@ -77,7 +77,7 @@ public class RootTreeNode extends Node implements NodeContainer, Comparable<Root
     }
 
     @Override
-    public Node getNode(int position) {
+    public TreeNode getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(!mChildTreeNodes.isEmpty() || mRootModelNode.visibleWhenEmpty());
         Assert.assertTrue(!getSelectionCallback().hasActionMode() || mRootModelNode.visibleDuringActionMode());
@@ -88,21 +88,21 @@ public class RootTreeNode extends Node implements NodeContainer, Comparable<Root
 
         Assert.assertTrue(mExpanded);
 
-        Node node = mChildTreeNodes.get(position - 1);
-        Assert.assertTrue(node != null);
+        TreeNode treeNode = mChildTreeNodes.get(position - 1);
+        Assert.assertTrue(treeNode != null);
 
-        return node;
+        return treeNode;
     }
 
     @Override
-    public int getPosition(Node node) {
-        if (node == this)
+    public int getPosition(TreeNode treeNode) {
+        if (treeNode == this)
             return 0;
 
-        if (!(node instanceof ChildTreeNode))
+        if (!(treeNode instanceof ChildTreeNode))
             return -1;
 
-        ChildTreeNode childTreeNode = (ChildTreeNode) node;
+        ChildTreeNode childTreeNode = (ChildTreeNode) treeNode;
         if (mChildTreeNodes.contains(childTreeNode)) {
             Assert.assertTrue(mExpanded);
             return mChildTreeNodes.indexOf(childTreeNode) + 1;
@@ -241,19 +241,19 @@ public class RootTreeNode extends Node implements NodeContainer, Comparable<Root
         }
     }
 
-    public Stream<Node> getSelectedNodes() {
+    public Stream<TreeNode> getSelectedNodes() {
         Assert.assertTrue(!mSelected || mRootModelNode.selectable());
 
-        ArrayList<Node> selectedNodes = new ArrayList<>();
+        ArrayList<TreeNode> selectedTreeNodes = new ArrayList<>();
 
         if (mSelected)
-            selectedNodes.add(this);
+            selectedTreeNodes.add(this);
 
-        selectedNodes.addAll(Stream.of(mChildTreeNodes)
+        selectedTreeNodes.addAll(Stream.of(mChildTreeNodes)
                 .filter(ChildTreeNode::isSelected)
                 .collect(Collectors.toList()));
 
-        return Stream.of(selectedNodes);
+        return Stream.of(selectedTreeNodes);
     }
 
     public void add(ChildTreeNode childTreeNode) {
@@ -348,8 +348,8 @@ public class RootTreeNode extends Node implements NodeContainer, Comparable<Root
         boolean last = (treeNodeCollection.displayedSize() == position + 1);
 
         if (!last) {
-            Node nextNode = treeNodeCollection.getNode(position + 1);
-            return (nextNode.expanded());
+            TreeNode nextTreeNode = treeNodeCollection.getNode(position + 1);
+            return (nextTreeNode.expanded());
         } else {
             return false;
         }
@@ -375,7 +375,7 @@ public class RootTreeNode extends Node implements NodeContainer, Comparable<Root
     }
 
     @Override
-    public List<Node> getSelectedChildren() {
+    public List<TreeNode> getSelectedChildren() {
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
         Assert.assertTrue(!mSelected);
 

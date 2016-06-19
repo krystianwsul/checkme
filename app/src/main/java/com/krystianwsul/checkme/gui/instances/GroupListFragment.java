@@ -41,10 +41,10 @@ import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.instances.tree.ChildModelNode;
 import com.krystianwsul.checkme.gui.instances.tree.ChildTreeNode;
 import com.krystianwsul.checkme.gui.instances.tree.ModelNodeCollection;
-import com.krystianwsul.checkme.gui.instances.tree.Node;
 import com.krystianwsul.checkme.gui.instances.tree.RootModelNode;
 import com.krystianwsul.checkme.gui.instances.tree.RootTreeNode;
 import com.krystianwsul.checkme.gui.instances.tree.TreeModelAdapter;
+import com.krystianwsul.checkme.gui.instances.tree.TreeNode;
 import com.krystianwsul.checkme.gui.instances.tree.TreeNodeCollection;
 import com.krystianwsul.checkme.gui.instances.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity;
@@ -160,7 +160,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(Stream.of(instanceDatas)
                             .allMatch(instanceData -> instanceData.TaskCurrent));
 
-                    List<Node> selectedNodes = mTreeViewAdapter.getSelectedNodes();
+                    List<TreeNode> selectedTreeNodes = mTreeViewAdapter.getSelectedNodes();
 
                     for (GroupListLoader.InstanceData instanceData : instanceDatas) {
                         if (instanceData.Exists) {
@@ -176,29 +176,29 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     TickService.startService(getActivity());
 
                     do {
-                        Node node = selectedNodes.get(0);
-                        Assert.assertTrue(node != null);
+                        TreeNode treeNode = selectedTreeNodes.get(0);
+                        Assert.assertTrue(treeNode != null);
 
                         GroupListLoader.InstanceData instanceData1;
-                        if (node instanceof RootTreeNode) {
-                            instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode) ((RootTreeNode) node).getRootModelNode()).getSingleInstanceData();
+                        if (treeNode instanceof RootTreeNode) {
+                            instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode) ((RootTreeNode) treeNode).getRootModelNode()).getSingleInstanceData();
                         } else {
-                            Assert.assertTrue(node instanceof ChildTreeNode);
-                            instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) ((ChildTreeNode) node).getChildModelNode()).mInstanceData;
+                            Assert.assertTrue(treeNode instanceof ChildTreeNode);
+                            instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) ((ChildTreeNode) treeNode).getChildModelNode()).mInstanceData;
                         }
 
                         if (instanceData1.Exists) {
-                            node.update();
+                            treeNode.update();
                         } else {
-                            if (node instanceof RootTreeNode) {
-                                RootTreeNode notDoneGroupTreeNode = (RootTreeNode) node;
+                            if (treeNode instanceof RootTreeNode) {
+                                RootTreeNode notDoneGroupTreeNode = (RootTreeNode) treeNode;
 
                                 GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = (GroupAdapter.NodeCollection.NotDoneGroupNode) notDoneGroupTreeNode.getRootModelNode();
                                 Assert.assertTrue(notDoneGroupNode != null);
 
                                 ((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mNodeCollection.mNotDoneGroupCollection.remove(notDoneGroupNode);
                             } else {
-                                ChildTreeNode notDoneInstanceTreeNode = (ChildTreeNode) node;
+                                ChildTreeNode notDoneInstanceTreeNode = (ChildTreeNode) treeNode;
 
                                 GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = (GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) notDoneInstanceTreeNode.getChildModelNode();
                                 Assert.assertTrue(notDoneInstanceNode != null);
@@ -208,7 +208,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                             decrementSelected();
                         }
-                    } while (!(selectedNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
+                    } while (!(selectedTreeNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
                     break;
                 }
@@ -715,8 +715,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(position < treeViewAdapter.getItemCount());
 
             if (position < treeViewAdapter.displayedSize()) {
-                Node node = treeViewAdapter.getNode(position);
-                node.onBindViewHolder(abstractHolder);
+                TreeNode treeNode = treeViewAdapter.getNode(position);
+                treeNode.onBindViewHolder(abstractHolder);
             } else {
                 Assert.assertTrue(position == treeViewAdapter.displayedSize());
                 Assert.assertTrue(mShowFab);
@@ -2531,20 +2531,20 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         return new Date(calendar);
     }
 
-    private static List<GroupListLoader.InstanceData> nodesToInstanceDatas(List<Node> nodes) {
-        Assert.assertTrue(nodes != null);
+    private static List<GroupListLoader.InstanceData> nodesToInstanceDatas(List<TreeNode> treeNodes) {
+        Assert.assertTrue(treeNodes != null);
 
         List<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>();
-        for (Node node : nodes) {
-            if (node instanceof RootTreeNode) {
-                GroupListLoader.InstanceData instanceData = ((GroupAdapter.NodeCollection.NotDoneGroupNode) ((RootTreeNode) node).getRootModelNode()).getSingleInstanceData();
+        for (TreeNode treeNode : treeNodes) {
+            if (treeNode instanceof RootTreeNode) {
+                GroupListLoader.InstanceData instanceData = ((GroupAdapter.NodeCollection.NotDoneGroupNode) ((RootTreeNode) treeNode).getRootModelNode()).getSingleInstanceData();
                 Assert.assertTrue(instanceData != null);
 
                 instanceDatas.add(instanceData);
             } else {
-                Assert.assertTrue(node instanceof ChildTreeNode);
+                Assert.assertTrue(treeNode instanceof ChildTreeNode);
 
-                GroupListLoader.InstanceData instanceData = ((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) ((ChildTreeNode) node).getChildModelNode()).mInstanceData;
+                GroupListLoader.InstanceData instanceData = ((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) ((ChildTreeNode) treeNode).getChildModelNode()).mInstanceData;
                 Assert.assertTrue(instanceData != null);
 
                 instanceDatas.add(instanceData);

@@ -334,21 +334,26 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             if (oldParentPosition == 0) {
                 if (mModelNode.visibleWhenEmpty()) {
+                    Log.e("asdf", "a");
                     treeViewAdapter.notifyItemChanged(oldParentPosition);
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                 } else {
+                    Log.e("asdf", "b");
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                 }
             } else {
                 if (mModelNode.visibleWhenEmpty()) {
+                    Log.e("asdf", "c");
                     treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                 } else {
+                    Log.e("asdf", "d");
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                 }
             }
         } else {
+            Log.e("asdf", "e");
             treeViewAdapter.notifyItemChanged(oldParentPosition);
             treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
@@ -551,5 +556,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(treeNodeCollection != null);
 
         return treeNodeCollection;
+    }
+
+    public List<TreeNode> getAllChildren() {
+        return mChildTreeNodes;
     }
 }

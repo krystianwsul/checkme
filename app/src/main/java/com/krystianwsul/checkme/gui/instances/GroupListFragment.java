@@ -158,56 +158,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             .allMatch(instanceData -> instanceData.TaskCurrent));
 
                     List<TreeNode> selectedTreeNodes = mTreeViewAdapter.getSelectedNodes();
-
-                    for (GroupListLoader.InstanceData instanceData : instanceDatas) {
-                        if (instanceData.Exists) {
-                            instanceData.TaskCurrent = false;
-                            instanceData.IsRootTask = null;
-                        } else {
-                            GroupListLoader.InstanceDataParent instanceDataParent = instanceData.InstanceDataParentReference.get();
-                            Assert.assertTrue(instanceDataParent != null);
-
-                            instanceDataParent.remove(instanceData.InstanceKey);
-                        }
-                    }
-
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskIds);
-
-                    TickService.startService(getActivity());
+                    Assert.assertTrue(selectedTreeNodes != null);
+                    Assert.assertTrue(!selectedTreeNodes.isEmpty());
 
                     do {
                         TreeNode treeNode = selectedTreeNodes.get(0);
                         Assert.assertTrue(treeNode != null);
 
-                        GroupListLoader.InstanceData instanceData1;
-                        if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
-                            instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode) treeNode.getModelNode()).getSingleInstanceData();
-                        } else {
-                            instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) treeNode.getModelNode()).mInstanceData;
-                        }
+                        recursiveDelete(treeNode);
 
-                        if (instanceData1.Exists) {
-                            treeNode.unselect();
-
-                            treeNode.update();
-
-                            decrementSelected();
-                        } else {
-                            if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
-                                GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = (GroupAdapter.NodeCollection.NotDoneGroupNode) treeNode.getModelNode();
-                                Assert.assertTrue(notDoneGroupNode != null);
-
-                                notDoneGroupNode.removeFromParent();
-                            } else {
-                                GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = (GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) treeNode.getModelNode();
-                                Assert.assertTrue(notDoneInstanceNode != null);
-
-                                notDoneInstanceNode.removeFromParent();
-                            }
-
-                            decrementSelected();
-                        }
+                        decrementSelected();
                     } while (!(selectedTreeNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
+
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskIds);
+
+                    TickService.startService(getActivity());
 
                     break;
                 }
@@ -231,6 +196,63 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     break;
                 default:
                     throw new UnsupportedOperationException();
+            }
+        }
+
+        private void recursiveDelete(TreeNode treeNode) {
+            Assert.assertTrue(treeNode != null);
+
+            GroupListLoader.InstanceData instanceData1;
+            if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
+                instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode) treeNode.getModelNode()).getSingleInstanceData();
+            } else if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) {
+                instanceData1 = ((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) treeNode.getModelNode()).mInstanceData;
+            } else if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.DoneInstanceNode) {
+                instanceData1 = ((GroupAdapter.NodeCollection.DoneInstanceNode) treeNode.getModelNode()).mInstanceData;
+            } else {
+                Assert.assertTrue((treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.DividerNode));
+
+                Stream.of(treeNode.getAllChildren())
+                        .forEach(this::recursiveDelete);
+
+                return;
+            }
+
+            if (instanceData1.Exists) {
+                instanceData1.TaskCurrent = false;
+                instanceData1.IsRootTask = null;
+            } else {
+                GroupListLoader.InstanceDataParent instanceDataParent = instanceData1.InstanceDataParentReference.get();
+                Assert.assertTrue(instanceDataParent != null);
+
+                instanceDataParent.remove(instanceData1.InstanceKey);
+            }
+
+            if (instanceData1.Exists) {
+                treeNode.unselect();
+
+                treeNode.update();
+
+                ArrayList<TreeNode> children = new ArrayList<>(treeNode.getAllChildren());
+                Stream.of(children)
+                        .forEach(this::recursiveDelete);
+            } else {
+                if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
+                    GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = (GroupAdapter.NodeCollection.NotDoneGroupNode) treeNode.getModelNode();
+                    Assert.assertTrue(notDoneGroupNode != null);
+
+                    notDoneGroupNode.removeFromParent();
+                } else if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) {
+                    GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = (GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) treeNode.getModelNode();
+                    Assert.assertTrue(notDoneInstanceNode != null);
+
+                    notDoneInstanceNode.removeFromParent();
+                } else {
+                    GroupAdapter.NodeCollection.DoneInstanceNode doneInstanceNode = (GroupAdapter.NodeCollection.DoneInstanceNode) treeNode.getModelNode();
+                    Assert.assertTrue(doneInstanceNode != null);
+
+                    doneInstanceNode.removeFromParent();
+                }
             }
         }
 
@@ -1630,7 +1652,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         instanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
                         Assert.assertTrue(instanceData.Done != null);
 
-                        instanceData.Exists = true;
+                        recursiveExists(instanceData);
 
                         TickService.startService(groupListFragment.getActivity());
 
@@ -2119,7 +2141,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, true);
                             Assert.assertTrue(mInstanceData.Done != null);
 
-                            mInstanceData.Exists = true;
+                            recursiveExists(mInstanceData);
 
                             TickService.startService(groupListFragment.getActivity());
 
@@ -2712,6 +2734,20 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 public boolean visibleDuringActionMode() {
                     return true;
                 }
+
+                private DividerNode getDividerNode() {
+                    DividerNode dividerNode = mDividerNodeReference.get();
+                    Assert.assertTrue(dividerNode != null);
+
+                    return dividerNode;
+                }
+
+                public void removeFromParent() {
+                    DividerNode dividerNode = getDividerNode();
+                    Assert.assertTrue(dividerNode != null);
+
+                    dividerNode.remove(this);
+                }
             }
         }
     }
@@ -2810,5 +2846,21 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         return instanceDatas;
+    }
+
+    private static void recursiveExists(GroupListLoader.InstanceData instanceData) {
+        Assert.assertTrue(instanceData != null);
+
+        instanceData.Exists = true;
+
+        GroupListLoader.InstanceDataParent instanceDataParent = instanceData.InstanceDataParentReference.get();
+        Assert.assertTrue(instanceDataParent != null);
+
+        if (instanceDataParent instanceof GroupListLoader.InstanceData) {
+            GroupListLoader.InstanceData instanceData1 = (GroupListLoader.InstanceData) instanceDataParent;
+            recursiveExists(instanceData1);
+        } else {
+            Assert.assertTrue(instanceDataParent instanceof GroupListLoader.Data);
+        }
     }
 }

@@ -108,6 +108,7 @@ public class TreeNodeCollection implements NodeContainer {
         Assert.assertTrue(treeViewAdapter != null);
 
         int newPosition = getPosition(notDoneGroupTreeNode);
+        Assert.assertTrue(newPosition >= 0);
 
         treeViewAdapter.notifyItemInserted(newPosition);
 
@@ -124,6 +125,7 @@ public class TreeNodeCollection implements NodeContainer {
         Assert.assertTrue(treeViewAdapter != null);
 
         int oldPosition = getPosition(notDoneGroupTreeNode);
+        Assert.assertTrue(oldPosition >= 0);
 
         int displayedSize = notDoneGroupTreeNode.displayedSize();
 

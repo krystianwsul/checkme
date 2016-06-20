@@ -305,11 +305,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             } else {
                 Assert.assertTrue(instanceDatas.size() > 1);
 
-                boolean isRootInstance = instanceDatas.get(0).IsRootInstance;
-                Assert.assertTrue(Stream.of(instanceDatas)
-                    .allMatch(instanceData -> instanceData.IsRootInstance == isRootInstance));
-
-                menu.findItem(R.id.action_group_edit_instance).setVisible(isRootInstance);
+                menu.findItem(R.id.action_group_edit_instance).setVisible(Stream.of(instanceDatas)
+                        .allMatch(instanceData -> instanceData.IsRootInstance));
                 menu.findItem(R.id.action_group_show_task).setVisible(false);
                 menu.findItem(R.id.action_group_edit_task).setVisible(false);
 
@@ -1610,9 +1607,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 View.OnClickListener getCheckBoxOnClickListener() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
-                    Assert.assertTrue(notDoneGroupTreeNode != null);
-
                     final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
                     Assert.assertTrue(notDoneGroupCollection != null);
 
@@ -1640,9 +1634,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         TickService.startService(groupListFragment.getActivity());
 
-                        notDoneGroupCollection.remove(this);
-
                         nodeCollection.mDividerNode.add(instanceData);
+
+                        notDoneGroupCollection.remove(this);
                     };
                 }
 

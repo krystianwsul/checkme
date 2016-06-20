@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
@@ -218,8 +219,25 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             if (!TextUtils.isEmpty(DisplayText) && !DisplayText.equals(instanceData.DisplayText))
                 return false;
 
-            if (!Children.equals(instanceData.Children))
+            if (!Children.equals(instanceData.Children)) {
+                for (InstanceKey instanceKey : Children.keySet()) {
+                    if (!Children.keySet().contains(instanceKey)) {
+                        Log.e("asdf", instanceData.Children.get(instanceKey).Name + " missing from mData");
+                        continue;
+                    }
+
+                    if (!instanceData.Children.keySet().contains(instanceKey)) {
+                        Log.e("asdf", Children.get(instanceKey).Name + " missing from data");
+                        continue;
+                    }
+
+                    if (!Children.get(instanceKey).equals(instanceData.Children.get(instanceKey))) {
+                        Log.e("asdf", "here be dragons nested " + Children.get(instanceKey).equals(instanceData.Children.get(instanceKey)));
+                    }
+                }
+
                 return false;
+            }
 
             if (!Name.equals(instanceData.Name))
                 return false;

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
@@ -334,26 +333,21 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             if (oldParentPosition == 0) {
                 if (mModelNode.visibleWhenEmpty()) {
-                    Log.e("asdf", "a");
                     treeViewAdapter.notifyItemChanged(oldParentPosition);
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                 } else {
-                    Log.e("asdf", "b");
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                 }
             } else {
                 if (mModelNode.visibleWhenEmpty()) {
-                    Log.e("asdf", "c");
                     treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                 } else {
-                    Log.e("asdf", "d");
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
                     treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                 }
             }
         } else {
-            Log.e("asdf", "e");
             treeViewAdapter.notifyItemChanged(oldParentPosition);
             treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
@@ -506,10 +500,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
-                    Log.e("asdf", "hiding " + oldPosition + ", " + (1 + childrenDisplayedSize()));
                     treeViewAdapter.notifyItemRangeRemoved(oldPosition, 1 + childrenDisplayedSize());
                 } else {
-                    Log.e("asdf", "hiding " + oldPosition);
                     treeViewAdapter.notifyItemRemoved(oldPosition);
                 }
             }

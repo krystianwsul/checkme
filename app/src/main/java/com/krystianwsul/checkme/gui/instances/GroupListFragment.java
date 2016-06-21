@@ -27,7 +27,6 @@ import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -659,6 +658,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         private NodeCollection mNodeCollection;
 
+        private final float mDensity;
+
         public static TreeViewAdapter getAdapter(GroupListFragment groupListFragment, int dataId, List<GroupListLoader.CustomTimeData> customTimeDatas, boolean useGroups, boolean showFab, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes) {
             Assert.assertTrue(groupListFragment != null);
             Assert.assertTrue(customTimeDatas != null);
@@ -677,6 +678,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mDataId = dataId;
             mCustomTimeDatas = customTimeDatas;
             mShowFab = showFab;
+
+            mDensity = groupListFragment.getActivity().getResources().getDisplayMetrics().density;
         }
 
         private TreeViewAdapter initialize(boolean useGroups, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes) {
@@ -687,7 +690,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             TreeNodeCollection treeNodeCollection = new TreeNodeCollection(new WeakReference<>(treeViewAdapter));
 
-            mNodeCollection = new NodeCollection(new WeakReference<>(this), useGroups, new WeakReference<>(treeNodeCollection));
+            mNodeCollection = new NodeCollection(mDensity, 0, new WeakReference<>(this), useGroups, new WeakReference<>(treeNodeCollection));
 
             treeNodeCollection.setNodes(mNodeCollection.initialize(treeViewAdapter, instanceDatas, expansionState, selectedNodes));
 
@@ -701,6 +704,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             if (viewType == TYPE_GROUP) {
                 LinearLayout groupRow = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
+                LinearLayout groupRowContainer = (LinearLayout) groupRow.findViewById(R.id.group_row_container);
                 TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
                 TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
                 TextView groupRowChildren = (TextView) groupRow.findViewById(R.id.group_row_children);
@@ -708,7 +712,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
                 View groupRowSeparator = groupRow.findViewById(R.id.group_row_separator);
 
-                return new GroupHolder(groupRow, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator);
+                return new GroupHolder(groupRow, groupRowContainer, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator);
             } else {
                 Assert.assertTrue(viewType == TreeViewAdapter.TYPE_FAB_PADDING);
 
@@ -775,6 +779,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         public static class GroupHolder extends AbstractHolder {
             public final LinearLayout mGroupRow;
+            public final LinearLayout mGroupRowContainer;
             public final TextView mGroupRowName;
             public final TextView mGroupRowDetails;
             public final TextView mGroupRowChildren;
@@ -782,9 +787,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             public final CheckBox mGroupRowCheckBox;
             public final View mGroupRowSeparator;
 
-            public GroupHolder(LinearLayout groupRow, TextView groupRowName, TextView groupRowDetails, TextView groupRowChildren, ImageView groupRowExpand, CheckBox groupRowCheckBox, View groupRowSeparator) {
+            public GroupHolder(LinearLayout groupRow, LinearLayout groupRowContainer, TextView groupRowName, TextView groupRowDetails, TextView groupRowChildren, ImageView groupRowExpand, CheckBox groupRowCheckBox, View groupRowSeparator) {
                 super(groupRow);
 
+                Assert.assertTrue(groupRowContainer != null);
                 Assert.assertTrue(groupRowName != null);
                 Assert.assertTrue(groupRowDetails != null);
                 Assert.assertTrue(groupRowChildren != null);
@@ -793,24 +799,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(groupRowSeparator != null);
 
                 mGroupRow = groupRow;
+                mGroupRowContainer = groupRowContainer;
                 mGroupRowName = groupRowName;
                 mGroupRowDetails = groupRowDetails;
                 mGroupRowChildren = groupRowChildren;
                 mGroupRowExpand = groupRowExpand;
                 mGroupRowCheckBox = groupRowCheckBox;
                 mGroupRowSeparator = groupRowSeparator;
-            }
-        }
-
-        public static class DividerHolder extends AbstractHolder {
-            public final ImageView GroupListDividerImage;
-
-            DividerHolder(RelativeLayout rowGroupListDivider, ImageView groupListDividerImage) {
-                super(rowGroupListDivider);
-
-                Assert.assertTrue(groupListDividerImage != null);
-
-                GroupListDividerImage = groupListDividerImage;
             }
         }
 
@@ -829,10 +824,15 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             private final boolean mUseGroups;
 
-            private NodeCollection(WeakReference<NodeCollectionParent> nodeCollectionParentReference, boolean useGroups, WeakReference<NodeContainer> nodeContainerReference) {
+            private final float mDensity;
+            private final int mIndentation;
+
+            private NodeCollection(float density, int indentation, WeakReference<NodeCollectionParent> nodeCollectionParentReference, boolean useGroups, WeakReference<NodeContainer> nodeContainerReference) {
                 Assert.assertTrue(nodeCollectionParentReference != null);
                 Assert.assertTrue(nodeContainerReference != null);
 
+                mDensity = density;
+                mIndentation = indentation;
                 mNodeCollectionParentReference = nodeCollectionParentReference;
                 mUseGroups = useGroups;
                 mNodeContainerReference = nodeContainerReference;
@@ -858,12 +858,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     expandedGroups = expansionState.ExpandedGroups;
                 }
 
-                mNotDoneGroupCollection = new NotDoneGroupCollection(new WeakReference<>(this), mNodeContainerReference);
+                mNotDoneGroupCollection = new NotDoneGroupCollection(mDensity, mIndentation, new WeakReference<>(this), mNodeContainerReference);
 
                 List<TreeNode> rootTreeNodes = mNotDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, selectedNodes);
                 Assert.assertTrue(rootTreeNodes != null);
 
-                mDividerNode = new DividerNode(new WeakReference<>(this));
+                mDividerNode = new DividerNode(mDensity, mIndentation, new WeakReference<>(this));
 
                 TreeNode dividerTreeNode = mDividerNode.initialize(doneExpanded, mNodeContainerReference, doneInstanceDatas);
                 Assert.assertTrue(dividerTreeNode != null);
@@ -942,10 +942,15 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final ArrayList<NotDoneGroupNode> mNotDoneGroupNodes = new ArrayList<>();
 
-                private NotDoneGroupCollection(WeakReference<NodeCollection> nodeCollectionReference, WeakReference<NodeContainer> nodeContainerReference) {
+                private final float mDensity;
+                private final int mIndentation;
+
+                private NotDoneGroupCollection(float density, int indentation, WeakReference<NodeCollection> nodeCollectionReference, WeakReference<NodeContainer> nodeContainerReference) {
                     Assert.assertTrue(nodeCollectionReference != null);
                     Assert.assertTrue(nodeContainerReference != null);
 
+                    mDensity = density;
+                    mIndentation = indentation;
                     mNodeCollectionReference = nodeCollectionReference;
                     mNodeContainerReference = nodeContainerReference;
                 }
@@ -1045,7 +1050,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(instanceDatas != null);
                     Assert.assertTrue(!instanceDatas.isEmpty());
 
-                    NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(notDoneGroupCollectionReference, instanceDatas);
+                    NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(mDensity, mIndentation, notDoneGroupCollectionReference, instanceDatas);
 
                     NodeCollection nodeCollection = mNodeCollectionReference.get();
                     Assert.assertTrue(nodeCollection != null);
@@ -1091,6 +1096,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
 
             private static abstract class GroupHolderNode {
+                protected final float mDensity;
+                protected final int mIndentation;
+
+                public GroupHolderNode(float density, int indentation) {
+                    mDensity = density;
+                    mIndentation = indentation;
+                }
+
                 abstract int getNameVisibility();
                 abstract String getName();
                 abstract int getNameColor();
@@ -1120,6 +1133,10 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 public final void onBindViewHolder(GroupAdapter.AbstractHolder abstractHolder) {
                     final GroupAdapter.GroupHolder groupHolder = (GroupAdapter.GroupHolder) abstractHolder;
+
+                    int padding = 48 * mIndentation;
+
+                    groupHolder.mGroupRowContainer.setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
 
                     int nameVisibility = getNameVisibility();
                     //noinspection ResourceType
@@ -1188,7 +1205,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 public final ExactTimeStamp mExactTimeStamp;
 
-                private NotDoneGroupNode(WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference, List<GroupListLoader.InstanceData> instanceDatas) {
+                private NotDoneGroupNode(float density, int indentation, WeakReference<NotDoneGroupCollection> notDoneGroupCollectionReference, List<GroupListLoader.InstanceData> instanceDatas) {
+                    super(density, indentation);
                     Assert.assertTrue(notDoneGroupCollectionReference != null);
                     Assert.assertTrue(instanceDatas != null);
                     Assert.assertTrue(!instanceDatas.isEmpty());
@@ -1208,7 +1226,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mNotDoneGroupTreeNodeReference = new WeakReference<>(notDoneGroupTreeNode);
 
                     if (mInstanceDatas.size() == 1) {
-                        mNodeCollection = new NodeCollection(new WeakReference<>(this), false, new WeakReference<>(notDoneGroupTreeNode));
+                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(notDoneGroupTreeNode));
 
                         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
@@ -1813,7 +1831,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         GroupListLoader.InstanceData instanceData1 = mInstanceDatas.get(0);
 
-                        GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(instanceData1, new WeakReference<>(NotDoneGroupNode.this));
+                        GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(mDensity, mIndentation, instanceData1, new WeakReference<>(NotDoneGroupNode.this));
                         mNotDoneInstanceNodes.add(notDoneInstanceNode);
 
                         TreeNode childTreeNode = notDoneInstanceNode.initialize(null, mNotDoneGroupTreeNodeReference);
@@ -1833,7 +1851,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(instanceData != null);
                     Assert.assertTrue(mNotDoneGroupTreeNodeReference != null);
 
-                    GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(instanceData, new WeakReference<>(this));
+                    GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(mDensity, mIndentation, instanceData, new WeakReference<>(this));
 
                     TreeNode childTreeNode = notDoneInstanceNode.initialize(selectedNodes, mNotDoneGroupTreeNodeReference);
 
@@ -1887,7 +1905,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     private NodeCollection mNodeCollection;
 
-                    public NotDoneInstanceNode(GroupListLoader.InstanceData instanceData, WeakReference<NotDoneGroupNode> notDoneGroupNodeReference) {
+                    public NotDoneInstanceNode(float density, int indentation, GroupListLoader.InstanceData instanceData, WeakReference<NotDoneGroupNode> notDoneGroupNodeReference) {
+                        super(density, indentation);
+
                         Assert.assertTrue(instanceData != null);
                         Assert.assertTrue(notDoneGroupNodeReference != null);
 
@@ -1906,7 +1926,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         TreeNode childTreeNode = new TreeNode(this, new WeakReference<>(notDoneGroupTreeNode), false, selectedNodes != null && selectedNodes.contains(mInstanceData.InstanceKey));
                         mChildTreeNodeReference = new WeakReference<>(childTreeNode);
 
-                        mNodeCollection = new NodeCollection(new WeakReference<>(this), false, new WeakReference<>(childTreeNode));
+                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(childTreeNode));
                         childTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, selectedNodes));
 
                         return childTreeNode;
@@ -2250,7 +2270,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final ArrayList<DoneInstanceNode> mDoneInstanceNodes = new ArrayList<>();
 
-                private DividerNode(WeakReference<NodeCollection> nodeCollectionReference) {
+                private DividerNode(float density, int indentation, WeakReference<NodeCollection> nodeCollectionReference) {
+                    super(density, indentation);
+
                     Assert.assertTrue(nodeCollectionReference != null);
 
                     mNodeCollectionReference = nodeCollectionReference;
@@ -2272,7 +2294,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 private TreeNode newChildTreeNode(GroupListLoader.InstanceData instanceData) {
                     Assert.assertTrue(instanceData.Done != null);
 
-                    DoneInstanceNode doneInstanceNode = new DoneInstanceNode(instanceData, new WeakReference<>(this));
+                    DoneInstanceNode doneInstanceNode = new DoneInstanceNode(mDensity, mIndentation, instanceData, new WeakReference<>(this));
 
                     TreeNode dividerTreeNode = mDividerTreeNodeReference.get();
                     Assert.assertTrue(dividerTreeNode != null);
@@ -2497,7 +2519,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final GroupListLoader.InstanceData mInstanceData;
 
-                public DoneInstanceNode(GroupListLoader.InstanceData instanceData, WeakReference<DividerNode> dividerNodeReference) {
+                public DoneInstanceNode(float density, int indentation, GroupListLoader.InstanceData instanceData, WeakReference<DividerNode> dividerNodeReference) {
+                    super(density, indentation);
+
                     Assert.assertTrue(instanceData != null);
                     Assert.assertTrue(dividerNodeReference != null);
 

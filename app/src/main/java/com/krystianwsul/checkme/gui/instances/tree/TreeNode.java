@@ -164,17 +164,23 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             return 0;
         } else {
             if (mExpanded) {
-                return 1 + childrenDisplayedSize();
+                return 1 + Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (a, b) -> a + b);
             } else {
                 return 1;
             }
         }
     }
 
-    private int childrenDisplayedSize() {
-        return Stream.of(mChildTreeNodes)
-                .map(TreeNode::displayedSize)
-                .reduce(0, (lhs, rhs) -> lhs + rhs);
+    private int visibleSize() {
+        if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())) {
+            return 0;
+        } else {
+            if (mExpanded) {
+                return 1 + Stream.of(mChildTreeNodes).map(TreeNode::visibleSize).reduce(0, (a, b) -> a + b);
+            } else {
+                return 1;
+            }
+        }
     }
 
     public TreeNode getNode(int position) {
@@ -500,7 +506,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
-                    treeViewAdapter.notifyItemRangeRemoved(oldPosition, 1 + childrenDisplayedSize());
+                    treeViewAdapter.notifyItemRangeRemoved(oldPosition, visibleSize());
                 } else {
                     treeViewAdapter.notifyItemRemoved(oldPosition);
                 }

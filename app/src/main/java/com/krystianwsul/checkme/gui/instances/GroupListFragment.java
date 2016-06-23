@@ -2060,6 +2060,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
+                        Assert.assertTrue(!mInstanceData.Children.isEmpty());
+
                         if (!mInstanceData.TaskCurrent) {
                             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled);
                         } else {
@@ -2239,13 +2241,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         return Integer.valueOf(mInstanceData.InstanceKey.TaskId).compareTo(((NotDoneInstanceNode) another).mInstanceData.InstanceKey.TaskId);
                     }
 
-                    public void removeFromParent() {
-                        NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
-                        Assert.assertTrue(notDoneGroupNode != null);
-
-                        notDoneGroupNode.remove(this);
-                    }
-
                     @Override
                     public boolean selectable() {
                         return true;
@@ -2259,6 +2254,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     @Override
                     public boolean visibleDuringActionMode() {
                         return true;
+                    }
+
+                    public void removeFromParent() {
+                        NotDoneGroupNode notDoneGroupNode = mNotDoneGroupNodeReference.get();
+                        Assert.assertTrue(notDoneGroupNode != null);
+
+                        notDoneGroupNode.remove(this);
                     }
                 }
             }
@@ -2512,12 +2514,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
             }
 
-            public static class DoneInstanceNode extends GroupHolderNode implements ModelNode {
+            public static class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollectionParent {
                 private final WeakReference<DividerNode> mDividerNodeReference;
 
                 private WeakReference<TreeNode> mChildTreeNodeReference;
 
                 private final GroupListLoader.InstanceData mInstanceData;
+
+                private NodeCollection mNodeCollection;
 
                 public DoneInstanceNode(float density, int indentation, GroupListLoader.InstanceData instanceData, WeakReference<DividerNode> dividerNodeReference) {
                     super(density, indentation);
@@ -2533,12 +2537,61 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 public TreeNode initialize(TreeNode dividerTreeNode) {
                     Assert.assertTrue(dividerTreeNode != null);
 
+                    TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+                    Assert.assertTrue(treeViewAdapter != null);
+
                     TreeNode doneTreeNode = new TreeNode(this, new WeakReference<>(dividerTreeNode), false, false);
                     mChildTreeNodeReference = new WeakReference<>(doneTreeNode);
 
-                    doneTreeNode.setChildTreeNodes(new ArrayList<>());
+                    mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(doneTreeNode));
+                    doneTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, null));
 
                     return doneTreeNode;
+                }
+
+                private TreeNode getTreeNode() {
+                    TreeNode treeNode = mChildTreeNodeReference.get();
+                    Assert.assertTrue(treeNode != null);
+
+                    return treeNode;
+                }
+
+                private DividerNode getDividerNode() {
+                    DividerNode dividerNode = mDividerNodeReference.get();
+                    Assert.assertTrue(dividerNode != null);
+
+                    return dividerNode;
+                }
+
+                private NodeCollection getParentNodeCollection() {
+                    DividerNode dividerNode = getDividerNode();
+                    Assert.assertTrue(dividerNode != null);
+
+                    NodeCollection nodeCollection = dividerNode.getNodeCollection();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    return nodeCollection;
+                }
+
+                private TreeViewAdapter getTreeViewAdapter() {
+                    NodeCollection nodeCollection = getParentNodeCollection();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    TreeViewAdapter treeViewAdapter = nodeCollection.getTreeViewAdapter();
+                    Assert.assertTrue(treeViewAdapter != null);
+
+                    return treeViewAdapter;
+                }
+
+                @Override
+                public GroupAdapter getGroupAdapter() {
+                    NodeCollection nodeCollection = getParentNodeCollection();
+                    Assert.assertTrue(nodeCollection != null);
+
+                    GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    return groupAdapter;
                 }
 
                 @Override
@@ -2608,7 +2661,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 String getChildren() {
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
-
                     return Stream.of(mInstanceData.Children.values())
                             .sortBy(child -> child.InstanceKey.TaskId)
                             .map(child -> child.Name)
@@ -2617,10 +2669,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getChildrenColor() {
-                    final DividerNode dividerNode = mDividerNodeReference.get();
-                    Assert.assertTrue(dividerNode != null);
-
-                    GroupListFragment groupListFragment = dividerNode.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupAdapter().mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
@@ -2643,21 +2692,28 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getExpandImageResource() {
-                    final DividerNode dividerNode = mDividerNodeReference.get();
-                    Assert.assertTrue(dividerNode != null);
+                    TreeNode treeNode = getTreeNode();
+                    Assert.assertTrue(treeNode != null);
 
-                    GroupListFragment groupListFragment = dividerNode.getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupAdapter().mGroupListFragmentReference.get();
                     Assert.assertTrue(groupListFragment != null);
 
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
 
-                    return R.drawable.ic_list_black_36dp;
+                    if (treeNode.expanded())
+                        return R.drawable.ic_expand_less_black_36dp;
+                    else
+                        return R.drawable.ic_expand_more_black_36dp;
                 }
 
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
+                    TreeNode treeNode = getTreeNode();
+                    Assert.assertTrue(treeNode != null);
+
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
-                    return null;
+
+                    return treeNode.getExpandListener();
                 }
 
                 @Override
@@ -2757,13 +2813,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 public boolean visibleDuringActionMode() {
                     return true;
-                }
-
-                private DividerNode getDividerNode() {
-                    DividerNode dividerNode = mDividerNodeReference.get();
-                    Assert.assertTrue(dividerNode != null);
-
-                    return dividerNode;
                 }
 
                 public void removeFromParent() {

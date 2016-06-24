@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -71,7 +72,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         Assert.assertTrue(date != null);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
-        intent.putExtra(DATE_KEY, date);
+        intent.putExtra(DATE_KEY, (Parcelable) date);
         return intent;
     }
 
@@ -102,7 +103,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
-        intent.putExtra(DATE_KEY, date);
+        intent.putExtra(DATE_KEY, (Parcelable) date);
         return intent;
     }
 

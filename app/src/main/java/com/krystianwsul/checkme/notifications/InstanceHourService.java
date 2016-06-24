@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -19,7 +20,7 @@ public class InstanceHourService extends IntentService {
         Assert.assertTrue(instanceKey != null);
 
         Intent intent = new Intent(context, InstanceHourService.class);
-        intent.putExtra(INSTANCE_KEY, instanceKey);
+        intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         intent.putExtra(NOTIFICATION_ID_KEY, notificationId);
         return intent;
     }

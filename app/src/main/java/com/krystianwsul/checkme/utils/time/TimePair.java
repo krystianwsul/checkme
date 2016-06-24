@@ -5,7 +5,9 @@ import android.os.Parcelable;
 
 import junit.framework.Assert;
 
-public class TimePair implements Parcelable {
+import java.io.Serializable;
+
+public class TimePair implements Parcelable, Serializable {
     public final Integer CustomTimeId;
     public final HourMinute HourMinute;
 

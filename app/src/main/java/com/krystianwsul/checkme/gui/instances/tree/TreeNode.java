@@ -324,8 +324,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         int childDisplayedSize = childTreeNode.displayedSize();
 
-        boolean lastInParent = (mChildTreeNodes.indexOf(childTreeNode) == mChildTreeNodes.size() - 1);
-
         int oldParentPosition = treeNodeCollection.getPosition(this);
         Assert.assertTrue(oldParentPosition >= 0);
 
@@ -362,6 +360,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             if (oldParentPosition > 0)
                 treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
         }
+    }
+
+    public void removeAll() {
+        List<TreeNode> oldChildTreeNodes = new ArrayList<>(mChildTreeNodes);
+        Stream.of(oldChildTreeNodes)
+                .forEach(this::remove);
     }
 
     @Override
@@ -479,13 +483,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return Stream.of(mChildTreeNodes)
                 .filter(TreeNode::isSelected)
                 .collect(Collectors.toList());
-    }
-
-    public void select() {
-        Assert.assertTrue(mModelNode.selectable());
-        Assert.assertTrue(!mSelected);
-
-        mSelected = true;
     }
 
     public void onCreateActionMode() {

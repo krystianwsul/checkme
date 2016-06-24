@@ -4,10 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class HourMinute implements Comparable<HourMinute>, Parcelable {
+public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializable {
     private final int mHour;
     private final int mMinute;
 

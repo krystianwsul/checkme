@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -42,13 +43,13 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         Assert.assertTrue(instanceKey != null);
 
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INSTANCE_KEY, instanceKey);
+        intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         return intent;
     }
 
     public static Intent getNotificationIntent(Context context, InstanceKey instanceKey) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
-        intent.putExtra(INSTANCE_KEY, instanceKey);
+        intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         intent.putExtra(SET_NOTIFIED_KEY, true);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;

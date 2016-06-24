@@ -9,11 +9,12 @@ import com.krystianwsul.checkme.R;
 
 import junit.framework.Assert;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class Date implements Comparable<Date>, Parcelable {
+public class Date implements Comparable<Date>, Parcelable, Serializable {
     private final Integer mYear;
     private final Integer mMonth;
     private final Integer mDay;

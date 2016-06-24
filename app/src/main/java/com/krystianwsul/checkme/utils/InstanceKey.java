@@ -9,7 +9,9 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-public class InstanceKey implements Parcelable {
+import java.io.Serializable;
+
+public class InstanceKey implements Parcelable, Serializable {
     public final int TaskId;
     public final Date ScheduleDate;
     public final TimePair ScheduleTimePair;

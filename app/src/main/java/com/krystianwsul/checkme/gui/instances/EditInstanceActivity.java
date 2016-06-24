@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -103,7 +104,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Intent intent = new Intent(context, EditInstanceActivity.class);
-        intent.putExtra(INSTANCE_KEY, instanceKey);
+        intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         return intent;
     }
 

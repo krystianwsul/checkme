@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.notifications;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -17,7 +18,7 @@ public class InstanceNotificationDeleteService extends IntentService {
         Assert.assertTrue(instanceKey != null);
 
         Intent intent = new Intent(context, InstanceNotificationDeleteService.class);
-        intent.putExtra(INSTANCE_KEY, instanceKey);
+        intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         return intent;
     }
 

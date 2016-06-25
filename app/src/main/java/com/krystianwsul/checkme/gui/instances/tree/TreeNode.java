@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
@@ -474,16 +473,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (positionInCollection == treeNodeCollection.displayedSize() - 1)
             return false;
 
-        if (parent.getPosition(this) == parent.displayedSize() - 1) {
-            Log.e("asdf", "last in parent " + positionInCollection);
+        if (parent.getPosition(this) == parent.displayedSize() - 1)
             return true;
-        }
 
         TreeNode nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1);
+        Assert.assertTrue(nextTreeNode != null);
 
-        if (nextTreeNode.expanded()) {
-            Log.e("asdf", "nextTreeNode expanded " + positionInCollection);
-        }
         return (nextTreeNode.expanded());
     }
 

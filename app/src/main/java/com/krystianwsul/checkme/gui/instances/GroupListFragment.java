@@ -333,12 +333,49 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 if (Stream.of(instanceDatas).allMatch(instanceData -> instanceData.TaskCurrent)) {
                     menu.findItem(R.id.action_group_join).setVisible(true);
-                    menu.findItem(R.id.action_group_delete_task).setVisible(true);
+                    menu.findItem(R.id.action_group_delete_task).setVisible(!containsLoop(instanceDatas));
                 } else {
                     menu.findItem(R.id.action_group_join).setVisible(false);
                     menu.findItem(R.id.action_group_delete_task).setVisible(false);
                 }
             }
+        }
+
+        private boolean containsLoop(List<GroupListLoader.InstanceData> instanceDatas) {
+            Assert.assertTrue(instanceDatas != null);
+            Assert.assertTrue(instanceDatas.size() > 1);
+
+            for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+                Assert.assertTrue(instanceData != null);
+
+                List<GroupListLoader.InstanceData> parents = new ArrayList<>();
+                addParents(parents, instanceData);
+
+                for (GroupListLoader.InstanceData parent : parents) {
+                    Assert.assertTrue(parent != null);
+
+                    if (instanceDatas.contains(parent))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void addParents(List<GroupListLoader.InstanceData> parents, GroupListLoader.InstanceData instanceData) {
+            Assert.assertTrue(parents != null);
+            Assert.assertTrue(instanceData != null);
+
+            GroupListLoader.InstanceDataParent instanceDataParent = instanceData.InstanceDataParentReference.get();
+            Assert.assertTrue(instanceDataParent != null);
+
+            if (!(instanceDataParent instanceof GroupListLoader.InstanceData))
+                return;
+
+            GroupListLoader.InstanceData parent = (GroupListLoader.InstanceData) instanceDataParent;
+
+            parents.add(parent);
+            addParents(parents, parent);
         }
     };
 

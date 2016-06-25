@@ -5,7 +5,7 @@ import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 
 public class MyCrashlytics {
-    private static final boolean mEnabled = false;
+    private static final boolean mEnabled = true;
 
     public static void initialize(OrganizatorApplication organizatorApplication) {
         if (mEnabled)

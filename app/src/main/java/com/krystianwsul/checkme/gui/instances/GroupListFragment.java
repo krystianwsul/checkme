@@ -1490,14 +1490,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getChildrenVisibility() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
-                    Assert.assertTrue(notDoneGroupTreeNode != null);
-
                     if (singleInstance()) {
                         GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                         Assert.assertTrue(instanceData != null);
 
-                        if (instanceData.Children.isEmpty()) {
+                        if (instanceData.Children.isEmpty() || expanded()) {
                             return View.GONE;
                         } else {
                             return View.VISIBLE;
@@ -1510,6 +1507,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 String getChildren() {
                     Assert.assertTrue(singleInstance());
+                    Assert.assertTrue(!expanded());
 
                     GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                     Assert.assertTrue(instanceData != null);
@@ -1520,25 +1518,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getChildrenColor() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
-                    Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                    final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
-                    Assert.assertTrue(notDoneGroupCollection != null);
-
-                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
-                    Assert.assertTrue(nodeCollection != null);
-
-                    GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
-                    Assert.assertTrue(groupAdapter != null);
-
-                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
-                    Assert.assertTrue(groupListFragment != null);
-
                     Assert.assertTrue(singleInstance());
+                    Assert.assertTrue(!expanded());
+
+                    GroupListFragment groupListFragment = getGroupListFragment();
+                    Assert.assertTrue(groupListFragment != null);
 
                     GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                     Assert.assertTrue(instanceData != null);
+
+                    Assert.assertTrue(!instanceData.Children.isEmpty());
 
                     if (!instanceData.TaskCurrent) {
                         return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled);
@@ -2096,7 +2085,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getChildrenVisibility() {
-                        if (mInstanceData.Children.isEmpty()) {
+                        if (mInstanceData.Children.isEmpty() || expanded()) {
                             return View.GONE;
                         } else {
                             return View.VISIBLE;
@@ -2105,6 +2094,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     String getChildren() {
+                        Assert.assertTrue(!expanded());
                         Assert.assertTrue(!mInstanceData.Children.isEmpty());
                         return getChildrenText(mInstanceData.Children.values());
                     }
@@ -2114,6 +2104,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
+                        Assert.assertTrue(!expanded());
                         Assert.assertTrue(!mInstanceData.Children.isEmpty());
 
                         if (!mInstanceData.TaskCurrent) {
@@ -2689,6 +2680,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return groupAdapter;
                 }
 
+                private GroupListFragment getGroupListFragment() {
+                    GroupAdapter groupAdapter = getGroupAdapter();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    GroupListFragment groupListFragment = groupAdapter.getGroupListFragment();
+                    Assert.assertTrue(groupListFragment != null);
+
+                    return groupListFragment;
+                }
+
                 @Override
                 int getNameVisibility() {
                     return View.VISIBLE;
@@ -2746,7 +2747,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getChildrenVisibility() {
-                    if (mInstanceData.Children.isEmpty()) {
+                    if (mInstanceData.Children.isEmpty() || expanded()) {
                         return View.GONE;
                     } else {
                         return View.VISIBLE;
@@ -2755,16 +2756,18 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 String getChildren() {
+                    Assert.assertTrue(!expanded());
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
                     return getChildrenText(mInstanceData.Children.values());
                 }
 
                 @Override
                 int getChildrenColor() {
-                    GroupListFragment groupListFragment = getGroupAdapter().mGroupListFragmentReference.get();
-                    Assert.assertTrue(groupListFragment != null);
-
+                    Assert.assertTrue(!expanded());
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
+
+                    GroupListFragment groupListFragment = getGroupListFragment();
+                    Assert.assertTrue(groupListFragment != null);
 
                     if (!mInstanceData.TaskCurrent) {
                         return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled);

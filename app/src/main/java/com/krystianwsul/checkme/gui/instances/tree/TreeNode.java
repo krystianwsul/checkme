@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
@@ -63,6 +64,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     public void setChildTreeNodes(List<TreeNode> childTreeNodes) {
         Assert.assertTrue(childTreeNodes != null);
+        Assert.assertTrue(!mExpanded || !childTreeNodes.isEmpty());
 
         mChildTreeNodes = childTreeNodes;
 
@@ -70,7 +72,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public boolean expanded() {
-        Assert.assertTrue(!mExpanded || !mChildTreeNodes.isEmpty());
+        Assert.assertTrue(!mExpanded || visibleSize() > 1);
         return mExpanded;
     }
 
@@ -472,10 +474,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (positionInCollection == treeNodeCollection.displayedSize() - 1)
             return false;
 
-        if (parent.getPosition(this) == parent.displayedSize() - 1)
+        if (parent.getPosition(this) == parent.displayedSize() - 1) {
+            Log.e("asdf", "last in parent " + positionInCollection);
             return true;
+        }
 
         TreeNode nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1);
+
+        if (nextTreeNode.expanded()) {
+            Log.e("asdf", "nextTreeNode expanded " + positionInCollection);
+        }
         return (nextTreeNode.expanded());
     }
 

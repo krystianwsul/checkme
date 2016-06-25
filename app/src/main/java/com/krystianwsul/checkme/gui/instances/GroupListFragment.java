@@ -880,6 +880,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 mDividerNode = new DividerNode(mDensity, mIndentation, new WeakReference<>(this));
 
+                doneExpanded = doneExpanded && !doneInstanceDatas.isEmpty();
+
                 TreeNode dividerTreeNode = mDividerNode.initialize(doneExpanded, mNodeContainerReference, doneInstanceDatas, expandedInstances);
                 Assert.assertTrue(dividerTreeNode != null);
 
@@ -1224,9 +1226,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     boolean expanded;
                     boolean doneExpanded;
                     if (mInstanceDatas.size() == 1) {
-                        if (expandedInstances != null && expandedInstances.containsKey(mInstanceDatas.get(0).InstanceKey)) {
+                        GroupListLoader.InstanceData instanceData = mInstanceDatas.get(0);
+                        Assert.assertTrue(instanceData != null);
+
+                        if (expandedInstances != null && expandedInstances.containsKey(instanceData.InstanceKey) && !instanceData.Children.isEmpty()) {
                             expanded = true;
-                            doneExpanded = expandedInstances.get(mInstanceDatas.get(0).InstanceKey);
+                            doneExpanded = expandedInstances.get(instanceData.InstanceKey);
                         } else {
                             expanded = false;
                             doneExpanded = false;
@@ -1805,7 +1810,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         Assert.assertTrue(childTreeNodes != null);
 
                         Stream.of(childTreeNodes)
-                                .forEach(notDoneGroupTreeNode::remove);
+                                .forEach(notDoneGroupTreeNode::add);
                     }
                 }
 
@@ -1942,7 +1947,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         boolean expanded = false;
                         boolean doneExpanded = false;
-                        if ((expandedInstances != null && expandedInstances.containsKey(mInstanceData.InstanceKey))) {
+                        if ((expandedInstances != null && expandedInstances.containsKey(mInstanceData.InstanceKey) && !mInstanceData.Children.isEmpty())) {
                             expanded = true;
                             doneExpanded = expandedInstances.get(mInstanceData.InstanceKey);
                         }
@@ -2324,6 +2329,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 private TreeNode initialize(boolean expanded, WeakReference<NodeContainer> nodeContainerReference, List<GroupListLoader.InstanceData> doneInstanceDatas, HashMap<InstanceKey, Boolean> expandedInstances) {
+                    Assert.assertTrue(!expanded || !doneInstanceDatas.isEmpty());
+
                     TreeNode dividerTreeNode = new TreeNode(this, nodeContainerReference, expanded, false);
                     mDividerTreeNodeReference = new WeakReference<>(dividerTreeNode);
 
@@ -2599,7 +2606,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     boolean expanded = false;
                     boolean doneExpanded = false;
-                    if (expandedInstances != null && expandedInstances.containsKey(mInstanceData.InstanceKey)) {
+                    if (expandedInstances != null && expandedInstances.containsKey(mInstanceData.InstanceKey) && !mInstanceData.Children.isEmpty()) {
                         expanded = true;
                         doneExpanded = expandedInstances.get(mInstanceData.InstanceKey);
                     }

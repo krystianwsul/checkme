@@ -221,8 +221,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     @SuppressWarnings("RedundantIfStatement")
     private boolean dataChanged() {
-        if (mParentTaskId == null) {
-            Assert.assertTrue((mChildTaskId != null) || (mTaskIds != null));
+        if (mChildTaskId != null) {
+            Assert.assertTrue(mParentTaskId == null);
+            Assert.assertTrue(mTaskIds == null);
 
             if (mData == null)
                 return false;
@@ -232,9 +233,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
             return false;
         } else {
-            Assert.assertTrue(mChildTaskId == null);
-            Assert.assertTrue(mTaskIds == null);
-            Assert.assertTrue(mData == null);
+            Assert.assertTrue(mParentTaskId != null);
 
             if (!TextUtils.isEmpty(mCreateChildTaskName.getText()))
                 return true;

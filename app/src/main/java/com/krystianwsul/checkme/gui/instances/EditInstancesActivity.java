@@ -39,7 +39,6 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class EditInstancesActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<EditInstancesLoader.Data> {
     private static final String INSTANCE_KEYS = "instanceKeys";
@@ -279,14 +278,14 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
             mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
             Assert.assertTrue(mInitialHourMinute != null);
         } else {
-            List<Date> dates = Stream.of(mData.InstanceDatas.values())
+            Assert.assertTrue(!mData.InstanceDatas.isEmpty());
+
+            mDate = Stream.of(mData.InstanceDatas.values())
                     .map(instanceData -> instanceData.InstanceDate)
-                    .distinct()
-                    .collect(Collectors.toList());
+                    .sorted()
+                    .findFirst().get();
+            Assert.assertTrue(mDate != null);
 
-            Assert.assertTrue(dates.size() == 1);
-
-            mDate = dates.get(0);
             mTimePairPersist = new TimePairPersist();
 
             mInitialHourMinute = mTimePairPersist.getHourMinute();
@@ -413,14 +412,12 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         if (mData == null)
             return false;
 
-        List<Date> dates = Stream.of(mData.InstanceDatas.values())
+        Assert.assertTrue(!mData.InstanceDatas.isEmpty());
+
+        Date date = Stream.of(mData.InstanceDatas.values())
                 .map(instanceData -> instanceData.InstanceDate)
-                .distinct()
-                .collect(Collectors.toList());
-
-        Assert.assertTrue(dates.size() == 1);
-
-        Date date = dates.get(0);
+                .sorted()
+                .findFirst().get();
         Assert.assertTrue(date != null);
 
         if (!date.equals(mDate))

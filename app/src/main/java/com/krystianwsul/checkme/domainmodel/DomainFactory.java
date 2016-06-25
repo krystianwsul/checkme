@@ -1589,9 +1589,16 @@ public class DomainFactory {
             Task joinTask = mTasks.get(joinTaskId);
             Assert.assertTrue(joinTask != null);
             Assert.assertTrue(joinTask.current(now));
-            Assert.assertTrue(joinTask.isRootTask(now));
 
-            joinTask.setScheduleEndExactTimeStamp(now);
+            if (joinTask.isRootTask(now)) {
+                joinTask.setScheduleEndExactTimeStamp(now);
+            } else {
+                TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, now);
+                Assert.assertTrue(taskHierarchy != null);
+
+                taskHierarchy.setEndExactTimeStamp(now);
+            }
+
 
             createTaskHierarchy(rootTask, joinTask, now);
         }

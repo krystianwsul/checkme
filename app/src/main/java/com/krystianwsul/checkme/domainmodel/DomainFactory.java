@@ -760,9 +760,30 @@ public class DomainFactory {
         ArrayList<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 
         HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
-        for (Instance instance : rootInstances)
-            if ((instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
-                notificationInstanceDatas.put(instance.getInstanceKey(), new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp()));
+        for (Instance instance : rootInstances) {
+            if ((instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0) {
+                String childrenText = null;
+
+                List<Instance> childInstances = instance.getChildInstances(now);
+                Assert.assertTrue(childInstances != null);
+
+                if (!childInstances.isEmpty()) {
+                    Stream<Instance> notDone = Stream.of(childInstances)
+                            .filter(childInstance -> childInstance.getDone() == null)
+                            .sortBy(Instance::getTaskId);
+
+                    Stream<Instance> done = Stream.of(childInstances)
+                            .filter(childInstance -> childInstance.getDone() != null)
+                            .sortBy(childInstance -> -childInstance.getDone().getLong());
+
+                    childrenText = Stream.concat(notDone, done)
+                            .map(Instance::getName)
+                            .collect(Collectors.joining(", "));
+                }
+
+                notificationInstanceDatas.put(instance.getInstanceKey(), new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), childrenText));
+            }
+        }
 
         HashMap<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = new HashMap<>();
         for (Instance instance : mExistingInstances)

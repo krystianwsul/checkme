@@ -195,7 +195,7 @@ public class TickService extends IntentService {
         PendingIntent pendingHourIntent = PendingIntent.getService(this, notificationInstanceData.NotificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, getString(R.string.hour), pendingHourIntent).build());
 
-        notify(notificationInstanceData.Name, notificationInstanceData.DisplayText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), null, true);
+        notify(notificationInstanceData.Name, notificationInstanceData.ChildrenText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), null, true);
     }
 
     private void notifyGroup(Collection<NotificationInstanceData> notificationInstanceDatas, boolean silent) {
@@ -240,7 +240,6 @@ public class TickService extends IntentService {
 
     private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions, Long when, NotificationCompat.InboxStyle inboxStyle, boolean autoCancel) {
         Assert.assertTrue(!TextUtils.isEmpty(title));
-        Assert.assertTrue(!TextUtils.isEmpty(text));
         Assert.assertTrue(deleteIntent != null);
         Assert.assertTrue(contentIntent != null);
 
@@ -248,12 +247,14 @@ public class TickService extends IntentService {
 
         NotificationCompat.Builder builder = (new NotificationCompat.Builder(this))
                 .setContentTitle(title)
-                .setContentText(text)
                 .setSmallIcon(R.drawable.ikona_bez)
                 .setDeleteIntent(deleteIntent)
                 .setContentIntent(contentIntent)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        if (!TextUtils.isEmpty(text))
+            builder.setContentText(text);
 
         if (!silent)
             builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
@@ -302,8 +303,9 @@ public class TickService extends IntentService {
         public final int NotificationId;
         public final String DisplayText;
         public final TimeStamp InstanceTimeStamp;
+        public final String ChildrenText;
 
-        public NotificationInstanceData(InstanceKey instanceKey, String name, int notificationId, String displayText, TimeStamp instanceTimeStamp) {
+        public NotificationInstanceData(InstanceKey instanceKey, String name, int notificationId, String displayText, TimeStamp instanceTimeStamp, String childrenText) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
@@ -314,6 +316,7 @@ public class TickService extends IntentService {
             NotificationId = notificationId;
             DisplayText = displayText;
             InstanceTimeStamp = instanceTimeStamp;
+            ChildrenText = childrenText;
         }
     }
 

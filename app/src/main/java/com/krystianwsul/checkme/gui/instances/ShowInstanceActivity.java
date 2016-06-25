@@ -51,7 +51,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         Intent intent = new Intent(context, ShowInstanceActivity.class);
         intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         intent.putExtra(SET_NOTIFIED_KEY, true);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
     }
 

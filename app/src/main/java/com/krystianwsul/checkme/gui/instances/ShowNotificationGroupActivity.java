@@ -24,7 +24,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         Intent intent = new Intent(context, ShowNotificationGroupActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys);
         return intent;
     }

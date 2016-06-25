@@ -1509,20 +1509,13 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 String getChildren() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
-                    Assert.assertTrue(notDoneGroupTreeNode != null);
-
                     Assert.assertTrue(singleInstance());
 
                     GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                     Assert.assertTrue(instanceData != null);
 
                     Assert.assertTrue(!instanceData.Children.isEmpty());
-
-                    return Stream.of(instanceData.Children.values())
-                            .sortBy(child -> child.InstanceKey.TaskId)
-                            .map(child -> child.Name)
-                            .collect(Collectors.joining(", "));
+                    return getChildrenText(instanceData.Children.values());
                 }
 
                 @Override
@@ -2113,10 +2106,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     @Override
                     String getChildren() {
                         Assert.assertTrue(!mInstanceData.Children.isEmpty());
-                        return Stream.of(mInstanceData.Children.values())
-                                .sortBy(child -> child.InstanceKey.TaskId)
-                                .map(child -> child.Name)
-                                .collect(Collectors.joining(", "));
+                        return getChildrenText(mInstanceData.Children.values());
                     }
 
                     @Override
@@ -2766,10 +2756,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 String getChildren() {
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
-                    return Stream.of(mInstanceData.Children.values())
-                            .sortBy(child -> child.InstanceKey.TaskId)
-                            .map(child -> child.Name)
-                            .collect(Collectors.joining(", "));
+                    return getChildrenText(mInstanceData.Children.values());
                 }
 
                 @Override
@@ -2953,6 +2940,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(DoneExpanded ? 1 : 0);
             dest.writeTypedList(ExpandedGroups);
+            ExactTimeStamp start = ExactTimeStamp.getNow();
             dest.writeSerializable(ExpandedInstances);
         }
 
@@ -3046,5 +3034,22 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         } else {
             Assert.assertTrue(instanceDataParent instanceof GroupListLoader.Data);
         }
+    }
+
+    private static String getChildrenText(Collection<GroupListLoader.InstanceData> instanceDatas) {
+        Assert.assertTrue(instanceDatas != null);
+        Assert.assertTrue(!instanceDatas.isEmpty());
+
+        Stream<GroupListLoader.InstanceData> notDone = Stream.of(instanceDatas)
+                .filter(instanceData -> instanceData.Done == null)
+                .sortBy(instanceData -> instanceData.InstanceKey.TaskId);
+
+        Stream<GroupListLoader.InstanceData> done = Stream.of(instanceDatas)
+                .filter(instanceData -> instanceData.Done != null)
+                .sortBy(instanceData -> -instanceData.Done.getLong());
+
+        return Stream.concat(notDone, done)
+                .map(instanceData -> instanceData.Name)
+                .collect(Collectors.joining(", "));
     }
 }

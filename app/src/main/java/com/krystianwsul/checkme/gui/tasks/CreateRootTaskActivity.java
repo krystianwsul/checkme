@@ -20,7 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
@@ -228,7 +228,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     @Override
     protected void onResume() {
-        Crashlytics.log("CreateRootTaskActivity.onResume");
+        MyCrashlytics.log("CreateRootTaskActivity.onResume");
 
         super.onResume();
     }

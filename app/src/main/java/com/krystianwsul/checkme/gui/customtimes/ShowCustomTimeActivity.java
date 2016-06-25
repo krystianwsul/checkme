@@ -16,7 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
@@ -178,7 +178,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     @Override
     protected void onResume() {
-        Crashlytics.log("ShowCustomTimeActivity.onResume");
+        MyCrashlytics.log("ShowCustomTimeActivity.onResume");
 
         super.onResume();
     }

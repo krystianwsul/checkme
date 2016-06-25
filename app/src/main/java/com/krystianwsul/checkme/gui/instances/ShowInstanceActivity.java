@@ -14,7 +14,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity;
@@ -177,7 +177,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     protected void onResume() {
-        Crashlytics.log("ShowInstanceActivity.onResume");
+        MyCrashlytics.log("ShowInstanceActivity.onResume");
 
         super.onResume();
     }

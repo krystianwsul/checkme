@@ -210,6 +210,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (treeNode == this)
             return 0;
 
+        if (!mExpanded)
+            return -1;
+
         int offset = 1;
         for (TreeNode childTreeNode : mChildTreeNodes) {
             int position = childTreeNode.getPosition(treeNode);
@@ -498,8 +501,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mModelNode.visibleDuringActionMode()) {
             treeViewAdapter.notifyItemChanged(oldPosition);
 
-            Stream.of(mChildTreeNodes)
-                    .forEach(TreeNode::onCreateActionMode);
+            if (mExpanded)
+                Stream.of(mChildTreeNodes)
+                        .forEach(TreeNode::onCreateActionMode);
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
@@ -527,14 +531,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mModelNode.visibleDuringActionMode()) {
             treeViewAdapter.notifyItemChanged(position);
 
-            Stream.of(mChildTreeNodes)
-                    .forEach(TreeNode::onDestroyActionMode);
+            if (mExpanded)
+                Stream.of(mChildTreeNodes)
+                        .forEach(TreeNode::onDestroyActionMode);
         } else {
             if (mChildTreeNodes.size() > 0) {
-                if (mExpanded)
+                if (mExpanded) {
                     treeViewAdapter.notifyItemRangeInserted(position, displayedSize());
-                else
+                } else {
                     treeViewAdapter.notifyItemInserted(position);
+                }
             }
 
             if (position > 0)

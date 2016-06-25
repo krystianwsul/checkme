@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.annimon.stream.Stream;
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
@@ -203,7 +203,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onResume() {
-        Crashlytics.log("TaskListFragment.onResume");
+        MyCrashlytics.log("TaskListFragment.onResume");
 
         super.onResume();
     }

@@ -25,7 +25,7 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
@@ -200,7 +200,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
     @Override
     public void onResume() {
-        Crashlytics.log("WeeklyScheduleFragment.onResume");
+        MyCrashlytics.log("WeeklyScheduleFragment.onResume");
 
         super.onResume();
     }

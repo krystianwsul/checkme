@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -133,7 +133,7 @@ public class DayFragment extends Fragment {
 
     @Override
     public void onResume() {
-        Crashlytics.log("DayFragment.onResume");
+        MyCrashlytics.log("DayFragment.onResume");
 
         super.onResume();
     }

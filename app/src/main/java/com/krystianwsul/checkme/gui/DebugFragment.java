@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.notifications.TickService;
@@ -103,7 +103,7 @@ public class DebugFragment extends Fragment {
 
     @Override
     public void onResume() {
-        Crashlytics.log("DebugFragment.onResume");
+        MyCrashlytics.log("DebugFragment.onResume");
 
         super.onResume();
     }

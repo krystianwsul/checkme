@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
@@ -171,7 +171,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     @Override
     protected void onResume() {
-        Crashlytics.log("CreateChildTaskActivity.onResume");
+        MyCrashlytics.log("CreateChildTaskActivity.onResume");
 
         super.onResume();
     }

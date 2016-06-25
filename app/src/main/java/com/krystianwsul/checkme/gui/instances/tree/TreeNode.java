@@ -312,6 +312,29 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         };
     }
 
+    private boolean visible() {
+        NodeContainer nodeContainer = getParent();
+        Assert.assertTrue(nodeContainer != null);
+
+        SelectionCallback selectionCallback = getSelectionCallback();
+        Assert.assertTrue(selectionCallback != null);
+
+        if (!mModelNode.visibleDuringActionMode() && selectionCallback.hasActionMode())
+            return false;
+
+        if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())
+            return false;
+
+        if (nodeContainer instanceof TreeNodeCollection) {
+            return true;
+        } else {
+            Assert.assertTrue(nodeContainer instanceof TreeNode);
+            TreeNode parent = (TreeNode) nodeContainer;
+
+            return (parent.visible() && parent.expanded());
+        }
+    }
+
     @Override
     public void remove(TreeNode childTreeNode) {
         Assert.assertTrue(childTreeNode != null);
@@ -329,40 +352,69 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         int childDisplayedSize = childTreeNode.displayedSize();
 
         int oldParentPosition = treeNodeCollection.getPosition(this);
-        Assert.assertTrue(oldParentPosition >= 0);
 
         int oldChildPosition = treeNodeCollection.getPosition(childTreeNode);
-        Assert.assertTrue(oldChildPosition >= 0);
 
         mChildTreeNodes.remove(childTreeNode);
 
-        if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
-            mExpanded = false;
+        if (!visible())
+            return;
 
-            if (oldParentPosition == 0) {
-                if (mModelNode.visibleWhenEmpty()) {
-                    treeViewAdapter.notifyItemChanged(oldParentPosition);
-                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
+        Assert.assertTrue(oldParentPosition >= 0);
+
+        if (expanded()) {
+            Assert.assertTrue(oldChildPosition >= 0);
+
+            if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
+                mExpanded = false;
+
+                if (oldParentPosition == 0) {
+                    if (mModelNode.visibleWhenEmpty()) {
+                        treeViewAdapter.notifyItemChanged(oldParentPosition);
+                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
+                    } else {
+                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
+                    }
                 } else {
-                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
+                    if (mModelNode.visibleWhenEmpty()) {
+                        treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
+                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
+                    } else {
+                        treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
+                    }
                 }
             } else {
-                if (mModelNode.visibleWhenEmpty()) {
-                    treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
-                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
-                } else {
+                treeViewAdapter.notifyItemChanged(oldParentPosition);
+                treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
+
+                treeViewAdapter.notifyItemChanged(oldChildPosition - 1);
+
+                if (oldParentPosition > 0)
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                    treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
-                }
             }
         } else {
-            treeViewAdapter.notifyItemChanged(oldParentPosition);
-            treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
+            if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
+                if (oldParentPosition == 0) {
+                    if (mModelNode.visibleWhenEmpty()) {
+                        treeViewAdapter.notifyItemChanged(oldParentPosition);
+                    } else {
+                        treeViewAdapter.notifyItemRemoved(oldParentPosition);
+                    }
+                } else {
+                    if (mModelNode.visibleWhenEmpty()) {
+                        treeViewAdapter.notifyItemChanged(oldParentPosition);
+                    } else {
+                        treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                        treeViewAdapter.notifyItemRemoved(oldParentPosition);
+                    }
+                }
+            } else {
+                treeViewAdapter.notifyItemChanged(oldParentPosition);
 
-            treeViewAdapter.notifyItemChanged(oldChildPosition - 1);
-
-            if (oldParentPosition > 0)
-                treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                if (oldParentPosition > 0)
+                    treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+            }
         }
     }
 

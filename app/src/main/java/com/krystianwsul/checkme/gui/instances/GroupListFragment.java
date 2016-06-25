@@ -1545,32 +1545,23 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getExpandVisibility() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode notDoneGroupTreeNode = getTreeNode();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
-                    final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
-                    Assert.assertTrue(notDoneGroupCollection != null);
-
-                    final NodeCollection nodeCollection = notDoneGroupCollection.mNodeCollectionReference.get();
-                    Assert.assertTrue(nodeCollection != null);
-
-                    GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
-                    Assert.assertTrue(groupAdapter != null);
-
-                    GroupListFragment groupListFragment = groupAdapter.mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     if (singleInstance()) {
                         GroupListLoader.InstanceData instanceData = getSingleInstanceData();
                         Assert.assertTrue(instanceData != null);
 
-                        if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedNodes().count() > 0)) {
+                        if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedChildren().size() > 0)) {
                             return View.INVISIBLE;
                         } else {
                             return View.VISIBLE;
                         }
                     } else {
-                        if (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedNodes().count() > 0)
+                        if (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedChildren().size() > 0)
                             return View.INVISIBLE;
                         else
                             return View.VISIBLE;
@@ -1579,11 +1570,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getExpandImageResource() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode notDoneGroupTreeNode = getTreeNode();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                    final NotDoneGroupCollection notDoneGroupCollection = mNotDoneGroupCollectionReference.get();
-                    Assert.assertTrue(notDoneGroupCollection != null);
 
                     GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
@@ -1599,7 +1587,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         else
                             return R.drawable.ic_expand_more_black_36dp;
                     } else {
-                        Assert.assertTrue(!(groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedNodes().count() > 0));
+                        Assert.assertTrue(!(groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedChildren().size() > 0));
 
                         if (notDoneGroupTreeNode.expanded())
                             return R.drawable.ic_expand_less_black_36dp;
@@ -1610,7 +1598,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode notDoneGroupTreeNode = getTreeNode();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
                     return notDoneGroupTreeNode.getExpandListener();
@@ -2132,7 +2120,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
-                        if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedNodes().count() > 0)) {
+                        if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedChildren().size() > 0)) {
                             return View.INVISIBLE;
                         } else {
                             return View.VISIBLE;
@@ -2147,7 +2135,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
-                        Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedNodes().count() > 0)));
+                        Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedChildren().size() > 0)));
 
                         if (treeNode.expanded())
                             return R.drawable.ic_expand_less_black_36dp;
@@ -2163,7 +2151,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment groupListFragment = getGroupListFragment();
                         Assert.assertTrue(groupListFragment != null);
 
-                        Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedNodes().count() > 0)));
+                        Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedChildren().size() > 0)));
 
                         return treeNode.getExpandListener();
                     }
@@ -2800,7 +2788,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     TreeNode treeNode = getTreeNode();
                     Assert.assertTrue(treeNode != null);
 
-                    GroupListFragment groupListFragment = getGroupAdapter().mGroupListFragmentReference.get();
+                    GroupListFragment groupListFragment = getGroupListFragment();
                     Assert.assertTrue(groupListFragment != null);
 
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());

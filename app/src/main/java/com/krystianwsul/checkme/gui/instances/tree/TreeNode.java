@@ -287,13 +287,13 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
             Assert.assertTrue(selectionCallback != null);
 
-            Assert.assertTrue(!(selectionCallback.hasActionMode() && getSelectedNodes().count() > 0));
+            Assert.assertTrue(!(selectionCallback.hasActionMode() && !getSelectedChildren().isEmpty()));
 
             int position = treeNodeCollection.getPosition(this);
             Assert.assertTrue(position >= 0);
 
             if (mExpanded) { // hiding
-                Assert.assertTrue(getSelectedNodes().count() == 0);
+                Assert.assertTrue(getSelectedChildren().isEmpty());
 
                 int displayedSize = displayedSize();
                 mExpanded = false;

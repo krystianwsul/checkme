@@ -75,22 +75,9 @@
             android:name=".notifications.InstanceNotificationDeleteService"
             android:exported="false" />
 
-        <receiver
-            android:name="com.google.android.gms.analytics.AnalyticsReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
-            </intent-filter>
-        </receiver>
-
-        <service
-            android:name="com.google.android.gms.analytics.AnalyticsService"
-            android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".PruneService"
-            android:exported="false" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="e6ad996c53b8b11ff453660591b423b7ac73008d" />
     </application>
 
 </manifest>

@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 
-import com.krystianwsul.checkme.EventBuffer;
+import com.crashlytics.android.Crashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -59,7 +59,7 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     protected void onResume() {
-        EventBuffer.getInstance().add("ShowGroupActivity onResume");
+        Crashlytics.log("ShowGroupActivity.onResume");
 
         super.onResume();
     }

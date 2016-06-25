@@ -22,7 +22,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
-import com.krystianwsul.checkme.EventBuffer;
+import com.crashlytics.android.Crashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
@@ -216,7 +216,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
     @Override
     public void onResume() {
-        EventBuffer.getInstance().add("EditInstancesActivity onResume");
+        Crashlytics.log("EditInstancesActivity.onResume");
 
         super.onResume();
 

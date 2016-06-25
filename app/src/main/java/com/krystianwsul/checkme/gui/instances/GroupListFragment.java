@@ -31,7 +31,7 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.EventBuffer;
+import com.crashlytics.android.Crashlytics;
 import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -415,7 +415,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onResume() {
-        EventBuffer.getInstance().add("GroupListFragment onResume");
+        Crashlytics.log("GroupListFragment.onResume");
 
         super.onResume();
     }

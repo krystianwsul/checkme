@@ -14,7 +14,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.krystianwsul.checkme.EventBuffer;
+import com.crashlytics.android.Crashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
@@ -103,7 +103,7 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
     @Override
     protected void onResume() {
-        EventBuffer.getInstance().add("ShowTaskActivity onResume");
+        Crashlytics.log("ShowTaskActivity.onResume");
 
         super.onResume();
     }

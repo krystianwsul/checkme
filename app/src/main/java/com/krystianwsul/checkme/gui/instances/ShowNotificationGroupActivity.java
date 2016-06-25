@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 
-import com.krystianwsul.checkme.EventBuffer;
+import com.crashlytics.android.Crashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
@@ -53,7 +53,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
 
     @Override
     protected void onResume() {
-        EventBuffer.getInstance().add("ShowNotificationGroupActivity onResume");
+        Crashlytics.log("ShowNotificationGroupActivity.onResume");
 
         super.onResume();
     }

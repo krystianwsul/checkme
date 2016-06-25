@@ -21,7 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 
-import com.krystianwsul.checkme.EventBuffer;
+import com.crashlytics.android.Crashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     @Override
     protected void onResume() {
-        EventBuffer.getInstance().add("MainActivity onResume");
+        Crashlytics.log("MainActivity.onResume");
 
         super.onResume();
     }

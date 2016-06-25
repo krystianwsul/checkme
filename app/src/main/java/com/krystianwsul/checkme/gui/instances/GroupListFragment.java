@@ -164,7 +164,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         TreeNode treeNode = selectedTreeNodes.get(0);
                         Assert.assertTrue(treeNode != null);
 
-                        recursiveDelete(treeNode);
+                        recursiveDelete(treeNode, true);
 
                         decrementSelected();
                     } while (!(selectedTreeNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
@@ -198,7 +198,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
         }
 
-        private void recursiveDelete(TreeNode treeNode) {
+        private void recursiveDelete(TreeNode treeNode, boolean root) {
             Assert.assertTrue(treeNode != null);
 
             GroupListLoader.InstanceData instanceData1;
@@ -212,12 +212,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue((treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.DividerNode));
 
                 Stream.of(treeNode.getAllChildren())
-                        .forEach(this::recursiveDelete);
+                        .forEach(child -> recursiveDelete(child, false));
 
                 return;
             }
 
-            if (instanceData1.Exists) {
+            if (instanceData1.Exists || !root) {
                 instanceData1.TaskCurrent = false;
                 instanceData1.IsRootTask = null;
             } else {
@@ -227,14 +227,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 instanceDataParent.remove(instanceData1.InstanceKey);
             }
 
-            if (instanceData1.Exists) {
+            if (instanceData1.Exists || !root) {
                 treeNode.unselect();
 
                 treeNode.update();
 
                 ArrayList<TreeNode> children = new ArrayList<>(treeNode.getAllChildren());
                 Stream.of(children)
-                        .forEach(this::recursiveDelete);
+                        .forEach(child -> recursiveDelete(child, false));
             } else {
                 if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
                     GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = (GroupAdapter.NodeCollection.NotDoneGroupNode) treeNode.getModelNode();

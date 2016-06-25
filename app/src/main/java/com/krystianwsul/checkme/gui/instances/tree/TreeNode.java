@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
@@ -355,65 +356,92 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         int oldChildPosition = treeNodeCollection.getPosition(childTreeNode);
 
+        boolean expanded = expanded();
+        boolean visible = visible();
+
         mChildTreeNodes.remove(childTreeNode);
 
-        if (!visible())
+        if (!visible) {
+            Log.e("asdf", "a");
             return;
+        }
 
         Assert.assertTrue(oldParentPosition >= 0);
 
-        if (expanded()) {
+        if (expanded) {
+            Log.e("asdf", "b");
             Assert.assertTrue(oldChildPosition >= 0);
 
             if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
                 mExpanded = false;
+                Log.e("asdf", "c");
 
                 if (oldParentPosition == 0) {
+                    Log.e("asdf", "d");
                     if (mModelNode.visibleWhenEmpty()) {
+                        Log.e("asdf", "e");
                         treeViewAdapter.notifyItemChanged(oldParentPosition);
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
+                        Log.e("asdf", "f");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 } else {
+                    Log.e("asdf", "g");
                     if (mModelNode.visibleWhenEmpty()) {
+                        Log.e("asdf", "h");
                         treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
+                        Log.e("asdf", "i");
                         treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 }
             } else {
+                Log.e("asdf", "j");
                 treeViewAdapter.notifyItemChanged(oldParentPosition);
                 treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
                 treeViewAdapter.notifyItemChanged(oldChildPosition - 1);
 
-                if (oldParentPosition > 0)
+                if (oldParentPosition > 0) {
+                    Log.e("asdf", "k");
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                }
             }
         } else {
+            Log.e("asdf", "l");
             if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
+                Log.e("asdf", "m");
                 if (oldParentPosition == 0) {
+                    Log.e("asdf", "n");
                     if (mModelNode.visibleWhenEmpty()) {
+                        Log.e("asdf", "o");
                         treeViewAdapter.notifyItemChanged(oldParentPosition);
                     } else {
+                        Log.e("asdf", "p");
                         treeViewAdapter.notifyItemRemoved(oldParentPosition);
                     }
                 } else {
+                    Log.e("asdf", "q");
                     if (mModelNode.visibleWhenEmpty()) {
+                        Log.e("asdf", "r");
                         treeViewAdapter.notifyItemChanged(oldParentPosition);
                     } else {
+                        Log.e("asdf", "s");
                         treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
                         treeViewAdapter.notifyItemRemoved(oldParentPosition);
                     }
                 }
             } else {
+                Log.e("asdf", "t");
                 treeViewAdapter.notifyItemChanged(oldParentPosition);
 
-                if (oldParentPosition > 0)
+                if (oldParentPosition > 0) {
+                    Log.e("asdf", "u");
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                }
             }
         }
     }

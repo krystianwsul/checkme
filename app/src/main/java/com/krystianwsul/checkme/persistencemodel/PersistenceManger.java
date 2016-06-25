@@ -324,9 +324,6 @@ public class PersistenceManger {
     public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime, ExactTimeStamp now) {
         Assert.assertTrue(task != null);
 
-        ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
-        Assert.assertTrue((taskEndExactTimeStamp == null || taskEndExactTimeStamp.compareTo(scheduleDateTime.getTimeStamp().toExactTimeStamp()) > 0));
-
         Date scheduleDate = scheduleDateTime.getDate();
         Time scheduleTime = scheduleDateTime.getTime();
 

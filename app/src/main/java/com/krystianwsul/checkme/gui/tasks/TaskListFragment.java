@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
+import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
 
 import junit.framework.Assert;
@@ -287,7 +288,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         void onDestroyTaskActionMode();
     }
 
-    public static class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> {
+    public static class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements TreeModelAdapter {
         private final WeakReference<TaskListFragment> mTaskListFragmentReference;
 
         private final ArrayList<TaskWrapper> mTaskWrappers;
@@ -335,11 +336,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         @Override
-        public void onBindViewHolder(final TaskHolder taskHolder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
             TaskWrapper taskWrapper = mTaskWrappers.get(position);
             Assert.assertTrue(taskWrapper != null);
 
-            taskWrapper.onBindViewHolder(taskHolder);
+            taskWrapper.onBindViewHolder(viewHolder);
         }
 
         public void uncheck() {
@@ -385,6 +386,14 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             Assert.assertTrue(taskListFragment != null);
 
             return taskListFragment;
+        }
+
+        @Override
+        public SelectionCallback getSelectionCallback() {
+            TaskListFragment taskListFragment = getTaskListFragment();
+            Assert.assertTrue(taskListFragment != null);
+
+            return taskListFragment.mSelectionCallback;
         }
 
         private static class TaskWrapper implements ModelNode {

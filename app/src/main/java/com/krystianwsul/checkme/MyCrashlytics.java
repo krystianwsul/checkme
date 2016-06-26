@@ -9,7 +9,7 @@ import junit.framework.Assert;
 import io.fabric.sdk.android.Fabric;
 
 public class MyCrashlytics {
-    private static final boolean mEnabled = true;
+    private static final boolean mEnabled = false;
 
     public static void initialize(OrganizatorApplication organizatorApplication) {
         Assert.assertTrue(organizatorApplication != null);

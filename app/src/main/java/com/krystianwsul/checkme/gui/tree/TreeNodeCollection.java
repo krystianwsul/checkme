@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree;
+package com.krystianwsul.checkme.gui.tree;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;

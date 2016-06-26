@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree;
+package com.krystianwsul.checkme.gui.tree;
 
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 

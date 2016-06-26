@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances.tree;
+package com.krystianwsul.checkme.gui.tree;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;

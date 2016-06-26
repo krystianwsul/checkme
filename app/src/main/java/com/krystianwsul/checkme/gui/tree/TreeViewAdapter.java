@@ -4,14 +4,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
 import java.util.List;
 
-public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.GroupAdapter.AbstractHolder> {
-    public static final int TYPE_FAB_PADDING = 2;
+public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    public static final int TYPE_FAB_PADDING = 1000;
 
     private final boolean mShowPadding;
 
@@ -27,12 +26,12 @@ public class TreeViewAdapter extends RecyclerView.Adapter<GroupListFragment.Grou
     }
 
     @Override
-    public GroupListFragment.GroupAdapter.AbstractHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return mTreeModelAdapter.onCreateViewHolder(parent, viewType);
     }
 
     @Override
-    public void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         mTreeModelAdapter.onBindViewHolder(holder, position);
     }
 

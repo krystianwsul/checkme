@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.gui.tree;
 
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
+import android.support.v7.widget.RecyclerView;
 
 public interface ModelNode extends Comparable<ModelNode> {
-    void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder);
+    void onBindViewHolder(RecyclerView.ViewHolder viewHolder);
 
     int getItemViewType();
 

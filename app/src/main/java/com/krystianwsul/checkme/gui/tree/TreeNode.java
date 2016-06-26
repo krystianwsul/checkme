@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.gui.tree;
 
 import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 import junit.framework.Assert;
 
@@ -40,8 +40,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(!mSelected || mModelNode.selectable());
     }
 
-    public void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder abstractHolder) {
-        mModelNode.onBindViewHolder(abstractHolder);
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder) {
+        mModelNode.onBindViewHolder(viewHolder);
     }
 
     public int getItemViewType() {

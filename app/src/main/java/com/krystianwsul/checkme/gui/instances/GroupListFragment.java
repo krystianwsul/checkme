@@ -751,7 +751,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public AbstractHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_GROUP) {
                 LinearLayout groupRow = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
@@ -773,7 +773,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public void onBindViewHolder(AbstractHolder abstractHolder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
             Assert.assertTrue(position >= 0);
 
             TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
@@ -783,7 +783,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             if (position < treeViewAdapter.displayedSize()) {
                 TreeNode treeNode = treeViewAdapter.getNode(position);
-                treeNode.onBindViewHolder(abstractHolder);
+                treeNode.onBindViewHolder(viewHolder);
             } else {
                 Assert.assertTrue(position == treeViewAdapter.displayedSize());
                 Assert.assertTrue(mShowFab);
@@ -830,13 +830,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             return treeViewAdapter;
         }
 
-        public static abstract class AbstractHolder extends RecyclerView.ViewHolder {
-            public AbstractHolder(View view) {
-                super(view);
-            }
-        }
-
-        public static class GroupHolder extends AbstractHolder {
+        public static class GroupHolder extends RecyclerView.ViewHolder {
             public final LinearLayout mGroupRow;
             public final LinearLayout mGroupRowContainer;
             public final TextView mGroupRowName;
@@ -868,7 +862,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
         }
 
-        public static class FabPaddingHolder extends AbstractHolder {
+        public static class FabPaddingHolder extends RecyclerView.ViewHolder {
             FabPaddingHolder(FrameLayout frameLayout) {
                 super(frameLayout);
             }
@@ -1164,8 +1158,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 abstract View.OnClickListener getOnClickListener();
 
                 @SuppressWarnings("unused")
-                public final void onBindViewHolder(GroupAdapter.AbstractHolder abstractHolder) {
-                    final GroupAdapter.GroupHolder groupHolder = (GroupAdapter.GroupHolder) abstractHolder;
+                public final void onBindViewHolder(RecyclerView.ViewHolder viewHolder) {
+                    final GroupAdapter.GroupHolder groupHolder = (GroupAdapter.GroupHolder) viewHolder;
 
                     int padding = 48 * mIndentation;
 

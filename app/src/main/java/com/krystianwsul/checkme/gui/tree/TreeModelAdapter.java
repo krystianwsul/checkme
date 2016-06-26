@@ -1,12 +1,13 @@
 package com.krystianwsul.checkme.gui.tree;
 
+import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 
 public interface TreeModelAdapter {
-    GroupListFragment.GroupAdapter.AbstractHolder onCreateViewHolder(ViewGroup parent, int viewType);
-    void onBindViewHolder(GroupListFragment.GroupAdapter.AbstractHolder holder, int position);
+    RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
+
+    void onBindViewHolder(RecyclerView.ViewHolder holder, int position);
     SelectionCallback getSelectionCallback();
 }

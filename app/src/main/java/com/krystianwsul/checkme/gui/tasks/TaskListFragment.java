@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tasks;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -25,6 +26,7 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
+import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
 
 import junit.framework.Assert;
@@ -385,7 +387,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             return taskListFragment;
         }
 
-        private static class TaskWrapper {
+        private static class TaskWrapper implements ModelNode {
             private final WeakReference<TaskAdapter> mTaskAdapterReference;
 
             public final TaskListLoader.TaskData mTaskData;
@@ -421,8 +423,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 return taskListFragment;
             }
 
-            public void onBindViewHolder(TaskHolder taskHolder) {
-                Assert.assertTrue(taskHolder != null);
+            @Override
+            public void onBindViewHolder(RecyclerView.ViewHolder viewHolder) {
+                Assert.assertTrue(viewHolder != null);
+
+                TaskHolder taskHolder = (TaskHolder) viewHolder;
 
                 TaskListFragment taskListFragment = getTaskListFragment();
                 Assert.assertTrue(taskListFragment != null);
@@ -466,6 +471,17 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 });
             }
 
+            @Override
+            public int getItemViewType() {
+                return 0;
+            }
+
+            @Override
+            public boolean selectable() {
+                return true;
+            }
+
+            @Override
             public void onClick() {
                 TaskListFragment taskListFragment = getTaskListFragment();
                 Assert.assertTrue(taskListFragment != null);
@@ -492,6 +508,28 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 }
 
                 taskAdapter.notifyItemChanged(position);
+            }
+
+            @Override
+            public boolean visibleWhenEmpty() {
+                return true;
+            }
+
+            @Override
+            public boolean visibleDuringActionMode() {
+                return true;
+            }
+
+            @Override
+            public int compareTo(@NonNull ModelNode another) {
+                TaskListFragment taskListFragment = getTaskListFragment();
+                Assert.assertTrue(taskListFragment != null);
+
+                int comparison = Integer.valueOf(mTaskData.TaskId).compareTo(((TaskWrapper) another).mTaskData.TaskId);
+                if (taskListFragment.mTaskId == null)
+                    comparison = -comparison;
+
+                return comparison;
             }
         }
 

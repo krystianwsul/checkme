@@ -14,6 +14,8 @@ import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -28,8 +30,8 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 public class TickService extends IntentService {
     private static final int MAX_NOTIFICATIONS = 4;
@@ -195,7 +197,9 @@ public class TickService extends IntentService {
         PendingIntent pendingHourIntent = PendingIntent.getService(this, notificationInstanceData.NotificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, getString(R.string.hour), pendingHourIntent).build());
 
-        notify(notificationInstanceData.Name, notificationInstanceData.ChildrenText, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), null, true);
+        NotificationCompat.InboxStyle inboxStyle = (notificationInstanceData.Children.isEmpty() ? null : getInboxStyle(notificationInstanceData.Children));
+
+        notify(notificationInstanceData.Name, TextUtils.join(", ", notificationInstanceData.Children), notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), inboxStyle, true);
     }
 
     private void notifyGroup(Collection<NotificationInstanceData> notificationInstanceDatas, boolean silent) {
@@ -215,27 +219,36 @@ public class TickService extends IntentService {
         Intent contentIntent = ShowNotificationGroupActivity.getIntent(this, instanceKeys);
         PendingIntent pendingContentIntent = PendingIntent.getActivity(this, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
+        NotificationCompat.InboxStyle inboxStyle = getInboxStyle(Stream.of(notificationInstanceDatas)
+                .sorted((lhs, rhs) -> {
+                    int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
+                    if (timeStampComparison != 0)
+                        return timeStampComparison;
+
+                    return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
+                })
+                .map(notificationInstanceData -> notificationInstanceData.Name + " (" + notificationInstanceData.DisplayText + ")")
+                .collect(Collectors.toList()));
+
+        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null, null, inboxStyle, false);
+    }
+
+    private NotificationCompat.InboxStyle getInboxStyle(List<String> lines) {
+        Assert.assertTrue(lines != null);
+        Assert.assertTrue(!lines.isEmpty());
+
+        int max = 5;
+
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
-        ArrayList<NotificationInstanceData> notificationInstanceDataArray = new ArrayList<>(notificationInstanceDatas);
-        Collections.sort(notificationInstanceDataArray, (lhs, rhs) -> {
-            int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
-            if (timeStampComparison != 0)
-                return timeStampComparison;
+        Stream.of(lines).limit(max).forEach(inboxStyle::addLine);
 
-            return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
-        });
+        int extraCount = lines.size() - max;
 
-        int lineCount = Math.min(5, notificationInstanceDataArray.size());
-        for (int i = 0; i < lineCount; i++) {
-            NotificationInstanceData notificationInstanceData = notificationInstanceDataArray.get(i);
-            inboxStyle.addLine(notificationInstanceData.Name + " (" + notificationInstanceData.DisplayText + ")");
-        }
-        int extraCount = notificationInstanceDatas.size() - lineCount;
         if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + getString(R.string.more));
 
-        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null, null, inboxStyle, false);
+        return inboxStyle;
     }
 
     private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions, Long when, NotificationCompat.InboxStyle inboxStyle, boolean autoCancel) {
@@ -303,20 +316,21 @@ public class TickService extends IntentService {
         public final int NotificationId;
         public final String DisplayText;
         public final TimeStamp InstanceTimeStamp;
-        public final String ChildrenText;
+        public final List<String> Children;
 
-        public NotificationInstanceData(InstanceKey instanceKey, String name, int notificationId, String displayText, TimeStamp instanceTimeStamp, String childrenText) {
+        public NotificationInstanceData(InstanceKey instanceKey, String name, int notificationId, String displayText, TimeStamp instanceTimeStamp, List<String> children) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
             Assert.assertTrue(instanceTimeStamp != null);
+            Assert.assertTrue(children != null);
 
             InstanceKey = instanceKey;
             Name = name;
             NotificationId = notificationId;
             DisplayText = displayText;
             InstanceTimeStamp = instanceTimeStamp;
-            ChildrenText = childrenText;
+            Children = children;
         }
     }
 

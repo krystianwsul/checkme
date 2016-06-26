@@ -301,7 +301,14 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             mTaskWrappers = new ArrayList<>();
             for (TaskListLoader.TaskData taskData : data.TaskDatas)
-                mTaskWrappers.add(new TaskWrapper(taskData, selectedTasks));
+                mTaskWrappers.add(new TaskWrapper(new WeakReference<>(this), taskData, selectedTasks));
+        }
+
+        public int getPosition(TaskWrapper taskWrapper) {
+            Assert.assertTrue(taskWrapper != null);
+            Assert.assertTrue(mTaskWrappers.contains(taskWrapper));
+
+            return mTaskWrappers.indexOf(taskWrapper);
         }
 
         @Override
@@ -327,48 +334,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         public void onBindViewHolder(final TaskHolder taskHolder, int position) {
-            TaskListFragment taskListFragment = mTaskListFragmentReference.get();
-            Assert.assertTrue(taskListFragment != null);
-
             TaskWrapper taskWrapper = mTaskWrappers.get(position);
+            Assert.assertTrue(taskWrapper != null);
 
-            if (taskWrapper.mSelected)
-                taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(taskListFragment.getActivity(), R.color.selected));
-            else
-                taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
-
-            taskHolder.mShowTaskRow.setOnLongClickListener(v -> {
-                taskHolder.onLongClick();
-                return true;
-            });
-
-            if (TextUtils.isEmpty(taskWrapper.mTaskData.Children))
-                taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
-            else
-                taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
-
-            taskHolder.mTaskRowName.setText(taskWrapper.mTaskData.Name);
-
-            if (TextUtils.isEmpty(taskWrapper.mTaskData.ScheduleText)) {
-                taskHolder.mTaskRowDetails.setVisibility(View.GONE);
-            } else {
-                taskHolder.mTaskRowDetails.setVisibility(View.VISIBLE);
-                taskHolder.mTaskRowDetails.setText(taskWrapper.mTaskData.ScheduleText);
-            }
-
-            if (TextUtils.isEmpty(taskWrapper.mTaskData.Children)) {
-                taskHolder.mTaskRowChildren.setVisibility(View.GONE);
-            } else {
-                taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
-                taskHolder.mTaskRowChildren.setText(taskWrapper.mTaskData.Children);
-            }
-
-            taskHolder.mShowTaskRow.setOnClickListener(v -> {
-                if (taskListFragment.mSelectionCallback.hasActionMode())
-                    taskHolder.onLongClick();
-                else
-                    taskHolder.onRowClick();
-            });
+            taskWrapper.onBindViewHolder(taskHolder);
         }
 
         public void uncheck() {
@@ -409,18 +378,120 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             DomainFactory.getDomainFactory(taskListFragment.getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
         }
 
+        public TaskListFragment getTaskListFragment() {
+            TaskListFragment taskListFragment = mTaskListFragmentReference.get();
+            Assert.assertTrue(taskListFragment != null);
+
+            return taskListFragment;
+        }
+
         private static class TaskWrapper {
+            private final WeakReference<TaskAdapter> mTaskAdapterReference;
+
             public final TaskListLoader.TaskData mTaskData;
             public boolean mSelected;
 
-            public TaskWrapper(TaskListLoader.TaskData taskData, ArrayList<Integer> selectedTasks) {
+            public TaskWrapper(WeakReference<TaskAdapter> taskAdapterReference, TaskListLoader.TaskData taskData, ArrayList<Integer> selectedTasks) {
+                Assert.assertTrue(taskAdapterReference != null);
                 Assert.assertTrue(taskData != null);
+
+                mTaskAdapterReference = taskAdapterReference;
                 mTaskData = taskData;
 
                 if (selectedTasks != null) {
                     Assert.assertTrue(!selectedTasks.isEmpty());
                     mSelected = selectedTasks.contains(mTaskData.TaskId);
                 }
+            }
+
+            private TaskAdapter getTaskAdapter() {
+                TaskAdapter taskAdapter = mTaskAdapterReference.get();
+                Assert.assertTrue(taskAdapter != null);
+
+                return taskAdapter;
+            }
+
+            private TaskListFragment getTaskListFragment() {
+                TaskAdapter taskAdapter = getTaskAdapter();
+                Assert.assertTrue(taskAdapter != null);
+
+                TaskListFragment taskListFragment = taskAdapter.getTaskListFragment();
+                Assert.assertTrue(taskListFragment != null);
+
+                return taskListFragment;
+            }
+
+            public void onBindViewHolder(TaskHolder taskHolder) {
+                Assert.assertTrue(taskHolder != null);
+
+                TaskListFragment taskListFragment = getTaskListFragment();
+                Assert.assertTrue(taskListFragment != null);
+
+                if (mSelected)
+                    taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(taskListFragment.getActivity(), R.color.selected));
+                else
+                    taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
+
+                taskHolder.mShowTaskRow.setOnLongClickListener(v -> {
+                    onLongClick();
+                    return true;
+                });
+
+                if (TextUtils.isEmpty(mTaskData.Children))
+                    taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
+                else
+                    taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
+
+                taskHolder.mTaskRowName.setText(mTaskData.Name);
+
+                if (TextUtils.isEmpty(mTaskData.ScheduleText)) {
+                    taskHolder.mTaskRowDetails.setVisibility(View.GONE);
+                } else {
+                    taskHolder.mTaskRowDetails.setVisibility(View.VISIBLE);
+                    taskHolder.mTaskRowDetails.setText(mTaskData.ScheduleText);
+                }
+
+                if (TextUtils.isEmpty(mTaskData.Children)) {
+                    taskHolder.mTaskRowChildren.setVisibility(View.GONE);
+                } else {
+                    taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
+                    taskHolder.mTaskRowChildren.setText(mTaskData.Children);
+                }
+
+                taskHolder.mShowTaskRow.setOnClickListener(v -> {
+                    if (taskListFragment.mSelectionCallback.hasActionMode())
+                        onLongClick();
+                    else
+                        onClick();
+                });
+            }
+
+            public void onClick() {
+                TaskListFragment taskListFragment = getTaskListFragment();
+                Assert.assertTrue(taskListFragment != null);
+
+                taskListFragment.getActivity().startActivity(ShowTaskActivity.getIntent(mTaskData.TaskId, taskListFragment.getActivity()));
+            }
+
+            public void onLongClick() {
+                TaskAdapter taskAdapter = getTaskAdapter();
+                Assert.assertTrue(taskAdapter != null);
+
+                TaskListFragment taskListFragment = taskAdapter.getTaskListFragment();
+                Assert.assertTrue(taskListFragment != null);
+
+                int position = taskAdapter.getPosition(this);
+                Assert.assertTrue(position >= 0);
+
+                mSelected = !mSelected;
+
+                if (mSelected) {
+                    taskListFragment.mSelectionCallback.incrementSelected();
+                } else {
+                    taskListFragment.mSelectionCallback.decrementSelected();
+                }
+
+                taskAdapter.notifyItemChanged(position);
             }
         }
 
@@ -444,36 +515,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 mTaskRowDetails = taskRowDetails;
                 mTaskRowChildren = taskRowChildren;
                 mTaskRowImg = taskRowImg;
-            }
-
-            public void onRowClick() {
-                TaskListFragment taskListFragment = mTaskListFragmentReference.get();
-                Assert.assertTrue(taskListFragment != null);
-
-                TaskWrapper taskWrapper = mTaskWrappers.get(getAdapterPosition());
-                Assert.assertTrue(taskWrapper != null);
-
-                taskListFragment.getActivity().startActivity(ShowTaskActivity.getIntent(taskWrapper.mTaskData.TaskId, taskListFragment.getActivity()));
-            }
-
-            public void onLongClick() {
-                TaskListFragment taskListFragment = mTaskListFragmentReference.get();
-                Assert.assertTrue(taskListFragment != null);
-
-                int position = getAdapterPosition();
-
-                TaskWrapper taskWrapper = mTaskWrappers.get(position);
-                Assert.assertTrue(taskWrapper != null);
-
-                taskWrapper.mSelected = !taskWrapper.mSelected;
-
-                if (taskWrapper.mSelected) {
-                    taskListFragment.mSelectionCallback.incrementSelected();
-                } else {
-                    taskListFragment.mSelectionCallback.decrementSelected();
-                }
-
-                notifyItemChanged(position);
             }
         }
     }

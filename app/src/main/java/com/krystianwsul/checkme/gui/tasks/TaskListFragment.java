@@ -28,7 +28,11 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
+import com.krystianwsul.checkme.gui.tree.NodeContainer;
 import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
+import com.krystianwsul.checkme.gui.tree.TreeNode;
+import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
+import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
 
 import junit.framework.Assert;
@@ -51,22 +55,22 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private TaskListLoader.Data mData;
 
-    private TaskAdapter mTaskAdapter;
+    private TreeViewAdapter mTreeViewAdapter;
 
     private final SelectionCallback mSelectionCallback = new SelectionCallback() {
         @Override
         protected void unselect() {
-            mTaskAdapter.uncheck();
+            mTreeViewAdapter.unselect();
         }
 
         @Override
         protected void onMenuClick(MenuItem menuItem) {
-            List<TaskAdapter.TaskWrapper> selected = mTaskAdapter.getSelectedNodes();
+            List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
             Assert.assertTrue(selected != null);
             Assert.assertTrue(!selected.isEmpty());
 
             ArrayList<Integer> taskIds = Stream.of(selected)
-                    .map(taskWrapper -> taskWrapper.mTaskData.TaskId)
+                    .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mTaskData.TaskId)
                     .collect(Collectors.toCollection(ArrayList::new));
             Assert.assertTrue(taskIds != null);
             Assert.assertTrue(!taskIds.isEmpty());
@@ -75,7 +79,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 case R.id.action_task_edit:
                     Assert.assertTrue(selected.size() == 1);
 
-                    TaskListLoader.TaskData taskData = selected.get(0).mTaskData;
+                    TaskListLoader.TaskData taskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mTaskData;
 
                     if (taskData.IsRootTask)
                         startActivity(CreateRootTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
@@ -89,7 +93,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                         startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mTaskId, taskIds));
                     break;
                 case R.id.action_task_delete:
-                    mTaskAdapter.removeSelected();
+                    do {
+                        TreeNode treeNode = selected.get(0);
+                        Assert.assertTrue(treeNode != null);
+
+                        TaskAdapter.TaskWrapper taskWrapper = (TaskAdapter.TaskWrapper) treeNode.getModelNode();
+                        Assert.assertTrue(taskWrapper != null);
+
+                        taskWrapper.removeFromParent();
+
+                        decrementSelected();
+                    } while (!(selected = mTreeViewAdapter.getSelectedNodes()).isEmpty());
+
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
+
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -224,8 +241,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
         mData = data;
 
-        if (mTaskAdapter != null) {
-            List<TaskAdapter.TaskWrapper> selected = mTaskAdapter.getSelectedNodes();
+        if (mTreeViewAdapter != null) {
+            List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
             Assert.assertTrue(selected != null);
 
             if (selected.isEmpty()) {
@@ -234,7 +251,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             } else {
                 Assert.assertTrue(mSelectionCallback.hasActionMode());
                 mSelectedTaskIds = Stream.of(selected)
-                        .map(taskWrapper -> taskWrapper.mTaskData.TaskId)
+                        .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mTaskData.TaskId)
                         .collect(Collectors.toList());
             }
         }
@@ -246,12 +263,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
-        mTaskAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds);
-        Assert.assertTrue(mTaskAdapter != null);
+        mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds);
+        Assert.assertTrue(mTreeViewAdapter != null);
 
-        mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
+        mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter);
 
-        mSelectionCallback.setSelected(mTaskAdapter.getSelectedNodes().size());
+        mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
         mTaskListFragmentFab.setVisibility(View.VISIBLE);
 
@@ -278,16 +295,15 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mTaskAdapter != null) {
-            List<TaskAdapter.TaskWrapper> selected = mTaskAdapter.getSelectedNodes();
+        if (mTreeViewAdapter != null) {
+            List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
             Assert.assertTrue(selected != null);
-            Assert.assertTrue(!selected.isEmpty());
 
             if (!selected.isEmpty()) {
                 Assert.assertTrue(mSelectionCallback.hasActionMode());
 
                 ArrayList<Integer> taskIds = Stream.of(selected)
-                        .map(taskWrapper -> taskWrapper.mTaskData.TaskId)
+                        .map(taskWrapper -> ((TaskAdapter.TaskWrapper) taskWrapper.getModelNode()).mTaskData.TaskId)
                         .collect(Collectors.toCollection(ArrayList::new));
                 Assert.assertTrue(taskIds != null);
                 Assert.assertTrue(!taskIds.isEmpty());
@@ -314,15 +330,16 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         private ArrayList<TaskWrapper> mTaskWrappers;
 
-        public static TaskAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks) {
+        private WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
+        private WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
+
+        public static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks) {
             Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
             TaskAdapter taskAdapter = new TaskAdapter(taskListFragment, data.DataId);
 
-            taskAdapter.initialize(data.TaskDatas, selectedTasks);
-
-            return taskAdapter;
+            return taskAdapter.initialize(data.TaskDatas, selectedTasks);
         }
 
         private TaskAdapter(TaskListFragment taskListFragment, int dataId) {
@@ -333,24 +350,32 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mDataId = dataId;
         }
 
-        private void initialize(List<TaskListLoader.TaskData> taskDatas, List<Integer> selectedTasks) {
+        private TreeViewAdapter initialize(List<TaskListLoader.TaskData> taskDatas, List<Integer> selectedTasks) {
             Assert.assertTrue(taskDatas != null);
 
+            TreeViewAdapter treeViewAdapter = new TreeViewAdapter(false, this);
+            mTreeViewAdapterReference = new WeakReference<>(treeViewAdapter);
+
+            TreeNodeCollection treeNodeCollection = new TreeNodeCollection(new WeakReference<>(treeViewAdapter));
+            mTreeNodeCollectionReference = new WeakReference<>(treeNodeCollection);
+
+            treeViewAdapter.setTreeNodeCollection(treeNodeCollection);
+
             mTaskWrappers = new ArrayList<>();
+
+            List<TreeNode> treeNodes = new ArrayList<>();
+
             for (TaskListLoader.TaskData taskData : taskDatas) {
                 TaskWrapper taskWrapper = new TaskWrapper(new WeakReference<>(this), taskData);
 
-                taskWrapper.initialize(selectedTasks);
+                treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNodeCollection)));
 
                 mTaskWrappers.add(taskWrapper);
             }
-        }
 
-        public int getPosition(TaskWrapper taskWrapper) {
-            Assert.assertTrue(taskWrapper != null);
-            Assert.assertTrue(mTaskWrappers.contains(taskWrapper));
+            treeNodeCollection.setNodes(treeNodes);
 
-            return mTaskWrappers.indexOf(taskWrapper);
+            return treeViewAdapter;
         }
 
         @Override
@@ -418,11 +443,40 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             DomainFactory.getDomainFactory(taskListFragment.getActivity()).setTaskEndTimeStamps(mDataId, taskIds);
         }
 
+        public void remove(TaskWrapper taskWrapper) {
+            Assert.assertTrue(taskWrapper != null);
+            Assert.assertTrue(mTaskWrappers.contains(taskWrapper));
+
+            mTaskWrappers.remove(taskWrapper);
+
+            TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+            Assert.assertTrue(treeNodeCollection != null);
+
+            TreeNode treeNode = taskWrapper.getTreeNode();
+            Assert.assertTrue(treeNode != null);
+
+            treeNodeCollection.remove(treeNode);
+        }
+
         public TaskListFragment getTaskListFragment() {
             TaskListFragment taskListFragment = mTaskListFragmentReference.get();
             Assert.assertTrue(taskListFragment != null);
 
             return taskListFragment;
+        }
+
+        public TreeViewAdapter getTreeViewAdapter() {
+            TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
+            Assert.assertTrue(treeViewAdapter != null);
+
+            return treeViewAdapter;
+        }
+
+        public TreeNodeCollection getTreeNodeCollection() {
+            TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
+            Assert.assertTrue(treeNodeCollection != null);
+
+            return treeNodeCollection;
         }
 
         @Override
@@ -437,7 +491,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             private final WeakReference<TaskAdapter> mTaskAdapterReference;
 
             public final TaskListLoader.TaskData mTaskData;
-            public boolean mSelected;
+            public boolean mSelected = false;
+
+            private WeakReference<TreeNode> mTreeNodeReference;
 
             public TaskWrapper(WeakReference<TaskAdapter> taskAdapterReference, TaskListLoader.TaskData taskData) {
                 Assert.assertTrue(taskAdapterReference != null);
@@ -447,11 +503,27 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 mTaskData = taskData;
             }
 
-            public void initialize(List<Integer> selectedTasks) {
+            public TreeNode initialize(List<Integer> selectedTasks, WeakReference<NodeContainer> nodeContainerReference) {
+                Assert.assertTrue(nodeContainerReference != null);
+
                 if (selectedTasks != null) {
                     Assert.assertTrue(!selectedTasks.isEmpty());
                     mSelected = selectedTasks.contains(mTaskData.TaskId);
                 }
+
+                TreeNode treeNode = new TreeNode(this, nodeContainerReference, false, mSelected);
+                treeNode.setChildTreeNodes(new ArrayList<>());
+
+                mTreeNodeReference = new WeakReference<>(treeNode);
+
+                return treeNode;
+            }
+
+            private TreeNode getTreeNode() {
+                TreeNode treeNode = mTreeNodeReference.get();
+                Assert.assertTrue(treeNode != null);
+
+                return treeNode;
             }
 
             private TaskAdapter getTaskAdapter() {
@@ -477,18 +549,18 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                 TaskHolder taskHolder = (TaskHolder) viewHolder;
 
+                TreeNode treeNode = getTreeNode();
+                Assert.assertTrue(treeNode != null);
+
                 TaskListFragment taskListFragment = getTaskListFragment();
                 Assert.assertTrue(taskListFragment != null);
 
-                if (mSelected)
+                if (treeNode.isSelected())
                     taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(taskListFragment.getActivity(), R.color.selected));
                 else
                     taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
 
-                taskHolder.mShowTaskRow.setOnLongClickListener(v -> {
-                    onLongClick();
-                    return true;
-                });
+                taskHolder.mShowTaskRow.setOnLongClickListener(treeNode.getOnLongClickListener());
 
                 if (TextUtils.isEmpty(mTaskData.Children))
                     taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
@@ -511,12 +583,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     taskHolder.mTaskRowChildren.setText(mTaskData.Children);
                 }
 
-                taskHolder.mShowTaskRow.setOnClickListener(v -> {
-                    if (taskListFragment.mSelectionCallback.hasActionMode())
-                        onLongClick();
-                    else
-                        onClick();
-                });
+                taskHolder.mShowTaskRow.setOnClickListener(treeNode.getOnClickListener());
             }
 
             @Override
@@ -535,27 +602,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 Assert.assertTrue(taskListFragment != null);
 
                 taskListFragment.getActivity().startActivity(ShowTaskActivity.getIntent(mTaskData.TaskId, taskListFragment.getActivity()));
-            }
-
-            public void onLongClick() {
-                TaskAdapter taskAdapter = getTaskAdapter();
-                Assert.assertTrue(taskAdapter != null);
-
-                TaskListFragment taskListFragment = taskAdapter.getTaskListFragment();
-                Assert.assertTrue(taskListFragment != null);
-
-                int position = taskAdapter.getPosition(this);
-                Assert.assertTrue(position >= 0);
-
-                mSelected = !mSelected;
-
-                if (mSelected) {
-                    taskListFragment.mSelectionCallback.incrementSelected();
-                } else {
-                    taskListFragment.mSelectionCallback.decrementSelected();
-                }
-
-                taskAdapter.notifyItemChanged(position);
             }
 
             @Override
@@ -578,6 +624,13 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     comparison = -comparison;
 
                 return comparison;
+            }
+
+            public void removeFromParent() {
+                TaskAdapter taskAdapter = getTaskAdapter();
+                Assert.assertTrue(taskAdapter != null);
+
+                taskAdapter.remove(this);
             }
         }
 

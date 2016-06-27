@@ -34,6 +34,7 @@ import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
     private static final String SELECTED_TASKS_KEY = "selectedTasks";
@@ -239,7 +240,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
-        mTaskAdapter = new TaskAdapter(this, data, mSelectedTasks);
+        mTaskAdapter = TaskAdapter.getAdapter(this, data, mSelectedTasks);
+        Assert.assertTrue(mTaskAdapter != null);
+
         mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
 
         mSelectionCallback.setSelected(mTaskAdapter.getSelected().size());
@@ -291,20 +294,40 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public static class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements TreeModelAdapter {
         private final WeakReference<TaskListFragment> mTaskListFragmentReference;
 
-        private final ArrayList<TaskWrapper> mTaskWrappers;
+        private final int mDataId;
 
-        private final TaskListLoader.Data mData;
+        private ArrayList<TaskWrapper> mTaskWrappers;
 
-        public TaskAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, ArrayList<Integer> selectedTasks) {
+        public static TaskAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, ArrayList<Integer> selectedTasks) {
             Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
+            TaskAdapter taskAdapter = new TaskAdapter(taskListFragment, data.DataId);
+
+            taskAdapter.initialize(data.TaskDatas, selectedTasks);
+
+            return taskAdapter;
+        }
+
+        private TaskAdapter(TaskListFragment taskListFragment, int dataId) {
+            Assert.assertTrue(taskListFragment != null);
+
             mTaskListFragmentReference = new WeakReference<>(taskListFragment);
-            mData = data;
+
+            mDataId = dataId;
+        }
+
+        private void initialize(List<TaskListLoader.TaskData> taskDatas, List<Integer> selectedTasks) {
+            Assert.assertTrue(taskDatas != null);
 
             mTaskWrappers = new ArrayList<>();
-            for (TaskListLoader.TaskData taskData : data.TaskDatas)
-                mTaskWrappers.add(new TaskWrapper(new WeakReference<>(this), taskData, selectedTasks));
+            for (TaskListLoader.TaskData taskData : taskDatas) {
+                TaskWrapper taskWrapper = new TaskWrapper(new WeakReference<>(this), taskData);
+
+                taskWrapper.initialize(selectedTasks);
+
+                mTaskWrappers.add(taskWrapper);
+            }
         }
 
         public int getPosition(TaskWrapper taskWrapper) {
@@ -378,7 +401,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 notifyItemRemoved(position);
             }
 
-            DomainFactory.getDomainFactory(taskListFragment.getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
+            DomainFactory.getDomainFactory(taskListFragment.getActivity()).setTaskEndTimeStamps(mDataId, taskIds);
         }
 
         public TaskListFragment getTaskListFragment() {
@@ -402,13 +425,15 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             public final TaskListLoader.TaskData mTaskData;
             public boolean mSelected;
 
-            public TaskWrapper(WeakReference<TaskAdapter> taskAdapterReference, TaskListLoader.TaskData taskData, ArrayList<Integer> selectedTasks) {
+            public TaskWrapper(WeakReference<TaskAdapter> taskAdapterReference, TaskListLoader.TaskData taskData) {
                 Assert.assertTrue(taskAdapterReference != null);
                 Assert.assertTrue(taskData != null);
 
                 mTaskAdapterReference = taskAdapterReference;
                 mTaskData = taskData;
+            }
 
+            public void initialize(List<Integer> selectedTasks) {
                 if (selectedTasks != null) {
                     Assert.assertTrue(!selectedTasks.isEmpty());
                     mSelected = selectedTasks.contains(mTaskData.TaskId);

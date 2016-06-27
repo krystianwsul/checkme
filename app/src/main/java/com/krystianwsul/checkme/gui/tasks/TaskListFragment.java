@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
@@ -60,19 +61,21 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         protected void onMenuClick(MenuItem menuItem) {
-            ArrayList<Integer> taskIds = mTaskAdapter.getSelected();
+            List<TaskAdapter.TaskWrapper> selected = mTaskAdapter.getSelectedNodes();
+            Assert.assertTrue(selected != null);
+            Assert.assertTrue(!selected.isEmpty());
+
+            ArrayList<Integer> taskIds = Stream.of(selected)
+                    .map(taskWrapper -> taskWrapper.mTaskData.TaskId)
+                    .collect(Collectors.toCollection(ArrayList::new));
             Assert.assertTrue(taskIds != null);
             Assert.assertTrue(!taskIds.isEmpty());
 
             switch (menuItem.getItemId()) {
                 case R.id.action_task_edit:
-                    Assert.assertTrue(taskIds.size() == 1);
+                    Assert.assertTrue(selected.size() == 1);
 
-                    TaskListLoader.TaskData taskData = Stream.of(mTaskAdapter.mTaskWrappers)
-                            .filter(taskWrapper -> taskWrapper.mSelected)
-                            .findFirst()
-                            .get()
-                            .mTaskData;
+                    TaskListLoader.TaskData taskData = selected.get(0).mTaskData;
 
                     if (taskData.IsRootTask)
                         startActivity(CreateRootTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
@@ -134,7 +137,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         }
     };
 
-    private ArrayList<Integer> mSelectedTasks;
+    private List<Integer> mSelectedTaskIds;
 
     public static TaskListFragment getInstance() {
         TaskListFragment taskListFragment = new TaskListFragment();
@@ -185,9 +188,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_TASKS_KEY)) {
-            mSelectedTasks = savedInstanceState.getIntegerArrayList(SELECTED_TASKS_KEY);
-            Assert.assertTrue(mSelectedTasks != null);
-            Assert.assertTrue(!mSelectedTasks.isEmpty());
+            mSelectedTaskIds = savedInstanceState.getIntegerArrayList(SELECTED_TASKS_KEY);
+            Assert.assertTrue(mSelectedTaskIds != null);
+            Assert.assertTrue(!mSelectedTaskIds.isEmpty());
         }
 
         View view = getView();
@@ -222,14 +225,17 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         mData = data;
 
         if (mTaskAdapter != null) {
-            ArrayList<Integer> selected = mTaskAdapter.getSelected();
+            List<TaskAdapter.TaskWrapper> selected = mTaskAdapter.getSelectedNodes();
+            Assert.assertTrue(selected != null);
 
             if (selected.isEmpty()) {
                 Assert.assertTrue(!mSelectionCallback.hasActionMode());
-                mSelectedTasks = null;
+                mSelectedTaskIds = null;
             } else {
                 Assert.assertTrue(mSelectionCallback.hasActionMode());
-                mSelectedTasks = selected;
+                mSelectedTaskIds = Stream.of(selected)
+                        .map(taskWrapper -> taskWrapper.mTaskData.TaskId)
+                        .collect(Collectors.toList());
             }
         }
 
@@ -240,12 +246,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
-        mTaskAdapter = TaskAdapter.getAdapter(this, data, mSelectedTasks);
+        mTaskAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds);
         Assert.assertTrue(mTaskAdapter != null);
 
         mTaskListFragmentRecycler.setAdapter(mTaskAdapter);
 
-        mSelectionCallback.setSelected(mTaskAdapter.getSelected().size());
+        mSelectionCallback.setSelected(mTaskAdapter.getSelectedNodes().size());
 
         mTaskListFragmentFab.setVisibility(View.VISIBLE);
 
@@ -273,10 +279,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         super.onSaveInstanceState(outState);
 
         if (mTaskAdapter != null) {
-            ArrayList<Integer> selected = mTaskAdapter.getSelected();
+            List<TaskAdapter.TaskWrapper> selected = mTaskAdapter.getSelectedNodes();
+            Assert.assertTrue(selected != null);
+            Assert.assertTrue(!selected.isEmpty());
+
             if (!selected.isEmpty()) {
                 Assert.assertTrue(mSelectionCallback.hasActionMode());
-                outState.putIntegerArrayList(SELECTED_TASKS_KEY, mTaskAdapter.getSelected());
+
+                ArrayList<Integer> taskIds = Stream.of(selected)
+                        .map(taskWrapper -> taskWrapper.mTaskData.TaskId)
+                        .collect(Collectors.toCollection(ArrayList::new));
+                Assert.assertTrue(taskIds != null);
+                Assert.assertTrue(!taskIds.isEmpty());
+
+                outState.putIntegerArrayList(SELECTED_TASKS_KEY, taskIds);
             }
         }
     }
@@ -298,7 +314,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         private ArrayList<TaskWrapper> mTaskWrappers;
 
-        public static TaskAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, ArrayList<Integer> selectedTasks) {
+        public static TaskAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks) {
             Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
@@ -375,12 +391,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
         }
 
-        public ArrayList<Integer> getSelected() {
-            ArrayList<Integer> taskIds = new ArrayList<>();
-            for (TaskWrapper taskWrapper : mTaskWrappers)
-                if (taskWrapper.mSelected)
-                    taskIds.add(taskWrapper.mTaskData.TaskId);
-            return taskIds;
+        public List<TaskWrapper> getSelectedNodes() {
+            return Stream.of(mTaskWrappers)
+                    .filter(taskWrapper -> taskWrapper.mSelected)
+                    .collect(Collectors.toList());
         }
 
         public void removeSelected() {

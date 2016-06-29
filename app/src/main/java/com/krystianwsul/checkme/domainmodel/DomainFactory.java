@@ -741,12 +741,7 @@ public class DomainFactory {
 
         ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
         for (Task task : tasks) {
-            String children = Stream.of(task.getChildTasks(now))
-                    .sortBy(Task::getId)
-                    .map(Task::getName)
-                    .collect(Collectors.joining(", "));
-
-            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), children, task.isRootTask(now)));
+            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.isRootTask(now)));
         }
 
         return new TaskListLoader.Data(taskDatas);
@@ -1848,5 +1843,20 @@ public class DomainFactory {
         }
 
         return instanceDatas;
+    }
+
+    private List<TaskListLoader.TaskData> getChildTaskDatas(Task parentTask, ExactTimeStamp now, Context context) {
+        Assert.assertTrue(parentTask != null);
+        Assert.assertTrue(now != null);
+        Assert.assertTrue(context != null);
+
+        List<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
+        for (Task childTask : parentTask.getChildTasks(now)) {
+            taskDatas.add(new TaskListLoader.TaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.isRootTask(now)));
+        }
+
+        Collections.sort(taskDatas, (lhs, rhs) -> Integer.valueOf(lhs.TaskId).compareTo(rhs.TaskId));
+
+        return taskDatas;
     }
 }

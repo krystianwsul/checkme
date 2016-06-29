@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     private final Integer mTaskId;
@@ -23,9 +23,9 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<TaskData> TaskDatas;
+        public final List<TaskData> TaskDatas;
 
-        public Data(ArrayList<TaskData> taskDatas) {
+        public Data(List<TaskData> taskDatas) {
             Assert.assertTrue(taskDatas != null);
             TaskDatas = taskDatas;
         }
@@ -56,11 +56,12 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
         public final int TaskId;
         public final String Name;
         public final String ScheduleText;
-        public final String Children;
+        public final List<TaskData> Children;
         public final boolean IsRootTask;
 
-        public TaskData(int taskId, String name, String scheduleText, String children, boolean isRootTask) {
+        public TaskData(int taskId, String name, String scheduleText, List<TaskData> children, boolean isRootTask) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(children != null);
 
             TaskId = taskId;
             Name = name;
@@ -76,8 +77,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
-            if (!TextUtils.isEmpty(Children))
-                hashCode += Children.hashCode();
+            hashCode += Children.hashCode();
             hashCode += (IsRootTask ? 1 : 0);
             return hashCode;
         }
@@ -108,10 +108,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
                 return false;
 
-            if (TextUtils.isEmpty(Children) != TextUtils.isEmpty(taskData.Children))
-                return false;
-
-            if (!TextUtils.isEmpty(Children) && !Children.equals(taskData.Children))
+            if (!Children.equals(taskData.Children))
                 return false;
 
             if (IsRootTask != taskData.IsRootTask)

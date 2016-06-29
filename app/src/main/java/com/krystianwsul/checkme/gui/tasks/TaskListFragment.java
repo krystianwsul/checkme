@@ -43,6 +43,7 @@ import java.util.List;
 
 public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
     private static final String SELECTED_TASKS_KEY = "selectedTasks";
+    private static final String EXPANDED_TASKS_KEY = "expandedTasks";
 
     private static final String ALL_TASKS_KEY = "allTasks";
     private static final String TASK_ID_KEY = "taskId";
@@ -128,11 +129,21 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         protected void onSecondAdded() {
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(false);
+
+            List<TreeNode> selectedNodes = mTreeViewAdapter.getSelectedNodes();
+            Assert.assertTrue(selectedNodes != null);
+            Assert.assertTrue(!selectedNodes.isEmpty());
+
+            mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
         }
 
         @Override
         protected void onOtherAdded() {
+            List<TreeNode> selectedNodes = mTreeViewAdapter.getSelectedNodes();
+            Assert.assertTrue(selectedNodes != null);
+            Assert.assertTrue(!selectedNodes.isEmpty());
 
+            mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
         }
 
         @Override
@@ -146,15 +157,58 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         protected void onSecondToLastRemoved() {
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(false);
             mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(true);
+            mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(true);
         }
 
         @Override
         protected void onOtherRemoved() {
+            List<TreeNode> selectedNodes = mTreeViewAdapter.getSelectedNodes();
+            Assert.assertTrue(selectedNodes != null);
+            Assert.assertTrue(selectedNodes.size() > 1);
 
+            mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
+        }
+
+        private boolean containsLoop(List<TreeNode> treeNodes) {
+            Assert.assertTrue(treeNodes != null);
+            Assert.assertTrue(treeNodes.size() > 1);
+
+            for (TreeNode treeNode : treeNodes) {
+                Assert.assertTrue(treeNode != null);
+
+                List<TreeNode> parents = new ArrayList<>();
+                addParents(parents, treeNode);
+
+                for (TreeNode parent : parents) {
+                    Assert.assertTrue(parent != null);
+
+                    if (treeNodes.contains(parent))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void addParents(List<TreeNode> parents, TreeNode treeNode) {
+            Assert.assertTrue(parents != null);
+            Assert.assertTrue(treeNode != null);
+
+            NodeContainer parent = treeNode.getParent();
+            Assert.assertTrue(parent != null);
+
+            if (!(parent instanceof TreeNode))
+                return;
+
+            TreeNode parentNode = (TreeNode) parent;
+
+            parents.add(parentNode);
+            addParents(parents, parentNode);
         }
     };
 
     private List<Integer> mSelectedTaskIds;
+    private List<Integer> mExpandedTaskIds;
 
     public static TaskListFragment getInstance() {
         TaskListFragment taskListFragment = new TaskListFragment();
@@ -204,10 +258,18 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mTaskId = null;
         }
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_TASKS_KEY)) {
-            mSelectedTaskIds = savedInstanceState.getIntegerArrayList(SELECTED_TASKS_KEY);
-            Assert.assertTrue(mSelectedTaskIds != null);
-            Assert.assertTrue(!mSelectedTaskIds.isEmpty());
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(SELECTED_TASKS_KEY)) {
+                mSelectedTaskIds = savedInstanceState.getIntegerArrayList(SELECTED_TASKS_KEY);
+                Assert.assertTrue(mSelectedTaskIds != null);
+                Assert.assertTrue(!mSelectedTaskIds.isEmpty());
+            }
+
+            if (savedInstanceState.containsKey(EXPANDED_TASKS_KEY)) {
+                mExpandedTaskIds = savedInstanceState.getIntegerArrayList(EXPANDED_TASKS_KEY);
+                Assert.assertTrue(mExpandedTaskIds != null);
+                Assert.assertTrue(!mExpandedTaskIds.isEmpty());
+            }
         }
 
         View view = getView();
@@ -254,6 +316,15 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                         .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mTaskData.TaskId)
                         .collect(Collectors.toList());
             }
+
+            List<Integer> expanded = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskIds();
+            Assert.assertTrue(expanded != null);
+
+            if (expanded.isEmpty()) {
+                mExpandedTaskIds = null;
+            } else {
+                mExpandedTaskIds = expanded;
+            }
         }
 
         mTaskListFragmentFab.setOnClickListener(v -> {
@@ -263,7 +334,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
-        mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds);
+        mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds, mExpandedTaskIds);
         Assert.assertTrue(mTreeViewAdapter != null);
 
         mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter);
@@ -310,6 +381,12 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                 outState.putIntegerArrayList(SELECTED_TASKS_KEY, taskIds);
             }
+
+            ArrayList<Integer> expandedTaskIds = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskIds();
+            Assert.assertTrue(expandedTaskIds != null);
+
+            if (!expandedTaskIds.isEmpty())
+                outState.putIntegerArrayList(EXPANDED_TASKS_KEY, expandedTaskIds);
         }
     }
 
@@ -331,13 +408,13 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         private WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
         private WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
 
-        public static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks) {
+        public static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks, List<Integer> expandedTasks) {
             Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
             TaskAdapter taskAdapter = new TaskAdapter(taskListFragment);
 
-            return taskAdapter.initialize(data.TaskDatas, selectedTasks);
+            return taskAdapter.initialize(data.TaskDatas, selectedTasks, expandedTasks);
         }
 
         private TaskAdapter(TaskListFragment taskListFragment) {
@@ -346,7 +423,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mTaskListFragmentReference = new WeakReference<>(taskListFragment);
         }
 
-        private TreeViewAdapter initialize(List<TaskListLoader.TaskData> taskDatas, List<Integer> selectedTasks) {
+        private TreeViewAdapter initialize(List<TaskListLoader.TaskData> taskDatas, List<Integer> selectedTasks, List<Integer> expandedTasks) {
             Assert.assertTrue(taskDatas != null);
 
             TreeViewAdapter treeViewAdapter = new TreeViewAdapter(false, this);
@@ -364,7 +441,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             for (TaskListLoader.TaskData taskData : taskDatas) {
                 TaskWrapper taskWrapper = new TaskWrapper(new WeakReference<>(this), taskData);
 
-                treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNodeCollection)));
+                treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNodeCollection), expandedTasks));
 
                 mTaskWrappers.add(taskWrapper);
             }
@@ -460,11 +537,16 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             return this;
         }
 
+        public ArrayList<Integer> getExpandedTaskIds() {
+            return Stream.of(mTaskWrappers)
+                    .flatMap(TaskWrapper::getExpandedTaskIds)
+                    .collect(Collectors.toCollection(ArrayList::new));
+        }
+
         private static class TaskWrapper implements ModelNode, TaskParent {
             private final WeakReference<TaskParent> mTaskParentReference;
 
             public final TaskListLoader.TaskData mTaskData;
-            public boolean mSelected = false;
 
             private WeakReference<TreeNode> mTreeNodeReference;
 
@@ -478,15 +560,22 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 mTaskData = taskData;
             }
 
-            public TreeNode initialize(List<Integer> selectedTasks, WeakReference<NodeContainer> nodeContainerReference) {
+            public TreeNode initialize(List<Integer> selectedTasks, WeakReference<NodeContainer> nodeContainerReference, List<Integer> expandedTasks) {
                 Assert.assertTrue(nodeContainerReference != null);
 
+                boolean selected = false;
                 if (selectedTasks != null) {
                     Assert.assertTrue(!selectedTasks.isEmpty());
-                    mSelected = selectedTasks.contains(mTaskData.TaskId);
+                    selected = selectedTasks.contains(mTaskData.TaskId);
                 }
 
-                TreeNode treeNode = new TreeNode(this, nodeContainerReference, false, mSelected);
+                boolean expanded = false;
+                if (expandedTasks != null) {
+                    Assert.assertTrue(!expandedTasks.isEmpty());
+                    expanded = expandedTasks.contains(mTaskData.TaskId);
+                }
+
+                TreeNode treeNode = new TreeNode(this, nodeContainerReference, expanded, selected);
 
                 mTreeNodeReference = new WeakReference<>(treeNode);
 
@@ -497,7 +586,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 for (TaskListLoader.TaskData taskData : mTaskData.Children) {
                     TaskWrapper taskWrapper = new TaskWrapper(new WeakReference<>(this), taskData);
 
-                    treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNode)));
+                    treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNode), expandedTasks));
 
                     mTaskWrappers.add(taskWrapper);
                 }
@@ -656,6 +745,23 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 Assert.assertTrue(childTreeNode != null);
 
                 treeNode.remove(childTreeNode);
+            }
+
+            public Stream<Integer> getExpandedTaskIds() {
+                List<Integer> expandedTaskIds = new ArrayList<>();
+
+                TreeNode treeNode = getTreeNode();
+                Assert.assertTrue(treeNode != null);
+
+                if (treeNode.expanded()) {
+                    expandedTaskIds.add(mTaskData.TaskId);
+
+                    expandedTaskIds.addAll(Stream.of(mTaskWrappers)
+                            .flatMap(TaskWrapper::getExpandedTaskIds)
+                            .collect(Collectors.toList()));
+                }
+
+                return Stream.of(expandedTaskIds);
             }
         }
 

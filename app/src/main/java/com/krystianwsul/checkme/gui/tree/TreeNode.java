@@ -133,7 +133,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
-    private NodeContainer getParent() {
+    public NodeContainer getParent() {
         NodeContainer parent = mParentReference.get();
         Assert.assertTrue(parent != null);
 

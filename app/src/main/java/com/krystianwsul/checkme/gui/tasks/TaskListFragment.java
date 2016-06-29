@@ -383,11 +383,21 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
             TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
-            TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
-            TextView taskRowChildren = (TextView) showTaskRow.findViewById(R.id.task_row_children);
-            ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
+            Assert.assertTrue(taskRowName != null);
 
-            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowChildren, taskRowImage);
+            TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
+            Assert.assertTrue(taskRowDetails != null);
+
+            TextView taskRowChildren = (TextView) showTaskRow.findViewById(R.id.task_row_children);
+            Assert.assertTrue(taskRowChildren != null);
+
+            ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
+            Assert.assertTrue(taskRowImage != null);
+
+            View taskRowSeparator = showTaskRow.findViewById(R.id.task_row_separator);
+            Assert.assertTrue(taskRowSeparator != null);
+
+            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowChildren, taskRowImage, taskRowSeparator);
         }
 
         @Override
@@ -581,6 +591,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                             .collect(Collectors.joining(", ")));
                 }
 
+                taskHolder.mTaskRowSeparator.setVisibility(treeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
+
                 taskHolder.mShowTaskRow.setOnClickListener(treeNode.getOnClickListener());
             }
 
@@ -653,20 +665,23 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             public final TextView mTaskRowDetails;
             public final TextView mTaskRowChildren;
             public final ImageView mTaskRowImg;
+            public final View mTaskRowSeparator;
 
-            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, TextView taskRowChildren, ImageView taskRowImg) {
+            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, TextView taskRowChildren, ImageView taskRowImg, View taskRowSeparator) {
                 super(showTaskRow);
 
                 Assert.assertTrue(taskRowName != null);
                 Assert.assertTrue(taskRowDetails != null);
                 Assert.assertTrue(taskRowChildren != null);
                 Assert.assertTrue(taskRowImg != null);
+                Assert.assertTrue(taskRowSeparator != null);
 
                 mShowTaskRow = showTaskRow;
                 mTaskRowName = taskRowName;
                 mTaskRowDetails = taskRowDetails;
                 mTaskRowChildren = taskRowChildren;
                 mTaskRowImg = taskRowImg;
+                mTaskRowSeparator = taskRowSeparator;
             }
         }
     }

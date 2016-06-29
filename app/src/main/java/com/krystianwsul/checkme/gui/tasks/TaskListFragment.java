@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -414,7 +415,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             TaskAdapter taskAdapter = new TaskAdapter(taskListFragment);
 
-            return taskAdapter.initialize(data.TaskDatas, selectedTasks, expandedTasks);
+            float density = taskListFragment.getActivity().getResources().getDisplayMetrics().density;
+
+            return taskAdapter.initialize(density, data.TaskDatas, selectedTasks, expandedTasks);
         }
 
         private TaskAdapter(TaskListFragment taskListFragment) {
@@ -423,7 +426,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mTaskListFragmentReference = new WeakReference<>(taskListFragment);
         }
 
-        private TreeViewAdapter initialize(List<TaskListLoader.TaskData> taskDatas, List<Integer> selectedTasks, List<Integer> expandedTasks) {
+        private TreeViewAdapter initialize(float density, List<TaskListLoader.TaskData> taskDatas, List<Integer> selectedTasks, List<Integer> expandedTasks) {
             Assert.assertTrue(taskDatas != null);
 
             TreeViewAdapter treeViewAdapter = new TreeViewAdapter(false, this);
@@ -439,7 +442,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             List<TreeNode> treeNodes = new ArrayList<>();
 
             for (TaskListLoader.TaskData taskData : taskDatas) {
-                TaskWrapper taskWrapper = new TaskWrapper(new WeakReference<>(this), taskData);
+                TaskWrapper taskWrapper = new TaskWrapper(density, 0, new WeakReference<>(this), taskData);
 
                 treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNodeCollection), expandedTasks));
 
@@ -459,6 +462,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             LayoutInflater inflater = LayoutInflater.from(taskListFragment.getActivity());
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
+            LinearLayout taskRowContainer = (LinearLayout) showTaskRow.findViewById(R.id.task_row_container);
+            Assert.assertTrue(taskRowContainer != null);
+
             TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
             Assert.assertTrue(taskRowName != null);
 
@@ -474,7 +480,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             View taskRowSeparator = showTaskRow.findViewById(R.id.task_row_separator);
             Assert.assertTrue(taskRowSeparator != null);
 
-            return new TaskHolder(showTaskRow, taskRowName, taskRowDetails, taskRowChildren, taskRowImage, taskRowSeparator);
+            return new TaskHolder(showTaskRow, taskRowContainer, taskRowName, taskRowDetails, taskRowChildren, taskRowImage, taskRowSeparator);
         }
 
         @Override
@@ -552,10 +558,15 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             private List<TaskWrapper> mTaskWrappers;
 
-            public TaskWrapper(WeakReference<TaskParent> taskParentReference, TaskListLoader.TaskData taskData) {
+            private final float mDensity;
+            private final int mIndentation;
+
+            public TaskWrapper(float density, int indentation, WeakReference<TaskParent> taskParentReference, TaskListLoader.TaskData taskData) {
                 Assert.assertTrue(taskParentReference != null);
                 Assert.assertTrue(taskData != null);
 
+                mDensity = density;
+                mIndentation = indentation;
                 mTaskParentReference = taskParentReference;
                 mTaskData = taskData;
             }
@@ -584,7 +595,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 List<TreeNode> treeNodes = new ArrayList<>();
 
                 for (TaskListLoader.TaskData taskData : mTaskData.Children) {
-                    TaskWrapper taskWrapper = new TaskWrapper(new WeakReference<>(this), taskData);
+                    TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, new WeakReference<>(this), taskData);
 
                     treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNode), expandedTasks));
 
@@ -649,6 +660,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                 taskHolder.mShowTaskRow.setOnLongClickListener(treeNode.getOnLongClickListener());
 
+                int padding = 48 * mIndentation;
+
+                taskHolder.mTaskRowContainer.setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
+
                 if (mTaskData.Children.isEmpty())
                     taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
                 else {
@@ -671,7 +686,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     taskHolder.mTaskRowDetails.setText(mTaskData.ScheduleText);
                 }
 
-                if (mTaskData.Children.isEmpty()) {
+                if (mTaskData.Children.isEmpty() || treeNode.expanded()) {
                     taskHolder.mTaskRowChildren.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
@@ -767,15 +782,17 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         public class TaskHolder extends RecyclerView.ViewHolder {
             public final View mShowTaskRow;
+            public final LinearLayout mTaskRowContainer;
             public final TextView mTaskRowName;
             public final TextView mTaskRowDetails;
             public final TextView mTaskRowChildren;
             public final ImageView mTaskRowImg;
             public final View mTaskRowSeparator;
 
-            public TaskHolder(View showTaskRow, TextView taskRowName, TextView taskRowDetails, TextView taskRowChildren, ImageView taskRowImg, View taskRowSeparator) {
+            public TaskHolder(View showTaskRow, LinearLayout taskRowContainer, TextView taskRowName, TextView taskRowDetails, TextView taskRowChildren, ImageView taskRowImg, View taskRowSeparator) {
                 super(showTaskRow);
 
+                Assert.assertTrue(taskRowContainer != null);
                 Assert.assertTrue(taskRowName != null);
                 Assert.assertTrue(taskRowDetails != null);
                 Assert.assertTrue(taskRowChildren != null);
@@ -783,6 +800,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 Assert.assertTrue(taskRowSeparator != null);
 
                 mShowTaskRow = showTaskRow;
+                mTaskRowContainer = taskRowContainer;
                 mTaskRowName = taskRowName;
                 mTaskRowDetails = taskRowDetails;
                 mTaskRowChildren = taskRowChildren;

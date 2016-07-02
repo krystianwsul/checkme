@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
-    private static final String PARENT_FRAGMENT_TAG = "parentFragment";
+    private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
 
     private static final String PARENT_ID = "parentId";
 
@@ -56,7 +56,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
 
-    private final ParentFragment.Listener mParentFragmentListener = taskData -> {
+    private final ParentPickerFragment.Listener mParentFragmentListener = taskData -> {
         Assert.assertTrue(taskData != null);
 
         mParent = taskData;
@@ -242,14 +242,14 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         mCreateChildTaskParent.setVisibility(View.VISIBLE);
 
         mCreateChildTaskParent.setOnClickListener(v -> {
-            ParentFragment parentFragment = ParentFragment.newInstance();
-            parentFragment.show(getSupportFragmentManager(), PARENT_FRAGMENT_TAG);
-            parentFragment.initialize(mData.TaskDatas, mParentFragmentListener);
+            ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance();
+            parentPickerFragment.show(getSupportFragmentManager(), PARENT_PICKER_FRAGMENT_TAG);
+            parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
         });
 
-        ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentByTag(PARENT_FRAGMENT_TAG);
-        if (parentFragment != null)
-            parentFragment.initialize(mData.TaskDatas, mParentFragmentListener);
+        ParentPickerFragment parentPickerFragment = (ParentPickerFragment) getSupportFragmentManager().findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG);
+        if (parentPickerFragment != null)
+            parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
 
         invalidateOptionsMenu();
     }

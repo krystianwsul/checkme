@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-public class ParentFragment extends DialogFragment {
+public class ParentPickerFragment extends DialogFragment {
     private static final String EXPANDED_TASKS_KEY = "expandedTasks";
 
     private RecyclerView mRecyclerView;
@@ -47,11 +47,11 @@ public class ParentFragment extends DialogFragment {
     private TreeViewAdapter mTreeViewAdapter;
     private List<Integer> mExpandedTaskIds;
 
-    public static ParentFragment newInstance() {
-        return new ParentFragment();
+    public static ParentPickerFragment newInstance() {
+        return new ParentPickerFragment();
     }
 
-    public ParentFragment() {
+    public ParentPickerFragment() {
 
     }
 
@@ -133,28 +133,28 @@ public class ParentFragment extends DialogFragment {
     }
 
     public static class TaskAdapter implements TreeModelAdapter, TaskParent {
-        private final WeakReference<ParentFragment> mParentFragmentReference;
+        private final WeakReference<ParentPickerFragment> mParentFragmentReference;
 
         private ArrayList<TaskWrapper> mTaskWrappers;
 
         private WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
         private WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
 
-        public static TreeViewAdapter getAdapter(ParentFragment parentFragment, TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas, List<Integer> expandedTasks) {
-            Assert.assertTrue(parentFragment != null);
+        public static TreeViewAdapter getAdapter(ParentPickerFragment parentPickerFragment, TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas, List<Integer> expandedTasks) {
+            Assert.assertTrue(parentPickerFragment != null);
             Assert.assertTrue(taskDatas != null);
 
-            TaskAdapter taskAdapter = new TaskAdapter(parentFragment);
+            TaskAdapter taskAdapter = new TaskAdapter(parentPickerFragment);
 
-            float density = parentFragment.getResources().getDisplayMetrics().density;
+            float density = parentPickerFragment.getResources().getDisplayMetrics().density;
 
             return taskAdapter.initialize(density, taskDatas, expandedTasks);
         }
 
-        private TaskAdapter(ParentFragment parentFragment) {
-            Assert.assertTrue(parentFragment != null);
+        private TaskAdapter(ParentPickerFragment parentPickerFragment) {
+            Assert.assertTrue(parentPickerFragment != null);
 
-            mParentFragmentReference = new WeakReference<>(parentFragment);
+            mParentFragmentReference = new WeakReference<>(parentPickerFragment);
         }
 
         private TreeViewAdapter initialize(float density, TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas, List<Integer> expandedTasks) {
@@ -187,10 +187,10 @@ public class ParentFragment extends DialogFragment {
 
         @Override
         public TaskHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            ParentFragment parentFragment = getParentFragment();
-            Assert.assertTrue(parentFragment != null);
+            ParentPickerFragment parentPickerFragment = getParentFragment();
+            Assert.assertTrue(parentPickerFragment != null);
 
-            LayoutInflater inflater = LayoutInflater.from(parentFragment.getActivity());
+            LayoutInflater inflater = LayoutInflater.from(parentPickerFragment.getActivity());
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
             LinearLayout taskRowContainer = (LinearLayout) showTaskRow.findViewById(R.id.task_row_container);
@@ -225,11 +225,11 @@ public class ParentFragment extends DialogFragment {
             treeNode.onBindViewHolder(viewHolder);
         }
 
-        public ParentFragment getParentFragment() {
-            ParentFragment parentFragment = mParentFragmentReference.get();
-            Assert.assertTrue(parentFragment != null);
+        public ParentPickerFragment getParentFragment() {
+            ParentPickerFragment parentPickerFragment = mParentFragmentReference.get();
+            Assert.assertTrue(parentPickerFragment != null);
 
-            return parentFragment;
+            return parentPickerFragment;
         }
 
         public TreeViewAdapter getTreeViewAdapter() {
@@ -348,14 +348,14 @@ public class ParentFragment extends DialogFragment {
                 return taskAdapter;
             }
 
-            private ParentFragment getParentFragment() {
+            private ParentPickerFragment getParentFragment() {
                 TaskAdapter taskAdapter = getTaskAdapter();
                 Assert.assertTrue(taskAdapter != null);
 
-                ParentFragment parentFragment = taskAdapter.getParentFragment();
-                Assert.assertTrue(parentFragment != null);
+                ParentPickerFragment parentPickerFragment = taskAdapter.getParentFragment();
+                Assert.assertTrue(parentPickerFragment != null);
 
-                return parentFragment;
+                return parentPickerFragment;
             }
 
             @Override
@@ -367,11 +367,11 @@ public class ParentFragment extends DialogFragment {
                 TreeNode treeNode = getTreeNode();
                 Assert.assertTrue(treeNode != null);
 
-                ParentFragment parentFragment = getParentFragment();
-                Assert.assertTrue(parentFragment != null);
+                ParentPickerFragment parentPickerFragment = getParentFragment();
+                Assert.assertTrue(parentPickerFragment != null);
 
                 if (treeNode.isSelected())
-                    taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(parentFragment.getActivity(), R.color.selected));
+                    taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(parentPickerFragment.getActivity(), R.color.selected));
                 else
                     taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
 
@@ -429,12 +429,12 @@ public class ParentFragment extends DialogFragment {
 
             @Override
             public void onClick() {
-                ParentFragment parentFragment = getParentFragment();
-                Assert.assertTrue(parentFragment != null);
+                ParentPickerFragment parentPickerFragment = getParentFragment();
+                Assert.assertTrue(parentPickerFragment != null);
 
-                parentFragment.dismiss();
+                parentPickerFragment.dismiss();
 
-                parentFragment.mListener.onTaskSelected(mTaskData);
+                parentPickerFragment.mListener.onTaskSelected(mTaskData);
             }
 
             @Override
@@ -449,8 +449,8 @@ public class ParentFragment extends DialogFragment {
 
             @Override
             public int compareTo(@NonNull ModelNode another) {
-                ParentFragment parentFragment = getParentFragment();
-                Assert.assertTrue(parentFragment != null);
+                ParentPickerFragment parentPickerFragment = getParentFragment();
+                Assert.assertTrue(parentPickerFragment != null);
 
                 int comparison = Integer.valueOf(mTaskData.TaskId).compareTo(((TaskWrapper) another).mTaskData.TaskId);
                 if (mIndentation == 0)

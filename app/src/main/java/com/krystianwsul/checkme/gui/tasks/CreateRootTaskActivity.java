@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -16,16 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
-import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
@@ -37,8 +32,6 @@ import java.util.ArrayList;
 public class CreateRootTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
-    private static final String POSITION_KEY = "position";
-    private static final String SCHEDULE_TYPE_CHANGED_KEY = "scheduleTypeChanged";
 
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
@@ -46,9 +39,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     private ScheduleHint mScheduleHint;
 
-    private Spinner mCreateRootTaskSpinner;
-    private EditText mCreateRootTaskName;
     private Bundle mSavedInstanceState;
+    private EditText mCreateRootTaskName;
 
     private Integer mRootTaskId;
     private ArrayList<Integer> mTaskIds;
@@ -56,8 +48,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private boolean mIsTimeValid = false;
 
     private CreateRootTaskLoader.Data mData;
-
-    private boolean mScheduleTypeChanged = false;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateRootTaskActivity.this::finish;
 
@@ -134,15 +124,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
                 if (TextUtils.isEmpty(name))
                     break;
 
-                ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-                Assert.assertTrue(scheduleFragment != null);
+                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+                Assert.assertTrue(schedulePickerFragment != null);
 
                 if (mRootTaskId != null) {
-                    scheduleFragment.updateRootTask(mRootTaskId, name);
+                    schedulePickerFragment.updateRootTask(mRootTaskId, name);
                 } else if (mTaskIds != null) {
-                    scheduleFragment.createRootJoinTask(name, mTaskIds);
+                    schedulePickerFragment.createRootJoinTask(name, mTaskIds);
                 } else {
-                    scheduleFragment.createRootTask(name);
+                    schedulePickerFragment.createRootTask(name);
                 }
 
                 finish();
@@ -184,15 +174,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
         Assert.assertTrue(mCreateRootTaskName != null);
 
-        mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
-        Assert.assertTrue(mCreateRootTaskSpinner != null);
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mCreateRootTaskSpinner.setAdapter(adapter);
-
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
+            Assert.assertTrue(!intent.hasExtra(SCHEDULE_HINT_KEY));
 
             mRootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(mRootTaskId != -1);
@@ -201,6 +185,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
                 mTaskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
                 Assert.assertTrue(mTaskIds != null);
                 Assert.assertTrue(mTaskIds.size() > 1);
+            }
+
+            if (intent.hasExtra(SCHEDULE_HINT_KEY)) {
+                mScheduleHint = intent.getParcelableExtra(SCHEDULE_HINT_KEY);
+                Assert.assertTrue(mScheduleHint != null);
             }
 
             if (savedInstanceState == null)
@@ -221,54 +210,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         super.onResume();
     }
 
-    private void loadFragment(int position) {
-        Assert.assertTrue(position >= 0);
-        Assert.assertTrue(position < 3);
-
-        Fragment fragment = createFragment(position);
-        Assert.assertTrue(fragment != null);
-
-        getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commitAllowingStateLoss();
-    }
-
-    private Fragment createFragment(int position) {
-        Assert.assertTrue(position >= 0);
-        Assert.assertTrue(position < 3);
-
-        switch (position) {
-            case 0:
-                if (mScheduleHint != null) {
-                    return SingleScheduleFragment.newInstance(mScheduleHint);
-                } else {
-                    return SingleScheduleFragment.newInstance();
-                }
-            case 1:
-                if (mScheduleHint != null) {
-                    return DailyScheduleFragment.newInstance(mScheduleHint);
-                } else  {
-                    return DailyScheduleFragment.newInstance();
-                }
-            case 2:
-                if (mScheduleHint != null) {
-                    return WeeklyScheduleFragment.newInstance(mScheduleHint);
-                } else {
-                    return WeeklyScheduleFragment.newInstance();
-                }
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        if (mData != null) {
-            outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
-            outState.putBoolean(SCHEDULE_TYPE_CHANGED_KEY, mScheduleTypeChanged);
-        }
-    }
-
     @Override
     public Loader<CreateRootTaskLoader.Data> onCreateLoader(int id, Bundle args) {
         return new CreateRootTaskLoader(this, mRootTaskId);
@@ -279,78 +220,38 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mData = data;
 
         mCreateRootTaskName.setVisibility(View.VISIBLE);
-        mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
 
-        int spinnerPosition;
-        int count = 0;
-        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(POSITION_KEY)) {
-            count++;
-
-            spinnerPosition = mSavedInstanceState.getInt(POSITION_KEY, -1);
-            Assert.assertTrue(spinnerPosition != -1);
-            if (spinnerPosition > 0)
-                count++;
-
-            mScheduleTypeChanged = mSavedInstanceState.getBoolean(SCHEDULE_TYPE_CHANGED_KEY);
-        } else if (mRootTaskId != null) {
+        if (mRootTaskId != null && mSavedInstanceState == null) {
             Assert.assertTrue(mData.RootTaskData != null);
 
             mCreateRootTaskName.setText(mData.RootTaskData.Name);
+        }
 
-            ScheduleType scheduleType = mData.RootTaskData.ScheduleType;
+        SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        if (schedulePickerFragment == null) {
+            if (mRootTaskId != null) {
+                Assert.assertTrue(mTaskIds == null);
+                Assert.assertTrue(mScheduleHint == null);
 
-            Fragment fragment;
-            if (scheduleType == ScheduleType.SINGLE) {
-                fragment = SingleScheduleFragment.newInstance(mRootTaskId);
-                spinnerPosition = 0;
-            } else if (scheduleType == ScheduleType.DAILY) {
-                count++;
-
-                fragment = DailyScheduleFragment.newInstance(mRootTaskId);
-                spinnerPosition = 1;
-            } else if (scheduleType == ScheduleType.WEEKLY) {
-                count++;
-
-                fragment = WeeklyScheduleFragment.newInstance(mRootTaskId);
-                spinnerPosition = 2;
+                schedulePickerFragment = SchedulePickerFragment.getEditInstance(mRootTaskId);
+            } else if (mTaskIds != null) {
+                if (mScheduleHint == null)
+                    schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
+                else
+                    schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds, mScheduleHint);
             } else {
-                throw new IndexOutOfBoundsException("unknown schedule type");
+                if (mScheduleHint == null)
+                    schedulePickerFragment = SchedulePickerFragment.getCreateInstance();
+                else
+                    schedulePickerFragment = SchedulePickerFragment.getCreateInstance(mScheduleHint);
             }
 
-            getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commitAllowingStateLoss();
-        } else {
-            spinnerPosition = 0;
-            loadFragment(0);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.create_task_frame, schedulePickerFragment)
+                    .commitAllowingStateLoss();
         }
-        final int finalCount = count;
 
         invalidateOptionsMenu();
-
-        mCreateRootTaskSpinner.setSelection(spinnerPosition);
-
-        mCreateRootTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private int mCount = finalCount;
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Assert.assertTrue(position >= 0);
-                Assert.assertTrue(position < 3);
-
-                if (mCount > 0) {
-                    mCount--;
-                    return;
-                }
-
-                mScheduleTypeChanged = true;
-
-                loadFragment(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
     }
 
     @Override
@@ -391,13 +292,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
             if (!TextUtils.isEmpty(mCreateRootTaskName.getText()))
                 return true;
 
-            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-            Assert.assertTrue(scheduleFragment != null);
+            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+            Assert.assertTrue(schedulePickerFragment != null);
 
-            if (!(scheduleFragment instanceof SingleScheduleFragment))
-                return true;
-
-            if (scheduleFragment.dataChanged())
+            if (schedulePickerFragment.dataChanged())
                 return true;
 
             return false;
@@ -407,13 +305,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
             if (!mCreateRootTaskName.getText().toString().equals(mData.RootTaskData.Name))
                 return true;
 
-            if (mScheduleTypeChanged)
-                return true;
+            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+            Assert.assertTrue(schedulePickerFragment != null);
 
-            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
-            Assert.assertTrue(scheduleFragment != null);
-
-            if (scheduleFragment.dataChanged())
+            if (schedulePickerFragment.dataChanged())
                 return true;
 
             return false;

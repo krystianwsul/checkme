@@ -30,20 +30,20 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class CreateRootTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
-    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+    private static final String TASK_ID_KEY = "taskId";
     private static final String TASK_IDS_KEY = "taskIds";
 
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
     private static final String DISCARD_TAG = "discard";
 
-    private ScheduleHint mScheduleHint;
-
     private Bundle mSavedInstanceState;
     private EditText mCreateRootTaskName;
 
-    private Integer mRootTaskId;
+    private Integer mTaskId;
     private ArrayList<Integer> mTaskIds;
+
+    private ScheduleHint mScheduleHint;
 
     private boolean mIsTimeValid = false;
 
@@ -87,11 +87,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         return intent;
     }
 
-    public static Intent getEditIntent(Context context, int rootTaskId) {
+    public static Intent getEditIntent(Context context, int taskId) {
         Assert.assertTrue(context != null);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
-        intent.putExtra(ROOT_TASK_ID_KEY, rootTaskId);
+        intent.putExtra(TASK_ID_KEY, taskId);
         return intent;
     }
 
@@ -105,7 +105,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public boolean onPrepareOptionsMenu(Menu menu) {
         Assert.assertTrue(mCreateRootTaskName != null);
 
-        menu.findItem(R.id.action_create_root_task_save).setVisible((mRootTaskId == null) || (mData != null));
+        menu.findItem(R.id.action_create_root_task_save).setVisible((mTaskId == null) || (mData != null));
 
         return true;
     }
@@ -127,8 +127,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
                 SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
                 Assert.assertTrue(schedulePickerFragment != null);
 
-                if (mRootTaskId != null) {
-                    schedulePickerFragment.updateRootTask(mRootTaskId, name);
+                if (mTaskId != null) {
+                    schedulePickerFragment.updateRootTask(mTaskId, name);
                 } else if (mTaskIds != null) {
                     schedulePickerFragment.createRootJoinTask(name, mTaskIds);
                 } else {
@@ -174,12 +174,12 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
         Assert.assertTrue(mCreateRootTaskName != null);
 
-        if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
+        if (intent.hasExtra(TASK_ID_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
             Assert.assertTrue(!intent.hasExtra(SCHEDULE_HINT_KEY));
 
-            mRootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
-            Assert.assertTrue(mRootTaskId != -1);
+            mTaskId = intent.getIntExtra(TASK_ID_KEY, -1);
+            Assert.assertTrue(mTaskId != -1);
         } else {
             if (intent.hasExtra(TASK_IDS_KEY)) {
                 mTaskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
@@ -212,7 +212,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     @Override
     public Loader<CreateRootTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new CreateRootTaskLoader(this, mRootTaskId);
+        return new CreateRootTaskLoader(this, mTaskId);
     }
 
     @Override
@@ -221,7 +221,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         mCreateRootTaskName.setVisibility(View.VISIBLE);
 
-        if (mRootTaskId != null && mSavedInstanceState == null) {
+        if (mTaskId != null && mSavedInstanceState == null) {
             Assert.assertTrue(mData.RootTaskData != null);
 
             mCreateRootTaskName.setText(mData.RootTaskData.Name);
@@ -229,11 +229,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
         if (schedulePickerFragment == null) {
-            if (mRootTaskId != null) {
+            if (mTaskId != null) {
                 Assert.assertTrue(mTaskIds == null);
                 Assert.assertTrue(mScheduleHint == null);
 
-                schedulePickerFragment = SchedulePickerFragment.getEditInstance(mRootTaskId);
+                schedulePickerFragment = SchedulePickerFragment.getEditInstance(mTaskId);
             } else if (mTaskIds != null) {
                 if (mScheduleHint == null)
                     schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
@@ -286,7 +286,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         if (mData == null)
             return false;
 
-        if (mRootTaskId == null) {
+        if (mTaskId == null) {
             Assert.assertTrue(mData.RootTaskData == null);
 
             if (!TextUtils.isEmpty(mCreateRootTaskName.getText()))

@@ -190,7 +190,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
                         }
                     } else {
-                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mInstanceKey.TaskId, taskIds));
+                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), taskIds, mInstanceKey.TaskId));
                     }
                     break;
                 default:

@@ -26,44 +26,45 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
-    private static final String PARENT_TASK_ID_KEY = "parentTaskId";
+    private static final String TASK_ID_KEY = "taskId";
     private static final String TASK_IDS_KEY = "taskIds";
-    private static final String CHILD_TASK_ID_KEY = "childTaskId";
+
+    private static final String PARENT_TASK_ID_HINT_KEY = "parentTaskIdHint";
 
     private static final String DISCARD_TAG = "discard";
 
     private Bundle mSavedInstanceState;
-
     private EditText mCreateChildTaskName;
 
-    private Integer mParentTaskId = null;
+    private Integer mTaskId = null;
     private ArrayList<Integer> mTaskIds;
-    private Integer mChildTaskId = null;
+
+    private Integer mParentTaskIdHint = null;
 
     private CreateChildTaskLoader.Data mData;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
 
-    public static Intent getCreateIntent(Context context, int parentTaskId) {
+    public static Intent getCreateIntent(Context context, int parentTaskIdHint) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
-        intent.putExtra(PARENT_TASK_ID_KEY, parentTaskId);
+        intent.putExtra(PARENT_TASK_ID_HINT_KEY, parentTaskIdHint);
         return intent;
     }
 
-    public static Intent getJoinIntent(Context context, int parentTaskId, ArrayList<Integer> joinTaskIds) {
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, int parentTaskIdHint) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
-        intent.putExtra(PARENT_TASK_ID_KEY, parentTaskId);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
+        intent.putExtra(PARENT_TASK_ID_HINT_KEY, parentTaskIdHint);
         return intent;
     }
 
-    public static Intent getEditIntent(Context context, int childTaskId) {
+    public static Intent getEditIntent(Context context, int taskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
-        intent.putExtra(CHILD_TASK_ID_KEY, childTaskId);
+        intent.putExtra(TASK_ID_KEY, taskId);
         return intent;
     }
 
@@ -77,7 +78,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     public boolean onPrepareOptionsMenu(Menu menu) {
         Assert.assertTrue(mCreateChildTaskName != null);
 
-        menu.findItem(R.id.action_create_child_task_save).setVisible((mParentTaskId != null) || (mData != null));
+        menu.findItem(R.id.action_create_child_task_save).setVisible((mParentTaskIdHint != null) || (mData != null));
 
         return true;
     }
@@ -96,8 +97,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
                 int parentTaskId = parentFragment.getParentTaskId();
 
-                if (mParentTaskId != null) {
-                    Assert.assertTrue(mChildTaskId == null);
+                if (mParentTaskIdHint != null) {
+                    Assert.assertTrue(mTaskId == null);
                     Assert.assertTrue(mData.ChildTaskData == null);
 
                     if (mTaskIds != null)
@@ -105,11 +106,11 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                     else
                         DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mData.DataId, parentTaskId, name);
                 } else {
-                    Assert.assertTrue(mChildTaskId != null);
+                    Assert.assertTrue(mTaskId != null);
                     Assert.assertTrue(mData.ChildTaskData != null);
                     Assert.assertTrue(mTaskIds == null);
 
-                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mChildTaskId, name, parentTaskId);
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mTaskId, name, parentTaskId);
                 }
 
                 finish();
@@ -146,8 +147,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         Assert.assertTrue(mCreateChildTaskName != null);
 
         Intent intent = getIntent();
-        if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
-            mParentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
+        if (intent.hasExtra(PARENT_TASK_ID_HINT_KEY)) {
+            mParentTaskIdHint = intent.getIntExtra(PARENT_TASK_ID_HINT_KEY, -1);
+            Assert.assertTrue(mParentTaskIdHint != -1);
 
             if (intent.hasExtra(TASK_IDS_KEY)) {
                 mTaskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
@@ -155,11 +157,11 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                 Assert.assertTrue(mTaskIds.size() > 1);
             }
         } else {
-            Assert.assertTrue(intent.hasExtra(CHILD_TASK_ID_KEY));
+            Assert.assertTrue(intent.hasExtra(TASK_ID_KEY));
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
 
-            mChildTaskId = intent.getIntExtra(CHILD_TASK_ID_KEY, -1);
-            Assert.assertTrue(mChildTaskId != -1);
+            mTaskId = intent.getIntExtra(TASK_ID_KEY, -1);
+            Assert.assertTrue(mTaskId != -1);
         }
 
         if (mSavedInstanceState != null)
@@ -181,7 +183,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     @Override
     public Loader<CreateChildTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new CreateChildTaskLoader(this, mChildTaskId);
+        return new CreateChildTaskLoader(this, mTaskId);
     }
 
     @Override
@@ -197,18 +199,18 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
         ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
         if (parentFragment == null) {
-            if (mParentTaskId != null) {
-                Assert.assertTrue(mChildTaskId == null);
+            if (mParentTaskIdHint != null) {
+                Assert.assertTrue(mTaskId == null);
 
                 if (mTaskIds != null)
-                    parentFragment = ParentFragment.getJoinInstance(mParentTaskId, mTaskIds);
+                    parentFragment = ParentFragment.getJoinInstance(mParentTaskIdHint, mTaskIds);
                 else
-                    parentFragment = ParentFragment.getCreateInstance(mParentTaskId);
+                    parentFragment = ParentFragment.getCreateInstance(mParentTaskIdHint);
             } else {
-                Assert.assertTrue(mChildTaskId != null);
+                Assert.assertTrue(mTaskId != null);
                 Assert.assertTrue(mTaskIds == null);
 
-                parentFragment = ParentFragment.getEditInstance(mChildTaskId);
+                parentFragment = ParentFragment.getEditInstance(mTaskId);
             }
 
             getSupportFragmentManager().beginTransaction()
@@ -246,8 +248,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         if (mData == null)
             return false;
 
-        if (mChildTaskId != null) {
-            Assert.assertTrue(mParentTaskId == null);
+        if (mTaskId != null) {
+            Assert.assertTrue(mParentTaskIdHint == null);
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mData.ChildTaskData != null);
 
@@ -260,7 +262,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             if (parentFragment.dataChanged())
                 return true;
         } else {
-            Assert.assertTrue(mParentTaskId != null);
+            Assert.assertTrue(mParentTaskIdHint != null);
 
             if (!TextUtils.isEmpty(mCreateChildTaskName.getText()))
                 return true;

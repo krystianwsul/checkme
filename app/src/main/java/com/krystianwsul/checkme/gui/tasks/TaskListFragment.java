@@ -92,7 +92,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     if (mTaskId == null)
                         startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
                     else
-                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), mTaskId, taskIds));
+                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), taskIds, mTaskId));
                     break;
                 case R.id.action_task_delete:
                     do {

@@ -1,16 +1,15 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
-public class CreateRootTaskLoader extends DomainLoader<CreateRootTaskLoader.Data> {
+public class SchedulePickerLoader extends DomainLoader<SchedulePickerLoader.Data> {
     private final Integer mRootTaskId;
 
-    public CreateRootTaskLoader(Context context, Integer rootTaskId) {
+    public SchedulePickerLoader(Context context, Integer rootTaskId) {
         super(context);
 
         mRootTaskId = rootTaskId;
@@ -18,7 +17,7 @@ public class CreateRootTaskLoader extends DomainLoader<CreateRootTaskLoader.Data
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getCreateRootTaskData(getContext(), mRootTaskId);
+        return DomainFactory.getDomainFactory(getContext()).getSchedulePickerData(getContext(), mRootTaskId);
     }
 
     public static class Data extends DomainLoader.Data {
@@ -61,19 +60,16 @@ public class CreateRootTaskLoader extends DomainLoader<CreateRootTaskLoader.Data
     }
 
     public static class RootTaskData {
-        public final String Name;
         public final com.krystianwsul.checkme.utils.ScheduleType ScheduleType;
 
-        public RootTaskData(String name, com.krystianwsul.checkme.utils.ScheduleType scheduleType) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-
-            Name = name;
+        public RootTaskData(com.krystianwsul.checkme.utils.ScheduleType scheduleType) {
+            Assert.assertTrue(scheduleType != null);
             ScheduleType = scheduleType;
         }
 
         @Override
         public int hashCode() {
-            return (Name.hashCode() + ScheduleType.hashCode());
+            return ScheduleType.hashCode();
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -89,9 +85,6 @@ public class CreateRootTaskLoader extends DomainLoader<CreateRootTaskLoader.Data
                 return false;
 
             RootTaskData rootTaskData = (RootTaskData) object;
-
-            if (!Name.equals(rootTaskData.Name))
-                return false;
 
             if (!ScheduleType.equals(rootTaskData.ScheduleType))
                 return false;

@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
+import com.krystianwsul.checkme.loaders.SchedulePickerLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
@@ -589,9 +590,6 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = getTaskDatas(context, now);
-        Assert.assertTrue(taskDatas != null);
-
         CreateRootTaskLoader.RootTaskData rootTaskData = null;
         if (rootTaskId != null) {
             Task rootTask = mTasks.get(rootTaskId);
@@ -600,7 +598,25 @@ public class DomainFactory {
             rootTaskData = new CreateRootTaskLoader.RootTaskData(rootTask.getName(), rootTask.getCurrentSchedule(now).getType());
         }
 
-        return new CreateRootTaskLoader.Data(taskDatas, rootTaskData);
+        return new CreateRootTaskLoader.Data(rootTaskData);
+    }
+
+    public synchronized SchedulePickerLoader.Data getSchedulePickerData(Context context, Integer rootTaskId) {
+        fakeDelay();
+
+        Assert.assertTrue(context != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        SchedulePickerLoader.RootTaskData rootTaskData = null;
+        if (rootTaskId != null) {
+            Task rootTask = mTasks.get(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            rootTaskData = new SchedulePickerLoader.RootTaskData(rootTask.getCurrentSchedule(now).getType());
+        }
+
+        return new SchedulePickerLoader.Data(rootTaskData);
     }
 
     public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {

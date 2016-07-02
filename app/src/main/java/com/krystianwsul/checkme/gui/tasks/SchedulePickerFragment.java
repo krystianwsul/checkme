@@ -15,14 +15,14 @@ import android.widget.Spinner;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
+import com.krystianwsul.checkme.loaders.SchedulePickerLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class SchedulePickerFragment extends Fragment implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
+public class SchedulePickerFragment extends Fragment implements LoaderManager.LoaderCallbacks<SchedulePickerLoader.Data> {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
@@ -40,7 +40,7 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     private Integer mRootTaskId;
     private ArrayList<Integer> mTaskIds;
 
-    private CreateRootTaskLoader.Data mData;
+    private SchedulePickerLoader.Data mData;
 
     private boolean mScheduleTypeChanged = false;
 
@@ -200,12 +200,12 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     }
 
     @Override
-    public Loader<CreateRootTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new CreateRootTaskLoader(getActivity(), mRootTaskId);
+    public Loader<SchedulePickerLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new SchedulePickerLoader(getActivity(), mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<CreateRootTaskLoader.Data> loader, final CreateRootTaskLoader.Data data) {
+    public void onLoadFinished(Loader<SchedulePickerLoader.Data> loader, final SchedulePickerLoader.Data data) {
         mData = data;
 
         mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
@@ -281,7 +281,7 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     }
 
     @Override
-    public void onLoaderReset(Loader<CreateRootTaskLoader.Data> loader) {
+    public void onLoaderReset(Loader<SchedulePickerLoader.Data> loader) {
 
     }
 

@@ -14,7 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -24,6 +27,8 @@ import com.krystianwsul.checkme.loaders.CreateChildTaskLoader;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
     private static final String PARENT_TASK_ID_KEY = "parentTaskId";
@@ -35,6 +40,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private boolean mFirstLoad;
 
     private EditText mCreateChildTaskName;
+    private TextView mCreateChildTaskParent;
 
     private Integer mParentTaskId = null;
     private ArrayList<Integer> mTaskIds;
@@ -93,15 +99,15 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
                 if (mParentTaskId != null) {
                     Assert.assertTrue(mChildTaskId == null);
-                    Assert.assertTrue(mData == null);
+                    Assert.assertTrue(mData.ChildTaskData == null);
 
                     if (mTaskIds != null)
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mParentTaskId, name, mTaskIds);
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mData.DataId, mParentTaskId, name, mTaskIds);
                     else
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mParentTaskId, name);
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mData.DataId, mParentTaskId, name);
                 } else {
                     Assert.assertTrue(mChildTaskId != null);
-                    Assert.assertTrue(mData != null);
+                    Assert.assertTrue(mData.ChildTaskData != null);
                     Assert.assertTrue(mTaskIds == null);
 
                     DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mChildTaskId, name);
@@ -140,6 +146,9 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
         Assert.assertTrue(mCreateChildTaskName != null);
 
+        mCreateChildTaskParent = (TextView) findViewById(R.id.create_child_task_parent);
+        Assert.assertTrue(mCreateChildTaskParent != null);
+
         Intent intent = getIntent();
         if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
             mParentTaskId = intent.getIntExtra(PARENT_TASK_ID_KEY, -1);
@@ -149,16 +158,12 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                 Assert.assertTrue(mTaskIds != null);
                 Assert.assertTrue(mTaskIds.size() > 1);
             }
-
-            updateGui(null);
         } else {
             Assert.assertTrue(intent.hasExtra(CHILD_TASK_ID_KEY));
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
 
             mChildTaskId = intent.getIntExtra(CHILD_TASK_ID_KEY, -1);
             Assert.assertTrue(mChildTaskId != -1);
-
-            getSupportLoaderManager().initLoader(0, null, this);
         }
 
         if (mFirstLoad)
@@ -167,6 +172,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -183,18 +190,30 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     @Override
     public void onLoadFinished(Loader<CreateChildTaskLoader.Data> loader, final CreateChildTaskLoader.Data data) {
-        updateGui(data);
+        mData = data;
 
-        invalidateOptionsMenu();
-    }
-
-    private void updateGui(final CreateChildTaskLoader.Data data) {
         mCreateChildTaskName.setVisibility(View.VISIBLE);
 
-        if (mFirstLoad && data != null)
-            mCreateChildTaskName.setText(data.Name);
+        if (mFirstLoad && (data.ChildTaskData != null))
+            mCreateChildTaskName.setText(data.ChildTaskData.Name);
 
-        mData = data;
+        CreateChildTaskLoader.TaskData parentTaskData;
+        if (mParentTaskId != null) {
+            Assert.assertTrue(mChildTaskId == null);
+            Assert.assertTrue(mData.ChildTaskData == null);
+
+            parentTaskData = findTaskData(mParentTaskId);
+        } else {
+            Assert.assertTrue(mChildTaskId != null);
+            Assert.assertTrue(mData.ChildTaskData != null);
+
+            parentTaskData = findTaskData(mData.ChildTaskData.ParentTaskId);
+        }
+
+        Assert.assertTrue(parentTaskData != null);
+        mCreateChildTaskParent.setText(parentTaskData.Name);
+
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -225,10 +244,10 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             Assert.assertTrue(mParentTaskId == null);
             Assert.assertTrue(mTaskIds == null);
 
-            if (mData == null)
+            if (mData.ChildTaskData == null)
                 return false;
 
-            if (!mCreateChildTaskName.getText().toString().equals(mData.Name))
+            if (!mCreateChildTaskName.getText().toString().equals(mData.ChildTaskData.Name))
                 return true;
 
             return false;
@@ -240,5 +259,29 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
             return false;
         }
+    }
+
+    private CreateChildTaskLoader.TaskData findTaskData(int taskId) {
+        Assert.assertTrue(mData != null);
+
+        List<CreateChildTaskLoader.TaskData> taskDatas = findTaskDataHelper(mData.TaskDatas, taskId)
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(taskDatas.size() == 1);
+        return taskDatas.get(0);
+    }
+
+    private Stream<CreateChildTaskLoader.TaskData> findTaskDataHelper(Map<Integer, CreateChildTaskLoader.TaskData> taskDatas, int taskId) {
+        Assert.assertTrue(taskDatas != null);
+
+        if (taskDatas.containsKey(taskId)) {
+            List<CreateChildTaskLoader.TaskData> ret = new ArrayList<>();
+            ret.add(taskDatas.get(taskId));
+            return Stream.of(ret);
+        }
+
+        return Stream.of(taskDatas.values())
+                .map(taskData -> findTaskDataHelper(taskData.TaskDatas, taskId))
+                .flatMap(stream -> stream);
     }
 }

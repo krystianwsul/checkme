@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TickService extends IntentService {
     private static final int MAX_NOTIFICATIONS = 4;
@@ -90,23 +91,23 @@ public class TickService extends IntentService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        ArrayList<InstanceKey> shownInstanceKeys = new ArrayList<>();
-        for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
-            shownInstanceKeys.add(shownInstanceData.InstanceKey);
+        List<InstanceKey> shownInstanceKeys = Stream.of(data.ShownInstanceDatas.values())
+                .map(shownInstanceData -> shownInstanceData.InstanceKey)
+                .collect(Collectors.toList());
 
-        ArrayList<InstanceKey> notificationInstanceKeys = new ArrayList<>();
-        for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values())
-            notificationInstanceKeys.add(notificationInstanceData.InstanceKey);
+        List<InstanceKey> notificationInstanceKeys = Stream.of(data.NotificationInstanceDatas.values())
+                .map(notificationInstanceData -> notificationInstanceData.InstanceKey)
+                .collect(Collectors.toList());
 
-        ArrayList<InstanceKey> showInstanceKeys = new ArrayList<>();
-        for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values())
-            if (!shownInstanceKeys.contains(notificationInstanceData.InstanceKey))
-                showInstanceKeys.add(notificationInstanceData.InstanceKey);
+        List<InstanceKey> showInstanceKeys = Stream.of(data.NotificationInstanceDatas.values())
+                .map(notificationInstanceData -> notificationInstanceData.InstanceKey)
+                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
+                .collect(Collectors.toList());
 
-        ArrayList<InstanceKey> hideInstanceKeys = new ArrayList<>();
-        for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
-            if (!notificationInstanceKeys.contains(shownInstanceData.InstanceKey))
-                hideInstanceKeys.add(shownInstanceData.InstanceKey);
+        List<InstanceKey> hideInstanceKeys = Stream.of(data.ShownInstanceDatas.values())
+                .map(shownInstanceData -> shownInstanceData.InstanceKey)
+                .filter(instanceKey -> !notificationInstanceKeys.contains(instanceKey))
+                .collect(Collectors.toList());
 
         if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
             DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, showInstanceKeys, hideInstanceKeys);
@@ -297,10 +298,10 @@ public class TickService extends IntentService {
 
     public static class Data extends DomainLoader.Data {
         public final HashMap<InstanceKey, NotificationInstanceData> NotificationInstanceDatas;
-        public final HashMap<InstanceKey, ShownInstanceData> ShownInstanceDatas;
+        public final Map<InstanceKey, ShownInstanceData> ShownInstanceDatas;
         public final TimeStamp NextAlarm;
 
-        public Data(HashMap<InstanceKey, NotificationInstanceData> notificationInstanceDatas, HashMap<InstanceKey, ShownInstanceData> shownInstanceDatas, TimeStamp nextAlarm) {
+        public Data(HashMap<InstanceKey, NotificationInstanceData> notificationInstanceDatas, Map<InstanceKey, ShownInstanceData> shownInstanceDatas, TimeStamp nextAlarm) {
             Assert.assertTrue(notificationInstanceDatas != null);
             Assert.assertTrue(shownInstanceDatas != null);
 

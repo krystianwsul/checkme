@@ -356,7 +356,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
+        List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
@@ -394,7 +394,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
+        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
 
         List<Instance> currentInstances = Stream.of(rootInstances)
                 .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
@@ -430,7 +430,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
+        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
 
         List<Instance> currentInstances = Stream.of(rootInstances)
                 .filter((Instance instance) -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
@@ -522,9 +522,9 @@ public class DomainFactory {
         Collections.sort(instances, (Instance lhs, Instance rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));
 
         ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        ArrayList<GroupListLoader.CustomTimeData> customTimeDatas = new ArrayList<>();
-        for (CustomTime customTime : currentCustomTimes)
-            customTimeDatas.add(new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()));
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+                .collect(Collectors.toList());
 
         GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null);
 
@@ -563,13 +563,39 @@ public class DomainFactory {
         return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask);
     }
 
-    public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(int childTaskId) {
+    public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(Integer childTaskId) {
         fakeDelay();
 
-        Task childTask = mTasks.get(childTaskId);
-        Assert.assertTrue(childTask != null);
+        ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return new CreateChildTaskLoader.Data(childTask.getName());
+        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = new TreeMap<>((lhs, rhs) -> -lhs.compareTo(rhs));
+
+        for (Task task : mTasks.values()) {
+            if (!task.current(now)) {
+                continue;
+            }
+
+            if (!task.isVisible(now))
+                continue;
+
+            if (!task.isRootTask(now))
+                continue;
+
+            taskDatas.put(task.getId(), new CreateChildTaskLoader.TaskData(task.getName(), getChildTaskDatas(now, task)));
+        }
+
+        CreateChildTaskLoader.ChildTaskData childTaskData = null;
+        if (childTaskId != null) {
+            Task childTask = mTasks.get(childTaskId);
+            Assert.assertTrue(childTask != null);
+
+            Task parentTask = childTask.getParentTask(now);
+            Assert.assertTrue(parentTask != null);
+
+            childTaskData = new CreateChildTaskLoader.ChildTaskData(childTask.getName(), parentTask.getId());
+        }
+
+        return new CreateChildTaskLoader.Data(taskDatas, childTaskData);
     }
 
     public synchronized CreateRootTaskLoader.Data getCreateRootTaskData(int rootTaskId) {
@@ -739,10 +765,9 @@ public class DomainFactory {
         if (taskId == null)
             Collections.reverse(tasks);
 
-        ArrayList<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
-        for (Task task : tasks) {
-            taskDatas.add(new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.isRootTask(now)));
-        }
+        List<TaskListLoader.TaskData> taskDatas = Stream.of(tasks)
+                .map(task -> new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.isRootTask(now)))
+                .collect(Collectors.toList());
 
         return new TaskListLoader.Data(taskDatas);
     }
@@ -752,7 +777,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
+        List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 
         HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
         for (Instance instance : rootInstances) {
@@ -776,10 +801,9 @@ public class DomainFactory {
             }
         }
 
-        HashMap<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = new HashMap<>();
-        for (Instance instance : mExistingInstances)
-            if (instance.getNotificationShown())
-                shownInstanceDatas.put(instance.getInstanceKey(), new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey()));
+        Map<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = Stream.of(mExistingInstances)
+                .filter(Instance::getNotificationShown)
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey())));
 
         TimeStamp nextAlarm = null;
         for (Instance existingInstance : mExistingInstances) {
@@ -919,7 +943,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateInstancesShown(int dataId, ArrayList<InstanceKey> showInstanceKeys, ArrayList<InstanceKey> hideInstanceKeys) {
+    public synchronized void updateInstancesShown(int dataId, List<InstanceKey> showInstanceKeys, List<InstanceKey> hideInstanceKeys) {
         Assert.assertTrue(hideInstanceKeys != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -977,7 +1001,7 @@ public class DomainFactory {
         Task rootTask = createRootTask(name, now);
         Assert.assertTrue(rootTask != null);
 
-        ArrayList<Time> times = getTimes(timePairs);
+        List<Time> times = getTimes(timePairs);
 
         Schedule schedule = createDailySchedule(rootTask, times, now);
         Assert.assertTrue(schedule != null);
@@ -1053,7 +1077,7 @@ public class DomainFactory {
         rootTask.setName(name);
         rootTask.setScheduleEndExactTimeStamp(now);
 
-        ArrayList<Time> times = getTimes(timePairs);
+        List<Time> times = getTimes(timePairs);
 
         Schedule schedule = createDailySchedule(rootTask, times, now);
         Assert.assertTrue(schedule != null);
@@ -1123,7 +1147,7 @@ public class DomainFactory {
         Task rootTask = createRootTask(name, now);
         Assert.assertTrue(rootTask != null);
 
-        ArrayList<Time> times = getTimes(timePairs);
+        List<Time> times = getTimes(timePairs);
 
         Schedule schedule = createDailySchedule(rootTask, times, now);
         Assert.assertTrue(schedule != null);
@@ -1157,7 +1181,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createChildTask(int parentTaskId, String name) {
+    public synchronized void createChildTask(int dataId, int parentTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task parentTask = mTasks.get(parentTaskId);
@@ -1175,10 +1199,10 @@ public class DomainFactory {
 
         createTaskHierarchy(parentTask, childTask, now);
 
-        save(0);
+        save(dataId);
     }
 
-    public synchronized void createJoinChildTask(int parentTaskId, String name, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createJoinChildTask(int dataId, int parentTaskId, String name, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
@@ -1200,7 +1224,7 @@ public class DomainFactory {
 
         joinChildTasks(parentTask, childTask, joinTaskIds, now);
 
-        save(0);
+        save(dataId);
     }
 
     public synchronized void updateChildTask(int dataId, int childTaskId, String name) {
@@ -1390,7 +1414,7 @@ public class DomainFactory {
         }
     }
 
-    private ArrayList<Instance> getRootInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
+    private List<Instance> getRootInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
         Assert.assertTrue(now != null);
@@ -1423,12 +1447,10 @@ public class DomainFactory {
             }
         }
 
-        ArrayList<Instance> rootInstances = new ArrayList<>();
-        for (Instance instance : allInstances)
-            if (instance.isRootInstance(now) && instance.isVisible(now))
-                rootInstances.add(instance);
-
-        return rootInstances;
+        return Stream.of(allInstances)
+                .filter(instance -> instance.isRootInstance(now))
+                .filter(instance -> instance.isVisible(now))
+                .collect(Collectors.toList());
     }
 
     InstanceRecord createInstanceRecord(Task task, Instance instance, DateTime scheduleDateTime, ExactTimeStamp now) {
@@ -1563,15 +1585,13 @@ public class DomainFactory {
         return rootTask;
     }
 
-    private ArrayList<Time> getTimes(List<TimePair> timePairs) {
+    private List<Time> getTimes(List<TimePair> timePairs) {
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
 
-        ArrayList<Time> times = new ArrayList<>();
-        for (TimePair timePair : timePairs)
-            times.add(getTime(timePair));
-
-        return times;
+        return Stream.of(timePairs)
+                .map(this::getTime)
+                .collect(Collectors.toList());
     }
 
     private Time getTime(TimePair timePair) {
@@ -1675,7 +1695,7 @@ public class DomainFactory {
         return singleSchedule;
     }
 
-    private DailySchedule createDailySchedule(Task rootTask, ArrayList<Time> times, ExactTimeStamp startExactTimeStamp) {
+    private DailySchedule createDailySchedule(Task rootTask, List<Time> times, ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(times != null);
         Assert.assertTrue(!times.isEmpty());
@@ -1858,5 +1878,12 @@ public class DomainFactory {
         Collections.sort(taskDatas, (lhs, rhs) -> Integer.valueOf(lhs.TaskId).compareTo(rhs.TaskId));
 
         return taskDatas;
+    }
+
+    private TreeMap<Integer, CreateChildTaskLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask) {
+        Assert.assertTrue(parentTask != null);
+
+        return Stream.of(parentTask.getChildTasks(now))
+                .collect(Collectors.toMap(Task::getId, childTask -> new CreateChildTaskLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask)), TreeMap::new));
     }
 }

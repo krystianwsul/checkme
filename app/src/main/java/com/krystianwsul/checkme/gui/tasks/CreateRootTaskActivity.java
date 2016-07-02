@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +39,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
+    private static final String SCHEDULE_TYPE_CHANGED_KEY = "scheduleTypeChanged";
 
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
@@ -55,6 +57,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private boolean mIsTimeValid = false;
 
     private CreateRootTaskLoader.Data mData;
+
+    private boolean mScheduleTypeChanged = false;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateRootTaskActivity.this::finish;
 
@@ -260,8 +264,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mData != null)
+        if (mData != null) {
             outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
+            outState.putBoolean(SCHEDULE_TYPE_CHANGED_KEY, mScheduleTypeChanged);
+        }
     }
 
     @Override
@@ -277,14 +283,19 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
 
         int spinnerPosition;
-        int count = 1;
+        int count = 0;
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(POSITION_KEY)) {
+            count++;
+
             spinnerPosition = mSavedInstanceState.getInt(POSITION_KEY, -1);
             Assert.assertTrue(spinnerPosition != -1);
             if (spinnerPosition > 0)
-                count = 2;
+                count++;
+
+            mScheduleTypeChanged = mSavedInstanceState.getBoolean(SCHEDULE_TYPE_CHANGED_KEY);
         } else if (mRootTaskId != null) {
             Assert.assertTrue(mData.RootTaskData != null);
+
             mCreateRootTaskName.setText(mData.RootTaskData.Name);
 
             ScheduleType scheduleType = mData.RootTaskData.ScheduleType;
@@ -294,9 +305,13 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
                 fragment = SingleScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 0;
             } else if (scheduleType == ScheduleType.DAILY) {
+                count++;
+
                 fragment = DailyScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 1;
             } else if (scheduleType == ScheduleType.WEEKLY) {
+                count++;
+
                 fragment = WeeklyScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 2;
             } else {
@@ -314,11 +329,13 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         mCreateRootTaskSpinner.setSelection(spinnerPosition);
 
+        Log.e("asdf", "count: " + count);
         mCreateRootTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             private int mCount = finalCount;
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.e("asdf", "onItemSelected");
                 Assert.assertTrue(position >= 0);
                 Assert.assertTrue(position < 3);
 
@@ -326,6 +343,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
                     mCount--;
                     return;
                 }
+
+                mScheduleTypeChanged = true;
 
                 loadFragment(position);
             }
@@ -391,17 +410,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
             if (!mCreateRootTaskName.getText().toString().equals(mData.RootTaskData.Name))
                 return true;
 
+            if (mScheduleTypeChanged)
+                return true;
+
             ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
             Assert.assertTrue(scheduleFragment != null);
-
-            if ((mData.RootTaskData.ScheduleType == ScheduleType.SINGLE) && !(scheduleFragment instanceof SingleScheduleFragment))
-                return true;
-
-            if ((mData.RootTaskData.ScheduleType == ScheduleType.DAILY) && !(scheduleFragment instanceof DailyScheduleFragment))
-                return true;
-
-            if ((mData.RootTaskData.ScheduleType == ScheduleType.WEEKLY) && !(scheduleFragment instanceof WeeklyScheduleFragment))
-                return true;
 
             if (scheduleFragment.dataChanged())
                 return true;

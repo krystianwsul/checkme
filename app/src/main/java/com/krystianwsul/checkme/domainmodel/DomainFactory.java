@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
+import com.krystianwsul.checkme.loaders.ParentLoader;
 import com.krystianwsul.checkme.loaders.SchedulePickerLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
@@ -566,9 +567,6 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = getTaskDatas(context, now);
-        Assert.assertTrue(taskDatas != null);
-
         CreateChildTaskLoader.ChildTaskData childTaskData = null;
         if (childTaskId != null) {
             Task childTask = mTasks.get(childTaskId);
@@ -580,7 +578,31 @@ public class DomainFactory {
             childTaskData = new CreateChildTaskLoader.ChildTaskData(childTask.getName(), parentTask.getId());
         }
 
-        return new CreateChildTaskLoader.Data(taskDatas, childTaskData);
+        return new CreateChildTaskLoader.Data(childTaskData);
+    }
+
+    public synchronized ParentLoader.Data getParentData(Integer childTaskId, Context context) {
+        fakeDelay();
+
+        Assert.assertTrue(context != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        TreeMap<Integer, ParentLoader.TaskData> taskDatas = getTaskDatas(context, now);
+        Assert.assertTrue(taskDatas != null);
+
+        ParentLoader.ChildTaskData childTaskData = null;
+        if (childTaskId != null) {
+            Task childTask = mTasks.get(childTaskId);
+            Assert.assertTrue(childTask != null);
+
+            Task parentTask = childTask.getParentTask(now);
+            Assert.assertTrue(parentTask != null);
+
+            childTaskData = new ParentLoader.ChildTaskData(childTask.getName(), parentTask.getId());
+        }
+
+        return new ParentLoader.Data(taskDatas, childTaskData);
     }
 
     public synchronized CreateRootTaskLoader.Data getCreateRootTaskData(Context context, Integer rootTaskId) {
@@ -1895,19 +1917,19 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    private TreeMap<Integer, CreateChildTaskLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask, Context context) {
+    private TreeMap<Integer, ParentLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask, Context context) {
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(context != null);
 
         return Stream.of(parentTask.getChildTasks(now))
-                .collect(Collectors.toMap(Task::getId, childTask -> new CreateChildTaskLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask, context), childTask.getId(), childTask.getScheduleText(context, now)), TreeMap::new));
+                .collect(Collectors.toMap(Task::getId, childTask -> new ParentLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask, context), childTask.getId(), childTask.getScheduleText(context, now)), TreeMap::new));
     }
 
-    private TreeMap<Integer, CreateChildTaskLoader.TaskData> getTaskDatas(Context context, ExactTimeStamp now) {
+    private TreeMap<Integer, ParentLoader.TaskData> getTaskDatas(Context context, ExactTimeStamp now) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(now != null);
 
-        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = new TreeMap<>((lhs, rhs) -> -lhs.compareTo(rhs));
+        TreeMap<Integer, ParentLoader.TaskData> taskDatas = new TreeMap<>((lhs, rhs) -> -lhs.compareTo(rhs));
 
         for (Task task : mTasks.values()) {
             if (!task.current(now)) {
@@ -1920,7 +1942,7 @@ public class DomainFactory {
             if (!task.isRootTask(now))
                 continue;
 
-            taskDatas.put(task.getId(), new CreateChildTaskLoader.TaskData(task.getName(), getChildTaskDatas(now, task, context), task.getId(), task.getScheduleText(context, now)));
+            taskDatas.put(task.getId(), new ParentLoader.TaskData(task.getName(), getChildTaskDatas(now, task, context), task.getId(), task.getScheduleText(context, now)));
         }
 
         return taskDatas;

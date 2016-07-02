@@ -7,8 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
-import java.util.TreeMap;
-
 public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Data> {
     private final Integer mChildTaskId;
 
@@ -24,20 +22,15 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
     }
 
     public static class Data extends DomainLoader.Data {
-        public final TreeMap<Integer, TaskData> TaskDatas;
         public final ChildTaskData ChildTaskData;
 
-        public Data(TreeMap<Integer, TaskData> taskDatas, ChildTaskData childTaskData) {
-            Assert.assertTrue(taskDatas != null);
-
-            TaskDatas = taskDatas;
+        public Data(ChildTaskData childTaskData) {
             ChildTaskData = childTaskData;
         }
 
         @Override
         public int hashCode() {
             int hash = 0;
-            hash += TaskDatas.hashCode();
             if (ChildTaskData != null)
                 hash += ChildTaskData.hashCode();
             return hash;
@@ -57,73 +50,10 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
 
             Data data = (Data) object;
 
-            if (!TaskDatas.equals(data.TaskDatas))
-                return false;
-
             if ((ChildTaskData == null) != (data.ChildTaskData == null))
                 return false;
 
             if ((ChildTaskData != null) && !ChildTaskData.equals(data.ChildTaskData))
-                return false;
-
-            return true;
-        }
-    }
-
-    public static class TaskData {
-        public final String Name;
-        public final TreeMap<Integer, TaskData> TaskDatas;
-        public final int TaskId;
-        public final String ScheduleText;
-
-        public TaskData(String name, TreeMap<Integer, TaskData> taskDatas, int taskId, String scheduleText) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(taskDatas != null);
-
-            Name = name;
-            TaskDatas = taskDatas;
-            TaskId = taskId;
-            ScheduleText = scheduleText;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 0;
-            hash += Name.hashCode();
-            hash += TaskDatas.hashCode();
-            hash += TaskId;
-            if (!TextUtils.isEmpty(ScheduleText))
-                hash += ScheduleText.hashCode();
-            return hash;
-        }
-
-        @SuppressWarnings("RedundantIfStatement")
-        @Override
-        public boolean equals(Object object) {
-            if (object == null)
-                return false;
-
-            if (object == this)
-                return true;
-
-            if (!(object instanceof TaskData))
-                return false;
-
-            TaskData taskData = (TaskData) object;
-
-            if (!Name.equals(taskData.Name))
-                return false;
-
-            if (!TaskDatas.equals(taskData.TaskDatas))
-                return false;
-
-            if (TaskId != taskData.TaskId)
-                return false;
-
-            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskData.ScheduleText))
-                return false;
-
-            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
                 return false;
 
             return true;

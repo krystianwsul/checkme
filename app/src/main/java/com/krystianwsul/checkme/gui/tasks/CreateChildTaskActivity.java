@@ -14,10 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.TextView;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -27,14 +24,8 @@ import com.krystianwsul.checkme.loaders.CreateChildTaskLoader;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
-    private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
-
-    private static final String PARENT_ID = "parentId";
-
     private static final String PARENT_TASK_ID_KEY = "parentTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String CHILD_TASK_ID_KEY = "childTaskId";
@@ -44,24 +35,14 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private Bundle mSavedInstanceState;
 
     private EditText mCreateChildTaskName;
-    private TextView mCreateChildTaskParent;
 
     private Integer mParentTaskId = null;
     private ArrayList<Integer> mTaskIds;
     private Integer mChildTaskId = null;
 
-    private CreateChildTaskLoader.TaskData mParent;
-
     private CreateChildTaskLoader.Data mData;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
-
-    private final ParentPickerFragment.Listener mParentFragmentListener = taskData -> {
-        Assert.assertTrue(taskData != null);
-
-        mParent = taskData;
-        mCreateChildTaskParent.setText(taskData.Name);
-    };
 
     public static Intent getCreateIntent(Context context, int parentTaskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
@@ -110,20 +91,25 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                 if (TextUtils.isEmpty(name))
                     break;
 
+                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+                Assert.assertTrue(parentFragment != null);
+
+                int parentTaskId = parentFragment.getParentTaskId();
+
                 if (mParentTaskId != null) {
                     Assert.assertTrue(mChildTaskId == null);
                     Assert.assertTrue(mData.ChildTaskData == null);
 
                     if (mTaskIds != null)
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mData.DataId, mParent.TaskId, name, mTaskIds);
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mData.DataId, parentTaskId, name, mTaskIds);
                     else
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mData.DataId, mParent.TaskId, name);
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mData.DataId, parentTaskId, name);
                 } else {
                     Assert.assertTrue(mChildTaskId != null);
                     Assert.assertTrue(mData.ChildTaskData != null);
                     Assert.assertTrue(mTaskIds == null);
 
-                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mChildTaskId, name, mParent.TaskId);
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mChildTaskId, name, parentTaskId);
                 }
 
                 finish();
@@ -158,9 +144,6 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
         mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
         Assert.assertTrue(mCreateChildTaskName != null);
-
-        mCreateChildTaskParent = (TextView) findViewById(R.id.create_child_task_parent);
-        Assert.assertTrue(mCreateChildTaskParent != null);
 
         Intent intent = getIntent();
         if (intent.hasExtra(PARENT_TASK_ID_KEY)) {
@@ -197,14 +180,6 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        if (mParent != null)
-            outState.putInt(PARENT_ID, mParent.TaskId);
-    }
-
-    @Override
     public Loader<CreateChildTaskLoader.Data> onCreateLoader(int id, Bundle args) {
         return new CreateChildTaskLoader(this, mChildTaskId);
     }
@@ -215,41 +190,31 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
         mCreateChildTaskName.setVisibility(View.VISIBLE);
 
-        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(PARENT_ID)) {
-            int parentId = mSavedInstanceState.getInt(PARENT_ID);
-            mParent = findTaskData(parentId);
-            Assert.assertTrue(mParent != null);
-        } else {
+        if (mSavedInstanceState == null) {
             if (data.ChildTaskData != null)
                 mCreateChildTaskName.setText(data.ChildTaskData.Name);
-
-            if (mParentTaskId != null) {
-                Assert.assertTrue(mChildTaskId == null);
-                Assert.assertTrue(mData.ChildTaskData == null);
-
-                mParent = findTaskData(mParentTaskId);
-            } else {
-                Assert.assertTrue(mChildTaskId != null);
-                Assert.assertTrue(mData.ChildTaskData != null);
-
-                mParent = findTaskData(mData.ChildTaskData.ParentTaskId);
-            }
         }
 
-        Assert.assertTrue(mParent != null);
-        mCreateChildTaskParent.setText(mParent.Name);
+        ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+        if (parentFragment == null) {
+            if (mParentTaskId != null) {
+                Assert.assertTrue(mChildTaskId == null);
 
-        mCreateChildTaskParent.setVisibility(View.VISIBLE);
+                if (mTaskIds != null)
+                    parentFragment = ParentFragment.getJoinInstance(mParentTaskId, mTaskIds);
+                else
+                    parentFragment = ParentFragment.getCreateInstance(mParentTaskId);
+            } else {
+                Assert.assertTrue(mChildTaskId != null);
+                Assert.assertTrue(mTaskIds == null);
 
-        mCreateChildTaskParent.setOnClickListener(v -> {
-            ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance();
-            parentPickerFragment.show(getSupportFragmentManager(), PARENT_PICKER_FRAGMENT_TAG);
-            parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
-        });
+                parentFragment = ParentFragment.getEditInstance(mChildTaskId);
+            }
 
-        ParentPickerFragment parentPickerFragment = (ParentPickerFragment) getSupportFragmentManager().findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG);
-        if (parentPickerFragment != null)
-            parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.create_child_task_frame, parentFragment)
+                    .commitAllowingStateLoss();
+        }
 
         invalidateOptionsMenu();
     }
@@ -281,8 +246,6 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         if (mData == null)
             return false;
 
-        Assert.assertTrue(mParent != null);
-
         if (mChildTaskId != null) {
             Assert.assertTrue(mParentTaskId == null);
             Assert.assertTrue(mTaskIds == null);
@@ -291,7 +254,10 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             if (!mCreateChildTaskName.getText().toString().equals(mData.ChildTaskData.Name))
                 return true;
 
-            if (mParent.TaskId != mData.ChildTaskData.ParentTaskId)
+            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+            Assert.assertTrue(parentFragment != null);
+
+            if (parentFragment.dataChanged())
                 return true;
         } else {
             Assert.assertTrue(mParentTaskId != null);
@@ -299,34 +265,13 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             if (!TextUtils.isEmpty(mCreateChildTaskName.getText()))
                 return true;
 
-            if (mParent.TaskId != mParentTaskId)
-                return false;
+            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+            Assert.assertTrue(parentFragment != null);
+
+            if (parentFragment.dataChanged())
+                return true;
         }
 
         return false;
-    }
-
-    private CreateChildTaskLoader.TaskData findTaskData(int taskId) {
-        Assert.assertTrue(mData != null);
-
-        List<CreateChildTaskLoader.TaskData> taskDatas = findTaskDataHelper(mData.TaskDatas, taskId)
-                .collect(Collectors.toList());
-
-        Assert.assertTrue(taskDatas.size() == 1);
-        return taskDatas.get(0);
-    }
-
-    private Stream<CreateChildTaskLoader.TaskData> findTaskDataHelper(Map<Integer, CreateChildTaskLoader.TaskData> taskDatas, int taskId) {
-        Assert.assertTrue(taskDatas != null);
-
-        if (taskDatas.containsKey(taskId)) {
-            List<CreateChildTaskLoader.TaskData> ret = new ArrayList<>();
-            ret.add(taskDatas.get(taskId));
-            return Stream.of(ret);
-        }
-
-        return Stream.of(taskDatas.values())
-                .map(taskData -> findTaskDataHelper(taskData.TaskDatas, taskId))
-                .flatMap(stream -> stream);
     }
 }

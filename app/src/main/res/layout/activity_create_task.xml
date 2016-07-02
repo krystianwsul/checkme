@@ -9,14 +9,14 @@
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/create_child_task_toolbar"
+        android:id="@+id/create_task_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:popupTheme="@style/AppTheme.PopupOverlay">
 
         <EditText
-            android:id="@+id/create_child_task_name"
+            android:id="@+id/create_task_name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
@@ -29,8 +29,15 @@
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
+        android:id="@+id/create_task_parent_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/create_child_task_frame" />
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/create_task_schedule_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
 </LinearLayout>

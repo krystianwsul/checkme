@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
@@ -36,7 +37,7 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
     private static final String DISCARD_TAG = "discard";
 
     private Bundle mSavedInstanceState;
-    private EditText mCreateRootTaskName;
+    private EditText mCreateTaskName;
 
     private Integer mTaskId;
     private ArrayList<Integer> mTaskIds;
@@ -101,7 +102,7 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Assert.assertTrue(mCreateRootTaskName != null);
+        Assert.assertTrue(mCreateTaskName != null);
 
         menu.findItem(R.id.action_create_root_task_save).setVisible((mTaskId == null) || (mData != null));
 
@@ -112,17 +113,17 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_create_root_task_save:
-                Assert.assertTrue(mCreateRootTaskName != null);
+                Assert.assertTrue(mCreateTaskName != null);
 
                 if (!mIsTimeValid)
                     break;
 
-                String name = mCreateRootTaskName.getText().toString().trim();
+                String name = mCreateTaskName.getText().toString().trim();
 
                 if (TextUtils.isEmpty(name))
                     break;
 
-                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
                 Assert.assertTrue(schedulePickerFragment != null);
 
                 if (mTaskId != null) {
@@ -148,9 +149,9 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_root_task);
+        setContentView(R.layout.activity_create_task);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.create_root_task_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.create_task_toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -169,8 +170,13 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
             Assert.assertTrue(mScheduleHint != null);
         }
 
-        mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
-        Assert.assertTrue(mCreateRootTaskName != null);
+        mCreateTaskName = (EditText) findViewById(R.id.create_task_name);
+        Assert.assertTrue(mCreateTaskName != null);
+
+        FrameLayout createTaskScheduleFrame = (FrameLayout) findViewById(R.id.create_task_schedule_frame);
+        Assert.assertTrue(createTaskScheduleFrame != null);
+
+        createTaskScheduleFrame.setVisibility(View.VISIBLE);
 
         if (intent.hasExtra(TASK_ID_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
@@ -217,15 +223,15 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
     public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
-        mCreateRootTaskName.setVisibility(View.VISIBLE);
+        mCreateTaskName.setVisibility(View.VISIBLE);
 
         if (mTaskId != null && mSavedInstanceState == null) {
             Assert.assertTrue(mData.TaskData != null);
 
-            mCreateRootTaskName.setText(mData.TaskData.Name);
+            mCreateTaskName.setText(mData.TaskData.Name);
         }
 
-        SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
         if (schedulePickerFragment == null) {
             if (mTaskId != null) {
                 Assert.assertTrue(mTaskIds == null);
@@ -245,7 +251,7 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
             }
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.create_task_frame, schedulePickerFragment)
+                    .add(R.id.create_task_schedule_frame, schedulePickerFragment)
                     .commitAllowingStateLoss();
         }
 
@@ -287,10 +293,10 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
         if (mTaskId == null) {
             Assert.assertTrue(mData.TaskData == null);
 
-            if (!TextUtils.isEmpty(mCreateRootTaskName.getText()))
+            if (!TextUtils.isEmpty(mCreateTaskName.getText()))
                 return true;
 
-            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
             Assert.assertTrue(schedulePickerFragment != null);
 
             if (schedulePickerFragment.dataChanged())
@@ -300,10 +306,10 @@ public class CreateRootTaskActivity extends CreateTaskActivity {
         } else {
             Assert.assertTrue(mData.TaskData != null);
 
-            if (!mCreateRootTaskName.getText().toString().equals(mData.TaskData.Name))
+            if (!mCreateTaskName.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
-            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
             Assert.assertTrue(schedulePickerFragment != null);
 
             if (schedulePickerFragment.dataChanged())

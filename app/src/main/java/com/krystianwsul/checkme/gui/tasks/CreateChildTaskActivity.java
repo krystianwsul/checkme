@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
@@ -32,7 +33,7 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
     private static final String DISCARD_TAG = "discard";
 
     private Bundle mSavedInstanceState;
-    private EditText mCreateChildTaskName;
+    private EditText mCreateTaskName;
 
     private Integer mTaskId = null;
     private ArrayList<Integer> mTaskIds;
@@ -74,7 +75,7 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Assert.assertTrue(mCreateChildTaskName != null);
+        Assert.assertTrue(mCreateTaskName != null);
 
         menu.findItem(R.id.action_create_child_task_save).setVisible((mParentTaskIdHint != null) || (mData != null));
 
@@ -85,12 +86,12 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_create_child_task_save:
-                String name = mCreateChildTaskName.getText().toString().trim();
+                String name = mCreateTaskName.getText().toString().trim();
 
                 if (TextUtils.isEmpty(name))
                     break;
 
-                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
                 Assert.assertTrue(parentFragment != null);
 
                 int parentTaskId = parentFragment.getParentTaskId();
@@ -126,9 +127,9 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_child_task);
+        setContentView(R.layout.activity_create_task);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.create_child_task_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.create_task_toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -141,8 +142,13 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
 
         mSavedInstanceState = savedInstanceState;
 
-        mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
-        Assert.assertTrue(mCreateChildTaskName != null);
+        mCreateTaskName = (EditText) findViewById(R.id.create_task_name);
+        Assert.assertTrue(mCreateTaskName != null);
+
+        FrameLayout createTaskParentFrame = (FrameLayout) findViewById(R.id.create_task_parent_frame);
+        Assert.assertTrue(createTaskParentFrame != null);
+
+        createTaskParentFrame.setVisibility(View.VISIBLE);
 
         Intent intent = getIntent();
         if (intent.hasExtra(PARENT_TASK_ID_HINT_KEY)) {
@@ -188,14 +194,14 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
     public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
-        mCreateChildTaskName.setVisibility(View.VISIBLE);
+        mCreateTaskName.setVisibility(View.VISIBLE);
 
         if (mSavedInstanceState == null) {
             if (data.TaskData != null)
-                mCreateChildTaskName.setText(data.TaskData.Name);
+                mCreateTaskName.setText(data.TaskData.Name);
         }
 
-        ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+        ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
         if (parentFragment == null) {
             if (mParentTaskIdHint != null) {
                 Assert.assertTrue(mTaskId == null);
@@ -212,7 +218,7 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
             }
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.create_child_task_frame, parentFragment)
+                    .add(R.id.create_task_parent_frame, parentFragment)
                     .commitAllowingStateLoss();
         }
 
@@ -251,10 +257,10 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mData.TaskData != null);
 
-            if (!mCreateChildTaskName.getText().toString().equals(mData.TaskData.Name))
+            if (!mCreateTaskName.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
-            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
             Assert.assertTrue(parentFragment != null);
 
             if (parentFragment.dataChanged())
@@ -262,10 +268,10 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
         } else {
             Assert.assertTrue(mParentTaskIdHint != null);
 
-            if (!TextUtils.isEmpty(mCreateChildTaskName.getText()))
+            if (!TextUtils.isEmpty(mCreateTaskName.getText()))
                 return true;
 
-            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
+            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
             Assert.assertTrue(parentFragment != null);
 
             if (parentFragment.dataChanged())

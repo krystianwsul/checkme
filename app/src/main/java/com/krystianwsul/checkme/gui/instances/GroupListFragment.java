@@ -792,11 +792,27 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public SelectionCallback getSelectionCallback() {
+        public boolean hasActionMode() {
             GroupListFragment groupListFragment = mGroupListFragmentReference.get();
             Assert.assertTrue(groupListFragment != null);
 
-            return groupListFragment.mSelectionCallback;
+            return groupListFragment.mSelectionCallback.hasActionMode();
+        }
+
+        @Override
+        public void incrementSelected() {
+            GroupListFragment groupListFragment = mGroupListFragmentReference.get();
+            Assert.assertTrue(groupListFragment != null);
+
+            groupListFragment.mSelectionCallback.incrementSelected();
+        }
+
+        @Override
+        public void decrementSelected() {
+            GroupListFragment groupListFragment = mGroupListFragmentReference.get();
+            Assert.assertTrue(groupListFragment != null);
+
+            groupListFragment.mSelectionCallback.decrementSelected();
         }
 
         private GroupListFragment getGroupListFragment() {

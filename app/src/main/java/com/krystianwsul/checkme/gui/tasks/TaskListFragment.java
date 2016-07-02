@@ -531,11 +531,27 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         @Override
-        public SelectionCallback getSelectionCallback() {
+        public boolean hasActionMode() {
             TaskListFragment taskListFragment = getTaskListFragment();
             Assert.assertTrue(taskListFragment != null);
 
-            return taskListFragment.mSelectionCallback;
+            return taskListFragment.mSelectionCallback.hasActionMode();
+        }
+
+        @Override
+        public void incrementSelected() {
+            TaskListFragment taskListFragment = getTaskListFragment();
+            Assert.assertTrue(taskListFragment != null);
+
+            taskListFragment.mSelectionCallback.incrementSelected();
+        }
+
+        @Override
+        public void decrementSelected() {
+            TaskListFragment taskListFragment = getTaskListFragment();
+            Assert.assertTrue(taskListFragment != null);
+
+            taskListFragment.mSelectionCallback.decrementSelected();
         }
 
         @Override
@@ -734,7 +750,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 Assert.assertTrue(taskListFragment != null);
 
                 int comparison = Integer.valueOf(mTaskData.TaskId).compareTo(((TaskWrapper) another).mTaskData.TaskId);
-                if (taskListFragment.mTaskId == null)
+                if (taskListFragment.mTaskId == null && mIndentation == 0)
                     comparison = -comparison;
 
                 return comparison;

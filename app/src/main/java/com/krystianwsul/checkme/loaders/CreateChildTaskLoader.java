@@ -20,7 +20,7 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mChildTaskId);
+        return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mChildTaskId, getContext());
     }
 
     public static class Data extends DomainLoader.Data {
@@ -73,18 +73,28 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
     public static class TaskData {
         public final String Name;
         public final TreeMap<Integer, TaskData> TaskDatas;
+        public final int TaskId;
+        public final String ScheduleText;
 
-        public TaskData(String name, TreeMap<Integer, TaskData> taskDatas) {
+        public TaskData(String name, TreeMap<Integer, TaskData> taskDatas, int taskId, String scheduleText) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(taskDatas != null);
 
             Name = name;
             TaskDatas = taskDatas;
+            TaskId = taskId;
+            ScheduleText = scheduleText;
         }
 
         @Override
         public int hashCode() {
-            return Name.hashCode() + TaskDatas.hashCode();
+            int hash = 0;
+            hash += Name.hashCode();
+            hash += TaskDatas.hashCode();
+            hash += TaskId;
+            if (!TextUtils.isEmpty(ScheduleText))
+                hash += ScheduleText.hashCode();
+            return hash;
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -105,6 +115,15 @@ public class CreateChildTaskLoader extends DomainLoader<CreateChildTaskLoader.Da
                 return false;
 
             if (!TaskDatas.equals(taskData.TaskDatas))
+                return false;
+
+            if (TaskId != taskData.TaskId)
+                return false;
+
+            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskData.ScheduleText))
+                return false;
+
+            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
                 return false;
 
             return true;

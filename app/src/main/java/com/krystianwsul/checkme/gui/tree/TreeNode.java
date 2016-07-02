@@ -6,7 +6,6 @@ import android.view.View;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.gui.SelectionCallback;
 
 import junit.framework.Assert;
 
@@ -88,11 +87,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public View.OnClickListener getOnClickListener() {
-        SelectionCallback selectionCallback = getSelectionCallback();
-        Assert.assertTrue(selectionCallback != null);
-
         return v -> {
-            if (selectionCallback.hasActionMode()) {
+            if (hasActionMode()) {
                 onLongClick();
             } else {
                 mModelNode.onClick();
@@ -110,21 +106,18 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
-        Assert.assertTrue(selectionCallback != null);
-
         NodeContainer parent = getParent();
         Assert.assertTrue(parent != null);
 
         mSelected = !mSelected;
 
         if (mSelected) {
-            selectionCallback.incrementSelected();
+            incrementSelected();
 
             if (parent.getSelectedChildren().size() == 1) // first in group
                 parent.update();
         } else {
-            selectionCallback.decrementSelected();
+            decrementSelected();
 
             if (parent.getSelectedChildren().size() == 0) // last in group
                 parent.update();
@@ -140,11 +133,25 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return parent;
     }
 
-    private SelectionCallback getSelectionCallback() {
+    private boolean hasActionMode() {
         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
         Assert.assertTrue(treeViewAdapter != null);
 
-        return treeViewAdapter.getSelectionCallback();
+        return treeViewAdapter.hasActionMode();
+    }
+
+    private void incrementSelected() {
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        treeViewAdapter.incrementSelected();
+    }
+
+    private void decrementSelected() {
+        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        Assert.assertTrue(treeViewAdapter != null);
+
+        treeViewAdapter.decrementSelected();
     }
 
     private TreeViewAdapter getTreeViewAdapter() {
@@ -158,10 +165,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public int displayedSize() {
-        SelectionCallback selectionCallback = getSelectionCallback();
-        Assert.assertTrue(selectionCallback != null);
-
-        if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mModelNode.visibleDuringActionMode() && selectionCallback.hasActionMode())) {
+        if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mModelNode.visibleDuringActionMode() && hasActionMode())) {
             return 0;
         } else {
             if (mExpanded) {
@@ -187,7 +191,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public TreeNode getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(!mChildTreeNodes.isEmpty() || mModelNode.visibleWhenEmpty());
-        Assert.assertTrue(!getSelectionCallback().hasActionMode() || mModelNode.visibleDuringActionMode());
+        Assert.assertTrue(mModelNode.visibleDuringActionMode() || !hasActionMode());
         Assert.assertTrue(position < displayedSize());
 
         if (position == 0)
@@ -285,10 +289,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
             Assert.assertTrue(treeViewAdapter != null);
 
-            SelectionCallback selectionCallback = treeViewAdapter.getSelectionCallback();
-            Assert.assertTrue(selectionCallback != null);
-
-            Assert.assertTrue(!(selectionCallback.hasActionMode() && !getSelectedChildren().isEmpty()));
+            Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode()));
 
             int position = treeNodeCollection.getPosition(this);
             Assert.assertTrue(position >= 0);
@@ -316,10 +317,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         NodeContainer nodeContainer = getParent();
         Assert.assertTrue(nodeContainer != null);
 
-        SelectionCallback selectionCallback = getSelectionCallback();
-        Assert.assertTrue(selectionCallback != null);
-
-        if (!mModelNode.visibleDuringActionMode() && selectionCallback.hasActionMode())
+        if (!mModelNode.visibleDuringActionMode() && hasActionMode())
             return false;
 
         if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())

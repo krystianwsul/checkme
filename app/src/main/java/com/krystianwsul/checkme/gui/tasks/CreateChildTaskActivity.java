@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
+    private static final String PARENT_FRAGMENT_TAG = "parentFragment";
+
     private static final String PARENT_TASK_ID_KEY = "parentTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String CHILD_TASK_ID_KEY = "childTaskId";
@@ -49,6 +51,12 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private CreateChildTaskLoader.Data mData;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
+
+    private final ParentFragment.Listener mParentFragmentListener = taskData -> {
+        Assert.assertTrue(taskData != null);
+
+        mCreateChildTaskParent.setText(taskData.Name);
+    };
 
     public static Intent getCreateIntent(Context context, int parentTaskId) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
@@ -212,6 +220,18 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
         Assert.assertTrue(parentTaskData != null);
         mCreateChildTaskParent.setText(parentTaskData.Name);
+
+        mCreateChildTaskParent.setVisibility(View.VISIBLE);
+
+        mCreateChildTaskParent.setOnClickListener(v -> {
+            ParentFragment parentFragment = ParentFragment.newInstance();
+            parentFragment.show(getSupportFragmentManager(), PARENT_FRAGMENT_TAG);
+            parentFragment.initialize(mData.TaskDatas, mParentFragmentListener);
+        });
+
+        ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentByTag(PARENT_FRAGMENT_TAG);
+        if (parentFragment != null)
+            parentFragment.initialize(mData.TaskDatas, mParentFragmentListener);
 
         invalidateOptionsMenu();
     }

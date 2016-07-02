@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.tree;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.krystianwsul.checkme.gui.SelectionCallback;
-
 import junit.framework.Assert;
 
 import java.util.List;
@@ -58,8 +56,16 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mTreeNodeCollection = treeNodeCollection;
     }
 
-    public SelectionCallback getSelectionCallback() {
-        return mTreeModelAdapter.getSelectionCallback();
+    public boolean hasActionMode() {
+        return mTreeModelAdapter.hasActionMode();
+    }
+
+    public void incrementSelected() {
+        mTreeModelAdapter.incrementSelected();
+    }
+
+    public void decrementSelected() {
+        mTreeModelAdapter.decrementSelected();
     }
 
     public List<TreeNode> getSelectedNodes() {

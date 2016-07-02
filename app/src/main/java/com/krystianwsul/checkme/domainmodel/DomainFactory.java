@@ -563,8 +563,10 @@ public class DomainFactory {
         return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask);
     }
 
-    public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(Integer childTaskId) {
+    public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(Integer childTaskId, Context context) {
         fakeDelay();
+
+        Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -581,7 +583,7 @@ public class DomainFactory {
             if (!task.isRootTask(now))
                 continue;
 
-            taskDatas.put(task.getId(), new CreateChildTaskLoader.TaskData(task.getName(), getChildTaskDatas(now, task)));
+            taskDatas.put(task.getId(), new CreateChildTaskLoader.TaskData(task.getName(), getChildTaskDatas(now, task, context), task.getId(), task.getScheduleText(context, now)));
         }
 
         CreateChildTaskLoader.ChildTaskData childTaskData = null;
@@ -1880,10 +1882,11 @@ public class DomainFactory {
         return taskDatas;
     }
 
-    private TreeMap<Integer, CreateChildTaskLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask) {
+    private TreeMap<Integer, CreateChildTaskLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask, Context context) {
         Assert.assertTrue(parentTask != null);
+        Assert.assertTrue(context != null);
 
         return Stream.of(parentTask.getChildTasks(now))
-                .collect(Collectors.toMap(Task::getId, childTask -> new CreateChildTaskLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask)), TreeMap::new));
+                .collect(Collectors.toMap(Task::getId, childTask -> new CreateChildTaskLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask, context), childTask.getId(), childTask.getScheduleText(context, now)), TreeMap::new));
     }
 }

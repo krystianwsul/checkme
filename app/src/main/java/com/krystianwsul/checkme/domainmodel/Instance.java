@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 class Instance {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
@@ -200,7 +201,7 @@ class Instance {
         DateTime scheduleDateTime = getScheduleDateTime();
         Assert.assertTrue(scheduleDateTime != null);
 
-        ArrayList<TaskHierarchy> taskHierarchies = domainFactory.getTaskHierarchies(task);
+        List<TaskHierarchy> taskHierarchies = domainFactory.getTaskHierarchies(task);
         HashSet<Instance> childInstances = new HashSet<>();
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);

@@ -56,8 +56,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     private boolean mIsTimeValid = false;
 
-    private boolean mLoaded = false;
-
     private CreateRootTaskLoader.Data mData;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateRootTaskActivity.this::finish;
@@ -207,15 +205,12 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             mRootTaskId = intent.getIntExtra(ROOT_TASK_ID_KEY, -1);
             Assert.assertTrue(mRootTaskId != -1);
-
-            getSupportLoaderManager().initLoader(0, null, this);
         } else {
             if (intent.hasExtra(TASK_IDS_KEY)) {
                 mTaskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
                 Assert.assertTrue(mTaskIds != null);
                 Assert.assertTrue(mTaskIds.size() > 1);
             }
-            updateGui(null);
 
             if (savedInstanceState == null)
                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -224,6 +219,8 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -289,7 +286,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mLoaded)
+        if (mData != null)
             outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
     }
 
@@ -302,12 +299,6 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     public void onLoadFinished(Loader<CreateRootTaskLoader.Data> loader, final CreateRootTaskLoader.Data data) {
         mData = data;
 
-        updateGui(data);
-    }
-
-    private void updateGui(final CreateRootTaskLoader.Data data) {
-        mLoaded = true;
-
         mCreateRootTaskName.setVisibility(View.VISIBLE);
         mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
 
@@ -319,10 +310,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
             if (position > 0)
                 count = 2;
         } else if (mRootTaskId != null) {
-            Assert.assertTrue(data != null);
-            mCreateRootTaskName.setText(data.Name);
+            Assert.assertTrue(mData.RootTaskData != null);
+            mCreateRootTaskName.setText(mData.RootTaskData.Name);
 
-            ScheduleType scheduleType = data.ScheduleType;
+            ScheduleType scheduleType = mData.RootTaskData.ScheduleType;
 
             Fragment fragment;
             if (scheduleType == ScheduleType.SINGLE) {
@@ -401,8 +392,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     @SuppressWarnings("RedundantIfStatement")
     private boolean dataChanged() {
+        if (mData == null)
+            return false;
+
         if (mRootTaskId == null) {
-            Assert.assertTrue(mData == null);
+            Assert.assertTrue(mData.RootTaskData == null);
 
             if (!TextUtils.isEmpty(mCreateRootTaskName.getText()))
                 return true;
@@ -418,22 +412,21 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             return false;
         } else {
-            if (mData == null)
-                return false;
+            Assert.assertTrue(mData.RootTaskData != null);
 
-            if (!mCreateRootTaskName.getText().toString().equals(mData.Name))
+            if (!mCreateRootTaskName.getText().toString().equals(mData.RootTaskData.Name))
                 return true;
 
             ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.create_root_task_frame);
             Assert.assertTrue(scheduleFragment != null);
 
-            if ((mData.ScheduleType == ScheduleType.SINGLE) && !(scheduleFragment instanceof SingleScheduleFragment))
+            if ((mData.RootTaskData.ScheduleType == ScheduleType.SINGLE) && !(scheduleFragment instanceof SingleScheduleFragment))
                 return true;
 
-            if ((mData.ScheduleType == ScheduleType.DAILY) && !(scheduleFragment instanceof DailyScheduleFragment))
+            if ((mData.RootTaskData.ScheduleType == ScheduleType.DAILY) && !(scheduleFragment instanceof DailyScheduleFragment))
                 return true;
 
-            if ((mData.ScheduleType == ScheduleType.WEEKLY) && !(scheduleFragment instanceof WeeklyScheduleFragment))
+            if ((mData.RootTaskData.ScheduleType == ScheduleType.WEEKLY) && !(scheduleFragment instanceof WeeklyScheduleFragment))
                 return true;
 
             if (scheduleFragment.dataChanged())

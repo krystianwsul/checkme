@@ -13,6 +13,7 @@ import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Task {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
@@ -82,7 +83,7 @@ public class Task {
         mTaskRecord.setName(name);
     }
 
-    public ArrayList<Task> getChildTasks(ExactTimeStamp exactTimeStamp) {
+    public List<Task> getChildTasks(ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
 

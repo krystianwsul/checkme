@@ -289,7 +289,7 @@ public class DomainFactory {
     public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
         fakeDelay();
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+        List<CustomTime> currentCustomTimes = getCurrentCustomTimes();
 
         ArrayList<ShowCustomTimesLoader.CustomTimeData> entries = new ArrayList<>();
         for (CustomTime customTime : currentCustomTimes) {
@@ -358,8 +358,7 @@ public class DomainFactory {
 
         List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -405,9 +404,8 @@ public class DomainFactory {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         HourMinute hourMinute = timeStamp.getHourMinute();
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
         Time time = null;
-        for (CustomTime customTime : currentCustomTimes)
+        for (CustomTime customTime : getCurrentCustomTimes())
             if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
                 time = customTime;
         if (time == null)
@@ -437,8 +435,7 @@ public class DomainFactory {
                 .collect(Collectors.toList());
         Assert.assertTrue(!currentInstances.isEmpty());
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -477,8 +474,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -521,8 +517,7 @@ public class DomainFactory {
 
         Collections.sort(instances, (Instance lhs, Instance rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));
 
-        ArrayList<CustomTime> currentCustomTimes = getCurrentCustomTimes();
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(currentCustomTimes)
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -570,21 +565,8 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = new TreeMap<>((lhs, rhs) -> -lhs.compareTo(rhs));
-
-        for (Task task : mTasks.values()) {
-            if (!task.current(now)) {
-                continue;
-            }
-
-            if (!task.isVisible(now))
-                continue;
-
-            if (!task.isRootTask(now))
-                continue;
-
-            taskDatas.put(task.getId(), new CreateChildTaskLoader.TaskData(task.getName(), getChildTaskDatas(now, task, context), task.getId(), task.getScheduleText(context, now)));
-        }
+        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = getTaskDatas(context, now);
+        Assert.assertTrue(taskDatas != null);
 
         CreateChildTaskLoader.ChildTaskData childTaskData = null;
         if (childTaskId != null) {
@@ -600,15 +582,25 @@ public class DomainFactory {
         return new CreateChildTaskLoader.Data(taskDatas, childTaskData);
     }
 
-    public synchronized CreateRootTaskLoader.Data getCreateRootTaskData(int rootTaskId) {
+    public synchronized CreateRootTaskLoader.Data getCreateRootTaskData(Context context, Integer rootTaskId) {
         fakeDelay();
 
-        Task rootTask = mTasks.get(rootTaskId);
-        Assert.assertTrue(rootTask != null);
+        Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return new CreateRootTaskLoader.Data(rootTask.getName(), rootTask.getCurrentSchedule(now).getType());
+        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = getTaskDatas(context, now);
+        Assert.assertTrue(taskDatas != null);
+
+        CreateRootTaskLoader.RootTaskData rootTaskData = null;
+        if (rootTaskId != null) {
+            Task rootTask = mTasks.get(rootTaskId);
+            Assert.assertTrue(rootTask != null);
+
+            rootTaskData = new CreateRootTaskLoader.RootTaskData(rootTask.getName(), rootTask.getCurrentSchedule(now).getType());
+        }
+
+        return new CreateRootTaskLoader.Data(taskDatas, rootTaskData);
     }
 
     public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
@@ -738,7 +730,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<Task> tasks;
+        List<Task> tasks;
 
         if (taskId != null) {
             Task parentTask = mTasks.get(taskId);
@@ -1358,11 +1350,11 @@ public class DomainFactory {
                 .filter(instance -> !instance.isRelevant(now))
                 .collect(Collectors.toList());
 
-        for (Task task : irrelevantTasks)
-            task.setRelevant();
+        Stream.of(irrelevantTasks)
+                .forEach(Task::setRelevant);
 
-        for (Instance instance : irrelevantInstances)
-            instance.setRelevant();
+        Stream.of(irrelevantInstances)
+                .forEach(Instance::setRelevant);
 
         for (Task task : mTasks.values())
             task.updateOldestVisible(now);
@@ -1380,8 +1372,8 @@ public class DomainFactory {
                 mTaskHierarchies.remove(irrelevanTaskHierarchy.getId());
         }
 
-        for (Instance instance : irrelevantInstances)
-            mExistingInstances.remove(instance);
+        Stream.of(irrelevantInstances)
+                .forEach(mExistingInstances::remove);
     }
 
     // internal
@@ -1768,31 +1760,25 @@ public class DomainFactory {
         return weeklySchedule;
     }
 
-    ArrayList<Task> getChildTasks(Task parentTask, ExactTimeStamp exactTimeStamp) {
+    List<Task> getChildTasks(Task parentTask, ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
-        ArrayList<TaskHierarchy> taskHierarchies = getTaskHierarchies(parentTask);
-        ArrayList<Task> childTasks = new ArrayList<>();
-        for (TaskHierarchy taskHierarchy : taskHierarchies)
-            if (taskHierarchy.current(exactTimeStamp) && taskHierarchy.getChildTask().current(exactTimeStamp))
-                childTasks.add(taskHierarchy.getChildTask());
-
-        Collections.sort(childTasks, (Task lhs, Task rhs) -> Integer.valueOf(lhs.getId()).compareTo(rhs.getId()));
-
-        return childTasks;
+        return Stream.of(getTaskHierarchies(parentTask))
+                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
+                .map(TaskHierarchy::getChildTask)
+                .filter(childTask -> childTask.current(exactTimeStamp))
+                .sortBy(Task::getId)
+                .collect(Collectors.toList());
     }
 
-    ArrayList<TaskHierarchy> getTaskHierarchies(Task parentTask) {
+    List<TaskHierarchy> getTaskHierarchies(Task parentTask) {
         Assert.assertTrue(parentTask != null);
 
-        ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
-        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values()) {
-            if (taskHierarchy.getParentTask() == parentTask)
-                taskHierarchies.add(taskHierarchy);
-        }
-        return taskHierarchies;
+        return Stream.of(mTaskHierarchies.values())
+                .filter(taskHierarchy -> taskHierarchy.getParentTask() == parentTask)
+                .collect(Collectors.toList());
     }
 
     Task getParentTask(Task childTask, ExactTimeStamp exactTimeStamp) {
@@ -1854,12 +1840,10 @@ public class DomainFactory {
         return mCustomTimes.get(customTimeId);
     }
 
-    private ArrayList<CustomTime> getCurrentCustomTimes() {
-        ArrayList<CustomTime> customTimes = new ArrayList<>();
-        for (CustomTime customTime : mCustomTimes.values())
-            if (customTime.getCurrent())
-                customTimes.add(customTime);
-        return customTimes;
+    private List<CustomTime> getCurrentCustomTimes() {
+        return Stream.of(mCustomTimes.values())
+                .filter(CustomTime::getCurrent)
+                .collect(Collectors.toList());
     }
 
     private HashMap<InstanceKey, GroupListLoader.InstanceData> getChildInstanceDatas(Instance instance, ExactTimeStamp now, WeakReference<GroupListLoader.InstanceDataParent> instanceDataParentReference) {
@@ -1889,14 +1873,10 @@ public class DomainFactory {
         Assert.assertTrue(now != null);
         Assert.assertTrue(context != null);
 
-        List<TaskListLoader.TaskData> taskDatas = new ArrayList<>();
-        for (Task childTask : parentTask.getChildTasks(now)) {
-            taskDatas.add(new TaskListLoader.TaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.isRootTask(now)));
-        }
-
-        Collections.sort(taskDatas, (lhs, rhs) -> Integer.valueOf(lhs.TaskId).compareTo(rhs.TaskId));
-
-        return taskDatas;
+        return Stream.of(parentTask.getChildTasks(now))
+                .sortBy(Task::getId)
+                .map(childTask -> new TaskListLoader.TaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.isRootTask(now)))
+                .collect(Collectors.toList());
     }
 
     private TreeMap<Integer, CreateChildTaskLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask, Context context) {
@@ -1905,5 +1885,28 @@ public class DomainFactory {
 
         return Stream.of(parentTask.getChildTasks(now))
                 .collect(Collectors.toMap(Task::getId, childTask -> new CreateChildTaskLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask, context), childTask.getId(), childTask.getScheduleText(context, now)), TreeMap::new));
+    }
+
+    private TreeMap<Integer, CreateChildTaskLoader.TaskData> getTaskDatas(Context context, ExactTimeStamp now) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(now != null);
+
+        TreeMap<Integer, CreateChildTaskLoader.TaskData> taskDatas = new TreeMap<>((lhs, rhs) -> -lhs.compareTo(rhs));
+
+        for (Task task : mTasks.values()) {
+            if (!task.current(now)) {
+                continue;
+            }
+
+            if (!task.isVisible(now))
+                continue;
+
+            if (!task.isRootTask(now))
+                continue;
+
+            taskDatas.put(task.getId(), new CreateChildTaskLoader.TaskData(task.getName(), getChildTaskDatas(now, task, context), task.getId(), task.getScheduleText(context, now)));
+        }
+
+        return taskDatas;
     }
 }

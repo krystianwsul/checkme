@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<DailyScheduleLoader.Data> {
-    private static final String HOUR_MINUTE_KEY = "hourMinute";
+    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
     private static final String TIME_ENTRY_KEY = "timeEntries";
@@ -109,11 +109,13 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         return new DailyScheduleFragment();
     }
 
-    public static DailyScheduleFragment newInstance(HourMinute hourMinute) {
+    public static DailyScheduleFragment newInstance(CreateRootTaskActivity.ScheduleHint scheduleHint) {
+        Assert.assertTrue(scheduleHint != null);
+
         DailyScheduleFragment dailyScheduleFragment = new DailyScheduleFragment();
 
         Bundle args = new Bundle();
-        args.putParcelable(HOUR_MINUTE_KEY, hourMinute);
+        args.putParcelable(SCHEDULE_HINT_KEY, scheduleHint);
 
         dailyScheduleFragment.setArguments(args);
         return dailyScheduleFragment;
@@ -150,15 +152,17 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         if (args != null)
         {
             if (args.containsKey(ROOT_TASK_ID_KEY)) {
-                Assert.assertTrue(!args.containsKey(HOUR_MINUTE_KEY));
+                Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
 
                 mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
                 Assert.assertTrue(mRootTaskId != -1);
             } else {
-                Assert.assertTrue(args.containsKey(HOUR_MINUTE_KEY));
+                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
 
-                mHourMinute = args.getParcelable(HOUR_MINUTE_KEY);
-                Assert.assertTrue(mHourMinute != null);
+                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                Assert.assertTrue(scheduleHint != null);
+
+                mHourMinute = scheduleHint.mHourMinute;
             }
         }
 

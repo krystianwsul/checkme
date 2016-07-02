@@ -185,7 +185,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         if (mPosition != null) {
                             Assert.assertTrue(mTimeRange != null);
 
-                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, rangePositionToDate(mTimeRange, mPosition)));
+                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, new CreateRootTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition))));
                         } else {
                             startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
                         }
@@ -606,7 +606,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(data.TaskEditable == null);
 
             showFab = true;
-            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, rangePositionToDate(mTimeRange, mPosition))));
+            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, new CreateRootTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition)))));
 
             emptyTextId = R.string.instances_empty_root;
         } else if (mTimeStamp != null) {
@@ -617,7 +617,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             if (mTimeStamp.compareTo(TimeStamp.getNow()) > 0) {
                 showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, mTimeStamp)));
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, new CreateRootTaskActivity.ScheduleHint(mTimeStamp))));
             } else {
                 showFab = false;
             }

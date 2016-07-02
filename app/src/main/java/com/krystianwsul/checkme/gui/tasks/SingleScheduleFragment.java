@@ -37,8 +37,8 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
-    private static final String ARGUMENT_DATE_KEY = "date";
-    private static final String HOUR_MINUTE_KEY = "hourMinute";
+    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
+
     private static final String INITIAL_HOUR_MINUTE_KEY = "initialHourMinute";
 
     private static final String PARCEL_DATE_KEY = "date";
@@ -100,27 +100,13 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         return new SingleScheduleFragment();
     }
 
-    public static SingleScheduleFragment newInstance(Date date) {
-        Assert.assertTrue(date != null);
+    public static SingleScheduleFragment newInstance(CreateRootTaskActivity.ScheduleHint scheduleHint) {
+        Assert.assertTrue(scheduleHint != null);
 
         SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
 
         Bundle args = new Bundle();
-        args.putParcelable(ARGUMENT_DATE_KEY, date);
-        singleScheduleFragment.setArguments(args);
-
-        return singleScheduleFragment;
-    }
-
-    public static SingleScheduleFragment newInstance(Date date, HourMinute hourMinute) {
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(hourMinute != null);
-
-        SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
-
-        Bundle args = new Bundle();
-        args.putParcelable(ARGUMENT_DATE_KEY, date);
-        args.putParcelable(HOUR_MINUTE_KEY, hourMinute);
+        args.putParcelable(SCHEDULE_HINT_KEY, scheduleHint);
         singleScheduleFragment.setArguments(args);
 
         return singleScheduleFragment;
@@ -150,12 +136,12 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         Bundle args = getArguments();
         if (args != null) {
             if (args.containsKey(ROOT_TASK_ID_KEY)) {
-                Assert.assertTrue(!args.containsKey(ARGUMENT_DATE_KEY));
+                Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
 
                 mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
                 Assert.assertTrue(mRootTaskId != -1);
             } else {
-                Assert.assertTrue(args.containsKey(ARGUMENT_DATE_KEY));
+                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
             }
         }
 
@@ -389,21 +375,22 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
         } else if (args != null) {
             if (args.containsKey(ROOT_TASK_ID_KEY)) {
-                Assert.assertTrue(!args.containsKey(ARGUMENT_DATE_KEY));
+                Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
                 Assert.assertTrue(mData.ScheduleData != null);
 
                 mDate = mData.ScheduleData.Date;
                 mTimePairPersist = new TimePairPersist(mData.ScheduleData.TimePair);
             } else {
-                Assert.assertTrue(args.containsKey(ARGUMENT_DATE_KEY));
-                mDate = args.getParcelable(ARGUMENT_DATE_KEY);
+                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
+
+                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                Assert.assertTrue(scheduleHint != null);
+
+                mDate = scheduleHint.mDate;
                 Assert.assertTrue(mDate != null);
 
-                if (args.containsKey(HOUR_MINUTE_KEY)) {
-                    HourMinute hourMinute = args.getParcelable(HOUR_MINUTE_KEY);
-                    Assert.assertTrue(hourMinute != null);
-
-                    mTimePairPersist = new TimePairPersist(hourMinute);
+                if (scheduleHint.mHourMinute != null) {
+                    mTimePairPersist = new TimePairPersist(scheduleHint.mHourMinute);
                 } else {
                     mTimePairPersist = new TimePairPersist();
                 }
@@ -433,8 +420,11 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             Bundle args = getArguments();
 
             Date initialDate;
-            if (args != null && args.containsKey(ARGUMENT_DATE_KEY)) {
-                initialDate = args.getParcelable(ARGUMENT_DATE_KEY);
+            if (args != null && args.containsKey(SCHEDULE_HINT_KEY)) {
+                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                Assert.assertTrue(scheduleHint != null);
+
+                initialDate = scheduleHint.mDate;
                 Assert.assertTrue(initialDate != null);
             } else {
                 initialDate = Date.today();

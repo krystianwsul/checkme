@@ -42,8 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<WeeklyScheduleLoader.Data> {
-    private static final String DAY_OF_WEEK_KEY = "dayOfWeek";
-    private static final String HOUR_MINUTE_KEY = "hourMinute";
+    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
     private static final String DATE_TIME_ENTRY_KEY = "dateTimeEntries";
@@ -117,27 +116,13 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         return new WeeklyScheduleFragment();
     }
 
-    public static WeeklyScheduleFragment newInstance(DayOfWeek dayOfWeek) {
-        Assert.assertTrue(dayOfWeek != null);
+    public static WeeklyScheduleFragment newInstance(CreateRootTaskActivity.ScheduleHint scheduleHint) {
+        Assert.assertTrue(scheduleHint != null);
 
         WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
 
         Bundle args = new Bundle();
-        args.putSerializable(DAY_OF_WEEK_KEY, dayOfWeek);
-        weeklyScheduleFragment.setArguments(args);
-
-        return weeklyScheduleFragment;
-    }
-
-    public static WeeklyScheduleFragment newInstance(DayOfWeek dayOfWeek, HourMinute hourMinute) {
-        Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(hourMinute != null);
-
-        WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
-
-        Bundle args = new Bundle();
-        args.putSerializable(DAY_OF_WEEK_KEY, dayOfWeek);
-        args.putParcelable(HOUR_MINUTE_KEY, hourMinute);
+        args.putParcelable(SCHEDULE_HINT_KEY, scheduleHint);
         weeklyScheduleFragment.setArguments(args);
 
         return weeklyScheduleFragment;
@@ -173,20 +158,20 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         Bundle args = getArguments();
         if (args != null) {
             if (args.containsKey(ROOT_TASK_ID_KEY)) {
-                Assert.assertTrue(!args.containsKey(DAY_OF_WEEK_KEY));
+                Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
 
                 mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
                 Assert.assertTrue(mRootTaskId != -1);
             } else {
-                Assert.assertTrue(args.containsKey(DAY_OF_WEEK_KEY));
+                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
 
-                mDayOfWeek = (DayOfWeek) args.getSerializable(DAY_OF_WEEK_KEY);
+                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                Assert.assertTrue(scheduleHint != null);
+
+                mDayOfWeek = scheduleHint.mDate.getDayOfWeek();
                 Assert.assertTrue(mDayOfWeek != null);
 
-                if (args.containsKey(HOUR_MINUTE_KEY)) {
-                    mHourMinute = args.getParcelable(HOUR_MINUTE_KEY);
-                    Assert.assertTrue(mHourMinute != null);
-                }
+                mHourMinute = scheduleHint.mHourMinute;
             }
         }
 

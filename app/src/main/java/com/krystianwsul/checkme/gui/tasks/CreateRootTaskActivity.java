@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -26,7 +27,6 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
-import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -39,13 +39,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
 
-    private static final String DATE_KEY = "day";
-    private static final String TIME_STAMP_KEY = "timeStamp";
+    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
     private static final String DISCARD_TAG = "discard";
 
-    private Date mDate;
-    private TimeStamp mTimeStamp;
+    private ScheduleHint mScheduleHint;
 
     private Spinner mCreateRootTaskSpinner;
     private EditText mCreateRootTaskName;
@@ -65,21 +63,12 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         return new Intent(context, CreateRootTaskActivity.class);
     }
 
-    public static Intent getCreateIntent(Context context, Date date) {
+    public static Intent getCreateIntent(Context context, ScheduleHint scheduleHint) {
         Assert.assertTrue(context != null);
-        Assert.assertTrue(date != null);
+        Assert.assertTrue(scheduleHint != null);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
-        intent.putExtra(DATE_KEY, (Parcelable) date);
-        return intent;
-    }
-
-    public static Intent getCreateIntent(Context context, TimeStamp timeStamp) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(timeStamp != null);
-
-        Intent intent = new Intent(context, CreateRootTaskActivity.class);
-        intent.putExtra(TIME_STAMP_KEY, timeStamp);
+        intent.putExtra(SCHEDULE_HINT_KEY, scheduleHint);
         return intent;
     }
 
@@ -93,15 +82,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         return intent;
     }
 
-    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, Date date) {
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, ScheduleHint scheduleHint) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
-        Assert.assertTrue(date != null);
+        Assert.assertTrue(scheduleHint != null);
 
         Intent intent = new Intent(context, CreateRootTaskActivity.class);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
-        intent.putExtra(DATE_KEY, (Parcelable) date);
+        intent.putExtra(SCHEDULE_HINT_KEY, scheduleHint);
         return intent;
     }
 
@@ -184,14 +173,9 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mSavedInstanceState = savedInstanceState;
 
         Intent intent = getIntent();
-        if (intent.hasExtra(DATE_KEY)) {
-            Assert.assertTrue(!intent.hasExtra(TIME_STAMP_KEY));
-
-            mDate = intent.getParcelableExtra(DATE_KEY);
-            Assert.assertTrue(mDate != null);
-        } else if (intent.hasExtra(TIME_STAMP_KEY)) {
-            mTimeStamp = intent.getParcelableExtra(TIME_STAMP_KEY);
-            Assert.assertTrue(mTimeStamp != null);
+        if (intent.hasExtra(SCHEDULE_HINT_KEY)) {
+            mScheduleHint = intent.getParcelableExtra(SCHEDULE_HINT_KEY);
+            Assert.assertTrue(mScheduleHint != null);
         }
 
         mCreateRootTaskName = (EditText) findViewById(R.id.create_root_task_name);
@@ -250,34 +234,20 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         switch (position) {
             case 0:
-                if (mDate != null) {
-                    Assert.assertTrue(mTimeStamp == null);
-                    return SingleScheduleFragment.newInstance(mDate);
-                } else if (mTimeStamp != null) {
-                    Date date = mTimeStamp.getDate();
-                    HourMinute hourMinute = mTimeStamp.getHourMinute();
-
-                    return SingleScheduleFragment.newInstance(date, hourMinute);
+                if (mScheduleHint != null) {
+                    return SingleScheduleFragment.newInstance(mScheduleHint);
                 } else {
                     return SingleScheduleFragment.newInstance();
                 }
             case 1:
-                if (mTimeStamp != null) {
-                    HourMinute hourMinute = mTimeStamp.getHourMinute();
-                    return DailyScheduleFragment.newInstance(hourMinute);
+                if (mScheduleHint != null) {
+                    return DailyScheduleFragment.newInstance(mScheduleHint);
                 } else  {
                     return DailyScheduleFragment.newInstance();
                 }
             case 2:
-                if (mDate != null) {
-                    Assert.assertTrue(mTimeStamp == null);
-
-                    return WeeklyScheduleFragment.newInstance(mDate.getDayOfWeek());
-                } else if (mTimeStamp != null) {
-                    DayOfWeek dayOfWeek = mTimeStamp.getDate().getDayOfWeek();
-                    HourMinute hourMinute = mTimeStamp.getHourMinute();
-
-                    return WeeklyScheduleFragment.newInstance(dayOfWeek, hourMinute);
+                if (mScheduleHint != null) {
+                    return WeeklyScheduleFragment.newInstance(mScheduleHint);
                 } else {
                     return WeeklyScheduleFragment.newInstance();
                 }
@@ -438,5 +408,63 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
             return false;
         }
+    }
+
+    public static class ScheduleHint implements Parcelable {
+        public final Date mDate;
+        public final HourMinute mHourMinute;
+
+        public ScheduleHint(Date date) {
+            Assert.assertTrue(date != null);
+
+            mDate = date;
+            mHourMinute = null;
+        }
+
+        public ScheduleHint(TimeStamp timeStamp) {
+            Assert.assertTrue(timeStamp != null);
+
+            mDate = timeStamp.getDate();
+            Assert.assertTrue(mDate != null);
+
+            mHourMinute = timeStamp.getHourMinute();
+            Assert.assertTrue(mHourMinute != null);
+        }
+
+        private ScheduleHint(Date date, HourMinute hourMinute) {
+            Assert.assertTrue(date != null);
+
+            mDate = date;
+            mHourMinute = hourMinute;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(mDate, 0);
+            dest.writeInt(mHourMinute != null ? 1 : 0);
+        }
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator<ScheduleHint>() {
+            @Override
+            public ScheduleHint createFromParcel(Parcel source) {
+                Date date = source.readParcelable(Date.class.getClassLoader());
+                Assert.assertTrue(date != null);
+
+                boolean hasHourMinute = (source.readInt() == 1);
+                HourMinute hourMinute = (hasHourMinute ? source.readParcelable(HourMinute.class.getClassLoader()) : null);
+
+                return new ScheduleHint(date, hourMinute);
+            }
+
+            @Override
+            public ScheduleHint[] newArray(int size) {
+                return new ScheduleHint[size];
+            }
+        };
     }
 }

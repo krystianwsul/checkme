@@ -33,13 +33,15 @@ import java.util.Map;
 public class CreateChildTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
     private static final String PARENT_FRAGMENT_TAG = "parentFragment";
 
+    private static final String PARENT_ID = "parentId";
+
     private static final String PARENT_TASK_ID_KEY = "parentTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String CHILD_TASK_ID_KEY = "childTaskId";
 
     private static final String DISCARD_TAG = "discard";
 
-    private boolean mFirstLoad;
+    private Bundle mSavedInstanceState;
 
     private EditText mCreateChildTaskName;
     private TextView mCreateChildTaskParent;
@@ -48,6 +50,8 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private ArrayList<Integer> mTaskIds;
     private Integer mChildTaskId = null;
 
+    private CreateChildTaskLoader.TaskData mParent;
+
     private CreateChildTaskLoader.Data mData;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
@@ -55,6 +59,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     private final ParentFragment.Listener mParentFragmentListener = taskData -> {
         Assert.assertTrue(taskData != null);
 
+        mParent = taskData;
         mCreateChildTaskParent.setText(taskData.Name);
     };
 
@@ -110,15 +115,15 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
                     Assert.assertTrue(mData.ChildTaskData == null);
 
                     if (mTaskIds != null)
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mData.DataId, mParentTaskId, name, mTaskIds);
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mData.DataId, mParent.TaskId, name, mTaskIds);
                     else
-                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mData.DataId, mParentTaskId, name);
+                        DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mData.DataId, mParent.TaskId, name);
                 } else {
                     Assert.assertTrue(mChildTaskId != null);
                     Assert.assertTrue(mData.ChildTaskData != null);
                     Assert.assertTrue(mTaskIds == null);
 
-                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mChildTaskId, name);
+                    DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mChildTaskId, name, mParent.TaskId);
                 }
 
                 finish();
@@ -149,7 +154,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
-        mFirstLoad = (savedInstanceState == null);
+        mSavedInstanceState = savedInstanceState;
 
         mCreateChildTaskName = (EditText) findViewById(R.id.create_child_task_name);
         Assert.assertTrue(mCreateChildTaskName != null);
@@ -174,7 +179,7 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
             Assert.assertTrue(mChildTaskId != -1);
         }
 
-        if (mFirstLoad)
+        if (mSavedInstanceState != null)
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
@@ -192,6 +197,14 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (mParent != null)
+            outState.putInt(PARENT_ID, mParent.TaskId);
+    }
+
+    @Override
     public Loader<CreateChildTaskLoader.Data> onCreateLoader(int id, Bundle args) {
         return new CreateChildTaskLoader(this, mChildTaskId);
     }
@@ -202,24 +215,29 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
         mCreateChildTaskName.setVisibility(View.VISIBLE);
 
-        if (mFirstLoad && (data.ChildTaskData != null))
-            mCreateChildTaskName.setText(data.ChildTaskData.Name);
-
-        CreateChildTaskLoader.TaskData parentTaskData;
-        if (mParentTaskId != null) {
-            Assert.assertTrue(mChildTaskId == null);
-            Assert.assertTrue(mData.ChildTaskData == null);
-
-            parentTaskData = findTaskData(mParentTaskId);
+        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(PARENT_ID)) {
+            int parentId = mSavedInstanceState.getInt(PARENT_ID);
+            mParent = findTaskData(parentId);
+            Assert.assertTrue(mParent != null);
         } else {
-            Assert.assertTrue(mChildTaskId != null);
-            Assert.assertTrue(mData.ChildTaskData != null);
+            if (data.ChildTaskData != null)
+                mCreateChildTaskName.setText(data.ChildTaskData.Name);
 
-            parentTaskData = findTaskData(mData.ChildTaskData.ParentTaskId);
+            if (mParentTaskId != null) {
+                Assert.assertTrue(mChildTaskId == null);
+                Assert.assertTrue(mData.ChildTaskData == null);
+
+                mParent = findTaskData(mParentTaskId);
+            } else {
+                Assert.assertTrue(mChildTaskId != null);
+                Assert.assertTrue(mData.ChildTaskData != null);
+
+                mParent = findTaskData(mData.ChildTaskData.ParentTaskId);
+            }
         }
 
-        Assert.assertTrue(parentTaskData != null);
-        mCreateChildTaskParent.setText(parentTaskData.Name);
+        Assert.assertTrue(mParent != null);
+        mCreateChildTaskParent.setText(mParent.Name);
 
         mCreateChildTaskParent.setVisibility(View.VISIBLE);
 
@@ -260,25 +278,32 @@ public class CreateChildTaskActivity extends AppCompatActivity implements Loader
 
     @SuppressWarnings("RedundantIfStatement")
     private boolean dataChanged() {
+        if (mData == null)
+            return false;
+
+        Assert.assertTrue(mParent != null);
+
         if (mChildTaskId != null) {
             Assert.assertTrue(mParentTaskId == null);
             Assert.assertTrue(mTaskIds == null);
-
-            if (mData.ChildTaskData == null)
-                return false;
+            Assert.assertTrue(mData.ChildTaskData != null);
 
             if (!mCreateChildTaskName.getText().toString().equals(mData.ChildTaskData.Name))
                 return true;
 
-            return false;
+            if (mParent.TaskId != mData.ChildTaskData.ParentTaskId)
+                return true;
         } else {
             Assert.assertTrue(mParentTaskId != null);
 
             if (!TextUtils.isEmpty(mCreateChildTaskName.getText()))
                 return true;
 
-            return false;
+            if (mParent.TaskId != mParentTaskId)
+                return false;
         }
+
+        return false;
     }
 
     private CreateChildTaskLoader.TaskData findTaskData(int taskId) {

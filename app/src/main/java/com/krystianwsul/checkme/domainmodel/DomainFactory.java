@@ -1229,13 +1229,30 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateChildTask(int dataId, int childTaskId, String name) {
+    public synchronized void updateChildTask(int dataId, int childTaskId, String name, int parentTaskId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Task childTask = mTasks.get(childTaskId);
         Assert.assertTrue(childTask != null);
 
         childTask.setName(name);
+
+        Task oldParentTask = childTask.getParentTask(now);
+        Assert.assertTrue(oldParentTask != null);
+
+        Task newParentTask = mTasks.get(parentTaskId);
+        Assert.assertTrue(newParentTask != null);
+
+        if (oldParentTask != newParentTask) {
+            TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(childTask, now);
+            Assert.assertTrue(oldTaskHierarchy != null);
+
+            oldTaskHierarchy.setEndExactTimeStamp(now);
+
+            createTaskHierarchy(newParentTask, childTask, now);
+        }
 
         save(dataId);
     }

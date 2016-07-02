@@ -12,7 +12,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -329,13 +328,11 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
         mCreateRootTaskSpinner.setSelection(spinnerPosition);
 
-        Log.e("asdf", "count: " + count);
         mCreateRootTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             private int mCount = finalCount;
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.e("asdf", "onItemSelected");
                 Assert.assertTrue(position >= 0);
                 Assert.assertTrue(position < 3);
 

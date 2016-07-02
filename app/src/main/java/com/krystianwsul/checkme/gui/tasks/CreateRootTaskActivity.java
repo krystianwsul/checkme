@@ -8,7 +8,6 @@ import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -29,7 +28,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class CreateRootTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
+public class CreateRootTaskActivity extends CreateTaskActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
     private static final String TASK_ID_KEY = "taskId";
     private static final String TASK_IDS_KEY = "taskIds";
 

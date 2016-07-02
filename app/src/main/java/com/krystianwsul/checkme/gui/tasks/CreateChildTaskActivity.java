@@ -2,19 +2,12 @@ package com.krystianwsul.checkme.gui.tasks;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
@@ -25,25 +18,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class CreateChildTaskActivity extends CreateTaskActivity {
-    private static final String TASK_ID_KEY = "taskId";
-    private static final String TASK_IDS_KEY = "taskIds";
-
-    private static final String PARENT_TASK_ID_HINT_KEY = "parentTaskIdHint";
-
-    private static final String DISCARD_TAG = "discard";
-
-    private Bundle mSavedInstanceState;
-    private EditText mCreateTaskName;
-
-    private Integer mTaskId = null;
-    private ArrayList<Integer> mTaskIds;
-
-    private Integer mParentTaskIdHint = null;
-
-    private CreateTaskLoader.Data mData;
-
-    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
-
     public static Intent getCreateIntent(Context context, int parentTaskIdHint) {
         Intent intent = new Intent(context, CreateChildTaskActivity.class);
         intent.putExtra(PARENT_TASK_ID_HINT_KEY, parentTaskIdHint);
@@ -68,24 +42,9 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_create_child_task, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        Assert.assertTrue(mCreateTaskName != null);
-
-        menu.findItem(R.id.action_create_child_task_save).setVisible((mParentTaskIdHint != null) || (mData != null));
-
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_create_child_task_save:
+            case R.id.action_create_task_save:
                 String name = mCreateTaskName.getText().toString().trim();
 
                 if (TextUtils.isEmpty(name))
@@ -125,74 +84,13 @@ public class CreateChildTaskActivity extends CreateTaskActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_task);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.create_task_toolbar);
-        Assert.assertTrue(toolbar != null);
-
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        Assert.assertTrue(actionBar != null);
-
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
-
-        mSavedInstanceState = savedInstanceState;
-
-        mCreateTaskName = (EditText) findViewById(R.id.create_task_name);
-        Assert.assertTrue(mCreateTaskName != null);
+    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
+        mData = data;
 
         FrameLayout createTaskParentFrame = (FrameLayout) findViewById(R.id.create_task_parent_frame);
         Assert.assertTrue(createTaskParentFrame != null);
 
         createTaskParentFrame.setVisibility(View.VISIBLE);
-
-        Intent intent = getIntent();
-        if (intent.hasExtra(PARENT_TASK_ID_HINT_KEY)) {
-            mParentTaskIdHint = intent.getIntExtra(PARENT_TASK_ID_HINT_KEY, -1);
-            Assert.assertTrue(mParentTaskIdHint != -1);
-
-            if (intent.hasExtra(TASK_IDS_KEY)) {
-                mTaskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
-                Assert.assertTrue(mTaskIds != null);
-                Assert.assertTrue(mTaskIds.size() > 1);
-            }
-        } else {
-            Assert.assertTrue(intent.hasExtra(TASK_ID_KEY));
-            Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
-
-            mTaskId = intent.getIntExtra(TASK_ID_KEY, -1);
-            Assert.assertTrue(mTaskId != -1);
-        }
-
-        if (mSavedInstanceState != null)
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
-        if (discardDialogFragment != null)
-            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
-
-        getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("CreateChildTaskActivity.onResume");
-
-        super.onResume();
-    }
-
-    @Override
-    public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new CreateTaskLoader(this, mTaskId);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
-        mData = data;
 
         mCreateTaskName.setVisibility(View.VISIBLE);
 

@@ -7,8 +7,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.MainActivity;
-import com.krystianwsul.checkme.loaders.CreateChildTaskLoader;
-import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
@@ -560,25 +559,39 @@ public class DomainFactory {
         return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask);
     }
 
-    public synchronized CreateChildTaskLoader.Data getCreateChildTaskData(Integer childTaskId, Context context) {
+    public synchronized CreateTaskLoader.Data getCreateChildTaskData(Integer taskId, Context context) {
         fakeDelay();
 
         Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        CreateChildTaskLoader.ChildTaskData childTaskData = null;
-        if (childTaskId != null) {
-            Task childTask = mTasks.get(childTaskId);
-            Assert.assertTrue(childTask != null);
+        CreateTaskLoader.TaskData taskData = null;
+        if (taskId != null) {
+            Task task = mTasks.get(taskId);
+            Assert.assertTrue(task != null);
 
-            Task parentTask = childTask.getParentTask(now);
-            Assert.assertTrue(parentTask != null);
+            Integer parentTaskId;
+            ScheduleType scheduleType;
 
-            childTaskData = new CreateChildTaskLoader.ChildTaskData(childTask.getName(), parentTask.getId());
+            if (task.isRootTask(now)) {
+                Schedule schedule = task.getCurrentSchedule(now);
+                Assert.assertTrue(schedule != null);
+
+                parentTaskId = null;
+                scheduleType = schedule.getType();
+            } else {
+                Task parentTask = task.getParentTask(now);
+                Assert.assertTrue(parentTask != null);
+
+                parentTaskId = parentTask.getId();
+                scheduleType = null;
+            }
+
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleType);
         }
 
-        return new CreateChildTaskLoader.Data(childTaskData);
+        return new CreateTaskLoader.Data(taskData);
     }
 
     public synchronized ParentLoader.Data getParentData(Integer childTaskId, Context context) {
@@ -603,24 +616,6 @@ public class DomainFactory {
         }
 
         return new ParentLoader.Data(taskDatas, childTaskData);
-    }
-
-    public synchronized CreateRootTaskLoader.Data getCreateRootTaskData(Context context, Integer rootTaskId) {
-        fakeDelay();
-
-        Assert.assertTrue(context != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        CreateRootTaskLoader.RootTaskData rootTaskData = null;
-        if (rootTaskId != null) {
-            Task rootTask = mTasks.get(rootTaskId);
-            Assert.assertTrue(rootTask != null);
-
-            rootTaskData = new CreateRootTaskLoader.RootTaskData(rootTask.getName(), rootTask.getCurrentSchedule(now).getType());
-        }
-
-        return new CreateRootTaskLoader.Data(rootTaskData);
     }
 
     public synchronized SchedulePickerLoader.Data getSchedulePickerData(Context context, Integer rootTaskId) {

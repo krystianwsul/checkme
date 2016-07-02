@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +18,7 @@ import android.widget.EditText;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
-import com.krystianwsul.checkme.loaders.CreateRootTaskLoader;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
@@ -28,7 +27,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class CreateRootTaskActivity extends CreateTaskActivity implements LoaderManager.LoaderCallbacks<CreateRootTaskLoader.Data> {
+public class CreateRootTaskActivity extends CreateTaskActivity {
     private static final String TASK_ID_KEY = "taskId";
     private static final String TASK_IDS_KEY = "taskIds";
 
@@ -46,7 +45,7 @@ public class CreateRootTaskActivity extends CreateTaskActivity implements Loader
 
     private boolean mIsTimeValid = false;
 
-    private CreateRootTaskLoader.Data mData;
+    private CreateTaskLoader.Data mData;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateRootTaskActivity.this::finish;
 
@@ -210,20 +209,20 @@ public class CreateRootTaskActivity extends CreateTaskActivity implements Loader
     }
 
     @Override
-    public Loader<CreateRootTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new CreateRootTaskLoader(this, mTaskId);
+    public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new CreateTaskLoader(this, mTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<CreateRootTaskLoader.Data> loader, final CreateRootTaskLoader.Data data) {
+    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
         mCreateRootTaskName.setVisibility(View.VISIBLE);
 
         if (mTaskId != null && mSavedInstanceState == null) {
-            Assert.assertTrue(mData.RootTaskData != null);
+            Assert.assertTrue(mData.TaskData != null);
 
-            mCreateRootTaskName.setText(mData.RootTaskData.Name);
+            mCreateRootTaskName.setText(mData.TaskData.Name);
         }
 
         SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
@@ -254,7 +253,7 @@ public class CreateRootTaskActivity extends CreateTaskActivity implements Loader
     }
 
     @Override
-    public void onLoaderReset(Loader<CreateRootTaskLoader.Data> loader) {
+    public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {
 
     }
 
@@ -286,7 +285,7 @@ public class CreateRootTaskActivity extends CreateTaskActivity implements Loader
             return false;
 
         if (mTaskId == null) {
-            Assert.assertTrue(mData.RootTaskData == null);
+            Assert.assertTrue(mData.TaskData == null);
 
             if (!TextUtils.isEmpty(mCreateRootTaskName.getText()))
                 return true;
@@ -299,9 +298,9 @@ public class CreateRootTaskActivity extends CreateTaskActivity implements Loader
 
             return false;
         } else {
-            Assert.assertTrue(mData.RootTaskData != null);
+            Assert.assertTrue(mData.TaskData != null);
 
-            if (!mCreateRootTaskName.getText().toString().equals(mData.RootTaskData.Name))
+            if (!mCreateRootTaskName.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
             SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);

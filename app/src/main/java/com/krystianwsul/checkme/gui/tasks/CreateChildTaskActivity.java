@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -18,13 +17,13 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
-import com.krystianwsul.checkme.loaders.CreateChildTaskLoader;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class CreateChildTaskActivity extends CreateTaskActivity implements LoaderManager.LoaderCallbacks<CreateChildTaskLoader.Data> {
+public class CreateChildTaskActivity extends CreateTaskActivity {
     private static final String TASK_ID_KEY = "taskId";
     private static final String TASK_IDS_KEY = "taskIds";
 
@@ -40,7 +39,7 @@ public class CreateChildTaskActivity extends CreateTaskActivity implements Loade
 
     private Integer mParentTaskIdHint = null;
 
-    private CreateChildTaskLoader.Data mData;
+    private CreateTaskLoader.Data mData;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateChildTaskActivity.this::finish;
 
@@ -98,7 +97,7 @@ public class CreateChildTaskActivity extends CreateTaskActivity implements Loade
 
                 if (mParentTaskIdHint != null) {
                     Assert.assertTrue(mTaskId == null);
-                    Assert.assertTrue(mData.ChildTaskData == null);
+                    Assert.assertTrue(mData.TaskData == null);
 
                     if (mTaskIds != null)
                         DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createJoinChildTask(mData.DataId, parentTaskId, name, mTaskIds);
@@ -106,7 +105,7 @@ public class CreateChildTaskActivity extends CreateTaskActivity implements Loade
                         DomainFactory.getDomainFactory(CreateChildTaskActivity.this).createChildTask(mData.DataId, parentTaskId, name);
                 } else {
                     Assert.assertTrue(mTaskId != null);
-                    Assert.assertTrue(mData.ChildTaskData != null);
+                    Assert.assertTrue(mData.TaskData != null);
                     Assert.assertTrue(mTaskIds == null);
 
                     DomainFactory.getDomainFactory(CreateChildTaskActivity.this).updateChildTask(mData.DataId, mTaskId, name, parentTaskId);
@@ -181,19 +180,19 @@ public class CreateChildTaskActivity extends CreateTaskActivity implements Loade
     }
 
     @Override
-    public Loader<CreateChildTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new CreateChildTaskLoader(this, mTaskId);
+    public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new CreateTaskLoader(this, mTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<CreateChildTaskLoader.Data> loader, final CreateChildTaskLoader.Data data) {
+    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
         mCreateChildTaskName.setVisibility(View.VISIBLE);
 
         if (mSavedInstanceState == null) {
-            if (data.ChildTaskData != null)
-                mCreateChildTaskName.setText(data.ChildTaskData.Name);
+            if (data.TaskData != null)
+                mCreateChildTaskName.setText(data.TaskData.Name);
         }
 
         ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);
@@ -221,7 +220,7 @@ public class CreateChildTaskActivity extends CreateTaskActivity implements Loade
     }
 
     @Override
-    public void onLoaderReset(Loader<CreateChildTaskLoader.Data> loader) {
+    public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {
     }
 
     @Override
@@ -250,9 +249,9 @@ public class CreateChildTaskActivity extends CreateTaskActivity implements Loade
         if (mTaskId != null) {
             Assert.assertTrue(mParentTaskIdHint == null);
             Assert.assertTrue(mTaskIds == null);
-            Assert.assertTrue(mData.ChildTaskData != null);
+            Assert.assertTrue(mData.TaskData != null);
 
-            if (!mCreateChildTaskName.getText().toString().equals(mData.ChildTaskData.Name))
+            if (!mCreateChildTaskName.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
             ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_child_task_frame);

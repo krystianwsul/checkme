@@ -68,7 +68,7 @@ public class ParentPickerFragment extends DialogFragment {
 
         MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
                 .title(R.string.parent_dialog_title)
-                .customView(R.layout.fragment_parent, false)
+                .customView(R.layout.fragment_parent_picker, false)
                 .build();
 
         mRecyclerView = (RecyclerView) materialDialog.getCustomView();

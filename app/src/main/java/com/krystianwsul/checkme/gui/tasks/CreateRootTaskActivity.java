@@ -200,6 +200,10 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mCreateRootTaskSpinner = (Spinner) findViewById(R.id.create_root_task_spinner);
         Assert.assertTrue(mCreateRootTaskSpinner != null);
 
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCreateRootTaskSpinner.setAdapter(adapter);
+
         if (intent.hasExtra(ROOT_TASK_ID_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
 
@@ -302,12 +306,12 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
         mCreateRootTaskName.setVisibility(View.VISIBLE);
         mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
 
-        int spinnerPosition = 0;
+        int spinnerPosition;
         int count = 1;
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(POSITION_KEY)) {
-            int position = mSavedInstanceState.getInt(POSITION_KEY, -1);
-            Assert.assertTrue(position != -1);
-            if (position > 0)
+            spinnerPosition = mSavedInstanceState.getInt(POSITION_KEY, -1);
+            Assert.assertTrue(spinnerPosition != -1);
+            if (spinnerPosition > 0)
                 count = 2;
         } else if (mRootTaskId != null) {
             Assert.assertTrue(mData.RootTaskData != null);
@@ -318,6 +322,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
             Fragment fragment;
             if (scheduleType == ScheduleType.SINGLE) {
                 fragment = SingleScheduleFragment.newInstance(mRootTaskId);
+                spinnerPosition = 0;
             } else if (scheduleType == ScheduleType.DAILY) {
                 fragment = DailyScheduleFragment.newInstance(mRootTaskId);
                 spinnerPosition = 1;
@@ -327,17 +332,15 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
             } else {
                 throw new IndexOutOfBoundsException("unknown schedule type");
             }
+
             getSupportFragmentManager().beginTransaction().replace(R.id.create_root_task_frame, fragment).commitAllowingStateLoss();
         } else {
+            spinnerPosition = 0;
             loadFragment(0);
         }
         final int finalCount = count;
 
         invalidateOptionsMenu();
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mCreateRootTaskSpinner.setAdapter(adapter);
 
         mCreateRootTaskSpinner.setSelection(spinnerPosition);
 
@@ -366,6 +369,7 @@ public class CreateRootTaskActivity extends AppCompatActivity implements LoaderM
 
     @Override
     public void onLoaderReset(Loader<CreateRootTaskLoader.Data> loader) {
+
     }
 
     public void setTimeValid(boolean valid) {

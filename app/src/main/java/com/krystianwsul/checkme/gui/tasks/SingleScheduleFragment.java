@@ -412,6 +412,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         } else {
             mDate = Date.today();
             mTimePairPersist = new TimePairPersist();
+            mInitialHourMinute = mTimePairPersist.getHourMinute();
         }
 
         updateDateText();

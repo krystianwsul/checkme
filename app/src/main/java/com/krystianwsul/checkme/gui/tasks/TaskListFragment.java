@@ -84,15 +84,15 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     TaskListLoader.TaskData taskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mTaskData;
 
                     if (taskData.IsRootTask)
-                        startActivity(CreateRootTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
+                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
                     else
-                        startActivity(CreateChildTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
+                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
                     break;
                 case R.id.action_task_join:
                     if (mTaskId == null)
-                        startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds));
                     else
-                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), taskIds, mTaskId));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, mTaskId));
                     break;
                 case R.id.action_task_delete:
                     do {
@@ -330,9 +330,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         mTaskListFragmentFab.setOnClickListener(v -> {
             if (mTaskId == null)
-                startActivity(CreateRootTaskActivity.getCreateIntent(getContext()));
+                startActivity(CreateTaskActivity.getCreateIntent(getContext()));
             else
-                startActivity(CreateChildTaskActivity.getCreateIntent(getActivity(), mTaskId));
+                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mTaskId));
         });
 
         mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds, mExpandedTaskIds);

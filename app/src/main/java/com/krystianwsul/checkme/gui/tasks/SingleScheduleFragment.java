@@ -100,7 +100,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         return new SingleScheduleFragment();
     }
 
-    public static SingleScheduleFragment newInstance(CreateRootTaskActivity.ScheduleHint scheduleHint) {
+    public static SingleScheduleFragment newInstance(CreateTaskActivity.ScheduleHint scheduleHint) {
         Assert.assertTrue(scheduleHint != null);
 
         SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
@@ -298,13 +298,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private void setValidTime() {
         if (isValidDateTime()) {
-            ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
-
             mSingleScheduleDateLayout.setError(null);
             mSingleScheduleTimeLayout.setError(null);
         } else {
-            ((CreateRootTaskActivity) getActivity()).setTimeValid(false);
-
             if (isValidDate()) {
                 mSingleScheduleDateLayout.setError(null);
                 mSingleScheduleTimeLayout.setError(getString(R.string.error_time));
@@ -316,36 +312,51 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public void createRootTask(String name) {
+    public boolean createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Assert.assertTrue(mRootTaskId == null);
 
+        if (!isValidDateTime())
+            return false;
+
         DomainFactory.getDomainFactory(getActivity()).createSingleScheduleRootTask(mData.DataId, name, mDate, mTimePairPersist.getTimePair());
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     @Override
-    public void updateRootTask(int rootTaskId, String name) {
+    public boolean updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (!isValidDateTime())
+            return false;
 
         DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleRootTask(mData.DataId, rootTaskId, name, mDate, mTimePairPersist.getTimePair());
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     @Override
-    public void createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
+    public boolean createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         Assert.assertTrue(mRootTaskId == null);
 
+        if (!isValidDateTime())
+            return false;
+
         DomainFactory.getDomainFactory(getActivity()).createSingleScheduleJoinRootTask(mData.DataId, name, mDate, mTimePairPersist.getTimePair(), joinTaskIds);
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     @Override
@@ -383,7 +394,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             } else {
                 Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
 
-                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
                 Assert.assertTrue(scheduleHint != null);
 
                 mDate = scheduleHint.mDate;
@@ -421,7 +432,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
             Date initialDate;
             if (args != null && args.containsKey(SCHEDULE_HINT_KEY)) {
-                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
                 Assert.assertTrue(scheduleHint != null);
 
                 initialDate = scheduleHint.mDate;

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -9,11 +10,16 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -24,7 +30,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public abstract class CreateTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
+public class CreateTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
     protected static final String DISCARD_TAG = "discard";
 
     protected static final String TASK_ID_KEY = "taskId";
@@ -36,15 +42,77 @@ public abstract class CreateTaskActivity extends AppCompatActivity implements Lo
     protected Bundle mSavedInstanceState;
     protected EditText mCreateTaskName;
 
+    protected FrameLayout mCreateTaskParentFrame;
+    protected FrameLayout mCreateTaskScheduleFrame;
+
     protected final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateTaskActivity.this::finish;
 
     protected Integer mTaskId;
     protected ArrayList<Integer> mTaskIds;
 
-    protected CreateRootTaskActivity.ScheduleHint mScheduleHint;
+    protected CreateTaskActivity.ScheduleHint mScheduleHint;
     protected Integer mParentTaskIdHint = null;
 
     protected CreateTaskLoader.Data mData;
+
+    public static Intent getCreateIntent(Context context) {
+        Assert.assertTrue(context != null);
+        return new Intent(context, CreateTaskActivity.class);
+    }
+
+    public static Intent getCreateIntent(Context context, ScheduleHint scheduleHint) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(scheduleHint != null);
+
+        Intent intent = new Intent(context, CreateTaskActivity.class);
+        intent.putExtra(SCHEDULE_HINT_KEY, scheduleHint);
+        return intent;
+    }
+
+    public static Intent getCreateIntent(Context context, int parentTaskIdHint) {
+        Intent intent = new Intent(context, CreateTaskActivity.class);
+        intent.putExtra(PARENT_TASK_ID_HINT_KEY, parentTaskIdHint);
+        return intent;
+    }
+
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        Intent intent = new Intent(context, CreateTaskActivity.class);
+        intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
+        return intent;
+    }
+
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, int parentTaskIdHint) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        Intent intent = new Intent(context, CreateTaskActivity.class);
+        intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
+        intent.putExtra(PARENT_TASK_ID_HINT_KEY, parentTaskIdHint);
+        return intent;
+    }
+
+    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, ScheduleHint scheduleHint) {
+        Assert.assertTrue(context != null);
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+        Assert.assertTrue(scheduleHint != null);
+
+        Intent intent = new Intent(context, CreateTaskActivity.class);
+        intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
+        intent.putExtra(SCHEDULE_HINT_KEY, scheduleHint);
+        return intent;
+    }
+
+    public static Intent getEditIntent(Context context, int taskId) {
+        Intent intent = new Intent(context, CreateTaskActivity.class);
+        intent.putExtra(TASK_ID_KEY, taskId);
+        return intent;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -58,6 +126,69 @@ public abstract class CreateTaskActivity extends AppCompatActivity implements Lo
 
         menu.findItem(R.id.action_create_task_save).setVisible(mData != null);
 
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_create_task_save:
+                Assert.assertTrue(mData != null);
+                Assert.assertTrue(mCreateTaskName != null);
+
+                String name = mCreateTaskName.getText().toString().trim();
+
+                if (TextUtils.isEmpty(name))
+                    break;
+
+                if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
+                    ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
+                    Assert.assertTrue(parentFragment != null);
+
+                    int parentTaskId = parentFragment.getParentTaskId();
+
+                    if (mParentTaskIdHint != null) {
+                        Assert.assertTrue(mTaskId == null);
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        if (mTaskIds != null)
+                            DomainFactory.getDomainFactory(CreateTaskActivity.this).createJoinChildTask(mData.DataId, parentTaskId, name, mTaskIds);
+                        else
+                            DomainFactory.getDomainFactory(CreateTaskActivity.this).createChildTask(mData.DataId, parentTaskId, name);
+                    } else {
+                        Assert.assertTrue(mTaskId != null);
+                        Assert.assertTrue(mData.TaskData != null);
+                        Assert.assertTrue(mTaskIds == null);
+
+                        DomainFactory.getDomainFactory(CreateTaskActivity.this).updateChildTask(mData.DataId, mTaskId, name, parentTaskId);
+                    }
+
+                    finish();
+                } else {
+                    SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
+                    Assert.assertTrue(schedulePickerFragment != null);
+
+                    boolean finish;
+                    if (mTaskId != null) {
+                        finish = schedulePickerFragment.updateRootTask(mTaskId, name);
+                    } else if (mTaskIds != null) {
+                        finish = schedulePickerFragment.createRootJoinTask(name, mTaskIds);
+                    } else {
+                        finish = schedulePickerFragment.createRootTask(name);
+                    }
+
+                    if (finish)
+                        finish();
+                }
+
+                break;
+            case android.R.id.home:
+                if (tryClose())
+                    finish();
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
         return true;
     }
 
@@ -81,6 +212,12 @@ public abstract class CreateTaskActivity extends AppCompatActivity implements Lo
 
         mCreateTaskName = (EditText) findViewById(R.id.create_task_name);
         Assert.assertTrue(mCreateTaskName != null);
+
+        mCreateTaskParentFrame = (FrameLayout) findViewById(R.id.create_task_parent_frame);
+        Assert.assertTrue(mCreateTaskParentFrame != null);
+
+        mCreateTaskScheduleFrame = (FrameLayout) findViewById(R.id.create_task_schedule_frame);
+        Assert.assertTrue(mCreateTaskScheduleFrame != null);
 
         Intent intent = getIntent();
         if (intent.hasExtra(TASK_ID_KEY)) {
@@ -125,6 +262,148 @@ public abstract class CreateTaskActivity extends AppCompatActivity implements Lo
     @Override
     public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
         return new CreateTaskLoader(this, mTaskId);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
+        mData = data;
+
+        mCreateTaskName.setVisibility(View.VISIBLE);
+
+        if (mData.TaskData != null && mSavedInstanceState == null) {
+            Assert.assertTrue(mTaskId != null);
+
+            mCreateTaskName.setText(mData.TaskData.Name);
+        }
+
+        Assert.assertTrue(mData.TaskData != null || (mParentTaskIdHint != null || mScheduleHint != null));
+
+        if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
+            mCreateTaskParentFrame.setVisibility(View.VISIBLE);
+
+            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
+            if (parentFragment == null) {
+                if (mParentTaskIdHint != null) {
+                    Assert.assertTrue(mTaskId == null);
+
+                    if (mTaskIds != null)
+                        parentFragment = ParentFragment.getJoinInstance(mParentTaskIdHint, mTaskIds);
+                    else
+                        parentFragment = ParentFragment.getCreateInstance(mParentTaskIdHint);
+                } else {
+                    Assert.assertTrue(mTaskId != null);
+                    Assert.assertTrue(mTaskIds == null);
+
+                    parentFragment = ParentFragment.getEditInstance(mTaskId);
+                }
+
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.create_task_parent_frame, parentFragment)
+                        .commitAllowingStateLoss();
+            }
+        } else {
+            mCreateTaskScheduleFrame.setVisibility(View.VISIBLE);
+
+            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
+            if (schedulePickerFragment == null) {
+                if (mTaskId != null) {
+                    Assert.assertTrue(mTaskIds == null);
+                    Assert.assertTrue(mScheduleHint == null);
+
+                    schedulePickerFragment = SchedulePickerFragment.getEditInstance(mTaskId);
+                } else if (mTaskIds != null) {
+                    if (mScheduleHint == null)
+                        schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
+                    else
+                        schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds, mScheduleHint);
+                } else {
+                    if (mScheduleHint == null)
+                        schedulePickerFragment = SchedulePickerFragment.getCreateInstance();
+                    else
+                        schedulePickerFragment = SchedulePickerFragment.getCreateInstance(mScheduleHint);
+                }
+
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.create_task_schedule_frame, schedulePickerFragment)
+                        .commitAllowingStateLoss();
+            }
+        }
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (tryClose())
+            super.onBackPressed();
+    }
+
+    protected boolean tryClose() {
+        if (dataChanged()) {
+            DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
+            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
+            discardDialogFragment.show(getSupportFragmentManager(), DISCARD_TAG);
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean dataChanged() {
+        if (mData == null)
+            return false;
+
+        if (mTaskId != null) {
+            Assert.assertTrue(mData.TaskData != null);
+            Assert.assertTrue(mTaskIds == null);
+            Assert.assertTrue(mParentTaskIdHint == null);
+            Assert.assertTrue(mScheduleHint == null);
+
+            if (!mCreateTaskName.getText().toString().equals(mData.TaskData.Name))
+                return true;
+
+            if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
+                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
+                Assert.assertTrue(parentFragment != null);
+
+                if (parentFragment.dataChanged())
+                    return true;
+            } else {
+                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
+                Assert.assertTrue(schedulePickerFragment != null);
+
+                if (schedulePickerFragment.dataChanged())
+                    return true;
+            }
+        } else {
+            if (!TextUtils.isEmpty(mCreateTaskName.getText()))
+                return true;
+
+            if (mParentTaskIdHint != null) {
+                Assert.assertTrue(mScheduleHint == null);
+
+                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
+                Assert.assertTrue(parentFragment != null);
+
+                if (parentFragment.dataChanged())
+                    return true;
+            } else {
+                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
+                Assert.assertTrue(schedulePickerFragment != null);
+
+                if (schedulePickerFragment.dataChanged())
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     public static class ScheduleHint implements Parcelable {

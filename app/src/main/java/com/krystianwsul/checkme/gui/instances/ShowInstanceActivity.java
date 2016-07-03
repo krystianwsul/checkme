@@ -17,8 +17,7 @@ import android.view.MenuItem;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity;
-import com.krystianwsul.checkme.gui.tasks.CreateRootTaskActivity;
+import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.notifications.TickService;
@@ -121,9 +120,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 Assert.assertTrue(mData.TaskCurrent);
 
                 if (mData.IsRootTask)
-                    startActivity(CreateRootTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
                 else
-                    startActivity(CreateChildTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
                 break;
             case R.id.instance_menu_delete_task:
                 Assert.assertTrue(mData != null);

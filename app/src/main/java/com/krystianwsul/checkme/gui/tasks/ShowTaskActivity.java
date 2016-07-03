@@ -83,9 +83,9 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
         switch (item.getItemId()) {
             case R.id.task_menu_edit:
                 if (mData.IsRootTask)
-                    startActivity(CreateRootTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
                 else
-                    startActivity(CreateChildTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
                 break;
             case R.id.task_menu_delete:
                 ArrayList<Integer> dataIds = new ArrayList<>();

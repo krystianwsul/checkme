@@ -109,7 +109,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         return new DailyScheduleFragment();
     }
 
-    public static DailyScheduleFragment newInstance(CreateRootTaskActivity.ScheduleHint scheduleHint) {
+    public static DailyScheduleFragment newInstance(CreateTaskActivity.ScheduleHint scheduleHint) {
         Assert.assertTrue(scheduleHint != null);
 
         DailyScheduleFragment dailyScheduleFragment = new DailyScheduleFragment();
@@ -159,7 +159,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             } else {
                 Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
 
-                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
                 Assert.assertTrue(scheduleHint != null);
 
                 mHourMinute = scheduleHint.mHourMinute;
@@ -168,8 +168,6 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
         mDailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
         Assert.assertTrue(mDailyScheduleFab != null);
-
-        ((CreateRootTaskActivity) getActivity()).setTimeValid(false);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -228,8 +226,6 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             mTimeEntryAdapter.addTimeEntry();
         });
         mDailyScheduleFab.setVisibility(View.VISIBLE);
-
-        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
     }
 
     @Override
@@ -258,10 +254,13 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     }
 
     @Override
-    public void createRootTask(String name) {
+    public boolean createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Assert.assertTrue(mRootTaskId == null);
+
+        if (mData == null)
+            return false;
 
         List<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
@@ -269,11 +268,16 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         DomainFactory.getDomainFactory(getActivity()).createDailyScheduleRootTask(mData.DataId, name, timePairs);
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     @Override
-    public void updateRootTask(int rootTaskId, String name) {
+    public boolean updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
 
         List<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
@@ -281,15 +285,20 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleRootTask(mData.DataId, rootTaskId, name, timePairs);
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     @Override
-    public void createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
+    public boolean createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         Assert.assertTrue(mRootTaskId == null);
+
+        if (mData == null)
+            return false;
 
         List<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
@@ -297,6 +306,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         DomainFactory.getDomainFactory(getActivity()).createDailyScheduleJoinRootTask(mData.DataId, name, timePairs, joinTaskIds);
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {

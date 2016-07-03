@@ -116,7 +116,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         return new WeeklyScheduleFragment();
     }
 
-    public static WeeklyScheduleFragment newInstance(CreateRootTaskActivity.ScheduleHint scheduleHint) {
+    public static WeeklyScheduleFragment newInstance(CreateTaskActivity.ScheduleHint scheduleHint) {
         Assert.assertTrue(scheduleHint != null);
 
         WeeklyScheduleFragment weeklyScheduleFragment = new WeeklyScheduleFragment();
@@ -165,7 +165,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             } else {
                 Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
 
-                CreateRootTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
                 Assert.assertTrue(scheduleHint != null);
 
                 mDayOfWeek = scheduleHint.mDate.getDayOfWeek();
@@ -177,8 +177,6 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
         mWeeklyScheduleFab = (FloatingActionButton) view.findViewById(R.id.weekly_schedule_fab);
         Assert.assertTrue(mWeeklyScheduleFab != null);
-
-        ((CreateRootTaskActivity) getActivity()).setTimeValid(false);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -237,8 +235,6 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             mDayOfWeekTimeEntryAdapter.addDayOfWeekTimeEntry();
         });
         mWeeklyScheduleFab.setVisibility(View.VISIBLE);
-
-        ((CreateRootTaskActivity) getActivity()).setTimeValid(true);
     }
 
     @Override
@@ -269,8 +265,11 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public void createRootTask(String name) {
+    public boolean createRootTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
 
         ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -278,11 +277,16 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         DomainFactory.getDomainFactory(getActivity()).createWeeklyScheduleRootTask(mData.DataId, name, dayOfWeekTimePairs);
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     @Override
-    public void updateRootTask(int rootTaskId, String name) {
+    public boolean updateRootTask(int rootTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
 
         ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -290,13 +294,18 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         DomainFactory.getDomainFactory(getActivity()).updateWeeklyScheduleRootTask(mData.DataId, rootTaskId, name, dayOfWeekTimePairs);
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     @Override
-    public void createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
+    public boolean createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
+
+        if (mData == null)
+            return false;
 
         ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -304,6 +313,8 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         DomainFactory.getDomainFactory(getActivity()).createWeeklyScheduleJoinRootTask(mData.DataId, name, dayOfWeekTimePairs, joinTaskIds);
 
         TickService.startService(getActivity());
+
+        return true;
     }
 
     private class DayOfWeekTimeEntryAdapter extends RecyclerView.Adapter<DayOfWeekTimeEntryAdapter.DayOfWeekTimeHolder> {

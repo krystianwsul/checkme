@@ -37,8 +37,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.tasks.CreateChildTaskActivity;
-import com.krystianwsul.checkme.gui.tasks.CreateRootTaskActivity;
+import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.gui.tree.NodeContainer;
@@ -144,9 +143,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(instanceData3.TaskCurrent);
 
                     if (instanceData3.IsRootTask)
-                        startActivity(CreateRootTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
+                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
                     else
-                        startActivity(CreateChildTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
+                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
                     break;
                 case R.id.action_group_delete_task: {
                     ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(instanceDatas)
@@ -185,12 +184,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         if (mPosition != null) {
                             Assert.assertTrue(mTimeRange != null);
 
-                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds, new CreateRootTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition))));
+                            startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition))));
                         } else {
-                            startActivity(CreateRootTaskActivity.getJoinIntent(getActivity(), taskIds));
+                            startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds));
                         }
                     } else {
-                        startActivity(CreateChildTaskActivity.getJoinIntent(getActivity(), taskIds, mInstanceKey.TaskId));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, mInstanceKey.TaskId));
                     }
                     break;
                 default:
@@ -606,7 +605,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             Assert.assertTrue(data.TaskEditable == null);
 
             showFab = true;
-            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, new CreateRootTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition)))));
+            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition)))));
 
             emptyTextId = R.string.instances_empty_root;
         } else if (mTimeStamp != null) {
@@ -617,7 +616,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             if (mTimeStamp.compareTo(TimeStamp.getNow()) > 0) {
                 showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateRootTaskActivity.getCreateIntent(activity, new CreateRootTaskActivity.ScheduleHint(mTimeStamp))));
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(mTimeStamp))));
             } else {
                 showFab = false;
             }
@@ -630,7 +629,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             if (data.TaskEditable) {
                 showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateChildTaskActivity.getCreateIntent(activity, mInstanceKey.TaskId)));
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, mInstanceKey.TaskId)));
 
                 emptyTextId = R.string.empty_child;
             } else {

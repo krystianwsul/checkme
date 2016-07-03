@@ -35,11 +35,7 @@
         <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
 
         <activity
-            android:name=".gui.tasks.CreateRootTaskActivity"
-            android:windowSoftInputMode="stateVisible" />
-
-        <activity
-            android:name=".gui.tasks.CreateChildTaskActivity"
+            android:name=".gui.tasks.CreateTaskActivity"
             android:windowSoftInputMode="stateVisible" />
 
         <activity android:name=".gui.instances.EditInstanceActivity" />

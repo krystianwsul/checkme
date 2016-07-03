@@ -19,7 +19,6 @@ import android.widget.FrameLayout;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -141,45 +140,47 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 if (TextUtils.isEmpty(name))
                     break;
 
+                boolean finish;
                 if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
                     ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
                     Assert.assertTrue(parentFragment != null);
 
-                    int parentTaskId = parentFragment.getParentTaskId();
-
-                    if (mParentTaskIdHint != null) {
-                        Assert.assertTrue(mTaskId == null);
-                        Assert.assertTrue(mData.TaskData == null);
-
-                        if (mTaskIds != null)
-                            DomainFactory.getDomainFactory(CreateTaskActivity.this).createJoinChildTask(mData.DataId, parentTaskId, name, mTaskIds);
-                        else
-                            DomainFactory.getDomainFactory(CreateTaskActivity.this).createChildTask(mData.DataId, parentTaskId, name);
-                    } else {
-                        Assert.assertTrue(mTaskId != null);
+                    if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(CreateTaskActivity.this).updateChildTask(mData.DataId, mTaskId, name, parentTaskId);
-                    }
+                        finish = parentFragment.updateTask(mTaskId, name);
+                    } else if (mTaskIds != null) {
+                        Assert.assertTrue(mData.TaskData == null);
 
-                    finish();
+                        finish = parentFragment.createJoinTask(name, mTaskIds);
+                    } else {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        finish = parentFragment.createTask(name);
+                    }
                 } else {
                     SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
                     Assert.assertTrue(schedulePickerFragment != null);
 
-                    boolean finish;
                     if (mTaskId != null) {
-                        finish = schedulePickerFragment.updateRootTask(mTaskId, name);
-                    } else if (mTaskIds != null) {
-                        finish = schedulePickerFragment.createRootJoinTask(name, mTaskIds);
-                    } else {
-                        finish = schedulePickerFragment.createRootTask(name);
-                    }
+                        Assert.assertTrue(mData.TaskData != null);
+                        Assert.assertTrue(mTaskIds == null);
 
-                    if (finish)
-                        finish();
+                        finish = schedulePickerFragment.updateTask(mTaskId, name);
+                    } else if (mTaskIds != null) {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        finish = schedulePickerFragment.createJoinTask(name, mTaskIds);
+                    } else {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        finish = schedulePickerFragment.createTask(name);
+                    }
                 }
+
+                if (finish)
+                    finish();
 
                 break;
             case android.R.id.home:
@@ -283,18 +284,19 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
             if (parentFragment == null) {
-                if (mParentTaskIdHint != null) {
-                    Assert.assertTrue(mTaskId == null);
-
-                    if (mTaskIds != null)
-                        parentFragment = ParentFragment.getJoinInstance(mParentTaskIdHint, mTaskIds);
-                    else
-                        parentFragment = ParentFragment.getCreateInstance(mParentTaskIdHint);
-                } else {
-                    Assert.assertTrue(mTaskId != null);
+                if (mTaskId != null) {
                     Assert.assertTrue(mTaskIds == null);
+                    Assert.assertTrue(mParentTaskIdHint == null);
 
                     parentFragment = ParentFragment.getEditInstance(mTaskId);
+                } else if (mTaskIds != null) {
+                    Assert.assertTrue(mParentTaskIdHint != null);
+
+                    parentFragment = ParentFragment.getJoinInstance(mParentTaskIdHint, mTaskIds);
+                } else {
+                    Assert.assertTrue(mParentTaskIdHint != null);
+
+                    parentFragment = ParentFragment.getCreateInstance(mParentTaskIdHint);
                 }
 
                 getSupportFragmentManager().beginTransaction()

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.loaders.ParentLoader;
 
 import junit.framework.Assert;
@@ -255,5 +257,40 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
 
     public int getParentTaskId() {
         return mParent.TaskId;
+    }
+
+    public boolean updateTask(int taskId, String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
+
+        DomainFactory.getDomainFactory(getActivity()).updateChildTask(mData.DataId, taskId, name, getParentTaskId());
+
+        return true;
+    }
+
+    public boolean createJoinTask(String name, List<Integer> taskIds) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(taskIds != null);
+        Assert.assertTrue(taskIds.size() > 1);
+
+        if (mData == null)
+            return false;
+
+        DomainFactory.getDomainFactory(getActivity()).createJoinChildTask(mData.DataId, getParentTaskId(), name, taskIds);
+
+        return true;
+    }
+
+    public boolean createTask(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
+
+        DomainFactory.getDomainFactory(getActivity()).createChildTask(mData.DataId, getParentTaskId(), name);
+
+        return true;
     }
 }

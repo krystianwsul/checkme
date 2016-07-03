@@ -319,21 +319,21 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
         }
     }
 
-    public boolean updateRootTask(int rootTaskId, String name) {
+    public boolean updateTask(int rootTaskId, String name) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
         Assert.assertTrue(scheduleFragment != null);
 
         return scheduleFragment.updateRootTask(rootTaskId, name);
     }
 
-    public boolean createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
+    public boolean createJoinTask(String name, ArrayList<Integer> joinTaskIds) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
         Assert.assertTrue(scheduleFragment != null);
 
         return scheduleFragment.createRootJoinTask(name, joinTaskIds);
     }
 
-    public boolean createRootTask(String name) {
+    public boolean createTask(String name) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
         Assert.assertTrue(scheduleFragment != null);
 

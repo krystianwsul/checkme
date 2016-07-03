@@ -1230,7 +1230,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createJoinChildTask(int dataId, int parentTaskId, String name, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createJoinChildTask(int dataId, int parentTaskId, String name, List<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
@@ -1681,7 +1681,7 @@ public class DomainFactory {
         }
     }
 
-    private void joinChildTasks(Task oldParentTask, Task newParentTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp now) {
+    private void joinChildTasks(Task oldParentTask, Task newParentTask, List<Integer> joinTaskIds, ExactTimeStamp now) {
         Assert.assertTrue(oldParentTask != null);
         Assert.assertTrue(oldParentTask.current(now));
         Assert.assertTrue(newParentTask != null);

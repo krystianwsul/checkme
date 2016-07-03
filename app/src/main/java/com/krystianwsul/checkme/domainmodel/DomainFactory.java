@@ -594,14 +594,15 @@ public class DomainFactory {
         return new CreateTaskLoader.Data(taskData);
     }
 
-    public synchronized ParentLoader.Data getParentData(Integer childTaskId, Context context) {
+    public synchronized ParentLoader.Data getParentData(Integer childTaskId, Context context, List<Integer> excludedTaskIds) {
         fakeDelay();
 
         Assert.assertTrue(context != null);
+        Assert.assertTrue(excludedTaskIds != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TreeMap<Integer, ParentLoader.TaskData> taskDatas = getTaskDatas(context, now);
+        TreeMap<Integer, ParentLoader.TaskData> taskDatas = getTaskDatas(context, now, excludedTaskIds);
         Assert.assertTrue(taskDatas != null);
 
         ParentLoader.ChildTaskData childTaskData = null;
@@ -1912,17 +1913,20 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    private TreeMap<Integer, ParentLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask, Context context) {
+    private TreeMap<Integer, ParentLoader.TaskData> getChildTaskDatas(ExactTimeStamp now, Task parentTask, Context context, List<Integer> excludedTaskIds) {
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(context != null);
+        Assert.assertTrue(excludedTaskIds != null);
 
         return Stream.of(parentTask.getChildTasks(now))
-                .collect(Collectors.toMap(Task::getId, childTask -> new ParentLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask, context), childTask.getId(), childTask.getScheduleText(context, now)), TreeMap::new));
+                .filterNot(childTask -> excludedTaskIds.contains(childTask.getId()))
+                .collect(Collectors.toMap(Task::getId, childTask -> new ParentLoader.TaskData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskIds), childTask.getId(), childTask.getScheduleText(context, now)), TreeMap::new));
     }
 
-    private TreeMap<Integer, ParentLoader.TaskData> getTaskDatas(Context context, ExactTimeStamp now) {
+    private TreeMap<Integer, ParentLoader.TaskData> getTaskDatas(Context context, ExactTimeStamp now, List<Integer> excludedTaskIds) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(now != null);
+        Assert.assertTrue(excludedTaskIds != null);
 
         TreeMap<Integer, ParentLoader.TaskData> taskDatas = new TreeMap<>((lhs, rhs) -> -lhs.compareTo(rhs));
 
@@ -1937,7 +1941,10 @@ public class DomainFactory {
             if (!task.isRootTask(now))
                 continue;
 
-            taskDatas.put(task.getId(), new ParentLoader.TaskData(task.getName(), getChildTaskDatas(now, task, context), task.getId(), task.getScheduleText(context, now)));
+            if (excludedTaskIds.contains(task.getId()))
+                continue;
+
+            taskDatas.put(task.getId(), new ParentLoader.TaskData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskIds), task.getId(), task.getScheduleText(context, now)));
         }
 
         return taskDatas;

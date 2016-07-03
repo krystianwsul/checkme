@@ -146,7 +146,20 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<ParentLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new ParentLoader(getActivity(), mChildTaskId);
+        List<Integer> excludedTaskIds = new ArrayList<>();
+
+        if (mChildTaskId != null) {
+            Assert.assertTrue(mTaskIds == null);
+            Assert.assertTrue(mParentTaskId == null);
+
+            excludedTaskIds.add(mChildTaskId);
+        } else if (mTaskIds != null) {
+            Assert.assertTrue(mParentTaskId != null);
+
+            excludedTaskIds.addAll(mTaskIds);
+        }
+
+        return new ParentLoader(getActivity(), mChildTaskId, excludedTaskIds);
     }
 
     @Override

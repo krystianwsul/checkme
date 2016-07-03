@@ -7,20 +7,25 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
+import java.util.List;
 import java.util.TreeMap;
 
 public class ParentLoader extends DomainLoader<ParentLoader.Data> {
     private final Integer mChildTaskId;
+    private final List<Integer> mExcludedTaskIds;
 
-    public ParentLoader(Context context, Integer childTaskId) {
+    public ParentLoader(Context context, Integer childTaskId, List<Integer> excludedTaskIds) {
         super(context);
 
+        Assert.assertTrue(excludedTaskIds != null);
+
         mChildTaskId = childTaskId;
+        mExcludedTaskIds = excludedTaskIds;
     }
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getParentData(mChildTaskId, getContext());
+        return DomainFactory.getDomainFactory(getContext()).getParentData(mChildTaskId, getContext(), mExcludedTaskIds);
     }
 
     public static class Data extends DomainLoader.Data {

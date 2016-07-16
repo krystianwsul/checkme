@@ -35,6 +35,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
@@ -342,7 +343,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public boolean createRootJoinTask(String name, ArrayList<Integer> joinTaskIds) {
+    public boolean createRootJoinTask(String name, List<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);

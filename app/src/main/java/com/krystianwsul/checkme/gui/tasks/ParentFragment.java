@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ParentFragment extends Fragment implements LoaderManager.LoaderCallbacks<ParentLoader.Data> {
+public class ParentFragment extends Fragment implements LoaderManager.LoaderCallbacks<ParentLoader.Data>, CreateTaskFragment {
     private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
 
     private static final String PARENT_ID = "parentId";
@@ -207,6 +207,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @SuppressWarnings("RedundantIfStatement")
+    @Override
     public boolean dataChanged() {
         if (mData == null)
             return false;
@@ -259,6 +260,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         return mParent.TaskId;
     }
 
+    @Override
     public boolean updateTask(int taskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -270,6 +272,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         return true;
     }
 
+    @Override
     public boolean createJoinTask(String name, List<Integer> taskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(taskIds != null);
@@ -283,6 +286,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         return true;
     }
 
+    @Override
     public boolean createTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 

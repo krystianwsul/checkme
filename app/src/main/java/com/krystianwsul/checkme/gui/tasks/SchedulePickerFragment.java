@@ -21,16 +21,15 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class SchedulePickerFragment extends Fragment implements LoaderManager.LoaderCallbacks<SchedulePickerLoader.Data> {
+public class SchedulePickerFragment extends Fragment implements LoaderManager.LoaderCallbacks<SchedulePickerLoader.Data>, CreateTaskFragment {
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
     private static final String TASK_IDS_KEY = "taskIds";
     private static final String POSITION_KEY = "position";
     private static final String SCHEDULE_TYPE_CHANGED_KEY = "scheduleTypeChanged";
 
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
-
-    private static final String DISCARD_TAG = "discard";
 
     private CreateTaskActivity.ScheduleHint mScheduleHint;
 
@@ -286,6 +285,7 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     }
 
     @SuppressWarnings("RedundantIfStatement")
+    @Override
     public boolean dataChanged() {
         if (mData == null)
             return false;
@@ -319,6 +319,7 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
         }
     }
 
+    @Override
     public boolean updateTask(int rootTaskId, String name) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
         Assert.assertTrue(scheduleFragment != null);
@@ -326,13 +327,15 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
         return scheduleFragment.updateRootTask(rootTaskId, name);
     }
 
-    public boolean createJoinTask(String name, ArrayList<Integer> joinTaskIds) {
+    @Override
+    public boolean createJoinTask(String name, List<Integer> joinTaskIds) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
         Assert.assertTrue(scheduleFragment != null);
 
         return scheduleFragment.createRootJoinTask(name, joinTaskIds);
     }
 
+    @Override
     public boolean createTask(String name) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
         Assert.assertTrue(scheduleFragment != null);

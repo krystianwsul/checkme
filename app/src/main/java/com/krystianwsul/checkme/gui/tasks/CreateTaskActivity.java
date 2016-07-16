@@ -11,11 +11,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.FrameLayout;
+import android.widget.Spinner;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
@@ -30,29 +33,30 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class CreateTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
-    protected static final String DISCARD_TAG = "discard";
+    private static final String DISCARD_TAG = "discard";
 
-    protected static final String TASK_ID_KEY = "taskId";
-    protected static final String TASK_IDS_KEY = "taskIds";
+    private static final String TASK_ID_KEY = "taskId";
+    private static final String TASK_IDS_KEY = "taskIds";
 
-    protected static final String PARENT_TASK_ID_HINT_KEY = "parentTaskIdHint";
-    protected static final String SCHEDULE_HINT_KEY = "scheduleHint";
+    private static final String PARENT_TASK_ID_HINT_KEY = "parentTaskIdHint";
+    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
-    protected Bundle mSavedInstanceState;
-    protected EditText mCreateTaskName;
+    private static final String POSITION_KEY = "position";
 
-    protected FrameLayout mCreateTaskParentFrame;
-    protected FrameLayout mCreateTaskScheduleFrame;
+    private Bundle mSavedInstanceState;
+    private EditText mCreateTaskName;
 
-    protected final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateTaskActivity.this::finish;
+    private Spinner mCreateTaskSpinner;
 
-    protected Integer mTaskId;
-    protected ArrayList<Integer> mTaskIds;
+    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateTaskActivity.this::finish;
 
-    protected CreateTaskActivity.ScheduleHint mScheduleHint;
-    protected Integer mParentTaskIdHint = null;
+    private Integer mTaskId;
+    private ArrayList<Integer> mTaskIds;
 
-    protected CreateTaskLoader.Data mData;
+    private CreateTaskActivity.ScheduleHint mScheduleHint;
+    private Integer mParentTaskIdHint = null;
+
+    private CreateTaskLoader.Data mData;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -141,42 +145,23 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     break;
 
                 boolean finish;
-                if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
-                    ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
-                    Assert.assertTrue(parentFragment != null);
 
-                    if (mTaskId != null) {
-                        Assert.assertTrue(mData.TaskData != null);
-                        Assert.assertTrue(mTaskIds == null);
+                CreateTaskFragment createTaskFragment = (CreateTaskFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+                Assert.assertTrue(createTaskFragment != null);
 
-                        finish = parentFragment.updateTask(mTaskId, name);
-                    } else if (mTaskIds != null) {
-                        Assert.assertTrue(mData.TaskData == null);
+                if (mTaskId != null) {
+                    Assert.assertTrue(mData.TaskData != null);
+                    Assert.assertTrue(mTaskIds == null);
 
-                        finish = parentFragment.createJoinTask(name, mTaskIds);
-                    } else {
-                        Assert.assertTrue(mData.TaskData == null);
+                    finish = createTaskFragment.updateTask(mTaskId, name);
+                } else if (mTaskIds != null) {
+                    Assert.assertTrue(mData.TaskData == null);
 
-                        finish = parentFragment.createTask(name);
-                    }
+                    finish = createTaskFragment.createJoinTask(name, mTaskIds);
                 } else {
-                    SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
-                    Assert.assertTrue(schedulePickerFragment != null);
+                    Assert.assertTrue(mData.TaskData == null);
 
-                    if (mTaskId != null) {
-                        Assert.assertTrue(mData.TaskData != null);
-                        Assert.assertTrue(mTaskIds == null);
-
-                        finish = schedulePickerFragment.updateTask(mTaskId, name);
-                    } else if (mTaskIds != null) {
-                        Assert.assertTrue(mData.TaskData == null);
-
-                        finish = schedulePickerFragment.createJoinTask(name, mTaskIds);
-                    } else {
-                        Assert.assertTrue(mData.TaskData == null);
-
-                        finish = schedulePickerFragment.createTask(name);
-                    }
+                    finish = createTaskFragment.createTask(name);
                 }
 
                 if (finish)
@@ -214,11 +199,12 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mCreateTaskName = (EditText) findViewById(R.id.create_task_name);
         Assert.assertTrue(mCreateTaskName != null);
 
-        mCreateTaskParentFrame = (FrameLayout) findViewById(R.id.create_task_parent_frame);
-        Assert.assertTrue(mCreateTaskParentFrame != null);
+        mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
+        Assert.assertTrue(mCreateTaskSpinner != null);
 
-        mCreateTaskScheduleFrame = (FrameLayout) findViewById(R.id.create_task_schedule_frame);
-        Assert.assertTrue(mCreateTaskScheduleFrame != null);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.task_spinner, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCreateTaskSpinner.setAdapter(adapter);
 
         Intent intent = getIntent();
         if (intent.hasExtra(TASK_ID_KEY)) {
@@ -277,13 +263,24 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             mCreateTaskName.setText(mData.TaskData.Name);
         }
 
+        mCreateTaskSpinner.setVisibility(View.VISIBLE);
+
+        int count = 0;
+        if (mSavedInstanceState != null) {
+            count++;
+
+            if (mSavedInstanceState.getInt(POSITION_KEY) != 0)
+                count++;
+        }
+
         Assert.assertTrue(mData.TaskData != null || (mParentTaskIdHint != null || mScheduleHint != null));
 
         if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
-            mCreateTaskParentFrame.setVisibility(View.VISIBLE);
+            if (mSavedInstanceState == null) {
+                count++;
+                mCreateTaskSpinner.setSelection(1);
 
-            ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
-            if (parentFragment == null) {
+                ParentFragment parentFragment;
                 if (mTaskId != null) {
                     Assert.assertTrue(mTaskIds == null);
                     Assert.assertTrue(mParentTaskIdHint == null);
@@ -300,14 +297,12 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 }
 
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.create_task_parent_frame, parentFragment)
+                        .replace(R.id.create_task_frame, parentFragment)
                         .commitAllowingStateLoss();
             }
         } else {
-            mCreateTaskScheduleFrame.setVisibility(View.VISIBLE);
-
-            SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
-            if (schedulePickerFragment == null) {
+            if (mSavedInstanceState == null) {
+                SchedulePickerFragment schedulePickerFragment;
                 if (mTaskId != null) {
                     Assert.assertTrue(mTaskIds == null);
                     Assert.assertTrue(mScheduleHint == null);
@@ -326,10 +321,32 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 }
 
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.create_task_schedule_frame, schedulePickerFragment)
+                        .replace(R.id.create_task_frame, schedulePickerFragment)
                         .commitAllowingStateLoss();
             }
         }
+
+        final int finalCount = count;
+
+        mCreateTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            private int mCount = finalCount;
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (mCount > 0) {
+                    mCount--;
+                    return;
+                }
+
+                //keep fragments in one frame
+                Log.e("asdf", "selecting position " + position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         invalidateOptionsMenu();
     }
@@ -340,12 +357,19 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(POSITION_KEY, mCreateTaskSpinner.getSelectedItemPosition());
+    }
+
+    @Override
     public void onBackPressed() {
         if (tryClose())
             super.onBackPressed();
     }
 
-    protected boolean tryClose() {
+    private boolean tryClose() {
         if (dataChanged()) {
             DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
@@ -371,38 +395,22 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (!mCreateTaskName.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
-            if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
-                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
-                Assert.assertTrue(parentFragment != null);
+            CreateTaskFragment createTaskFragment = (CreateTaskFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+            Assert.assertTrue(createTaskFragment != null);
 
-                if (parentFragment.dataChanged())
-                    return true;
-            } else {
-                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
-                Assert.assertTrue(schedulePickerFragment != null);
-
-                if (schedulePickerFragment.dataChanged())
-                    return true;
-            }
+            if (createTaskFragment.dataChanged())
+                return true;
         } else {
             if (!TextUtils.isEmpty(mCreateTaskName.getText()))
                 return true;
 
-            if (mParentTaskIdHint != null) {
-                Assert.assertTrue(mScheduleHint == null);
+            Assert.assertTrue((mParentTaskIdHint == null) || (mScheduleHint == null));
 
-                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
-                Assert.assertTrue(parentFragment != null);
+            CreateTaskFragment createTaskFragment = (CreateTaskFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+            Assert.assertTrue(createTaskFragment != null);
 
-                if (parentFragment.dataChanged())
-                    return true;
-            } else {
-                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
-                Assert.assertTrue(schedulePickerFragment != null);
-
-                if (schedulePickerFragment.dataChanged())
-                    return true;
-            }
+            if (createTaskFragment.dataChanged())
+                return true;
         }
 
         return false;

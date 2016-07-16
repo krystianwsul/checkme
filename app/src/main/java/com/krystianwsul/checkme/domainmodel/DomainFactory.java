@@ -1138,7 +1138,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createSingleScheduleJoinRootTask(int dataId, String name, Date date, TimePair timePair, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createSingleScheduleJoinRootTask(int dataId, String name, Date date, TimePair timePair, List<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
@@ -1163,7 +1163,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createDailyScheduleJoinRootTask(int dataId, String name, List<TimePair> timePairs, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createDailyScheduleJoinRootTask(int dataId, String name, List<TimePair> timePairs, List<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -1187,7 +1187,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createWeeklyScheduleJoinRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ArrayList<Integer> joinTaskIds) {
+    public synchronized void createWeeklyScheduleJoinRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, List<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1655,7 +1655,7 @@ public class DomainFactory {
         }
     }
 
-    private void joinRootTasks(Task rootTask, ArrayList<Integer> joinTaskIds, ExactTimeStamp now) {
+    private void joinRootTasks(Task rootTask, List<Integer> joinTaskIds, ExactTimeStamp now) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(rootTask.current(now));
         Assert.assertTrue(rootTask.isRootTask(now));

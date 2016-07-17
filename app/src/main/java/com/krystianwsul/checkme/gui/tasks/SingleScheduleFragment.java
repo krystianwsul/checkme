@@ -335,7 +335,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         if (!isValidDateTime())
             return false;
 
-        DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleRootTask(mData.DataId, rootTaskId, name, mDate, mTimePairPersist.getTimePair());
+        DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleTask(mData.DataId, rootTaskId, name, mDate, mTimePairPersist.getTimePair());
 
         TickService.startService(getActivity());
 

@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -273,8 +273,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 count++;
         }
 
-        Assert.assertTrue(mData.TaskData != null || (mParentTaskIdHint != null || mScheduleHint != null));
-
         if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
             if (mSavedInstanceState == null) {
                 count++;
@@ -338,8 +336,36 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     return;
                 }
 
-                //keep fragments in one frame
-                Log.e("asdf", "selecting position " + position);
+                Fragment fragment;
+                if (position == 0) {
+                    if (mTaskId != null) {
+                        Assert.assertTrue(mTaskIds == null);
+
+                        fragment = SchedulePickerFragment.getEditInstance(mTaskId);
+                    } else if (mTaskIds != null) {
+                        fragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
+                    } else {
+                        fragment = SchedulePickerFragment.getCreateInstance();
+                    }
+                } else {
+                    Assert.assertTrue(position == 1);
+
+                    if (mTaskId != null) {
+                        Assert.assertTrue(mTaskIds == null);
+
+                        fragment = ParentFragment.getEditInstance(mTaskId);
+                    } else if (mTaskIds != null) {
+                        fragment = ParentFragment.getJoinInstance(mTaskIds);
+                    } else {
+                        fragment = ParentFragment.getCreateInstance();
+                    }
+                }
+
+                Assert.assertTrue(fragment != null);
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.create_task_frame, fragment)
+                        .commit();
             }
 
             @Override

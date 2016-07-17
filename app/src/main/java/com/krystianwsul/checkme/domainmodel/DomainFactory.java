@@ -611,15 +611,14 @@ public class DomainFactory {
             Assert.assertTrue(childTask != null);
 
             Task parentTask = childTask.getParentTask(now);
-            Assert.assertTrue(parentTask != null);
-
-            childTaskData = new ParentLoader.ChildTaskData(childTask.getName(), parentTask.getId());
+            if (parentTask != null)
+                childTaskData = new ParentLoader.ChildTaskData(childTask.getName(), parentTask.getId());
         }
 
         return new ParentLoader.Data(taskDatas, childTaskData);
     }
 
-    public synchronized SchedulePickerLoader.Data getSchedulePickerData(Context context, Integer rootTaskId) {
+    public synchronized SchedulePickerLoader.Data getSchedulePickerData(Context context, Integer taskId) {
         fakeDelay();
 
         Assert.assertTrue(context != null);
@@ -627,11 +626,12 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         SchedulePickerLoader.RootTaskData rootTaskData = null;
-        if (rootTaskId != null) {
-            Task rootTask = mTasks.get(rootTaskId);
-            Assert.assertTrue(rootTask != null);
+        if (taskId != null) {
+            Task task = mTasks.get(taskId);
+            Assert.assertTrue(task != null);
 
-            rootTaskData = new SchedulePickerLoader.RootTaskData(rootTask.getCurrentSchedule(now).getType());
+            if (task.isRootTask(now))
+                rootTaskData = new SchedulePickerLoader.RootTaskData(task.getCurrentSchedule(now).getType());
         }
 
         return new SchedulePickerLoader.Data(rootTaskData);
@@ -775,9 +775,8 @@ public class DomainFactory {
         } else {
             tasks = new ArrayList<>();
             for (Task rootTask : mTasks.values()) {
-                if (!rootTask.current(now)) {
+                if (!rootTask.current(now))
                     continue;
-                }
 
                 if (!rootTask.isVisible(now))
                     continue;
@@ -1057,83 +1056,103 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateSingleScheduleRootTask(int dataId, int rootTaskId, String name, Date date, TimePair timePair) {
+    public synchronized void updateSingleScheduleTask(int dataId, int taskId, String name, Date date, TimePair timePair) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
 
-        Task rootTask = mTasks.get(rootTaskId);
-        Assert.assertTrue(rootTask != null);
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
-        Assert.assertTrue(rootTask.current(now));
-        Assert.assertTrue(rootTask.isRootTask(now));
+        Assert.assertTrue(task.current(now));
 
-        rootTask.setName(name);
+        task.setName(name);
 
-        if (rootTask.getCurrentSchedule(now).getType() == ScheduleType.SINGLE) {
-            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(now);
+        if (task.isRootTask(now) && task.getCurrentSchedule(now).getType() == ScheduleType.SINGLE) {
+            SingleSchedule singleSchedule = (SingleSchedule) task.getCurrentSchedule(now);
 
-            Instance instance = singleSchedule.getInstance(rootTask);
+            Instance instance = singleSchedule.getInstance(task);
             Assert.assertTrue(instance != null);
 
             instance.setInstanceDateTime(date, timePair, now);
         } else {
-            rootTask.setScheduleEndExactTimeStamp(now);
+            if (task.isRootTask(now)) {
+                task.setScheduleEndExactTimeStamp(now);
+            } else {
+                TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+                Assert.assertTrue(taskHierarchy != null);
 
-            Schedule schedule = createSingleSchedule(rootTask, date, getTime(timePair), now);
+                taskHierarchy.setEndExactTimeStamp(now);
+            }
+
+            Schedule schedule = createSingleSchedule(task, date, getTime(timePair), now);
             Assert.assertTrue(schedule != null);
 
-            rootTask.addSchedule(schedule);
+            task.addSchedule(schedule);
         }
 
         save(dataId);
     }
 
-    public synchronized void updateDailyScheduleRootTask(int dataId, int rootTaskId, String name, List<TimePair> timePairs) {
+    public synchronized void updateDailyScheduleTask(int dataId, int taskId, String name, List<TimePair> timePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
 
-        Task rootTask = mTasks.get(rootTaskId);
-        Assert.assertTrue(rootTask != null);
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
-        Assert.assertTrue(rootTask.current(now));
-        Assert.assertTrue(rootTask.isRootTask(now));
+        Assert.assertTrue(task.current(now));
 
-        rootTask.setName(name);
-        rootTask.setScheduleEndExactTimeStamp(now);
+        task.setName(name);
+
+        if (task.isRootTask(now)) {
+            task.setScheduleEndExactTimeStamp(now);
+        } else {
+            TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+            Assert.assertTrue(taskHierarchy != null);
+
+            taskHierarchy.setEndExactTimeStamp(now);
+        }
 
         List<Time> times = getTimes(timePairs);
 
-        Schedule schedule = createDailySchedule(rootTask, times, now);
+        Schedule schedule = createDailySchedule(task, times, now);
         Assert.assertTrue(schedule != null);
 
-        rootTask.addSchedule(schedule);
+        task.addSchedule(schedule);
 
         save(dataId);
     }
 
-    public synchronized void updateWeeklyScheduleRootTask(int dataId, int rootTaskId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
+    public synchronized void updateWeeklyScheduleTask(int dataId, int taskId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        Task rootTask = mTasks.get(rootTaskId);
-        Assert.assertTrue(rootTask != null);
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
-        Assert.assertTrue(rootTask.current(now));
-        Assert.assertTrue(rootTask.isRootTask(now));
+        Assert.assertTrue(task.current(now));
 
-        rootTask.setName(name);
-        rootTask.setScheduleEndExactTimeStamp(now);
+        task.setName(name);
 
-        Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, now);
+        if (task.isRootTask(now)) {
+            task.setScheduleEndExactTimeStamp(now);
+        } else {
+            TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+            Assert.assertTrue(taskHierarchy != null);
+
+            taskHierarchy.setEndExactTimeStamp(now);
+        }
+
+        Schedule schedule = createWeeklySchedule(task, dayOfWeekTimePairs, now);
         Assert.assertTrue(schedule != null);
 
-        rootTask.addSchedule(schedule);
+        task.addSchedule(schedule);
 
         save(dataId);
     }
@@ -1158,7 +1177,7 @@ public class DomainFactory {
 
         rootTask.addSchedule(schedule);
 
-        joinRootTasks(rootTask, joinTaskIds, now);
+        joinTasks(rootTask, joinTaskIds, now);
 
         save(dataId);
     }
@@ -1182,7 +1201,7 @@ public class DomainFactory {
 
         rootTask.addSchedule(schedule);
 
-        joinRootTasks(rootTask, joinTaskIds, now);
+        joinTasks(rootTask, joinTaskIds, now);
 
         save(dataId);
     }
@@ -1204,7 +1223,7 @@ public class DomainFactory {
 
         rootTask.addSchedule(schedule);
 
-        joinRootTasks(rootTask, joinTaskIds, now);
+        joinTasks(rootTask, joinTaskIds, now);
 
         save(dataId);
     }
@@ -1250,35 +1269,35 @@ public class DomainFactory {
 
         createTaskHierarchy(parentTask, childTask, now);
 
-        joinChildTasks(parentTask, childTask, joinTaskIds, now);
+        joinTasks(childTask, joinTaskIds, now);
 
         save(dataId);
     }
 
-    public synchronized void updateChildTask(int dataId, int childTaskId, String name, int parentTaskId) {
+    public synchronized void updateChildTask(int dataId, int taskId, String name, int parentTaskId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task childTask = mTasks.get(childTaskId);
-        Assert.assertTrue(childTask != null);
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
 
-        childTask.setName(name);
-
-        Task oldParentTask = childTask.getParentTask(now);
-        Assert.assertTrue(oldParentTask != null);
+        task.setName(name);
 
         Task newParentTask = mTasks.get(parentTaskId);
         Assert.assertTrue(newParentTask != null);
 
-        if (oldParentTask != newParentTask) {
-            TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(childTask, now);
+        Task oldParentTask = task.getParentTask(now);
+        if (oldParentTask == null) {
+            task.setScheduleEndExactTimeStamp(now);
+        } else if (oldParentTask != newParentTask) {
+            TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(task, now);
             Assert.assertTrue(oldTaskHierarchy != null);
 
             oldTaskHierarchy.setEndExactTimeStamp(now);
-
-            createTaskHierarchy(newParentTask, childTask, now);
         }
+
+        createTaskHierarchy(newParentTask, task, now);
 
         save(dataId);
     }
@@ -1655,10 +1674,9 @@ public class DomainFactory {
         }
     }
 
-    private void joinRootTasks(Task rootTask, List<Integer> joinTaskIds, ExactTimeStamp now) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(rootTask.current(now));
-        Assert.assertTrue(rootTask.isRootTask(now));
+    private void joinTasks(Task newParentTask, List<Integer> joinTaskIds, ExactTimeStamp now) {
+        Assert.assertTrue(newParentTask != null);
+        Assert.assertTrue(newParentTask.current(now));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
@@ -1675,31 +1693,6 @@ public class DomainFactory {
 
                 taskHierarchy.setEndExactTimeStamp(now);
             }
-
-
-            createTaskHierarchy(rootTask, joinTask, now);
-        }
-    }
-
-    private void joinChildTasks(Task oldParentTask, Task newParentTask, List<Integer> joinTaskIds, ExactTimeStamp now) {
-        Assert.assertTrue(oldParentTask != null);
-        Assert.assertTrue(oldParentTask.current(now));
-        Assert.assertTrue(newParentTask != null);
-        Assert.assertTrue(newParentTask.current(now));
-        Assert.assertTrue(!newParentTask.isRootTask(now));
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        for (int joinTaskId : joinTaskIds) {
-            Task joinTask = mTasks.get(joinTaskId);
-            Assert.assertTrue(joinTask != null);
-            Assert.assertTrue(joinTask.current(now));
-            Assert.assertTrue(!joinTask.isRootTask(now));
-
-            TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, now);
-            Assert.assertTrue(taskHierarchy != null);
-
-            taskHierarchy.setEndExactTimeStamp(now);
 
             createTaskHierarchy(newParentTask, joinTask, now);
         }

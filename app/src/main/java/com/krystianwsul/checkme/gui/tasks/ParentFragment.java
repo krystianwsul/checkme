@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tasks;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -36,11 +37,12 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
 
     private Bundle mSavedInstanceState;
 
+    private TextInputLayout mFragmentParentLayout;
     private TextView mCreateChildTaskParent;
 
     private Integer mParentTaskId = null;
     private ArrayList<Integer> mTaskIds;
-    private Integer mChildTaskId = null;
+    private Integer mTaskId = null;
 
     private ParentLoader.TaskData mParent;
 
@@ -51,6 +53,8 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
 
         mParent = taskData;
         mCreateChildTaskParent.setText(taskData.Name);
+
+        setValidParent();
     };
 
     public static ParentFragment getCreateInstance(int parentTaskId) {
@@ -87,6 +91,28 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         return parentFragment;
     }
 
+    public static ParentFragment getCreateInstance() {
+        ParentFragment parentFragment = new ParentFragment();
+
+        Bundle args = new Bundle();
+        parentFragment.setArguments(args);
+
+        return parentFragment;
+    }
+
+    public static ParentFragment getJoinInstance(ArrayList<Integer> joinTaskIds) {
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        ParentFragment parentFragment = new ParentFragment();
+
+        Bundle args = new Bundle();
+        args.putIntegerArrayList(TASK_IDS_KEY, joinTaskIds);
+        parentFragment.setArguments(args);
+
+        return parentFragment;
+    }
+
     public ParentFragment() {
         // Required empty public constructor
     }
@@ -94,6 +120,9 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_parent, container, false);
+
+        mFragmentParentLayout = (TextInputLayout) view.findViewById(R.id.fragment_parent_layout);
+        Assert.assertTrue(mFragmentParentLayout != null);
 
         mCreateChildTaskParent = (TextView) view.findViewById(R.id.create_child_task_parent);
         Assert.assertTrue(mCreateChildTaskParent != null);
@@ -110,20 +139,22 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         Bundle args = getArguments();
         Assert.assertTrue(args != null);
 
-        if (args.containsKey(PARENT_TASK_ID_KEY)) {
-            mParentTaskId = args.getInt(PARENT_TASK_ID_KEY);
+        if (args.containsKey(CHILD_TASK_ID_KEY)) {
+            Assert.assertTrue(!args.containsKey(PARENT_TASK_ID_KEY));
+            Assert.assertTrue(!args.containsKey(TASK_IDS_KEY));
+
+            mTaskId = args.getInt(CHILD_TASK_ID_KEY, -1);
+            Assert.assertTrue(mTaskId != -1);
+        } else {
+            if (args.containsKey(PARENT_TASK_ID_KEY)) {
+                mParentTaskId = args.getInt(PARENT_TASK_ID_KEY);
+            }
 
             if (args.containsKey(TASK_IDS_KEY)) {
                 mTaskIds = args.getIntegerArrayList(TASK_IDS_KEY);
                 Assert.assertTrue(mTaskIds != null);
                 Assert.assertTrue(mTaskIds.size() > 1);
             }
-        } else {
-            Assert.assertTrue(args.containsKey(CHILD_TASK_ID_KEY));
-            Assert.assertTrue(!args.containsKey(TASK_IDS_KEY));
-
-            mChildTaskId = args.getInt(CHILD_TASK_ID_KEY, -1);
-            Assert.assertTrue(mChildTaskId != -1);
         }
 
         getLoaderManager().initLoader(0, null, this);
@@ -140,8 +171,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mData != null) {
-            Assert.assertTrue(mParent != null);
+        if (mData != null && mParent != null) {
             outState.putInt(PARENT_ID, mParent.TaskId);
         }
     }
@@ -150,18 +180,16 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     public Loader<ParentLoader.Data> onCreateLoader(int id, Bundle args) {
         List<Integer> excludedTaskIds = new ArrayList<>();
 
-        if (mChildTaskId != null) {
+        if (mTaskId != null) {
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mParentTaskId == null);
 
-            excludedTaskIds.add(mChildTaskId);
+            excludedTaskIds.add(mTaskId);
         } else if (mTaskIds != null) {
-            Assert.assertTrue(mParentTaskId != null);
-
             excludedTaskIds.addAll(mTaskIds);
         }
 
-        return new ParentLoader(getActivity(), mChildTaskId, excludedTaskIds);
+        return new ParentLoader(getActivity(), mTaskId, excludedTaskIds);
     }
 
     @Override
@@ -173,21 +201,21 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
             mParent = findTaskData(parentId);
             Assert.assertTrue(mParent != null);
         } else {
-            if (mParentTaskId != null) {
-                Assert.assertTrue(mChildTaskId == null);
-                Assert.assertTrue(mData.ChildTaskData == null);
-
-                mParent = findTaskData(mParentTaskId);
-            } else {
-                Assert.assertTrue(mChildTaskId != null);
-                Assert.assertTrue(mData.ChildTaskData != null);
+            if (mData.ChildTaskData != null) {
+                Assert.assertTrue(mParentTaskId == null);
+                Assert.assertTrue(mTaskIds == null);
+                Assert.assertTrue(mTaskId != null);
 
                 mParent = findTaskData(mData.ChildTaskData.ParentTaskId);
+            } else if (mParentTaskId != null) {
+                Assert.assertTrue(mTaskId == null);
+
+                mParent = findTaskData(mParentTaskId);
             }
         }
 
-        Assert.assertTrue(mParent != null);
-        mCreateChildTaskParent.setText(mParent.Name);
+        if (mParent != null)
+            mCreateChildTaskParent.setText(mParent.Name);
 
         mCreateChildTaskParent.setVisibility(View.VISIBLE);
 
@@ -200,6 +228,8 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         ParentPickerFragment parentPickerFragment = (ParentPickerFragment) getChildFragmentManager().findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG);
         if (parentPickerFragment != null)
             parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
+
+        setValidParent();
     }
 
     @Override
@@ -212,20 +242,20 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         if (mData == null)
             return false;
 
-        Assert.assertTrue(mParent != null);
-
-        if (mChildTaskId != null) {
+        if (mData.ChildTaskData != null) {
             Assert.assertTrue(mParentTaskId == null);
             Assert.assertTrue(mTaskIds == null);
-            Assert.assertTrue(mData.ChildTaskData != null);
+            Assert.assertTrue(mTaskId != null);
 
             if (mParent.TaskId != mData.ChildTaskData.ParentTaskId)
                 return true;
         } else {
-            Assert.assertTrue(mParentTaskId != null);
-
-            if (mParent.TaskId != mParentTaskId) {
-                return true;
+            if (mParentTaskId != null) {
+                if (mParent == null || mParent.TaskId != mParentTaskId)
+                    return true;
+            } else {
+                if (mParent != null)
+                    return true;
             }
         }
 
@@ -256,18 +286,14 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
                 .flatMap(stream -> stream);
     }
 
-    public int getParentTaskId() {
-        return mParent.TaskId;
-    }
-
     @Override
     public boolean updateTask(int taskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        if (mData == null)
+        if (!isValidParent())
             return false;
 
-        DomainFactory.getDomainFactory(getActivity()).updateChildTask(mData.DataId, taskId, name, getParentTaskId());
+        DomainFactory.getDomainFactory(getActivity()).updateChildTask(mData.DataId, taskId, name, mParent.TaskId);
 
         return true;
     }
@@ -278,10 +304,10 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         Assert.assertTrue(taskIds != null);
         Assert.assertTrue(taskIds.size() > 1);
 
-        if (mData == null)
+        if (!isValidParent())
             return false;
 
-        DomainFactory.getDomainFactory(getActivity()).createJoinChildTask(mData.DataId, getParentTaskId(), name, taskIds);
+        DomainFactory.getDomainFactory(getActivity()).createJoinChildTask(mData.DataId, mParent.TaskId, name, taskIds);
 
         return true;
     }
@@ -290,11 +316,32 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     public boolean createTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
+        if (!isValidParent())
+            return false;
+
+        DomainFactory.getDomainFactory(getActivity()).createChildTask(mData.DataId, mParent.TaskId, name);
+
+        return true;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean isValidParent() {
         if (mData == null)
             return false;
 
-        DomainFactory.getDomainFactory(getActivity()).createChildTask(mData.DataId, getParentTaskId(), name);
+        if (mParent == null)
+            return false;
 
         return true;
+    }
+
+    private void setValidParent() {
+        Assert.assertTrue(mFragmentParentLayout != null);
+
+        if (isValidParent()) {
+            mFragmentParentLayout.setError(null);
+        } else {
+            mFragmentParentLayout.setError(getString(R.string.error_parent));
+        }
     }
 }

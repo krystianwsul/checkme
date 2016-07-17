@@ -282,7 +282,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         List<TimePair> timePairs = getTimePairs();
         Assert.assertTrue(!timePairs.isEmpty());
 
-        DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleRootTask(mData.DataId, rootTaskId, name, timePairs);
+        DomainFactory.getDomainFactory(getActivity()).updateDailyScheduleTask(mData.DataId, rootTaskId, name, timePairs);
 
         TickService.startService(getActivity());
 

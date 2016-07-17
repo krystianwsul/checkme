@@ -5,12 +5,23 @@
     tools:context="com.krystianwsul.checkme.gui.tasks.ParentFragment"
     android:layout_margin="@dimen/activity_horizontal_margin">
 
-    <TextView
-        android:id="@+id/create_child_task_parent"
-        android:singleLine="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Spinner.Underlined"
-        android:visibility="invisible" />
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/fragment_parent_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/create_child_task_parent"
+            android:singleLine="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            tools:ignore="LabelFor,TextFields"
+            android:visibility="invisible" />
+
+    </android.support.design.widget.TextInputLayout>
 
 </LinearLayout>

@@ -291,7 +291,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs = getDayOfWeekTimePairs();
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
 
-        DomainFactory.getDomainFactory(getActivity()).updateWeeklyScheduleRootTask(mData.DataId, rootTaskId, name, dayOfWeekTimePairs);
+        DomainFactory.getDomainFactory(getActivity()).updateWeeklyScheduleTask(mData.DataId, rootTaskId, name, dayOfWeekTimePairs);
 
         TickService.startService(getActivity());
 

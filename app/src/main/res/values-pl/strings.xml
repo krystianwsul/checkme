@@ -42,4 +42,5 @@
     <string name="week">Tydzień</string>
     <string name="month">Miesiąc</string>
     <string name="parent_dialog_title">Wybierz zadanie</string>
+    <string name="error_parent">Nie ma wybranego nadrzędnego zadania</string>
 </resources>

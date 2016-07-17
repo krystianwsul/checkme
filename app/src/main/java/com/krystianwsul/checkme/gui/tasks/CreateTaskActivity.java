@@ -55,6 +55,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     private CreateTaskActivity.ScheduleHint mScheduleHint;
     private Integer mParentTaskIdHint = null;
+    private String mNameHint = null;
 
     private CreateTaskLoader.Data mData;
 
@@ -214,6 +215,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             mTaskId = intent.getIntExtra(TASK_ID_KEY, -1);
             Assert.assertTrue(mTaskId != -1);
+        } else if ((intent.getAction() != null) && intent.getAction().equals(Intent.ACTION_SEND)) {
+            Assert.assertTrue(intent.getType().equals("text/plain"));
+
+            mNameHint = intent.getStringExtra(Intent.EXTRA_TEXT);
+            Assert.assertTrue(!TextUtils.isEmpty(mNameHint));
         } else {
             if (intent.hasExtra(TASK_IDS_KEY)) {
                 mTaskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
@@ -257,10 +263,19 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mCreateTaskName.setVisibility(View.VISIBLE);
 
-        if (mData.TaskData != null && mSavedInstanceState == null) {
-            Assert.assertTrue(mTaskId != null);
+        if (mSavedInstanceState == null) {
+            if (mData.TaskData != null) {
+                Assert.assertTrue(mTaskId != null);
 
-            mCreateTaskName.setText(mData.TaskData.Name);
+                mCreateTaskName.setText(mData.TaskData.Name);
+            } else if (!TextUtils.isEmpty(mNameHint)) {
+                Assert.assertTrue(mTaskId == null);
+                Assert.assertTrue(mTaskIds == null);
+                Assert.assertTrue(mParentTaskIdHint == null);
+                Assert.assertTrue(mScheduleHint == null);
+
+                mCreateTaskName.setText(mNameHint);
+            }
         }
 
         mCreateTaskSpinner.setVisibility(View.VISIBLE);

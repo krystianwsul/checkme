@@ -9,19 +9,29 @@ import junit.framework.Assert;
 import io.fabric.sdk.android.Fabric;
 
 public class MyCrashlytics {
-    private static final boolean mEnabled = false;
+    private static Boolean sEnabled = null;
 
     public static void initialize(OrganizatorApplication organizatorApplication) {
         Assert.assertTrue(organizatorApplication != null);
+        Assert.assertTrue(sEnabled == null);
 
-        if (mEnabled)
+        sEnabled = organizatorApplication.getResources().getBoolean(R.bool.crashlytics_enabled);
+
+        if (sEnabled)
             Fabric.with(organizatorApplication, new Crashlytics());
     }
 
     public static void log(String message) {
         Assert.assertTrue(!TextUtils.isEmpty(message));
+        Assert.assertTrue(sEnabled != null);
 
-        if (mEnabled)
+        if (sEnabled)
             Crashlytics.log(message);
+    }
+
+    public static boolean getEnabled() {
+        Assert.assertTrue(sEnabled != null);
+
+        return sEnabled;
     }
 }

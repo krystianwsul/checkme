@@ -97,6 +97,9 @@ public class DebugFragment extends Fragment {
             stringBuilder.append((t2.getLong() - t1.getLong()));
             stringBuilder.append(" ms");
 
+            stringBuilder.append("\ncrashlytics enabled: ");
+            stringBuilder.append(MyCrashlytics.getEnabled());
+
             debugData.setText(stringBuilder);
         });
     }

@@ -38,6 +38,7 @@ public class TaskRecord extends Record {
                 + COLUMN_END_TIME + " TEXT, "
                 + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1, "
                 + COLUMN_OLDEST_VISIBLE + " INTEGER);");
+        sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_TASKS + "(" + COLUMN_RELEVANT + " DESC)");
     }
 
     @SuppressWarnings("UnusedParameters")

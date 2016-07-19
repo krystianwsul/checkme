@@ -95,6 +95,7 @@ public class InstanceRecord extends Record {
                 + COLUMN_SCHEDULE_MINUTE + ", "
                 + COLUMN_SCHEDULE_CUSTOM_TIME_ID
                 + ")");
+        sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_INSTANCES + "(" + COLUMN_RELEVANT + " DESC)");
     }
 
     @SuppressWarnings("UnusedParameters")

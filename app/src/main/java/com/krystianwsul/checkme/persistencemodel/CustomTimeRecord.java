@@ -29,6 +29,9 @@ public class CustomTimeRecord extends Record {
     private static final String COLUMN_SATURDAY_HOUR = "saturdayHour";
     private static final String COLUMN_SATURDAY_MINUTE = "saturdayMinute";
     private static final String COLUMN_CURRENT = "current";
+    private static final String COLUMN_RELEVANT = "relevant";
+
+    private static final String INDEX_RELEVANT = "customTimesIndexRelevant";
 
     private final int mId;
     private String mName;
@@ -56,6 +59,8 @@ public class CustomTimeRecord extends Record {
 
     private boolean mCurrent;
 
+    private boolean mRelevant;
+
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -76,15 +81,21 @@ public class CustomTimeRecord extends Record {
                 + COLUMN_FRIDAY_MINUTE + " INTEGER NOT NULL, "
                 + COLUMN_SATURDAY_HOUR + " INTEGER NOT NULL, "
                 + COLUMN_SATURDAY_MINUTE + " INTEGER NOT NULL, "
-                + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);");
+                + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1, "
+                + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1);");
+        sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_CUSTOM_TIMES + "(" + COLUMN_RELEVANT + " DESC)");
     }
 
     @SuppressWarnings("UnusedParameters")
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Assert.assertTrue(sqLiteDatabase != null);
 
-        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CUSTOM_TIMES);
-        //onCreate(sqLiteDatabase);
+        if (oldVersion <= 8) {
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_CUSTOM_TIMES
+                    + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
+
+            sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_CUSTOM_TIMES + "(" + COLUMN_RELEVANT + " DESC)");
+        }
     }
 
     public static ArrayList<CustomTimeRecord> getCustomTimeRecords(SQLiteDatabase sqLiteDatabase) {
@@ -123,8 +134,9 @@ public class CustomTimeRecord extends Record {
         int saturdayHour = cursor.getInt(14);
         int saturdayMinute = cursor.getInt(15);
         boolean current = (cursor.getInt(16) == 1);
+        boolean relevant = (cursor.getInt(17) == 1);
 
-        return new CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
+        return new CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current, relevant);
     }
 
     static int getMaxId(SQLiteDatabase sqLiteDatabase) {
@@ -132,7 +144,7 @@ public class CustomTimeRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID);
     }
 
-    CustomTimeRecord(boolean created, int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
+    CustomTimeRecord(boolean created, int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current, boolean relevant) {
         super(created);
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -162,6 +174,8 @@ public class CustomTimeRecord extends Record {
         mSaturdayMinute = saturdayMinute;
 
         mCurrent = current;
+
+        mRelevant = relevant;
     }
 
     public int getId() {
@@ -239,6 +253,10 @@ public class CustomTimeRecord extends Record {
         return mCurrent;
     }
 
+    public boolean getRelevant() {
+        return mRelevant;
+    }
+
     public void setSundayHour(int hour) {
         mSundayHour = hour;
         mChanged = true;
@@ -314,6 +332,11 @@ public class CustomTimeRecord extends Record {
         mChanged = true;
     }
 
+    public void setRelevant(boolean relevant) {
+        mRelevant = relevant;
+        mChanged = true;
+    }
+
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
@@ -333,6 +356,7 @@ public class CustomTimeRecord extends Record {
         contentValues.put(COLUMN_SATURDAY_HOUR, mSaturdayHour);
         contentValues.put(COLUMN_SATURDAY_MINUTE, mSaturdayMinute);
         contentValues.put(COLUMN_CURRENT, mCurrent);
+        contentValues.put(COLUMN_RELEVANT, mRelevant);
 
         return contentValues;
     }

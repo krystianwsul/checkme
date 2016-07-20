@@ -179,6 +179,10 @@ public class DomainFactory {
         return mExistingInstances.size();
     }
 
+    public int getCustomTimeCount() {
+        return mCustomTimes.size();
+    }
+
     private void save(int dataId) {
         ArrayList<Integer> dataIds = new ArrayList<>();
         dataIds.add(dataId);
@@ -725,7 +729,7 @@ public class DomainFactory {
             Assert.assertTrue(weeklySchedule != null);
             Assert.assertTrue(weeklySchedule.current(now));
 
-            ArrayList<Pair<DayOfWeek, Time>> pairs = weeklySchedule.getDayOfWeekTimes();
+            List<Pair<DayOfWeek, Time>> pairs = weeklySchedule.getDayOfWeekTimes();
             scheduleDatas = new ArrayList<>();
             for (Pair<DayOfWeek, Time> pair : pairs) {
                 scheduleDatas.add(new WeeklyScheduleLoader.ScheduleData(pair.first, pair.second.getTimePair()));
@@ -806,27 +810,26 @@ public class DomainFactory {
 
         List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 
-        HashMap<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = new HashMap<>();
-        for (Instance instance : rootInstances) {
-            if ((instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0) {
-                List<Instance> childInstances = instance.getChildInstances(now);
-                Assert.assertTrue(childInstances != null);
+        Map<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = Stream.of(rootInstances)
+                .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> {
+                    List<Instance> childInstances = instance.getChildInstances(now);
+                    Assert.assertTrue(childInstances != null);
 
-                Stream<Instance> notDone = Stream.of(childInstances)
-                        .filter(childInstance -> childInstance.getDone() == null)
-                        .sortBy(Instance::getTaskId);
+                    Stream<Instance> notDone = Stream.of(childInstances)
+                            .filter(childInstance -> childInstance.getDone() == null)
+                            .sortBy(Instance::getTaskId);
 
-                Stream<Instance> done = Stream.of(childInstances)
-                        .filter(childInstance -> childInstance.getDone() != null)
-                        .sortBy(childInstance -> -childInstance.getDone().getLong());
+                    Stream<Instance> done = Stream.of(childInstances)
+                            .filter(childInstance -> childInstance.getDone() != null)
+                            .sortBy(childInstance -> -childInstance.getDone().getLong());
 
-                List<String> children = Stream.concat(notDone, done)
-                        .map(Instance::getName)
-                        .collect(Collectors.toList());
+                    List<String> children = Stream.concat(notDone, done)
+                            .map(Instance::getName)
+                            .collect(Collectors.toList());
 
-                notificationInstanceDatas.put(instance.getInstanceKey(), new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), children));
-            }
-        }
+                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), children);
+                }));
 
         Map<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = Stream.of(mExistingInstances)
                 .filter(Instance::getNotificationShown)
@@ -1403,11 +1406,24 @@ public class DomainFactory {
                 .filter(instance -> !instance.isRelevant(now))
                 .collect(Collectors.toList());
 
+        List<Task> relevantTasks = new ArrayList<>(mTasks.values());
+        relevantTasks.removeAll(irrelevantTasks);
+
+        List<Instance> relevantInstances = new ArrayList<>(mExistingInstances);
+        relevantInstances.removeAll(irrelevantInstances);
+
+        List<CustomTime> irrelevantCustomTimes = Stream.of(mCustomTimes.values())
+                .filter(customTime -> !customTime.isRelevant(relevantTasks, relevantInstances, now))
+                .collect(Collectors.toList());
+
         Stream.of(irrelevantTasks)
                 .forEach(Task::setRelevant);
 
         Stream.of(irrelevantInstances)
                 .forEach(Instance::setRelevant);
+
+        Stream.of(irrelevantCustomTimes)
+                .forEach(CustomTime::setRelevant);
 
         for (Task task : mTasks.values())
             task.updateOldestVisible(now);
@@ -1427,6 +1443,9 @@ public class DomainFactory {
 
         Stream.of(irrelevantInstances)
                 .forEach(mExistingInstances::remove);
+
+        Stream.of(irrelevantCustomTimes)
+                .forEach(mCustomTimes::remove);
     }
 
     // internal

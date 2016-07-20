@@ -107,4 +107,6 @@ public abstract class Schedule {
     protected abstract ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili);
 
     protected abstract TimeStamp getNextAlarm(ExactTimeStamp now);
+
+    public abstract boolean usesCustomTime(CustomTime customTime);
 }

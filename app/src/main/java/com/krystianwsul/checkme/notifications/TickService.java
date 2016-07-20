@@ -30,7 +30,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -297,11 +296,11 @@ public class TickService extends IntentService {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final HashMap<InstanceKey, NotificationInstanceData> NotificationInstanceDatas;
+        public final Map<InstanceKey, NotificationInstanceData> NotificationInstanceDatas;
         public final Map<InstanceKey, ShownInstanceData> ShownInstanceDatas;
         public final TimeStamp NextAlarm;
 
-        public Data(HashMap<InstanceKey, NotificationInstanceData> notificationInstanceDatas, Map<InstanceKey, ShownInstanceData> shownInstanceDatas, TimeStamp nextAlarm) {
+        public Data(Map<InstanceKey, NotificationInstanceData> notificationInstanceDatas, Map<InstanceKey, ShownInstanceData> shownInstanceDatas, TimeStamp nextAlarm) {
             Assert.assertTrue(notificationInstanceDatas != null);
             Assert.assertTrue(shownInstanceDatas != null);
 

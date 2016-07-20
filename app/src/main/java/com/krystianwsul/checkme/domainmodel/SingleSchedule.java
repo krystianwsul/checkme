@@ -108,4 +108,15 @@ public class SingleSchedule extends Schedule {
         else
             return null;
     }
+
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean usesCustomTime(CustomTime customTime) {
+        Assert.assertTrue(customTime != null);
+
+        Integer customTimeId = mSingleScheduleDateTime.getTime().getTimePair().CustomTimeId;
+        if ((customTimeId != null) && (customTime.getId() == customTimeId))
+            return true;
+
+        return false;
+    }
 }

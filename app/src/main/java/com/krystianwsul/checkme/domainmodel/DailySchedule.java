@@ -103,4 +103,18 @@ public class DailySchedule extends Schedule {
 
         return nextAlarm;
     }
+
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
+    public boolean usesCustomTime(CustomTime customTime) {
+        Assert.assertTrue(customTime != null);
+
+        return Stream.of(mDailyScheduleTimes).anyMatch(dailyScheduleTime -> {
+            Integer customTimeId = dailyScheduleTime.getTime().getTimePair().CustomTimeId;
+            if ((customTimeId != null) && (customTime.getId() == customTimeId))
+                return true;
+
+            return false;
+        });
+    }
 }

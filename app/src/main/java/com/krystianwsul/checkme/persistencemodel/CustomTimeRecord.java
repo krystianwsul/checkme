@@ -103,7 +103,7 @@ public class CustomTimeRecord extends Record {
 
         ArrayList<CustomTimeRecord> customTimeRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, COLUMN_RELEVANT + " = 1", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             customTimeRecords.add(cursorToCustomTimeRecord(cursor));

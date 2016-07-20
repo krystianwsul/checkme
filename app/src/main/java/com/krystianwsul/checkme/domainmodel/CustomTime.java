@@ -3,14 +3,17 @@ package com.krystianwsul.checkme.domainmodel;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
+import java.util.List;
 import java.util.TreeMap;
 
 public class CustomTime implements Time {
@@ -123,5 +126,27 @@ public class CustomTime implements Time {
     @Override
     public TimePair getTimePair() {
         return new TimePair(mCustomTimeRecord.getId(), null);
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean isRelevant(List<Task> relevantTasks, List<Instance> relevantInstances, ExactTimeStamp now) {
+        Assert.assertTrue(relevantTasks != null);
+        Assert.assertTrue(relevantInstances != null);
+        Assert.assertTrue(now != null);
+
+        if (mCustomTimeRecord.getCurrent())
+            return true;
+
+        if (Stream.of(relevantTasks).anyMatch(task -> task.usesCustomTime(now, this)))
+            return true;
+
+        if (Stream.of(relevantInstances).anyMatch(instance -> instance.usesCustomTime(this)))
+            return true;
+
+        return false;
+    }
+
+    public void setRelevant() {
+        mCustomTimeRecord.setRelevant(false);
     }
 }

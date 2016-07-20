@@ -483,4 +483,20 @@ class Instance {
     public void setRelevant() {
         mInstanceRecord.setRelevant(false);
     }
+
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean usesCustomTime(CustomTime customTime) {
+        Assert.assertTrue(customTime != null);
+        Assert.assertTrue(exists());
+
+        Integer scheduleCustomTimeId = getScheduleCustomTimeId();
+        if ((scheduleCustomTimeId != null) && (customTime.getId() == scheduleCustomTimeId))
+            return true;
+
+        Integer instanceCustomTimeId = getInstanceCustomTimeId();
+        if ((instanceCustomTimeId != null) && (customTime.getId() == instanceCustomTimeId))
+            return true;
+
+        return false;
+    }
 }

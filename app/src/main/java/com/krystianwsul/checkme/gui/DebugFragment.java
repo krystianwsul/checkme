@@ -88,6 +88,8 @@ public class DebugFragment extends Fragment {
             stringBuilder.append(domainFactory.getTaskCount());
             stringBuilder.append(", instances: ");
             stringBuilder.append(domainFactory.getInstanceCount());
+            stringBuilder.append(", custom times: ");
+            stringBuilder.append(domainFactory.getCustomTimeCount());
 
             ExactTimeStamp t1 = ExactTimeStamp.getNow();
             DomainFactory.getDomainFactory(getContext()).getGroupListData(getActivity(), 0, MainActivity.TimeRange.DAY);

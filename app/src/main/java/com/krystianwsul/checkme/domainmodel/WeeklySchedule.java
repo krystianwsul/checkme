@@ -19,6 +19,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 public class WeeklySchedule extends Schedule {
@@ -76,14 +77,12 @@ public class WeeklySchedule extends Schedule {
         return instances;
     }
 
-    public ArrayList<Pair<DayOfWeek, Time>> getDayOfWeekTimes() {
+    public List<Pair<DayOfWeek, Time>> getDayOfWeekTimes() {
         Assert.assertTrue(!mWeeklyScheduleDayOfWeekTimes.isEmpty());
 
-        ArrayList<Pair<DayOfWeek, Time>> dayOfWeekTimes = new ArrayList<>();
-        for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes)
-            dayOfWeekTimes.add(new Pair<>(weeklyScheduleDayOfWeekTime.getDayOfWeek(), weeklyScheduleDayOfWeekTime.getTime()));
-
-        return dayOfWeekTimes;
+        return Stream.of(mWeeklyScheduleDayOfWeekTimes)
+                .map(weeklyScheduleDayOfWeekTime -> new Pair<>(weeklyScheduleDayOfWeekTime.getDayOfWeek(), weeklyScheduleDayOfWeekTime.getTime()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -113,5 +112,19 @@ public class WeeklySchedule extends Schedule {
         }
 
         return nextAlarm;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
+    public boolean usesCustomTime(CustomTime customTime) {
+        Assert.assertTrue(customTime != null);
+
+        return Stream.of(mWeeklyScheduleDayOfWeekTimes).anyMatch(dailyScheduleTime -> {
+            Integer customTimeId = dailyScheduleTime.getTime().getTimePair().CustomTimeId;
+            if ((customTimeId != null) && (customTime.getId() == customTimeId))
+                return true;
+
+            return false;
+        });
     }
 }

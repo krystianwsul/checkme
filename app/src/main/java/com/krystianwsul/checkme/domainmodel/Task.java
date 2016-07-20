@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
@@ -59,10 +60,9 @@ public class Task {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
 
-        ArrayList<Schedule> currentSchedules = new ArrayList<>();
-        for (Schedule schedule : mSchedules)
-            if (schedule.current(exactTimeStamp))
-                currentSchedules.add(schedule);
+        List<Schedule> currentSchedules = Stream.of(mSchedules)
+                .filter(schedule -> schedule.current(exactTimeStamp))
+                .collect(Collectors.toList());
 
         if (currentSchedules.isEmpty()) {
             Assert.assertTrue(!isRootTask(exactTimeStamp));
@@ -280,5 +280,21 @@ public class Task {
 
     public void setRelevant() {
         mTaskRecord.setRelevant(false);
+    }
+
+    public boolean usesCustomTime(ExactTimeStamp now, CustomTime customTime) {
+        Assert.assertTrue(now != null);
+        Assert.assertTrue(customTime != null);
+
+        if (!current(now))
+            return false;
+
+        if (!isRootTask(now))
+            return false;
+
+        Schedule schedule = getCurrentSchedule(now);
+        Assert.assertTrue(schedule != null);
+
+        return schedule.usesCustomTime(customTime);
     }
 }

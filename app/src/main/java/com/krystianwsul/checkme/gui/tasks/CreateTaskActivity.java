@@ -65,6 +65,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     public static Intent getCreateIntent(Context context, ScheduleHint scheduleHint) {
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(scheduleHint != null);
 
@@ -493,7 +494,13 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(mDate, 0);
-            dest.writeInt(mHourMinute != null ? 1 : 0);
+
+            if (mHourMinute == null) {
+                dest.writeInt(0);
+            } else {
+                dest.writeInt(1);
+                dest.writeParcelable(mHourMinute, 0);
+            }
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<ScheduleHint>() {

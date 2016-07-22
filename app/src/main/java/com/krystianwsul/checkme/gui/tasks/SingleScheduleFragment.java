@@ -67,6 +67,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private Bundle mSavedInstanceState;
 
+    private boolean mFirst = true;
+
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
         public void onCustomTimeSelected(int customTimeId) {
@@ -413,9 +415,11 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
         mData = data;
 
-        if (mData.ScheduleData != null && mSavedInstanceState == null) {
+        if (mFirst && mData.ScheduleData != null && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(PARCEL_DATE_KEY))) {
             Assert.assertTrue(mDate == null);
             Assert.assertTrue(mTimePairPersist == null);
+
+            mFirst = false;
 
             mDate = mData.ScheduleData.Date;
             mTimePairPersist = new TimePairPersist(mData.ScheduleData.TimePair);

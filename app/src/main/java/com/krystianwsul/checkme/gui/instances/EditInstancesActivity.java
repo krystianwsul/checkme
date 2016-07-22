@@ -12,7 +12,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -70,6 +69,8 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
     private BroadcastReceiver mBroadcastReceiver;
 
     private TimePairPersist mTimePairPersist;
+
+    private boolean mFirst = true;
 
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
@@ -205,6 +206,19 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         mEditInstanceTime = (TextView) findViewById(R.id.edit_instance_time);
         Assert.assertTrue(mEditInstanceTime != null);
 
+        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(DATE_KEY)) {
+            mDate = mSavedInstanceState.getParcelable(DATE_KEY);
+            Assert.assertTrue(mDate != null);
+
+            Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
+            mTimePairPersist = mSavedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
+            Assert.assertTrue(mTimePairPersist != null);
+
+            Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
+            mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
+            Assert.assertTrue(mInitialHourMinute != null);
+        }
+
         getSupportLoaderManager().initLoader(0, null, this);
 
         mBroadcastReceiver = new BroadcastReceiver() {
@@ -273,19 +287,13 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
         mEditInstanceLayout.setVisibility(View.VISIBLE);
 
-        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(DATE_KEY)) {
-            mDate = mSavedInstanceState.getParcelable(DATE_KEY);
-            Assert.assertTrue(mDate != null);
-
-            Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
-            mTimePairPersist = mSavedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
-            Assert.assertTrue(mTimePairPersist != null);
-
-            Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
-            mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
-            Assert.assertTrue(mInitialHourMinute != null);
-        } else {
+        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(DATE_KEY))) {
+            Assert.assertTrue(mDate == null);
+            Assert.assertTrue(mTimePairPersist == null);
+            Assert.assertTrue(mInitialHourMinute == null);
             Assert.assertTrue(!mData.InstanceDatas.isEmpty());
+
+            mFirst = false;
 
             mDate = Stream.of(mData.InstanceDatas.values())
                     .map(instanceData -> instanceData.InstanceDate)
@@ -375,10 +383,14 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
     private boolean isValidDateTime() {
         if (mData != null) {
             HourMinute hourMinute;
-            if (mTimePairPersist.getCustomTimeId() != null)
+            if (mTimePairPersist.getCustomTimeId() != null) {
+                if (!mData.CustomTimeDatas.containsKey(mTimePairPersist.getCustomTimeId()))
+                    return false; //cached data doesn't contain new custom time
+
                 hourMinute = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId()).HourMinutes.get(mDate.getDayOfWeek());
-            else
+            } else {
                 hourMinute = mTimePairPersist.getHourMinute();
+            }
 
             return (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
         } else {
@@ -444,6 +456,12 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e("asdf", "resultCode: " + resultCode);
+        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
+        Assert.assertTrue(resultCode >= 0);
+        Assert.assertTrue(data == null);
+        Assert.assertTrue(mTimePairPersist != null);
+
+        if (resultCode > 0)
+            mTimePairPersist.setCustomTimeId(resultCode);
     }
 }

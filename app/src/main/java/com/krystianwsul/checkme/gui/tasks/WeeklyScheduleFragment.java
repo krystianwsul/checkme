@@ -70,6 +70,8 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
     private List<DayOfWeekTimeEntry> mDayOfWeekTimeEntries;
 
+    private boolean mFirst = true;
+
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
         public void onCustomTimeSelected(int customTimeId) {
@@ -223,8 +225,10 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     public void onLoadFinished(Loader<WeeklyScheduleLoader.Data> loader, WeeklyScheduleLoader.Data data) {
         mData = data;
 
-        if (mSavedInstanceState == null && mData.ScheduleDatas != null) {
+        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(DATE_TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
             Assert.assertTrue(mDayOfWeekTimeEntries == null);
+
+            mFirst = false;
 
             mDayOfWeekTimeEntries = new ArrayList<>();
             boolean showDelete = (mData.ScheduleDatas.size() > 1);

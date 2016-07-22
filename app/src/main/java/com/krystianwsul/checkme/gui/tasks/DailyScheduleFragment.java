@@ -63,6 +63,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
     private Bundle mSavedInstanceState;
 
+    private boolean mFirst = true;
+
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
         public void onCustomTimeSelected(int customTimeId) {
@@ -227,9 +229,11 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     public void onLoadFinished(Loader<DailyScheduleLoader.Data> loader, DailyScheduleLoader.Data data) {
         mData = data;
 
-        if (mSavedInstanceState == null && mData.ScheduleDatas != null) {
+        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
             Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
             Assert.assertTrue(mTimeEntries == null);
+
+            mFirst = false;
 
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
             mTimeEntries = Stream.of(mData.ScheduleDatas)

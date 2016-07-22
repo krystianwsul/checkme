@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
+import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -54,8 +55,6 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     private Integer mRootTaskId;
     private SingleScheduleLoader.Data mData;
 
-    private Bundle mSavedInstanceState;
-
     private TextInputLayout mSingleScheduleDateLayout;
     private TextView mSingleScheduleDate;
     private TextInputLayout mSingleScheduleTimeLayout;
@@ -65,6 +64,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     private TimePairPersist mTimePairPersist;
 
     private BroadcastReceiver mBroadcastReceiver;
+
+    private Bundle mSavedInstanceState;
 
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
@@ -77,13 +78,18 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         }
 
         @Override
-        public void onHourMinuteSelected() {
+        public void onOtherSelected() {
             Assert.assertTrue(mData != null);
 
             RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
             radialTimePickerDialogFragment.setStartTime(mTimePairPersist.getHourMinute().getHour(), mTimePairPersist.getHourMinute().getMinute());
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
             radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
+        }
+
+        @Override
+        public void onAddSelected() {
+            startActivityForResult(ShowCustomTimeActivity.getCreateIntent(getActivity()), ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
         }
     };
 
@@ -133,18 +139,6 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         super.onActivityCreated(savedInstanceState);
 
         mSavedInstanceState = savedInstanceState;
-
-        Bundle args = getArguments();
-        if (args != null) {
-            if (args.containsKey(ROOT_TASK_ID_KEY)) {
-                Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
-
-                mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
-                Assert.assertTrue(mRootTaskId != -1);
-            } else {
-                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
-            }
-        }
 
         View view = getView();
         Assert.assertTrue(view != null);
@@ -197,6 +191,52 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = (CalendarDatePickerDialogFragment) getChildFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
         if (calendarDatePickerDialogFragment != null)
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            if (args.containsKey(ROOT_TASK_ID_KEY)) {
+                Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
+
+                mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
+                Assert.assertTrue(mRootTaskId != -1);
+            } else {
+                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
+            }
+        }
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(PARCEL_DATE_KEY)) {
+            Assert.assertTrue(savedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
+            Assert.assertTrue(savedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
+
+            mDate = savedInstanceState.getParcelable(PARCEL_DATE_KEY);
+            Assert.assertTrue(mDate != null);
+
+            mTimePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
+            Assert.assertTrue(mTimePairPersist != null);
+
+            mInitialHourMinute = savedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
+        } else if (args != null) {
+            if (!args.containsKey(ROOT_TASK_ID_KEY)) {
+                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
+
+                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                Assert.assertTrue(scheduleHint != null);
+
+                mDate = scheduleHint.mDate;
+                Assert.assertTrue(mDate != null);
+
+                if (scheduleHint.mHourMinute != null) {
+                    mTimePairPersist = new TimePairPersist(scheduleHint.mHourMinute);
+                } else {
+                    mTimePairPersist = new TimePairPersist();
+                }
+                mInitialHourMinute = mTimePairPersist.getHourMinute();
+            }
+        } else {
+            mDate = Date.today();
+            mTimePairPersist = new TimePairPersist();
+            mInitialHourMinute = mTimePairPersist.getHourMinute();
+        }
 
         getLoaderManager().initLoader(0, null, this);
 
@@ -285,10 +325,14 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
                 return true;
             } else {
                 HourMinute hourMinute;
-                if (mTimePairPersist.getCustomTimeId() != null)
+                if (mTimePairPersist.getCustomTimeId() != null) {
+                    if (!mData.CustomTimeDatas.containsKey(mTimePairPersist.getCustomTimeId()))
+                        return false; //cached data doesn't contain new custom time
+
                     hourMinute = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId()).HourMinutes.get(mDate.getDayOfWeek());
-                else
+                } else {
                     hourMinute = mTimePairPersist.getHourMinute();
+                }
 
                 return (new TimeStamp(mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
             }
@@ -369,50 +413,16 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
         mData = data;
 
-        Bundle args = getArguments();
+        if (mData.ScheduleData != null && mSavedInstanceState == null) {
+            Assert.assertTrue(mDate == null);
+            Assert.assertTrue(mTimePairPersist == null);
+
+            mDate = mData.ScheduleData.Date;
+            mTimePairPersist = new TimePairPersist(mData.ScheduleData.TimePair);
+        }
 
         mSingleScheduleDate.setVisibility(View.VISIBLE);
         mSingleScheduleTimeLayout.setVisibility(View.VISIBLE);
-
-        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(PARCEL_DATE_KEY)) {
-            Assert.assertTrue(mSavedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
-            Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
-
-            mDate = mSavedInstanceState.getParcelable(PARCEL_DATE_KEY);
-            Assert.assertTrue(mDate != null);
-
-            mTimePairPersist = mSavedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
-            Assert.assertTrue(mTimePairPersist != null);
-
-            mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
-        } else if (args != null) {
-            if (args.containsKey(ROOT_TASK_ID_KEY)) {
-                Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
-                Assert.assertTrue(mData.ScheduleData != null);
-
-                mDate = mData.ScheduleData.Date;
-                mTimePairPersist = new TimePairPersist(mData.ScheduleData.TimePair);
-            } else {
-                Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
-
-                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
-                Assert.assertTrue(scheduleHint != null);
-
-                mDate = scheduleHint.mDate;
-                Assert.assertTrue(mDate != null);
-
-                if (scheduleHint.mHourMinute != null) {
-                    mTimePairPersist = new TimePairPersist(scheduleHint.mHourMinute);
-                } else {
-                    mTimePairPersist = new TimePairPersist();
-                }
-                mInitialHourMinute = mTimePairPersist.getHourMinute();
-            }
-        } else {
-            mDate = Date.today();
-            mTimePairPersist = new TimePairPersist();
-            mInitialHourMinute = mTimePairPersist.getHourMinute();
-        }
 
         updateDateText();
     }
@@ -468,5 +478,17 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
             return false;
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
+        Assert.assertTrue(resultCode >= 0);
+        Assert.assertTrue(data == null);
+
+        Assert.assertTrue(mTimePairPersist != null);
+
+        if (resultCode > 1)
+            mTimePairPersist.setCustomTimeId(resultCode);
     }
 }

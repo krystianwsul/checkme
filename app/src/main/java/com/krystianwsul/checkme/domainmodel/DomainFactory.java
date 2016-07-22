@@ -1339,7 +1339,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized int createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
 
@@ -1358,6 +1358,8 @@ public class DomainFactory {
         mCustomTimes.put(customTime.getId(), customTime);
 
         save(0);
+
+        return customTime.getId();
     }
 
     public synchronized void updateCustomTime(int dataId, int customTimeId, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {

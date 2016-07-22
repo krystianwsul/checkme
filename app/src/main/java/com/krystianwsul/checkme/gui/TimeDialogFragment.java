@@ -53,6 +53,7 @@ public class TimeDialogFragment extends DialogFragment {
                 .map(customTimeData -> customTimeData.Name)
                 .collect(Collectors.toList());
         names.add(getString(R.string.other));
+        names.add(getString(R.string.add));
 
         return new MaterialDialog.Builder(getActivity())
                 .title(R.string.time_dialog_title)
@@ -60,13 +61,16 @@ public class TimeDialogFragment extends DialogFragment {
                 .itemsCallback((dialog, view, which, text) -> {
                     Assert.assertTrue(mTimeDialogListener != null);
                     Assert.assertTrue(which < names.size());
-                    Assert.assertTrue(which <= customTimeDatas.size());
+                    Assert.assertTrue(which < customTimeDatas.size() + 2);
 
-                    if (which == customTimeDatas.size()) {
-                        mTimeDialogListener.onHourMinuteSelected();
-                    } else {
+                    if (which < customTimeDatas.size()) {
                         int id = customTimeDatas.get(which).Id;
                         mTimeDialogListener.onCustomTimeSelected(id);
+                    } else if (which == customTimeDatas.size()) {
+                        mTimeDialogListener.onOtherSelected();
+                    } else {
+                        Assert.assertTrue(which == customTimeDatas.size() + 1);
+                        mTimeDialogListener.onAddSelected();
                     }
                 })
                 .show();
@@ -79,7 +83,10 @@ public class TimeDialogFragment extends DialogFragment {
 
     public interface TimeDialogListener {
         void onCustomTimeSelected(int customTimeId);
-        void onHourMinuteSelected();
+
+        void onOtherSelected();
+
+        void onAddSelected();
     }
 
     public static class CustomTimeData implements Parcelable {

@@ -43,6 +43,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private static final String TIME_PICKER_TAG = "timePicker";
     private static final String DISCARD_TAG = "discard";
 
+    public static final int CREATE_CUSTOM_TIME_REQUEST_CODE = 1;
+
     private Integer mCustomTimeId;
     private ShowCustomTimeLoader.Data mData;
 
@@ -96,10 +98,14 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                 if (TextUtils.isEmpty(name))
                     break;
 
-                if (mData != null)
+                if (mData != null) {
                     DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
-                else
-                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(name, mHourMinutes);
+                } else {
+                    int customTimeId = DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(name, mHourMinutes);
+                    Assert.assertTrue(customTimeId > 0);
+
+                    setResult(customTimeId);
+                }
 
                 finish();
                 break;

@@ -12,6 +12,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +29,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
+import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -82,13 +84,18 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
         }
 
         @Override
-        public void onHourMinuteSelected() {
+        public void onOtherSelected() {
             Assert.assertTrue(mData != null);
 
             RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
             radialTimePickerDialogFragment.setStartTime(mTimePairPersist.getHourMinute().getHour(), mTimePairPersist.getHourMinute().getMinute());
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
             radialTimePickerDialogFragment.show(getSupportFragmentManager(), TIME_FRAGMENT_TAG);
+        }
+
+        @Override
+        public void onAddSelected() {
+            startActivityForResult(ShowCustomTimeActivity.getCreateIntent(EditInstancesActivity.this), ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
         }
     };
 
@@ -433,5 +440,10 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
             return true;
 
         return false;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.e("asdf", "resultCode: " + resultCode);
     }
 }

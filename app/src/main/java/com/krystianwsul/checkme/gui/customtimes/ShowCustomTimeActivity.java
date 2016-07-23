@@ -40,6 +40,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private static final String HOUR_MINUTE_FRIDAY_KEY = "hourMinuteFriday";
     private static final String HOUR_MINUTE_SATURDAY_KEY = "hourMinuteSaturday";
 
+    private static final String EDITED_DAY_OF_WEEK_KEY = "editedDayOfWeek";
+
     private static final String TIME_PICKER_TAG = "timePicker";
     private static final String DISCARD_TAG = "discard";
 
@@ -49,9 +51,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private ShowCustomTimeLoader.Data mData;
 
     private final HashMap<DayOfWeek, TextView> mTimeViews = new HashMap<>();
-    private final HashMap<DayOfWeek, HourMinute> mHourMinutes = new HashMap<>();
+    private HashMap<DayOfWeek, HourMinute> mHourMinutes;
 
-    private DayOfWeek editedDayOfWeek = null;
+    private DayOfWeek mEditedDayOfWeek = null;
 
     private EditText mCustomTimeName;
 
@@ -148,7 +150,13 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         initializeDay(DayOfWeek.FRIDAY, R.id.time_friday_name, R.id.time_friday_time);
         initializeDay(DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time);
 
+        Intent intent = getIntent();
+
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(HOUR_MINUTE_SUNDAY_KEY)) {
+            Assert.assertTrue(mSavedInstanceState.containsKey(EDITED_DAY_OF_WEEK_KEY));
+            Assert.assertTrue(mHourMinutes == null);
+            mHourMinutes = new HashMap<>();
+
             extractKey(HOUR_MINUTE_SUNDAY_KEY, DayOfWeek.SUNDAY);
             extractKey(HOUR_MINUTE_MONDAY_KEY, DayOfWeek.MONDAY);
             extractKey(HOUR_MINUTE_TUESDAY_KEY, DayOfWeek.TUESDAY);
@@ -157,24 +165,33 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             extractKey(HOUR_MINUTE_FRIDAY_KEY, DayOfWeek.FRIDAY);
             extractKey(HOUR_MINUTE_SATURDAY_KEY, DayOfWeek.SATURDAY);
 
+            mEditedDayOfWeek = (DayOfWeek) mSavedInstanceState.getSerializable(EDITED_DAY_OF_WEEK_KEY);
+
             updateGui();
         } else {
-            Intent intent = getIntent();
             if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
                 Assert.assertTrue(!intent.hasExtra(NEW_KEY));
-
-                mCustomTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1);
-                Assert.assertTrue(mCustomTimeId != -1);
-
-                getSupportLoaderManager().initLoader(0, null, this);
             } else {
                 Assert.assertTrue(intent.hasExtra(NEW_KEY));
+                Assert.assertTrue(mHourMinutes == null);
+                mHourMinutes = new HashMap<>();
 
                 for (DayOfWeek dayOfWeek : DayOfWeek.values())
                     mHourMinutes.put(dayOfWeek, sDefaultHourMinute);
 
                 updateGui();
             }
+        }
+
+        if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
+            Assert.assertTrue(!intent.hasExtra(NEW_KEY));
+
+            mCustomTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1);
+            Assert.assertTrue(mCustomTimeId != -1);
+
+            getSupportLoaderManager().initLoader(0, null, this);
+        } else {
+            Assert.assertTrue(intent.hasExtra(NEW_KEY));
         }
 
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
@@ -193,6 +210,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         Assert.assertTrue(mSavedInstanceState != null);
         Assert.assertTrue(!TextUtils.isEmpty(key));
         Assert.assertTrue(dayOfWeek != null);
+        Assert.assertTrue(mHourMinutes != null);
 
         Assert.assertTrue(mSavedInstanceState.containsKey(key));
 
@@ -220,7 +238,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (!mHourMinutes.isEmpty()) {
+        if (mHourMinutes != null) {
             outState.putParcelable(HOUR_MINUTE_SUNDAY_KEY, mHourMinutes.get(DayOfWeek.SUNDAY));
             outState.putParcelable(HOUR_MINUTE_MONDAY_KEY, mHourMinutes.get(DayOfWeek.MONDAY));
             outState.putParcelable(HOUR_MINUTE_TUESDAY_KEY, mHourMinutes.get(DayOfWeek.TUESDAY));
@@ -228,6 +246,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             outState.putParcelable(HOUR_MINUTE_THURSDAY_KEY, mHourMinutes.get(DayOfWeek.THURSDAY));
             outState.putParcelable(HOUR_MINUTE_FRIDAY_KEY, mHourMinutes.get(DayOfWeek.FRIDAY));
             outState.putParcelable(HOUR_MINUTE_SATURDAY_KEY, mHourMinutes.get(DayOfWeek.SATURDAY));
+
+            outState.putSerializable(EDITED_DAY_OF_WEEK_KEY, mEditedDayOfWeek);
         }
     }
 
@@ -237,16 +257,20 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     }
 
     private void updateGui() {
+        Assert.assertTrue(mHourMinutes != null);
+
         mCustomTimeName.setVisibility(View.VISIBLE);
 
         final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
-            Assert.assertTrue(editedDayOfWeek != null);
-            Assert.assertTrue(mTimeViews.containsKey(editedDayOfWeek));
-            Assert.assertTrue(mHourMinutes.containsKey(editedDayOfWeek));
+            Assert.assertTrue(mEditedDayOfWeek != null);
+            Assert.assertTrue(mTimeViews.containsKey(mEditedDayOfWeek));
+            Assert.assertTrue(mHourMinutes.containsKey(mEditedDayOfWeek));
 
             HourMinute hourMinute = new HourMinute(hourOfDay, minute);
-            mHourMinutes.put(editedDayOfWeek, hourMinute);
-            mTimeViews.get(editedDayOfWeek).setText(hourMinute.toString());
+            mHourMinutes.put(mEditedDayOfWeek, hourMinute);
+            mTimeViews.get(mEditedDayOfWeek).setText(hourMinute.toString());
+
+            mEditedDayOfWeek = null;
         };
 
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
@@ -260,7 +284,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
             final DayOfWeek finalDayOfWeek = dayOfWeek;
             timeView.setOnClickListener(v -> {
-                editedDayOfWeek = finalDayOfWeek;
+                mEditedDayOfWeek = finalDayOfWeek;
 
                 HourMinute currHourMinute = mHourMinutes.get(finalDayOfWeek);
 
@@ -280,12 +304,17 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     public void onLoadFinished(Loader<ShowCustomTimeLoader.Data> loader, ShowCustomTimeLoader.Data data) {
         mData = data;
 
-        mCustomTimeName.setText(mData.Name);
+        if (mSavedInstanceState == null || !mSavedInstanceState.containsKey(HOUR_MINUTE_SUNDAY_KEY)) {
+            Assert.assertTrue(mHourMinutes == null);
+            mHourMinutes = new HashMap<>();
 
-        for (DayOfWeek dayOfWeek : DayOfWeek.values())
-            mHourMinutes.put(dayOfWeek, mData.HourMinutes.get(dayOfWeek));
+            mCustomTimeName.setText(mData.Name);
 
-        updateGui();
+            for (DayOfWeek dayOfWeek : DayOfWeek.values())
+                mHourMinutes.put(dayOfWeek, mData.HourMinutes.get(dayOfWeek));
+
+            updateGui();
+        }
 
         invalidateOptionsMenu();
     }

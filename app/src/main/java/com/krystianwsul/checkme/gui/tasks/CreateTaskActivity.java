@@ -44,7 +44,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private static final String POSITION_KEY = "position";
 
     private Bundle mSavedInstanceState;
-    private EditText mCreateTaskName;
+    private EditText mToolbarEditText;
 
     private Spinner mCreateTaskSpinner;
 
@@ -127,7 +127,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Assert.assertTrue(mCreateTaskName != null);
+        Assert.assertTrue(mToolbarEditText != null);
 
         menu.findItem(R.id.action_create_task_save).setVisible(mData != null);
 
@@ -139,9 +139,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         switch (item.getItemId()) {
             case R.id.action_create_task_save:
                 Assert.assertTrue(mData != null);
-                Assert.assertTrue(mCreateTaskName != null);
+                Assert.assertTrue(mToolbarEditText != null);
 
-                String name = mCreateTaskName.getText().toString().trim();
+                String name = mToolbarEditText.getText().toString().trim();
 
                 if (TextUtils.isEmpty(name))
                     break;
@@ -185,7 +185,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_task);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.create_task_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -198,8 +198,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mSavedInstanceState = savedInstanceState;
 
-        mCreateTaskName = (EditText) findViewById(R.id.create_task_name);
-        Assert.assertTrue(mCreateTaskName != null);
+        mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
+        Assert.assertTrue(mToolbarEditText != null);
 
         mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
         Assert.assertTrue(mCreateTaskSpinner != null);
@@ -262,20 +262,20 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
-        mCreateTaskName.setVisibility(View.VISIBLE);
+        mToolbarEditText.setVisibility(View.VISIBLE);
 
         if (mSavedInstanceState == null) {
             if (mData.TaskData != null) {
                 Assert.assertTrue(mTaskId != null);
 
-                mCreateTaskName.setText(mData.TaskData.Name);
+                mToolbarEditText.setText(mData.TaskData.Name);
             } else if (!TextUtils.isEmpty(mNameHint)) {
                 Assert.assertTrue(mTaskId == null);
                 Assert.assertTrue(mTaskIds == null);
                 Assert.assertTrue(mParentTaskIdHint == null);
                 Assert.assertTrue(mScheduleHint == null);
 
-                mCreateTaskName.setText(mNameHint);
+                mToolbarEditText.setText(mNameHint);
             }
         }
 
@@ -434,7 +434,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             Assert.assertTrue(mParentTaskIdHint == null);
             Assert.assertTrue(mScheduleHint == null);
 
-            if (!mCreateTaskName.getText().toString().equals(mData.TaskData.Name))
+            if (!mToolbarEditText.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
             CreateTaskFragment createTaskFragment = (CreateTaskFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
@@ -443,7 +443,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (createTaskFragment.dataChanged())
                 return true;
         } else {
-            if (!TextUtils.isEmpty(mCreateTaskName.getText()))
+            if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
             Assert.assertTrue((mParentTaskIdHint == null) || (mScheduleHint == null));

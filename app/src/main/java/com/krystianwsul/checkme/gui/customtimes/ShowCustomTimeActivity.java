@@ -56,7 +56,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     private DayOfWeek mEditedDayOfWeek = null;
 
-    private EditText mCustomTimeName;
+    private EditText mToolbarEditText;
 
     private Bundle mSavedInstanceState;
 
@@ -86,7 +86,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Assert.assertTrue(mCustomTimeName != null);
+        Assert.assertTrue(mToolbarEditText != null);
 
         menu.findItem(R.id.action_custom_time_save).setVisible((mCustomTimeId == null) || (mData != null));
 
@@ -99,7 +99,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             case R.id.action_custom_time_save:
                 Assert.assertTrue(!mHourMinutes.isEmpty());
 
-                String name = mCustomTimeName.getText().toString().trim();
+                String name = mToolbarEditText.getText().toString().trim();
                 if (TextUtils.isEmpty(name))
                     break;
 
@@ -129,7 +129,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_custom_time);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.custom_time_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -142,8 +142,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
         mSavedInstanceState = savedInstanceState;
 
-        mCustomTimeName = (EditText) findViewById(R.id.custom_time_name);
-        Assert.assertTrue(mCustomTimeName != null);
+        mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
+        Assert.assertTrue(mToolbarEditText != null);
 
         mShowCustomTimeContainer = (LinearLayout) findViewById(R.id.show_custom_time_container);
         Assert.assertTrue(mShowCustomTimeContainer != null);
@@ -265,7 +265,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private void updateGui() {
         Assert.assertTrue(mHourMinutes != null);
 
-        mCustomTimeName.setVisibility(View.VISIBLE);
+        mToolbarEditText.setVisibility(View.VISIBLE);
         mShowCustomTimeContainer.setVisibility(View.VISIBLE);
 
         final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
@@ -315,7 +315,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             Assert.assertTrue(mHourMinutes == null);
             mHourMinutes = new HashMap<>();
 
-            mCustomTimeName.setText(mData.Name);
+            mToolbarEditText.setText(mData.Name);
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())
                 mHourMinutes.put(dayOfWeek, mData.HourMinutes.get(dayOfWeek));
@@ -352,7 +352,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         if (mCustomTimeId == null) {
             Assert.assertTrue(mData == null);
 
-            if (!TextUtils.isEmpty(mCustomTimeName.getText()))
+            if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())
@@ -364,7 +364,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             if (mData == null)
                 return false;
 
-            if (!mCustomTimeName.getText().toString().equals(mData.Name))
+            if (!mToolbarEditText.getText().toString().equals(mData.Name))
                 return true;
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())

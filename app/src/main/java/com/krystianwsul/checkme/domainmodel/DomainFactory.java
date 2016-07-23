@@ -1293,14 +1293,16 @@ public class DomainFactory {
         Task oldParentTask = task.getParentTask(now);
         if (oldParentTask == null) {
             task.setScheduleEndExactTimeStamp(now);
+
+            createTaskHierarchy(newParentTask, task, now);
         } else if (oldParentTask != newParentTask) {
             TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(task, now);
             Assert.assertTrue(oldTaskHierarchy != null);
 
             oldTaskHierarchy.setEndExactTimeStamp(now);
-        }
 
-        createTaskHierarchy(newParentTask, task, now);
+            createTaskHierarchy(newParentTask, task, now);
+        }
 
         save(dataId);
     }

@@ -228,8 +228,6 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         ParentPickerFragment parentPickerFragment = (ParentPickerFragment) getChildFragmentManager().findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG);
         if (parentPickerFragment != null)
             parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
-
-        setValidParent();
     }
 
     @Override
@@ -290,8 +288,10 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     public boolean updateTask(int taskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        if (!isValidParent())
+        if (!isValidParent()) {
+            setValidParent();
             return false;
+        }
 
         DomainFactory.getDomainFactory(getActivity()).updateChildTask(mData.DataId, taskId, name, mParent.TaskId);
 
@@ -304,8 +304,10 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         Assert.assertTrue(taskIds != null);
         Assert.assertTrue(taskIds.size() > 1);
 
-        if (!isValidParent())
+        if (!isValidParent()) {
+            setValidParent();
             return false;
+        }
 
         DomainFactory.getDomainFactory(getActivity()).createJoinChildTask(mData.DataId, mParent.TaskId, name, taskIds);
 
@@ -316,8 +318,10 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     public boolean createTask(String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        if (!isValidParent())
+        if (!isValidParent()) {
+            setValidParent();
             return false;
+        }
 
         DomainFactory.getDomainFactory(getActivity()).createChildTask(mData.DataId, mParent.TaskId, name);
 

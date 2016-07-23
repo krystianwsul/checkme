@@ -44,4 +44,5 @@
     <string name="parent_dialog_title">Pick a task</string>
     <string name="error_parent">No parent task chosen</string>
     <string name="add">Add</string>
+    <string name="parentTask">Parent task</string>
 </resources>

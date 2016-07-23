@@ -44,4 +44,5 @@
     <string name="parent_dialog_title">Wybierz zadanie</string>
     <string name="error_parent">Nie ma wybranego nadrzędnego zadania</string>
     <string name="add">Dodaj</string>
+    <string name="parentTask">Nadrzędne zadanie</string>
 </resources>

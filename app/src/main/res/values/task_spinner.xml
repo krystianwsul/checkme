@@ -3,5 +3,6 @@
     <string-array name="task_spinner">
         <item>Schedule</item>
         <item>Parent task</item>
+        <item>No reminder</item>
     </string-array>
 </resources>

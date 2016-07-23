@@ -3,5 +3,6 @@
     <string-array name="task_spinner">
         <item>Harmonogram</item>
         <item>Nadrzędne zadanie</item>
+        <item>Bez przypomnienia</item>
     </string-array>
 </resources>

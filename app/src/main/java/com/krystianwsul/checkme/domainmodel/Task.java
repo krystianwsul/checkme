@@ -47,7 +47,9 @@ public class Task {
 
         Schedule currentSchedule = getCurrentSchedule(exactTimeStamp);
         if (isRootTask(exactTimeStamp)) {
-            Assert.assertTrue(currentSchedule != null);
+            if (currentSchedule == null)
+                return null;
+
             Assert.assertTrue(currentSchedule.current(exactTimeStamp));
             return currentSchedule.getTaskText(context);
         } else {
@@ -65,7 +67,6 @@ public class Task {
                 .collect(Collectors.toList());
 
         if (currentSchedules.isEmpty()) {
-            Assert.assertTrue(!isRootTask(exactTimeStamp));
             return null;
         } else {
             Assert.assertTrue(currentSchedules.size() == 1);
@@ -129,10 +130,16 @@ public class Task {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(current(endExactTimeStamp));
 
-        if (isRootTask(endExactTimeStamp))
-            setScheduleEndExactTimeStamp(endExactTimeStamp);
-        else
+        if (isRootTask(endExactTimeStamp)) {
+            Schedule schedule = getCurrentSchedule(endExactTimeStamp);
+            if (schedule != null) {
+                Assert.assertTrue(schedule.current(endExactTimeStamp));
+
+                schedule.setEndExactTimeStamp(endExactTimeStamp);
+            }
+        } else {
             Assert.assertTrue(getCurrentSchedule(endExactTimeStamp) == null);
+        }
 
         for (Task childTask : getChildTasks(endExactTimeStamp)) {
             Assert.assertTrue(childTask != null);
@@ -145,17 +152,6 @@ public class Task {
         domainFactory.setParentHierarchyEndTimeStamp(this, endExactTimeStamp);
 
         mTaskRecord.setEndTime(endExactTimeStamp.getLong());
-    }
-
-    void setScheduleEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
-        Assert.assertTrue(endExactTimeStamp != null);
-        Assert.assertTrue(current(endExactTimeStamp));
-
-        Schedule currentSchedule = getCurrentSchedule(endExactTimeStamp);
-        Assert.assertTrue(currentSchedule != null);
-        Assert.assertTrue(currentSchedule.current(endExactTimeStamp));
-
-        currentSchedule.setEndExactTimeStamp(endExactTimeStamp);
     }
 
     public boolean current(ExactTimeStamp exactTimeStamp) {
@@ -234,7 +230,8 @@ public class Task {
             Task rootTask = getRootTask(now);
 
             Schedule schedule = rootTask.getCurrentSchedule(now);
-            Assert.assertTrue(schedule != null);
+            if (schedule == null)
+                return true;
 
             if (schedule.getType() == ScheduleType.SINGLE) {
                 SingleSchedule singleSchedule = (SingleSchedule) schedule;

@@ -404,6 +404,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         return mData.DataId;
     }
 
+    public void destroyLoader() {
+        getLoaderManager().destroyLoader(0);
+    }
+
     public interface TaskListListener {
         void onCreateTaskActionMode(ActionMode actionMode);
         void onDestroyTaskActionMode();

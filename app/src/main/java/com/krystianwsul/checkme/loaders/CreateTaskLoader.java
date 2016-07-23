@@ -67,7 +67,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         public TaskData(String name, Integer parentTaskId, com.krystianwsul.checkme.utils.ScheduleType scheduleType) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue((parentTaskId == null) != (scheduleType == null));
+            Assert.assertTrue((parentTaskId == null) || (scheduleType == null));
 
             Name = name;
             ParentTaskId = parentTaskId;

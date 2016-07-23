@@ -97,11 +97,18 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
                 Utils.share(mData.Name, this);
                 break;
             case R.id.task_menu_delete:
+                TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
+                Assert.assertTrue(taskListFragment != null);
+
+                getSupportLoaderManager().destroyLoader(0);
+                taskListFragment.destroyLoader();
+
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mData.DataId);
-                dataIds.add(((TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment)).getDataId());
+                dataIds.add(taskListFragment.getDataId());
                 DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(dataIds, mData.TaskId);
                 TickService.startService(this);
+
                 finish();
                 break;
             default:

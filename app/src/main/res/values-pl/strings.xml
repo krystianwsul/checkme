@@ -45,4 +45,6 @@
     <string name="error_parent">Nie ma wybranego nadrzędnego zadania</string>
     <string name="add">Dodaj</string>
     <string name="parentTask">Nadrzędne zadanie</string>
+    <string name="share">Udostępnij</string>
+    <string name="sendTo">Prześlij do:</string>
 </resources>

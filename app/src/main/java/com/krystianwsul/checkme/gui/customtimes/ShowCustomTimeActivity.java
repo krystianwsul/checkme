@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
@@ -62,6 +63,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private static final HourMinute sDefaultHourMinute = new HourMinute(9, 0);
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = ShowCustomTimeActivity.this::finish;
+
+    private LinearLayout mShowCustomTimeContainer;
 
     public static Intent getEditIntent(int customTimeId, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
@@ -141,6 +144,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
         mCustomTimeName = (EditText) findViewById(R.id.custom_time_name);
         Assert.assertTrue(mCustomTimeName != null);
+
+        mShowCustomTimeContainer = (LinearLayout) findViewById(R.id.show_custom_time_container);
+        Assert.assertTrue(mShowCustomTimeContainer != null);
 
         initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
         initializeDay(DayOfWeek.MONDAY, R.id.time_monday_name, R.id.time_monday_time);
@@ -260,6 +266,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         Assert.assertTrue(mHourMinutes != null);
 
         mCustomTimeName.setVisibility(View.VISIBLE);
+        mShowCustomTimeContainer.setVisibility(View.VISIBLE);
 
         final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
             Assert.assertTrue(mEditedDayOfWeek != null);

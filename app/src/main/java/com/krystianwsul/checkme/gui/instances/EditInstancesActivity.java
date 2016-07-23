@@ -174,6 +174,7 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
 
         mActionBar.setDisplayHomeAsUpEnabled(true);
         mActionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+        mActionBar.setTitle(null);
 
         mSavedInstanceState = savedInstanceState;
 

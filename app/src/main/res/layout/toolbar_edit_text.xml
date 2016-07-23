@@ -4,19 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="128dp"
+    android:layout_height="wrap_content"
     android:minHeight="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
-    app:popupTheme="@style/AppTheme.PopupOverlay"
-    android:gravity="bottom">
+    app:popupTheme="@style/AppTheme.PopupOverlay">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/toolbar_layout"
+        android:layout_marginTop="56dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:visibility="invisible"
-        app:hintAnimationEnabled="false">
+        app:hintAnimationEnabled="false"
+        app:errorEnabled="true">
 
         <EditText
             android:id="@+id/toolbar_edit_text"

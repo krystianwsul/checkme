@@ -47,4 +47,5 @@
     <string name="parentTask">Nadrzędne zadanie</string>
     <string name="share">Udostępnij</string>
     <string name="sendTo">Prześlij do:</string>
+    <string name="nameError">Wprowadź nazwę</string>
 </resources>

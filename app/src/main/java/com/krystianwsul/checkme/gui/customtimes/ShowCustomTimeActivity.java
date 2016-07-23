@@ -9,7 +9,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -101,6 +103,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             case R.id.action_custom_time_save:
                 Assert.assertTrue(!mHourMinutes.isEmpty());
 
+                updateError();
+
                 String name = mToolbarEditText.getText().toString().trim();
                 if (TextUtils.isEmpty(name))
                     break;
@@ -149,6 +153,23 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
+
+        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                updateError();
+            }
+        });
 
         mShowCustomTimeContainer = (LinearLayout) findViewById(R.id.show_custom_time_container);
         Assert.assertTrue(mShowCustomTimeContainer != null);
@@ -377,6 +398,15 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                     return true;
 
             return false;
+        }
+    }
+
+    private void updateError() {
+        if (TextUtils.isEmpty(mToolbarEditText.getText())) {
+            mToolbarLayout.setError(getString(R.string.nameError));
+            mToolbarLayout.setPadding(0, 0, 0, 0);
+        } else {
+            mToolbarLayout.setError(null);
         }
     }
 }

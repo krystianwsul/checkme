@@ -12,7 +12,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -144,8 +146,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 Assert.assertTrue(mData != null);
                 Assert.assertTrue(mToolbarEditText != null);
 
-                String name = mToolbarEditText.getText().toString().trim();
+                updateError();
 
+                String name = mToolbarEditText.getText().toString().trim();
                 if (TextUtils.isEmpty(name))
                     break;
 
@@ -204,8 +207,28 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
         Assert.assertTrue(mToolbarLayout != null);
 
+//        mToolbarLayout.setError("a");
+        //      mToolbarLayout.setError(null);
+
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
+
+        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                updateError();
+            }
+        });
 
         mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
         Assert.assertTrue(mCreateTaskSpinner != null);
@@ -428,6 +451,14 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             return false;
         } else {
             return true;
+        }
+    }
+
+    private void updateError() {
+        if (TextUtils.isEmpty(mToolbarEditText.getText())) {
+            mToolbarLayout.setError(getString(R.string.nameError));
+        } else {
+            mToolbarLayout.setError(null);
         }
     }
 

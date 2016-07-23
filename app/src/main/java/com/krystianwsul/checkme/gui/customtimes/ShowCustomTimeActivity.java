@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.customtimes;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -56,6 +57,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     private DayOfWeek mEditedDayOfWeek = null;
 
+    private TextInputLayout mToolbarLayout;
     private EditText mToolbarEditText;
 
     private Bundle mSavedInstanceState;
@@ -141,6 +143,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
         mSavedInstanceState = savedInstanceState;
+
+        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
+        Assert.assertTrue(mToolbarLayout != null);
 
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
@@ -265,7 +270,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private void updateGui() {
         Assert.assertTrue(mHourMinutes != null);
 
-        mToolbarEditText.setVisibility(View.VISIBLE);
+        mToolbarLayout.setVisibility(View.VISIBLE);
         mShowCustomTimeContainer.setVisibility(View.VISIBLE);
 
         final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {

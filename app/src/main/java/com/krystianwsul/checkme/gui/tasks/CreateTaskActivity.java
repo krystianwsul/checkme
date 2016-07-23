@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -44,6 +45,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private static final String POSITION_KEY = "position";
 
     private Bundle mSavedInstanceState;
+
+    private TextInputLayout mToolbarLayout;
     private EditText mToolbarEditText;
 
     private Spinner mCreateTaskSpinner;
@@ -198,6 +201,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mSavedInstanceState = savedInstanceState;
 
+        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
+        Assert.assertTrue(mToolbarLayout != null);
+
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
 
@@ -262,7 +268,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
-        mToolbarEditText.setVisibility(View.VISIBLE);
+        mToolbarLayout.setVisibility(View.VISIBLE);
 
         if (mSavedInstanceState == null) {
             if (mData.TaskData != null) {
@@ -278,6 +284,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 mToolbarEditText.setText(mNameHint);
             }
         }
+
+        mToolbarLayout.setHintAnimationEnabled(true);
 
         mCreateTaskSpinner.setVisibility(View.VISIBLE);
 

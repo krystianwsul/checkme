@@ -25,7 +25,7 @@
     <string name="navigation_drawer_close">Zamknij navigation drawer</string>
     <string name="mark_done">Oznacz jako zrobione</string>
     <string name="mark_not_done">Oznacz jako nie zrobione</string>
-    <string name="name_hint">Wpisz nazwę</string>
+    <string name="name_hint">Nazwa</string>
     <string name="time_dialog_title">Wybierz czas</string>
     <string name="edit_task">Edytuj zadanie</string>
     <string name="delete_task">Usuń zadanie</string>

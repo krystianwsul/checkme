@@ -28,286 +28,292 @@
 
     </android.support.v7.widget.Toolbar>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/listVerticalPadding">
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:paddingTop="7dp"
-                android:id="@+id/time_sunday_name"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
+                android:layout_marginTop="@dimen/listVerticalPadding">
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap">
-
-                <EditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    tools:ignore="LabelFor,TextFields"
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/time_sunday_time"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="7dp"
+                    android:id="@+id/time_sunday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"/>
 
-            </android.support.design.widget.TextInputLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/listVerticalPadding">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:paddingTop="7dp"
-                android:id="@+id/time_monday_name"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap">
-
-                <EditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    tools:ignore="LabelFor,TextFields"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/time_monday_time"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap">
+
+                    <EditText
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        tools:ignore="LabelFor,TextFields"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_sunday_time"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listVerticalPadding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="7dp"
+                    android:id="@+id/time_monday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"/>
 
-            </android.support.design.widget.TextInputLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/listVerticalPadding">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:paddingTop="7dp"
-                android:id="@+id/time_tuesday_name"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap">
-
-                <EditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    tools:ignore="LabelFor,TextFields"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/time_tuesday_time"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap">
+
+                    <EditText
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        tools:ignore="LabelFor,TextFields"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_monday_time"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listVerticalPadding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="7dp"
+                    android:id="@+id/time_tuesday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"/>
 
-            </android.support.design.widget.TextInputLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/listVerticalPadding">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:paddingTop="7dp"
-                android:id="@+id/time_wednesday_name"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap">
-
-                <EditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    tools:ignore="LabelFor,TextFields"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/time_wednesday_time"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap">
+
+                    <EditText
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        tools:ignore="LabelFor,TextFields"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_tuesday_time"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listVerticalPadding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="7dp"
+                    android:id="@+id/time_wednesday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"/>
 
-            </android.support.design.widget.TextInputLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/listVerticalPadding">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:paddingTop="7dp"
-                android:id="@+id/time_thursday_name"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap">
-
-                <EditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    tools:ignore="LabelFor,TextFields"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/time_thursday_time"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap">
+
+                    <EditText
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        tools:ignore="LabelFor,TextFields"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_wednesday_time"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listVerticalPadding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="7dp"
+                    android:id="@+id/time_thursday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"/>
 
-            </android.support.design.widget.TextInputLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/listVerticalPadding">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:paddingTop="7dp"
-                android:id="@+id/time_friday_name"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap">
-
-                <EditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    tools:ignore="LabelFor,TextFields"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/time_friday_time"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap">
+
+                    <EditText
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        tools:ignore="LabelFor,TextFields"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_thursday_time"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listVerticalPadding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="7dp"
+                    android:id="@+id/time_friday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"/>
 
-            </android.support.design.widget.TextInputLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/listVerticalPadding">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:paddingTop="7dp"
-                android:id="@+id/time_saturday_name"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap">
-
-                <EditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    tools:ignore="LabelFor,TextFields"
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/time_saturday_time"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap">
+
+                    <EditText
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        tools:ignore="LabelFor,TextFields"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_friday_time"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"/>
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listVerticalPadding">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="7dp"
+                    android:id="@+id/time_saturday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"/>
 
-            </android.support.design.widget.TextInputLayout>
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap">
 
-        </RelativeLayout>
+                    <EditText
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        tools:ignore="LabelFor,TextFields"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_saturday_time"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"/>
 
-    </LinearLayout>
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

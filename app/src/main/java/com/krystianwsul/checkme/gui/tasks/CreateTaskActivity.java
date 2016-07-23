@@ -492,16 +492,32 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             CreateTaskFragment createTaskFragment = (CreateTaskFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
             Assert.assertTrue(createTaskFragment != null);
 
+            if (mData.TaskData.ParentTaskId != null) {
+                if (!(createTaskFragment instanceof ParentFragment))
+                    return true;
+            } else {
+                if (!(createTaskFragment instanceof SchedulePickerFragment))
+                    return true;
+            }
+
             if (createTaskFragment.dataChanged())
                 return true;
         } else {
             if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
-            Assert.assertTrue((mParentTaskIdHint == null) || (mScheduleHint == null));
-
             CreateTaskFragment createTaskFragment = (CreateTaskFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
             Assert.assertTrue(createTaskFragment != null);
+
+            if (mParentTaskIdHint != null) {
+                Assert.assertTrue(mScheduleHint == null);
+
+                if (!(createTaskFragment instanceof ParentFragment))
+                    return true;
+            } else {
+                if (!(createTaskFragment instanceof SchedulePickerFragment))
+                    return true;
+            }
 
             if (createTaskFragment.dataChanged())
                 return true;

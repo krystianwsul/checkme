@@ -387,36 +387,46 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     return;
                 }
 
-                Fragment fragment;
-                if (position == 0) {
-                    if (mTaskId != null) {
-                        Assert.assertTrue(mTaskIds == null);
+                if (position == 2) {
+                    Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+                    Assert.assertTrue(fragment != null);
 
-                        fragment = SchedulePickerFragment.getEditInstance(mTaskId);
-                    } else if (mTaskIds != null) {
-                        fragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
-                    } else {
-                        fragment = SchedulePickerFragment.getCreateInstance();
-                    }
+                    getSupportFragmentManager().beginTransaction()
+                            .remove(fragment)
+                            .commit();
                 } else {
-                    Assert.assertTrue(position == 1);
+                    Fragment fragment;
 
-                    if (mTaskId != null) {
-                        Assert.assertTrue(mTaskIds == null);
+                    if (position == 0) {
+                        if (mTaskId != null) {
+                            Assert.assertTrue(mTaskIds == null);
 
-                        fragment = ParentFragment.getEditInstance(mTaskId);
-                    } else if (mTaskIds != null) {
-                        fragment = ParentFragment.getJoinInstance(mTaskIds);
+                            fragment = SchedulePickerFragment.getEditInstance(mTaskId);
+                        } else if (mTaskIds != null) {
+                            fragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
+                        } else {
+                            fragment = SchedulePickerFragment.getCreateInstance();
+                        }
                     } else {
-                        fragment = ParentFragment.getCreateInstance();
+                        Assert.assertTrue(position == 1);
+
+                        if (mTaskId != null) {
+                            Assert.assertTrue(mTaskIds == null);
+
+                            fragment = ParentFragment.getEditInstance(mTaskId);
+                        } else if (mTaskIds != null) {
+                            fragment = ParentFragment.getJoinInstance(mTaskIds);
+                        } else {
+                            fragment = ParentFragment.getCreateInstance();
+                        }
                     }
+
+                    Assert.assertTrue(fragment != null);
+
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.create_task_frame, fragment)
+                            .commit();
                 }
-
-                Assert.assertTrue(fragment != null);
-
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.create_task_frame, fragment)
-                        .commit();
             }
 
             @Override

@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -73,6 +74,8 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         boolean editInstance = (mData != null && !mData.Done && mData.IsRootInstance);
         menu.findItem(R.id.instance_menu_edit_instance).setVisible(editInstance);
 
+        menu.findItem(R.id.instance_menu_share).setVisible(mData != null);
+
         boolean showTask = (mData != null && !mData.Done && mData.TaskCurrent);
         menu.findItem(R.id.instance_menu_show_task).setVisible(showTask);
 
@@ -106,6 +109,11 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 Assert.assertTrue(mData.IsRootInstance);
 
                 startActivity(EditInstanceActivity.getIntent(this, mData.InstanceKey));
+                break;
+            case R.id.instance_menu_share:
+                Assert.assertTrue(mData != null);
+
+                Utils.share(mData.Name, this);
                 break;
             case R.id.instance_menu_show_task:
                 Assert.assertTrue(mData != null);

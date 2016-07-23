@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_task_share"
+        android:title="@string/share"
+        android:orderInCategory="25"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_share_white_24dp"/>
+    <item
         android:id="@+id/action_task_edit"
         android:title="@string/edit"
         android:orderInCategory="50"

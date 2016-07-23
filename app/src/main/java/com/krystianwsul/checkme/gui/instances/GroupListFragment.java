@@ -48,6 +48,7 @@ import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -127,6 +128,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         startActivity(EditInstancesActivity.getIntent(getActivity(), instanceKeys));
                     }
+                    break;
+                case R.id.action_group_share:
+                    Assert.assertTrue(instanceDatas.size() == 1);
+
+                    Utils.share(instanceDatas.get(0).Name, getActivity());
                     break;
                 case R.id.action_group_show_task:
                     Assert.assertTrue(instanceDatas.size() == 1);
@@ -318,6 +324,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 Assert.assertTrue(instanceData != null);
 
                 menu.findItem(R.id.action_group_edit_instance).setVisible(instanceData.IsRootInstance);
+                menu.findItem(R.id.action_group_share).setVisible(true);
                 menu.findItem(R.id.action_group_show_task).setVisible(instanceData.TaskCurrent);
                 menu.findItem(R.id.action_group_edit_task).setVisible(instanceData.TaskCurrent);
                 menu.findItem(R.id.action_group_join).setVisible(false);
@@ -327,6 +334,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 menu.findItem(R.id.action_group_edit_instance).setVisible(Stream.of(instanceDatas)
                         .allMatch(instanceData -> instanceData.IsRootInstance));
+                menu.findItem(R.id.action_group_share).setVisible(false);
                 menu.findItem(R.id.action_group_show_task).setVisible(false);
                 menu.findItem(R.id.action_group_edit_task).setVisible(false);
 

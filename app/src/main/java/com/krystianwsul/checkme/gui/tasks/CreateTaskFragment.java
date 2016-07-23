@@ -10,4 +10,6 @@ public interface CreateTaskFragment {
     boolean createTask(String name);
 
     boolean dataChanged();
+
+    void updateError();
 }

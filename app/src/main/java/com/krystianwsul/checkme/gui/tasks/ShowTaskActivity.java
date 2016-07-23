@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -73,6 +74,9 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.findItem(R.id.task_menu_edit).setVisible(mData != null);
+
+        menu.findItem(R.id.task_menu_share).setVisible(mData != null);
+
         menu.findItem(R.id.task_menu_delete).setVisible(mData != null);
 
         return true;
@@ -86,6 +90,11 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
                     startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
                 else
                     startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
+                break;
+            case R.id.task_menu_share:
+                Assert.assertTrue(mData != null);
+
+                Utils.share(mData.Name, this);
                 break;
             case R.id.task_menu_delete:
                 ArrayList<Integer> dataIds = new ArrayList<>();

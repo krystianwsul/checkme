@@ -54,7 +54,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         mParent = taskData;
         mCreateChildTaskParent.setText(taskData.Name);
 
-        setValidParent();
+        updateError();
     };
 
     public static ParentFragment getCreateInstance(int parentTaskId) {
@@ -289,7 +289,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         if (!isValidParent()) {
-            setValidParent();
+            updateError();
             return false;
         }
 
@@ -305,7 +305,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         Assert.assertTrue(taskIds.size() > 1);
 
         if (!isValidParent()) {
-            setValidParent();
+            updateError();
             return false;
         }
 
@@ -319,7 +319,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         if (!isValidParent()) {
-            setValidParent();
+            updateError();
             return false;
         }
 
@@ -339,7 +339,8 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         return true;
     }
 
-    private void setValidParent() {
+    @Override
+    public void updateError() {
         Assert.assertTrue(mFragmentParentLayout != null);
 
         if (isValidParent()) {

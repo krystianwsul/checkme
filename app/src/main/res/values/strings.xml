@@ -25,7 +25,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="mark_done">Mark done</string>
     <string name="mark_not_done">Mark not done</string>
-    <string name="name_hint">Enter a name</string>
+    <string name="name_hint">Name</string>
     <string name="time_dialog_title">Pick a time</string>
     <string name="edit_task">Edit task</string>
     <string name="delete_task">Delete task</string>
@@ -45,4 +45,7 @@
     <string name="error_parent">No parent task chosen</string>
     <string name="add">Add</string>
     <string name="parentTask">Parent task</string>
+    <string name="share">Share</string>
+    <string name="sendTo">Send to:</string>
+    <string name="nameError">Enter a name</string>
 </resources>

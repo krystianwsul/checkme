@@ -35,6 +35,7 @@ import com.krystianwsul.checkme.gui.tree.TreeNode;
 import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
 import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -78,6 +79,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             Assert.assertTrue(!taskIds.isEmpty());
 
             switch (menuItem.getItemId()) {
+                case R.id.action_task_share:
+                    Assert.assertTrue(selected.size() == 1);
+
+                    Utils.share(((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mTaskData.Name, getActivity());
+                    break;
                 case R.id.action_task_edit:
                     Assert.assertTrue(selected.size() == 1);
 
@@ -128,6 +134,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         protected void onSecondAdded() {
+            mActionMode.getMenu().findItem(R.id.action_task_share).setVisible(false);
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(false);
 
@@ -156,6 +163,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         @Override
         protected void onSecondToLastRemoved() {
+            mActionMode.getMenu().findItem(R.id.action_task_share).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(false);
             mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(true);

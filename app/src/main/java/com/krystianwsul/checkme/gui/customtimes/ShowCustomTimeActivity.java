@@ -3,12 +3,15 @@ package com.krystianwsul.checkme.gui.customtimes;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,7 +59,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     private DayOfWeek mEditedDayOfWeek = null;
 
-    private EditText mCustomTimeName;
+    private TextInputLayout mToolbarLayout;
+    private EditText mToolbarEditText;
 
     private Bundle mSavedInstanceState;
 
@@ -86,7 +90,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Assert.assertTrue(mCustomTimeName != null);
+        Assert.assertTrue(mToolbarEditText != null);
 
         menu.findItem(R.id.action_custom_time_save).setVisible((mCustomTimeId == null) || (mData != null));
 
@@ -99,7 +103,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             case R.id.action_custom_time_save:
                 Assert.assertTrue(!mHourMinutes.isEmpty());
 
-                String name = mCustomTimeName.getText().toString().trim();
+                updateError();
+
+                String name = mToolbarEditText.getText().toString().trim();
                 if (TextUtils.isEmpty(name))
                     break;
 
@@ -129,7 +135,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_custom_time);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.custom_time_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -142,8 +148,11 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
 
         mSavedInstanceState = savedInstanceState;
 
-        mCustomTimeName = (EditText) findViewById(R.id.custom_time_name);
-        Assert.assertTrue(mCustomTimeName != null);
+        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
+        Assert.assertTrue(mToolbarLayout != null);
+
+        mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
+        Assert.assertTrue(mToolbarEditText != null);
 
         mShowCustomTimeContainer = (LinearLayout) findViewById(R.id.show_custom_time_container);
         Assert.assertTrue(mShowCustomTimeContainer != null);
@@ -265,7 +274,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
     private void updateGui() {
         Assert.assertTrue(mHourMinutes != null);
 
-        mCustomTimeName.setVisibility(View.VISIBLE);
+        mToolbarLayout.setVisibility(View.VISIBLE);
         mShowCustomTimeContainer.setVisibility(View.VISIBLE);
 
         final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
@@ -305,6 +314,30 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
+
+        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+            private boolean mSkip = (mSavedInstanceState != null);
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mSkip) {
+                    mSkip = false;
+                    return;
+                }
+
+                updateError();
+            }
+        });
     }
 
     @Override
@@ -315,7 +348,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             Assert.assertTrue(mHourMinutes == null);
             mHourMinutes = new HashMap<>();
 
-            mCustomTimeName.setText(mData.Name);
+            mToolbarEditText.setText(mData.Name);
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())
                 mHourMinutes.put(dayOfWeek, mData.HourMinutes.get(dayOfWeek));
@@ -352,7 +385,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         if (mCustomTimeId == null) {
             Assert.assertTrue(mData == null);
 
-            if (!TextUtils.isEmpty(mCustomTimeName.getText()))
+            if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())
@@ -364,7 +397,7 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
             if (mData == null)
                 return false;
 
-            if (!mCustomTimeName.getText().toString().equals(mData.Name))
+            if (!mToolbarEditText.getText().toString().equals(mData.Name))
                 return true;
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())
@@ -372,6 +405,15 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                     return true;
 
             return false;
+        }
+    }
+
+    private void updateError() {
+        if (TextUtils.isEmpty(mToolbarEditText.getText())) {
+            mToolbarLayout.setError(getString(R.string.nameError));
+            mToolbarLayout.setPadding(0, 0, 0, 0);
+        } else {
+            mToolbarLayout.setError(null);
         }
     }
 }

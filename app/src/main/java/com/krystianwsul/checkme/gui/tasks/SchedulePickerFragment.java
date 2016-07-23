@@ -340,4 +340,9 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
 
         return scheduleFragment.createRootTask(name);
     }
+
+    @Override
+    public void updateError() {
+
+    }
 }

@@ -207,28 +207,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
         Assert.assertTrue(mToolbarLayout != null);
 
-//        mToolbarLayout.setError("a");
-        //      mToolbarLayout.setError(null);
-
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
-
-        mToolbarEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                updateError();
-            }
-        });
 
         mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
         Assert.assertTrue(mCreateTaskSpinner != null);
@@ -309,6 +289,30 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
 
         mToolbarLayout.setHintAnimationEnabled(true);
+
+        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+            private boolean mSkip = (mSavedInstanceState != null);
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mSkip) {
+                    mSkip = false;
+                    return;
+                }
+
+                updateNameError();
+            }
+        });
 
         mCreateTaskSpinner.setVisibility(View.VISIBLE);
 
@@ -455,6 +459,15 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     private void updateError() {
+        updateNameError();
+
+        CreateTaskFragment createTaskFragment = (CreateTaskFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_frame);
+        Assert.assertTrue(createTaskFragment != null);
+
+        createTaskFragment.updateError();
+    }
+
+    private void updateNameError() {
         if (TextUtils.isEmpty(mToolbarEditText.getText())) {
             mToolbarLayout.setError(getString(R.string.nameError));
         } else {

@@ -154,23 +154,6 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
 
-        mToolbarEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                updateError();
-            }
-        });
-
         mShowCustomTimeContainer = (LinearLayout) findViewById(R.id.show_custom_time_container);
         Assert.assertTrue(mShowCustomTimeContainer != null);
 
@@ -331,6 +314,30 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
         if (radialTimePickerDialogFragment != null)
             radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
+
+        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+            private boolean mSkip = (mSavedInstanceState != null);
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mSkip) {
+                    mSkip = false;
+                    return;
+                }
+
+                updateError();
+            }
+        });
     }
 
     @Override

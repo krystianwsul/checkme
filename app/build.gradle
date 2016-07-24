@@ -34,9 +34,11 @@ android {
         }
         debug {
             zipAlignEnabled true
+            versionNameSuffix "-debug"
         }
         proto {
             initWith debug
+            versionNameSuffix "-proto"
         }
     }
     productFlavors {

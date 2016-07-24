@@ -1521,6 +1521,10 @@ public class DomainFactory {
         if (taskHierarchy != null)
             taskHierarchy.setEndExactTimeStamp(now);
 
+        Schedule schedule = task.getCurrentSchedule(now);
+        if (schedule != null)
+            schedule.setEndExactTimeStamp(now);
+
         save(dataId);
     }
 

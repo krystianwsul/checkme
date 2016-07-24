@@ -48,4 +48,5 @@
     <string name="share">Share</string>
     <string name="sendTo">Send to:</string>
     <string name="nameError">Enter a name</string>
+    <string name="add_task">Add subtask</string>
 </resources>

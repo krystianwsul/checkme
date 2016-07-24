@@ -27,4 +27,10 @@
         app:showAsAction="ifRoom"
         android:orderInCategory="200"
         android:icon="@drawable/ic_delete_white_24dp"/>
+    <item
+        android:id="@+id/action_task_add"
+        android:title="@string/add_task"
+        android:orderInCategory="300"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_add_white_24dp"/>
 </menu>

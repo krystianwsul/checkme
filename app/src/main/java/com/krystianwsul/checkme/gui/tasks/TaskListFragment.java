@@ -89,10 +89,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                     TaskListLoader.TaskData taskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mTaskData;
 
-                    if (taskData.IsRootTask)
-                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
-                    else
-                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), taskData.TaskId));
                     break;
                 case R.id.action_task_join:
                     if (mTaskId == null)
@@ -115,6 +112,14 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                     DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
 
+                    break;
+                case R.id.action_task_add:
+                    Assert.assertTrue(selected.size() == 1);
+
+                    TaskListLoader.TaskData taskData1 = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mTaskData;
+                    Assert.assertTrue(taskData1 != null);
+
+                    startActivity(CreateTaskActivity.getCreateIntent(getActivity(), taskData1.TaskId));
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -143,6 +148,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             Assert.assertTrue(!selectedNodes.isEmpty());
 
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
+
+            mActionMode.getMenu().findItem(R.id.action_task_add).setVisible(false);
         }
 
         @Override
@@ -167,6 +174,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(false);
             mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(true);
+            mActionMode.getMenu().findItem(R.id.action_task_add).setVisible(true);
         }
 
         @Override

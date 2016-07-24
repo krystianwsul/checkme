@@ -148,10 +148,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListLoader.InstanceData instanceData3 = instanceDatas.get(0);
                     Assert.assertTrue(instanceData3.TaskCurrent);
 
-                    if (instanceData3.IsRootTask)
-                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
-                    else
-                        startActivity(CreateTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), instanceData3.InstanceKey.TaskId));
                     break;
                 case R.id.action_group_delete_task: {
                     ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(instanceDatas)
@@ -180,6 +177,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     break;
                 }
+                case R.id.action_group_add_task:
+                    Assert.assertTrue(instanceDatas.size() == 1);
+
+                    GroupListLoader.InstanceData instanceData4 = instanceDatas.get(0);
+                    Assert.assertTrue(instanceData4.TaskCurrent);
+
+                    getActivity().startActivity(CreateTaskActivity.getCreateIntent(getActivity(), instanceData4.InstanceKey.TaskId));
+                    break;
                 case R.id.action_group_join:
                     ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(instanceDatas)
                             .map(instanceData -> instanceData.InstanceKey.TaskId)
@@ -329,6 +334,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 menu.findItem(R.id.action_group_edit_task).setVisible(instanceData.TaskCurrent);
                 menu.findItem(R.id.action_group_join).setVisible(false);
                 menu.findItem(R.id.action_group_delete_task).setVisible(instanceData.TaskCurrent);
+                menu.findItem(R.id.action_group_add_task).setVisible(instanceData.TaskCurrent);
             } else {
                 Assert.assertTrue(instanceDatas.size() > 1);
 
@@ -337,6 +343,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 menu.findItem(R.id.action_group_share).setVisible(false);
                 menu.findItem(R.id.action_group_show_task).setVisible(false);
                 menu.findItem(R.id.action_group_edit_task).setVisible(false);
+                menu.findItem(R.id.action_group_add_task).setVisible(false);
 
                 if (Stream.of(instanceDatas).allMatch(instanceData -> instanceData.TaskCurrent)) {
                     menu.findItem(R.id.action_group_join).setVisible(true);

@@ -217,7 +217,8 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         if (mParent != null)
             mCreateChildTaskParent.setText(mParent.Name);
 
-        mCreateChildTaskParent.setVisibility(View.VISIBLE);
+        mFragmentParentLayout.setVisibility(View.VISIBLE);
+        mFragmentParentLayout.setHintAnimationEnabled(true);
 
         mCreateChildTaskParent.setOnClickListener(v -> {
             ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance();

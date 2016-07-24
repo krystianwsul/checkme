@@ -1,5 +1,7 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context="com.krystianwsul.checkme.gui.tasks.ParentFragment"
@@ -10,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/parentTask"
-        android:textColorHint="@color/textDisabled">
+        android:textColorHint="@color/textDisabled"
+        app:hintAnimationEnabled="false"
+        android:visibility="invisible">
 
         <EditText
             android:id="@+id/create_child_task_parent"
@@ -22,7 +26,6 @@
             android:focusable="false"
             android:focusableInTouchMode="false"
             tools:ignore="LabelFor,TextFields"
-            android:visibility="invisible"
             android:textSize="@dimen/textPrimary"/>
 
     </android.support.design.widget.TextInputLayout>

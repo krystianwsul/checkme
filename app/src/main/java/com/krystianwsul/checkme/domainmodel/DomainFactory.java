@@ -1649,7 +1649,7 @@ public class DomainFactory {
     private ArrayList<Schedule> loadSchedules(Task task) {
         Assert.assertTrue(task != null);
 
-        ArrayList<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(task);
+        List<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(task);
         Assert.assertTrue(scheduleRecords != null);
 
         ArrayList<Schedule> schedules = new ArrayList<>();
@@ -1699,7 +1699,7 @@ public class DomainFactory {
 
         DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
 
-        ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = mPersistenceManager.getDailyScheduleTimeRecords(dailySchedule);
+        List<DailyScheduleTimeRecord> dailyScheduleTimeRecords = mPersistenceManager.getDailyScheduleTimeRecords(dailySchedule);
         Assert.assertTrue(dailyScheduleTimeRecords != null);
         Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
 
@@ -1717,7 +1717,7 @@ public class DomainFactory {
 
         WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
 
-        ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = mPersistenceManager.getWeeklyScheduleDayOfWeekTimeRecords(weeklySchedule);
+        List<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = mPersistenceManager.getWeeklyScheduleDayOfWeekTimeRecords(weeklySchedule);
         Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecords != null);
         Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
 

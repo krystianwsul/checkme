@@ -3009,7 +3009,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(DoneExpanded ? 1 : 0);
             dest.writeTypedList(ExpandedGroups);
-            ExactTimeStamp start = ExactTimeStamp.getNow();
             dest.writeSerializable(ExpandedInstances);
         }
 

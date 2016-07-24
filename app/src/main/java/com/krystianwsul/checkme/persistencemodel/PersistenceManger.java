@@ -69,15 +69,13 @@ public class PersistenceManger {
 
         mSQLiteDatabase = MySQLiteHelper.getDatabase(mApplicationContext);
 
-        mCustomTimeRecords = new ArrayList<>();
-        for (CustomTimeRecord customTimeRecord : CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase))
-            mCustomTimeRecords.add(customTimeRecord);
+        mCustomTimeRecords = CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase);
+        Assert.assertTrue(mCustomTimeRecords != null);
 
         mCustomTimeMaxId = CustomTimeRecord.getMaxId(mSQLiteDatabase);
 
-        mTaskRecords = new ArrayList<>();
-        for (TaskRecord taskRecord : TaskRecord.getTaskRecords(mSQLiteDatabase))
-            mTaskRecords.add(taskRecord);
+        mTaskRecords = TaskRecord.getTaskRecords(mSQLiteDatabase);
+        Assert.assertTrue(mTaskRecords != null);
 
         mTaskMaxId = TaskRecord.getMaxId(mSQLiteDatabase);
 
@@ -85,17 +83,19 @@ public class PersistenceManger {
                 .map(TaskRecord::getId)
                 .collect(Collectors.toList());
 
-        mTaskHierarchyRecords = new ArrayList<>();
-        if (!mTaskRecords.isEmpty())
-            for (TaskHierarchyRecord taskHierarchyRecord : TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase, taskIds))
-                mTaskHierarchyRecords.add(taskHierarchyRecord);
+        if (mTaskRecords.isEmpty())
+            mTaskHierarchyRecords = new ArrayList<>();
+        else
+            mTaskHierarchyRecords = TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase, taskIds);
+        Assert.assertTrue(mTaskHierarchyRecords != null);
 
         mTaskHierarchyMaxId = TaskHierarchyRecord.getMaxId(mSQLiteDatabase);
 
-        mScheduleRecords = new ArrayList<>();
-        if (!mTaskRecords.isEmpty())
-            for (ScheduleRecord scheduleRecord : ScheduleRecord.getScheduleRecords(mSQLiteDatabase, taskIds))
-                mScheduleRecords.add(scheduleRecord);
+        if (mTaskRecords.isEmpty())
+            mScheduleRecords = new ArrayList<>();
+        else
+            mScheduleRecords = ScheduleRecord.getScheduleRecords(mSQLiteDatabase, taskIds);
+        Assert.assertTrue(mScheduleRecords != null);
 
         mScheduleMaxId = ScheduleRecord.getMaxId(mSQLiteDatabase);
 
@@ -108,23 +108,24 @@ public class PersistenceManger {
             for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : SingleScheduleDateTimeRecord.getSingleScheduleDateTimeRecords(mSQLiteDatabase, scheduleIds))
                 mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
 
-        mDailyScheduleTimeRecords = new ArrayList<>();
-        if (!scheduleIds.isEmpty())
-            for (DailyScheduleTimeRecord dailyScheduleTimeRecord : DailyScheduleTimeRecord.getDailyScheduleTimeRecords(mSQLiteDatabase, scheduleIds))
-                mDailyScheduleTimeRecords.add(dailyScheduleTimeRecord);
+        if (scheduleIds.isEmpty())
+            mDailyScheduleTimeRecords = new ArrayList<>();
+        else
+            mDailyScheduleTimeRecords = DailyScheduleTimeRecord.getDailyScheduleTimeRecords(mSQLiteDatabase, scheduleIds);
+        Assert.assertTrue(mDailyScheduleTimeRecords != null);
 
         mDailyScheduleTimeMaxId = DailyScheduleTimeRecord.getMaxId(mSQLiteDatabase);
 
-        mWeeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
-        if (!scheduleIds.isEmpty())
-            for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : WeeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleDayOfWeekTimeRecords(mSQLiteDatabase, scheduleIds))
-                mWeeklyScheduleDayOfWeekTimeRecords.add(weeklyScheduleDayOfWeekTimeRecord);
+        if (scheduleIds.isEmpty())
+            mWeeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
+        else
+            mWeeklyScheduleDayOfWeekTimeRecords = WeeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleDayOfWeekTimeRecords(mSQLiteDatabase, scheduleIds);
+        Assert.assertTrue(mWeeklyScheduleDayOfWeekTimeRecords != null);
 
         mWeeklyScheduleDayOfWeekTimeMaxId = WeeklyScheduleDayOfWeekTimeRecord.getMaxId(mSQLiteDatabase);
 
-        mInstanceRecords = new ArrayList<>();
-        for (InstanceRecord instanceRecord : InstanceRecord.getInstanceRecords(mSQLiteDatabase))
-            mInstanceRecords.add(instanceRecord);
+        mInstanceRecords = InstanceRecord.getInstanceRecords(mSQLiteDatabase);
+        Assert.assertTrue(mInstanceRecords != null);
 
         mInstanceMaxId = InstanceRecord.getMaxId(mSQLiteDatabase);
     }
@@ -145,14 +146,12 @@ public class PersistenceManger {
         return mTaskHierarchyRecords;
     }
 
-    public ArrayList<ScheduleRecord> getScheduleRecords(Task task) {
+    public List<ScheduleRecord> getScheduleRecords(Task task) {
         Assert.assertTrue(task != null);
 
-        ArrayList<ScheduleRecord> scheduleRecords = new ArrayList<>();
-        for (ScheduleRecord scheduleRecord : mScheduleRecords)
-            if (scheduleRecord.getRootTaskId() == task.getId())
-                scheduleRecords.add(scheduleRecord);
-        return scheduleRecords;
+        return Stream.of(mScheduleRecords)
+                .filter(scheduleRecord -> scheduleRecord.getRootTaskId() == task.getId())
+                .collect(Collectors.toList());
     }
 
     public SingleScheduleDateTimeRecord getSingleScheduleDateTimeRecord(SingleSchedule singleSchedule) {
@@ -160,24 +159,20 @@ public class PersistenceManger {
         return mSingleScheduleDateTimeRecords.get(singleSchedule.getId());
     }
 
-    public ArrayList<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(DailySchedule dailySchedule) {
+    public List<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(DailySchedule dailySchedule) {
         Assert.assertTrue(dailySchedule != null);
 
-        ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = new ArrayList<>();
-        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords)
-            if (dailyScheduleTimeRecord.getScheduleId() == dailySchedule.getId())
-                dailyScheduleTimeRecords.add(dailyScheduleTimeRecord);
-        return dailyScheduleTimeRecords;
+        return Stream.of(mDailyScheduleTimeRecords)
+                .filter(dailyScheduleTimeRecord -> dailyScheduleTimeRecord.getScheduleId() == dailySchedule.getId())
+                .collect(Collectors.toList());
     }
 
-    public ArrayList<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(WeeklySchedule weeklySchedule) {
+    public List<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(WeeklySchedule weeklySchedule) {
         Assert.assertTrue(weeklySchedule != null);
 
-        ArrayList<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
-        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords)
-            if (weeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleId() == weeklySchedule.getId())
-                weeklyScheduleDayOfWeekTimeRecords.add(weeklyScheduleDayOfWeekTimeRecord);
-        return weeklyScheduleDayOfWeekTimeRecords;
+        return Stream.of(mWeeklyScheduleDayOfWeekTimeRecords)
+                .filter(weeklyScheduleDayOfWeekTimeRecord -> weeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleId() == weeklySchedule.getId())
+                .collect(Collectors.toList());
     }
 
     public Collection<InstanceRecord> getInstanceRecords() {

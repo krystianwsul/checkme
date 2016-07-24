@@ -310,4 +310,70 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     public interface InstanceDataParent {
         void remove(InstanceKey instanceKey);
     }
+
+    public static class TaskData {
+        public final int TaskId;
+        public final String Name;
+        public final String ScheduleText;
+        public final List<TaskData> Children;
+        public final boolean IsRootTask;
+
+        public TaskData(int taskId, String name, String scheduleText, List<TaskData> children, boolean isRootTask) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(children != null);
+
+            TaskId = taskId;
+            Name = name;
+            ScheduleText = scheduleText;
+            Children = children;
+            IsRootTask = isRootTask;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            hashCode += TaskId;
+            hashCode += Name.hashCode();
+            if (!TextUtils.isEmpty(ScheduleText))
+                hashCode += ScheduleText.hashCode();
+            hashCode += Children.hashCode();
+            hashCode += (IsRootTask ? 1 : 0);
+            return hashCode;
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof TaskData))
+                return false;
+
+            TaskData taskData = (TaskData) object;
+
+            if (TaskId != taskData.TaskId)
+                return false;
+
+            if (!Name.equals(taskData.Name))
+                return false;
+
+            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskData.ScheduleText))
+                return false;
+
+            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
+                return false;
+
+            if (!Children.equals(taskData.Children))
+                return false;
+
+            if (IsRootTask != taskData.IsRootTask)
+                return false;
+
+            return true;
+        }
+    }
 }

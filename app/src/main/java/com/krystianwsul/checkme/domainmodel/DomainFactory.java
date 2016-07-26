@@ -373,6 +373,7 @@ public class DomainFactory {
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
+                    .filter(task -> task.getCurrentSchedule(now) == null)
                     .map(task -> new GroupListLoader.TaskData(task.getId(), task.getName(), getChildTaskDatas(task, now), true))
                     .collect(Collectors.toList());
         }

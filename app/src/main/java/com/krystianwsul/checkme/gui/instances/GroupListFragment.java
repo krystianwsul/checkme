@@ -746,7 +746,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             List<TimeStamp> expandedGroups = null;
             HashMap<InstanceKey, Boolean> expandedInstances = null;
             boolean doneExpanded = false;
-            Boolean unscheduledExpanded = null;
+            boolean unscheduledExpanded = false;
             List<Integer> expandedTasks = null;
 
             if (expansionState != null) {
@@ -853,7 +853,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             boolean doneExpanded = mNodeCollection.getDoneExpanded();
 
-            Boolean unscheduledExpanded = mNodeCollection.getUnscheduledExpanded();
+            boolean unscheduledExpanded = mNodeCollection.getUnscheduledExpanded();
 
             List<Integer> expandedTasks = mNodeCollection.getExpandedTasks();
 
@@ -934,7 +934,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 mNodeContainerReference = nodeContainerReference;
             }
 
-            private List<TreeNode> initialize(TreeViewAdapter treeViewAdapter, Collection<GroupListLoader.InstanceData> instanceDatas, List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, boolean doneExpanded, ArrayList<InstanceKey> selectedNodes, boolean selectable, List<GroupListLoader.TaskData> taskDatas, Boolean unscheduledExpanded, List<Integer> expandedTasks) {
+            private List<TreeNode> initialize(TreeViewAdapter treeViewAdapter, Collection<GroupListLoader.InstanceData> instanceDatas, List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, boolean doneExpanded, ArrayList<InstanceKey> selectedNodes, boolean selectable, List<GroupListLoader.TaskData> taskDatas, boolean unscheduledExpanded, List<Integer> expandedTasks) {
                 Assert.assertTrue(treeViewAdapter != null);
                 Assert.assertTrue(instanceDatas != null);
 
@@ -954,8 +954,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 Assert.assertTrue((mIndentation == 0) || (taskDatas == null));
                 if (taskDatas != null && !taskDatas.isEmpty()) {
-                    Assert.assertTrue(unscheduledExpanded != null);
-
                     mUnscheduledNode = new UnscheduledNode(mDensity, new WeakReference<>(this));
 
                     TreeNode unscheduledTreeNode = mUnscheduledNode.initialize(unscheduledExpanded, mNodeContainerReference, taskDatas, expandedTasks);
@@ -1019,9 +1017,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 mDividerNode.addExpandedInstances(expandedInstances);
             }
 
-            public Boolean getUnscheduledExpanded() {
+            public boolean getUnscheduledExpanded() {
                 if (mUnscheduledNode == null)
-                    return null;
+                    return false;
                 else
                     return mUnscheduledNode.expanded();
             }
@@ -1352,7 +1350,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
-                        notDoneGroupTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceDatas.get(0).Children.values(), expandedGroups, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, null, null));
+                        notDoneGroupTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceDatas.get(0).Children.values(), expandedGroups, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
                     } else {
                         List<TreeNode> notDoneInstanceTreeNodes = Stream.of(mInstanceDatas)
                                 .map(instanceData -> newChildTreeNode(instanceData, expandedInstances, selectedNodes))
@@ -1906,7 +1904,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
                         Assert.assertTrue(treeViewAdapter != null);
 
-                        List<TreeNode> childTreeNodes = mNodeCollection.initialize(treeViewAdapter, mInstanceDatas.get(0).Children.values(), null, null, false, null, mSelectable, null, null, null);
+                        List<TreeNode> childTreeNodes = mNodeCollection.initialize(treeViewAdapter, mInstanceDatas.get(0).Children.values(), null, null, false, null, mSelectable, null, false, null);
                         Assert.assertTrue(childTreeNodes != null);
 
                         Stream.of(childTreeNodes)
@@ -2056,7 +2054,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         mChildTreeNodeReference = new WeakReference<>(childTreeNode);
 
                         mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(childTreeNode));
-                        childTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, null, null));
+                        childTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
 
                         return childTreeNode;
                     }
@@ -2714,7 +2712,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mTreeNodeReference = new WeakReference<>(doneTreeNode);
 
                     mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(doneTreeNode));
-                    doneTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, expandedInstances, doneExpanded, null, false, null, null, null));
+                    doneTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, expandedInstances, doneExpanded, null, false, null, false, null));
 
                     return doneTreeNode;
                 }
@@ -3547,13 +3545,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         public final boolean DoneExpanded;
         public final List<TimeStamp> ExpandedGroups;
         public final HashMap<InstanceKey, Boolean> ExpandedInstances;
-        public final Boolean UnscheduledExpanded;
+        public final boolean UnscheduledExpanded;
         public final List<Integer> ExpandedTasks;
 
-        public ExpansionState(boolean doneExpanded, List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, Boolean unscheduledExpanded, List<Integer> expandedTasks) {
+        public ExpansionState(boolean doneExpanded, List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, boolean unscheduledExpanded, List<Integer> expandedTasks) {
             Assert.assertTrue(expandedGroups != null);
             Assert.assertTrue(expandedInstances != null);
-            Assert.assertTrue((expandedTasks == null) || (unscheduledExpanded != null));
 
             DoneExpanded = doneExpanded;
             ExpandedGroups = expandedGroups;
@@ -3573,12 +3570,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             dest.writeTypedList(ExpandedGroups);
             dest.writeSerializable(ExpandedInstances);
 
-            if (UnscheduledExpanded == null) {
-                dest.writeInt(0);
-            } else {
-                dest.writeInt(1);
-                dest.writeInt(UnscheduledExpanded ? 1 : 0);
-            }
+            dest.writeInt(UnscheduledExpanded ? 1 : 0);
 
             if (ExpandedTasks == null) {
                 dest.writeInt(0);
@@ -3598,8 +3590,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @SuppressWarnings("unchecked") HashMap<InstanceKey, Boolean> expandedInstances = (HashMap<InstanceKey, Boolean>) source.readSerializable();
 
-                boolean hasUnscheduled = (source.readInt() == 1);
-                Boolean unscheduledExpanded = (hasUnscheduled ? (source.readInt() == 1) : null);
+                boolean unscheduledExpanded = (source.readInt() == 1);
 
                 boolean hasTasks = (source.readInt() == 1);
                 List<Integer> expandedTasks;

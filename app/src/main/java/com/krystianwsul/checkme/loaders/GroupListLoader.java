@@ -93,6 +93,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             hashCode += CustomTimeDatas.hashCode();
             if (TaskEditable != null)
                 hashCode += (TaskEditable ? 2 : 1);
+            if (TaskDatas != null)
+                hashCode += TaskDatas.hashCode();
             return hashCode;
         }
 
@@ -120,6 +122,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if ((TaskEditable != null) && !TaskEditable.equals(data.TaskEditable))
+                return false;
+
+            if ((TaskDatas == null) != (data.TaskDatas == null))
+                return false;
+
+            if ((TaskDatas != null) && !TaskDatas.equals(data.TaskDatas))
                 return false;
 
             return true;

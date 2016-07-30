@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.krystianwsul.checkme.DataDiff;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -104,6 +105,14 @@ public class DebugFragment extends Fragment {
 
             debugData.setText(stringBuilder);
         });
+
+        Button debugDiffButton = (Button) view.findViewById(R.id.debug_diff_button);
+        Assert.assertTrue(debugDiffButton != null);
+
+        TextView debugDiffText = (TextView) view.findViewById(R.id.debug_diff_text);
+        Assert.assertTrue(debugDiffText != null);
+
+        debugDiffButton.setOnClickListener(v -> debugDiffText.setText(DataDiff.getDiff()));
     }
 
     @Override

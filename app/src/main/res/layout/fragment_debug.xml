@@ -36,4 +36,16 @@
         android:layout_height="wrap_content"
         android:id="@+id/debug_data"/>
 
+    <Button
+        android:id="@+id/debug_diff_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="HardcodedText"
+        android:text="show data diff"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/debug_diff_text"/>
+
 </LinearLayout>

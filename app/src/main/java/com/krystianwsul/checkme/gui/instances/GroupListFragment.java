@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.DataDiff;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
@@ -62,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -563,25 +563,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onLoadFinished(Loader<GroupListLoader.Data> loader, GroupListLoader.Data data) {
         if (mData != null) {
-            HashSet<InstanceKey> instanceKeys = new HashSet<>();
-            instanceKeys.addAll(mData.InstanceDatas.keySet());
-            instanceKeys.addAll(data.InstanceDatas.keySet());
-
-            for (InstanceKey instanceKey : instanceKeys) {
-                if (!mData.InstanceDatas.keySet().contains(instanceKey)) {
-                    Log.e("asdf", data.InstanceDatas.get(instanceKey).Name + " missing from mData");
-                    continue;
-                }
-
-                if (!data.InstanceDatas.keySet().contains(instanceKey)) {
-                    Log.e("asdf", mData.InstanceDatas.get(instanceKey).Name + " missing from data");
-                    continue;
-                }
-
-                if (!mData.InstanceDatas.get(instanceKey).equals(data.InstanceDatas.get(instanceKey))) {
-                    Log.e("asdf", "here be dragons " + mData.InstanceDatas.get(instanceKey).equals(data.InstanceDatas.get(instanceKey)));
-                }
-            }
+            DataDiff.diffData(mData, data);
+            Log.e("asdf", "difference w data:\n" + DataDiff.getDiff());
         }
 
         mData = data;

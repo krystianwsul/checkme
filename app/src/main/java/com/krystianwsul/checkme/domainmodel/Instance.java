@@ -441,6 +441,24 @@ class Instance {
     }
 
     boolean isVisible(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        boolean isVisible = isVisibleHelper(now);
+
+        if (isVisible) {
+            Task task = mTaskReference.get();
+            Assert.assertTrue(task != null);
+
+            ExactTimeStamp oldestVisible = task.getOldestVisible();
+            Assert.assertTrue(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getTimeStamp().toExactTimeStamp()) <= 0);
+        }
+
+        return isVisible;
+    }
+
+    private boolean isVisibleHelper(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
         Calendar calendar = now.getCalendar();
         calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
         ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);

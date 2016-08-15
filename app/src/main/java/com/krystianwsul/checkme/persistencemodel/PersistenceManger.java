@@ -212,7 +212,7 @@ public class PersistenceManger {
 
         int id = ++mTaskMaxId;
 
-        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, true, null);
+        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, true, null, null, null);
         mTaskRecords.add(taskRecord);
 
         return taskRecord;

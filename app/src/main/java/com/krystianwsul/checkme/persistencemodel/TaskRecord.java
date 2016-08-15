@@ -18,6 +18,9 @@ public class TaskRecord extends Record {
     private static final String COLUMN_END_TIME = "endTime";
     private static final String COLUMN_RELEVANT = "relevant";
     private static final String COLUMN_OLDEST_VISIBLE = "oldestVisible";
+    private static final String COLUMN_OLDEST_VISIBLE_YEAR = "oldestVisibleYear";
+    private static final String COLUMN_OLDEST_VISIBLE_MONTH = "oldestVisibleMonth";
+    private static final String COLUMN_OLDEST_VISIBLE_DAY = "oldestVisibleDay";
 
     private static final String INDEX_RELEVANT = "tasksIndexRelevant";
 
@@ -28,7 +31,10 @@ public class TaskRecord extends Record {
     private Long mEndTime;
 
     private boolean mRelevant;
-    private Long mOldestVisible;
+
+    private Integer mOldestVisibleYear;
+    private Integer mOldestVisibleMonth;
+    private Integer mOldestVisibleDay;
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_TASKS
@@ -37,15 +43,15 @@ public class TaskRecord extends Record {
                 + COLUMN_START_TIME + " TEXT NOT NULL, "
                 + COLUMN_END_TIME + " TEXT, "
                 + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1, "
-                + COLUMN_OLDEST_VISIBLE + " INTEGER);");
+                + COLUMN_OLDEST_VISIBLE + " INTEGER, "
+                + COLUMN_OLDEST_VISIBLE_YEAR + " INTEGER, "
+                + COLUMN_OLDEST_VISIBLE_MONTH + " INTEGER, "
+                + COLUMN_OLDEST_VISIBLE_DAY + " INTEGER);");
         sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_TASKS + "(" + COLUMN_RELEVANT + " DESC)");
     }
 
     @SuppressWarnings("UnusedParameters")
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
-        //onCreate(sqLiteDatabase);
-
         if (oldVersion <= 5) {
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
                     + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
@@ -56,6 +62,15 @@ public class TaskRecord extends Record {
 
         if (oldVersion <= 7) {
             sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_TASKS + "(" + COLUMN_RELEVANT + " DESC)");
+        }
+
+        if (oldVersion <= 9) {
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
+                    + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_YEAR + " INTEGER");
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
+                    + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_MONTH + " INTEGER");
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
+                    + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_DAY + " INTEGER");
         }
     }
 
@@ -84,11 +99,16 @@ public class TaskRecord extends Record {
         Long endTime = (cursor.isNull(3) ? null : cursor.getLong(3));
         boolean relevant = (cursor.getInt(4) == 1);
         Long oldestVisible = (cursor.isNull(5) ? null : cursor.getLong(5));
+        Integer oldestVisibleYear = (cursor.isNull(6) ? null : cursor.getInt(6));
+        Integer oldestVisibleMonth = (cursor.isNull(7) ? null : cursor.getInt(7));
+        Integer oldestVisibleDay = (cursor.isNull(8) ? null : cursor.getInt(8));
 
         Assert.assertTrue(name != null);
         Assert.assertTrue(endTime == null || startTime <= endTime);
+        Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
+        Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));
 
-        return new TaskRecord(true, id, name, startTime, endTime, relevant, oldestVisible);
+        return new TaskRecord(true, id, name, startTime, endTime, relevant, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay);
     }
 
     static int getMaxId(SQLiteDatabase sqLiteDatabase) {
@@ -96,11 +116,13 @@ public class TaskRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_TASKS, COLUMN_ID);
     }
 
-    TaskRecord(boolean created, int id, String name, long startTime, Long endTime, boolean relevant, Long oldestVisible) {
+    TaskRecord(boolean created, int id, String name, long startTime, Long endTime, boolean relevant, Integer oldestVisibleYear, Integer oldestVisibleMonth, Integer oldestVisibleDay) {
         super(created);
 
         Assert.assertTrue(name != null);
         Assert.assertTrue(endTime == null || startTime <= endTime);
+        Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
+        Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));
 
         mId = id;
         mName = name;
@@ -108,7 +130,10 @@ public class TaskRecord extends Record {
         mEndTime = endTime;
 
         mRelevant = relevant;
-        mOldestVisible = oldestVisible;
+
+        mOldestVisibleDay = oldestVisibleDay;
+        mOldestVisibleMonth = oldestVisibleMonth;
+        mOldestVisibleYear = oldestVisibleYear;
     }
 
     public int getId() {
@@ -131,8 +156,16 @@ public class TaskRecord extends Record {
         return mRelevant;
     }
 
-    public Long getOldestVisible() {
-        return mOldestVisible;
+    public Integer getOldestVisibleYear() {
+        return mOldestVisibleYear;
+    }
+
+    public Integer getOldestVisibleMonth() {
+        return mOldestVisibleMonth;
+    }
+
+    public Integer getOldestVisibleDay() {
+        return mOldestVisibleDay;
     }
 
     public void setName(String name) {
@@ -155,8 +188,18 @@ public class TaskRecord extends Record {
         mChanged = true;
     }
 
-    public void setOldestVisible(long oldestVisible) {
-        mOldestVisible = oldestVisible;
+    public void setOldestVisibleYear(int oldestVisibleYear) {
+        mOldestVisibleYear = oldestVisibleYear;
+        mChanged = true;
+    }
+
+    public void setOldestVisibleMonth(int oldestVisibleYearMonth) {
+        mOldestVisibleMonth = oldestVisibleYearMonth;
+        mChanged = true;
+    }
+
+    public void setOldestVisibleDay(int oldestVisibleDay) {
+        mOldestVisibleDay = oldestVisibleDay;
         mChanged = true;
     }
 
@@ -167,7 +210,9 @@ public class TaskRecord extends Record {
         contentValues.put(COLUMN_START_TIME, mStartTime);
         contentValues.put(COLUMN_END_TIME, mEndTime);
         contentValues.put(COLUMN_RELEVANT, mRelevant ? 1 : 0);
-        contentValues.put(COLUMN_OLDEST_VISIBLE, mOldestVisible);
+        contentValues.put(COLUMN_OLDEST_VISIBLE_YEAR, mOldestVisibleYear);
+        contentValues.put(COLUMN_OLDEST_VISIBLE_MONTH, mOldestVisibleMonth);
+        contentValues.put(COLUMN_OLDEST_VISIBLE_DAY, mOldestVisibleDay);
         return contentValues;
     }
 

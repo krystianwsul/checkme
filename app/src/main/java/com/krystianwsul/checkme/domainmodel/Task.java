@@ -8,7 +8,9 @@ import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.HourMili;
 
 import junit.framework.Assert;
 
@@ -171,18 +173,32 @@ public class Task {
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
-    ExactTimeStamp getOldestVisible() {
-        if (mTaskRecord.getOldestVisible() != null)
-            return new ExactTimeStamp(mTaskRecord.getOldestVisible());
-        else
+    Date getOldestVisible() {
+        if (mTaskRecord.getOldestVisibleYear() != null) {
+            Assert.assertTrue(mTaskRecord.getOldestVisibleMonth() != null);
+            Assert.assertTrue(mTaskRecord.getOldestVisibleDay() != null);
+
+            return new Date(mTaskRecord.getOldestVisibleYear(), mTaskRecord.getOldestVisibleMonth(), mTaskRecord.getOldestVisibleDay());
+        } else {
+            Assert.assertTrue(mTaskRecord.getOldestVisibleMonth() == null);
+            Assert.assertTrue(mTaskRecord.getOldestVisibleDay() == null);
+
             return null;
+        }
     }
 
     ArrayList<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(now != null);
 
-        ExactTimeStamp myStartExactTimeStamp = (startExactTimeStamp != null ? startExactTimeStamp : getOldestVisible()); // 24 hack
+        ExactTimeStamp myStartExactTimeStamp; // 24 hack
+        Date oldestVisible = getOldestVisible();
+        if (oldestVisible != null) {
+            HourMili zero = new HourMili(0, 0, 0, 0);
+            myStartExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
+        } else {
+            myStartExactTimeStamp = null;
+        }
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
@@ -201,16 +217,20 @@ public class Task {
                 .filter(instance -> instance.isVisible(now))
                 .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
 
+        Date oldestVisible;
+
         if (optional.isPresent()) {
-            ExactTimeStamp oldestVisible = optional.get().getScheduleDateTime().getTimeStamp().toExactTimeStamp();
+            oldestVisible = optional.get().getScheduleDateTime().getDate();
 
-            if (oldestVisible.compareTo(now) > 0)
-                oldestVisible = now;
-
-            mTaskRecord.setOldestVisible(oldestVisible.getLong());
+            if (oldestVisible.compareTo(now.getDate()) > 0)
+                oldestVisible = now.getDate();
         } else {
-            mTaskRecord.setOldestVisible(now.getLong());
+            oldestVisible = now.getDate();
         }
+
+        mTaskRecord.setOldestVisibleYear(oldestVisible.getYear());
+        mTaskRecord.setOldestVisibleMonth(oldestVisible.getMonth());
+        mTaskRecord.setOldestVisibleDay(oldestVisible.getDay());
     }
 
     private Task getRootTask(ExactTimeStamp exactTimeStamp) {

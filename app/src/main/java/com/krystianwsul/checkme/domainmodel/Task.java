@@ -191,18 +191,19 @@ public class Task {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(now != null);
 
-        ExactTimeStamp myStartExactTimeStamp; // 24 hack
-        Date oldestVisible = getOldestVisible();
-        if (oldestVisible != null) {
-            HourMili zero = new HourMili(0, 0, 0, 0);
-            myStartExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
-        } else {
-            myStartExactTimeStamp = null;
+        if (startExactTimeStamp == null) { // 24 hack
+            Date oldestVisible = getOldestVisible();
+            if (oldestVisible != null) {
+                HourMili zero = new HourMili(0, 0, 0, 0);
+                startExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
+            } else {
+                startExactTimeStamp = null;
+            }
         }
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
-            instances.addAll(schedule.getInstances(myStartExactTimeStamp, endExactTimeStamp));
+            instances.addAll(schedule.getInstances(startExactTimeStamp, endExactTimeStamp));
 
         return instances;
     }

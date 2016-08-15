@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -449,8 +450,12 @@ class Instance {
             Task task = mTaskReference.get();
             Assert.assertTrue(task != null);
 
-            ExactTimeStamp oldestVisible = task.getOldestVisible();
-            Assert.assertTrue(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getTimeStamp().toExactTimeStamp()) <= 0);
+            Date oldestVisible = task.getOldestVisible();
+
+            if (!(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getDate()) <= 0))
+                Log.e("asdf", getName() + " oldest: " + oldestVisible + ", schedule: " + getScheduleDateTime() + ", instance: " + getInstanceDateTime());
+
+            //Assert.assertTrue(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getTimeStamp().toExactTimeStamp()) <= 0);
         }
 
         return isVisible;
@@ -481,13 +486,13 @@ class Instance {
         Task task = mTaskReference.get();
         Assert.assertTrue(task != null);
 
-        ExactTimeStamp oldestRelevant = task.getOldestVisible();
+        Date oldestVisible = task.getOldestVisible();
 
-        if (oldestRelevant == null)
+        if (oldestVisible == null)
             return true;
 
         //noinspection RedundantIfStatement
-        if (getScheduleDateTime().getTimeStamp().toExactTimeStamp().compareTo(oldestRelevant) >= 0)
+        if (getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
             return true;
 
         return false;

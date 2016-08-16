@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Schedule {
     private final ScheduleRecord mScheduleRecord;
@@ -57,7 +57,7 @@ public abstract class Schedule {
         return ScheduleType.values()[mScheduleRecord.getType()];
     }
 
-    abstract ArrayList<Instance> getInstances(ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp);
+    abstract List<Instance> getInstances(ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp);
 
     protected abstract TimeStamp getNextAlarm(ExactTimeStamp now);
 

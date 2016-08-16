@@ -452,6 +452,7 @@ class Instance {
 
             Date oldestVisible = task.getOldestVisible();
 
+            // zone hack
             if (!(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getDate()) <= 0))
                 Log.e("asdf", getName() + " oldest: " + oldestVisible + ", schedule: " + getScheduleDateTime() + ", instance: " + getInstanceDateTime());
 

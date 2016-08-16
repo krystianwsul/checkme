@@ -187,7 +187,7 @@ public class Task {
         }
     }
 
-    ArrayList<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
+    List<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(now != null);
 
@@ -211,8 +211,11 @@ public class Task {
     void updateOldestVisible(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
         // 24 hack
-        ArrayList<Instance> instances = getInstances(null, now.plusOne(), now);
+        List<Instance> instances = domainFactory.getInstances(this, null, now.plusOne(), now);
 
         Optional<Instance> optional = Stream.of(instances)
                 .filter(instance -> instance.isVisible(now))
@@ -272,7 +275,7 @@ public class Task {
             return true;
 
         //noinspection RedundantIfStatement
-        if (Stream.of(getInstances(null, now.plusOne(), now))
+        if (Stream.of(domainFactory.getInstances(this, null, now.plusOne(), now))
                 .anyMatch(instance -> instance.isRelevant(now)))
             return true;
 

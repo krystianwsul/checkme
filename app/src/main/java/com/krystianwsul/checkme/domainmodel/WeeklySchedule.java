@@ -22,7 +22,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-public class WeeklySchedule extends Schedule {
+public class WeeklySchedule extends RepeatingSchedule {
     private final ArrayList<WeeklyScheduleDayOfWeekTime> mWeeklyScheduleDayOfWeekTimes = new ArrayList<>();
 
     WeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {

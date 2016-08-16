@@ -49,12 +49,11 @@ class SingleScheduleDateTime {
         return new DateTime(getDate(), getTime());
     }
 
-    Instance getInstance(Task task, Date scheduleDate) {
+    Instance getInstance(Task task) {
         Assert.assertTrue(task != null);
-        Assert.assertTrue(scheduleDate != null);
 
-        DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
-        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
+        DateTime scheduleDateTime = getDateTime();
+        //Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp())); zone hack
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);

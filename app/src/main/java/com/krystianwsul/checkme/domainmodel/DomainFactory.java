@@ -1597,6 +1597,44 @@ public class DomainFactory {
         }
     }
 
+    List<Instance> getInstances(Task task, ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(endExactTimeStamp != null);
+        Assert.assertTrue(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
+        Assert.assertTrue(now != null);
+
+        HashSet<Instance> allInstances = new HashSet<>();
+
+        for (Instance instance : mExistingInstances) {
+            if (instance.getTaskId() != task.getId())
+                continue;
+
+            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
+
+            if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
+                continue;
+
+            if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
+                continue;
+
+            allInstances.add(instance);
+        }
+
+        for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
+            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
+
+            if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
+                continue;
+
+            if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
+                continue;
+
+            allInstances.add(instance);
+        }
+
+        return new ArrayList<>(allInstances);
+    }
+
     private List<Instance> getRootInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);

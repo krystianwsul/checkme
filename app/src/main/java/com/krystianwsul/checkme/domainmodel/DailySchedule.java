@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class DailySchedule extends Schedule {
+public class DailySchedule extends RepeatingSchedule {
     private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
 
     DailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {

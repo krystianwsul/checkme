@@ -3,11 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
-import com.krystianwsul.checkme.utils.time.Date;
-import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMili;
-import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -63,35 +59,6 @@ public class SingleSchedule extends Schedule {
         return instance;
     }
 
-    @Override
-    protected ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili) {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
-        Assert.assertTrue(date != null);
-
-        ArrayList<Instance> instances = new ArrayList<>();
-
-        if (date.compareTo(mSingleScheduleDateTime.getDate()) != 0)
-            return instances;
-
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-
-        HourMinute hourMinute = mSingleScheduleDateTime.getTime().getHourMinute(dayOfWeek);
-        Assert.assertTrue(hourMinute != null);
-
-        if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
-            return instances;
-
-        if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
-            return instances;
-
-        Task rootTask = mRootTaskReference.get();
-        Assert.assertTrue(rootTask != null);
-
-        instances.add(mSingleScheduleDateTime.getInstance(rootTask, date));
-
-        return instances;
-    }
-
     public Time getTime() {
         Assert.assertTrue(mSingleScheduleDateTime != null);
         return mSingleScheduleDateTime.getTime();
@@ -118,5 +85,27 @@ public class SingleSchedule extends Schedule {
             return true;
 
         return false;
+    }
+
+    @Override
+    ArrayList<Instance> getInstances(ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
+        Assert.assertTrue(givenExactEndTimeStamp != null);
+
+        ArrayList<Instance> instances = new ArrayList<>();
+
+        ExactTimeStamp singleScheduleExactTimeStamp = mSingleScheduleDateTime.getDateTime().getTimeStamp().toExactTimeStamp();
+
+        if (givenStartExactTimeStamp != null && givenStartExactTimeStamp.compareTo(singleScheduleExactTimeStamp) > 0)
+            return instances;
+
+        if (givenExactEndTimeStamp.compareTo(singleScheduleExactTimeStamp) <= 0)
+            return instances;
+
+        Task rootTask = mRootTaskReference.get();
+        Assert.assertTrue(rootTask != null);
+
+        instances.add(mSingleScheduleDateTime.getInstance(rootTask));
+
+        return instances;
     }
 }

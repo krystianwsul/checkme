@@ -196,8 +196,6 @@ public class Task {
             if (oldestVisible != null) {
                 HourMili zero = new HourMili(0, 0, 0, 0);
                 startExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
-            } else {
-                startExactTimeStamp = null;
             }
         }
 
@@ -215,7 +213,7 @@ public class Task {
         Assert.assertTrue(domainFactory != null);
 
         // 24 hack
-        List<Instance> instances = domainFactory.getInstances(this, null, now.plusOne(), now);
+        List<Instance> instances = domainFactory.getPastInstances(this, now);
 
         Optional<Instance> optional = Stream.of(instances)
                 .filter(instance -> instance.isVisible(now))
@@ -275,7 +273,7 @@ public class Task {
             return true;
 
         //noinspection RedundantIfStatement
-        if (Stream.of(domainFactory.getInstances(this, null, now.plusOne(), now))
+        if (Stream.of(domainFactory.getPastInstances(this, now))
                 .anyMatch(instance -> instance.isRelevant(now)))
             return true;
 

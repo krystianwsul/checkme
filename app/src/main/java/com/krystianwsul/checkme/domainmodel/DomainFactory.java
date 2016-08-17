@@ -1597,40 +1597,18 @@ public class DomainFactory {
         }
     }
 
-    List<Instance> getInstances(Task task, ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
+    List<Instance> getPastInstances(Task task, ExactTimeStamp now) {
         Assert.assertTrue(task != null);
-        Assert.assertTrue(endExactTimeStamp != null);
-        Assert.assertTrue(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
         Assert.assertTrue(now != null);
 
         HashSet<Instance> allInstances = new HashSet<>();
 
-        for (Instance instance : mExistingInstances) {
-            if (instance.getTaskId() != task.getId())
-                continue;
+        allInstances.addAll(Stream.of(mExistingInstances)
+                .filter(instance -> instance.getTaskId() == task.getId())
+                .filter(instance -> instance.getScheduleDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
+                .collect(Collectors.toList()));
 
-            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
-
-            if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
-                continue;
-
-            if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
-                continue;
-
-            allInstances.add(instance);
-        }
-
-        for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
-            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
-
-            if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
-                continue;
-
-            if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
-                continue;
-
-            allInstances.add(instance);
-        }
+        allInstances.addAll(task.getInstances(null, now.plusOne(), now));
 
         return new ArrayList<>(allInstances);
     }

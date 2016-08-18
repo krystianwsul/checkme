@@ -202,7 +202,7 @@ class Instance {
         DateTime scheduleDateTime = getScheduleDateTime();
         Assert.assertTrue(scheduleDateTime != null);
 
-        List<TaskHierarchy> taskHierarchies = domainFactory.getTaskHierarchies(task);
+        List<TaskHierarchy> taskHierarchies = domainFactory.getChildTaskHierarchies(task);
         HashSet<Instance> childInstances = new HashSet<>();
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);

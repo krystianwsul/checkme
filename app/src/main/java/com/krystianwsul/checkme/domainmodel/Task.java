@@ -199,9 +199,26 @@ public class Task {
             }
         }
 
-        ArrayList<Instance> instances = new ArrayList<>();
+        List<Instance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
-            instances.addAll(schedule.getInstances(startExactTimeStamp, endExactTimeStamp));
+            instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        List<TaskHierarchy> taskHierarchies = domainFactory.getParentTaskHierarchies(this);
+        Assert.assertTrue(taskHierarchies != null);
+
+        ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
+
+        instances.addAll(Stream.of(taskHierarchies)
+                .map(TaskHierarchy::getParentTask)
+                .map(task -> task.getInstances(finalStartExactTimeStamp, endExactTimeStamp, now))
+                .flatMap(Stream::of)
+                .map(instance -> instance.getChildInstances(now))
+                .flatMap(Stream::of)
+                .filter(instance -> instance.getTaskId() == getId())
+                .collect(Collectors.toList()));
 
         return instances;
     }
@@ -290,7 +307,7 @@ public class Task {
         Assert.assertTrue(domainFactory != null);
 
         //noinspection RedundantIfStatement
-        if (Stream.of(domainFactory.getTaskHierarchies(this))
+        if (Stream.of(domainFactory.getChildTaskHierarchies(this))
                 .anyMatch(taskHierarchy -> taskHierarchy.getChildTask().isRelevant(now)))
             return true;
 

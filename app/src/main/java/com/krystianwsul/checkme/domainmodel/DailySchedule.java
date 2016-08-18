@@ -42,15 +42,13 @@ public class DailySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili) {
+    protected ArrayList<Instance> getInstancesInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
+        Assert.assertTrue(task != null);
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
 
         ArrayList<Instance> instances = new ArrayList<>();
-
-        Task rootTask = mRootTaskReference.get();
-        Assert.assertTrue(rootTask != null);
 
         for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
             HourMinute hourMinute = dailyScheduleTime.getTime().getHourMinute(day);
@@ -62,7 +60,7 @@ public class DailySchedule extends RepeatingSchedule {
             if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
                 continue;
 
-            instances.add(dailyScheduleTime.getInstance(rootTask, date));
+            instances.add(dailyScheduleTime.getInstance(task, date));
         }
 
         return instances;

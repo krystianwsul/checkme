@@ -88,23 +88,23 @@ public class SingleSchedule extends Schedule {
     }
 
     @Override
-    ArrayList<Instance> getInstances(ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
+    ArrayList<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
+        Assert.assertTrue(task != null);
         Assert.assertTrue(givenExactEndTimeStamp != null);
 
         ArrayList<Instance> instances = new ArrayList<>();
 
         ExactTimeStamp singleScheduleExactTimeStamp = mSingleScheduleDateTime.getDateTime().getTimeStamp().toExactTimeStamp();
 
-        if (givenStartExactTimeStamp != null && givenStartExactTimeStamp.compareTo(singleScheduleExactTimeStamp) > 0)
+        if (givenStartExactTimeStamp != null && givenStartExactTimeStamp.compareTo(singleScheduleExactTimeStamp) > 0) {
             return instances;
+        }
 
-        if (givenExactEndTimeStamp.compareTo(singleScheduleExactTimeStamp) <= 0)
+        if (givenExactEndTimeStamp.compareTo(singleScheduleExactTimeStamp) <= 0) {
             return instances;
+        }
 
-        Task rootTask = mRootTaskReference.get();
-        Assert.assertTrue(rootTask != null);
-
-        instances.add(mSingleScheduleDateTime.getInstance(rootTask));
+        instances.add(mSingleScheduleDateTime.getInstance(task));
 
         return instances;
     }

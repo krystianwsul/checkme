@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+
 import junit.framework.Assert;
 
 import java.util.ArrayList;
@@ -71,6 +73,27 @@ public class TaskRecord extends Record {
                     + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_MONTH + " INTEGER");
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
                     + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_DAY + " INTEGER");
+
+            Cursor cursor = sqLiteDatabase.query(TABLE_TASKS, null, COLUMN_RELEVANT + " = 1", null, null, null, null);
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                if (!cursor.isNull(5)) {
+                    int id = cursor.getInt(0);
+                    long oldestVisible = cursor.getLong(5);
+
+                    ExactTimeStamp exactTimeStamp = new ExactTimeStamp(oldestVisible);
+
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(COLUMN_OLDEST_VISIBLE_YEAR, exactTimeStamp.getDate().getYear());
+                    contentValues.put(COLUMN_OLDEST_VISIBLE_MONTH, exactTimeStamp.getDate().getMonth());
+                    contentValues.put(COLUMN_OLDEST_VISIBLE_DAY, exactTimeStamp.getDate().getDay());
+
+                    sqLiteDatabase.update(TABLE_TASKS, contentValues, COLUMN_ID + " = " + id, null);
+                }
+
+                cursor.moveToNext();
+            }
+            cursor.close();
         }
     }
 

@@ -270,6 +270,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     private void showTab(int tab) {
+        float density = getResources().getDisplayMetrics().density;
+
         switch (tab) {
             case INSTANCES_VISIBLE:
                 mActionBar.setTitle(null);
@@ -277,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
-                ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
                 break;
             case TASKS_VISIBLE:
@@ -286,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainTaskListFrame.setVisibility(View.VISIBLE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
-                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
                 break;
             case CUSTOM_TIMES_VISIBLE:
@@ -295,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.VISIBLE);
                 mMainDebugFrame.setVisibility(View.GONE);
-                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
                 break;
             case DEBUG_VISIBLE:
@@ -304,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 mMainTaskListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.VISIBLE);
-                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
                 break;
             default:

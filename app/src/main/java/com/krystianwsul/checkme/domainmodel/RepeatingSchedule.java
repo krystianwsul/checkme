@@ -16,7 +16,8 @@ public abstract class RepeatingSchedule extends Schedule {
     }
 
     @Override
-    ArrayList<Instance> getInstances(ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
+    ArrayList<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
+        Assert.assertTrue(task != null);
         Assert.assertTrue(givenExactEndTimeStamp != null);
 
         ExactTimeStamp myStartTimeStamp = getStartExactTimeStamp();
@@ -43,22 +44,22 @@ public abstract class RepeatingSchedule extends Schedule {
         Assert.assertTrue(startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
 
         if (startExactTimeStamp.getDate().equals(endExactTimeStamp.getDate())) {
-            return getInstancesInDate(startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), endExactTimeStamp.getHourMili());
+            return getInstancesInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), endExactTimeStamp.getHourMili());
         } else {
-            instances.addAll(getInstancesInDate(startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), null));
+            instances.addAll(getInstancesInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), null));
 
             Calendar loopStartCalendar = startExactTimeStamp.getDate().getCalendar();
             loopStartCalendar.add(Calendar.DATE, 1);
             Calendar loopEndCalendar = endExactTimeStamp.getDate().getCalendar();
 
             for (; loopStartCalendar.before(loopEndCalendar); loopStartCalendar.add(Calendar.DATE, 1))
-                instances.addAll(getInstancesInDate(new Date(loopStartCalendar), null, null));
+                instances.addAll(getInstancesInDate(task, new Date(loopStartCalendar), null, null));
 
-            instances.addAll(getInstancesInDate(endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMili()));
+            instances.addAll(getInstancesInDate(task, endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMili()));
         }
 
         return instances;
     }
 
-    protected abstract ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili);
+    protected abstract ArrayList<Instance> getInstancesInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili);
 }

@@ -1912,7 +1912,7 @@ public class DomainFactory {
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
-        return Stream.of(getTaskHierarchies(parentTask))
+        return Stream.of(getChildTaskHierarchies(parentTask))
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
                 .map(TaskHierarchy::getChildTask)
                 .filter(childTask -> childTask.current(exactTimeStamp))
@@ -1920,11 +1920,19 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    List<TaskHierarchy> getTaskHierarchies(Task parentTask) {
+    List<TaskHierarchy> getChildTaskHierarchies(Task parentTask) {
         Assert.assertTrue(parentTask != null);
 
         return Stream.of(mTaskHierarchies.values())
                 .filter(taskHierarchy -> taskHierarchy.getParentTask() == parentTask)
+                .collect(Collectors.toList());
+    }
+
+    List<TaskHierarchy> getParentTaskHierarchies(Task childTask) {
+        Assert.assertTrue(childTask != null);
+
+        return Stream.of(mTaskHierarchies.values())
+                .filter(taskHierarchy -> taskHierarchy.getChildTask() == childTask)
                 .collect(Collectors.toList());
     }
 

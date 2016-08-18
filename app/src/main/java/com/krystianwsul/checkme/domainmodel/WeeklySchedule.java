@@ -48,15 +48,13 @@ public class WeeklySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected ArrayList<Instance> getInstancesInDate(Date date, HourMili startHourMili, HourMili endHourMili) {
+    protected ArrayList<Instance> getInstancesInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
+        Assert.assertTrue(task != null);
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
 
         ArrayList<Instance> instances = new ArrayList<>();
-
-        Task rootTask = mRootTaskReference.get();
-        Assert.assertTrue(rootTask != null);
 
         for (WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime : mWeeklyScheduleDayOfWeekTimes) {
             if (weeklyScheduleDayOfWeekTime.getDayOfWeek() != day)
@@ -71,7 +69,7 @@ public class WeeklySchedule extends RepeatingSchedule {
             if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
                 continue;
 
-            instances.add(weeklyScheduleDayOfWeekTime.getInstance(rootTask, date));
+            instances.add(weeklyScheduleDayOfWeekTime.getInstance(task, date));
         }
 
         return instances;

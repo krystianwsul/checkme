@@ -57,7 +57,7 @@ public abstract class Schedule {
         return ScheduleType.values()[mScheduleRecord.getType()];
     }
 
-    abstract List<Instance> getInstances(ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp);
+    abstract List<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp);
 
     protected abstract TimeStamp getNextAlarm(ExactTimeStamp now);
 

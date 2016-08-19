@@ -70,12 +70,14 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public HashMap<InstanceKey, InstanceData> InstanceDatas;
         public final List<CustomTimeData> CustomTimeDatas;
         public final Boolean TaskEditable;
+        public List<TaskData> TaskDatas;
 
-        public Data(List<CustomTimeData> customTimeDatas, Boolean taskEditable) {
+        public Data(List<CustomTimeData> customTimeDatas, Boolean taskEditable, List<TaskData> taskDatas) {
             Assert.assertTrue(customTimeDatas != null);
 
             CustomTimeDatas = customTimeDatas;
             TaskEditable = taskEditable;
+            TaskDatas = taskDatas;
         }
 
         public void setInstanceDatas(HashMap<InstanceKey, InstanceData> instanceDatas) {
@@ -90,6 +92,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             hashCode += CustomTimeDatas.hashCode();
             if (TaskEditable != null)
                 hashCode += (TaskEditable ? 2 : 1);
+            if (TaskDatas != null)
+                hashCode += TaskDatas.hashCode();
             return hashCode;
         }
 
@@ -117,6 +121,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if ((TaskEditable != null) && !TaskEditable.equals(data.TaskEditable))
+                return false;
+
+            if ((TaskDatas == null) != (data.TaskDatas == null))
+                return false;
+
+            if ((TaskDatas != null) && !TaskDatas.equals(data.TaskDatas))
                 return false;
 
             return true;
@@ -296,17 +306,15 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     public static class TaskData {
         public final int TaskId;
         public final String Name;
-        public final String ScheduleText;
         public final List<TaskData> Children;
         public final boolean IsRootTask;
 
-        public TaskData(int taskId, String name, String scheduleText, List<TaskData> children, boolean isRootTask) {
+        public TaskData(int taskId, String name, List<TaskData> children, boolean isRootTask) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(children != null);
 
             TaskId = taskId;
             Name = name;
-            ScheduleText = scheduleText;
             Children = children;
             IsRootTask = isRootTask;
         }
@@ -316,8 +324,6 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             int hashCode = 0;
             hashCode += TaskId;
             hashCode += Name.hashCode();
-            if (!TextUtils.isEmpty(ScheduleText))
-                hashCode += ScheduleText.hashCode();
             hashCode += Children.hashCode();
             hashCode += (IsRootTask ? 1 : 0);
             return hashCode;
@@ -341,12 +347,6 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if (!Name.equals(taskData.Name))
-                return false;
-
-            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskData.ScheduleText))
-                return false;
-
-            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
                 return false;
 
             if (!Children.equals(taskData.Children))

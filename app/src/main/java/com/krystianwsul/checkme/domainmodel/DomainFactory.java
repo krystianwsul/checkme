@@ -367,7 +367,18 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null);
+        List<GroupListLoader.TaskData> taskDatas = null;
+        if (position == 0) {
+            taskDatas = Stream.of(mTasks.values())
+                    .filter(task -> task.current(now))
+                    .filter(task -> task.isVisible(now))
+                    .filter(task -> task.isRootTask(now))
+                    .filter(task -> task.getCurrentSchedule(now) == null)
+                    .map(task -> new GroupListLoader.TaskData(task.getId(), task.getName(), getChildTaskDatas(task, now), true))
+                    .collect(Collectors.toList());
+        }
+
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, taskDatas);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
@@ -384,6 +395,15 @@ public class DomainFactory {
         data.setInstanceDatas(instanceDatas);
 
         return data;
+    }
+
+    private List<GroupListLoader.TaskData> getChildTaskDatas(Task parentTask, ExactTimeStamp now) {
+        Assert.assertTrue(parentTask != null);
+        Assert.assertTrue(now != null);
+
+        return Stream.of(parentTask.getChildTasks(now))
+                .map(childTask -> new GroupListLoader.TaskData(childTask.getId(), childTask.getName(), getChildTaskDatas(childTask, now), false))
+                .collect(Collectors.toList());
     }
 
     public synchronized ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
@@ -444,7 +464,7 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null);
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
@@ -483,7 +503,7 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now));
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null);
 
         ArrayList<Instance> childInstances = instance.getChildInstances(now);
         for (Instance childInstance : childInstances) {
@@ -526,7 +546,7 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null);
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : instances) {

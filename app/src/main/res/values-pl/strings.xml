@@ -49,4 +49,5 @@
     <string name="sendTo">Prześlij do:</string>
     <string name="nameError">Wprowadź nazwę</string>
     <string name="add_task">Dodaj zadanie podrzędne</string>
+    <string name="noReminder">Bez przypomnienia</string>
 </resources>

@@ -15,6 +15,7 @@ import android.widget.Spinner;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.loaders.SchedulePickerLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 
@@ -157,7 +158,10 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
         Fragment fragment = createFragment(position);
         Assert.assertTrue(fragment != null);
 
-        getChildFragmentManager().beginTransaction().replace(R.id.schedule_picker_frame, fragment).commitAllowingStateLoss();
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.schedule_picker_frame, fragment)
+                .commitAllowingStateLoss();
     }
 
     private Fragment createFragment(int position) {
@@ -260,7 +264,7 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Assert.assertTrue(position >= 0);
-                Assert.assertTrue(position < 3);
+                Assert.assertTrue(position < 4);
 
                 if (mCount > 0) {
                     mCount--;
@@ -269,7 +273,16 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
 
                 mScheduleTypeChanged = true;
 
-                loadFragment(position);
+                if (position < 3) {
+                    loadFragment(position);
+                } else {
+                    Fragment fragment = getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
+                    Assert.assertTrue(fragment != null);
+
+                    getChildFragmentManager().beginTransaction()
+                            .remove(fragment)
+                            .commitAllowingStateLoss();
+                }
             }
 
             @Override
@@ -292,7 +305,8 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
 
         if (mData.RootTaskData == null) {
             ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-            Assert.assertTrue(scheduleFragment != null);
+            if (scheduleFragment == null)
+                return true;
 
             if (!(scheduleFragment instanceof SingleScheduleFragment))
                 return true;
@@ -308,7 +322,8 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
                 return true;
 
             ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-            Assert.assertTrue(scheduleFragment != null);
+            if (scheduleFragment == null)
+                return false;
 
             if (scheduleFragment.dataChanged())
                 return true;
@@ -320,25 +335,34 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     @Override
     public boolean updateTask(int rootTaskId, String name) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-        Assert.assertTrue(scheduleFragment != null);
-
-        return scheduleFragment.updateRootTask(rootTaskId, name);
+        if (scheduleFragment != null) {
+            return scheduleFragment.updateRootTask(rootTaskId, name);
+        } else {
+            DomainFactory.getDomainFactory(getActivity()).updateRootTask(mData.DataId, rootTaskId, name);
+            return true;
+        }
     }
 
     @Override
     public boolean createJoinTask(String name, List<Integer> joinTaskIds) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-        Assert.assertTrue(scheduleFragment != null);
-
-        return scheduleFragment.createRootJoinTask(name, joinTaskIds);
+        if (scheduleFragment != null) {
+            return scheduleFragment.createRootJoinTask(name, joinTaskIds);
+        } else {
+            DomainFactory.getDomainFactory(getActivity()).createJoinRootTask(mData.DataId, name, joinTaskIds);
+            return true;
+        }
     }
 
     @Override
     public boolean createTask(String name) {
         ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-        Assert.assertTrue(scheduleFragment != null);
-
-        return scheduleFragment.createRootTask(name);
+        if (scheduleFragment != null) {
+            return scheduleFragment.createRootTask(name);
+        } else {
+            DomainFactory.getDomainFactory(getActivity()).createRootTask(mData.DataId, name);
+            return true;
+        }
     }
 
     @Override

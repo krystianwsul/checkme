@@ -225,10 +225,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
                 Assert.assertTrue(scheduleHint != null);
 
                 mDate = scheduleHint.mDate;
-                Assert.assertTrue(mDate != null);
 
-                if (scheduleHint.mHourMinute != null) {
-                    mTimePairPersist = new TimePairPersist(scheduleHint.mHourMinute);
+                if (scheduleHint.mTimePair != null) {
+                    mTimePairPersist = new TimePairPersist(scheduleHint.mTimePair);
                 } else {
                     mTimePairPersist = new TimePairPersist();
                 }
@@ -451,7 +450,6 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
                 Assert.assertTrue(scheduleHint != null);
 
                 initialDate = scheduleHint.mDate;
-                Assert.assertTrue(initialDate != null);
             } else {
                 initialDate = Date.today();
             }

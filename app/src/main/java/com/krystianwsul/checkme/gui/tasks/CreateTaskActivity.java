@@ -30,7 +30,7 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.utils.time.TimeStamp;
+import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -572,30 +572,28 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     public static class ScheduleHint implements Parcelable {
         public final Date mDate;
-        public final HourMinute mHourMinute;
+        public final TimePair mTimePair;
 
         public ScheduleHint(Date date) {
             Assert.assertTrue(date != null);
 
             mDate = date;
-            mHourMinute = null;
+            mTimePair = null;
         }
 
-        public ScheduleHint(TimeStamp timeStamp) {
-            Assert.assertTrue(timeStamp != null);
+        public ScheduleHint(Date date, HourMinute hourMinute) {
+            Assert.assertTrue(date != null);
+            Assert.assertTrue(hourMinute != null);
 
-            mDate = timeStamp.getDate();
-            Assert.assertTrue(mDate != null);
-
-            mHourMinute = timeStamp.getHourMinute();
-            Assert.assertTrue(mHourMinute != null);
+            mDate = date;
+            mTimePair = new TimePair(hourMinute);
         }
 
-        private ScheduleHint(Date date, HourMinute hourMinute) {
+        public ScheduleHint(Date date, TimePair timePair) {
             Assert.assertTrue(date != null);
 
             mDate = date;
-            mHourMinute = hourMinute;
+            mTimePair = timePair;
         }
 
         @Override
@@ -607,11 +605,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(mDate, 0);
 
-            if (mHourMinute == null) {
+            if (mTimePair == null) {
                 dest.writeInt(0);
             } else {
                 dest.writeInt(1);
-                dest.writeParcelable(mHourMinute, 0);
+                dest.writeParcelable(mTimePair, 0);
             }
         }
 
@@ -621,10 +619,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 Date date = source.readParcelable(Date.class.getClassLoader());
                 Assert.assertTrue(date != null);
 
-                boolean hasHourMinute = (source.readInt() == 1);
-                HourMinute hourMinute = (hasHourMinute ? source.readParcelable(HourMinute.class.getClassLoader()) : null);
+                boolean hasTimePair = (source.readInt() == 1);
+                TimePair timePair = (hasTimePair ? source.readParcelable(HourMinute.class.getClassLoader()) : null);
 
-                return new ScheduleHint(date, hourMinute);
+                return new ScheduleHint(date, timePair);
             }
 
             @Override

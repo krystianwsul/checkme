@@ -61,7 +61,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private Bundle mSavedInstanceState;
 
     private DayOfWeek mDayOfWeek = DayOfWeek.today();
-    private HourMinute mHourMinute = null;
+    private TimePair mTimePair = null;
 
     private Integer mRootTaskId;
     private WeeklyScheduleLoader.Data mData;
@@ -182,7 +182,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
                 mDayOfWeek = scheduleHint.mDate.getDayOfWeek();
                 Assert.assertTrue(mDayOfWeek != null);
 
-                mHourMinute = scheduleHint.mHourMinute;
+                mTimePair = scheduleHint.mTimePair;
             }
         }
 
@@ -195,8 +195,8 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             mHourMinutePickerPosition = -1;
         } else {
             mDayOfWeekTimeEntries = new ArrayList<>();
-            if (mHourMinute != null)
-                mDayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(mDayOfWeek, new TimePair(mHourMinute), false));
+            if (mTimePair != null)
+                mDayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(mDayOfWeek, mTimePair, false));
             else
                 mDayOfWeekTimeEntries.add(new DayOfWeekTimeEntry(mDayOfWeek, false));
 
@@ -425,8 +425,8 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             }
 
             DayOfWeekTimeEntry dayOfWeekTimeEntry;
-            if (mHourMinute != null)
-                dayOfWeekTimeEntry = new DayOfWeekTimeEntry(mDayOfWeek, mHourMinute, true);
+            if (mTimePair != null)
+                dayOfWeekTimeEntry = new DayOfWeekTimeEntry(mDayOfWeek, mTimePair, true);
             else
                 dayOfWeekTimeEntry = new DayOfWeekTimeEntry(mDayOfWeek, true);
             mDayOfWeekTimeEntries.add(position, dayOfWeekTimeEntry);

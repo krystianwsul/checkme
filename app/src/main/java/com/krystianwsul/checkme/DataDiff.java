@@ -90,6 +90,9 @@ public class DataDiff {
         if (oldInstanceData.Exists != newInstanceData.Exists)
             sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.Exists + ", newInstanceData.Exists == " + newInstanceData.Exists);
 
+        if (!oldInstanceData.InstanceTimePair.equals(newInstanceData.InstanceTimePair))
+            sDiff.add(indent + "oldInstanceData.InstanceTimePair == " + oldInstanceData.InstanceTimePair + ", newInstanceData.InstanceTimePair == " + newInstanceData.InstanceTimePair);
+
         if (!oldInstanceData.Children.equals(newInstanceData.Children)) {
             sDiff.add(indent + "oldInstanceData.Children != newInstanceData.Children");
             diffMap(indent + "\t", oldInstanceData.Children, newInstanceData.Children);

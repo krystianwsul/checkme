@@ -52,7 +52,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     private TimeEntryAdapter mTimeEntryAdapter;
     private RecyclerView mDailyScheduleTimes;
 
-    private HourMinute mHourMinute;
+    private TimePair mTimePair;
 
     private Integer mRootTaskId;
     private DailyScheduleLoader.Data mData;
@@ -173,7 +173,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
                 CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
                 Assert.assertTrue(scheduleHint != null);
 
-                mHourMinute = scheduleHint.mHourMinute;
+                mTimePair = scheduleHint.mTimePair;
             }
         }
 
@@ -186,8 +186,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             mHourMinutePickerPosition = -1;
         } else {
             mTimeEntries = new ArrayList<>();
-            if (mHourMinute != null)
-                mTimeEntries.add(new TimeEntry(mHourMinute, false));
+            if (mTimePair != null)
+                mTimeEntries.add(new TimeEntry(mTimePair, false));
             else
                 mTimeEntries.add(new TimeEntry(false));
 
@@ -395,8 +395,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             }
 
             TimeEntry timeEntry;
-            if (mHourMinute != null)
-                timeEntry = new TimeEntry(mHourMinute, true);
+            if (mTimePair != null)
+                timeEntry = new TimeEntry(mTimePair, true);
             else
                 timeEntry = new TimeEntry(true);
             mTimeEntries.add(position, timeEntry);

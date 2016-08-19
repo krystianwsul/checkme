@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -152,14 +153,16 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public final boolean IsRootInstance;
         public Boolean IsRootTask;
         public boolean Exists;
+        public final TimePair InstanceTimePair;
 
         public final WeakReference<InstanceDataParent> InstanceDataParentReference;
 
-        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists, WeakReference<InstanceDataParent> instanceDataParentReference) {
+        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists, WeakReference<InstanceDataParent> instanceDataParentReference, TimePair instanceTimePair) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(instanceTimeStamp != null);
             Assert.assertTrue(instanceDataParentReference != null);
+            Assert.assertTrue(instanceTimePair != null);
 
             Done = done;
             InstanceKey = instanceKey;
@@ -170,6 +173,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             IsRootInstance = isRootInstance;
             IsRootTask = isRootTask;
             Exists = exists;
+            InstanceTimePair = instanceTimePair;
 
             InstanceDataParentReference = instanceDataParentReference;
         }
@@ -190,6 +194,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             if (IsRootTask != null)
                 hashCode += (IsRootTask ? 2 : 1);
             hashCode += (Exists ? 1 : 0);
+            hashCode += InstanceTimePair.hashCode();
             return hashCode;
         }
 
@@ -250,6 +255,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if (Exists != instanceData.Exists)
+                return false;
+
+            if (!InstanceTimePair.equals(instanceData.InstanceTimePair))
                 return false;
 
             return true;

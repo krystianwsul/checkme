@@ -54,6 +54,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -192,13 +193,16 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(taskIds.size() > 1);
 
                     if (mInstanceKey == null) {
-                        if (mPosition != null) {
-                            Assert.assertTrue(mTimeRange != null);
+                        GroupListLoader.InstanceData firstInstanceData = Stream.of(instanceDatas)
+                                .min((lhs, rhs) -> lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp))
+                                .get();
 
-                            startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition))));
-                        } else {
-                            startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds));
-                        }
+                        Date date = firstInstanceData.InstanceTimeStamp.getDate();
+                        Assert.assertTrue(date != null);
+
+                        TimePair timePair = firstInstanceData.InstanceTimePair;
+
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, new CreateTaskActivity.ScheduleHint(date, timePair)));
                     } else {
                         startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, mInstanceKey.TaskId));
                     }
@@ -614,7 +618,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             if (mTimeStamp.compareTo(TimeStamp.getNow()) > 0) {
                 showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(mTimeStamp))));
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(mTimeStamp.getDate(), mTimeStamp.getHourMinute()))));
             } else {
                 showFab = false;
             }
@@ -1001,10 +1005,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             }
 
             public boolean getUnscheduledExpanded() {
-                if (mUnscheduledNode == null)
-                    return false;
-                else
-                    return mUnscheduledNode.expanded();
+                return (mUnscheduledNode != null && mUnscheduledNode.expanded());
             }
 
             public List<Integer> getExpandedTasks() {

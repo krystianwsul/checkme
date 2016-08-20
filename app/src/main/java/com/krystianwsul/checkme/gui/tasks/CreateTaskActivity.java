@@ -17,6 +17,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -426,6 +427,40 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 }
             }
         }
+
+        mCreateTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
+                Assert.assertTrue(parentFragment != null);
+
+                SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
+                Assert.assertTrue(schedulePickerFragment != null);
+
+                switch (i) {
+                    case 0: // schedule
+                        parentFragment.clear();
+
+                        break;
+                    case 1: // parent
+                        schedulePickerFragment.clear();
+
+                        break;
+                    case 2: // no reminder
+                        parentFragment.clear();
+                        schedulePickerFragment.clear();
+
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         invalidateOptionsMenu();
     }

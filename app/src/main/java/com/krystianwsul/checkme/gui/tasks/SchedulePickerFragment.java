@@ -276,6 +276,8 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
                 if (position < 3) {
                     loadFragment(position);
                 } else {
+                    Assert.assertTrue(position == 3);
+
                     Fragment fragment = getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
                     Assert.assertTrue(fragment != null);
 
@@ -368,5 +370,9 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     @Override
     public void updateError() {
 
+    }
+
+    public void clear() {
+        mCreateRootTaskSpinner.setSelection(3);
     }
 }

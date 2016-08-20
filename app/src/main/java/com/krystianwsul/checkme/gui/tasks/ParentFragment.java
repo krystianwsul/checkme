@@ -350,4 +350,11 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
             mFragmentParentLayout.setError(getString(R.string.error_parent));
         }
     }
+
+    public void clear() {
+        mParent = null;
+        mCreateChildTaskParent.setText(null);
+
+        mFragmentParentLayout.setError(null);
+    }
 }

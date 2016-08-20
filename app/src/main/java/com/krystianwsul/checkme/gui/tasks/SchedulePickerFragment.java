@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tasks;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,7 +17,7 @@ import android.widget.Spinner;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.loaders.SchedulePickerLoader;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 
 import junit.framework.Assert;
@@ -24,13 +25,9 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SchedulePickerFragment extends Fragment implements LoaderManager.LoaderCallbacks<SchedulePickerLoader.Data>, CreateTaskFragment {
-    private static final String TASK_ID_KEY = "taskId";
-    private static final String TASK_IDS_KEY = "taskIds";
+public class SchedulePickerFragment extends Fragment implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data>, CreateTaskFragment {
     private static final String POSITION_KEY = "position";
     private static final String SCHEDULE_TYPE_CHANGED_KEY = "scheduleTypeChanged";
-
-    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
     private CreateTaskActivity.ScheduleHint mScheduleHint;
 
@@ -40,62 +37,12 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     private Integer mTaskId;
     private ArrayList<Integer> mTaskIds;
 
-    private SchedulePickerLoader.Data mData;
+    private CreateTaskLoader.Data mData;
 
     private boolean mScheduleTypeChanged = false;
 
-    public static SchedulePickerFragment getCreateInstance() {
+    public static SchedulePickerFragment getInstance() {
         return new SchedulePickerFragment();
-    }
-
-    public static SchedulePickerFragment getCreateInstance(CreateTaskActivity.ScheduleHint scheduleHint) {
-        Assert.assertTrue(scheduleHint != null);
-
-        SchedulePickerFragment schedulePickerFragment = new SchedulePickerFragment();
-
-        Bundle args = new Bundle();
-        args.putParcelable(SCHEDULE_HINT_KEY, scheduleHint);
-        schedulePickerFragment.setArguments(args);
-
-        return schedulePickerFragment;
-    }
-
-    public static SchedulePickerFragment getJoinInstance(ArrayList<Integer> joinTaskIds) {
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        SchedulePickerFragment schedulePickerFragment = new SchedulePickerFragment();
-
-        Bundle args = new Bundle();
-        args.putIntegerArrayList(TASK_IDS_KEY, joinTaskIds);
-        schedulePickerFragment.setArguments(args);
-
-        return schedulePickerFragment;
-    }
-
-    public static SchedulePickerFragment getJoinInstance(ArrayList<Integer> joinTaskIds, CreateTaskActivity.ScheduleHint scheduleHint) {
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-        Assert.assertTrue(scheduleHint != null);
-
-        SchedulePickerFragment schedulePickerFragment = new SchedulePickerFragment();
-
-        Bundle args = new Bundle();
-        args.putIntegerArrayList(TASK_IDS_KEY, joinTaskIds);
-        args.putParcelable(SCHEDULE_HINT_KEY, scheduleHint);
-        schedulePickerFragment.setArguments(args);
-
-        return schedulePickerFragment;
-    }
-
-    public static SchedulePickerFragment getEditInstance(int taskId) {
-        SchedulePickerFragment schedulePickerFragment = new SchedulePickerFragment();
-
-        Bundle args = new Bundle();
-        args.putInt(TASK_ID_KEY, taskId);
-        schedulePickerFragment.setArguments(args);
-
-        return schedulePickerFragment;
     }
 
     public SchedulePickerFragment() {
@@ -122,20 +69,22 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
 
         mSavedInstanceState = savedInstanceState;
 
-        Bundle args = getArguments();
+        Intent intent = getActivity().getIntent();
+        Assert.assertTrue(intent != null);
 
-        if (args != null && args.containsKey(SCHEDULE_HINT_KEY)) {
-            mScheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+        if (intent.hasExtra(CreateTaskActivity.SCHEDULE_HINT_KEY)) {
+            mScheduleHint = intent.getParcelableExtra(CreateTaskActivity.SCHEDULE_HINT_KEY);
             Assert.assertTrue(mScheduleHint != null);
         }
 
-        if (args != null && args.containsKey(TASK_ID_KEY)) {
-            Assert.assertTrue(!args.containsKey(TASK_IDS_KEY));
+        if (intent.hasExtra(CreateTaskActivity.TASK_ID_KEY)) {
+            Assert.assertTrue(!intent.hasExtra(CreateTaskActivity.TASK_IDS_KEY));
 
-            mTaskId = args.getInt(TASK_ID_KEY);
+            mTaskId = intent.getIntExtra(CreateTaskActivity.TASK_ID_KEY, -1);
+            Assert.assertTrue(mTaskId != -1);
         } else {
-            if (args != null && args.containsKey(TASK_IDS_KEY)) {
-                mTaskIds = args.getIntegerArrayList(TASK_IDS_KEY);
+            if (intent.hasExtra(CreateTaskActivity.TASK_IDS_KEY)) {
+                mTaskIds = intent.getIntegerArrayListExtra(CreateTaskActivity.TASK_IDS_KEY);
                 Assert.assertTrue(mTaskIds != null);
                 Assert.assertTrue(mTaskIds.size() > 1);
             }
@@ -203,12 +152,22 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     }
 
     @Override
-    public Loader<SchedulePickerLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new SchedulePickerLoader(getActivity(), mTaskId);
+    public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+        List<Integer> excludedTaskIds = new ArrayList<>();
+
+        if (mTaskId != null) {
+            Assert.assertTrue(mTaskIds == null);
+
+            excludedTaskIds.add(mTaskId);
+        } else if (mTaskIds != null) {
+            excludedTaskIds.addAll(mTaskIds);
+        }
+
+        return new CreateTaskLoader(getActivity(), mTaskId, excludedTaskIds);
     }
 
     @Override
-    public void onLoadFinished(Loader<SchedulePickerLoader.Data> loader, final SchedulePickerLoader.Data data) {
+    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
         mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
@@ -224,10 +183,10 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
                 count++;
 
             mScheduleTypeChanged = mSavedInstanceState.getBoolean(SCHEDULE_TYPE_CHANGED_KEY);
-        } else if (mData.RootTaskData != null) {
+        } else if (mData.TaskData != null && mData.TaskData.ScheduleType != null) {
             Assert.assertTrue(mTaskId != null);
 
-            ScheduleType scheduleType = mData.RootTaskData.ScheduleType;
+            ScheduleType scheduleType = mData.TaskData.ScheduleType;
 
             Fragment fragment;
             if (scheduleType == ScheduleType.SINGLE) {
@@ -295,7 +254,7 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
     }
 
     @Override
-    public void onLoaderReset(Loader<SchedulePickerLoader.Data> loader) {
+    public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {
 
     }
 
@@ -305,7 +264,7 @@ public class SchedulePickerFragment extends Fragment implements LoaderManager.Lo
         if (mData == null)
             return false;
 
-        if (mData.RootTaskData == null) {
+        if (mData.TaskData == null || mData.TaskData.ScheduleType == null) {
             ScheduleFragment scheduleFragment = (ScheduleFragment) getChildFragmentManager().findFragmentById(R.id.schedule_picker_frame);
             if (scheduleFragment == null)
                 return true;

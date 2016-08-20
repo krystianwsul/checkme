@@ -19,12 +19,14 @@
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:visibility="invisible" />
 
-    <FrameLayout
+    <fragment
+        android:name="com.krystianwsul.checkme.gui.tasks.ParentFragment"
         android:id="@+id/create_task_parent_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <FrameLayout
+    <fragment
+        android:name="com.krystianwsul.checkme.gui.tasks.SchedulePickerFragment"
         android:id="@+id/create_task_schedule_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tasks;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
@@ -18,7 +19,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.loaders.ParentLoader;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 
 import junit.framework.Assert;
 
@@ -26,14 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ParentFragment extends Fragment implements LoaderManager.LoaderCallbacks<ParentLoader.Data>, CreateTaskFragment {
+public class ParentFragment extends Fragment implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data>, CreateTaskFragment {
     private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
 
     private static final String PARENT_ID = "parentId";
-
-    private static final String PARENT_TASK_ID_KEY = "parentTaskId";
-    private static final String TASK_IDS_KEY = "taskIds";
-    private static final String CHILD_TASK_ID_KEY = "childTaskId";
 
     private Bundle mSavedInstanceState;
 
@@ -44,9 +41,9 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     private ArrayList<Integer> mTaskIds;
     private Integer mTaskId = null;
 
-    private ParentLoader.TaskData mParent;
+    private CreateTaskLoader.TaskTreeData mParent;
 
-    private ParentLoader.Data mData;
+    private CreateTaskLoader.Data mData;
 
     private final ParentPickerFragment.Listener mParentFragmentListener = taskData -> {
         Assert.assertTrue(taskData != null);
@@ -57,60 +54,8 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         updateError();
     };
 
-    public static ParentFragment getCreateInstance(int parentTaskId) {
-        ParentFragment parentFragment = new ParentFragment();
-
-        Bundle args = new Bundle();
-        args.putInt(PARENT_TASK_ID_KEY, parentTaskId);
-        parentFragment.setArguments(args);
-
-        return parentFragment;
-    }
-
-    public static ParentFragment getJoinInstance(int parentTaskId, ArrayList<Integer> joinTaskIds) {
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        ParentFragment parentFragment = new ParentFragment();
-
-        Bundle args = new Bundle();
-        args.putInt(PARENT_TASK_ID_KEY, parentTaskId);
-        args.putIntegerArrayList(TASK_IDS_KEY, joinTaskIds);
-        parentFragment.setArguments(args);
-
-        return parentFragment;
-    }
-
-    public static ParentFragment getEditInstance(int childTaskId) {
-        ParentFragment parentFragment = new ParentFragment();
-
-        Bundle args = new Bundle();
-        args.putInt(CHILD_TASK_ID_KEY, childTaskId);
-        parentFragment.setArguments(args);
-
-        return parentFragment;
-    }
-
-    public static ParentFragment getCreateInstance() {
-        ParentFragment parentFragment = new ParentFragment();
-
-        Bundle args = new Bundle();
-        parentFragment.setArguments(args);
-
-        return parentFragment;
-    }
-
-    public static ParentFragment getJoinInstance(ArrayList<Integer> joinTaskIds) {
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        ParentFragment parentFragment = new ParentFragment();
-
-        Bundle args = new Bundle();
-        args.putIntegerArrayList(TASK_IDS_KEY, joinTaskIds);
-        parentFragment.setArguments(args);
-
-        return parentFragment;
+    public static ParentFragment getInstance() {
+        return new ParentFragment();
     }
 
     public ParentFragment() {
@@ -136,22 +81,23 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
 
         mSavedInstanceState = savedInstanceState;
 
-        Bundle args = getArguments();
-        Assert.assertTrue(args != null);
+        Intent intent = getActivity().getIntent();
+        Assert.assertTrue(intent != null);
 
-        if (args.containsKey(CHILD_TASK_ID_KEY)) {
-            Assert.assertTrue(!args.containsKey(PARENT_TASK_ID_KEY));
-            Assert.assertTrue(!args.containsKey(TASK_IDS_KEY));
+        if (intent.hasExtra(CreateTaskActivity.TASK_ID_KEY)) {
+            Assert.assertTrue(!intent.hasExtra(CreateTaskActivity.PARENT_TASK_ID_HINT_KEY));
+            Assert.assertTrue(!intent.hasExtra(CreateTaskActivity.TASK_IDS_KEY));
 
-            mTaskId = args.getInt(CHILD_TASK_ID_KEY, -1);
+            mTaskId = intent.getIntExtra(CreateTaskActivity.TASK_ID_KEY, -1);
             Assert.assertTrue(mTaskId != -1);
         } else {
-            if (args.containsKey(PARENT_TASK_ID_KEY)) {
-                mParentTaskId = args.getInt(PARENT_TASK_ID_KEY);
+            if (intent.hasExtra(CreateTaskActivity.PARENT_TASK_ID_HINT_KEY)) {
+                mParentTaskId = intent.getIntExtra(CreateTaskActivity.PARENT_TASK_ID_HINT_KEY, -1);
+                Assert.assertTrue(mParentTaskId != -1);
             }
 
-            if (args.containsKey(TASK_IDS_KEY)) {
-                mTaskIds = args.getIntegerArrayList(TASK_IDS_KEY);
+            if (intent.hasExtra(CreateTaskActivity.TASK_IDS_KEY)) {
+                mTaskIds = intent.getIntegerArrayListExtra(CreateTaskActivity.TASK_IDS_KEY);
                 Assert.assertTrue(mTaskIds != null);
                 Assert.assertTrue(mTaskIds.size() > 1);
             }
@@ -177,7 +123,7 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public Loader<ParentLoader.Data> onCreateLoader(int id, Bundle args) {
+    public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
         List<Integer> excludedTaskIds = new ArrayList<>();
 
         if (mTaskId != null) {
@@ -189,11 +135,11 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
             excludedTaskIds.addAll(mTaskIds);
         }
 
-        return new ParentLoader(getActivity(), mTaskId, excludedTaskIds);
+        return new CreateTaskLoader(getActivity(), mTaskId, excludedTaskIds);
     }
 
     @Override
-    public void onLoadFinished(Loader<ParentLoader.Data> loader, final ParentLoader.Data data) {
+    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(PARENT_ID)) {
@@ -201,12 +147,12 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
             mParent = findTaskData(parentId);
             Assert.assertTrue(mParent != null);
         } else {
-            if (mData.ChildTaskData != null) {
+            if (mData.TaskData != null && mData.TaskData.ParentTaskId != null) {
                 Assert.assertTrue(mParentTaskId == null);
                 Assert.assertTrue(mTaskIds == null);
                 Assert.assertTrue(mTaskId != null);
 
-                mParent = findTaskData(mData.ChildTaskData.ParentTaskId);
+                mParent = findTaskData(mData.TaskData.ParentTaskId);
             } else if (mParentTaskId != null) {
                 Assert.assertTrue(mTaskId == null);
 
@@ -223,16 +169,16 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         mCreateChildTaskParent.setOnClickListener(v -> {
             ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance();
             parentPickerFragment.show(getChildFragmentManager(), PARENT_PICKER_FRAGMENT_TAG);
-            parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
+            parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
         });
 
         ParentPickerFragment parentPickerFragment = (ParentPickerFragment) getChildFragmentManager().findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG);
         if (parentPickerFragment != null)
-            parentPickerFragment.initialize(mData.TaskDatas, mParentFragmentListener);
+            parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
     }
 
     @Override
-    public void onLoaderReset(Loader<ParentLoader.Data> loader) {
+    public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -241,12 +187,12 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         if (mData == null)
             return false;
 
-        if (mData.ChildTaskData != null) {
+        if (mData.TaskData != null && mData.TaskData.ParentTaskId != null) {
             Assert.assertTrue(mParentTaskId == null);
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mTaskId != null);
 
-            if (mParent.TaskId != mData.ChildTaskData.ParentTaskId)
+            if (mParent.TaskId != mData.TaskData.ParentTaskId)
                 return true;
         } else {
             if (mParentTaskId != null) {
@@ -261,21 +207,21 @@ public class ParentFragment extends Fragment implements LoaderManager.LoaderCall
         return false;
     }
 
-    private ParentLoader.TaskData findTaskData(int taskId) {
+    private CreateTaskLoader.TaskTreeData findTaskData(int taskId) {
         Assert.assertTrue(mData != null);
 
-        List<ParentLoader.TaskData> taskDatas = findTaskDataHelper(mData.TaskDatas, taskId)
+        List<CreateTaskLoader.TaskTreeData> taskTreeDatas = findTaskDataHelper(mData.TaskTreeDatas, taskId)
                 .collect(Collectors.toList());
 
-        Assert.assertTrue(taskDatas.size() == 1);
-        return taskDatas.get(0);
+        Assert.assertTrue(taskTreeDatas.size() == 1);
+        return taskTreeDatas.get(0);
     }
 
-    private Stream<ParentLoader.TaskData> findTaskDataHelper(Map<Integer, ParentLoader.TaskData> taskDatas, int taskId) {
+    private Stream<CreateTaskLoader.TaskTreeData> findTaskDataHelper(Map<Integer, CreateTaskLoader.TaskTreeData> taskDatas, int taskId) {
         Assert.assertTrue(taskDatas != null);
 
         if (taskDatas.containsKey(taskId)) {
-            List<ParentLoader.TaskData> ret = new ArrayList<>();
+            List<CreateTaskLoader.TaskTreeData> ret = new ArrayList<>();
             ret.add(taskDatas.get(taskId));
             return Stream.of(ret);
         }

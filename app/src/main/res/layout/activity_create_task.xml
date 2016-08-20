@@ -20,7 +20,13 @@
         android:visibility="invisible" />
 
     <FrameLayout
-        android:id="@+id/create_task_frame"
+        android:id="@+id/create_task_parent_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <FrameLayout
+        android:id="@+id/create_task_schedule_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

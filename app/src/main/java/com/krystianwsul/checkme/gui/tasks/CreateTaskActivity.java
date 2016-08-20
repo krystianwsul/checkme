@@ -17,10 +17,8 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Spinner;
 
 import com.krystianwsul.checkme.MyCrashlytics;
@@ -62,9 +60,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private String mNameHint = null;
 
     private CreateTaskLoader.Data mData;
-
-    private FrameLayout mCreateTaskParentFrame;
-    private FrameLayout mCreateTaskScheduleFrame;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -158,9 +153,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 switch (mCreateTaskSpinner.getSelectedItemPosition()) {
                     case 0: // schedule
-                        Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.GONE);
-                        Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.VISIBLE);
-
                         SchedulePickerFragment schedulePickerFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
                         Assert.assertTrue(schedulePickerFragment != null);
 
@@ -183,9 +175,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             finish();
                         break;
                     case 1: // parent task
-                        Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.VISIBLE);
-                        Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.GONE);
-
                         ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
                         Assert.assertTrue(parentFragment != null);
 
@@ -208,9 +197,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             finish();
                         break;
                     case 2: // no reminder
-                        Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.GONE);
-                        Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.GONE);
-
                         if (mTaskId != null) {
                             Assert.assertTrue(mData.TaskData != null);
                             Assert.assertTrue(mTaskIds == null);
@@ -273,37 +259,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.task_spinner, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCreateTaskSpinner.setAdapter(adapter);
-
-        mCreateTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 2) {
-                    mCreateTaskParentFrame.setVisibility(View.GONE);
-                    mCreateTaskScheduleFrame.setVisibility(View.GONE);
-                } else {
-                    if (position == 0) {
-                        mCreateTaskParentFrame.setVisibility(View.GONE);
-                        mCreateTaskScheduleFrame.setVisibility(View.VISIBLE);
-                    } else {
-                        Assert.assertTrue(position == 1);
-
-                        mCreateTaskParentFrame.setVisibility(View.VISIBLE);
-                        mCreateTaskScheduleFrame.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        mCreateTaskParentFrame = (FrameLayout) findViewById(R.id.create_task_parent_frame);
-        Assert.assertTrue(mCreateTaskParentFrame != null);
-
-        mCreateTaskScheduleFrame = (FrameLayout) findViewById(R.id.create_task_schedule_frame);
-        Assert.assertTrue(mCreateTaskScheduleFrame != null);
 
         Intent intent = getIntent();
         if (intent.hasExtra(TASK_ID_KEY)) {
@@ -561,26 +516,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         if (mData == null)
             return false;
 
-        switch (mCreateTaskSpinner.getSelectedItemPosition()) {
-            case 0:
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.GONE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.VISIBLE);
-
-                break;
-            case 1:
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.VISIBLE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.GONE);
-
-                break;
-            case 2:
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.GONE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.GONE);
-
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-
         if (mTaskId != null) {
             Assert.assertTrue(mData.TaskData != null);
             Assert.assertTrue(mTaskIds == null);
@@ -600,26 +535,17 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 if (mCreateTaskSpinner.getSelectedItemPosition() != 1)
                     return true;
 
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.VISIBLE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.GONE);
-
                 if (parentFragment.dataChanged())
                     return true;
             } else if (mData.TaskData.ScheduleType != null) {
                 if (mCreateTaskSpinner.getSelectedItemPosition() != 0)
                     return true;
 
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.GONE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.VISIBLE);
-
                 if (schedulePickerFragment.dataChanged())
                     return true;
             } else {
                 if (mCreateTaskSpinner.getSelectedItemPosition() != 2)
                     return true;
-
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.GONE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.GONE);
             }
 
             return false;
@@ -639,16 +565,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 ParentFragment parentFragment = (ParentFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_parent_frame);
                 Assert.assertTrue(parentFragment != null);
 
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.VISIBLE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.GONE);
-
                 return parentFragment.dataChanged();
             } else {
                 if (mCreateTaskSpinner.getSelectedItemPosition() != 0)
                     return true;
-
-                Assert.assertTrue(mCreateTaskParentFrame.getVisibility() == View.GONE);
-                Assert.assertTrue(mCreateTaskScheduleFrame.getVisibility() == View.VISIBLE);
 
                 SchedulePickerFragment schedulePickerFragmentFragment = (SchedulePickerFragment) getSupportFragmentManager().findFragmentById(R.id.create_task_schedule_frame);
                 Assert.assertTrue(schedulePickerFragmentFragment != null);

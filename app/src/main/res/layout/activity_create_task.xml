@@ -22,8 +22,7 @@
     <FrameLayout
         android:id="@+id/create_task_parent_frame"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"/>
+        android:layout_height="wrap_content"/>
 
     <FrameLayout
         android:id="@+id/create_task_schedule_frame"

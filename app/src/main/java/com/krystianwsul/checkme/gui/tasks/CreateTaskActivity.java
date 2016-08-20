@@ -360,72 +360,21 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mCreateTaskSpinner.setVisibility(View.VISIBLE);
 
-        if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
-            if (mSavedInstanceState == null) {
+        if (mSavedInstanceState == null) {
+            if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
+                Assert.assertTrue(mScheduleHint == null);
+
                 mCreateTaskSpinner.setSelection(1);
-
-                ParentFragment parentFragment;
-                if (mTaskId != null) {
-                    Assert.assertTrue(mTaskIds == null);
-                    Assert.assertTrue(mParentTaskIdHint == null);
-
-                    parentFragment = ParentFragment.getEditInstance(mTaskId);
-                } else if (mTaskIds != null) {
-                    Assert.assertTrue(mParentTaskIdHint != null);
-
-                    parentFragment = ParentFragment.getJoinInstance(mParentTaskIdHint, mTaskIds);
-                } else {
-                    Assert.assertTrue(mParentTaskIdHint != null);
-
-                    parentFragment = ParentFragment.getCreateInstance(mParentTaskIdHint);
-                }
-
-                getSupportFragmentManager().beginTransaction()
-                        .add(R.id.create_task_parent_frame, parentFragment)
-                        .commitAllowingStateLoss();
-
-                setBlankSchedulePickerFragment();
-            }
-        } else if ((mData.TaskData != null && mData.TaskData.ScheduleType != null) || (mData.TaskData == null)) {
-            if (mSavedInstanceState == null) {
-                SchedulePickerFragment schedulePickerFragment;
-                if (mTaskId != null) {
-                    Assert.assertTrue(mTaskIds == null);
-                    Assert.assertTrue(mScheduleHint == null);
-
-                    schedulePickerFragment = SchedulePickerFragment.getEditInstance(mTaskId);
-                } else if (mTaskIds != null) {
-                    if (mScheduleHint == null)
-                        schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
-                    else
-                        schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds, mScheduleHint);
-                } else {
-                    if (mScheduleHint == null)
-                        schedulePickerFragment = SchedulePickerFragment.getCreateInstance();
-                    else
-                        schedulePickerFragment = SchedulePickerFragment.getCreateInstance(mScheduleHint);
-                }
-
-                getSupportFragmentManager().beginTransaction()
-                        .add(R.id.create_task_schedule_frame, schedulePickerFragment)
-                        .commitAllowingStateLoss();
-
-                setBlankParentFragment();
-            }
-        } else {
-            if (mSavedInstanceState == null) {
-                setBlankParentFragment();
-                setBlankSchedulePickerFragment();
-            }
-
-            if (mData.TaskData != null) {
+            } else if (mData.TaskData != null && mData.TaskData.ScheduleType == null) {
                 Assert.assertTrue(mData.TaskData.ParentTaskId == null);
-                Assert.assertTrue(mData.TaskData.ScheduleType == null);
+                Assert.assertTrue(mParentTaskIdHint == null);
+                Assert.assertTrue(mScheduleHint == null);
 
-                if (mSavedInstanceState == null) {
-                    mCreateTaskSpinner.setSelection(2);
-                }
+                mCreateTaskSpinner.setSelection(2);
             }
+
+            setParentFragment();
+            setSchedulePickerFragment();
         }
 
         mCreateTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -465,16 +414,26 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         invalidateOptionsMenu();
     }
 
-    private void setBlankParentFragment() {
+    private void setParentFragment() {
         ParentFragment parentFragment;
+
         if (mTaskId != null) {
             Assert.assertTrue(mTaskIds == null);
+            Assert.assertTrue(mParentTaskIdHint == null);
 
             parentFragment = ParentFragment.getEditInstance(mTaskId);
         } else if (mTaskIds != null) {
-            parentFragment = ParentFragment.getJoinInstance(mTaskIds);
+            if (mParentTaskIdHint != null) {
+                parentFragment = ParentFragment.getJoinInstance(mParentTaskIdHint, mTaskIds);
+            } else {
+                parentFragment = ParentFragment.getJoinInstance(mTaskIds);
+            }
         } else {
-            parentFragment = ParentFragment.getCreateInstance();
+            if (mParentTaskIdHint != null) {
+                parentFragment = ParentFragment.getCreateInstance(mParentTaskIdHint);
+            } else {
+                parentFragment = ParentFragment.getCreateInstance();
+            }
         }
 
         Assert.assertTrue(parentFragment != null);
@@ -484,16 +443,26 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 .commitAllowingStateLoss();
     }
 
-    private void setBlankSchedulePickerFragment() {
+    private void setSchedulePickerFragment() {
         SchedulePickerFragment schedulePickerFragment;
+
         if (mTaskId != null) {
             Assert.assertTrue(mTaskIds == null);
+            Assert.assertTrue(mScheduleHint == null);
 
             schedulePickerFragment = SchedulePickerFragment.getEditInstance(mTaskId);
         } else if (mTaskIds != null) {
-            schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
+            if (mScheduleHint != null) {
+                schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds, mScheduleHint);
+            } else {
+                schedulePickerFragment = SchedulePickerFragment.getJoinInstance(mTaskIds);
+            }
         } else {
-            schedulePickerFragment = SchedulePickerFragment.getCreateInstance();
+            if (mScheduleHint != null) {
+                schedulePickerFragment = SchedulePickerFragment.getCreateInstance(mScheduleHint);
+            } else {
+                schedulePickerFragment = SchedulePickerFragment.getCreateInstance();
+            }
         }
 
         Assert.assertTrue(schedulePickerFragment != null);

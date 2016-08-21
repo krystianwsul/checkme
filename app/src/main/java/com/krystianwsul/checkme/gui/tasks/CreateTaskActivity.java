@@ -85,8 +85,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mParent = taskData;
         mCreateChildTaskParent.setText(taskData.Name);
-
-        updateError();
     };
 
     private Spinner mCreateRootTaskSpinner;
@@ -226,36 +224,21 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        if (!isValidParent()) {
-                            updateErrorParent();
-                        } else {
-                            DomainFactory.getDomainFactory(this).updateChildTask(mData.DataId, mTaskId, name, mParent.TaskId);
-
-                            finish();
-                        }
+                        DomainFactory.getDomainFactory(this).updateChildTask(mData.DataId, mTaskId, name, mParent.TaskId);
+                        finish();
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
                         Assert.assertTrue(!TextUtils.isEmpty(name));
                         Assert.assertTrue(mTaskIds.size() > 1);
 
-                        if (!isValidParent()) {
-                            updateErrorParent();
-                        } else {
-                            DomainFactory.getDomainFactory(this).createJoinChildTask(mData.DataId, mParent.TaskId, name, mTaskIds);
-
-                            finish();
-                        }
+                        DomainFactory.getDomainFactory(this).createJoinChildTask(mData.DataId, mParent.TaskId, name, mTaskIds);
+                        finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        if (!isValidParent()) {
-                            updateErrorParent();
-                        } else {
-                            DomainFactory.getDomainFactory(this).createChildTask(mData.DataId, mParent.TaskId, name);
-
-                            finish();
-                        }
+                        DomainFactory.getDomainFactory(this).createChildTask(mData.DataId, mParent.TaskId, name);
+                        finish();
                     }
                 } else {
                     if (mTaskId != null) {
@@ -442,7 +425,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     return;
                 }
 
-                updateNameError();
+                updateError();
             }
         });
 
@@ -605,12 +588,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     private void updateError() {
-        updateNameError();
-
-        updateErrorParent();
-    }
-
-    private void updateNameError() {
         if (TextUtils.isEmpty(mToolbarEditText.getText())) {
             mToolbarLayout.setError(getString(R.string.nameError));
         } else {
@@ -721,32 +698,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 .flatMap(stream -> stream);
     }
 
-    @SuppressWarnings("RedundantIfStatement")
-    private boolean isValidParent() {
-        if (mData == null)
-            return false;
-
-        if (mParent == null)
-            return false;
-
-        return true;
-    }
-
-    private void updateErrorParent() {
-        Assert.assertTrue(mFragmentParentLayout != null);
-
-        if (isValidParent()) {
-            mFragmentParentLayout.setError(null);
-        } else {
-            mFragmentParentLayout.setError(getString(R.string.error_parent));
-        }
-    }
-
     private void clearParent() {
         mParent = null;
         mCreateChildTaskParent.setText(null);
-
-        mFragmentParentLayout.setError(null);
     }
 
     private void loadFragment(int position) {

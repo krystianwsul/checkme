@@ -320,7 +320,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mCreateRootTaskSpinner = (Spinner) findViewById(R.id.schedule_picker_spinner);
         Assert.assertTrue(mCreateRootTaskSpinner != null);
 
-        ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, R.layout.spinner_no_padding);
         scheduleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCreateRootTaskSpinner.setAdapter(scheduleAdapter);
 

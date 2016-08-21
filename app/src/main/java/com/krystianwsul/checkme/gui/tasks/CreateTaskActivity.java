@@ -83,6 +83,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private final ParentPickerFragment.Listener mParentFragmentListener = taskData -> {
         Assert.assertTrue(taskData != null);
 
+        clearSchedule();
+
         mParent = taskData;
         mCreateChildTaskParent.setText(taskData.Name);
 
@@ -170,6 +172,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+
         switch (item.getItemId()) {
             case R.id.action_create_task_save:
                 Assert.assertTrue(mData != null);
@@ -181,10 +185,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 if (TextUtils.isEmpty(name))
                     break;
 
-                boolean finish;
-
                 switch (mCreateTaskSpinner.getSelectedItemPosition()) {
                     case 0: // schedule
+                        Assert.assertTrue(!hasValueParent());
+                        Assert.assertTrue(hasValueSchedule());
+
                         if (mTaskId != null) {
                             Assert.assertTrue(mData.TaskData != null);
                             Assert.assertTrue(mTaskIds == null);
@@ -222,6 +227,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         }
                         break;
                     case 1: // parent task
+                        Assert.assertTrue(hasValueParent());
+                        Assert.assertTrue(!hasValueSchedule());
+
                         if (mTaskId != null) {
                             Assert.assertTrue(mData.TaskData != null);
                             Assert.assertTrue(mTaskIds == null);
@@ -259,6 +267,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         }
                         break;
                     case 2: // no reminder
+                        Assert.assertTrue(!hasValueParent());
+                        Assert.assertTrue(!hasValueSchedule());
+
                         if (mTaskId != null) {
                             Assert.assertTrue(mData.TaskData != null);
                             Assert.assertTrue(mTaskIds == null);
@@ -608,6 +619,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 mScheduleTypeChanged = true;
 
                 if (position < 3) {
+                    clearParent();
+
                     loadFragment(position);
                 } else {
                     Assert.assertTrue(position == 3);
@@ -628,6 +641,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         });
 
         invalidateOptionsMenu();
+
+        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
     }
 
     @Override
@@ -642,6 +657,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     private boolean tryClose() {
+        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+
         if (dataChanged()) {
             DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
@@ -841,6 +858,18 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     public void clearSchedule() {
         mCreateRootTaskSpinner.setSelection(3);
+    }
+
+    private boolean hasValueParent() {
+        Assert.assertTrue((mParent == null) == TextUtils.isEmpty(mCreateChildTaskParent.getText()));
+
+        return (mParent != null);
+    }
+
+    private boolean hasValueSchedule() {
+        Assert.assertTrue((mCreateRootTaskSpinner.getSelectedItemPosition() == 3) == (getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame) == null));
+
+        return (mCreateRootTaskSpinner.getSelectedItemPosition() != 3);
     }
 
     public static class ScheduleHint implements Parcelable {

@@ -41,7 +41,7 @@ class SingleScheduleDateTime {
         }
     }
 
-    Date getDate() {
+    private Date getDate() {
         return new Date(mSingleScheduleDateTimeRecord.getYear(), mSingleScheduleDateTimeRecord.getMonth(), mSingleScheduleDateTimeRecord.getDay());
     }
 

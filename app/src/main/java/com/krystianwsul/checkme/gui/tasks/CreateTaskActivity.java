@@ -45,11 +45,11 @@ import java.util.Map;
 public class CreateTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
     private static final String DISCARD_TAG = "discard";
 
-    static final String TASK_ID_KEY = "taskId";
-    static final String TASK_IDS_KEY = "taskIds";
+    private static final String TASK_ID_KEY = "taskId";
+    private static final String TASK_IDS_KEY = "taskIds";
 
-    static final String PARENT_TASK_ID_HINT_KEY = "parentTaskIdHint";
-    static final String SCHEDULE_HINT_KEY = "scheduleHint";
+    private static final String PARENT_TASK_ID_HINT_KEY = "parentTaskIdHint";
+    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
     private static final String PARENT_ID = "parentId";
     private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
@@ -732,7 +732,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         return true;
     }
 
-    public void updateErrorParent() {
+    private void updateErrorParent() {
         Assert.assertTrue(mFragmentParentLayout != null);
 
         if (isValidParent()) {
@@ -742,7 +742,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
     }
 
-    public void clearParent() {
+    private void clearParent() {
         mParent = null;
         mCreateChildTaskParent.setText(null);
 
@@ -790,7 +790,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
     }
 
-    public void clearSchedule() {
+    private void clearSchedule() {
         mCreateRootTaskSpinner.setSelection(3);
     }
 

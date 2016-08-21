@@ -71,7 +71,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public HashMap<InstanceKey, InstanceData> InstanceDatas;
         public final List<CustomTimeData> CustomTimeDatas;
         public final Boolean TaskEditable;
-        public List<TaskData> TaskDatas;
+        public final List<TaskData> TaskDatas;
 
         public Data(List<CustomTimeData> customTimeDatas, Boolean taskEditable, List<TaskData> taskDatas) {
             Assert.assertTrue(customTimeDatas != null);

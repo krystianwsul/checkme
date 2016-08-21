@@ -10,7 +10,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public abstract class RepeatingSchedule extends Schedule {
+abstract class RepeatingSchedule extends Schedule {
     RepeatingSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
         super(scheduleRecord, rootTask);
     }

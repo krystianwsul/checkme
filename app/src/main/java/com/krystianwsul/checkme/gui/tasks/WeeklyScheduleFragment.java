@@ -365,7 +365,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             final DayOfWeekTimeEntry dayOfWeekTimeEntry = mDayOfWeekTimeEntries.get(position);
             Assert.assertTrue(dayOfWeekTimeEntry != null);
 
-            final ArrayAdapter<DayOfWeek> dayOfWeekAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, DayOfWeek.values());
+            final ArrayAdapter<DayOfWeek> dayOfWeekAdapter = new ArrayAdapter<>(getContext(), R.layout.spinner_no_padding, DayOfWeek.values());
             dayOfWeekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             dayOfWeekTimeHolder.mWeeklyScheduleDay.setAdapter(dayOfWeekAdapter);

@@ -13,7 +13,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_horizontal_margin">
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:orientation="vertical">
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/fragment_parent_layout"
@@ -22,7 +24,9 @@
             android:hint="@string/parentTask"
             android:textColorHint="@color/textDisabled"
             app:hintAnimationEnabled="false"
-            android:visibility="invisible">
+            android:visibility="invisible"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp">
 
             <EditText
                 android:id="@+id/create_child_task_parent"
@@ -38,28 +42,20 @@
 
         </android.support.design.widget.TextInputLayout>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
         <Spinner
             android:id="@+id/schedule_picker_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             style="@style/Widget.AppCompat.Spinner.Underlined"
             android:visibility="invisible"/>
 
-        <FrameLayout
-            android:id="@+id/schedule_picker_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/schedule_picker_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

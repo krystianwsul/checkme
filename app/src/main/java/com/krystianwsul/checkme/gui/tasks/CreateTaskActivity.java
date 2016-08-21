@@ -62,8 +62,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private TextInputLayout mToolbarLayout;
     private EditText mToolbarEditText;
 
-    private Spinner mCreateTaskSpinner;
-
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateTaskActivity.this::finish;
 
     private Integer mTaskId;
@@ -185,110 +183,97 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 if (TextUtils.isEmpty(name))
                     break;
 
-                switch (mCreateTaskSpinner.getSelectedItemPosition()) {
-                    case 0: // schedule
-                        Assert.assertTrue(!hasValueParent());
-                        Assert.assertTrue(hasValueSchedule());
+                if (hasValueSchedule()) {
+                    Assert.assertTrue(!hasValueParent());
 
-                        if (mTaskId != null) {
-                            Assert.assertTrue(mData.TaskData != null);
-                            Assert.assertTrue(mTaskIds == null);
+                    if (mTaskId != null) {
+                        Assert.assertTrue(mData.TaskData != null);
+                        Assert.assertTrue(mTaskIds == null);
 
-                            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                            if (scheduleFragment != null) {
-                                if (scheduleFragment.updateRootTask(mTaskId, name))
-                                    finish();
-                            } else {
-                                DomainFactory.getDomainFactory(this).updateRootTask(mData.DataId, mTaskId, name);
+                        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
+                        if (scheduleFragment != null) {
+                            if (scheduleFragment.updateRootTask(mTaskId, name))
                                 finish();
-                            }
-                        } else if (mTaskIds != null) {
-                            Assert.assertTrue(mData.TaskData == null);
-
-                            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                            if (scheduleFragment != null) {
-                                if (scheduleFragment.createRootJoinTask(name, mTaskIds))
-                                    finish();
-                            } else {
-                                DomainFactory.getDomainFactory(this).createJoinRootTask(mData.DataId, name, mTaskIds);
-                                finish();
-                            }
                         } else {
-                            Assert.assertTrue(mData.TaskData == null);
-
-                            ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                            if (scheduleFragment != null) {
-                                if (scheduleFragment.createRootTask(name))
-                                    finish();
-                            } else {
-                                DomainFactory.getDomainFactory(this).createRootTask(mData.DataId, name);
-                                finish();
-                            }
-                        }
-                        break;
-                    case 1: // parent task
-                        Assert.assertTrue(hasValueParent());
-                        Assert.assertTrue(!hasValueSchedule());
-
-                        if (mTaskId != null) {
-                            Assert.assertTrue(mData.TaskData != null);
-                            Assert.assertTrue(mTaskIds == null);
-
-                            if (!isValidParent()) {
-                                updateErrorParent();
-                            } else {
-                                DomainFactory.getDomainFactory(this).updateChildTask(mData.DataId, mTaskId, name, mParent.TaskId);
-
-                                finish();
-                            }
-                        } else if (mTaskIds != null) {
-                            Assert.assertTrue(mData.TaskData == null);
-
-                            Assert.assertTrue(!TextUtils.isEmpty(name));
-                            Assert.assertTrue(mTaskIds.size() > 1);
-
-                            if (!isValidParent()) {
-                                updateErrorParent();
-                            } else {
-                                DomainFactory.getDomainFactory(this).createJoinChildTask(mData.DataId, mParent.TaskId, name, mTaskIds);
-
-                                finish();
-                            }
-                        } else {
-                            Assert.assertTrue(mData.TaskData == null);
-
-                            if (!isValidParent()) {
-                                updateErrorParent();
-                            } else {
-                                DomainFactory.getDomainFactory(this).createChildTask(mData.DataId, mParent.TaskId, name);
-
-                                finish();
-                            }
-                        }
-                        break;
-                    case 2: // no reminder
-                        Assert.assertTrue(!hasValueParent());
-                        Assert.assertTrue(!hasValueSchedule());
-
-                        if (mTaskId != null) {
-                            Assert.assertTrue(mData.TaskData != null);
-                            Assert.assertTrue(mTaskIds == null);
-
                             DomainFactory.getDomainFactory(this).updateRootTask(mData.DataId, mTaskId, name);
-                        } else if (mTaskIds != null) {
-                            Assert.assertTrue(mData.TaskData == null);
-
-                            DomainFactory.getDomainFactory(this).createJoinRootTask(mData.DataId, name, mTaskIds);
-                        } else {
-                            Assert.assertTrue(mData.TaskData == null);
-
-                            DomainFactory.getDomainFactory(this).createRootTask(mData.DataId, name);
+                            finish();
                         }
+                    } else if (mTaskIds != null) {
+                        Assert.assertTrue(mData.TaskData == null);
 
-                        finish();
-                        break;
-                    default:
-                        throw new UnsupportedOperationException();
+                        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
+                        if (scheduleFragment != null) {
+                            if (scheduleFragment.createRootJoinTask(name, mTaskIds))
+                                finish();
+                        } else {
+                            DomainFactory.getDomainFactory(this).createJoinRootTask(mData.DataId, name, mTaskIds);
+                            finish();
+                        }
+                    } else {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
+                        if (scheduleFragment != null) {
+                            if (scheduleFragment.createRootTask(name))
+                                finish();
+                        } else {
+                            DomainFactory.getDomainFactory(this).createRootTask(mData.DataId, name);
+                            finish();
+                        }
+                    }
+                } else if (hasValueParent()) {
+                    if (mTaskId != null) {
+                        Assert.assertTrue(mData.TaskData != null);
+                        Assert.assertTrue(mTaskIds == null);
+
+                        if (!isValidParent()) {
+                            updateErrorParent();
+                        } else {
+                            DomainFactory.getDomainFactory(this).updateChildTask(mData.DataId, mTaskId, name, mParent.TaskId);
+
+                            finish();
+                        }
+                    } else if (mTaskIds != null) {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        Assert.assertTrue(!TextUtils.isEmpty(name));
+                        Assert.assertTrue(mTaskIds.size() > 1);
+
+                        if (!isValidParent()) {
+                            updateErrorParent();
+                        } else {
+                            DomainFactory.getDomainFactory(this).createJoinChildTask(mData.DataId, mParent.TaskId, name, mTaskIds);
+
+                            finish();
+                        }
+                    } else {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        if (!isValidParent()) {
+                            updateErrorParent();
+                        } else {
+                            DomainFactory.getDomainFactory(this).createChildTask(mData.DataId, mParent.TaskId, name);
+
+                            finish();
+                        }
+                    }
+                } else {
+                    if (mTaskId != null) {
+                        Assert.assertTrue(mData.TaskData != null);
+                        Assert.assertTrue(mTaskIds == null);
+
+                        DomainFactory.getDomainFactory(this).updateRootTask(mData.DataId, mTaskId, name);
+                    } else if (mTaskIds != null) {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        DomainFactory.getDomainFactory(this).createJoinRootTask(mData.DataId, name, mTaskIds);
+                    } else {
+                        Assert.assertTrue(mData.TaskData == null);
+
+                        DomainFactory.getDomainFactory(this).createRootTask(mData.DataId, name);
+                    }
+
+                    finish();
                 }
 
                 break;
@@ -325,13 +310,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
-
-        mCreateTaskSpinner = (Spinner) findViewById(R.id.create_task_spinner);
-        Assert.assertTrue(mCreateTaskSpinner != null);
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.task_spinner, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mCreateTaskSpinner.setAdapter(adapter);
 
         mFragmentParentLayout = (TextInputLayout) findViewById(R.id.fragment_parent_layout);
         Assert.assertTrue(mFragmentParentLayout != null);
@@ -465,50 +443,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 }
 
                 updateNameError();
-            }
-        });
-
-        mCreateTaskSpinner.setVisibility(View.VISIBLE);
-
-        if (mSavedInstanceState == null) {
-            if ((mData.TaskData != null && mData.TaskData.ParentTaskId != null) || (mParentTaskIdHint != null)) {
-                Assert.assertTrue(mScheduleHint == null);
-
-                mCreateTaskSpinner.setSelection(1);
-            } else if (mData.TaskData != null && mData.TaskData.ScheduleType == null) {
-                Assert.assertTrue(mData.TaskData.ParentTaskId == null);
-                Assert.assertTrue(mParentTaskIdHint == null);
-                Assert.assertTrue(mScheduleHint == null);
-
-                mCreateTaskSpinner.setSelection(2);
-            }
-        }
-
-        mCreateTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                switch (i) {
-                    case 0: // schedule
-                        clearParent();
-
-                        break;
-                    case 1: // parent
-                        clearSchedule();
-
-                        break;
-                    case 2: // no reminder
-                        clearParent();
-                        clearSchedule();
-
-                        break;
-                    default:
-                        throw new UnsupportedOperationException();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
 
@@ -699,7 +633,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 return true;
 
             if (mData.TaskData.ParentTaskId != null) {
-                if (mCreateTaskSpinner.getSelectedItemPosition() != 1)
+                if (!hasValueParent())
                     return true;
 
                 if (mParent.TaskId != mData.TaskData.ParentTaskId)
@@ -707,7 +641,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 return false;
             } else if (mData.TaskData.ScheduleType != null) {
-                if (mCreateTaskSpinner.getSelectedItemPosition() != 0)
+                if (!hasValueSchedule())
                     return true;
 
                 if (mScheduleTypeChanged)
@@ -722,7 +656,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 return false;
             } else {
-                if (mCreateTaskSpinner.getSelectedItemPosition() != 2)
+                if (hasValueParent() || hasValueSchedule())
                     return true;
 
                 return false;
@@ -731,13 +665,13 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
-            if (mCreateTaskSpinner.getSelectedItemPosition() == 2)
+            if (hasValueParent() || hasValueSchedule())
                 return true;
 
             if (mParentTaskIdHint != null) {
                 Assert.assertTrue(mScheduleHint == null);
 
-                if (mCreateTaskSpinner.getSelectedItemPosition() != 1)
+                if (!hasValueParent())
                     return true;
 
                 if (mParent == null || mParent.TaskId != mParentTaskIdHint)
@@ -745,7 +679,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 return false;
             } else {
-                if (mCreateTaskSpinner.getSelectedItemPosition() != 0)
+                if (!hasValueSchedule())
                     return true;
 
                 ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);

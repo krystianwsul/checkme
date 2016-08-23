@@ -3,7 +3,11 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
+import com.krystianwsul.checkme.persistencemodel.SingleScheduleDateTimeRecord;
+import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -15,25 +19,21 @@ import java.util.ArrayList;
 public class SingleSchedule extends Schedule {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
 
-    private SingleScheduleDateTime mSingleScheduleDateTime;
+    private final SingleScheduleDateTimeRecord mSingleScheduleDateTimeRecord;
 
-    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory) {
+    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, SingleScheduleDateTimeRecord singleScheduleDateTimeRecord) {
         super(scheduleRecord, rootTask);
 
         Assert.assertTrue(domainFactory != null);
+        Assert.assertTrue(singleScheduleDateTimeRecord != null);
+
         mDomainFactoryReference = new WeakReference<>(domainFactory);
-    }
-
-    void setSingleScheduleDateTime(SingleScheduleDateTime singleScheduleDateTime) {
-        Assert.assertTrue(singleScheduleDateTime != null);
-        Assert.assertTrue(mSingleScheduleDateTime == null);
-
-        mSingleScheduleDateTime = singleScheduleDateTime;
+        mSingleScheduleDateTimeRecord = singleScheduleDateTimeRecord;
     }
 
     @Override
     String getTaskText(Context context) {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
+        Assert.assertTrue(mSingleScheduleDateTimeRecord != null);
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
@@ -41,35 +41,30 @@ public class SingleSchedule extends Schedule {
         Task rootTask = mRootTaskReference.get();
         Assert.assertTrue(rootTask != null);
 
-        Instance instance = domainFactory.getInstance(rootTask, mSingleScheduleDateTime.getDateTime());
+        Instance instance = domainFactory.getInstance(rootTask, getDateTime());
 
         return instance.getInstanceDateTime().getDisplayText(context);
     }
 
     Instance getInstance(Task task) {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
+        Assert.assertTrue(mSingleScheduleDateTimeRecord != null);
         Assert.assertTrue(task != null);
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
-        Instance instance = domainFactory.getInstance(task, mSingleScheduleDateTime.getDateTime());
+        Instance instance = domainFactory.getInstance(task, getDateTime());
         Assert.assertTrue(instance != null);
 
         return instance;
     }
 
-    public Time getTime() {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
-        return mSingleScheduleDateTime.getTime();
-    }
-
     @Override
     protected TimeStamp getNextAlarm(ExactTimeStamp now) {
-        Assert.assertTrue(mSingleScheduleDateTime != null);
+        Assert.assertTrue(mSingleScheduleDateTimeRecord != null);
         Assert.assertTrue(now != null);
 
-        TimeStamp timeStamp = mSingleScheduleDateTime.getDateTime().getTimeStamp();
+        TimeStamp timeStamp = getDateTime().getTimeStamp();
         if (timeStamp.toExactTimeStamp().compareTo(now) > 0)
             return timeStamp;
         else
@@ -80,7 +75,7 @@ public class SingleSchedule extends Schedule {
     public boolean usesCustomTime(CustomTime customTime) {
         Assert.assertTrue(customTime != null);
 
-        Integer customTimeId = mSingleScheduleDateTime.getTime().getTimePair().CustomTimeId;
+        Integer customTimeId = getTime().getTimePair().CustomTimeId;
         if ((customTimeId != null) && (customTime.getId() == customTimeId))
             return true;
 
@@ -94,7 +89,7 @@ public class SingleSchedule extends Schedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        ExactTimeStamp singleScheduleExactTimeStamp = mSingleScheduleDateTime.getDateTime().getTimeStamp().toExactTimeStamp();
+        ExactTimeStamp singleScheduleExactTimeStamp = getDateTime().getTimeStamp().toExactTimeStamp();
 
         if (givenStartExactTimeStamp != null && givenStartExactTimeStamp.compareTo(singleScheduleExactTimeStamp) > 0) {
             return instances;
@@ -104,8 +99,46 @@ public class SingleSchedule extends Schedule {
             return instances;
         }
 
-        instances.add(mSingleScheduleDateTime.getInstance(task));
+        instances.add(getInstanceInternal(task));
 
         return instances;
+    }
+
+    public Time getTime() {
+        Integer customTimeId = mSingleScheduleDateTimeRecord.getCustomTimeId();
+        if (customTimeId != null) {
+            DomainFactory domainFactory = mDomainFactoryReference.get();
+            Assert.assertTrue(domainFactory != null);
+
+            CustomTime customTime = domainFactory.getCustomTime(mSingleScheduleDateTimeRecord.getCustomTimeId());
+            Assert.assertTrue(customTime != null);
+            return customTime;
+        } else {
+            Integer hour = mSingleScheduleDateTimeRecord.getHour();
+            Integer minute = mSingleScheduleDateTimeRecord.getMinute();
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+            return new NormalTime(hour, minute);
+        }
+    }
+
+    private Date getDate() {
+        return new Date(mSingleScheduleDateTimeRecord.getYear(), mSingleScheduleDateTimeRecord.getMonth(), mSingleScheduleDateTimeRecord.getDay());
+    }
+
+    private DateTime getDateTime() {
+        return new DateTime(getDate(), getTime());
+    }
+
+    private Instance getInstanceInternal(Task task) {
+        Assert.assertTrue(task != null);
+
+        DateTime scheduleDateTime = getDateTime();
+        //Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp())); zone hack
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory.getInstance(task, scheduleDateTime);
     }
 }

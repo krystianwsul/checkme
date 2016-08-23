@@ -1472,8 +1472,8 @@ public class DomainFactory {
                     .filter(taskHierarchy -> irrelevantTasks.contains(taskHierarchy.getChildTask()))
                     .collect(Collectors.toList());
 
-            for (TaskHierarchy irrelevanTaskHierarchy : irrelevantTaskHierarchies)
-                mTaskHierarchies.remove(irrelevanTaskHierarchy.getId());
+            for (TaskHierarchy irrelevantTaskHierarchy : irrelevantTaskHierarchies)
+                mTaskHierarchies.remove(irrelevantTaskHierarchy.getId());
         }
 
         Stream.of(irrelevantInstances)
@@ -1714,15 +1714,10 @@ public class DomainFactory {
         Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
-        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask, this);
-
-        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.getSingleScheduleDateTimeRecord(singleSchedule);
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.getSingleScheduleDateTimeRecord(scheduleRecord.getId());
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-        SingleScheduleDateTime singleScheduleDateTime = new SingleScheduleDateTime(this, singleScheduleDateTimeRecord);
-        singleSchedule.setSingleScheduleDateTime(singleScheduleDateTime);
-
-        return singleSchedule;
+        return new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleDateTimeRecord);
     }
 
     private Schedule loadDailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
@@ -1854,14 +1849,10 @@ public class DomainFactory {
         ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startExactTimeStamp);
         Assert.assertTrue(scheduleRecord != null);
 
-        SingleSchedule singleSchedule = new SingleSchedule(scheduleRecord, rootTask, this);
-
-        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.createSingleScheduleDateTimeRecord(singleSchedule, date, time);
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = mPersistenceManager.createSingleScheduleDateTimeRecord(scheduleRecord.getId(), date, time);
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-        singleSchedule.setSingleScheduleDateTime(new SingleScheduleDateTime(this, singleScheduleDateTimeRecord));
-
-        return singleSchedule;
+        return new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleDateTimeRecord);
     }
 
     private DailySchedule createDailySchedule(Task rootTask, List<Time> times, ExactTimeStamp startExactTimeStamp) {

@@ -9,7 +9,6 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DailySchedule;
-import com.krystianwsul.checkme.domainmodel.SingleSchedule;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -154,9 +153,8 @@ public class PersistenceManger {
                 .collect(Collectors.toList());
     }
 
-    public SingleScheduleDateTimeRecord getSingleScheduleDateTimeRecord(SingleSchedule singleSchedule) {
-        Assert.assertTrue(singleSchedule != null);
-        return mSingleScheduleDateTimeRecords.get(singleSchedule.getId());
+    public SingleScheduleDateTimeRecord getSingleScheduleDateTimeRecord(int scheduleId) {
+        return mSingleScheduleDateTimeRecords.get(scheduleId);
     }
 
     public List<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(DailySchedule dailySchedule) {
@@ -246,8 +244,7 @@ public class PersistenceManger {
         return scheduleRecord;
     }
 
-    public SingleScheduleDateTimeRecord createSingleScheduleDateTimeRecord(SingleSchedule singleSchedule, Date date, Time time) {
-        Assert.assertTrue(singleSchedule != null);
+    public SingleScheduleDateTimeRecord createSingleScheduleDateTimeRecord(int scheduleId, Date date, Time time) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(time != null);
 
@@ -263,7 +260,7 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = new SingleScheduleDateTimeRecord(false, singleSchedule.getId(), date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
+        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = new SingleScheduleDateTimeRecord(false, scheduleId, date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
         mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
 
         return singleScheduleDateTimeRecord;

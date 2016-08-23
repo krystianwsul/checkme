@@ -372,7 +372,7 @@ public class DomainFactory {
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
-                    .filter(task -> task.getCurrentSchedules(now) == null)
+                    .filter(task -> task.getCurrentSchedules(now).isEmpty())
                     .map(task -> new GroupListLoader.TaskData(task.getId(), task.getName(), getChildTaskDatas(task, now), true))
                     .collect(Collectors.toList());
         }
@@ -645,7 +645,11 @@ public class DomainFactory {
 
             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedules(now);
+            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
+            Assert.assertTrue(schedules != null);
+            Assert.assertTrue(schedules.size() == 1); // todo schedule hack;
+
+            SingleSchedule singleSchedule = (SingleSchedule) schedules.get(0);
             Assert.assertTrue(singleSchedule != null);
             Assert.assertTrue(singleSchedule.current(now));
 
@@ -679,7 +683,11 @@ public class DomainFactory {
 
             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedules(now);
+            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
+            Assert.assertTrue(schedules != null);
+            Assert.assertTrue(schedules.size() == 1); // todo schedule hack;
+
+            DailySchedule dailySchedule = (DailySchedule) schedules.get(0);
             Assert.assertTrue(dailySchedule != null);
             Assert.assertTrue(dailySchedule.current(now));
 
@@ -715,7 +723,11 @@ public class DomainFactory {
 
             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-            WeeklySchedule weeklySchedule = (WeeklySchedule) rootTask.getCurrentSchedules(now);
+            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
+            Assert.assertTrue(schedules != null);
+            Assert.assertTrue(schedules.size() == 1); // todo schedule hack;
+
+            WeeklySchedule weeklySchedule = (WeeklySchedule) schedules.get(0);
             Assert.assertTrue(weeklySchedule != null);
             Assert.assertTrue(weeklySchedule.current(now));
 
@@ -1072,7 +1084,11 @@ public class DomainFactory {
         task.setName(name);
 
         if (task.isRootTask(now) && task.getCurrentSchedules(now).size() == 1 && task.getCurrentSchedules(now).get(0).getType() == ScheduleType.SINGLE) {
-            SingleSchedule singleSchedule = (SingleSchedule) task.getCurrentSchedules(now);
+            List<Schedule> schedules = task.getCurrentSchedules(now);
+            Assert.assertTrue(schedules != null);
+            Assert.assertTrue(schedules.size() == 1);
+
+            SingleSchedule singleSchedule = (SingleSchedule) schedules.get(0);
 
             Instance instance = singleSchedule.getInstance(task);
             Assert.assertTrue(instance != null);

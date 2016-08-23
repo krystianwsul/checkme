@@ -142,7 +142,7 @@ public class Task {
                         .forEach(schedule -> schedule.setEndExactTimeStamp(endExactTimeStamp));
             }
         } else {
-            Assert.assertTrue(getCurrentSchedules(endExactTimeStamp) == null);
+            Assert.assertTrue(getCurrentSchedules(endExactTimeStamp).isEmpty());
         }
 
         for (Task childTask : getChildTasks(endExactTimeStamp)) {

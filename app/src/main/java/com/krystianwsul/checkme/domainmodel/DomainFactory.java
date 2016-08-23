@@ -5,6 +5,7 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
+import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -371,7 +372,7 @@ public class DomainFactory {
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
-                    .filter(task -> task.getCurrentSchedule(now) == null)
+                    .filter(task -> task.getCurrentSchedules(now) == null)
                     .map(task -> new GroupListLoader.TaskData(task.getId(), task.getName(), getChildTaskDatas(task, now), true))
                     .collect(Collectors.toList());
         }
@@ -598,10 +599,21 @@ public class DomainFactory {
             ScheduleType scheduleType;
 
             if (task.isRootTask(now)) {
-                Schedule schedule = task.getCurrentSchedule(now);
+                List<Schedule> schedules = task.getCurrentSchedules(now);
+                Assert.assertTrue(schedules != null);
 
                 parentTaskId = null;
-                scheduleType = (schedule == null ? null : schedule.getType());
+
+                if (schedules.isEmpty()) {
+                    scheduleType = null;
+                } else {
+                    scheduleType = schedules.get(0).getType();
+                    Assert.assertTrue(scheduleType != null);
+
+                    Assert.assertTrue(Stream.of(schedules)
+                            .allMatch(schedule -> schedule.getType() == scheduleType));
+                    // todo schedule hack
+                }
             } else {
                 Task parentTask = task.getParentTask(now);
                 Assert.assertTrue(parentTask != null);
@@ -633,7 +645,7 @@ public class DomainFactory {
 
             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedule(now);
+            SingleSchedule singleSchedule = (SingleSchedule) rootTask.getCurrentSchedules(now);
             Assert.assertTrue(singleSchedule != null);
             Assert.assertTrue(singleSchedule.current(now));
 
@@ -667,7 +679,7 @@ public class DomainFactory {
 
             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedule(now);
+            DailySchedule dailySchedule = (DailySchedule) rootTask.getCurrentSchedules(now);
             Assert.assertTrue(dailySchedule != null);
             Assert.assertTrue(dailySchedule.current(now));
 
@@ -703,7 +715,7 @@ public class DomainFactory {
 
             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-            WeeklySchedule weeklySchedule = (WeeklySchedule) rootTask.getCurrentSchedule(now);
+            WeeklySchedule weeklySchedule = (WeeklySchedule) rootTask.getCurrentSchedules(now);
             Assert.assertTrue(weeklySchedule != null);
             Assert.assertTrue(weeklySchedule.current(now));
 
@@ -823,14 +835,21 @@ public class DomainFactory {
 
         for (Task task : mTasks.values()) {
             if (task.current(now) && task.isRootTask(now)) {
-                Schedule schedule = task.getCurrentSchedule(now);
-                if (schedule != null) {
-                    TimeStamp scheduleTimeStamp = schedule.getNextAlarm(now);
-                    if (scheduleTimeStamp != null) {
-                        Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
-                        if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
-                            nextAlarm = scheduleTimeStamp;
-                    }
+                List<Schedule> schedules = task.getCurrentSchedules(now);
+                Assert.assertTrue(schedules != null);
+
+                Optional<TimeStamp> optional = Stream.of(schedules)
+                        .map(schedule -> schedule.getNextAlarm(now))
+                        .filter(timeStamp -> timeStamp != null)
+                        .min(TimeStamp::compareTo);
+
+                if (optional.isPresent()) {
+                    TimeStamp scheduleTimeStamp = optional.get();
+                    Assert.assertTrue(scheduleTimeStamp != null);
+                    Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
+
+                    if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
+                        nextAlarm = scheduleTimeStamp;
                 }
             }
         }
@@ -1052,8 +1071,8 @@ public class DomainFactory {
 
         task.setName(name);
 
-        if (task.isRootTask(now) && task.getCurrentSchedule(now) != null && task.getCurrentSchedule(now).getType() == ScheduleType.SINGLE) {
-            SingleSchedule singleSchedule = (SingleSchedule) task.getCurrentSchedule(now);
+        if (task.isRootTask(now) && task.getCurrentSchedules(now).size() == 1 && task.getCurrentSchedules(now).get(0).getType() == ScheduleType.SINGLE) {
+            SingleSchedule singleSchedule = (SingleSchedule) task.getCurrentSchedules(now);
 
             Instance instance = singleSchedule.getInstance(task);
             Assert.assertTrue(instance != null);
@@ -1061,9 +1080,11 @@ public class DomainFactory {
             instance.setInstanceDateTime(date, timePair, now);
         } else {
             if (task.isRootTask(now)) {
-                Schedule schedule = task.getCurrentSchedule(now);
-                if (schedule != null)
-                    schedule.setEndExactTimeStamp(now);
+                List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
+                Assert.assertTrue(schedules != null);
+
+                Stream.of(schedules)
+                        .forEach(schedule -> schedule.setEndExactTimeStamp(now));
             } else {
                 TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
                 Assert.assertTrue(taskHierarchy != null);
@@ -1094,12 +1115,11 @@ public class DomainFactory {
         task.setName(name);
 
         if (task.isRootTask(now)) {
-            Schedule schedule = task.getCurrentSchedule(now);
-            if (schedule != null) {
-                Assert.assertTrue(schedule.current(now));
+            List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
+            Assert.assertTrue(schedules != null);
 
-                schedule.setEndExactTimeStamp(now);
-            }
+            Stream.of(schedules)
+                    .forEach(schedule -> schedule.setEndExactTimeStamp(now));
         } else {
             TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
             Assert.assertTrue(taskHierarchy != null);
@@ -1131,12 +1151,11 @@ public class DomainFactory {
         task.setName(name);
 
         if (task.isRootTask(now)) {
-            Schedule schedule = task.getCurrentSchedule(now);
-            if (schedule != null) {
-                Assert.assertTrue(schedule.current(now));
+            List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
+            Assert.assertTrue(schedules != null);
 
-                schedule.setEndExactTimeStamp(now);
-            }
+            Stream.of(schedules)
+                    .forEach(schedule -> schedule.setEndExactTimeStamp(now));
         } else {
             TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
             Assert.assertTrue(taskHierarchy != null);
@@ -1284,12 +1303,11 @@ public class DomainFactory {
 
         Task oldParentTask = task.getParentTask(now);
         if (oldParentTask == null) {
-            Schedule schedule = task.getCurrentSchedule(now);
-            if (schedule != null) {
-                Assert.assertTrue(schedule.current(now));
+            List<Schedule> schedules = task.getCurrentSchedules(now);
+            Assert.assertTrue(schedules != null);
 
-                schedule.setEndExactTimeStamp(now);
-            }
+            Stream.of(schedules)
+                    .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
             createTaskHierarchy(newParentTask, task, now);
         } else if (oldParentTask != newParentTask) {
@@ -1497,9 +1515,11 @@ public class DomainFactory {
         if (taskHierarchy != null)
             taskHierarchy.setEndExactTimeStamp(now);
 
-        Schedule schedule = task.getCurrentSchedule(now);
-        if (schedule != null)
-            schedule.setEndExactTimeStamp(now);
+        List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
+        Assert.assertTrue(schedules != null);
+
+        Stream.of(schedules)
+                .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
         save(dataId);
     }
@@ -1777,12 +1797,11 @@ public class DomainFactory {
             Assert.assertTrue(joinTask.current(now));
 
             if (joinTask.isRootTask(now)) {
-                Schedule schedule = joinTask.getCurrentSchedule(now);
-                if (schedule != null) {
-                    Assert.assertTrue(schedule.current(now));
+                List<Schedule> schedules = joinTask.getCurrentSchedules(now);
+                Assert.assertTrue(schedules != null);
 
-                    schedule.setEndExactTimeStamp(now);
-                }
+                Stream.of(schedules)
+                        .forEach(schedule -> schedule.setEndExactTimeStamp(now));
             } else {
                 TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, now);
                 Assert.assertTrue(taskHierarchy != null);

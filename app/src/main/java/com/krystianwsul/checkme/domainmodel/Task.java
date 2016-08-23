@@ -47,34 +47,32 @@ public class Task {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
 
-        Schedule currentSchedule = getCurrentSchedule(exactTimeStamp);
+        List<Schedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
+        Assert.assertTrue(currentSchedules != null);
+
         if (isRootTask(exactTimeStamp)) {
-            if (currentSchedule == null)
+            if (currentSchedules.isEmpty())
                 return null;
 
-            Assert.assertTrue(currentSchedule.current(exactTimeStamp));
-            return currentSchedule.getTaskText(context);
+            Assert.assertTrue(Stream.of(currentSchedules)
+                    .allMatch(schedule -> schedule.current(exactTimeStamp)));
+
+            return Stream.of(currentSchedules)
+                    .map(schedule -> schedule.getTaskText(context))
+                    .collect(Collectors.joining(", "));
         } else {
-            Assert.assertTrue(currentSchedule == null);
+            Assert.assertTrue(currentSchedules.isEmpty());
             return null;
         }
     }
 
-    public Schedule getCurrentSchedule(ExactTimeStamp exactTimeStamp) {
+    public List<Schedule> getCurrentSchedules(ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
 
-        List<Schedule> currentSchedules = Stream.of(mSchedules)
+        return Stream.of(mSchedules)
                 .filter(schedule -> schedule.current(exactTimeStamp))
                 .collect(Collectors.toList());
-
-        if (currentSchedules.isEmpty()) {
-            return null;
-        } else {
-            Assert.assertTrue(currentSchedules.size() == 1);
-            Assert.assertTrue(isRootTask(exactTimeStamp));
-            return currentSchedules.get(0);
-        }
     }
 
     public String getName() {
@@ -133,14 +131,18 @@ public class Task {
         Assert.assertTrue(current(endExactTimeStamp));
 
         if (isRootTask(endExactTimeStamp)) {
-            Schedule schedule = getCurrentSchedule(endExactTimeStamp);
-            if (schedule != null) {
-                Assert.assertTrue(schedule.current(endExactTimeStamp));
+            List<Schedule> schedules = getCurrentSchedules(endExactTimeStamp);
+            Assert.assertTrue(schedules != null);
 
-                schedule.setEndExactTimeStamp(endExactTimeStamp);
+            if (schedules.isEmpty()) {
+                Assert.assertTrue(Stream.of(schedules)
+                        .allMatch(schedule -> schedule.current(endExactTimeStamp)));
+
+                Stream.of(schedules)
+                        .forEach(schedule -> schedule.setEndExactTimeStamp(endExactTimeStamp));
             }
         } else {
-            Assert.assertTrue(getCurrentSchedule(endExactTimeStamp) == null);
+            Assert.assertTrue(getCurrentSchedules(endExactTimeStamp) == null);
         }
 
         for (Task childTask : getChildTasks(endExactTimeStamp)) {
@@ -268,18 +270,19 @@ public class Task {
         if (current(now)) {
             Task rootTask = getRootTask(now);
 
-            Schedule schedule = rootTask.getCurrentSchedule(now);
-            if (schedule == null)
+            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
+            Assert.assertTrue(schedules != null);
+
+            if (schedules.isEmpty())
                 return true;
 
-            if (schedule.getType() == ScheduleType.SINGLE) {
-                SingleSchedule singleSchedule = (SingleSchedule) schedule;
-
-                if (singleSchedule.getInstance(this).isVisible(now))
-                    return true;
-            } else {
+            if (Stream.of(schedules).anyMatch(schedule -> schedule.getType() != ScheduleType.SINGLE))
                 return true;
-            }
+
+            if (Stream.of(schedules)
+                    .map(schedule -> (SingleSchedule) schedule)
+                    .anyMatch(schedule -> schedule.getInstance(this).isVisible(now)))
+                return true;
         }
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
@@ -328,9 +331,10 @@ public class Task {
         if (!isRootTask(now))
             return false;
 
-        Schedule schedule = getCurrentSchedule(now);
-        Assert.assertTrue(schedule != null);
+        List<Schedule> schedules = getCurrentSchedules(now);
+        Assert.assertTrue(schedules != null);
 
-        return schedule.usesCustomTime(customTime);
+        return Stream.of(schedules)
+                .anyMatch(schedule -> schedule.usesCustomTime(customTime));
     }
 }

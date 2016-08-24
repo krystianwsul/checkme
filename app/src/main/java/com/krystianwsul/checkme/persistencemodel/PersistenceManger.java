@@ -8,9 +8,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
-import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.Task;
-import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -157,19 +155,15 @@ public class PersistenceManger {
         return mSingleScheduleDateTimeRecords.get(scheduleId);
     }
 
-    public List<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(DailySchedule dailySchedule) {
-        Assert.assertTrue(dailySchedule != null);
-
+    public List<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(int scheduleId) {
         return Stream.of(mDailyScheduleTimeRecords)
-                .filter(dailyScheduleTimeRecord -> dailyScheduleTimeRecord.getScheduleId() == dailySchedule.getId())
+                .filter(dailyScheduleTimeRecord -> dailyScheduleTimeRecord.getScheduleId() == scheduleId)
                 .collect(Collectors.toList());
     }
 
-    public List<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(WeeklySchedule weeklySchedule) {
-        Assert.assertTrue(weeklySchedule != null);
-
+    public List<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(int scheduleId) {
         return Stream.of(mWeeklyScheduleDayOfWeekTimeRecords)
-                .filter(weeklyScheduleDayOfWeekTimeRecord -> weeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleId() == weeklySchedule.getId())
+                .filter(weeklyScheduleDayOfWeekTimeRecord -> weeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleId() == scheduleId)
                 .collect(Collectors.toList());
     }
 
@@ -266,8 +260,7 @@ public class PersistenceManger {
         return singleScheduleDateTimeRecord;
     }
 
-    public DailyScheduleTimeRecord createDailyScheduleTimeRecord(DailySchedule dailySchedule, Time time) {
-        Assert.assertTrue(dailySchedule != null);
+    public DailyScheduleTimeRecord createDailyScheduleTimeRecord(int scheduleId, Time time) {
         Assert.assertTrue(time != null);
 
         Pair<CustomTime, HourMinute> pair = time.getPair();
@@ -284,13 +277,12 @@ public class PersistenceManger {
 
         int id = ++mDailyScheduleTimeMaxId;
 
-        DailyScheduleTimeRecord dailyScheduleTimeRecord = new DailyScheduleTimeRecord(false, id, dailySchedule.getId(), customTimeId, hour, minute);
+        DailyScheduleTimeRecord dailyScheduleTimeRecord = new DailyScheduleTimeRecord(false, id, scheduleId, customTimeId, hour, minute);
         mDailyScheduleTimeRecords.add(dailyScheduleTimeRecord);
         return dailyScheduleTimeRecord;
     }
 
-    public WeeklyScheduleDayOfWeekTimeRecord createWeeklyScheduleDayOfWeekTimeRecord(WeeklySchedule weeklySchedule, DayOfWeek dayOfWeek, Time time) {
-        Assert.assertTrue(weeklySchedule != null);
+    public WeeklyScheduleDayOfWeekTimeRecord createWeeklyScheduleDayOfWeekTimeRecord(int scheduleId, DayOfWeek dayOfWeek, Time time) {
         Assert.assertTrue(dayOfWeek != null);
         Assert.assertTrue(time != null);
 
@@ -308,7 +300,7 @@ public class PersistenceManger {
 
         int id = ++mWeeklyScheduleDayOfWeekTimeMaxId;
 
-        WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = new WeeklyScheduleDayOfWeekTimeRecord(false, id, weeklySchedule.getId(), dayOfWeek.ordinal(), customTimeId, hour, minute);
+        WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = new WeeklyScheduleDayOfWeekTimeRecord(false, id, scheduleId, dayOfWeek.ordinal(), customTimeId, hour, minute);
         mWeeklyScheduleDayOfWeekTimeRecords.add(weeklyScheduleDayOfWeekTimeRecord);
         return weeklyScheduleDayOfWeekTimeRecord;
     }

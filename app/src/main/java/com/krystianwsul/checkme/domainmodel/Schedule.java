@@ -26,10 +26,6 @@ public abstract class Schedule {
         mRootTaskReference = new WeakReference<>(rootTask);
     }
 
-    public int getId() {
-        return mScheduleRecord.getId();
-    }
-
     ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mScheduleRecord.getStartTime());
     }

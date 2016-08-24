@@ -1726,7 +1726,7 @@ public class DomainFactory {
 
         DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
 
-        List<DailyScheduleTimeRecord> dailyScheduleTimeRecords = mPersistenceManager.getDailyScheduleTimeRecords(dailySchedule);
+        List<DailyScheduleTimeRecord> dailyScheduleTimeRecords = mPersistenceManager.getDailyScheduleTimeRecords(scheduleRecord.getId());
         Assert.assertTrue(dailyScheduleTimeRecords != null);
         Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
 
@@ -1744,7 +1744,7 @@ public class DomainFactory {
 
         WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
 
-        List<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = mPersistenceManager.getWeeklyScheduleDayOfWeekTimeRecords(weeklySchedule);
+        List<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = mPersistenceManager.getWeeklyScheduleDayOfWeekTimeRecords(scheduleRecord.getId());
         Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecords != null);
         Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
 
@@ -1870,7 +1870,7 @@ public class DomainFactory {
         for (Time time : times) {
             Assert.assertTrue(time != null);
 
-            DailyScheduleTimeRecord dailyScheduleTimeRecord = mPersistenceManager.createDailyScheduleTimeRecord(dailySchedule, time);
+            DailyScheduleTimeRecord dailyScheduleTimeRecord = mPersistenceManager.createDailyScheduleTimeRecord(scheduleRecord.getId(), time);
             Assert.assertTrue(dailyScheduleTimeRecord != null);
 
             dailySchedule.addDailyScheduleTime(new DailyScheduleTime(this, dailyScheduleTimeRecord));
@@ -1900,7 +1900,7 @@ public class DomainFactory {
             Assert.assertTrue(dayOfWeek != null);
             Assert.assertTrue(time != null);
 
-            WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = mPersistenceManager.createWeeklyScheduleDayOfWeekTimeRecord(weeklySchedule, dayOfWeek, time);
+            WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = mPersistenceManager.createWeeklyScheduleDayOfWeekTimeRecord(scheduleRecord.getId(), dayOfWeek, time);
             Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
 
             weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord));

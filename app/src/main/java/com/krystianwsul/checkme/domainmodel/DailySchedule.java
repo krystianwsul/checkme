@@ -19,23 +19,24 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 public class DailySchedule extends RepeatingSchedule {
-    private final ArrayList<DailyScheduleTime> mDailyScheduleTimes = new ArrayList<>();
+    private DailyScheduleTime mDailyScheduleTime;
 
     DailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
         super(scheduleRecord, rootTask);
     }
 
-    void addDailyScheduleTime(DailyScheduleTime dailyScheduleTime) {
+    void setDailyScheduleTime(DailyScheduleTime dailyScheduleTime) {
         Assert.assertTrue(dailyScheduleTime != null);
-        mDailyScheduleTimes.add(dailyScheduleTime);
+        Assert.assertTrue(mDailyScheduleTime == null);
+
+        mDailyScheduleTime = dailyScheduleTime;
     }
 
     @Override
     String getTaskText(Context context) {
-        return context.getString(R.string.daily) + " " + Stream.of(mDailyScheduleTimes)
+        return context.getString(R.string.daily) + " " + Stream.of(mDailyScheduleTime)
                 .map(DailyScheduleTime::getTime)
                 .map(Time::toString)
                 .collect(Collectors.joining(", "));
@@ -50,33 +51,29 @@ public class DailySchedule extends RepeatingSchedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
-            HourMinute hourMinute = dailyScheduleTime.getTime().getHourMinute(day);
-            Assert.assertTrue(hourMinute != null);
+        HourMinute hourMinute = mDailyScheduleTime.getTime().getHourMinute(day);
+        Assert.assertTrue(hourMinute != null);
 
-            if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
-                continue;
+        if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
+            return instances;
 
-            if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
-                continue;
+        if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
+            return instances;
 
-            instances.add(dailyScheduleTime.getInstance(task, date));
-        }
+        instances.add(mDailyScheduleTime.getInstance(task, date));
 
         return instances;
     }
 
-    public List<Time> getTimes() {
-        Assert.assertTrue(!mDailyScheduleTimes.isEmpty());
+    public Time getTime() {
+        Assert.assertTrue(mDailyScheduleTime != null);
 
-        return Stream.of(mDailyScheduleTimes)
-                .map(DailyScheduleTime::getTime)
-                .collect(Collectors.toList());
+        return mDailyScheduleTime.getTime();
     }
 
     @Override
     protected TimeStamp getNextAlarm(ExactTimeStamp now) {
-        Assert.assertTrue(!mDailyScheduleTimes.isEmpty());
+        Assert.assertTrue(mDailyScheduleTime != null);
 
         Date today = Date.today();
 
@@ -87,19 +84,15 @@ public class DailySchedule extends RepeatingSchedule {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         HourMinute nowHourMinute = new HourMinute(now.getCalendar());
 
-        TimeStamp nextAlarm = null;
-        for (DailyScheduleTime dailyScheduleTime : mDailyScheduleTimes) {
-            HourMinute dailyScheduleHourMinute = dailyScheduleTime.getTime().getHourMinute(dayOfWeek);
-            DateTime dailyScheduleDateTime;
-            if (dailyScheduleHourMinute.compareTo(nowHourMinute) > 0)
-                dailyScheduleDateTime = new DateTime(today, dailyScheduleTime.getTime());
-            else
-                dailyScheduleDateTime = new DateTime(tomorrow, dailyScheduleTime.getTime());
-            if (nextAlarm == null || dailyScheduleDateTime.getTimeStamp().compareTo(nextAlarm) < 0)
-                nextAlarm = dailyScheduleDateTime.getTimeStamp();
-        }
+        HourMinute dailyScheduleHourMinute = mDailyScheduleTime.getTime().getHourMinute(dayOfWeek);
 
-        return nextAlarm;
+        DateTime dailyScheduleDateTime;
+        if (dailyScheduleHourMinute.compareTo(nowHourMinute) > 0)
+            dailyScheduleDateTime = new DateTime(today, mDailyScheduleTime.getTime());
+        else
+            dailyScheduleDateTime = new DateTime(tomorrow, mDailyScheduleTime.getTime());
+
+        return dailyScheduleDateTime.getTimeStamp();
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -107,7 +100,7 @@ public class DailySchedule extends RepeatingSchedule {
     public boolean usesCustomTime(CustomTime customTime) {
         Assert.assertTrue(customTime != null);
 
-        return Stream.of(mDailyScheduleTimes).anyMatch(dailyScheduleTime -> {
+        return Stream.of(mDailyScheduleTime).anyMatch(dailyScheduleTime -> {
             Integer customTimeId = dailyScheduleTime.getTime().getTimePair().CustomTimeId;
             if ((customTimeId != null) && (customTime.getId() == customTimeId))
                 return true;

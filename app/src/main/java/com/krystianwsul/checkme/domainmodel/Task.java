@@ -32,7 +32,7 @@ public class Task {
         mTaskRecord = taskRecord;
     }
 
-    void addSchedules(ArrayList<Schedule> schedules) {
+    void addSchedules(List<Schedule> schedules) {
         Assert.assertTrue(schedules != null);
         mSchedules.addAll(schedules);
     }

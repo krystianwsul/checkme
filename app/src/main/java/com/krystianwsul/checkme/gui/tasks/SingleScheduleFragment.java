@@ -424,7 +424,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             mTimePairPersist = new TimePairPersist(mData.ScheduleData.TimePair);
         }
 
-        mSingleScheduleDate.setVisibility(View.VISIBLE);
+        mSingleScheduleDateLayout.setVisibility(View.VISIBLE);
         mSingleScheduleTimeLayout.setVisibility(View.VISIBLE);
 
         updateDateText();

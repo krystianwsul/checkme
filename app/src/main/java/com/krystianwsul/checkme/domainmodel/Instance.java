@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.util.Log;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -453,8 +454,9 @@ class Instance {
             Date oldestVisible = task.getOldestVisible();
 
             // zone hack
-            if (!(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getDate()) <= 0))
+            if (!(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getDate()) <= 0)) {
                 Log.e("asdf", getName() + " oldest: " + oldestVisible + ", schedule: " + getScheduleDateTime() + ", instance: " + getInstanceDateTime());
+            }
 
             //Assert.assertTrue(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getTimeStamp().toExactTimeStamp()) <= 0);
         }
@@ -482,6 +484,10 @@ class Instance {
         Assert.assertTrue(now != null);
 
         if (isVisible(now))
+            return true;
+
+        if (Stream.of(getChildInstances(now))
+                .anyMatch(instance -> instance.isRelevant(now)))
             return true;
 
         Task task = mTaskReference.get();

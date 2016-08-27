@@ -95,6 +95,12 @@ public class DomainFactory {
         Assert.assertTrue(mPersistenceManager != null);
     }
 
+    DomainFactory(PersistenceManger persistenceManger) {
+        Assert.assertTrue(persistenceManger != null);
+
+        mPersistenceManager = persistenceManger;
+    }
+
     private void initialize() {
         Collection<CustomTimeRecord> customTimeRecords = mPersistenceManager.getCustomTimeRecords();
         Assert.assertTrue(customTimeRecords != null);
@@ -771,6 +777,13 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        return getTaskListData(now, context, taskId);
+    }
+
+    TaskListLoader.Data getTaskListData(ExactTimeStamp now, Context context, Integer taskId) {
+        Assert.assertTrue(now != null);
+        Assert.assertTrue(context != null);
+
         List<Task> tasks;
 
         if (taskId != null) {
@@ -942,16 +955,24 @@ public class DomainFactory {
     public synchronized ExactTimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done) {
         Assert.assertTrue(instanceKey != null);
 
-        Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
-
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        instance.setDone(done, now);
+        setInstanceDone(now, instanceKey, done);
 
         save(dataId);
 
-        return instance.getDone();
+        return now;
+    }
+
+    Instance setInstanceDone(ExactTimeStamp now, InstanceKey instanceKey, boolean done) {
+        Assert.assertTrue(instanceKey != null);
+
+        Instance instance = getInstance(instanceKey);
+        Assert.assertTrue(instance != null);
+
+        instance.setDone(done, now);
+
+        return instance;
     }
 
     public synchronized void setInstancesNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
@@ -1020,6 +1041,17 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        createSingleScheduleRootTask(now, name, date, timePair);
+
+        save(dataId);
+    }
+
+    Task createSingleScheduleRootTask(ExactTimeStamp now, String name, Date date, TimePair timePair) {
+        Assert.assertTrue(now != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(date != null);
+        Assert.assertTrue(timePair != null);
+
         Task rootTask = createRootTaskHelper(name, now);
         Assert.assertTrue(rootTask != null);
 
@@ -1030,7 +1062,7 @@ public class DomainFactory {
 
         rootTask.addSchedule(schedule);
 
-        save(dataId);
+        return rootTask;
     }
 
     public synchronized void createDailyScheduleRootTask(int dataId, String name, List<TimePair> timePairs) {
@@ -1265,10 +1297,20 @@ public class DomainFactory {
     public synchronized void createChildTask(int dataId, int parentTaskId, String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        createChildTask(now, parentTaskId, name);
+
+        save(dataId);
+    }
+
+    Task createChildTask(ExactTimeStamp now, int parentTaskId, String name) {
+        Assert.assertTrue(now != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
         Task parentTask = mTasks.get(parentTaskId);
         Assert.assertTrue(parentTask != null);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
         Assert.assertTrue(parentTask.current(now));
 
         TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now);
@@ -1280,7 +1322,7 @@ public class DomainFactory {
 
         createTaskHierarchy(parentTask, childTask, now);
 
-        save(dataId);
+        return childTask;
     }
 
     public synchronized void createJoinChildTask(int dataId, int parentTaskId, String name, List<Integer> joinTaskIds) {
@@ -1436,6 +1478,20 @@ public class DomainFactory {
     public synchronized void updateTaskOldestVisible() {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        Irrelevant irrelevant = setIrrelevant(now);
+        Assert.assertTrue(irrelevant != null);
+
+        save(0);
+
+        removeIrrelevant(irrelevant);
+    }
+
+    Irrelevant setIrrelevant(ExactTimeStamp now) {
+        Assert.assertTrue(now != null);
+
+        for (Task task : mTasks.values())
+            task.updateOldestVisible(now);
+
         // relevant hack
         List<Task> irrelevantTasks = Stream.of(mTasks.values())
                 .filter(task -> !task.isRelevant(now))
@@ -1464,26 +1520,27 @@ public class DomainFactory {
         Stream.of(irrelevantCustomTimes)
                 .forEach(CustomTime::setRelevant);
 
-        for (Task task : mTasks.values())
-            task.updateOldestVisible(now);
+        return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantInstances);
+    }
 
-        save(0);
+    void removeIrrelevant(Irrelevant irrelevant) {
+        Assert.assertTrue(irrelevant != null);
 
-        for (Task task : irrelevantTasks) {
+        for (Task task : irrelevant.mTasks) {
             mTasks.remove(task.getId());
 
             List<TaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values())
-                    .filter(taskHierarchy -> irrelevantTasks.contains(taskHierarchy.getChildTask()))
+                    .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
                     .collect(Collectors.toList());
 
             for (TaskHierarchy irrelevantTaskHierarchy : irrelevantTaskHierarchies)
                 mTaskHierarchies.remove(irrelevantTaskHierarchy.getId());
         }
 
-        Stream.of(irrelevantInstances)
+        Stream.of(irrelevant.mInstances)
                 .forEach(mExistingInstances::remove);
 
-        Stream.of(irrelevantCustomTimes)
+        Stream.of(irrelevant.mCustomTimes)
                 .forEach(mCustomTimes::remove);
     }
 
@@ -2083,5 +2140,21 @@ public class DomainFactory {
         }
 
         return taskDatas;
+    }
+
+    static class Irrelevant {
+        public final List<CustomTime> mCustomTimes;
+        public final List<Task> mTasks;
+        public final List<Instance> mInstances;
+
+        public Irrelevant(List<CustomTime> customTimes, List<Task> tasks, List<Instance> instances) {
+            Assert.assertTrue(customTimes != null);
+            Assert.assertTrue(tasks != null);
+            Assert.assertTrue(instances != null);
+
+            mCustomTimes = customTimes;
+            mTasks = tasks;
+            mInstances = instances;
+        }
     }
 }

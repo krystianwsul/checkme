@@ -38,8 +38,7 @@ public class ScheduleRecord extends Record {
 
     @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_SCHEDULES);
-        //onCreate(sqLiteDatabase);
+
     }
 
     public static ArrayList<ScheduleRecord> getScheduleRecords(SQLiteDatabase sqLiteDatabase, List<Integer> taskIds) {
@@ -60,7 +59,7 @@ public class ScheduleRecord extends Record {
         return scheduleRecords;
     }
 
-    private static ScheduleRecord cursorToScheduleRecord(Cursor cursor) {
+    static ScheduleRecord cursorToScheduleRecord(Cursor cursor) {
         Assert.assertTrue(cursor != null);
 
         int id = cursor.getInt(0);

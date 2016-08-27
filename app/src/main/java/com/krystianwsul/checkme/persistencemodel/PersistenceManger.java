@@ -37,9 +37,9 @@ public class PersistenceManger {
     private final List<TaskHierarchyRecord> mTaskHierarchyRecords;
 
     private final List<ScheduleRecord> mScheduleRecords;
-    private final Map<Integer, SingleScheduleDateTimeRecord> mSingleScheduleDateTimeRecords;
-    private final List<DailyScheduleTimeRecord> mDailyScheduleTimeRecords;
-    private final List<WeeklyScheduleDayOfWeekTimeRecord> mWeeklyScheduleDayOfWeekTimeRecords;
+    private final Map<Integer, SingleScheduleRecord> mSingleScheduleRecords;
+    private final Map<Integer, DailyScheduleRecord> mDailyScheduleRecords;
+    private final Map<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords;
 
     private final List<InstanceRecord> mInstanceRecords;
 
@@ -49,8 +49,6 @@ public class PersistenceManger {
     private int mTaskMaxId;
     private int mTaskHierarchyMaxId;
     private int mScheduleMaxId;
-    private int mDailyScheduleTimeMaxId;
-    private int mWeeklyScheduleDayOfWeekTimeMaxId;
     private int mInstanceMaxId;
 
     public static synchronized PersistenceManger getInstance(Context context) {
@@ -101,26 +99,23 @@ public class PersistenceManger {
                 .map(ScheduleRecord::getId)
                 .collect(Collectors.toList());
 
-        mSingleScheduleDateTimeRecords = new HashMap<>();
-        if (!scheduleIds.isEmpty())
-            for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : SingleScheduleDateTimeRecord.getSingleScheduleDateTimeRecords(mSQLiteDatabase, scheduleIds))
-                mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
+        if (scheduleIds.isEmpty())
+            mSingleScheduleRecords = new HashMap<>();
+        else
+            mSingleScheduleRecords = Stream.of(SingleScheduleRecord.getSingleScheduleRecords(mSQLiteDatabase, scheduleIds))
+                    .collect(Collectors.toMap(SingleScheduleRecord::getScheduleId, singleScheduleRecord -> singleScheduleRecord));
 
         if (scheduleIds.isEmpty())
-            mDailyScheduleTimeRecords = new ArrayList<>();
+            mDailyScheduleRecords = new HashMap<>();
         else
-            mDailyScheduleTimeRecords = DailyScheduleTimeRecord.getDailyScheduleTimeRecords(mSQLiteDatabase, scheduleIds);
-        Assert.assertTrue(mDailyScheduleTimeRecords != null);
-
-        mDailyScheduleTimeMaxId = DailyScheduleTimeRecord.getMaxId(mSQLiteDatabase);
+            mDailyScheduleRecords = Stream.of(DailyScheduleRecord.getDailyScheduleRecords(mSQLiteDatabase, scheduleIds))
+                    .collect(Collectors.toMap(DailyScheduleRecord::getScheduleId, dailyScheduleRecord -> dailyScheduleRecord));
 
         if (scheduleIds.isEmpty())
-            mWeeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
+            mWeeklyScheduleRecords = new HashMap<>();
         else
-            mWeeklyScheduleDayOfWeekTimeRecords = WeeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleDayOfWeekTimeRecords(mSQLiteDatabase, scheduleIds);
-        Assert.assertTrue(mWeeklyScheduleDayOfWeekTimeRecords != null);
-
-        mWeeklyScheduleDayOfWeekTimeMaxId = WeeklyScheduleDayOfWeekTimeRecord.getMaxId(mSQLiteDatabase);
+            mWeeklyScheduleRecords = Stream.of(WeeklyScheduleRecord.getWeeklyScheduleRecords(mSQLiteDatabase, scheduleIds))
+                    .collect(Collectors.toMap(WeeklyScheduleRecord::getScheduleId, weeklyScheduleRecord -> weeklyScheduleRecord));
 
         mInstanceRecords = InstanceRecord.getInstanceRecords(mSQLiteDatabase);
         Assert.assertTrue(mInstanceRecords != null);
@@ -134,9 +129,9 @@ public class PersistenceManger {
         mTaskRecords = new ArrayList<>();
         mTaskHierarchyRecords = new ArrayList<>();
         mScheduleRecords = new ArrayList<>();
-        mSingleScheduleDateTimeRecords = new HashMap<>();
-        mDailyScheduleTimeRecords = new ArrayList<>();
-        mWeeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
+        mSingleScheduleRecords = new HashMap<>();
+        mDailyScheduleRecords = new HashMap<>();
+        mWeeklyScheduleRecords = new HashMap<>();
         mInstanceRecords = new ArrayList<>();
         mApplicationContext = null;
 
@@ -144,8 +139,6 @@ public class PersistenceManger {
         mTaskMaxId = 0;
         mTaskHierarchyMaxId = 0;
         mScheduleMaxId = 0;
-        mDailyScheduleTimeMaxId = 0;
-        mWeeklyScheduleDayOfWeekTimeMaxId = 0;
         mInstanceMaxId = 0;
     }
 
@@ -173,20 +166,16 @@ public class PersistenceManger {
                 .collect(Collectors.toList());
     }
 
-    public SingleScheduleDateTimeRecord getSingleScheduleDateTimeRecord(int scheduleId) {
-        return mSingleScheduleDateTimeRecords.get(scheduleId);
+    public SingleScheduleRecord getSingleScheduleRecord(int scheduleId) {
+        return mSingleScheduleRecords.get(scheduleId);
     }
 
-    public List<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(int scheduleId) {
-        return Stream.of(mDailyScheduleTimeRecords)
-                .filter(dailyScheduleTimeRecord -> dailyScheduleTimeRecord.getScheduleId() == scheduleId)
-                .collect(Collectors.toList());
+    public DailyScheduleRecord getDailyScheduleRecord(int scheduleId) {
+        return mDailyScheduleRecords.get(scheduleId);
     }
 
-    public List<WeeklyScheduleDayOfWeekTimeRecord> getWeeklyScheduleDayOfWeekTimeRecords(int scheduleId) {
-        return Stream.of(mWeeklyScheduleDayOfWeekTimeRecords)
-                .filter(weeklyScheduleDayOfWeekTimeRecord -> weeklyScheduleDayOfWeekTimeRecord.getWeeklyScheduleId() == scheduleId)
-                .collect(Collectors.toList());
+    public WeeklyScheduleRecord getWeeklyScheduleRecords(int scheduleId) {
+        return mWeeklyScheduleRecords.get(scheduleId);
     }
 
     public Collection<InstanceRecord> getInstanceRecords() {
@@ -260,9 +249,12 @@ public class PersistenceManger {
         return scheduleRecord;
     }
 
-    public SingleScheduleDateTimeRecord createSingleScheduleDateTimeRecord(int scheduleId, Date date, Time time) {
+    public SingleScheduleRecord createSingleScheduleRecord(int scheduleId, Date date, Time time) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(time != null);
+        Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
 
         Pair<CustomTime, HourMinute> pair = time.getPair();
 
@@ -276,14 +268,17 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        SingleScheduleDateTimeRecord singleScheduleDateTimeRecord = new SingleScheduleDateTimeRecord(false, scheduleId, date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
-        mSingleScheduleDateTimeRecords.put(singleScheduleDateTimeRecord.getScheduleId(), singleScheduleDateTimeRecord);
+        SingleScheduleRecord singleScheduleRecord = new SingleScheduleRecord(false, scheduleId, date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
+        mSingleScheduleRecords.put(singleScheduleRecord.getScheduleId(), singleScheduleRecord);
 
-        return singleScheduleDateTimeRecord;
+        return singleScheduleRecord;
     }
 
-    public DailyScheduleTimeRecord createDailyScheduleTimeRecord(int scheduleId, Time time) {
+    public DailyScheduleRecord createDailyScheduleRecord(int scheduleId, Time time) {
         Assert.assertTrue(time != null);
+        Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
 
         Pair<CustomTime, HourMinute> pair = time.getPair();
 
@@ -297,16 +292,18 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        int id = ++mDailyScheduleTimeMaxId;
+        DailyScheduleRecord dailyScheduleRecord = new DailyScheduleRecord(false, scheduleId, customTimeId, hour, minute);
+        mDailyScheduleRecords.put(scheduleId, dailyScheduleRecord);
 
-        DailyScheduleTimeRecord dailyScheduleTimeRecord = new DailyScheduleTimeRecord(false, id, scheduleId, customTimeId, hour, minute);
-        mDailyScheduleTimeRecords.add(dailyScheduleTimeRecord);
-        return dailyScheduleTimeRecord;
+        return dailyScheduleRecord;
     }
 
-    public WeeklyScheduleDayOfWeekTimeRecord createWeeklyScheduleDayOfWeekTimeRecord(int scheduleId, DayOfWeek dayOfWeek, Time time) {
+    public WeeklyScheduleRecord createWeeklyScheduleRecord(int scheduleId, DayOfWeek dayOfWeek, Time time) {
         Assert.assertTrue(dayOfWeek != null);
         Assert.assertTrue(time != null);
+        Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
 
         Pair<CustomTime, HourMinute> pair = time.getPair();
 
@@ -320,11 +317,10 @@ public class PersistenceManger {
         Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
         Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
 
-        int id = ++mWeeklyScheduleDayOfWeekTimeMaxId;
+        WeeklyScheduleRecord weeklyScheduleRecord = new WeeklyScheduleRecord(false, scheduleId, dayOfWeek.ordinal(), customTimeId, hour, minute);
+        mWeeklyScheduleRecords.put(scheduleId, weeklyScheduleRecord);
 
-        WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = new WeeklyScheduleDayOfWeekTimeRecord(false, id, scheduleId, dayOfWeek.ordinal(), customTimeId, hour, minute);
-        mWeeklyScheduleDayOfWeekTimeRecords.add(weeklyScheduleDayOfWeekTimeRecord);
-        return weeklyScheduleDayOfWeekTimeRecord;
+        return weeklyScheduleRecord;
     }
 
     public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime, ExactTimeStamp now) {
@@ -354,7 +350,7 @@ public class PersistenceManger {
     }
 
     public void save() {
-        // insert
+        // save
 
         ArrayList<InsertCommand> insertCommands = new ArrayList<>();
 
@@ -374,17 +370,17 @@ public class PersistenceManger {
             if (scheduleRecord.needsInsert())
                 insertCommands.add(scheduleRecord.getInsertCommand());
 
-        for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
-            if (singleScheduleDateTimeRecord.needsInsert())
-                insertCommands.add(singleScheduleDateTimeRecord.getInsertCommand());
+        for (SingleScheduleRecord singleScheduleRecord : mSingleScheduleRecords.values())
+            if (singleScheduleRecord.needsInsert())
+                insertCommands.add(singleScheduleRecord.getInsertCommand());
 
-        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords)
-            if (dailyScheduleTimeRecord.needsInsert())
-                insertCommands.add(dailyScheduleTimeRecord.getInsertCommand());
+        for (DailyScheduleRecord dailyScheduleRecord : mDailyScheduleRecords.values())
+            if (dailyScheduleRecord.needsInsert())
+                insertCommands.add(dailyScheduleRecord.getInsertCommand());
 
-        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords)
-            if (weeklyScheduleDayOfWeekTimeRecord.needsInsert())
-                insertCommands.add(weeklyScheduleDayOfWeekTimeRecord.getInsertCommand());
+        for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values())
+            if (weeklyScheduleRecord.needsInsert())
+                insertCommands.add(weeklyScheduleRecord.getInsertCommand());
 
         for (InstanceRecord instanceRecord : mInstanceRecords)
             if (instanceRecord.needsInsert())
@@ -410,17 +406,17 @@ public class PersistenceManger {
             if (scheduleRecord.needsUpdate())
                 updateCommands.add(scheduleRecord.getUpdateCommand());
 
-        for (SingleScheduleDateTimeRecord singleScheduleDateTimeRecord : mSingleScheduleDateTimeRecords.values())
-            if (singleScheduleDateTimeRecord.needsUpdate())
-                updateCommands.add(singleScheduleDateTimeRecord.getUpdateCommand());
+        for (SingleScheduleRecord singleScheduleRecord : mSingleScheduleRecords.values())
+            if (singleScheduleRecord.needsUpdate())
+                updateCommands.add(singleScheduleRecord.getUpdateCommand());
 
-        for (DailyScheduleTimeRecord dailyScheduleTimeRecord : mDailyScheduleTimeRecords)
-            if (dailyScheduleTimeRecord.needsUpdate())
-                updateCommands.add(dailyScheduleTimeRecord.getUpdateCommand());
+        for (DailyScheduleRecord dailyScheduleRecord : mDailyScheduleRecords.values())
+            if (dailyScheduleRecord.needsUpdate())
+                updateCommands.add(dailyScheduleRecord.getUpdateCommand());
 
-        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : mWeeklyScheduleDayOfWeekTimeRecords)
-            if (weeklyScheduleDayOfWeekTimeRecord.needsUpdate())
-                updateCommands.add(weeklyScheduleDayOfWeekTimeRecord.getUpdateCommand());
+        for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values())
+            if (weeklyScheduleRecord.needsUpdate())
+                updateCommands.add(weeklyScheduleRecord.getUpdateCommand());
 
         for (InstanceRecord instanceRecord : mInstanceRecords)
             if (instanceRecord.needsUpdate())

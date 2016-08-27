@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.SingleScheduleDateTimeRecord;
+import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -19,21 +19,21 @@ import java.util.ArrayList;
 public class SingleSchedule extends Schedule {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
 
-    private final SingleScheduleDateTimeRecord mSingleScheduleDateTimeRecord;
+    private final SingleScheduleRecord mSingleScheduleRecord;
 
-    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, SingleScheduleDateTimeRecord singleScheduleDateTimeRecord) {
+    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, SingleScheduleRecord singleScheduleRecord) {
         super(scheduleRecord, rootTask);
 
         Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(singleScheduleDateTimeRecord != null);
+        Assert.assertTrue(singleScheduleRecord != null);
 
         mDomainFactoryReference = new WeakReference<>(domainFactory);
-        mSingleScheduleDateTimeRecord = singleScheduleDateTimeRecord;
+        mSingleScheduleRecord = singleScheduleRecord;
     }
 
     @Override
     String getTaskText(Context context) {
-        Assert.assertTrue(mSingleScheduleDateTimeRecord != null);
+        Assert.assertTrue(mSingleScheduleRecord != null);
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
@@ -47,7 +47,7 @@ public class SingleSchedule extends Schedule {
     }
 
     Instance getInstance(Task task) {
-        Assert.assertTrue(mSingleScheduleDateTimeRecord != null);
+        Assert.assertTrue(mSingleScheduleRecord != null);
         Assert.assertTrue(task != null);
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
@@ -61,7 +61,7 @@ public class SingleSchedule extends Schedule {
 
     @Override
     protected TimeStamp getNextAlarm(ExactTimeStamp now) {
-        Assert.assertTrue(mSingleScheduleDateTimeRecord != null);
+        Assert.assertTrue(mSingleScheduleRecord != null);
         Assert.assertTrue(now != null);
 
         TimeStamp timeStamp = getDateTime().getTimeStamp();
@@ -105,17 +105,17 @@ public class SingleSchedule extends Schedule {
     }
 
     public Time getTime() {
-        Integer customTimeId = mSingleScheduleDateTimeRecord.getCustomTimeId();
+        Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
             DomainFactory domainFactory = mDomainFactoryReference.get();
             Assert.assertTrue(domainFactory != null);
 
-            CustomTime customTime = domainFactory.getCustomTime(mSingleScheduleDateTimeRecord.getCustomTimeId());
+            CustomTime customTime = domainFactory.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {
-            Integer hour = mSingleScheduleDateTimeRecord.getHour();
-            Integer minute = mSingleScheduleDateTimeRecord.getMinute();
+            Integer hour = mSingleScheduleRecord.getHour();
+            Integer minute = mSingleScheduleRecord.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
@@ -123,7 +123,7 @@ public class SingleSchedule extends Schedule {
     }
 
     private Date getDate() {
-        return new Date(mSingleScheduleDateTimeRecord.getYear(), mSingleScheduleDateTimeRecord.getMonth(), mSingleScheduleDateTimeRecord.getDay());
+        return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
     }
 
     private DateTime getDateTime() {

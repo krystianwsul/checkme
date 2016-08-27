@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.persistencemodel.DailyScheduleTimeRecord;
+import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -23,16 +23,16 @@ import java.util.Calendar;
 public class DailySchedule extends RepeatingSchedule {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
 
-    private final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
+    private final DailyScheduleRecord mDailyScheduleRecord;
 
-    DailySchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, DailyScheduleTimeRecord dailyScheduleTimeRecord) {
+    DailySchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, DailyScheduleRecord dailyScheduleRecord) {
         super(scheduleRecord, rootTask);
 
         Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(dailyScheduleTimeRecord != null);
+        Assert.assertTrue(dailyScheduleRecord != null);
 
         mDomainFactoryReference = new WeakReference<>(domainFactory);
-        mDailyScheduleTimeRecord = dailyScheduleTimeRecord;
+        mDailyScheduleRecord = dailyScheduleRecord;
     }
 
     @Override
@@ -100,18 +100,18 @@ public class DailySchedule extends RepeatingSchedule {
     }
 
     public Time getTime() {
-        Integer customTimeId = mDailyScheduleTimeRecord.getCustomTimeId();
+        Integer customTimeId = mDailyScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
             DomainFactory domainFactory = mDomainFactoryReference.get();
             Assert.assertTrue(domainFactory != null);
 
-            CustomTime customTime = domainFactory.getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
+            CustomTime customTime = domainFactory.getCustomTime(mDailyScheduleRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
 
             return customTime;
         } else {
-            Integer hour = mDailyScheduleTimeRecord.getHour();
-            Integer minute = mDailyScheduleTimeRecord.getMinute();
+            Integer hour = mDailyScheduleRecord.getHour();
+            Integer minute = mDailyScheduleRecord.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);

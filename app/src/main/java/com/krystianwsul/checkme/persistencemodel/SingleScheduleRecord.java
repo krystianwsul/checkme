@@ -10,17 +10,22 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DailyScheduleTimeRecord extends Record {
-    private static final String TABLE_DAILY_SCHEDULE_TIMES = "dailyScheduleTimes";
+public class SingleScheduleRecord extends Record {
+    private static final String TABLE_SINGLE_SCHEDULES = "singleSchedules";
 
-    private static final String COLUMN_ID = "_id";
     private static final String COLUMN_SCHEDULE_ID = "scheduleId";
+    private static final String COLUMN_YEAR = "year";
+    private static final String COLUMN_MONTH = "month";
+    private static final String COLUMN_DAY = "day";
     private static final String COLUMN_CUSTOM_TIME_ID = "customTimeId";
     private static final String COLUMN_HOUR = "hour";
     private static final String COLUMN_MINUTE = "minute";
 
-    private final int mId;
     private final int mScheduleId;
+
+    private final int mYear;
+    private final int mMonth;
+    private final int mDay;
 
     private final Integer mCustomTimeId;
 
@@ -28,68 +33,69 @@ public class DailyScheduleTimeRecord extends Record {
     private final Integer mMinute;
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_DAILY_SCHEDULE_TIMES
-                + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_SINGLE_SCHEDULES
+                + " (" + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL UNIQUE REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
+                + COLUMN_YEAR + " INTEGER NOT NULL, "
+                + COLUMN_MONTH + " INTEGER NOT NULL, "
+                + COLUMN_DAY + " INTEGER NOT NULL, "
                 + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
                 + COLUMN_HOUR + " INTEGER, "
                 + COLUMN_MINUTE + " INTEGER);");
     }
 
-    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
+    @SuppressWarnings("UnusedParameters")
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_DAILY_SCHEDULE_TIMES);
-        //onCreate(sqLiteDatabase);
+
     }
 
-    public static ArrayList<DailyScheduleTimeRecord> getDailyScheduleTimeRecords(SQLiteDatabase sqLiteDatabase, List<Integer> scheduleIds) {
+    public static ArrayList<SingleScheduleRecord> getSingleScheduleRecords(SQLiteDatabase sqLiteDatabase, List<Integer> scheduleIds) {
         Assert.assertTrue(sqLiteDatabase != null);
         Assert.assertTrue(scheduleIds != null);
         Assert.assertTrue(!scheduleIds.isEmpty());
 
-        ArrayList<DailyScheduleTimeRecord> dailyScheduleTimeRecords = new ArrayList<>();
+        ArrayList<SingleScheduleRecord> singleScheduleDateTimeRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_DAILY_SCHEDULE_TIMES, null, COLUMN_SCHEDULE_ID + " IN (" + TextUtils.join(", ", scheduleIds) + ")", null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_SINGLE_SCHEDULES, null, COLUMN_SCHEDULE_ID + " IN (" + TextUtils.join(", ", scheduleIds) + ")", null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            dailyScheduleTimeRecords.add(cursorToDailyScheduleTimeRecord(cursor));
+            singleScheduleDateTimeRecords.add(cursorToSingleScheduleRecord(cursor));
             cursor.moveToNext();
         }
         cursor.close();
 
-        return dailyScheduleTimeRecords;
+        return singleScheduleDateTimeRecords;
     }
 
-    private static DailyScheduleTimeRecord cursorToDailyScheduleTimeRecord(Cursor cursor) {
+    private static SingleScheduleRecord cursorToSingleScheduleRecord(Cursor cursor) {
         Assert.assertTrue(cursor != null);
 
-        int id = cursor.getInt(0);
-        int scheduleId = cursor.getInt(1);
-        Integer customTimeId = (cursor.isNull(2) ? null : cursor.getInt(2));
-        Integer hour = (cursor.isNull(3) ? null : cursor.getInt(3));
-        Integer minute = (cursor.isNull(4) ? null : cursor.getInt(4));
+        int scheduleId = cursor.getInt(0);
+        int year = cursor.getInt(1);
+        int month = cursor.getInt(2);
+        int day = cursor.getInt(3);
+        Integer customTimeId = (cursor.isNull(4) ? null : cursor.getInt(4));
+        Integer hour = (cursor.isNull(5) ? null : cursor.getInt(5));
+        Integer minute = (cursor.isNull(6) ? null : cursor.getInt(6));
 
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
 
-        return new DailyScheduleTimeRecord(true, id, scheduleId, customTimeId, hour, minute);
+        return new SingleScheduleRecord(true, scheduleId, year, month, day, customTimeId, hour, minute);
     }
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-        return getMaxId(sqLiteDatabase, TABLE_DAILY_SCHEDULE_TIMES, COLUMN_ID);
-    }
-
-    DailyScheduleTimeRecord(boolean created, int id, int scheduleId, Integer customTimeId, Integer hour, Integer minute) {
+    SingleScheduleRecord(boolean created, int scheduleId, int year, int month, int day, Integer customTimeId, Integer hour, Integer minute) {
         super(created);
 
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
 
-        mId = id;
         mScheduleId = scheduleId;
+
+        mYear = year;
+        mMonth = month;
+        mDay = day;
 
         mCustomTimeId = customTimeId;
 
@@ -97,12 +103,20 @@ public class DailyScheduleTimeRecord extends Record {
         mMinute = minute;
     }
 
-    public int getId() {
-        return mId;
-    }
-
     public int getScheduleId() {
         return mScheduleId;
+    }
+
+    public int getYear() {
+        return mYear;
+    }
+
+    public int getMonth() {
+        return mMonth;
+    }
+
+    public int getDay() {
+        return mDay;
     }
 
     public Integer getCustomTimeId() {
@@ -121,6 +135,9 @@ public class DailyScheduleTimeRecord extends Record {
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_SCHEDULE_ID, mScheduleId);
+        contentValues.put(COLUMN_YEAR, mYear);
+        contentValues.put(COLUMN_MONTH, mMonth);
+        contentValues.put(COLUMN_DAY, mDay);
         contentValues.put(COLUMN_CUSTOM_TIME_ID, mCustomTimeId);
         contentValues.put(COLUMN_HOUR, mHour);
         contentValues.put(COLUMN_MINUTE, mMinute);
@@ -129,11 +146,11 @@ public class DailyScheduleTimeRecord extends Record {
 
     @Override
     UpdateCommand getUpdateCommand() {
-        return getUpdateCommand(TABLE_DAILY_SCHEDULE_TIMES, COLUMN_ID, mId);
+        return getUpdateCommand(TABLE_SINGLE_SCHEDULES, COLUMN_SCHEDULE_ID, mScheduleId);
     }
 
     @Override
     InsertCommand getInsertCommand() {
-        return getInsertCommand(TABLE_DAILY_SCHEDULE_TIMES);
+        return getInsertCommand(TABLE_SINGLE_SCHEDULES);
     }
 }

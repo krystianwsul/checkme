@@ -1792,12 +1792,7 @@ public class DomainFactory {
         Assert.assertTrue(!dailyScheduleTimeRecords.isEmpty());
 
         for (DailyScheduleTimeRecord dailyScheduleTimeRecord : dailyScheduleTimeRecords) {
-            DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
-
-            DailyScheduleTime dailyScheduleTime = new DailyScheduleTime(this, dailyScheduleTimeRecord);
-            dailySchedule.setDailyScheduleTime(dailyScheduleTime);
-
-            dailySchedules.add(dailySchedule);
+            dailySchedules.add(new DailySchedule(scheduleRecord, rootTask, this, dailyScheduleTimeRecord));
         }
 
         return dailySchedules;
@@ -1935,14 +1930,10 @@ public class DomainFactory {
         for (Time time : times) {
             Assert.assertTrue(time != null);
 
-            DailySchedule dailySchedule = new DailySchedule(scheduleRecord, rootTask);
-
             DailyScheduleTimeRecord dailyScheduleTimeRecord = mPersistenceManager.createDailyScheduleTimeRecord(scheduleRecord.getId(), time);
             Assert.assertTrue(dailyScheduleTimeRecord != null);
 
-            dailySchedule.setDailyScheduleTime(new DailyScheduleTime(this, dailyScheduleTimeRecord));
-
-            schedules.add(dailySchedule);
+            schedules.add(new DailySchedule(scheduleRecord, rootTask, this, dailyScheduleTimeRecord));
         }
 
         return schedules;

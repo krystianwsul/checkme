@@ -2,9 +2,8 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.persistencemodel.DailyScheduleTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -12,34 +11,34 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMili;
 import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 
 public class DailySchedule extends RepeatingSchedule {
-    private DailyScheduleTime mDailyScheduleTime;
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
 
-    DailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private final DailyScheduleTimeRecord mDailyScheduleTimeRecord;
+
+    DailySchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, DailyScheduleTimeRecord dailyScheduleTimeRecord) {
         super(scheduleRecord, rootTask);
-    }
 
-    void setDailyScheduleTime(DailyScheduleTime dailyScheduleTime) {
-        Assert.assertTrue(dailyScheduleTime != null);
-        Assert.assertTrue(mDailyScheduleTime == null);
+        Assert.assertTrue(domainFactory != null);
+        Assert.assertTrue(dailyScheduleTimeRecord != null);
 
-        mDailyScheduleTime = dailyScheduleTime;
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
+        mDailyScheduleTimeRecord = dailyScheduleTimeRecord;
     }
 
     @Override
     String getTaskText(Context context) {
-        return context.getString(R.string.daily) + " " + Stream.of(mDailyScheduleTime)
-                .map(DailyScheduleTime::getTime)
-                .map(Time::toString)
-                .collect(Collectors.joining(", "));
+        return context.getString(R.string.daily) + " " + getTime().toString();
     }
 
     @Override
@@ -51,7 +50,7 @@ public class DailySchedule extends RepeatingSchedule {
 
         ArrayList<Instance> instances = new ArrayList<>();
 
-        HourMinute hourMinute = mDailyScheduleTime.getTime().getHourMinute(day);
+        HourMinute hourMinute = getTime().getHourMinute(day);
         Assert.assertTrue(hourMinute != null);
 
         if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
@@ -60,21 +59,13 @@ public class DailySchedule extends RepeatingSchedule {
         if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
             return instances;
 
-        instances.add(mDailyScheduleTime.getInstance(task, date));
+        instances.add(getInstance(task, date));
 
         return instances;
     }
 
-    public Time getTime() {
-        Assert.assertTrue(mDailyScheduleTime != null);
-
-        return mDailyScheduleTime.getTime();
-    }
-
     @Override
     protected TimeStamp getNextAlarm(ExactTimeStamp now) {
-        Assert.assertTrue(mDailyScheduleTime != null);
-
         Date today = Date.today();
 
         Calendar calendar = Calendar.getInstance();
@@ -84,13 +75,13 @@ public class DailySchedule extends RepeatingSchedule {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         HourMinute nowHourMinute = new HourMinute(now.getCalendar());
 
-        HourMinute dailyScheduleHourMinute = mDailyScheduleTime.getTime().getHourMinute(dayOfWeek);
+        HourMinute dailyScheduleHourMinute = getTime().getHourMinute(dayOfWeek);
 
         DateTime dailyScheduleDateTime;
         if (dailyScheduleHourMinute.compareTo(nowHourMinute) > 0)
-            dailyScheduleDateTime = new DateTime(today, mDailyScheduleTime.getTime());
+            dailyScheduleDateTime = new DateTime(today, getTime());
         else
-            dailyScheduleDateTime = new DateTime(tomorrow, mDailyScheduleTime.getTime());
+            dailyScheduleDateTime = new DateTime(tomorrow, getTime());
 
         return dailyScheduleDateTime.getTimeStamp();
     }
@@ -100,12 +91,42 @@ public class DailySchedule extends RepeatingSchedule {
     public boolean usesCustomTime(CustomTime customTime) {
         Assert.assertTrue(customTime != null);
 
-        return Stream.of(mDailyScheduleTime).anyMatch(dailyScheduleTime -> {
-            Integer customTimeId = dailyScheduleTime.getTime().getTimePair().CustomTimeId;
-            if ((customTimeId != null) && (customTime.getId() == customTimeId))
-                return true;
+        Integer customTimeId = getTime().getTimePair().CustomTimeId;
+        if ((customTimeId != null) && (customTime.getId() == customTimeId))
+            return true;
 
-            return false;
-        });
+        return false;
+    }
+
+    public Time getTime() {
+        Integer customTimeId = mDailyScheduleTimeRecord.getCustomTimeId();
+        if (customTimeId != null) {
+            DomainFactory domainFactory = mDomainFactoryReference.get();
+            Assert.assertTrue(domainFactory != null);
+
+            CustomTime customTime = domainFactory.getCustomTime(mDailyScheduleTimeRecord.getCustomTimeId());
+            Assert.assertTrue(customTime != null);
+
+            return customTime;
+        } else {
+            Integer hour = mDailyScheduleTimeRecord.getHour();
+            Integer minute = mDailyScheduleTimeRecord.getMinute();
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+            return new NormalTime(hour, minute);
+        }
+    }
+
+    Instance getInstance(Task task, Date scheduleDate) {
+        Assert.assertTrue(task != null);
+        Assert.assertTrue(scheduleDate != null);
+
+        DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
+
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory.getInstance(task, scheduleDateTime);
     }
 }

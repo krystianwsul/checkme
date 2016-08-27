@@ -26,23 +26,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PersistenceManger {
     private static PersistenceManger sInstance;
 
     private final SQLiteDatabase mSQLiteDatabase;
 
-    private final ArrayList<CustomTimeRecord> mCustomTimeRecords;
+    private final List<CustomTimeRecord> mCustomTimeRecords;
 
-    private final ArrayList<TaskRecord> mTaskRecords;
-    private final ArrayList<TaskHierarchyRecord> mTaskHierarchyRecords;
+    private final List<TaskRecord> mTaskRecords;
+    private final List<TaskHierarchyRecord> mTaskHierarchyRecords;
 
-    private final ArrayList<ScheduleRecord> mScheduleRecords;
-    private final HashMap<Integer, SingleScheduleDateTimeRecord> mSingleScheduleDateTimeRecords;
-    private final ArrayList<DailyScheduleTimeRecord> mDailyScheduleTimeRecords;
-    private final ArrayList<WeeklyScheduleDayOfWeekTimeRecord> mWeeklyScheduleDayOfWeekTimeRecords;
+    private final List<ScheduleRecord> mScheduleRecords;
+    private final Map<Integer, SingleScheduleDateTimeRecord> mSingleScheduleDateTimeRecords;
+    private final List<DailyScheduleTimeRecord> mDailyScheduleTimeRecords;
+    private final List<WeeklyScheduleDayOfWeekTimeRecord> mWeeklyScheduleDayOfWeekTimeRecords;
 
-    private final ArrayList<InstanceRecord> mInstanceRecords;
+    private final List<InstanceRecord> mInstanceRecords;
 
     private final Context mApplicationContext;
 
@@ -127,6 +128,27 @@ public class PersistenceManger {
         Assert.assertTrue(mInstanceRecords != null);
 
         mInstanceMaxId = InstanceRecord.getMaxId(mSQLiteDatabase);
+    }
+
+    public PersistenceManger() {
+        mSQLiteDatabase = null;
+        mCustomTimeRecords = new ArrayList<>();
+        mTaskRecords = new ArrayList<>();
+        mTaskHierarchyRecords = new ArrayList<>();
+        mScheduleRecords = new ArrayList<>();
+        mSingleScheduleDateTimeRecords = new HashMap<>();
+        mDailyScheduleTimeRecords = new ArrayList<>();
+        mWeeklyScheduleDayOfWeekTimeRecords = new ArrayList<>();
+        mInstanceRecords = new ArrayList<>();
+        mApplicationContext = null;
+
+        mCustomTimeMaxId = 0;
+        mTaskMaxId = 0;
+        mTaskHierarchyMaxId = 0;
+        mScheduleMaxId = 0;
+        mDailyScheduleTimeMaxId = 0;
+        mWeeklyScheduleDayOfWeekTimeMaxId = 0;
+        mInstanceMaxId = 0;
     }
 
     public synchronized void reset() {

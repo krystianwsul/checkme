@@ -289,12 +289,12 @@ public class Task {
         Assert.assertTrue(domainFactory != null);
 
         if (Stream.of(domainFactory.getExistingInstances(this))
-                .anyMatch(instance -> instance.isRelevant(now)))
+                .anyMatch(instance -> instance.isVisible(now)))
             return true;
 
         //noinspection RedundantIfStatement
         if (Stream.of(domainFactory.getPastInstances(this, now))
-                .anyMatch(instance -> instance.isRelevant(now)))
+                .anyMatch(instance -> instance.isVisible(now)))
             return true;
 
         return false;

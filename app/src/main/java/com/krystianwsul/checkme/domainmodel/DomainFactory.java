@@ -719,7 +719,7 @@ public class DomainFactory {
     public synchronized WeeklyScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        ArrayList<WeeklyScheduleLoader.ScheduleData> scheduleDatas = null;
+        ArrayList<WeeklyScheduleLoader.ScheduleData> scheduleDatas = new ArrayList<>();
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
@@ -732,15 +732,16 @@ public class DomainFactory {
 
             List<Schedule> schedules = rootTask.getCurrentSchedules(now);
             Assert.assertTrue(schedules != null);
-            Assert.assertTrue(schedules.size() == 1); // todo schedule hack;
+            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.WEEKLY)); // todo schedule hack;
 
-            WeeklySchedule weeklySchedule = (WeeklySchedule) schedules.get(0);
-            Assert.assertTrue(weeklySchedule != null);
-            Assert.assertTrue(weeklySchedule.current(now));
+            for (Schedule schedule : schedules) {
+                WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
+                Assert.assertTrue(weeklySchedule != null);
+                Assert.assertTrue(weeklySchedule.current(now));
 
-            List<Pair<DayOfWeek, Time>> pairs = weeklySchedule.getDayOfWeekTimes();
-            scheduleDatas = new ArrayList<>();
-            for (Pair<DayOfWeek, Time> pair : pairs) {
+                Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTimes();
+                Assert.assertTrue(pair != null);
+
                 scheduleDatas.add(new WeeklyScheduleLoader.ScheduleData(pair.first, pair.second.getTimePair()));
 
                 CustomTime customTime = pair.second.getPair().first;
@@ -1096,10 +1097,11 @@ public class DomainFactory {
         Task rootTask = createRootTaskHelper(name, now);
         Assert.assertTrue(rootTask != null);
 
-        Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, now);
-        Assert.assertTrue(schedule != null);
+        List<Schedule> schedules = createWeeklySchedules(rootTask, dayOfWeekTimePairs, now);
+        Assert.assertTrue(schedules != null);
+        Assert.assertTrue(!schedules.isEmpty());
 
-        rootTask.addSchedule(schedule);
+        rootTask.addSchedules(schedules);
 
         save(dataId);
     }
@@ -1214,10 +1216,11 @@ public class DomainFactory {
             taskHierarchy.setEndExactTimeStamp(now);
         }
 
-        Schedule schedule = createWeeklySchedule(task, dayOfWeekTimePairs, now);
-        Assert.assertTrue(schedule != null);
+        List<Schedule> schedules = createWeeklySchedules(task, dayOfWeekTimePairs, now);
+        Assert.assertTrue(schedules != null);
+        Assert.assertTrue(!schedules.isEmpty());
 
-        task.addSchedule(schedule);
+        task.addSchedules(schedules);
 
         save(dataId);
     }
@@ -1284,10 +1287,11 @@ public class DomainFactory {
         Task rootTask = createRootTaskHelper(name, now);
         Assert.assertTrue(rootTask != null);
 
-        Schedule schedule = createWeeklySchedule(rootTask, dayOfWeekTimePairs, now);
-        Assert.assertTrue(schedule != null);
+        List<Schedule> schedules = createWeeklySchedules(rootTask, dayOfWeekTimePairs, now);
+        Assert.assertTrue(schedules != null);
+        Assert.assertTrue(!schedules.isEmpty());
 
-        rootTask.addSchedule(schedule);
+        rootTask.addSchedules(schedules);
 
         joinTasks(rootTask, joinTaskIds, now);
 
@@ -1761,7 +1765,7 @@ public class DomainFactory {
                     schedules.addAll(loadDailySchedules(scheduleRecord, task));
                     break;
                 case WEEKLY:
-                    schedules.add(loadWeeklySchedule(scheduleRecord, task));
+                    schedules.addAll(loadWeeklySchedules(scheduleRecord, task));
                     break;
                 default:
                     throw new IndexOutOfBoundsException("unknown schedule type");
@@ -1798,11 +1802,11 @@ public class DomainFactory {
         return dailySchedules;
     }
 
-    private Schedule loadWeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private List<Schedule> loadWeeklySchedules(ScheduleRecord scheduleRecord, Task rootTask) {
         Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
-        WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
+        List<Schedule> weeklySchedules = new ArrayList<>();
 
         List<WeeklyScheduleDayOfWeekTimeRecord> weeklyScheduleDayOfWeekTimeRecords = mPersistenceManager.getWeeklyScheduleDayOfWeekTimeRecords(scheduleRecord.getId());
         Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecords != null);
@@ -1810,10 +1814,14 @@ public class DomainFactory {
 
         for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
             WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord);
-            weeklySchedule.addWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
+
+            WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
+            weeklySchedule.setWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
+
+            weeklySchedules.add(weeklySchedule);
         }
 
-        return weeklySchedule;
+        return weeklySchedules;
     }
 
     private Task createRootTaskHelper(String name, ExactTimeStamp startExactTimeStamp) {
@@ -1939,7 +1947,7 @@ public class DomainFactory {
         return schedules;
     }
 
-    private WeeklySchedule createWeeklySchedule(Task rootTask, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ExactTimeStamp startExactTimeStamp) {
+    private List<Schedule> createWeeklySchedules(Task rootTask, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1949,7 +1957,7 @@ public class DomainFactory {
         ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.WEEKLY, startExactTimeStamp);
         Assert.assertTrue(scheduleRecord != null);
 
-        WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
+        List<Schedule> weeklySchedules = new ArrayList<>();
 
         for (Pair<DayOfWeek, TimePair> dayOfWeekTimePair : dayOfWeekTimePairs) {
             Assert.assertTrue(dayOfWeekTimePair != null);
@@ -1963,10 +1971,13 @@ public class DomainFactory {
             WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = mPersistenceManager.createWeeklyScheduleDayOfWeekTimeRecord(scheduleRecord.getId(), dayOfWeek, time);
             Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
 
-            weeklySchedule.addWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord));
+            WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
+            weeklySchedule.setWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord));
+
+            weeklySchedules.add(weeklySchedule);
         }
 
-        return weeklySchedule;
+        return weeklySchedules;
     }
 
     List<Task> getChildTasks(Task parentTask, ExactTimeStamp exactTimeStamp) {

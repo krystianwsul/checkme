@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 public class DailySchedule extends RepeatingSchedule {
@@ -42,26 +41,28 @@ public class DailySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected ArrayList<Instance> getInstancesInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
+    protected Instance getInstanceInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
 
-        ArrayList<Instance> instances = new ArrayList<>();
-
         HourMinute hourMinute = getTime().getHourMinute(day);
         Assert.assertTrue(hourMinute != null);
 
         if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
-            return instances;
+            return null;
 
         if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
-            return instances;
+            return null;
 
-        instances.add(getInstance(task, date));
+        DateTime scheduleDateTime = new DateTime(date, getTime());
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return instances;
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory.getInstance(task, scheduleDateTime);
     }
 
     @Override
@@ -115,18 +116,5 @@ public class DailySchedule extends RepeatingSchedule {
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
         }
-    }
-
-    Instance getInstance(Task task, Date scheduleDate) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(scheduleDate != null);
-
-        DateTime scheduleDateTime = new DateTime(scheduleDate, getTime());
-        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
-
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        return domainFactory.getInstance(task, scheduleDateTime);
     }
 }

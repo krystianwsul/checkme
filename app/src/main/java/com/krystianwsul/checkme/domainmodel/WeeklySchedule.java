@@ -4,37 +4,40 @@ import android.content.Context;
 import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
+import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleDayOfWeekTimeRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMili;
 import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 import java.util.Calendar;
 
 public class WeeklySchedule extends RepeatingSchedule {
-    private WeeklyScheduleDayOfWeekTime mWeeklyScheduleDayOfWeekTime;
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
 
-    WeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private final WeeklyScheduleDayOfWeekTimeRecord mWeeklyScheduleDayOfWeekTimeRecord;
+
+    WeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord) {
         super(scheduleRecord, rootTask);
-    }
 
-    void setWeeklyScheduleDayOfWeekTime(WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime) {
-        Assert.assertTrue(weeklyScheduleDayOfWeekTime != null);
-        Assert.assertTrue(mWeeklyScheduleDayOfWeekTime == null);
+        Assert.assertTrue(domainFactory != null);
+        Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
 
-        mWeeklyScheduleDayOfWeekTime = weeklyScheduleDayOfWeekTime;
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
+        mWeeklyScheduleDayOfWeekTimeRecord = weeklyScheduleDayOfWeekTimeRecord;
     }
 
     @Override
     String getTaskText(Context context) {
-        return mWeeklyScheduleDayOfWeekTime.getDayOfWeek() + ": " + mWeeklyScheduleDayOfWeekTime.getTime();
+        return getDayOfWeek() + ": " + getTime();
 
         /*
         return Stream.of(mWeeklyScheduleDayOfWeekTime)
@@ -50,33 +53,35 @@ public class WeeklySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected ArrayList<Instance> getInstancesInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
+    protected Instance getInstanceInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(date != null);
 
         DayOfWeek day = date.getDayOfWeek();
 
-        ArrayList<Instance> instances = new ArrayList<>();
+        if (getDayOfWeek() != day)
+            return null;
 
-        if (mWeeklyScheduleDayOfWeekTime.getDayOfWeek() != day)
-            return instances;
-
-        HourMinute hourMinute = mWeeklyScheduleDayOfWeekTime.getTime().getHourMinute(day);
+        HourMinute hourMinute = getTime().getHourMinute(day);
         Assert.assertTrue(hourMinute != null);
 
         if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
-            return instances;
+            return null;
 
         if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
-            return instances;
+            return null;
 
-        instances.add(mWeeklyScheduleDayOfWeekTime.getInstance(task, date));
+        DateTime scheduleDateTime = new DateTime(date, getTime());
+        Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return instances;
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory.getInstance(task, scheduleDateTime);
     }
 
-    public Pair<DayOfWeek, Time> getDayOfWeekTimes() {
-        return new Pair<>(mWeeklyScheduleDayOfWeekTime.getDayOfWeek(), mWeeklyScheduleDayOfWeekTime.getTime());
+    public Pair<DayOfWeek, Time> getDayOfWeekTime() {
+        return new Pair<>(getDayOfWeek(), getTime());
     }
 
     @Override
@@ -86,15 +91,15 @@ public class WeeklySchedule extends RepeatingSchedule {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         HourMinute nowHourMinute = new HourMinute(now.getCalendar());
 
-        int ordinalDifference = (mWeeklyScheduleDayOfWeekTime.getDayOfWeek().ordinal() - dayOfWeek.ordinal());
+        int ordinalDifference = (getDayOfWeek().ordinal() - dayOfWeek.ordinal());
         Calendar thisCalendar = today.getCalendar();
-        if ((ordinalDifference > 0) || ((ordinalDifference == 0) && mWeeklyScheduleDayOfWeekTime.getTime().getHourMinute(dayOfWeek).compareTo(nowHourMinute) > 0))
+        if ((ordinalDifference > 0) || ((ordinalDifference == 0) && getTime().getHourMinute(dayOfWeek).compareTo(nowHourMinute) > 0))
             thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference);
         else
             thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference + 7);
         Date thisDate = new Date(thisCalendar);
 
-        return (new DateTime(thisDate, mWeeklyScheduleDayOfWeekTime.getTime())).getTimeStamp();
+        return (new DateTime(thisDate, getTime())).getTimeStamp();
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -102,10 +107,32 @@ public class WeeklySchedule extends RepeatingSchedule {
     public boolean usesCustomTime(CustomTime customTime) {
         Assert.assertTrue(customTime != null);
 
-        Integer customTimeId = mWeeklyScheduleDayOfWeekTime.getTime().getTimePair().CustomTimeId;
+        Integer customTimeId = getTime().getTimePair().CustomTimeId;
         if ((customTimeId != null) && (customTime.getId() == customTimeId))
             return true;
 
         return false;
+    }
+
+    Time getTime() {
+        Integer customTimeId = mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId();
+        if (customTimeId != null) {
+            DomainFactory domainFactory = mDomainFactoryReference.get();
+            Assert.assertTrue(domainFactory != null);
+
+            CustomTime customTime = domainFactory.getCustomTime(mWeeklyScheduleDayOfWeekTimeRecord.getCustomTimeId());
+            Assert.assertTrue(customTime != null);
+            return customTime;
+        } else {
+            Integer hour = mWeeklyScheduleDayOfWeekTimeRecord.getHour();
+            Integer minute = mWeeklyScheduleDayOfWeekTimeRecord.getMinute();
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+            return new NormalTime(hour, minute);
+        }
+    }
+
+    DayOfWeek getDayOfWeek() {
+        return DayOfWeek.values()[mWeeklyScheduleDayOfWeekTimeRecord.getDayOfWeek()];
     }
 }

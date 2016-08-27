@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -9,6 +11,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 abstract class RepeatingSchedule extends Schedule {
     RepeatingSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
@@ -16,7 +19,7 @@ abstract class RepeatingSchedule extends Schedule {
     }
 
     @Override
-    ArrayList<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
+    List<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(givenExactEndTimeStamp != null);
 
@@ -44,22 +47,24 @@ abstract class RepeatingSchedule extends Schedule {
         Assert.assertTrue(startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
 
         if (startExactTimeStamp.getDate().equals(endExactTimeStamp.getDate())) {
-            return getInstancesInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), endExactTimeStamp.getHourMili());
+            instances.add(getInstanceInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), endExactTimeStamp.getHourMili()));
         } else {
-            instances.addAll(getInstancesInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), null));
+            instances.add(getInstanceInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), null));
 
             Calendar loopStartCalendar = startExactTimeStamp.getDate().getCalendar();
             loopStartCalendar.add(Calendar.DATE, 1);
             Calendar loopEndCalendar = endExactTimeStamp.getDate().getCalendar();
 
             for (; loopStartCalendar.before(loopEndCalendar); loopStartCalendar.add(Calendar.DATE, 1))
-                instances.addAll(getInstancesInDate(task, new Date(loopStartCalendar), null, null));
+                instances.add(getInstanceInDate(task, new Date(loopStartCalendar), null, null));
 
-            instances.addAll(getInstancesInDate(task, endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMili()));
+            instances.add(getInstanceInDate(task, endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMili()));
         }
 
-        return instances;
+        return Stream.of(instances)
+                .filter(instance -> instance != null)
+                .collect(Collectors.toList());
     }
 
-    protected abstract ArrayList<Instance> getInstancesInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili);
+    protected abstract Instance getInstanceInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili);
 }

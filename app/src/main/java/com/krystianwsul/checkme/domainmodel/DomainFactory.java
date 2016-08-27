@@ -739,7 +739,7 @@ public class DomainFactory {
                 Assert.assertTrue(weeklySchedule != null);
                 Assert.assertTrue(weeklySchedule.current(now));
 
-                Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTimes();
+                Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
                 Assert.assertTrue(pair != null);
 
                 scheduleDatas.add(new WeeklyScheduleLoader.ScheduleData(pair.first, pair.second.getTimePair()));
@@ -1812,14 +1812,8 @@ public class DomainFactory {
         Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecords != null);
         Assert.assertTrue(!weeklyScheduleDayOfWeekTimeRecords.isEmpty());
 
-        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords) {
-            WeeklyScheduleDayOfWeekTime weeklyScheduleDayOfWeekTime = new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord);
-
-            WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
-            weeklySchedule.setWeeklyScheduleDayOfWeekTime(weeklyScheduleDayOfWeekTime);
-
-            weeklySchedules.add(weeklySchedule);
-        }
+        for (WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord : weeklyScheduleDayOfWeekTimeRecords)
+            weeklySchedules.add(new WeeklySchedule(scheduleRecord, rootTask, this, weeklyScheduleDayOfWeekTimeRecord));
 
         return weeklySchedules;
     }
@@ -1971,10 +1965,7 @@ public class DomainFactory {
             WeeklyScheduleDayOfWeekTimeRecord weeklyScheduleDayOfWeekTimeRecord = mPersistenceManager.createWeeklyScheduleDayOfWeekTimeRecord(scheduleRecord.getId(), dayOfWeek, time);
             Assert.assertTrue(weeklyScheduleDayOfWeekTimeRecord != null);
 
-            WeeklySchedule weeklySchedule = new WeeklySchedule(scheduleRecord, rootTask);
-            weeklySchedule.setWeeklyScheduleDayOfWeekTime(new WeeklyScheduleDayOfWeekTime(this, weeklyScheduleDayOfWeekTimeRecord));
-
-            weeklySchedules.add(weeklySchedule);
+            weeklySchedules.add(new WeeklySchedule(scheduleRecord, rootTask, this, weeklyScheduleDayOfWeekTimeRecord));
         }
 
         return weeklySchedules;

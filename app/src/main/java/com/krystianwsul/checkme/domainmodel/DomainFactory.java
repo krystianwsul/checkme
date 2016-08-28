@@ -428,7 +428,6 @@ public class DomainFactory {
         List<Instance> currentInstances = Stream.of(rootInstances)
                 .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 .collect(Collectors.toList());
-        Assert.assertTrue(!currentInstances.isEmpty());
 
         Date date = timeStamp.getDate();
         DayOfWeek dayOfWeek = date.getDayOfWeek();
@@ -463,7 +462,6 @@ public class DomainFactory {
         List<Instance> currentInstances = Stream.of(rootInstances)
                 .filter((Instance instance) -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 .collect(Collectors.toList());
-        Assert.assertTrue(!currentInstances.isEmpty());
 
         List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))

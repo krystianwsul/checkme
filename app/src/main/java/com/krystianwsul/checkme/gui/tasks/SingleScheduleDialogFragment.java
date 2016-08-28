@@ -1,30 +1,31 @@
 package com.krystianwsul.checkme.gui.tasks;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
-import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -32,9 +33,9 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.List;
+import java.util.ArrayList;
 
-public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
+public class SingleScheduleDialogFragment extends DialogFragment implements LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
     private static final String INITIAL_HOUR_MINUTE_KEY = "initialHourMinute";
@@ -42,17 +43,19 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     private static final String PARCEL_DATE_KEY = "date";
     private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
 
-    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
+    private static final String DATE_FRAGMENT_TAG = "dateFragment";
+    private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
+    private static final String TIME_PICKER_TAG = "timePicker";
 
-    private static final String SINGLE_SCHEDULE_DIALOG_TAG = "singleScheduleDialog";
+    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
     private Integer mRootTaskId;
     private SingleScheduleLoader.Data mData;
 
-    private TextInputLayout mSingleScheduleDateLayout;
-    private TextView mSingleScheduleDate;
-    private TextInputLayout mSingleScheduleTimeLayout;
-    private TextView mSingleScheduleTime;
+    private TextInputLayout mSingleScheduleDialogDateLayout;
+    private TextView mSingleScheduleDialogDate;
+    private TextInputLayout mSingleScheduleDialogTimeLayout;
+    private TextView mSingleScheduleDialogTime;
 
     private Date mDate;
     private TimePairPersist mTimePairPersist;
@@ -80,6 +83,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
             radialTimePickerDialogFragment.setStartTime(mTimePairPersist.getHourMinute().getHour(), mTimePairPersist.getHourMinute().getMinute());
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
+            radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
         }
 
         @Override
@@ -98,14 +102,14 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private HourMinute mInitialHourMinute;
 
-    public static SingleScheduleFragment newInstance() {
-        return new SingleScheduleFragment();
+    public static SingleScheduleDialogFragment newInstance() {
+        return new SingleScheduleDialogFragment();
     }
 
-    public static SingleScheduleFragment newInstance(CreateTaskActivity.ScheduleHint scheduleHint) {
+    public static SingleScheduleDialogFragment newInstance(CreateTaskActivity.ScheduleHint scheduleHint) {
         Assert.assertTrue(scheduleHint != null);
 
-        SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
+        SingleScheduleDialogFragment singleScheduleFragment = new SingleScheduleDialogFragment();
 
         Bundle args = new Bundle();
         args.putParcelable(SCHEDULE_HINT_KEY, scheduleHint);
@@ -114,8 +118,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         return singleScheduleFragment;
     }
 
-    public static SingleScheduleFragment newInstance(int rootTaskId) {
-        SingleScheduleFragment singleScheduleFragment = new SingleScheduleFragment();
+    public static SingleScheduleDialogFragment newInstance(int rootTaskId) {
+        SingleScheduleDialogFragment singleScheduleFragment = new SingleScheduleDialogFragment();
 
         Bundle args = new Bundle();
         args.putInt(ROOT_TASK_ID_KEY, rootTaskId);
@@ -124,58 +128,73 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         return singleScheduleFragment;
     }
 
+    @NonNull
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_single_schedule, container, false);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        mSavedInstanceState = savedInstanceState;
+
+        MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
+                .customView(R.layout.fragment_single_schedule_dialog, false)
+                .build();
+
+        View view = materialDialog.getCustomView();
+        Assert.assertTrue(view != null);
+
+        mSingleScheduleDialogDateLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_dialog_date_layout);
+        Assert.assertTrue(mSingleScheduleDialogDateLayout != null);
+
+        mSingleScheduleDialogDate = (TextView) view.findViewById(R.id.single_schedule_dialog_date);
+        Assert.assertTrue(mSingleScheduleDialogDate != null);
+
+        mSingleScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_dialog_time_layout);
+        Assert.assertTrue(mSingleScheduleDialogTimeLayout != null);
+
+        mSingleScheduleDialogTime = (TextView) view.findViewById(R.id.single_schedule_dialog_time);
+        Assert.assertTrue(mSingleScheduleDialogTime != null);
+
+        return materialDialog;
     }
 
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mSavedInstanceState = savedInstanceState;
-
-        View view = getView();
-        Assert.assertTrue(view != null);
-
-        mSingleScheduleDateLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_date_layout);
-        Assert.assertTrue(mSingleScheduleDateLayout != null);
-
-        mSingleScheduleDate = (TextView) view.findViewById(R.id.single_schedule_date);
-        Assert.assertTrue(mSingleScheduleDate != null);
-
-        mSingleScheduleTimeLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_time_layout);
-        Assert.assertTrue(mSingleScheduleTimeLayout != null);
-
-        mSingleScheduleTime = (TextView) view.findViewById(R.id.single_schedule_time);
-        Assert.assertTrue(mSingleScheduleTime != null);
-
-        mSingleScheduleTime.setOnClickListener(v -> {
+        mSingleScheduleDialogTime.setOnClickListener(v -> {
             Assert.assertTrue(mData != null);
+            ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
+                    .sortBy(customTimeData -> customTimeData.HourMinutes.get(mDate.getDayOfWeek()))
+                    .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
+                    .collect(Collectors.toList()));
 
-            SingleScheduleDialogFragment singleScheduleDialogFragment = SingleScheduleDialogFragment.newInstance();
+            TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas);
+            Assert.assertTrue(timeDialogFragment != null);
 
-            singleScheduleDialogFragment.show(getChildFragmentManager(), SINGLE_SCHEDULE_DIALOG_TAG);
+            timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
+
+            timeDialogFragment.show(getChildFragmentManager(), TIME_LIST_FRAGMENT_TAG);
         });
 
-        //TimeDialogFragment timeDialogFragment = (TimeDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_LIST_FRAGMENT_TAG);
-        //if (timeDialogFragment != null)
-        //    timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
+        TimeDialogFragment timeDialogFragment = (TimeDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_LIST_FRAGMENT_TAG);
+        if (timeDialogFragment != null)
+            timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
+
+        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
+        if (radialTimePickerDialogFragment != null)
+            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
 
         final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = (dialog, year, monthOfYear, dayOfMonth) -> {
             mDate = new Date(year, monthOfYear + 1, dayOfMonth);
             updateDateText();
         };
-        mSingleScheduleDate.setOnClickListener(v -> {
-            Assert.assertTrue(mData != null);
-
-            SingleScheduleDialogFragment singleScheduleDialogFragment = SingleScheduleDialogFragment.newInstance();
-
-            singleScheduleDialogFragment.show(getChildFragmentManager(), SINGLE_SCHEDULE_DIALOG_TAG);
+        mSingleScheduleDialogDate.setOnClickListener(v -> {
+            MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
+            calendarDatePickerDialogFragment.setDate(mDate);
+            calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+            calendarDatePickerDialogFragment.show(getChildFragmentManager(), DATE_FRAGMENT_TAG);
         });
-        //CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = (CalendarDatePickerDialogFragment) getChildFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
-        //if (calendarDatePickerDialogFragment != null)
-        //    calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+        CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = (CalendarDatePickerDialogFragment) getChildFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
+        if (calendarDatePickerDialogFragment != null)
+            calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
 
         Bundle args = getArguments();
         if (args != null) {
@@ -268,9 +287,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private void updateDateText() {
         Assert.assertTrue(mDate != null);
-        Assert.assertTrue(mSingleScheduleDate != null);
+        Assert.assertTrue(mSingleScheduleDialogDate != null);
 
-        mSingleScheduleDate.setText(mDate.getDisplayText(getContext()));
+        mSingleScheduleDialogDate.setText(mDate.getDisplayText(getContext()));
 
         updateTimeText();
 
@@ -280,7 +299,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     @SuppressLint("SetTextI18n")
     private void updateTimeText() {
         Assert.assertTrue(mTimePairPersist != null);
-        Assert.assertTrue(mSingleScheduleTime != null);
+        Assert.assertTrue(mSingleScheduleDialogTime != null);
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mDate != null);
 
@@ -288,9 +307,9 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             SingleScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
-            mSingleScheduleTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
+            mSingleScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
         } else {
-            mSingleScheduleTime.setText(mTimePairPersist.getHourMinute().toString());
+            mSingleScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
         }
     }
 
@@ -327,65 +346,17 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private void setValidTime() {
         if (isValidDateTime()) {
-            mSingleScheduleDateLayout.setError(null);
-            mSingleScheduleTimeLayout.setError(null);
+            mSingleScheduleDialogDateLayout.setError(null);
+            mSingleScheduleDialogTimeLayout.setError(null);
         } else {
             if (isValidDate()) {
-                mSingleScheduleDateLayout.setError(null);
-                mSingleScheduleTimeLayout.setError(getString(R.string.error_time));
+                mSingleScheduleDialogDateLayout.setError(null);
+                mSingleScheduleDialogTimeLayout.setError(getString(R.string.error_time));
             } else {
-                mSingleScheduleDateLayout.setError(getString(R.string.error_date));
-                mSingleScheduleTimeLayout.setError(null);
+                mSingleScheduleDialogDateLayout.setError(getString(R.string.error_date));
+                mSingleScheduleDialogTimeLayout.setError(null);
             }
         }
-    }
-
-    @Override
-    public boolean createRootTask(String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        Assert.assertTrue(mRootTaskId == null);
-
-        if (!isValidDateTime())
-            return false;
-
-        DomainFactory.getDomainFactory(getActivity()).createSingleScheduleRootTask(mData.DataId, name, mDate, mTimePairPersist.getTimePair());
-
-        TickService.startService(getActivity());
-
-        return true;
-    }
-
-    @Override
-    public boolean updateRootTask(int rootTaskId, String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        if (!isValidDateTime())
-            return false;
-
-        DomainFactory.getDomainFactory(getActivity()).updateSingleScheduleTask(mData.DataId, rootTaskId, name, mDate, mTimePairPersist.getTimePair());
-
-        TickService.startService(getActivity());
-
-        return true;
-    }
-
-    @Override
-    public boolean createRootJoinTask(String name, List<Integer> joinTaskIds) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        Assert.assertTrue(mRootTaskId == null);
-
-        if (!isValidDateTime())
-            return false;
-
-        DomainFactory.getDomainFactory(getActivity()).createSingleScheduleJoinRootTask(mData.DataId, name, mDate, mTimePairPersist.getTimePair(), joinTaskIds);
-
-        TickService.startService(getActivity());
-
-        return true;
     }
 
     @Override
@@ -407,62 +378,14 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             mTimePairPersist = new TimePairPersist(mData.ScheduleData.TimePair);
         }
 
-        mSingleScheduleDateLayout.setVisibility(View.VISIBLE);
-        mSingleScheduleTimeLayout.setVisibility(View.VISIBLE);
+        mSingleScheduleDialogDateLayout.setVisibility(View.VISIBLE);
+        mSingleScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
 
         updateDateText();
     }
 
     @Override
-    public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {}
-
-    @SuppressWarnings("RedundantIfStatement")
-    @Override
-    public boolean dataChanged() {
-        if (mRootTaskId == null) {
-            if (mData == null)
-                return false;
-
-            Assert.assertTrue(mData.ScheduleData == null);
-
-            Bundle args = getArguments();
-
-            Date initialDate;
-            if (args != null && args.containsKey(SCHEDULE_HINT_KEY)) {
-                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
-                Assert.assertTrue(scheduleHint != null);
-
-                initialDate = scheduleHint.mDate;
-            } else {
-                initialDate = Date.today();
-            }
-
-            if (!mDate.equals(initialDate))
-                return true;
-
-            if (mTimePairPersist.getCustomTimeId() != null)
-                return true;
-
-            Assert.assertTrue(mInitialHourMinute != null);
-
-            if (!mInitialHourMinute.equals(mTimePairPersist.getHourMinute()))
-                return true;
-
-            return false;
-        } else {
-            if (mData == null)
-                return false;
-
-            Assert.assertTrue(mData.ScheduleData != null);
-
-            if (!mData.ScheduleData.Date.equals(mDate))
-                return true;
-
-            if (!mData.ScheduleData.TimePair.equals(mTimePairPersist.getTimePair()))
-                return true;
-
-            return false;
-        }
+    public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {
     }
 
     @Override

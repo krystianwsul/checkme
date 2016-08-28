@@ -31,6 +31,13 @@ public class TimePairPersist implements Parcelable {
         mHourMinute = hourMinute;
     }
 
+    public TimePairPersist(TimePairPersist timePairPersist) {
+        Assert.assertTrue(timePairPersist != null);
+
+        mCustomTimeId = timePairPersist.mCustomTimeId;
+        mHourMinute = timePairPersist.mHourMinute;
+    }
+
     public void setCustomTimeId(int customTimeId) {
         mCustomTimeId = customTimeId;
     }
@@ -56,6 +63,10 @@ public class TimePairPersist implements Parcelable {
             return new TimePair(mCustomTimeId);
         else
             return new TimePair(mHourMinute);
+    }
+
+    public TimePairPersist copy() {
+        return new TimePairPersist(this);
     }
 
     @Override

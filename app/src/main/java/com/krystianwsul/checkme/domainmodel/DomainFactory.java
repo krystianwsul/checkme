@@ -163,7 +163,7 @@ public class DomainFactory {
         return (sRead.getLong() - sStart.getLong());
     }
 
-    public long getInstantiateMilis() {
+    public long getInstantiateMillis() {
         return (sStop.getLong() - sRead.getLong());
     }
 
@@ -1094,7 +1094,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createWeeklyScheduleRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
+    public synchronized void createWeeklyScheduleRootTask(int dataId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1197,7 +1197,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateWeeklyScheduleTask(int dataId, int taskId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
+    public synchronized void updateWeeklyScheduleTask(int dataId, int taskId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1282,7 +1282,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createWeeklyScheduleJoinRootTask(int dataId, String name, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, List<Integer> joinTaskIds) {
+    public synchronized void createWeeklyScheduleJoinRootTask(int dataId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, List<Integer> joinTaskIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1935,7 +1935,7 @@ public class DomainFactory {
         return schedules;
     }
 
-    private List<Schedule> createWeeklySchedules(Task rootTask, ArrayList<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ExactTimeStamp startExactTimeStamp) {
+    private List<Schedule> createWeeklySchedules(Task rootTask, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());

@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -61,12 +60,12 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private final SingleScheduleDialogFragment.SingleScheduleDialogListener mSingleScheduleDialogListener = new SingleScheduleDialogFragment.SingleScheduleDialogListener() {
         @Override
-        public void onSingleScheduleDialogResult(Date date, TimePair timePair) {
+        public void onSingleScheduleDialogResult(Date date, TimePairPersist timePairPersist) {
             Assert.assertTrue(date != null);
-            Assert.assertTrue(timePair != null);
+            Assert.assertTrue(timePairPersist != null);
 
             mDate = date;
-            mTimePairPersist = new TimePairPersist(timePair);
+            mTimePairPersist = timePairPersist;
 
             updateText();
         }
@@ -350,7 +349,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         mSingleScheduleText.setOnClickListener(v -> {
             Assert.assertTrue(mData != null);
 
-            SingleScheduleDialogFragment singleScheduleDialogFragment = SingleScheduleDialogFragment.newInstance(mDate, mTimePairPersist.getTimePair());
+            SingleScheduleDialogFragment singleScheduleDialogFragment = SingleScheduleDialogFragment.newInstance(mDate, mTimePairPersist);
             singleScheduleDialogFragment.initialize(mData.CustomTimeDatas, mSingleScheduleDialogListener);
 
             singleScheduleDialogFragment.show(getChildFragmentManager(), SINGLE_SCHEDULE_DIALOG_TAG);

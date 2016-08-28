@@ -78,11 +78,11 @@ public class DebugFragment extends Fragment {
             DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
 
             stringBuilder.append("\ndata load time: ");
-            stringBuilder.append((domainFactory.getReadMillis() + domainFactory.getInstantiateMilis()));
+            stringBuilder.append((domainFactory.getReadMillis() + domainFactory.getInstantiateMillis()));
             stringBuilder.append("ms (");
             stringBuilder.append(domainFactory.getReadMillis());
             stringBuilder.append(" + ");
-            stringBuilder.append(domainFactory.getInstantiateMilis());
+            stringBuilder.append(domainFactory.getInstantiateMillis());
             stringBuilder.append(")");
 
             stringBuilder.append("\ntasks: ");

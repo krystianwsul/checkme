@@ -28,7 +28,6 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -38,17 +37,15 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class SingleScheduleDialogFragment extends DialogFragment {
-    private static final String INITIAL_HOUR_MINUTE_KEY = "initialHourMinute";
-
-    private static final String PARCEL_DATE_KEY = "date";
-    private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
+    private static final String DATE_STATE_KEY = "date";
+    private static final String TIME_PAIR_PERSIST_STATE_KEY = "timePairPersist";
 
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
     private static final String TIME_PICKER_TAG = "timePicker";
 
     private static final String DATE_KEY = "date";
-    private static final String TIME_PAIR_KEY = "timePair";
+    private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
 
     private Map<Integer, SingleScheduleLoader.CustomTimeData> mCustomTimeDatas;
     private SingleScheduleDialogListener mSingleScheduleDialogListener;
@@ -97,16 +94,14 @@ public class SingleScheduleDialogFragment extends DialogFragment {
         setValidTime();
     };
 
-    private HourMinute mInitialHourMinute;
-
     private MDButton mButton;
 
-    public static SingleScheduleDialogFragment newInstance(Date date, TimePair timePair) {
+    public static SingleScheduleDialogFragment newInstance(Date date, TimePairPersist timePairPersist) {
         SingleScheduleDialogFragment singleScheduleFragment = new SingleScheduleDialogFragment();
 
         Bundle args = new Bundle();
         args.putParcelable(DATE_KEY, date);
-        args.putParcelable(TIME_PAIR_KEY, timePair);
+        args.putParcelable(TIME_PAIR_PERSIST_KEY, timePairPersist.copy());
 
         singleScheduleFragment.setArguments(args);
         return singleScheduleFragment;
@@ -124,7 +119,7 @@ public class SingleScheduleDialogFragment extends DialogFragment {
                     Assert.assertTrue(mSingleScheduleDialogListener != null);
                     Assert.assertTrue(isValidDateTime());
 
-                    mSingleScheduleDialogListener.onSingleScheduleDialogResult(mDate, mTimePairPersist.getTimePair());
+                    mSingleScheduleDialogListener.onSingleScheduleDialogResult(mDate, mTimePairPersist);
                 })
                 .build();
 
@@ -149,29 +144,23 @@ public class SingleScheduleDialogFragment extends DialogFragment {
         Bundle args = getArguments();
         Assert.assertTrue(args != null);
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(PARCEL_DATE_KEY)) {
-            Assert.assertTrue(savedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY));
-            Assert.assertTrue(savedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
+        if (savedInstanceState != null) {
+            Assert.assertTrue(savedInstanceState.containsKey(DATE_STATE_KEY));
+            Assert.assertTrue(savedInstanceState.containsKey(TIME_PAIR_PERSIST_STATE_KEY));
 
-            mDate = savedInstanceState.getParcelable(PARCEL_DATE_KEY);
+            mDate = savedInstanceState.getParcelable(DATE_STATE_KEY);
             Assert.assertTrue(mDate != null);
 
-            mTimePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY);
+            mTimePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_STATE_KEY);
             Assert.assertTrue(mTimePairPersist != null);
-
-            mInitialHourMinute = savedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
         } else {
             Assert.assertTrue(args.containsKey(DATE_KEY));
             mDate = args.getParcelable(DATE_KEY);
             Assert.assertTrue(mDate != null);
 
-            Assert.assertTrue(args.containsKey(TIME_PAIR_KEY));
-            TimePair timePair = args.getParcelable(TIME_PAIR_KEY);
-            Assert.assertTrue(timePair != null);
-
-            mTimePairPersist = new TimePairPersist(timePair);
-
-            mInitialHourMinute = mTimePairPersist.getHourMinute();
+            Assert.assertTrue(args.containsKey(TIME_PAIR_PERSIST_KEY));
+            mTimePairPersist = args.getParcelable(TIME_PAIR_PERSIST_KEY);
+            Assert.assertTrue(mTimePairPersist != null);
         }
 
         return materialDialog;
@@ -273,9 +262,8 @@ public class SingleScheduleDialogFragment extends DialogFragment {
         Assert.assertTrue(mDate != null);
         Assert.assertTrue(mTimePairPersist != null);
 
-        outState.putParcelable(PARCEL_DATE_KEY, mDate);
-        outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist);
-        outState.putParcelable(INITIAL_HOUR_MINUTE_KEY, mInitialHourMinute);
+        outState.putParcelable(DATE_STATE_KEY, mDate);
+        outState.putParcelable(TIME_PAIR_PERSIST_STATE_KEY, mTimePairPersist);
     }
 
     private void updateDateText() {
@@ -361,6 +349,6 @@ public class SingleScheduleDialogFragment extends DialogFragment {
     }
 
     public interface SingleScheduleDialogListener {
-        void onSingleScheduleDialogResult(Date date, TimePair timePair);
+        void onSingleScheduleDialogResult(Date date, TimePairPersist timePairPersist);
     }
 }

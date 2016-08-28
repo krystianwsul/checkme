@@ -7,20 +7,20 @@
     android:paddingTop="5dp"
     android:paddingBottom="5dp">
 
+    <Spinner
+        android:id="@+id/weekly_schedule_dialog_day"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.Spinner.Underlined"/>
+
     <TextView
-        android:id="@+id/weekly_schedule_text"
+        android:id="@+id/weekly_schedule_dialog_time"
         android:singleLine="true"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
         style="@style/Widget.AppCompat.Spinner.Underlined"
         android:textSize="@dimen/textPrimary"/>
-
-    <ImageView
-        android:id="@+id/weekly_schedule_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_delete_black_24dp"
-        android:contentDescription="@string/delete"/>
 
 </LinearLayout>

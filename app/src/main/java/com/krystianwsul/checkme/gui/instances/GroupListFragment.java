@@ -662,11 +662,12 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
         if (data.InstanceDatas.isEmpty()) {
-            Assert.assertTrue(emptyTextId != null);
-
             mGroupListRecycler.setVisibility(View.GONE);
-            mEmptyText.setVisibility(View.VISIBLE);
-            mEmptyText.setText(emptyTextId);
+
+            if (emptyTextId != null) {
+                mEmptyText.setVisibility(View.VISIBLE);
+                mEmptyText.setText(emptyTextId);
+            }
         } else {
             mGroupListRecycler.setVisibility(View.VISIBLE);
             mEmptyText.setVisibility(View.GONE);

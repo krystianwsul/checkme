@@ -243,7 +243,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private boolean isValidDateTime() {
         if (mData != null) {
-            if (mData.ScheduleData != null && mData.ScheduleData.TimePair.equals(mTimePairPersist.getTimePair())) {
+            if (mData.ScheduleDatas != null && mData.ScheduleDatas.get(0).TimePair.equals(mTimePairPersist.getTimePair())) {
                 return true;
             } else {
                 HourMinute hourMinute;
@@ -332,14 +332,15 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
         mData = data;
 
-        if (mFirst && mData.ScheduleData != null && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(PARCEL_DATE_KEY))) {
+        if (mFirst && mData.ScheduleDatas != null && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(PARCEL_DATE_KEY))) {
             Assert.assertTrue(mDate == null);
             Assert.assertTrue(mTimePairPersist == null);
+            Assert.assertTrue(mData.ScheduleDatas.size() == 1); // todo schedule hack
 
             mFirst = false;
 
-            mDate = mData.ScheduleData.Date;
-            mTimePairPersist = new TimePairPersist(mData.ScheduleData.TimePair);
+            mDate = mData.ScheduleDatas.get(0).Date;
+            mTimePairPersist = new TimePairPersist(mData.ScheduleDatas.get(0).TimePair);
         }
 
         mSingleScheduleLayout.setVisibility(View.VISIBLE);
@@ -370,7 +371,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             if (mData == null)
                 return false;
 
-            Assert.assertTrue(mData.ScheduleData == null);
+            Assert.assertTrue(mData.ScheduleDatas == null);
 
             Bundle args = getArguments();
 
@@ -400,12 +401,13 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             if (mData == null)
                 return false;
 
-            Assert.assertTrue(mData.ScheduleData != null);
+            Assert.assertTrue(mData.ScheduleDatas != null);
+            Assert.assertTrue(mData.ScheduleDatas.size() == 1);
 
-            if (!mData.ScheduleData.Date.equals(mDate))
+            if (!mData.ScheduleDatas.get(0).Date.equals(mDate))
                 return true;
 
-            if (!mData.ScheduleData.TimePair.equals(mTimePairPersist.getTimePair()))
+            if (!mData.ScheduleDatas.get(0).TimePair.equals(mTimePairPersist.getTimePair()))
                 return true;
 
             return false;

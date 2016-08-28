@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
-import com.krystianwsul.checkme.loaders.WeeklyScheduleLoader;
+import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -40,7 +40,7 @@ public class WeeklyScheduleDialogFragment extends DialogFragment {
     private static final String DAY_OF_WEEK_STATE_KEY = "dayOfWeek";
     private static final String TIME_PAIR_PERSIST_STATE_KEY = "timePairPersist";
 
-    private Map<Integer, WeeklyScheduleLoader.CustomTimeData> mCustomTimeDatas;
+    private Map<Integer, SingleScheduleLoader.CustomTimeData> mCustomTimeDatas;
 
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
@@ -209,7 +209,7 @@ public class WeeklyScheduleDialogFragment extends DialogFragment {
     @SuppressLint("SetTextI18n")
     private void updateTime() {
         if (mTimePairPersist.getCustomTimeId() != null) {
-            WeeklyScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
+            SingleScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
             mWeeklyScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")");
@@ -225,7 +225,7 @@ public class WeeklyScheduleDialogFragment extends DialogFragment {
         super.onResume();
     }
 
-    public void initialize(Map<Integer, WeeklyScheduleLoader.CustomTimeData> customTimeDatas, WeeklyScheduleDialogListener weeklyScheduleDialogListener) {
+    public void initialize(Map<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas, WeeklyScheduleDialogListener weeklyScheduleDialogListener) {
         Assert.assertTrue(customTimeDatas != null);
         Assert.assertTrue(weeklyScheduleDialogListener != null);
 

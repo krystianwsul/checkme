@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
+import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.loaders.WeeklyScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -324,7 +325,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             dayOfWeekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             if (dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId() != null) {
-                WeeklyScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId());
+                SingleScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId());
                 Assert.assertTrue(customTimeData != null);
 
                 dayOfWeekTimeHolder.mWeeklyScheduleText.setText(dayOfWeekTimeEntry.mDayOfWeek + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(dayOfWeekTimeEntry.mDayOfWeek) + ")");

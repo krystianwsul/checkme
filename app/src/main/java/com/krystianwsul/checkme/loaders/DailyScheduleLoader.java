@@ -1,15 +1,14 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DailyScheduleLoader extends DomainLoader<DailyScheduleLoader.Data> {
     private final Integer mRootTaskId; // possibly null
@@ -26,10 +25,10 @@ public class DailyScheduleLoader extends DomainLoader<DailyScheduleLoader.Data> 
     }
 
     public static class Data extends DomainLoader.Data {
-        public final List<ScheduleData> ScheduleDatas;
-        public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
+        public final List<DailyScheduleData> ScheduleDatas;
+        public final Map<Integer, SingleScheduleLoader.CustomTimeData> CustomTimeDatas;
 
-        public Data(List<ScheduleData> scheduleDatas, HashMap<Integer, CustomTimeData> customTimeDatas) {
+        public Data(List<DailyScheduleData> scheduleDatas, Map<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas) {
             Assert.assertTrue(customTimeDatas != null);
 
             ScheduleDatas = scheduleDatas;
@@ -62,10 +61,10 @@ public class DailyScheduleLoader extends DomainLoader<DailyScheduleLoader.Data> 
         }
     }
 
-    public static class ScheduleData {
+    public static class DailyScheduleData implements SingleScheduleLoader.ScheduleData {
         public final TimePair TimePair;
 
-        public ScheduleData(TimePair timePair) {
+        public DailyScheduleData(TimePair timePair) {
             Assert.assertTrue(timePair != null);
             TimePair = timePair;
         }
@@ -83,45 +82,12 @@ public class DailyScheduleLoader extends DomainLoader<DailyScheduleLoader.Data> 
             if (object == this)
                 return true;
 
-            if (!(object instanceof ScheduleData))
+            if (!(object instanceof DailyScheduleData))
                 return false;
 
-            ScheduleData scheduleData = (ScheduleData) object;
+            DailyScheduleData dailyScheduleData = (DailyScheduleData) object;
 
-            return TimePair.equals(scheduleData.TimePair);
-        }
-    }
-
-    public static class CustomTimeData {
-        public final int Id;
-        public final String Name;
-
-        public CustomTimeData(int id, String name) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-
-            Id = id;
-            Name = name;
-        }
-
-        @Override
-        public int hashCode() {
-            return (Id + Name.hashCode());
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (object == null)
-                return false;
-
-            if (object == this)
-                return true;
-
-            if (!(object instanceof CustomTimeData))
-                return false;
-
-            CustomTimeData customTimeData = (CustomTimeData) object;
-
-            return (Id == customTimeData.Id && Name.equals(customTimeData.Name));
+            return TimePair.equals(dailyScheduleData.TimePair);
         }
     }
 }

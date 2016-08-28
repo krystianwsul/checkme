@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
+import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
@@ -357,7 +358,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             Assert.assertTrue(timeEntry != null);
 
             if (timeEntry.mTimePairPersist.getCustomTimeId() != null) {
-                DailyScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(timeEntry.mTimePairPersist.getCustomTimeId());
+                SingleScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(timeEntry.mTimePairPersist.getCustomTimeId());
                 Assert.assertTrue(customTimeData != null);
 
                 timeHolder.mDailyScheduleTime.setText(customTimeData.Name);

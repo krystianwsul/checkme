@@ -1,18 +1,15 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
-import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 
 public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data> {
     private final Integer mRootTaskId; // possibly null
@@ -29,10 +26,10 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
     }
 
     public static class Data extends DomainLoader.Data {
-        public final List<ScheduleData> ScheduleDatas;
-        public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
+        public final List<WeeklyScheduleData> ScheduleDatas;
+        public final Map<Integer, SingleScheduleLoader.CustomTimeData> CustomTimeDatas;
 
-        public Data(List<ScheduleData> scheduleDatas, HashMap<Integer, CustomTimeData> customTimeDatas) {
+        public Data(List<WeeklyScheduleData> scheduleDatas, Map<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas) {
             Assert.assertTrue(customTimeDatas != null);
 
             ScheduleDatas = scheduleDatas;
@@ -65,11 +62,11 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
         }
     }
 
-    public static class ScheduleData {
+    public static class WeeklyScheduleData implements SingleScheduleLoader.ScheduleData {
         public final DayOfWeek DayOfWeek;
         public final TimePair TimePair;
 
-        public ScheduleData(DayOfWeek dayOfWeek, TimePair timePair) {
+        public WeeklyScheduleData(DayOfWeek dayOfWeek, TimePair timePair) {
             Assert.assertTrue(dayOfWeek != null);
             Assert.assertTrue(timePair != null);
 
@@ -90,56 +87,12 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
             if (object == this)
                 return true;
 
-            if (!(object instanceof ScheduleData))
+            if (!(object instanceof WeeklyScheduleData))
                 return false;
 
-            ScheduleData scheduleData = (ScheduleData) object;
+            WeeklyScheduleData weeklyScheduleData = (WeeklyScheduleData) object;
 
-            return (DayOfWeek.equals(scheduleData.DayOfWeek) && TimePair.equals(scheduleData.TimePair));
-        }
-    }
-
-    public static class CustomTimeData {
-        public final int Id;
-        public final String Name;
-        public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
-
-        public CustomTimeData(int id, String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
-            Assert.assertTrue(hourMinutes.size() == 7);
-
-            Id = id;
-            Name = name;
-            HourMinutes = hourMinutes;
-        }
-
-        @Override
-        public int hashCode() {
-            return (Id + Name.hashCode() + HourMinutes.hashCode());
-        }
-
-        @SuppressWarnings("SimplifiableIfStatement")
-        @Override
-        public boolean equals(Object object) {
-            if (object == null)
-                return false;
-
-            if (object == this)
-                return true;
-
-            if (!(object instanceof CustomTimeData))
-                return false;
-
-            CustomTimeData customTimeData = (CustomTimeData) object;
-
-            if (Id != customTimeData.Id)
-                return false;
-
-            if (!Name.equals(customTimeData.Name))
-                return false;
-
-            return (HourMinutes.equals(customTimeData.HourMinutes));
+            return (DayOfWeek.equals(weeklyScheduleData.DayOfWeek) && TimePair.equals(weeklyScheduleData.TimePair));
         }
     }
 }

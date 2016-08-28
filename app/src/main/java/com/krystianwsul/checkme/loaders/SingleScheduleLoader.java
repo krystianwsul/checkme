@@ -11,7 +11,8 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data> {
@@ -29,21 +30,21 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ScheduleData ScheduleData;
-        public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
+        public final List<SingleScheduleData> ScheduleDatas;
+        public final Map<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(ScheduleData scheduleData, HashMap<Integer, CustomTimeData> customTimeDatas) {
+        public Data(List<SingleScheduleData> scheduleDatas, Map<Integer, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(customTimeDatas != null);
 
-            ScheduleData = scheduleData;
+            ScheduleDatas = scheduleDatas;
             CustomTimeDatas = customTimeDatas;
         }
 
         @Override
         public int hashCode() {
             int hashCode = 0;
-            if (ScheduleData != null)
-                hashCode += ScheduleData.hashCode();
+            if (ScheduleDatas != null)
+                hashCode += ScheduleDatas.hashCode();
             hashCode += CustomTimeDatas.hashCode();
             return hashCode;
         }
@@ -61,15 +62,19 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
 
             Data data = (Data) object;
 
-            return (((ScheduleData == null) == (data.ScheduleData == null)) && ((ScheduleData == null) || ScheduleData.equals(data.ScheduleData)) && CustomTimeDatas.equals(data.CustomTimeDatas));
+            return (((ScheduleDatas == null) == (data.ScheduleDatas == null)) && ((ScheduleDatas == null) || ScheduleDatas.equals(data.ScheduleDatas)) && CustomTimeDatas.equals(data.CustomTimeDatas));
         }
     }
 
-    public static class ScheduleData {
+    public interface ScheduleData {
+
+    }
+
+    public static class SingleScheduleData implements ScheduleData {
         public final Date Date;
         public final TimePair TimePair;
 
-        public ScheduleData(Date date, TimePair timePair) {
+        public SingleScheduleData(Date date, TimePair timePair) {
             Assert.assertTrue(date != null);
             Assert.assertTrue(timePair != null);
 
@@ -90,12 +95,12 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
             if (object == this)
                 return true;
 
-            if (!(object instanceof ScheduleData))
+            if (!(object instanceof SingleScheduleData))
                 return false;
 
-            ScheduleData scheduleData = (ScheduleData) object;
+            SingleScheduleData singleScheduleData = (SingleScheduleData) object;
 
-            return (Date.equals(scheduleData.Date) && TimePair.equals(scheduleData.TimePair));
+            return (Date.equals(singleScheduleData.Date) && TimePair.equals(singleScheduleData.TimePair));
         }
     }
 

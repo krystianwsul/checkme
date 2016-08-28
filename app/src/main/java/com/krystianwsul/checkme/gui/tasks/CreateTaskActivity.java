@@ -484,6 +484,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 Fragment fragment;
                 if (scheduleType == ScheduleType.SINGLE) {
+                    count++;
+
                     fragment = SingleScheduleFragment.newInstance(mTaskId);
                     spinnerPosition = 0;
                 } else if (scheduleType == ScheduleType.DAILY) {

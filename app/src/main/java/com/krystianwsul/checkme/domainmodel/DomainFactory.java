@@ -638,7 +638,7 @@ public class DomainFactory {
     public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        SingleScheduleLoader.ScheduleData scheduleData = null;
+        SingleScheduleLoader.ScheduleData scheduleData;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
@@ -664,6 +664,8 @@ public class DomainFactory {
             CustomTime customTime = singleSchedule.getTime().getPair().first;
             if (customTime != null)
                 customTimes.put(customTime.getId(), customTime);
+        } else {
+            scheduleData = null;
         }
 
         HashMap<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
@@ -676,7 +678,7 @@ public class DomainFactory {
     public synchronized DailyScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        ArrayList<DailyScheduleLoader.ScheduleData> scheduleDatas = null;
+        List<DailyScheduleLoader.ScheduleData> scheduleDatas;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
@@ -705,6 +707,8 @@ public class DomainFactory {
                 if (customTime != null)
                     customTimes.put(customTime.getId(), customTime);
             }
+        } else {
+            scheduleDatas = null;
         }
 
         HashMap<Integer, DailyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
@@ -717,12 +721,14 @@ public class DomainFactory {
     public synchronized WeeklyScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        ArrayList<WeeklyScheduleLoader.ScheduleData> scheduleDatas = new ArrayList<>();
+        List<WeeklyScheduleLoader.ScheduleData> scheduleDatas;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
 
         if (rootTaskId != null) {
+            scheduleDatas = new ArrayList<>();
+
             Task rootTask = mTasks.get(rootTaskId);
             Assert.assertTrue(rootTask != null);
 
@@ -730,6 +736,7 @@ public class DomainFactory {
 
             List<Schedule> schedules = rootTask.getCurrentSchedules(now);
             Assert.assertTrue(schedules != null);
+            Assert.assertTrue(!schedules.isEmpty());
             Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.WEEKLY)); // todo schedule hack;
 
             for (Schedule schedule : schedules) {
@@ -746,6 +753,8 @@ public class DomainFactory {
                 if (customTime != null)
                     customTimes.put(customTime.getId(), customTime);
             }
+        } else {
+            scheduleDatas = null;
         }
 
         HashMap<Integer, WeeklyScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();

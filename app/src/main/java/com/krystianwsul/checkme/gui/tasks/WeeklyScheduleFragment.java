@@ -226,6 +226,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         mData = data;
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(DATE_TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
+            Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
             Assert.assertTrue(mDayOfWeekTimeEntries == null);
 
             mFirst = false;

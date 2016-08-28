@@ -10,8 +10,8 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data> {
@@ -29,10 +29,10 @@ public class WeeklyScheduleLoader extends DomainLoader<WeeklyScheduleLoader.Data
     }
 
     public static class Data extends DomainLoader.Data {
-        public final ArrayList<ScheduleData> ScheduleDatas;
+        public final List<ScheduleData> ScheduleDatas;
         public final HashMap<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(ArrayList<ScheduleData> scheduleDatas, HashMap<Integer, CustomTimeData> customTimeDatas) {
+        public Data(List<ScheduleData> scheduleDatas, HashMap<Integer, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(customTimeDatas != null);
 
             ScheduleDatas = scheduleDatas;

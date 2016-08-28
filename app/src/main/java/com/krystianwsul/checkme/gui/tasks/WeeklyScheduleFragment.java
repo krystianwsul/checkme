@@ -30,6 +30,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.loaders.WeeklyScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -39,7 +40,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<WeeklyScheduleLoader.Data> {
+public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
@@ -59,7 +60,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private TimePair mTimePair = null;
 
     private Integer mRootTaskId;
-    private WeeklyScheduleLoader.Data mData;
+    private SingleScheduleLoader.Data mData;
 
     private FloatingActionButton mWeeklyScheduleFab;
 
@@ -182,23 +183,24 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public Loader<WeeklyScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
+    public Loader<SingleScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
         return new WeeklyScheduleLoader(getActivity(), mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<WeeklyScheduleLoader.Data> loader, WeeklyScheduleLoader.Data data) {
+    public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
         mData = data;
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(DATE_TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
             Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
             Assert.assertTrue(mDayOfWeekTimeEntries == null);
+            Assert.assertTrue(Stream.of(mData.ScheduleDatas).allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.WEEKLY)); // todo schedule hack
 
             mFirst = false;
 
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
             mDayOfWeekTimeEntries = Stream.of(mData.ScheduleDatas)
-                    .map(scheduleData -> new DayOfWeekTimeEntry(scheduleData.DayOfWeek, scheduleData.TimePair, showDelete))
+                    .map(scheduleData -> new DayOfWeekTimeEntry(((SingleScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((SingleScheduleLoader.WeeklyScheduleData) scheduleData).TimePair, showDelete))
                     .collect(Collectors.toList());
         }
 
@@ -217,7 +219,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public void onLoaderReset(Loader<WeeklyScheduleLoader.Data> loader) {
+    public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {
     }
 
     @Override
@@ -488,9 +490,11 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
         Assert.assertTrue(mDayOfWeekTimeEntryAdapter != null);
 
         Assert.assertTrue(mData.ScheduleDatas != null);
+        Assert.assertTrue(Stream.of(mData.ScheduleDatas)
+                .allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.WEEKLY)); // todo schedule hack
 
         List<Pair<DayOfWeek, TimePair>> oldDayOfWeekTimePairs = Stream.of(mData.ScheduleDatas)
-                .map(scheduleData -> new Pair<>(scheduleData.DayOfWeek, scheduleData.TimePair))
+                .map(scheduleData -> new Pair<>(((SingleScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((SingleScheduleLoader.WeeklyScheduleData) scheduleData).TimePair))
                 .sortBy(Pair::hashCode)
                 .collect(Collectors.toList());
 

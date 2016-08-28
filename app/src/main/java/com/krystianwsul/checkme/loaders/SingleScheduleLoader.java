@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -30,10 +31,10 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
     }
 
     public static class Data extends DomainLoader.Data {
-        public final List<SingleScheduleData> ScheduleDatas;
+        public final List<ScheduleData> ScheduleDatas;
         public final Map<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(List<SingleScheduleData> scheduleDatas, Map<Integer, CustomTimeData> customTimeDatas) {
+        public Data(List<ScheduleData> scheduleDatas, Map<Integer, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(customTimeDatas != null);
 
             ScheduleDatas = scheduleDatas;
@@ -67,7 +68,7 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
     }
 
     public interface ScheduleData {
-
+        ScheduleType getScheduleType();
     }
 
     public static class SingleScheduleData implements ScheduleData {
@@ -101,6 +102,11 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
             SingleScheduleData singleScheduleData = (SingleScheduleData) object;
 
             return (Date.equals(singleScheduleData.Date) && TimePair.equals(singleScheduleData.TimePair));
+        }
+
+        @Override
+        public ScheduleType getScheduleType() {
+            return ScheduleType.SINGLE;
         }
     }
 
@@ -145,6 +151,80 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
                 return false;
 
             return (HourMinutes.equals(customTimeData.HourMinutes));
+        }
+    }
+
+    public static class DailyScheduleData implements ScheduleData {
+        public final TimePair TimePair;
+
+        public DailyScheduleData(TimePair timePair) {
+            Assert.assertTrue(timePair != null);
+            TimePair = timePair;
+        }
+
+        @Override
+        public int hashCode() {
+            return TimePair.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof DailyScheduleData))
+                return false;
+
+            DailyScheduleData dailyScheduleData = (DailyScheduleData) object;
+
+            return TimePair.equals(dailyScheduleData.TimePair);
+        }
+
+        @Override
+        public ScheduleType getScheduleType() {
+            return ScheduleType.DAILY;
+        }
+    }
+
+    public static class WeeklyScheduleData implements ScheduleData {
+        public final DayOfWeek DayOfWeek;
+        public final TimePair TimePair;
+
+        public WeeklyScheduleData(DayOfWeek dayOfWeek, TimePair timePair) {
+            Assert.assertTrue(dayOfWeek != null);
+            Assert.assertTrue(timePair != null);
+
+            DayOfWeek = dayOfWeek;
+            TimePair = timePair;
+        }
+
+        @Override
+        public int hashCode() {
+            return TimePair.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof WeeklyScheduleData))
+                return false;
+
+            WeeklyScheduleData weeklyScheduleData = (WeeklyScheduleData) object;
+
+            return (DayOfWeek.equals(weeklyScheduleData.DayOfWeek) && TimePair.equals(weeklyScheduleData.TimePair));
+        }
+
+        @Override
+        public ScheduleType getScheduleType() {
+            return ScheduleType.WEEKLY;
         }
     }
 }

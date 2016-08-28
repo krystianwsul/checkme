@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -243,7 +244,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private boolean isValidDateTime() {
         if (mData != null) {
-            if (mData.ScheduleDatas != null && mData.ScheduleDatas.get(0).TimePair.equals(mTimePairPersist.getTimePair())) {
+            if (mData.ScheduleDatas != null && ((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair.equals(mTimePairPersist.getTimePair())) { // todo schedule hack
                 return true;
             } else {
                 HourMinute hourMinute;
@@ -336,11 +337,12 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             Assert.assertTrue(mDate == null);
             Assert.assertTrue(mTimePairPersist == null);
             Assert.assertTrue(mData.ScheduleDatas.size() == 1); // todo schedule hack
+            Assert.assertTrue(mData.ScheduleDatas.get(0).getScheduleType() == ScheduleType.SINGLE);
 
             mFirst = false;
 
-            mDate = mData.ScheduleDatas.get(0).Date;
-            mTimePairPersist = new TimePairPersist(mData.ScheduleDatas.get(0).TimePair);
+            mDate = ((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).Date;
+            mTimePairPersist = new TimePairPersist(((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair);
         }
 
         mSingleScheduleLayout.setVisibility(View.VISIBLE);
@@ -403,11 +405,12 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
             Assert.assertTrue(mData.ScheduleDatas != null);
             Assert.assertTrue(mData.ScheduleDatas.size() == 1);
+            Assert.assertTrue(mData.ScheduleDatas.get(0).getScheduleType() == ScheduleType.SINGLE); // todo schedule hack
 
-            if (!mData.ScheduleDatas.get(0).Date.equals(mDate))
+            if (!((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).Date.equals(mDate))
                 return true;
 
-            if (!mData.ScheduleDatas.get(0).TimePair.equals(mTimePairPersist.getTimePair()))
+            if (!((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair.equals(mTimePairPersist.getTimePair()))
                 return true;
 
             return false;

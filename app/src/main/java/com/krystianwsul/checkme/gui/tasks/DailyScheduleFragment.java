@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
 import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -38,7 +39,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<DailyScheduleLoader.Data> {
+public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
@@ -56,7 +57,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     private TimePair mTimePair;
 
     private Integer mRootTaskId;
-    private DailyScheduleLoader.Data mData;
+    private SingleScheduleLoader.Data mData;
 
     private FloatingActionButton mDailyScheduleFab;
 
@@ -222,23 +223,25 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     }
 
     @Override
-    public Loader<DailyScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
+    public Loader<SingleScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
         return new DailyScheduleLoader(getActivity(), mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<DailyScheduleLoader.Data> loader, DailyScheduleLoader.Data data) {
+    public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
         mData = data;
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
             Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
             Assert.assertTrue(mTimeEntries == null);
+            Assert.assertTrue(Stream.of(mData.ScheduleDatas)
+                    .allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.DAILY)); // todo schedule hack
 
             mFirst = false;
 
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
             mTimeEntries = Stream.of(mData.ScheduleDatas)
-                    .map(scheduleData -> new TimeEntry(scheduleData.TimePair, showDelete))
+                    .map(scheduleData -> new TimeEntry(((SingleScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete))
                     .collect(Collectors.toList());
         }
 
@@ -249,7 +252,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     }
 
     @Override
-    public void onLoaderReset(Loader<DailyScheduleLoader.Data> loader) {
+    public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {
     }
 
     @Override
@@ -522,9 +525,11 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         Assert.assertTrue(mTimeEntryAdapter != null);
 
         Assert.assertTrue(mData.ScheduleDatas != null);
+        Assert.assertTrue(Stream.of(mData.ScheduleDatas)
+                .allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.DAILY)); // todo schedule hack
 
         List<TimePair> oldTimePairs = Stream.of(mData.ScheduleDatas)
-                .map(scheduleData -> scheduleData.TimePair)
+                .map(scheduleData -> ((SingleScheduleLoader.DailyScheduleData) scheduleData).TimePair)
                 .sortBy(TimePair::hashCode)
                 .collect(Collectors.toList());
 

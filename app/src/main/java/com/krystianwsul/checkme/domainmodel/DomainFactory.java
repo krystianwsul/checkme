@@ -9,7 +9,6 @@ import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
@@ -20,7 +19,6 @@ import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
-import com.krystianwsul.checkme.loaders.WeeklyScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
@@ -638,7 +636,7 @@ public class DomainFactory {
     public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        List<SingleScheduleLoader.SingleScheduleData> scheduleDatas;
+        List<SingleScheduleLoader.ScheduleData> scheduleDatas;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
@@ -676,10 +674,10 @@ public class DomainFactory {
         return new SingleScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
 
-    public synchronized DailyScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
+    public synchronized SingleScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        List<DailyScheduleLoader.DailyScheduleData> scheduleDatas;
+        List<SingleScheduleLoader.ScheduleData> scheduleDatas;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
@@ -702,7 +700,7 @@ public class DomainFactory {
 
             scheduleDatas = new ArrayList<>();
             for (Time time : times) {
-                scheduleDatas.add(new DailyScheduleLoader.DailyScheduleData(time.getTimePair()));
+                scheduleDatas.add(new SingleScheduleLoader.DailyScheduleData(time.getTimePair()));
 
                 CustomTime customTime = time.getPair().first;
                 if (customTime != null)
@@ -716,13 +714,13 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getId(), new SingleScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new DailyScheduleLoader.Data(scheduleDatas, customTimeDatas);
+        return new SingleScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
 
-    public synchronized WeeklyScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
+    public synchronized SingleScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        List<WeeklyScheduleLoader.WeeklyScheduleData> scheduleDatas;
+        List<SingleScheduleLoader.ScheduleData> scheduleDatas;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
@@ -748,7 +746,7 @@ public class DomainFactory {
                 Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
                 Assert.assertTrue(pair != null);
 
-                scheduleDatas.add(new WeeklyScheduleLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
+                scheduleDatas.add(new SingleScheduleLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
 
                 CustomTime customTime = pair.second.getPair().first;
                 if (customTime != null)
@@ -762,7 +760,7 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getId(), new SingleScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new WeeklyScheduleLoader.Data(scheduleDatas, customTimeDatas);
+        return new SingleScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
 
     public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {

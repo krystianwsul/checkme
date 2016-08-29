@@ -1,12 +1,9 @@
 package com.krystianwsul.checkme.gui.tasks;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,8 +12,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -34,51 +29,9 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
-    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
-    private static final String ROOT_TASK_ID_KEY = "rootTaskId";
-
-    private static final String TIME_ENTRY_KEY = "timeEntries";
-    private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
-
-    private static final String DAILY_SCHEDULE_DIALOG_TAG = "dailyScheduleDialog";
-
-    private int mHourMinutePickerPosition = -1;
-
-    private TimeEntryAdapter mTimeEntryAdapter;
-    private RecyclerView mDailyScheduleTimes;
-
-    private TimePair mTimePair;
-
-    private Integer mRootTaskId;
-    private ScheduleLoader.Data mData;
-
-    private FloatingActionButton mDailyScheduleFab;
-
-    private List<TimeEntry> mTimeEntries;
-
-    private Bundle mSavedInstanceState;
-
-    private boolean mFirst = true;
-
-    private final DailyScheduleDialogFragment.DailyScheduleDialogListener mDailyScheduleDialogListener = new DailyScheduleDialogFragment.DailyScheduleDialogListener() {
-        @Override
-        public void onDailyScheduleDialogResult(TimePairPersist timePairPersist) {
-            Assert.assertTrue(timePairPersist != null);
-            Assert.assertTrue(mHourMinutePickerPosition != -1);
-            Assert.assertTrue(mData != null);
-
-            TimeEntry timeEntry = mTimeEntries.get(mHourMinutePickerPosition);
-            Assert.assertTrue(timeEntry != null);
-
-            timeEntry.mTimePairPersist = timePairPersist;
-            mTimeEntryAdapter.notifyItemChanged(mHourMinutePickerPosition);
-
-            mHourMinutePickerPosition = -1;
-        }
-    };
-
+public class DailyScheduleFragment extends RepeatingScheduleFragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
     }
@@ -107,7 +60,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_daily_schedule, container, false);
+        return inflater.inflate(R.layout.fragment_schedule, container, false);
     }
 
     @Override
@@ -119,8 +72,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         View view = getView();
         Assert.assertTrue(view != null);
 
-        mDailyScheduleTimes = (RecyclerView) view.findViewById(R.id.daily_schedule_times);
-        mDailyScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
+        mScheduleTimes = (RecyclerView) view.findViewById(R.id.schedule_recycler);
+        mScheduleTimes.setLayoutManager(new LinearLayoutManager(getContext()));
 
         Bundle args = getArguments();
         if (args != null)
@@ -133,36 +86,41 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             } else {
                 Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
 
-                CreateTaskActivity.ScheduleHint scheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
-                Assert.assertTrue(scheduleHint != null);
-
-                mTimePair = scheduleHint.mTimePair;
+                mScheduleHint = args.getParcelable(SCHEDULE_HINT_KEY);
+                Assert.assertTrue(mScheduleHint != null);
             }
         }
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(TIME_ENTRY_KEY)) {
-            mTimeEntries = savedInstanceState.getParcelableArrayList(TIME_ENTRY_KEY);
+        if (savedInstanceState != null && savedInstanceState.containsKey(SCHEDULE_ENTRY_KEY)) {
+            mScheduleEntries = savedInstanceState.getParcelableArrayList(SCHEDULE_ENTRY_KEY);
 
             mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
         } else if (args != null && args.containsKey(ROOT_TASK_ID_KEY)) {
             mHourMinutePickerPosition = -1;
         } else {
-            mTimeEntries = new ArrayList<>();
-            if (mTimePair != null)
-                mTimeEntries.add(new TimeEntry(mTimePair, false));
+            mScheduleEntries = new ArrayList<>();
+            if (mScheduleHint != null)
+                mScheduleEntries.add(new DailyScheduleEntry(mScheduleHint.mTimePair, false));
             else
-                mTimeEntries.add(new TimeEntry(false));
+                mScheduleEntries.add(new DailyScheduleEntry(false));
 
             mHourMinutePickerPosition = -1;
         }
 
-        mDailyScheduleFab = (FloatingActionButton) view.findViewById(R.id.daily_schedule_fab);
-        Assert.assertTrue(mDailyScheduleFab != null);
+        mScheduleFab = (FloatingActionButton) view.findViewById(R.id.schedule_fab);
+        Assert.assertTrue(mScheduleFab != null);
 
-        mDailyScheduleFab.setOnClickListener(v -> {
-            Assert.assertTrue(mTimeEntryAdapter != null);
-            mTimeEntryAdapter.addTimeEntry();
+        mScheduleFab.setOnClickListener(v -> {
+            Assert.assertTrue(mScheduleAdapter != null);
+
+            DailyScheduleEntry dailyScheduleEntry;
+            if (mScheduleHint != null)
+                dailyScheduleEntry = new DailyScheduleEntry(mScheduleHint.mTimePair, true);
+            else
+                dailyScheduleEntry = new DailyScheduleEntry(true);
+
+            mScheduleAdapter.addScheduleEntry(dailyScheduleEntry);
         });
 
         getLoaderManager().initLoader(0, null, this);
@@ -184,28 +142,28 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     public void onLoadFinished(Loader<ScheduleLoader.Data> loader, ScheduleLoader.Data data) {
         mData = data;
 
-        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
+        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRY_KEY)) && mData.ScheduleDatas != null) {
             Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
-            Assert.assertTrue(mTimeEntries == null);
+            Assert.assertTrue(mScheduleEntries == null);
             Assert.assertTrue(Stream.of(mData.ScheduleDatas)
                     .allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.DAILY)); // todo schedule hack
 
             mFirst = false;
 
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
-            mTimeEntries = Stream.of(mData.ScheduleDatas)
-                    .map(scheduleData -> new TimeEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete))
+            mScheduleEntries = Stream.of(mData.ScheduleDatas)
+                    .map(scheduleData -> new DailyScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete))
                     .collect(Collectors.toList());
         }
 
-        mTimeEntryAdapter = new TimeEntryAdapter(getContext());
-        mDailyScheduleTimes.setAdapter(mTimeEntryAdapter);
+        mScheduleAdapter = new ScheduleAdapter(getContext());
+        mScheduleTimes.setAdapter(mScheduleAdapter);
 
         DailyScheduleDialogFragment dailyScheduleDialogFragment = (DailyScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(DAILY_SCHEDULE_DIALOG_TAG);
         if (dailyScheduleDialogFragment != null)
             dailyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mDailyScheduleDialogListener);
 
-        mDailyScheduleFab.setVisibility(View.VISIBLE);
+        mScheduleFab.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -217,19 +175,19 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         super.onSaveInstanceState(outState);
 
         if (mData != null) {
-            Assert.assertTrue(mTimeEntryAdapter != null);
+            Assert.assertTrue(mScheduleAdapter != null);
 
-            outState.putParcelableArrayList(TIME_ENTRY_KEY, new ArrayList<>(mTimeEntries));
+            outState.putParcelableArrayList(SCHEDULE_ENTRY_KEY, new ArrayList<>(mScheduleEntries));
             outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
         }
     }
 
     private List<TimePair> getTimePairs() {
-        Assert.assertTrue(mTimeEntries != null);
-        Assert.assertTrue(!mTimeEntries.isEmpty());
+        Assert.assertTrue(mScheduleEntries != null);
+        Assert.assertTrue(!mScheduleEntries.isEmpty());
 
-        return Stream.of(mTimeEntries)
-                .map(timeEntry -> timeEntry.mTimePairPersist.getTimePair())
+        return Stream.of(mScheduleEntries)
+                .map(timeEntry -> ((DailyScheduleEntry) timeEntry).mTimePairPersist.getTimePair())
                 .collect(Collectors.toList());
     }
 
@@ -290,175 +248,70 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         return true;
     }
 
-    private class TimeEntryAdapter extends RecyclerView.Adapter<TimeEntryAdapter.TimeHolder> {
-        private final Context mContext;
-
-        public TimeEntryAdapter(Context context) {
-            Assert.assertTrue(context != null);
-
-            mContext = context;
-        }
-
-        @Override
-        public TimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View dailyScheduleRow = LayoutInflater.from(mContext).inflate(R.layout.row_daily_schedule, parent, false);
-
-            TextView dailyScheduleTime = (TextView) dailyScheduleRow.findViewById(R.id.daily_schedule_text);
-            Assert.assertTrue(dailyScheduleTime != null);
-
-            ImageView dailyScheduleImage = (ImageView) dailyScheduleRow.findViewById(R.id.daily_schedule_image);
-            Assert.assertTrue(dailyScheduleImage != null);
-
-            return new TimeHolder(dailyScheduleRow, dailyScheduleTime, dailyScheduleImage);
-        }
-
-        @Override
-        public void onBindViewHolder(final TimeHolder timeHolder, int position) {
-            final TimeEntry timeEntry = mTimeEntries.get(position);
-            Assert.assertTrue(timeEntry != null);
-
-            if (timeEntry.mTimePairPersist.getCustomTimeId() != null) {
-                ScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(timeEntry.mTimePairPersist.getCustomTimeId());
-                Assert.assertTrue(customTimeData != null);
-
-                timeHolder.mDailyScheduleTime.setText(customTimeData.Name);
-            } else {
-                timeHolder.mDailyScheduleTime.setText(timeEntry.mTimePairPersist.getHourMinute().toString());
-            }
-
-            timeHolder.mDailyScheduleTime.setOnClickListener(v -> timeHolder.onTimeClick());
-
-            timeHolder.mDailyScheduleImage.setVisibility(timeEntry.getShowDelete() ? View.VISIBLE : View.INVISIBLE);
-
-            timeHolder.mDailyScheduleImage.setOnClickListener(v -> {
-                Assert.assertTrue(mTimeEntries.size() > 1);
-                timeHolder.delete();
-
-                if (mTimeEntries.size() == 1) {
-                    mTimeEntries.get(0).setShowDelete(false);
-                    notifyItemChanged(0);
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return mTimeEntries.size();
-        }
-
-        public void addTimeEntry() {
-            int position = mTimeEntries.size();
-            Assert.assertTrue(position > 0);
-
-            if (position == 1) {
-                mTimeEntries.get(0).setShowDelete(true);
-                notifyItemChanged(0);
-            }
-
-            TimeEntry timeEntry;
-            if (mTimePair != null)
-                timeEntry = new TimeEntry(mTimePair, true);
-            else
-                timeEntry = new TimeEntry(true);
-            mTimeEntries.add(position, timeEntry);
-            notifyItemInserted(position);
-        }
-
-        public class TimeHolder extends RecyclerView.ViewHolder {
-            public final TextView mDailyScheduleTime;
-            public final ImageView mDailyScheduleImage;
-
-            public TimeHolder(View dailyScheduleRow, TextView dailyScheduleTime, ImageView dailyScheduleImage) {
-                super(dailyScheduleRow);
-
-                Assert.assertTrue(dailyScheduleTime != null);
-                Assert.assertTrue(dailyScheduleImage != null);
-
-                mDailyScheduleTime = dailyScheduleTime;
-                mDailyScheduleImage = dailyScheduleImage;
-            }
-
-            public void onTimeClick() {
-                Assert.assertTrue(mData != null);
-
-                mHourMinutePickerPosition = getAdapterPosition();
-
-                TimeEntry timeEntry = mTimeEntries.get(mHourMinutePickerPosition);
-                Assert.assertTrue(timeEntry != null);
-
-                DailyScheduleDialogFragment dailyScheduleDialogFragment = DailyScheduleDialogFragment.newInstance(timeEntry.mTimePairPersist);
-                Assert.assertTrue(dailyScheduleDialogFragment != null);
-
-                dailyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mDailyScheduleDialogListener);
-
-                dailyScheduleDialogFragment.show(getChildFragmentManager(), DAILY_SCHEDULE_DIALOG_TAG);
-            }
-
-            public void delete() {
-                int position = getAdapterPosition();
-                mTimeEntries.remove(position);
-                notifyItemRemoved(position);
-            }
-        }
-    }
-
-    public static class TimeEntry implements Parcelable {
+    public static class DailyScheduleEntry extends RepeatingScheduleFragment.ScheduleEntry {
         public TimePairPersist mTimePairPersist;
         private boolean mShowDelete;
 
-        private TimeEntry(TimePairPersist timePairPersist, boolean showDelete) {
-            Assert.assertTrue(timePairPersist != null);
+        public DailyScheduleEntry(Parcel parcel) {
+            Assert.assertTrue(parcel != null);
 
-            mTimePairPersist = timePairPersist;
-            mShowDelete = showDelete;
+            mTimePairPersist = parcel.readParcelable(TimePair.class.getClassLoader());
+            Assert.assertTrue(mTimePairPersist != null);
+
+            int showDeleteInt = parcel.readInt();
+            Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
+            mShowDelete = (showDeleteInt == 1);
         }
 
-        private TimeEntry(TimePair timePair, boolean showDelete) {
+        private DailyScheduleEntry(TimePair timePair, boolean showDelete) {
             Assert.assertTrue(timePair != null);
 
             mTimePairPersist = new TimePairPersist(timePair);
             mShowDelete = showDelete;
         }
 
-        private TimeEntry(boolean showDelete) {
+        private DailyScheduleEntry(boolean showDelete) {
             mTimePairPersist = new TimePairPersist();
             mShowDelete = showDelete;
         }
 
         @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
         public void writeToParcel(Parcel out, int flags) {
+            out.writeSerializable(ScheduleType.DAILY);
+
             out.writeParcelable(mTimePairPersist, 0);
             out.writeInt(mShowDelete ? 1 : 0);
         }
 
-        public static final Parcelable.Creator<TimeEntry> CREATOR = new Parcelable.Creator<TimeEntry>() {
-            public TimeEntry createFromParcel(Parcel in) {
-                TimePairPersist timePairPersist = in.readParcelable(TimePair.class.getClassLoader());
-                Assert.assertTrue(timePairPersist != null);
-
-                int showDeleteInt = in.readInt();
-                Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
-                boolean showDelete = (showDeleteInt == 1);
-
-                return new TimeEntry(timePairPersist, showDelete);
-            }
-
-            public TimeEntry[] newArray(int size) {
-                return new TimeEntry[size];
-            }
-        };
-
+        @Override
         public boolean getShowDelete() {
             return mShowDelete;
         }
 
+        @Override
         public void setShowDelete(boolean delete) {
             mShowDelete = delete;
+        }
+
+        public static final Creator<ScheduleEntry> CREATOR = ScheduleEntry.CREATOR;
+
+        @Override
+        public ScheduleType getScheduleType() {
+            return ScheduleType.DAILY;
+        }
+
+        @Override
+        public String getText(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
+            Assert.assertTrue(customTimeDatas != null);
+
+            if (mTimePairPersist.getCustomTimeId() != null) {
+                ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                Assert.assertTrue(customTimeData != null);
+
+                return customTimeData.Name;
+            } else {
+                return mTimePairPersist.getHourMinute().toString();
+            }
         }
     }
 
@@ -470,7 +323,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         if (mData == null)
             return false;
 
-        Assert.assertTrue(mTimeEntryAdapter != null);
+        Assert.assertTrue(mScheduleAdapter != null);
 
         Assert.assertTrue(mData.ScheduleDatas != null);
         Assert.assertTrue(Stream.of(mData.ScheduleDatas)
@@ -481,8 +334,8 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
                 .sortBy(TimePair::hashCode)
                 .collect(Collectors.toList());
 
-        List<TimePair> newTimePairs = Stream.of(mTimeEntries)
-                .map(timeEntry -> timeEntry.mTimePairPersist.getTimePair())
+        List<TimePair> newTimePairs = Stream.of(mScheduleEntries)
+                .map(timeEntry -> ((DailyScheduleEntry) timeEntry).mTimePairPersist.getTimePair())
                 .sortBy(TimePair::hashCode)
                 .collect(Collectors.toList());
 
@@ -501,10 +354,10 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
         Assert.assertTrue(mHourMinutePickerPosition >= 0);
 
         if (resultCode > 0) {
-            TimeEntry timeEntry = mTimeEntries.get(mHourMinutePickerPosition);
-            Assert.assertTrue(timeEntry != null);
+            DailyScheduleEntry dailyScheduleEntry = (DailyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
+            Assert.assertTrue(dailyScheduleEntry != null);
 
-            timeEntry.mTimePairPersist.setCustomTimeId(resultCode);
+            dailyScheduleEntry.mTimePairPersist.setCustomTimeId(resultCode);
         }
 
         mHourMinutePickerPosition = -1;

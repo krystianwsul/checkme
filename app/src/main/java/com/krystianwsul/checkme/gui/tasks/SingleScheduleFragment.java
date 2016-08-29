@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
-import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
+import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -32,7 +32,7 @@ import junit.framework.Assert;
 
 import java.util.List;
 
-public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
+public class SingleScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
     private static final String INITIAL_HOUR_MINUTE_KEY = "initialHourMinute";
@@ -45,7 +45,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     private static final String SINGLE_SCHEDULE_DIALOG_TAG = "singleScheduleDialog";
 
     private Integer mRootTaskId;
-    private SingleScheduleLoader.Data mData;
+    private ScheduleLoader.Data mData;
 
     private TextInputLayout mSingleScheduleLayout;
     private TextView mSingleScheduleText;
@@ -220,7 +220,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
         String timeText;
 
         if (mTimePairPersist.getCustomTimeId() != null) {
-            SingleScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
+            ScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
             timeText = customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
@@ -244,7 +244,7 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
     private boolean isValidDateTime() {
         if (mData != null) {
-            if (mData.ScheduleDatas != null && ((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair.equals(mTimePairPersist.getTimePair())) { // todo schedule hack
+            if (mData.ScheduleDatas != null && ((ScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair.equals(mTimePairPersist.getTimePair())) { // todo schedule hack
                 return true;
             } else {
                 HourMinute hourMinute;
@@ -325,12 +325,12 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public Loader<SingleScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new SingleScheduleLoader(getActivity(), mRootTaskId);
+    public Loader<ScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ScheduleLoader(getActivity(), mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
+    public void onLoadFinished(Loader<ScheduleLoader.Data> loader, ScheduleLoader.Data data) {
         mData = data;
 
         if (mFirst && mData.ScheduleDatas != null && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(PARCEL_DATE_KEY))) {
@@ -341,8 +341,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
 
             mFirst = false;
 
-            mDate = ((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).Date;
-            mTimePairPersist = new TimePairPersist(((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair);
+            mDate = ((ScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).Date;
+            mTimePairPersist = new TimePairPersist(((ScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair);
         }
 
         mSingleScheduleLayout.setVisibility(View.VISIBLE);
@@ -364,7 +364,8 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {}
+    public void onLoaderReset(Loader<ScheduleLoader.Data> loader) {
+    }
 
     @SuppressWarnings("RedundantIfStatement")
     @Override
@@ -407,10 +408,10 @@ public class SingleScheduleFragment extends Fragment implements ScheduleFragment
             Assert.assertTrue(mData.ScheduleDatas.size() == 1);
             Assert.assertTrue(mData.ScheduleDatas.get(0).getScheduleType() == ScheduleType.SINGLE); // todo schedule hack
 
-            if (!((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).Date.equals(mDate))
+            if (!((ScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).Date.equals(mDate))
                 return true;
 
-            if (!((SingleScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair.equals(mTimePairPersist.getTimePair()))
+            if (!((ScheduleLoader.SingleScheduleData) mData.ScheduleDatas.get(0)).TimePair.equals(mTimePairPersist.getTimePair()))
                 return true;
 
             return false;

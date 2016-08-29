@@ -12,12 +12,12 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
+import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
-import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
@@ -633,51 +633,10 @@ public class DomainFactory {
         return new CreateTaskLoader.Data(taskData, taskDatas);
     }
 
-    public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
+    public synchronized ScheduleLoader.Data getScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        List<SingleScheduleLoader.ScheduleData> scheduleDatas;
-
-        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
-
-        if (rootTaskId != null) {
-            Task rootTask = mTasks.get(rootTaskId);
-            Assert.assertTrue(rootTask != null);
-
-            ExactTimeStamp now = ExactTimeStamp.getNow();
-
-            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
-            Assert.assertTrue(schedules != null);
-            Assert.assertTrue(schedules.size() == 1); // todo schedule hack;
-
-            SingleSchedule singleSchedule = (SingleSchedule) schedules.get(0);
-            Assert.assertTrue(singleSchedule != null);
-            Assert.assertTrue(singleSchedule.current(now));
-
-            Instance instance = singleSchedule.getInstance(rootTask);
-
-            scheduleDatas = new ArrayList<>();
-            scheduleDatas.add(new SingleScheduleLoader.SingleScheduleData(instance.getInstanceDate(), instance.getInstanceTimePair()));
-
-            CustomTime customTime = singleSchedule.getTime().getPair().first;
-            if (customTime != null)
-                customTimes.put(customTime.getId(), customTime);
-        } else {
-            scheduleDatas = null;
-        }
-
-        HashMap<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : customTimes.values())
-            customTimeDatas.put(customTime.getId(), new SingleScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
-
-        return new SingleScheduleLoader.Data(scheduleDatas, customTimeDatas);
-    }
-
-    public synchronized SingleScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
-        fakeDelay();
-
-        List<SingleScheduleLoader.ScheduleData> scheduleDatas;
+        List<ScheduleLoader.ScheduleData> scheduleDatas;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
@@ -691,76 +650,76 @@ public class DomainFactory {
             List<Schedule> schedules = rootTask.getCurrentSchedules(now);
             Assert.assertTrue(schedules != null);
             Assert.assertTrue(!schedules.isEmpty());
-            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.DAILY)); // todo schedule hack;
 
-            List<Time> times = Stream.of(schedules)
-                    .map(schedule -> (DailySchedule) schedule)
-                    .map(DailySchedule::getTime)
-                    .collect(Collectors.toList());
+            ScheduleType scheduleType = schedules.get(0).getType(); // todo schedule hack;
+            Assert.assertTrue(Stream.of(schedules)
+                    .allMatch(schedule -> schedule.getType() == scheduleType));
 
-            scheduleDatas = new ArrayList<>();
-            for (Time time : times) {
-                scheduleDatas.add(new SingleScheduleLoader.DailyScheduleData(time.getTimePair()));
+            switch (scheduleType) {
+                case SINGLE:
+                    Assert.assertTrue(schedules.size() == 1); // todo schedule hack;
 
-                CustomTime customTime = time.getPair().first;
-                if (customTime != null)
-                    customTimes.put(customTime.getId(), customTime);
+                    SingleSchedule singleSchedule = (SingleSchedule) schedules.get(0);
+                    Assert.assertTrue(singleSchedule != null);
+                    Assert.assertTrue(singleSchedule.current(now));
+
+                    Instance instance = singleSchedule.getInstance(rootTask);
+
+                    scheduleDatas = new ArrayList<>();
+                    scheduleDatas.add(new ScheduleLoader.SingleScheduleData(instance.getInstanceDate(), instance.getInstanceTimePair()));
+
+                    CustomTime singleCustomTime = singleSchedule.getTime().getPair().first;
+                    if (singleCustomTime != null)
+                        customTimes.put(singleCustomTime.getId(), singleCustomTime);
+                    break;
+                case DAILY:
+                    Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.DAILY)); // todo schedule hack;
+
+                    List<Time> times = Stream.of(schedules)
+                            .map(schedule -> (DailySchedule) schedule)
+                            .map(DailySchedule::getTime)
+                            .collect(Collectors.toList());
+
+                    scheduleDatas = new ArrayList<>();
+                    for (Time time : times) {
+                        scheduleDatas.add(new ScheduleLoader.DailyScheduleData(time.getTimePair()));
+
+                        CustomTime dailyCustomTime = time.getPair().first;
+                        if (dailyCustomTime != null)
+                            customTimes.put(dailyCustomTime.getId(), dailyCustomTime);
+                    }
+                    break;
+                case WEEKLY:
+                    Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.WEEKLY)); // todo schedule hack;
+
+                    scheduleDatas = new ArrayList<>();
+                    for (Schedule schedule : schedules) {
+                        WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
+                        Assert.assertTrue(weeklySchedule != null);
+                        Assert.assertTrue(weeklySchedule.current(now));
+
+                        Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
+                        Assert.assertTrue(pair != null);
+
+                        scheduleDatas.add(new ScheduleLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
+
+                        CustomTime weeklyCustomTime = pair.second.getPair().first;
+                        if (weeklyCustomTime != null)
+                            customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                    }
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
             }
         } else {
             scheduleDatas = null;
         }
 
-        HashMap<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        HashMap<Integer, ScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes.values())
-            customTimeDatas.put(customTime.getId(), new SingleScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getId(), new ScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new SingleScheduleLoader.Data(scheduleDatas, customTimeDatas);
-    }
-
-    public synchronized SingleScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
-        fakeDelay();
-
-        List<SingleScheduleLoader.ScheduleData> scheduleDatas;
-
-        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
-
-        if (rootTaskId != null) {
-            scheduleDatas = new ArrayList<>();
-
-            Task rootTask = mTasks.get(rootTaskId);
-            Assert.assertTrue(rootTask != null);
-
-            ExactTimeStamp now = ExactTimeStamp.getNow();
-
-            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
-            Assert.assertTrue(schedules != null);
-            Assert.assertTrue(!schedules.isEmpty());
-            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.WEEKLY)); // todo schedule hack;
-
-            for (Schedule schedule : schedules) {
-                WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
-                Assert.assertTrue(weeklySchedule != null);
-                Assert.assertTrue(weeklySchedule.current(now));
-
-                Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
-                Assert.assertTrue(pair != null);
-
-                scheduleDatas.add(new SingleScheduleLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
-
-                CustomTime customTime = pair.second.getPair().first;
-                if (customTime != null)
-                    customTimes.put(customTime.getId(), customTime);
-            }
-        } else {
-            scheduleDatas = null;
-        }
-
-        HashMap<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : customTimes.values())
-            customTimeDatas.put(customTime.getId(), new SingleScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
-
-        return new SingleScheduleLoader.Data(scheduleDatas, customTimeDatas);
+        return new ScheduleLoader.Data(scheduleDatas, customTimeDatas);
     }
 
     public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {

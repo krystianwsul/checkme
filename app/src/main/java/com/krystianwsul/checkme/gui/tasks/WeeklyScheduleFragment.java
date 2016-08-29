@@ -27,8 +27,7 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
-import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
-import com.krystianwsul.checkme.loaders.WeeklyScheduleLoader;
+import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -40,7 +39,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
+public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
@@ -60,7 +59,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     private TimePair mTimePair = null;
 
     private Integer mRootTaskId;
-    private SingleScheduleLoader.Data mData;
+    private ScheduleLoader.Data mData;
 
     private FloatingActionButton mWeeklyScheduleFab;
 
@@ -183,12 +182,12 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public Loader<SingleScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new WeeklyScheduleLoader(getActivity(), mRootTaskId);
+    public Loader<ScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ScheduleLoader(getActivity(), mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
+    public void onLoadFinished(Loader<ScheduleLoader.Data> loader, ScheduleLoader.Data data) {
         mData = data;
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(DATE_TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
@@ -200,7 +199,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
 
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
             mDayOfWeekTimeEntries = Stream.of(mData.ScheduleDatas)
-                    .map(scheduleData -> new DayOfWeekTimeEntry(((SingleScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((SingleScheduleLoader.WeeklyScheduleData) scheduleData).TimePair, showDelete))
+                    .map(scheduleData -> new DayOfWeekTimeEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair, showDelete))
                     .collect(Collectors.toList());
         }
 
@@ -219,7 +218,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
     }
 
     @Override
-    public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {
+    public void onLoaderReset(Loader<ScheduleLoader.Data> loader) {
     }
 
     @Override
@@ -327,7 +326,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
             dayOfWeekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             if (dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId() != null) {
-                SingleScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId());
+                ScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(dayOfWeekTimeEntry.mTimePairPersist.getCustomTimeId());
                 Assert.assertTrue(customTimeData != null);
 
                 dayOfWeekTimeHolder.mWeeklyScheduleText.setText(dayOfWeekTimeEntry.mDayOfWeek + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(dayOfWeekTimeEntry.mDayOfWeek) + ")");
@@ -494,7 +493,7 @@ public class WeeklyScheduleFragment extends Fragment implements ScheduleFragment
                 .allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.WEEKLY)); // todo schedule hack
 
         List<Pair<DayOfWeek, TimePair>> oldDayOfWeekTimePairs = Stream.of(mData.ScheduleDatas)
-                .map(scheduleData -> new Pair<>(((SingleScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((SingleScheduleLoader.WeeklyScheduleData) scheduleData).TimePair))
+                .map(scheduleData -> new Pair<>(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair))
                 .sortBy(Pair::hashCode)
                 .collect(Collectors.toList());
 

@@ -25,7 +25,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
-import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
+import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -47,7 +47,7 @@ public class SingleScheduleDialogFragment extends DialogFragment {
     private static final String DATE_KEY = "date";
     private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
 
-    private Map<Integer, SingleScheduleLoader.CustomTimeData> mCustomTimeDatas;
+    private Map<Integer, ScheduleLoader.CustomTimeData> mCustomTimeDatas;
     private SingleScheduleDialogListener mSingleScheduleDialogListener;
 
     private TextInputLayout mSingleScheduleDialogDateLayout;
@@ -166,7 +166,7 @@ public class SingleScheduleDialogFragment extends DialogFragment {
         return materialDialog;
     }
 
-    public void initialize(Map<Integer, SingleScheduleLoader.CustomTimeData> customTimeDatas, SingleScheduleDialogListener singleScheduleDialogListener) {
+    public void initialize(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas, SingleScheduleDialogListener singleScheduleDialogListener) {
         Assert.assertTrue(customTimeDatas != null);
         Assert.assertTrue(singleScheduleDialogListener != null);
 
@@ -285,7 +285,7 @@ public class SingleScheduleDialogFragment extends DialogFragment {
         Assert.assertTrue(mDate != null);
 
         if (mTimePairPersist.getCustomTimeId() != null) {
-            SingleScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
+            ScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
             mSingleScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");

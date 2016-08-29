@@ -26,8 +26,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
-import com.krystianwsul.checkme.loaders.DailyScheduleLoader;
-import com.krystianwsul.checkme.loaders.SingleScheduleLoader;
+import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -39,7 +38,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<SingleScheduleLoader.Data> {
+public class DailyScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
     private static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
@@ -57,7 +56,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     private TimePair mTimePair;
 
     private Integer mRootTaskId;
-    private SingleScheduleLoader.Data mData;
+    private ScheduleLoader.Data mData;
 
     private FloatingActionButton mDailyScheduleFab;
 
@@ -223,12 +222,12 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     }
 
     @Override
-    public Loader<SingleScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new DailyScheduleLoader(getActivity(), mRootTaskId);
+    public Loader<ScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ScheduleLoader(getActivity(), mRootTaskId);
     }
 
     @Override
-    public void onLoadFinished(Loader<SingleScheduleLoader.Data> loader, SingleScheduleLoader.Data data) {
+    public void onLoadFinished(Loader<ScheduleLoader.Data> loader, ScheduleLoader.Data data) {
         mData = data;
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(TIME_ENTRY_KEY)) && mData.ScheduleDatas != null) {
@@ -241,7 +240,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
 
             boolean showDelete = (mData.ScheduleDatas.size() > 1);
             mTimeEntries = Stream.of(mData.ScheduleDatas)
-                    .map(scheduleData -> new TimeEntry(((SingleScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete))
+                    .map(scheduleData -> new TimeEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete))
                     .collect(Collectors.toList());
         }
 
@@ -252,7 +251,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
     }
 
     @Override
-    public void onLoaderReset(Loader<SingleScheduleLoader.Data> loader) {
+    public void onLoaderReset(Loader<ScheduleLoader.Data> loader) {
     }
 
     @Override
@@ -361,7 +360,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
             Assert.assertTrue(timeEntry != null);
 
             if (timeEntry.mTimePairPersist.getCustomTimeId() != null) {
-                SingleScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(timeEntry.mTimePairPersist.getCustomTimeId());
+                ScheduleLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(timeEntry.mTimePairPersist.getCustomTimeId());
                 Assert.assertTrue(customTimeData != null);
 
                 timeHolder.mDailyScheduleTime.setText(customTimeData.Name);
@@ -529,7 +528,7 @@ public class DailyScheduleFragment extends Fragment implements ScheduleFragment,
                 .allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.DAILY)); // todo schedule hack
 
         List<TimePair> oldTimePairs = Stream.of(mData.ScheduleDatas)
-                .map(scheduleData -> ((SingleScheduleLoader.DailyScheduleData) scheduleData).TimePair)
+                .map(scheduleData -> ((ScheduleLoader.DailyScheduleData) scheduleData).TimePair)
                 .sortBy(TimePair::hashCode)
                 .collect(Collectors.toList());
 

@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data> {
+public class ScheduleLoader extends DomainLoader<ScheduleLoader.Data> {
     private final Integer mRootTaskId; // possibly null
 
-    public SingleScheduleLoader(Context context, Integer rootTaskId) {
+    public ScheduleLoader(Context context, Integer rootTaskId) {
         super(context);
 
         mRootTaskId = rootTaskId;
@@ -27,7 +27,7 @@ public class SingleScheduleLoader extends DomainLoader<SingleScheduleLoader.Data
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getSingleScheduleData(mRootTaskId);
+        return DomainFactory.getDomainFactory(getContext()).getScheduleData(mRootTaskId);
     }
 
     public static class Data extends DomainLoader.Data {

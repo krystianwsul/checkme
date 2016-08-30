@@ -6,6 +6,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
+
 import junit.framework.Assert;
 
 public class UpdateCommand implements Parcelable {
@@ -28,8 +31,11 @@ public class UpdateCommand implements Parcelable {
         Assert.assertTrue(sqLiteDatabase != null);
 
         int updated = sqLiteDatabase.update(mTableName, mContentValues, mWhereClause, null);
+
         if (updated != 1)
-            throw new IllegalStateException("mTableName == " + mTableName + ", mWhereClause == " + mWhereClause + ", updated == " + updated);
+            throw new IllegalStateException("mTableName == " + mTableName + ", mWhereClause == " + mWhereClause + ", updated == " + updated + " contentValues: " + Stream.of(mContentValues.keySet())
+                    .map(key -> key + ": " + mContentValues.get(key))
+                    .collect(Collectors.joining(", ")));
     }
 
     @Override

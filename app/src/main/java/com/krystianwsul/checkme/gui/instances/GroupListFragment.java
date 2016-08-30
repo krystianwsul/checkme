@@ -1899,7 +1899,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 public int compareTo(@NonNull ModelNode another) {
-                    if (another instanceof DividerNode)
+                    Assert.assertTrue(another instanceof NotDoneGroupNode || another instanceof UnscheduledNode || another instanceof DividerNode);
+                    if (another instanceof UnscheduledNode || another instanceof DividerNode)
                         return -1;
 
                     NotDoneGroupNode notDoneGroupNode = (NotDoneGroupNode) another;

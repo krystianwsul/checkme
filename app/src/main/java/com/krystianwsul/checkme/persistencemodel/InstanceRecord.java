@@ -3,10 +3,16 @@ package com.krystianwsul.checkme.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class InstanceRecord extends Record {
     private static final String TABLE_INSTANCES = "instances";
@@ -31,8 +37,10 @@ public class InstanceRecord extends Record {
     private static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
     private static final String COLUMN_RELEVANT = "relevant";
 
-    private static final String INDEX_TASK_SCHEDULE = "instanceIndexTaskSchedule";
     private static final String INDEX_RELEVANT = "instancesIndexRelevant";
+
+    private static final String INDEX_TASK_SCHEDULE_HOUR_MINUTE = "instanceIndexTaskScheduleHourMinute";
+    private static final String INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID = "instanceIndexTaskScheduleCustomTimeId";
 
     private final int mId;
     private final int mTaskId;
@@ -85,17 +93,27 @@ public class InstanceRecord extends Record {
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
                 + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
                 + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1);");
-        sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE + " ON " + TABLE_INSTANCES
+
+        sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_INSTANCES + "(" + COLUMN_RELEVANT + " DESC)");
+
+        sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_HOUR_MINUTE + " ON " + TABLE_INSTANCES
                 + "("
                 + COLUMN_TASK_ID + ", "
                 + COLUMN_SCHEDULE_YEAR + ", "
                 + COLUMN_SCHEDULE_MONTH + ", "
                 + COLUMN_SCHEDULE_DAY + ", "
                 + COLUMN_SCHEDULE_HOUR + ", "
-                + COLUMN_SCHEDULE_MINUTE + ", "
+                + COLUMN_SCHEDULE_MINUTE
+                + ")");
+
+        sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID + " ON " + TABLE_INSTANCES
+                + "("
+                + COLUMN_TASK_ID + ", "
+                + COLUMN_SCHEDULE_YEAR + ", "
+                + COLUMN_SCHEDULE_MONTH + ", "
+                + COLUMN_SCHEDULE_DAY + ", "
                 + COLUMN_SCHEDULE_CUSTOM_TIME_ID
                 + ")");
-        sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_INSTANCES + "(" + COLUMN_RELEVANT + " DESC)");
     }
 
     @SuppressWarnings("UnusedParameters")
@@ -111,7 +129,7 @@ public class InstanceRecord extends Record {
         }
 
         if (oldVersion <= 6) {
-            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE + " ON " + TABLE_INSTANCES
+            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX instanceIndexTaskSchedule ON " + TABLE_INSTANCES
                     + "("
                     + COLUMN_TASK_ID + ", "
                     + COLUMN_SCHEDULE_YEAR + ", "
@@ -125,6 +143,89 @@ public class InstanceRecord extends Record {
 
         if (oldVersion <= 7) {
             sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_INSTANCES + "(" + COLUMN_RELEVANT + " DESC)");
+        }
+
+        if (oldVersion <= 11) {
+            ArrayList<InstanceRecord> instanceRecords = new ArrayList<>();
+
+            Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, null, null, null, null, null);
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                instanceRecords.add(cursorToInstanceRecord(cursor));
+                cursor.moveToNext();
+            }
+            cursor.close();
+
+            List<Integer> remove = new ArrayList<>();
+
+            Stream.of(instanceRecords)
+                    .groupBy(InstanceRecord::getTaskId)
+                    .forEach(taskGroup ->
+                            Stream.of(taskGroup.getValue())
+                                    .groupBy(instance -> instance.getScheduleDay() + 31 * (instance.getScheduleMonth() + 12 * instance.getScheduleYear()))
+                                    .forEach(dateGroup -> {
+                                        Stream.of(dateGroup.getValue())
+                                                .filter(instance -> instance.getScheduleHour() != null)
+                                                .groupBy(instance -> instance.getScheduleMinute() + 60 * instance.getScheduleHour())
+                                                .filter(hourMinuteGroup -> hourMinuteGroup.getValue().size() > 1)
+                                                .forEach(hourMinuteGroup -> {
+                                                    InstanceRecord goodInstanceRecord = Stream.of(hourMinuteGroup.getValue())
+                                                            .min((lhs, rhs) -> Long.valueOf(lhs.getHierarchyTime()).compareTo(rhs.getHierarchyTime()))
+                                                            .get();
+
+                                                    List<Integer> removeThis = Stream.of(hourMinuteGroup.getValue())
+                                                            .filter(instance -> instance.getId() != goodInstanceRecord.getId())
+                                                            .map(InstanceRecord::getId)
+                                                            .collect(Collectors.toList());
+                                                    Assert.assertTrue(!removeThis.isEmpty());
+
+                                                    remove.addAll(removeThis);
+                                                });
+
+                                        Stream.of(dateGroup.getValue())
+                                                .filter(instance -> instance.getScheduleCustomTimeId() != null)
+                                                .groupBy(InstanceRecord::getScheduleCustomTimeId)
+                                                .filter(customTimeIdGroup -> customTimeIdGroup.getValue().size() > 1)
+                                                .forEach(customTimeIdGroup -> {
+                                                    InstanceRecord goodInstanceRecord = Stream.of(customTimeIdGroup.getValue())
+                                                            .min((lhs, rhs) -> Long.valueOf(lhs.getHierarchyTime()).compareTo(rhs.getHierarchyTime()))
+                                                            .get();
+
+                                                    List<Integer> removeThis = Stream.of(customTimeIdGroup.getValue())
+                                                            .filter(instance -> instance.getId() != goodInstanceRecord.getId())
+                                                            .map(InstanceRecord::getId)
+                                                            .collect(Collectors.toList());
+                                                    Assert.assertTrue(!removeThis.isEmpty());
+
+                                                    remove.addAll(removeThis);
+                                                });
+                                    }));
+
+            Log.e("asdf", "size: " + remove.size());
+
+            if (!remove.isEmpty())
+                sqLiteDatabase.delete(TABLE_INSTANCES, "_id IN (" + TextUtils.join(", ", remove) + ")", null);
+
+            sqLiteDatabase.execSQL("DROP INDEX instanceIndexTaskSchedule");
+
+            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_HOUR_MINUTE + " ON " + TABLE_INSTANCES
+                    + "("
+                    + COLUMN_TASK_ID + ", "
+                    + COLUMN_SCHEDULE_YEAR + ", "
+                    + COLUMN_SCHEDULE_MONTH + ", "
+                    + COLUMN_SCHEDULE_DAY + ", "
+                    + COLUMN_SCHEDULE_HOUR + ", "
+                    + COLUMN_SCHEDULE_MINUTE
+                    + ")");
+
+            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID + " ON " + TABLE_INSTANCES
+                    + "("
+                    + COLUMN_TASK_ID + ", "
+                    + COLUMN_SCHEDULE_YEAR + ", "
+                    + COLUMN_SCHEDULE_MONTH + ", "
+                    + COLUMN_SCHEDULE_DAY + ", "
+                    + COLUMN_SCHEDULE_CUSTOM_TIME_ID
+                    + ")");
         }
     }
 

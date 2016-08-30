@@ -965,11 +965,12 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        setInstanceDone(now, instanceKey, done);
+        Instance instance = setInstanceDone(now, instanceKey, done);
+        Assert.assertTrue(instance != null);
 
         save(dataId);
 
-        return now;
+        return instance.getDone();
     }
 
     Instance setInstanceDone(ExactTimeStamp now, InstanceKey instanceKey, boolean done) {

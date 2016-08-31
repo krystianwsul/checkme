@@ -430,7 +430,7 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
 
                 switch (scheduleEntry.getScheduleType()) {
                     case SINGLE:
-                        throw new UnsupportedOperationException();
+                        throw new UnsupportedOperationException(); // todo schedule hack
                     case DAILY:
                         DailyScheduleFragment.DailyScheduleEntry dailyScheduleEntry = (DailyScheduleFragment.DailyScheduleEntry) scheduleEntry;
 
@@ -489,7 +489,7 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
                 Assert.assertTrue(scheduleType != null);
 
                 switch (scheduleType) {
-                    case SINGLE:
+                    case SINGLE: // todo schedule hack
                         throw new UnsupportedOperationException();
                     case DAILY:
                         return new DailyScheduleFragment.DailyScheduleEntry(in);

@@ -109,6 +109,8 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                 if (TextUtils.isEmpty(name))
                     break;
 
+                getSupportLoaderManager().destroyLoader(0);
+
                 if (mData != null) {
                     DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
                 } else {

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
@@ -215,6 +216,8 @@ public class DomainFactory {
     public synchronized EditInstanceLoader.Data getEditInstanceData(InstanceKey instanceKey) {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getEditInstanceData");
+
         Assert.assertTrue(instanceKey != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -243,6 +246,8 @@ public class DomainFactory {
 
     public synchronized EditInstancesLoader.Data getEditInstancesData(ArrayList<InstanceKey> instanceKeys) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getEditInstancesData");
 
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(instanceKeys.size() > 1);
@@ -280,6 +285,8 @@ public class DomainFactory {
     public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getShowCustomTimeData");
+
         CustomTime customTime = mCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
 
@@ -297,6 +304,8 @@ public class DomainFactory {
     public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getShowCustomTimesData");
+
         List<CustomTime> currentCustomTimes = getCurrentCustomTimes();
 
         ArrayList<ShowCustomTimesLoader.CustomTimeData> entries = new ArrayList<>();
@@ -311,6 +320,8 @@ public class DomainFactory {
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, int position, MainActivity.TimeRange timeRange) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getGroupListData");
 
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(timeRange != null);
@@ -412,6 +423,8 @@ public class DomainFactory {
     public synchronized ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getShowGroupData");
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
 
@@ -445,6 +458,8 @@ public class DomainFactory {
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, TimeStamp timeStamp) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getGroupListData");
 
         Assert.assertTrue(context != null);
         Assert.assertTrue(timeStamp != null);
@@ -487,6 +502,8 @@ public class DomainFactory {
     public synchronized GroupListLoader.Data getGroupListData(Context context, InstanceKey instanceKey) {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getGroupListData");
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -525,6 +542,8 @@ public class DomainFactory {
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, ArrayList<InstanceKey> instanceKeys) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getGroupListData");
 
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
@@ -569,6 +588,8 @@ public class DomainFactory {
     public synchronized ShowInstanceLoader.Data getShowInstanceData(Context context, InstanceKey instanceKey) {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getShowInstanceData");
+
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
@@ -586,6 +607,8 @@ public class DomainFactory {
 
     public synchronized CreateTaskLoader.Data getCreateChildTaskData(Integer taskId, Context context, List<Integer> excludedTaskIds) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getCreateChildTaskData");
 
         Assert.assertTrue(context != null);
         Assert.assertTrue(excludedTaskIds != null);
@@ -636,6 +659,8 @@ public class DomainFactory {
     public synchronized SingleScheduleLoader.Data getSingleScheduleData(Integer rootTaskId) {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getSingleScheduleData");
+
         List<SingleScheduleLoader.ScheduleData> scheduleDatas;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
@@ -676,6 +701,8 @@ public class DomainFactory {
 
     public synchronized SingleScheduleLoader.Data getDailyScheduleData(Integer rootTaskId) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getDailyScheduleData");
 
         List<SingleScheduleLoader.ScheduleData> scheduleDatas;
 
@@ -719,6 +746,8 @@ public class DomainFactory {
 
     public synchronized SingleScheduleLoader.Data getWeeklyScheduleData(Integer rootTaskId) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getWeeklyScheduleData");
 
         List<SingleScheduleLoader.ScheduleData> scheduleDatas;
 
@@ -766,6 +795,8 @@ public class DomainFactory {
     public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {
         fakeDelay();
 
+        MyCrashlytics.log("DomainFactory.getShowTaskData");
+
         Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -779,6 +810,8 @@ public class DomainFactory {
 
     public synchronized TaskListLoader.Data getTaskListData(Context context, Integer taskId) {
         fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getTaskListData");
 
         Assert.assertTrue(context != null);
 
@@ -827,6 +860,8 @@ public class DomainFactory {
     }
 
     public synchronized TickService.Data getTickServiceData(Context context) {
+        MyCrashlytics.log("DomainFactory.getTickServiceData");
+
         Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -893,6 +928,8 @@ public class DomainFactory {
     // sets
 
     public synchronized void setInstanceDateTime(int dataId, InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair) {
+        MyCrashlytics.log("DomainFactory.setInstanceDateTime");
+
         Assert.assertTrue(instanceKey != null);
         Assert.assertTrue(instanceDate != null);
         Assert.assertTrue(instanceTimePair != null);
@@ -908,6 +945,8 @@ public class DomainFactory {
     }
 
     public synchronized void setInstancesDateTime(int dataId, Set<InstanceKey> instanceKeys, Date instanceDate, TimePair instanceTimePair) {
+        MyCrashlytics.log("DomainFactory.setInstancesDateTime");
+
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(instanceKeys.size() > 1);
         Assert.assertTrue(instanceDate != null);
@@ -926,6 +965,8 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceAddHour(int dataId, InstanceKey instanceKey) {
+        MyCrashlytics.log("DomainFactory.setInstanceAddHour");
+
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);
@@ -945,6 +986,8 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceNotificationDone(int dataId, InstanceKey instanceKey) {
+        MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
+
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);
@@ -960,6 +1003,8 @@ public class DomainFactory {
     }
 
     public synchronized ExactTimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done) {
+        MyCrashlytics.log("DomainFactory.setInstanceDone");
+
         Assert.assertTrue(instanceKey != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -984,6 +1029,8 @@ public class DomainFactory {
     }
 
     public synchronized void setInstancesNotified(int dataId, ArrayList<InstanceKey> instanceKeys) {
+        MyCrashlytics.log("DomainFactory.setInstancesNotified");
+
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
@@ -1001,6 +1048,8 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceNotified(int dataId, InstanceKey instanceKey) {
+        MyCrashlytics.log("DomainFactory.setInstanceNotified");
+
         Assert.assertTrue(instanceKey != null);
 
         Instance instance = getInstance(instanceKey);
@@ -1015,6 +1064,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateInstancesShown(int dataId, List<InstanceKey> showInstanceKeys, List<InstanceKey> hideInstanceKeys) {
+        MyCrashlytics.log("DomainFactory.updateInstancesShown");
+
         Assert.assertTrue(hideInstanceKeys != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1043,6 +1094,8 @@ public class DomainFactory {
     }
 
     public synchronized void createSingleScheduleRootTask(int dataId, String name, Date date, TimePair timePair) {
+        MyCrashlytics.log("DomainFactory.createSingleScheduleRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
@@ -1074,6 +1127,8 @@ public class DomainFactory {
     }
 
     public synchronized void createDailyScheduleRootTask(int dataId, String name, List<TimePair> timePairs) {
+        MyCrashlytics.log("DomainFactory.createDailyScheduleRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -1095,6 +1150,8 @@ public class DomainFactory {
     }
 
     public synchronized void createWeeklyScheduleRootTask(int dataId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
+        MyCrashlytics.log("DomainFactory.createWeeklyScheduleRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1114,6 +1171,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateSingleScheduleTask(int dataId, int taskId, String name, Date date, TimePair timePair) {
+        MyCrashlytics.log("DomainFactory.updateSingleScheduleTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
@@ -1161,6 +1220,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateDailyScheduleTask(int dataId, int taskId, String name, List<TimePair> timePairs) {
+        MyCrashlytics.log("DomainFactory.updateDailyScheduleTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -1198,6 +1259,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateWeeklyScheduleTask(int dataId, int taskId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
+        MyCrashlytics.log("DomainFactory.updateWeeklyScheduleTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1233,6 +1296,8 @@ public class DomainFactory {
     }
 
     public synchronized void createSingleScheduleJoinRootTask(int dataId, String name, Date date, TimePair timePair, List<Integer> joinTaskIds) {
+        MyCrashlytics.log("DomainFactory.createSingleScheduleJoinRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
@@ -1258,6 +1323,8 @@ public class DomainFactory {
     }
 
     public synchronized void createDailyScheduleJoinRootTask(int dataId, String name, List<TimePair> timePairs, List<Integer> joinTaskIds) {
+        MyCrashlytics.log("DomainFactory.createDailyScheduleJoinRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(timePairs != null);
         Assert.assertTrue(!timePairs.isEmpty());
@@ -1283,6 +1350,8 @@ public class DomainFactory {
     }
 
     public synchronized void createWeeklyScheduleJoinRootTask(int dataId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, List<Integer> joinTaskIds) {
+        MyCrashlytics.log("DomainFactory.createWeeklyScheduleJoinRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(dayOfWeekTimePairs != null);
         Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
@@ -1306,6 +1375,8 @@ public class DomainFactory {
     }
 
     public synchronized void createChildTask(int dataId, int parentTaskId, String name) {
+        MyCrashlytics.log("DomainFactory.createChildTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1337,6 +1408,8 @@ public class DomainFactory {
     }
 
     public synchronized void createJoinChildTask(int dataId, int parentTaskId, String name, List<Integer> joinTaskIds) {
+        MyCrashlytics.log("DomainFactory.createJoinChildTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
@@ -1362,6 +1435,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateChildTask(int dataId, int taskId, String name, int parentTaskId) {
+        MyCrashlytics.log("DomainFactory.updateChildTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1396,6 +1471,8 @@ public class DomainFactory {
     }
 
     public synchronized void setTaskEndTimeStamp(ArrayList<Integer> dataIds, int taskId) {
+        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp");
+
         Assert.assertTrue(dataIds != null);
         Assert.assertTrue(!dataIds.isEmpty());
 
@@ -1412,6 +1489,8 @@ public class DomainFactory {
     }
 
     public synchronized void setTaskEndTimeStamps(int dataId, ArrayList<Integer> taskIds) {
+        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps");
+
         Assert.assertTrue(taskIds != null);
         Assert.assertTrue(!taskIds.isEmpty());
 
@@ -1430,6 +1509,8 @@ public class DomainFactory {
     }
 
     public synchronized int createCustomTime(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        MyCrashlytics.log("DomainFactory.createCustomTime");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
 
@@ -1453,6 +1534,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateCustomTime(int dataId, int customTimeId, String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+        MyCrashlytics.log("DomainFactory.updateCustomTime");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
 
@@ -1473,6 +1556,8 @@ public class DomainFactory {
     }
 
     public synchronized void setCustomTimeCurrent(int dataId, List<Integer> customTimeIds) {
+        MyCrashlytics.log("DomainFactory.setCustomTimeCurrent");
+
         Assert.assertTrue(customTimeIds != null);
         Assert.assertTrue(!customTimeIds.isEmpty());
 
@@ -1487,6 +1572,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateTaskOldestVisible() {
+        MyCrashlytics.log("DomainFactory.updateTaskOldestVisible");
+
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Irrelevant irrelevant = setIrrelevant(now);
@@ -1556,6 +1643,8 @@ public class DomainFactory {
     }
 
     public synchronized void createRootTask(int dataId, String name) {
+        MyCrashlytics.log("DomainFactory.createRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1571,6 +1660,8 @@ public class DomainFactory {
     }
 
     public synchronized void createJoinRootTask(int dataId, String name, List<Integer> joinTaskIds) {
+        MyCrashlytics.log("DomainFactory.createJoinRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
@@ -1590,6 +1681,8 @@ public class DomainFactory {
     }
 
     public synchronized void updateRootTask(int dataId, int taskId, String name) {
+        MyCrashlytics.log("DomainFactory.updateRootTask");
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();

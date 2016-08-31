@@ -659,7 +659,7 @@ public class DomainFactory {
     public synchronized ScheduleLoader.Data getScheduleData(Integer rootTaskId) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getSingleScheduleData");
+        MyCrashlytics.log("DomainFactory.getScheduleData");
 
         List<ScheduleLoader.ScheduleData> scheduleDatas;
 

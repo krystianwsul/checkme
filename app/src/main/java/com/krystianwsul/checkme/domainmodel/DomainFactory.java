@@ -1081,42 +1081,19 @@ public class DomainFactory {
         return rootTask;
     }
 
-    public synchronized void createDailyScheduleRootTask(int dataId, String name, List<TimePair> timePairs) {
-        MyCrashlytics.log("DomainFactory.createDailyScheduleRootTask");
+    public synchronized void createScheduleRootTask(int dataId, String name, List<ScheduleLoader.ScheduleData> scheduleDatas) {
+        MyCrashlytics.log("DomainFactory.createScheduleRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(timePairs != null);
-        Assert.assertTrue(!timePairs.isEmpty());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Task rootTask = createRootTaskHelper(name, now);
         Assert.assertTrue(rootTask != null);
 
-        List<Time> times = getTimes(timePairs);
-
-        List<Schedule> schedules = createDailySchedules(rootTask, times, now);
-        Assert.assertTrue(schedules != null);
-        Assert.assertTrue(!schedules.isEmpty());
-
-        rootTask.addSchedules(schedules);
-
-        save(dataId);
-    }
-
-    public synchronized void createWeeklyScheduleRootTask(int dataId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
-        MyCrashlytics.log("DomainFactory.createWeeklyScheduleRootTask");
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(dayOfWeekTimePairs != null);
-        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        Task rootTask = createRootTaskHelper(name, now);
-        Assert.assertTrue(rootTask != null);
-
-        List<Schedule> schedules = createWeeklySchedules(rootTask, dayOfWeekTimePairs, now);
+        List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
         Assert.assertTrue(schedules != null);
         Assert.assertTrue(!schedules.isEmpty());
 
@@ -1174,12 +1151,12 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateDailyScheduleTask(int dataId, int taskId, String name, List<TimePair> timePairs) {
-        MyCrashlytics.log("DomainFactory.updateDailyScheduleTask");
+    public synchronized void updateScheduleTask(int dataId, int taskId, String name, List<ScheduleLoader.ScheduleData> scheduleDatas) {
+        MyCrashlytics.log("DomainFactory.updateScheduleTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(timePairs != null);
-        Assert.assertTrue(!timePairs.isEmpty());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task task = mTasks.get(taskId);
         Assert.assertTrue(task != null);
@@ -1190,7 +1167,7 @@ public class DomainFactory {
         task.setName(name);
 
         if (task.isRootTask(now)) {
-            List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
+            List<Schedule> schedules = task.getCurrentSchedules(now);
             Assert.assertTrue(schedules != null);
 
             Stream.of(schedules)
@@ -1202,46 +1179,7 @@ public class DomainFactory {
             taskHierarchy.setEndExactTimeStamp(now);
         }
 
-        List<Time> times = getTimes(timePairs);
-
-        List<Schedule> schedules = createDailySchedules(task, times, now);
-        Assert.assertTrue(schedules != null);
-        Assert.assertTrue(!schedules.isEmpty());
-
-        task.addSchedules(schedules);
-
-        save(dataId);
-    }
-
-    public synchronized void updateWeeklyScheduleTask(int dataId, int taskId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs) {
-        MyCrashlytics.log("DomainFactory.updateWeeklyScheduleTask");
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(dayOfWeekTimePairs != null);
-        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-
-        Task task = mTasks.get(taskId);
-        Assert.assertTrue(task != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-        Assert.assertTrue(task.current(now));
-
-        task.setName(name);
-
-        if (task.isRootTask(now)) {
-            List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
-            Assert.assertTrue(schedules != null);
-
-            Stream.of(schedules)
-                    .forEach(schedule -> schedule.setEndExactTimeStamp(now));
-        } else {
-            TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
-            Assert.assertTrue(taskHierarchy != null);
-
-            taskHierarchy.setEndExactTimeStamp(now);
-        }
-
-        List<Schedule> schedules = createWeeklySchedules(task, dayOfWeekTimePairs, now);
+        List<Schedule> schedules = createSchedules(task, scheduleDatas, now);
         Assert.assertTrue(schedules != null);
         Assert.assertTrue(!schedules.isEmpty());
 
@@ -1277,12 +1215,12 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createDailyScheduleJoinRootTask(int dataId, String name, List<TimePair> timePairs, List<Integer> joinTaskIds) {
-        MyCrashlytics.log("DomainFactory.createDailyScheduleJoinRootTask");
+    public synchronized void createScheduleJoinRootTask(int dataId, String name, List<ScheduleLoader.ScheduleData> scheduleDatas, List<Integer> joinTaskIds) {
+        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(timePairs != null);
-        Assert.assertTrue(!timePairs.isEmpty());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
@@ -1291,34 +1229,7 @@ public class DomainFactory {
         Task rootTask = createRootTaskHelper(name, now);
         Assert.assertTrue(rootTask != null);
 
-        List<Time> times = getTimes(timePairs);
-
-        List<Schedule> schedules = createDailySchedules(rootTask, times, now);
-        Assert.assertTrue(schedules != null);
-        Assert.assertTrue(!schedules.isEmpty());
-
-        rootTask.addSchedules(schedules);
-
-        joinTasks(rootTask, joinTaskIds, now);
-
-        save(dataId);
-    }
-
-    public synchronized void createWeeklyScheduleJoinRootTask(int dataId, String name, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, List<Integer> joinTaskIds) {
-        MyCrashlytics.log("DomainFactory.createWeeklyScheduleJoinRootTask");
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(dayOfWeekTimePairs != null);
-        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        Task rootTask = createRootTaskHelper(name, now);
-        Assert.assertTrue(rootTask != null);
-
-        List<Schedule> schedules = createWeeklySchedules(rootTask, dayOfWeekTimePairs, now);
+        List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
         Assert.assertTrue(schedules != null);
         Assert.assertTrue(!schedules.isEmpty());
 
@@ -1875,15 +1786,6 @@ public class DomainFactory {
         return rootTask;
     }
 
-    private List<Time> getTimes(List<TimePair> timePairs) {
-        Assert.assertTrue(timePairs != null);
-        Assert.assertTrue(!timePairs.isEmpty());
-
-        return Stream.of(timePairs)
-                .map(this::getTime)
-                .collect(Collectors.toList());
-    }
-
     private Time getTime(TimePair timePair) {
         Assert.assertTrue(timePair != null);
 
@@ -1959,58 +1861,60 @@ public class DomainFactory {
         return new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleDateTimeRecord);
     }
 
-    private List<Schedule> createDailySchedules(Task rootTask, List<Time> times, ExactTimeStamp startExactTimeStamp) {
+    private List<Schedule> createSchedules(Task rootTask, List<ScheduleLoader.ScheduleData> scheduleDatas, ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(times != null);
-        Assert.assertTrue(!times.isEmpty());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(startExactTimeStamp != null);
         Assert.assertTrue(rootTask.current(startExactTimeStamp));
 
         List<Schedule> schedules = new ArrayList<>();
 
-        for (Time time : times) {
-            Assert.assertTrue(time != null);
+        for (ScheduleLoader.ScheduleData scheduleData : scheduleDatas) {
+            Assert.assertTrue(scheduleData != null);
 
-            ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.DAILY, startExactTimeStamp);
-            Assert.assertTrue(scheduleRecord != null);
+            switch (scheduleData.getScheduleType()) {
+                case SINGLE: // todo schedule hack
+                    throw new UnsupportedOperationException();
+                case DAILY: {
+                    ScheduleLoader.DailyScheduleData dailyScheduleData = (ScheduleLoader.DailyScheduleData) scheduleData;
 
-            DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
-            Assert.assertTrue(dailyScheduleRecord != null);
+                    Time time = getTime(dailyScheduleData.TimePair);
+                    Assert.assertTrue(time != null);
 
-            schedules.add(new DailySchedule(scheduleRecord, rootTask, this, dailyScheduleRecord));
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.DAILY, startExactTimeStamp);
+                    Assert.assertTrue(scheduleRecord != null);
+
+                    DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
+                    Assert.assertTrue(dailyScheduleRecord != null);
+
+                    schedules.add(new DailySchedule(scheduleRecord, rootTask, this, dailyScheduleRecord));
+                    break;
+                }
+                case WEEKLY: {
+                    ScheduleLoader.WeeklyScheduleData weeklyScheduleData = (ScheduleLoader.WeeklyScheduleData) scheduleData;
+
+                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
+                    Time time = getTime(weeklyScheduleData.TimePair);
+
+                    Assert.assertTrue(dayOfWeek != null);
+                    Assert.assertTrue(time != null);
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.WEEKLY, startExactTimeStamp);
+                    Assert.assertTrue(scheduleRecord != null);
+
+                    WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
+                    Assert.assertTrue(weeklyScheduleRecord != null);
+
+                    schedules.add(new WeeklySchedule(scheduleRecord, rootTask, this, weeklyScheduleRecord));
+                    break;
+                }
+                default:
+                    throw new UnsupportedOperationException();
+            }
         }
 
         return schedules;
-    }
-
-    private List<Schedule> createWeeklySchedules(Task rootTask, List<Pair<DayOfWeek, TimePair>> dayOfWeekTimePairs, ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(dayOfWeekTimePairs != null);
-        Assert.assertTrue(!dayOfWeekTimePairs.isEmpty());
-        Assert.assertTrue(startExactTimeStamp != null);
-        Assert.assertTrue(rootTask.current(startExactTimeStamp));
-
-        List<Schedule> weeklySchedules = new ArrayList<>();
-
-        for (Pair<DayOfWeek, TimePair> dayOfWeekTimePair : dayOfWeekTimePairs) {
-            Assert.assertTrue(dayOfWeekTimePair != null);
-
-            DayOfWeek dayOfWeek = dayOfWeekTimePair.first;
-            Time time = getTime(dayOfWeekTimePair.second);
-
-            Assert.assertTrue(dayOfWeek != null);
-            Assert.assertTrue(time != null);
-
-            ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.WEEKLY, startExactTimeStamp);
-            Assert.assertTrue(scheduleRecord != null);
-
-            WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
-            Assert.assertTrue(weeklyScheduleRecord != null);
-
-            weeklySchedules.add(new WeeklySchedule(scheduleRecord, rootTask, this, weeklyScheduleRecord));
-        }
-
-        return weeklySchedules;
     }
 
     List<Task> getChildTasks(Task parentTask, ExactTimeStamp exactTimeStamp) {

@@ -68,4 +68,5 @@ dependencies {
     compile 'com.android.support:gridlayout-v7:24.2.0'
     compile 'com.code-troopers.betterpickers:library:2.5.2'
     compile 'com.annimon:stream:1.0.9'
+    compile 'com.google.guava:guava:19.0'
 }

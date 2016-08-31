@@ -11,6 +11,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +20,14 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.ScheduleLoader;
+import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.TimePair;
@@ -33,36 +39,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class RepeatingScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
-    protected static final String SCHEDULE_HINT_KEY = "scheduleHint";
-    protected static final String ROOT_TASK_ID_KEY = "rootTaskId";
+public abstract class RepeatingScheduleFragment extends Fragment implements ScheduleFragment, LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
+    static final String SCHEDULE_HINT_KEY = "scheduleHint";
+    static final String ROOT_TASK_ID_KEY = "rootTaskId";
 
-    protected static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
+    private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
 
-    protected static final String SCHEDULE_ENTRY_KEY = "scheduleEntries";
+    private static final String SCHEDULE_ENTRY_KEY = "scheduleEntries";
 
-    protected static final String WEEKLY_SCHEDULE_DIALOG = "weeklyScheduleDialog";
-    protected static final String DAILY_SCHEDULE_DIALOG_TAG = "dailyScheduleDialog";
+    private static final String WEEKLY_SCHEDULE_DIALOG = "weeklyScheduleDialog";
+    private static final String DAILY_SCHEDULE_DIALOG_TAG = "dailyScheduleDialog";
 
-    protected int mHourMinutePickerPosition = -1;
+    private int mHourMinutePickerPosition = -1;
 
-    protected RecyclerView mScheduleTimes;
-    protected ScheduleAdapter mScheduleAdapter;
+    private RecyclerView mScheduleTimes;
+    private ScheduleAdapter mScheduleAdapter;
 
-    protected CreateTaskActivity.ScheduleHint mScheduleHint;
+    CreateTaskActivity.ScheduleHint mScheduleHint;
 
-    protected Bundle mSavedInstanceState;
+    private Bundle mSavedInstanceState;
 
-    protected Integer mRootTaskId;
-    protected ScheduleLoader.Data mData;
+    private Integer mRootTaskId;
+    private ScheduleLoader.Data mData;
 
-    protected FloatingActionButton mScheduleFab;
+    private FloatingActionButton mScheduleFab;
 
-    protected boolean mFirst = true;
+    private boolean mFirst = true;
 
-    protected List<ScheduleEntry> mScheduleEntries;
+    private List<ScheduleEntry> mScheduleEntries;
 
-    protected final DailyScheduleDialogFragment.DailyScheduleDialogListener mDailyScheduleDialogListener = new DailyScheduleDialogFragment.DailyScheduleDialogListener() {
+    private final DailyScheduleDialogFragment.DailyScheduleDialogListener mDailyScheduleDialogListener = new DailyScheduleDialogFragment.DailyScheduleDialogListener() {
         @Override
         public void onDailyScheduleDialogResult(TimePairPersist timePairPersist) {
             Assert.assertTrue(timePairPersist != null);
@@ -79,7 +85,7 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Load
         }
     };
 
-    protected final WeeklyScheduleDialogFragment.WeeklyScheduleDialogListener mWeeklyScheduleDialogListener = new WeeklyScheduleDialogFragment.WeeklyScheduleDialogListener() {
+    private final WeeklyScheduleDialogFragment.WeeklyScheduleDialogListener mWeeklyScheduleDialogListener = new WeeklyScheduleDialogFragment.WeeklyScheduleDialogListener() {
         @Override
         public void onWeeklyScheduleDialogResult(DayOfWeek dayOfWeek, TimePairPersist timePairPersist) {
             Assert.assertTrue(dayOfWeek != null);
@@ -156,6 +162,13 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Load
         });
 
         getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public void onResume() {
+        MyCrashlytics.log("RepeatingScheduleFragment.onResume");
+
+        super.onResume();
     }
 
     @Override
@@ -241,7 +254,93 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Load
         mHourMinutePickerPosition = -1;
     }
 
+    @Override
+    public boolean createRootTask(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
+
+        List<ScheduleLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        DomainFactory.getDomainFactory(getActivity()).createScheduleRootTask(mData.DataId, name, scheduleDatas);
+
+        TickService.startService(getActivity());
+
+        return true;
+    }
+
+    @Override
+    public boolean updateRootTask(int rootTaskId, String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
+
+        List<ScheduleLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        DomainFactory.getDomainFactory(getActivity()).updateScheduleTask(mData.DataId, rootTaskId, name, scheduleDatas);
+
+        TickService.startService(getActivity());
+
+        return true;
+    }
+
+    @Override
+    public boolean createRootJoinTask(String name, List<Integer> joinTaskIds) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        if (mData == null)
+            return false;
+
+        List<ScheduleLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        DomainFactory.getDomainFactory(getActivity()).createScheduleJoinRootTask(mData.DataId, name, scheduleDatas, joinTaskIds);
+
+        TickService.startService(getActivity());
+
+        return true;
+    }
+
     protected abstract ScheduleEntry firstScheduleEntry(boolean showDelete);
+
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
+    public boolean dataChanged() {
+        Assert.assertTrue(mRootTaskId != null);
+
+        if (mData == null)
+            return false;
+
+        Assert.assertTrue(mScheduleAdapter != null);
+
+        Assert.assertTrue(mData.ScheduleDatas != null);
+
+        Multiset<ScheduleLoader.ScheduleData> oldScheduleDatas = HashMultiset.create(mData.ScheduleDatas);
+
+        Multiset<ScheduleLoader.ScheduleData> newScheduleDatas = HashMultiset.create(Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList()));
+
+        if (!oldScheduleDatas.equals(newScheduleDatas))
+            return true;
+
+        return false;
+    }
 
     protected class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ScheduleHolder> {
         private final Context mContext;
@@ -381,6 +480,8 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Load
 
         public abstract boolean getShowDelete();
 
+        public abstract ScheduleLoader.ScheduleData getScheduleData();
+
         public static final Creator<ScheduleEntry> CREATOR = new Creator<ScheduleEntry>() {
             @Override
             public ScheduleEntry createFromParcel(Parcel in) {
@@ -427,7 +528,7 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Load
             mShowDelete = showDelete;
         }
 
-        protected DailyScheduleEntry(boolean showDelete) {
+        DailyScheduleEntry(boolean showDelete) {
             mTimePairPersist = new TimePairPersist();
             mShowDelete = showDelete;
         }
@@ -469,6 +570,11 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Load
             } else {
                 return mTimePairPersist.getHourMinute().toString();
             }
+        }
+
+        @Override
+        public ScheduleLoader.ScheduleData getScheduleData() {
+            return new ScheduleLoader.DailyScheduleData(mTimePairPersist.getTimePair());
         }
     }
 
@@ -545,6 +651,11 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Load
             } else {
                 return mDayOfWeek + ", " + mTimePairPersist.getHourMinute().toString();
             }
+        }
+
+        @Override
+        public ScheduleLoader.ScheduleData getScheduleData() {
+            return new ScheduleLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
         }
     }
 }

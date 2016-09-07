@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
@@ -273,29 +274,34 @@ public class Task {
             List<Schedule> schedules = rootTask.getCurrentSchedules(now);
             Assert.assertTrue(schedules != null);
 
-            if (schedules.isEmpty())
+            if (schedules.isEmpty()) {
                 return true;
+            }
 
-            if (Stream.of(schedules).anyMatch(schedule -> schedule.getType() != ScheduleType.SINGLE))
+            if (Stream.of(schedules).anyMatch(schedule -> schedule.getType() != ScheduleType.SINGLE)) {
                 return true;
+            }
 
             if (Stream.of(schedules)
                     .map(schedule -> (SingleSchedule) schedule)
-                    .anyMatch(schedule -> schedule.getInstance(this).isVisible(now)))
+                    .anyMatch(schedule -> schedule.getInstance(this).isVisible(now))) {
                 return true;
+            }
         }
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
         if (Stream.of(domainFactory.getExistingInstances(this))
-                .anyMatch(instance -> instance.isVisible(now)))
+                .anyMatch(instance -> instance.isVisible(now))) {
             return true;
+        }
 
         //noinspection RedundantIfStatement
         if (Stream.of(domainFactory.getPastInstances(this, now))
-                .anyMatch(instance -> instance.isVisible(now)))
+                .anyMatch(instance -> instance.isVisible(now))) {
             return true;
+        }
 
         return false;
     }
@@ -311,8 +317,22 @@ public class Task {
 
         //noinspection RedundantIfStatement
         if (Stream.of(domainFactory.getChildTaskHierarchies(this))
-                .anyMatch(taskHierarchy -> taskHierarchy.getChildTask().isRelevant(now)))
+                .anyMatch(taskHierarchy -> taskHierarchy.getChildTask().isRelevant(now))) {
             return true;
+        }
+
+        if (Stream.of(domainFactory.getExistingInstances(this))
+                .anyMatch(instance -> instance.isRelevant(now))) {
+            Log.e("asdf", getName() + " is relevant a");
+            return true;
+        }
+
+        //noinspection RedundantIfStatement
+        if (Stream.of(domainFactory.getPastInstances(this, now))
+                .anyMatch(instance -> instance.isRelevant(now))) {
+            Log.e("asdf", getName() + " is relevant b");
+            return true;
+        }
 
         return false;
     }

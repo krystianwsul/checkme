@@ -42,7 +42,92 @@ public class DomainFactoryTest {
     }
 
     @Test
-    public void testUpdateTaskOldestVisible() throws Exception {
+    public void testRelevantSingleNoChildren() throws Exception {
+        PersistenceManger persistenceManger = new PersistenceManger();
+
+        DomainFactory domainFactory = new DomainFactory(persistenceManger);
+
+        Date startDate = new Date(2016, 1, 1);
+        HourMili startHourMili = new HourMili(0, 0, 0, 0);
+
+        ExactTimeStamp startExactTimeStamp = new ExactTimeStamp(startDate, startHourMili);
+
+        Date scheduleDate = startDate;
+        HourMinute scheduleHourMinute = new HourMinute(2, 0);
+
+        Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.isEmpty());
+
+        Task rootTask = domainFactory.createSingleScheduleRootTask(startExactTimeStamp, "root task", scheduleDate, new TimePair(scheduleHourMinute));
+        Assert.assertTrue(rootTask != null);
+
+        Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
+        Assert.assertTrue(rootTask.isRelevant(startExactTimeStamp));
+
+        Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
+        Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.isEmpty());
+
+        DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
+
+        Instance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
+        Assert.assertTrue(rootInstance != null);
+
+        Assert.assertTrue(!rootInstance.exists());
+        Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
+        Assert.assertTrue(rootInstance.isRelevant(startExactTimeStamp));
+
+        Date doneDate = startDate;
+        HourMili doneHourMili = new HourMili(1, 0, 0, 0);
+
+        ExactTimeStamp doneExactTimeStamp = new ExactTimeStamp(doneDate, doneHourMili);
+
+        rootInstance = domainFactory.setInstanceDone(doneExactTimeStamp, rootInstance.getInstanceKey(), true);
+        Assert.assertTrue(rootInstance != null);
+
+        Assert.assertTrue(rootInstance.exists());
+
+        Date nextDayBeforeDate = new Date(2016, 1, 2);
+        HourMili nextDayBeforeHourMili = new HourMili(0, 0, 0, 0);
+
+        ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMili);
+
+        DomainFactory.Irrelevant irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp);
+        Assert.assertTrue(irrelevantBefore != null);
+        Assert.assertTrue(irrelevantBefore.mCustomTimes.isEmpty());
+        Assert.assertTrue(irrelevantBefore.mTasks.isEmpty());
+        Assert.assertTrue(irrelevantBefore.mInstances.isEmpty());
+
+        Assert.assertTrue(rootTask.getOldestVisible().equals(startDate));
+
+        Assert.assertTrue(domainFactory.getTaskListData(nextDayBeforeExactTimeStamp, mContext, null).TaskDatas.size() == 1);
+        Assert.assertTrue(domainFactory.getTaskListData(nextDayBeforeExactTimeStamp, mContext, null).TaskDatas.get(0).Children.isEmpty());
+
+        Date nextDayAfterDate = nextDayBeforeDate;
+        HourMili nextDayAfterHourMili = new HourMili(2, 0, 0, 0);
+
+        ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMili);
+
+        DomainFactory.Irrelevant irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp);
+        Assert.assertTrue(irrelevantAfter != null);
+        Assert.assertTrue(irrelevantAfter.mCustomTimes.isEmpty());
+        Assert.assertTrue(irrelevantAfter.mTasks.size() == 1);
+        Assert.assertTrue(irrelevantAfter.mInstances.size() == 1);
+
+        Assert.assertTrue(rootTask.getOldestVisible().equals(nextDayAfterDate));
+
+        Assert.assertTrue(!rootTask.isVisible(nextDayAfterExactTimeStamp));
+
+        Assert.assertTrue(!rootInstance.isVisible(nextDayAfterExactTimeStamp));
+
+        Assert.assertTrue(!rootTask.isRelevant(nextDayAfterExactTimeStamp));
+        Assert.assertTrue(!rootInstance.isRelevant(nextDayAfterExactTimeStamp));
+
+        domainFactory.removeIrrelevant(irrelevantAfter);
+
+        Assert.assertTrue(domainFactory.getTaskListData(nextDayAfterExactTimeStamp, mContext, null).TaskDatas.isEmpty());
+    }
+
+    @Test
+    public void testRelevantSingleWithChildren() throws Exception {
         PersistenceManger persistenceManger = new PersistenceManger();
 
         DomainFactory domainFactory = new DomainFactory(persistenceManger);

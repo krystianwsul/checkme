@@ -36,10 +36,15 @@ public class WeeklyScheduleFragment extends RepeatingScheduleFragment {
 
     @Override
     protected ScheduleEntry firstScheduleEntry(boolean showDelete) {
-        if (mScheduleHint != null)
-            return new WeeklyScheduleEntry(mScheduleHint.mDate.getDayOfWeek(), mScheduleHint.mTimePair, showDelete);
-        else
+        if (mScheduleHint != null) {
+            if (mScheduleHint.mTimePair != null) {
+                return new WeeklyScheduleEntry(mScheduleHint.mDate.getDayOfWeek(), mScheduleHint.mTimePair, showDelete);
+            } else {
+                return new WeeklyScheduleEntry(mScheduleHint.mDate.getDayOfWeek(), showDelete);
+            }
+        } else {
             return new WeeklyScheduleEntry(DayOfWeek.today(), showDelete);
+        }
     }
 
     @Override

@@ -35,7 +35,7 @@ public class DailyScheduleFragment extends RepeatingScheduleFragment {
 
     @Override
     protected ScheduleEntry firstScheduleEntry(boolean showDelete) {
-        if (mScheduleHint != null)
+        if (mScheduleHint != null && mScheduleHint.mTimePair != null)
             return new DailyScheduleEntry(mScheduleHint.mTimePair, showDelete);
         else
             return new DailyScheduleEntry(showDelete);

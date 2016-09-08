@@ -47,7 +47,6 @@ public class SingleSchedule extends Schedule {
     }
 
     Instance getInstance(Task task) {
-        Assert.assertTrue(mSingleScheduleRecord != null);
         Assert.assertTrue(task != null);
 
         DomainFactory domainFactory = mDomainFactoryReference.get();
@@ -99,7 +98,7 @@ public class SingleSchedule extends Schedule {
             return instances;
         }
 
-        instances.add(getInstanceInternal(task));
+        instances.add(getInstance(task));
 
         return instances;
     }
@@ -122,23 +121,11 @@ public class SingleSchedule extends Schedule {
         }
     }
 
-    private Date getDate() {
+    Date getDate() {
         return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
     }
 
     private DateTime getDateTime() {
         return new DateTime(getDate(), getTime());
-    }
-
-    private Instance getInstanceInternal(Task task) {
-        Assert.assertTrue(task != null);
-
-        DateTime scheduleDateTime = getDateTime();
-        //Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp())); zone hack
-
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        return domainFactory.getInstance(task, scheduleDateTime);
     }
 }

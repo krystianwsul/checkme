@@ -682,20 +682,22 @@ public class DomainFactory {
 
             switch (scheduleType) {
                 case SINGLE:
-                    Assert.assertTrue(schedules.size() == 1); // todo schedule hack;
-
-                    SingleSchedule singleSchedule = (SingleSchedule) schedules.get(0);
-                    Assert.assertTrue(singleSchedule != null);
-                    Assert.assertTrue(singleSchedule.current(now));
-
-                    Instance instance = singleSchedule.getInstance(rootTask);
+                    Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.SINGLE)); // todo schedule hack;
 
                     scheduleDatas = new ArrayList<>();
-                    scheduleDatas.add(new ScheduleLoader.SingleScheduleData(instance.getInstanceDate(), instance.getInstanceTimePair()));
+                    for (Schedule schedule : schedules) {
+                        SingleSchedule singleSchedule = (SingleSchedule) schedule;
+                        Assert.assertTrue(singleSchedule != null);
+                        Assert.assertTrue(singleSchedule.current(now));
 
-                    CustomTime singleCustomTime = singleSchedule.getTime().getPair().first;
-                    if (singleCustomTime != null)
-                        customTimes.put(singleCustomTime.getId(), singleCustomTime);
+                        Pair<Date, Time> pair = new Pair<>(singleSchedule.getDate(), singleSchedule.getTime());
+
+                        scheduleDatas.add(new ScheduleLoader.SingleScheduleData(pair.first, pair.second.getTimePair()));
+
+                        CustomTime weeklyCustomTime = pair.second.getPair().first;
+                        if (weeklyCustomTime != null)
+                            customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                    }
                     break;
                 case DAILY:
                     Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.DAILY)); // todo schedule hack;
@@ -1048,20 +1050,6 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createSingleScheduleRootTask(int dataId, String name, Date date, TimePair timePair) {
-        MyCrashlytics.log("DomainFactory.createSingleScheduleRootTask");
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(timePair != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        createSingleScheduleRootTask(now, name, date, timePair);
-
-        save(dataId);
-    }
-
     Task createSingleScheduleRootTask(ExactTimeStamp now, String name, Date date, TimePair timePair) {
         Assert.assertTrue(now != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1102,55 +1090,6 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateSingleScheduleTask(int dataId, int taskId, String name, Date date, TimePair timePair) {
-        MyCrashlytics.log("DomainFactory.updateSingleScheduleTask");
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(timePair != null);
-
-        Task task = mTasks.get(taskId);
-        Assert.assertTrue(task != null);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-        Assert.assertTrue(task.current(now));
-
-        task.setName(name);
-
-        if (task.isRootTask(now) && task.getCurrentSchedules(now).size() == 1 && task.getCurrentSchedules(now).get(0).getType() == ScheduleType.SINGLE) {
-            List<Schedule> schedules = task.getCurrentSchedules(now);
-            Assert.assertTrue(schedules != null);
-            Assert.assertTrue(schedules.size() == 1);
-
-            SingleSchedule singleSchedule = (SingleSchedule) schedules.get(0);
-
-            Instance instance = singleSchedule.getInstance(task);
-            Assert.assertTrue(instance != null);
-
-            instance.setInstanceDateTime(date, timePair, now);
-        } else {
-            if (task.isRootTask(now)) {
-                List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
-                Assert.assertTrue(schedules != null);
-
-                Stream.of(schedules)
-                        .forEach(schedule -> schedule.setEndExactTimeStamp(now));
-            } else {
-                TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
-                Assert.assertTrue(taskHierarchy != null);
-
-                taskHierarchy.setEndExactTimeStamp(now);
-            }
-
-            Schedule schedule = createSingleSchedule(task, date, getTime(timePair), now);
-            Assert.assertTrue(schedule != null);
-
-            task.addSchedule(schedule);
-        }
-
-        save(dataId);
-    }
-
     public synchronized void updateScheduleTask(int dataId, int taskId, String name, List<ScheduleLoader.ScheduleData> scheduleDatas) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
 
@@ -1184,33 +1123,6 @@ public class DomainFactory {
         Assert.assertTrue(!schedules.isEmpty());
 
         task.addSchedules(schedules);
-
-        save(dataId);
-    }
-
-    public synchronized void createSingleScheduleJoinRootTask(int dataId, String name, Date date, TimePair timePair, List<Integer> joinTaskIds) {
-        MyCrashlytics.log("DomainFactory.createSingleScheduleJoinRootTask");
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(timePair != null);
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        Task rootTask = createRootTaskHelper(name, now);
-        Assert.assertTrue(rootTask != null);
-
-        Time time = getTime(timePair);
-        Assert.assertTrue(time != null);
-
-        Schedule schedule = createSingleSchedule(rootTask, date, time, now);
-        Assert.assertTrue(schedule != null);
-
-        rootTask.addSchedule(schedule);
-
-        joinTasks(rootTask, joinTaskIds, now);
 
         save(dataId);
     }
@@ -1562,7 +1474,7 @@ public class DomainFactory {
         if (taskHierarchy != null)
             taskHierarchy.setEndExactTimeStamp(now);
 
-        List<Schedule> schedules = task.getCurrentSchedules(now); // todo schedule hack
+        List<Schedule> schedules = task.getCurrentSchedules(now);
         Assert.assertTrue(schedules != null);
 
         Stream.of(schedules)
@@ -1874,8 +1786,24 @@ public class DomainFactory {
             Assert.assertTrue(scheduleData != null);
 
             switch (scheduleData.getScheduleType()) {
-                case SINGLE: // todo schedule hack
-                    throw new UnsupportedOperationException();
+                case SINGLE: {
+                    ScheduleLoader.SingleScheduleData singleScheduleData = (ScheduleLoader.SingleScheduleData) scheduleData;
+
+                    Date date = singleScheduleData.Date;
+                    Time time = getTime(singleScheduleData.TimePair);
+
+                    Assert.assertTrue(date != null);
+                    Assert.assertTrue(time != null);
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startExactTimeStamp);
+                    Assert.assertTrue(scheduleRecord != null);
+
+                    SingleScheduleRecord singleScheduleRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
+                    Assert.assertTrue(singleScheduleRecord != null);
+
+                    schedules.add(new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleRecord));
+                    break;
+                }
                 case DAILY: {
                     ScheduleLoader.DailyScheduleData dailyScheduleData = (ScheduleLoader.DailyScheduleData) scheduleData;
 

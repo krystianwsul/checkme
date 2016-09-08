@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -47,8 +48,9 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
 
     private static final String SCHEDULE_ENTRY_KEY = "scheduleEntries";
 
-    private static final String WEEKLY_SCHEDULE_DIALOG = "weeklyScheduleDialog";
+    private static final String SINGLE_SCHEDULE_DIALOG_TAG = "singleScheduleDialog";
     private static final String DAILY_SCHEDULE_DIALOG_TAG = "dailyScheduleDialog";
+    private static final String WEEKLY_SCHEDULE_DIALOG_TAG = "weeklyScheduleDialog";
 
     private int mHourMinutePickerPosition = -1;
 
@@ -68,6 +70,27 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
 
     private List<ScheduleEntry> mScheduleEntries;
 
+    private final SingleScheduleDialogFragment.SingleScheduleDialogListener mSingleScheduleDialogListener = new SingleScheduleDialogFragment.SingleScheduleDialogListener() {
+        @Override
+        public void onSingleScheduleDialogResult(Date date, TimePairPersist timePairPersist) {
+            Assert.assertTrue(date != null);
+            Assert.assertTrue(timePairPersist != null);
+
+            Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mData != null);
+
+            SingleScheduleEntry singleScheduleEntry = (SingleScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
+            Assert.assertTrue(singleScheduleEntry != null);
+
+            singleScheduleEntry.mDate = date;
+            singleScheduleEntry.mTimePairPersist = timePairPersist;
+
+            mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
+
+            mHourMinutePickerPosition = -1;
+        }
+    };
+
     private final DailyScheduleDialogFragment.DailyScheduleDialogListener mDailyScheduleDialogListener = new DailyScheduleDialogFragment.DailyScheduleDialogListener() {
         @Override
         public void onDailyScheduleDialogResult(TimePairPersist timePairPersist) {
@@ -75,7 +98,7 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
             Assert.assertTrue(mHourMinutePickerPosition != -1);
             Assert.assertTrue(mData != null);
 
-            DailyScheduleFragment.DailyScheduleEntry dailyScheduleEntry = (DailyScheduleFragment.DailyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
+            DailyScheduleEntry dailyScheduleEntry = (DailyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
             Assert.assertTrue(dailyScheduleEntry != null);
 
             dailyScheduleEntry.mTimePairPersist = timePairPersist;
@@ -94,7 +117,7 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
             Assert.assertTrue(mHourMinutePickerPosition != -1);
             Assert.assertTrue(mData != null);
 
-            WeeklyScheduleFragment.WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleFragment.WeeklyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
+            WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
             Assert.assertTrue(weeklyScheduleEntry != null);
 
             weeklyScheduleEntry.mDayOfWeek = dayOfWeek;
@@ -183,8 +206,6 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRY_KEY)) && mData.ScheduleDatas != null) {
             Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
             Assert.assertTrue(mScheduleEntries == null);
-            Assert.assertTrue(Stream.of(mData.ScheduleDatas)
-                    .allMatch(scheduleData -> scheduleData.getScheduleType() == ScheduleType.DAILY || scheduleData.getScheduleType() == ScheduleType.WEEKLY)); // todo schedule hack
 
             mFirst = false;
 
@@ -193,11 +214,11 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
                     .map(scheduleData -> {
                         switch (scheduleData.getScheduleType()) {
                             case SINGLE:
-                                throw new UnsupportedOperationException(); // todo schedule hack
+                                return new SingleScheduleEntry(((ScheduleLoader.SingleScheduleData) scheduleData).Date, ((ScheduleLoader.SingleScheduleData) scheduleData).TimePair, showDelete);
                             case DAILY:
-                                return new DailyScheduleFragment.DailyScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete);
+                                return new DailyScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete);
                             case WEEKLY:
-                                return new WeeklyScheduleFragment.WeeklyScheduleEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair, showDelete);
+                                return new WeeklyScheduleEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair, showDelete);
                             default:
                                 throw new UnsupportedOperationException();
                         }
@@ -212,7 +233,7 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
         if (dailyScheduleDialogFragment != null)
             dailyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mDailyScheduleDialogListener);
 
-        WeeklyScheduleDialogFragment weeklyScheduleDialogFragment = (WeeklyScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(WEEKLY_SCHEDULE_DIALOG);
+        WeeklyScheduleDialogFragment weeklyScheduleDialogFragment = (WeeklyScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(WEEKLY_SCHEDULE_DIALOG_TAG);
         if (weeklyScheduleDialogFragment != null)
             weeklyScheduleDialogFragment.initialize(data.CustomTimeDatas, mWeeklyScheduleDialogListener);
 
@@ -430,9 +451,17 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
 
                 switch (scheduleEntry.getScheduleType()) {
                     case SINGLE:
-                        throw new UnsupportedOperationException(); // todo schedule hack
+                        SingleScheduleEntry singleScheduleEntry = (SingleScheduleEntry) scheduleEntry;
+
+                        SingleScheduleDialogFragment singleScheduleDialogFragment = SingleScheduleDialogFragment.newInstance(singleScheduleEntry.mDate, singleScheduleEntry.mTimePairPersist);
+                        Assert.assertTrue(singleScheduleDialogFragment != null);
+
+                        singleScheduleDialogFragment.initialize(mData.CustomTimeDatas, mSingleScheduleDialogListener);
+
+                        singleScheduleDialogFragment.show(getChildFragmentManager(), SINGLE_SCHEDULE_DIALOG_TAG);
+                        break;
                     case DAILY:
-                        DailyScheduleFragment.DailyScheduleEntry dailyScheduleEntry = (DailyScheduleFragment.DailyScheduleEntry) scheduleEntry;
+                        DailyScheduleEntry dailyScheduleEntry = (DailyScheduleEntry) scheduleEntry;
 
                         DailyScheduleDialogFragment dailyScheduleDialogFragment = DailyScheduleDialogFragment.newInstance(dailyScheduleEntry.mTimePairPersist);
                         Assert.assertTrue(dailyScheduleDialogFragment != null);
@@ -442,14 +471,14 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
                         dailyScheduleDialogFragment.show(getChildFragmentManager(), DAILY_SCHEDULE_DIALOG_TAG);
                         break;
                     case WEEKLY:
-                        WeeklyScheduleFragment.WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleFragment.WeeklyScheduleEntry) scheduleEntry;
+                        WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleEntry) scheduleEntry;
 
                         WeeklyScheduleDialogFragment weeklyScheduleDialogFragment = WeeklyScheduleDialogFragment.newInstance(weeklyScheduleEntry.mDayOfWeek, weeklyScheduleEntry.mTimePairPersist);
                         Assert.assertTrue(weeklyScheduleDialogFragment != null);
 
                         weeklyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mWeeklyScheduleDialogListener);
 
-                        weeklyScheduleDialogFragment.show(getChildFragmentManager(), WEEKLY_SCHEDULE_DIALOG);
+                        weeklyScheduleDialogFragment.show(getChildFragmentManager(), WEEKLY_SCHEDULE_DIALOG_TAG);
                         break;
                     default:
                         throw new UnsupportedOperationException();
@@ -489,12 +518,12 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
                 Assert.assertTrue(scheduleType != null);
 
                 switch (scheduleType) {
-                    case SINGLE: // todo schedule hack
-                        throw new UnsupportedOperationException();
+                    case SINGLE:
+                        return new SingleScheduleEntry(in);
                     case DAILY:
-                        return new DailyScheduleFragment.DailyScheduleEntry(in);
+                        return new DailyScheduleEntry(in);
                     case WEEKLY:
-                        return new WeeklyScheduleFragment.WeeklyScheduleEntry(in);
+                        return new WeeklyScheduleEntry(in);
                     default:
                         throw new UnsupportedOperationException();
                 }
@@ -505,6 +534,87 @@ public abstract class RepeatingScheduleFragment extends Fragment implements Sche
                 return new ScheduleEntry[size];
             }
         };
+    }
+
+    public static class SingleScheduleEntry extends RepeatingScheduleFragment.ScheduleEntry {
+        public Date mDate;
+        private boolean mShowDelete = false;
+
+        public SingleScheduleEntry(Date date, boolean showDelete) {
+            Assert.assertTrue(date != null);
+
+            mDate = date;
+            mTimePairPersist = new TimePairPersist();
+            mShowDelete = showDelete;
+        }
+
+        public SingleScheduleEntry(Date date, TimePair timePair, boolean showDelete) {
+            Assert.assertTrue(date != null);
+            Assert.assertTrue(timePair != null);
+
+            mDate = date;
+            mTimePairPersist = new TimePairPersist(timePair);
+            mShowDelete = showDelete;
+        }
+
+        public SingleScheduleEntry(Parcel parcel) {
+            Assert.assertTrue(parcel != null);
+
+            mDate = parcel.readParcelable(Date.class.getClassLoader());
+            Assert.assertTrue(mDate != null);
+
+            mTimePairPersist = parcel.readParcelable(TimePairPersist.class.getClassLoader());
+            Assert.assertTrue(mTimePairPersist != null);
+
+            int showDeleteInt = parcel.readInt();
+            Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
+            mShowDelete = (showDeleteInt == 1);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeSerializable(ScheduleType.SINGLE);
+
+            out.writeParcelable(mDate, 0);
+            out.writeParcelable(mTimePairPersist, 0);
+            out.writeInt(mShowDelete ? 1 : 0);
+        }
+
+        @Override
+        public boolean getShowDelete() {
+            return mShowDelete;
+        }
+
+        @Override
+        public void setShowDelete(boolean delete) {
+            mShowDelete = delete;
+        }
+
+        public static final Creator<ScheduleEntry> CREATOR = ScheduleEntry.CREATOR;
+
+        @Override
+        public ScheduleType getScheduleType() {
+            return ScheduleType.SINGLE;
+        }
+
+        @Override
+        public String getText(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
+            Assert.assertTrue(customTimeDatas != null);
+
+            if (mTimePairPersist.getCustomTimeId() != null) {
+                ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                Assert.assertTrue(customTimeData != null);
+
+                return mDate + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
+            } else {
+                return mDate + ", " + mTimePairPersist.getHourMinute().toString();
+            }
+        }
+
+        @Override
+        public ScheduleLoader.ScheduleData getScheduleData() {
+            return new ScheduleLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
+        }
     }
 
     public static class DailyScheduleEntry extends RepeatingScheduleFragment.ScheduleEntry {

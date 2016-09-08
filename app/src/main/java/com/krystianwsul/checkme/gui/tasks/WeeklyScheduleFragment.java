@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek;
 
 import junit.framework.Assert;
 
-public class WeeklyScheduleFragment extends RepeatingScheduleFragment {
+public class WeeklyScheduleFragment extends ScheduleFragment {
     public static WeeklyScheduleFragment newInstance() {
         return new WeeklyScheduleFragment();
     }

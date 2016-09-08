@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.MyCrashlytics;
 
 import junit.framework.Assert;
 
-public class DailyScheduleFragment extends RepeatingScheduleFragment {
+public class DailyScheduleFragment extends ScheduleFragment {
     public static DailyScheduleFragment newInstance() {
         return new DailyScheduleFragment();
     }

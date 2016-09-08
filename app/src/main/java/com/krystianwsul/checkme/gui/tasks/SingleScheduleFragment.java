@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 
 import junit.framework.Assert;
 
-public class SingleScheduleFragment extends RepeatingScheduleFragment {
+public class SingleScheduleFragment extends ScheduleFragment {
     public static SingleScheduleFragment newInstance() {
         return new SingleScheduleFragment();
     }

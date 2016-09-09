@@ -4,7 +4,9 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -70,11 +72,17 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
         }
     };
 
-    private DailyScheduleDialogListener mDailyScheduleDialogListener;
+    private DailyScheduleDialogListener mScheduleDialogListener;
 
     private TimePairPersist mTimePairPersist;
 
-    private TextView mDailyScheduleDialogTime;
+    private TextInputLayout mScheduleDialogDateLayout;
+    private TextView mScheduleDialogDate;
+
+    private Spinner mScheduleDialogDay;
+
+    private TextInputLayout mScheduleDialogTimeLayout;
+    private TextView mScheduleDialogTime;
 
     public static DailyScheduleDialogFragment newInstance(TimePairPersist timePairPersist) {
         Assert.assertTrue(timePairPersist != null);
@@ -92,22 +100,34 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
-                .customView(R.layout.row_daily_schedule_dialog, false)
+                .customView(R.layout.fragment_schedule_dialog, false)
                 .negativeText(android.R.string.cancel)
                 .positiveText(android.R.string.ok)
                 .onPositive((dialog, which) -> {
                     Assert.assertTrue(mCustomTimeDatas != null);
                     Assert.assertTrue(mTimePairPersist != null);
 
-                    mDailyScheduleDialogListener.onDailyScheduleDialogResult(mTimePairPersist);
+                    mScheduleDialogListener.onDailyScheduleDialogResult(mTimePairPersist);
                 })
                 .build();
 
         View view = materialDialog.getCustomView();
         Assert.assertTrue(view != null);
 
-        mDailyScheduleDialogTime = (TextView) view.findViewById(R.id.daily_schedule_dialog_time);
-        Assert.assertTrue(mDailyScheduleDialogTime != null);
+        mScheduleDialogDateLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_date_layout);
+        Assert.assertTrue(mScheduleDialogDateLayout != null);
+
+        mScheduleDialogDate = (TextView) view.findViewById(R.id.schedule_dialog_date);
+        Assert.assertTrue(mScheduleDialogDate != null);
+
+        mScheduleDialogDay = (Spinner) view.findViewById(R.id.schedule_dialog_day);
+        Assert.assertTrue(mScheduleDialogDay != null);
+
+        mScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_time_layout);
+        Assert.assertTrue(mScheduleDialogTimeLayout != null);
+
+        mScheduleDialogTime = (TextView) view.findViewById(R.id.schedule_dialog_time);
+        Assert.assertTrue(mScheduleDialogTime != null);
 
         return materialDialog;
     }
@@ -129,7 +149,7 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
             Assert.assertTrue(mTimePairPersist != null);
         }
 
-        mDailyScheduleDialogTime.setOnClickListener(v -> {
+        mScheduleDialogTime.setOnClickListener(v -> {
             Assert.assertTrue(mCustomTimeDatas != null);
 
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = Stream.of(mCustomTimeDatas.values())
@@ -162,7 +182,7 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
         Assert.assertTrue(dailyScheduleDialogListener != null);
 
         mCustomTimeDatas = customTimeDatas;
-        mDailyScheduleDialogListener = dailyScheduleDialogListener;
+        mScheduleDialogListener = dailyScheduleDialogListener;
 
         if (getActivity() != null)
             initialize();
@@ -170,9 +190,11 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
 
     private void initialize() {
         Assert.assertTrue(mCustomTimeDatas != null);
-        Assert.assertTrue(mDailyScheduleDialogListener != null);
+        Assert.assertTrue(mScheduleDialogListener != null);
         Assert.assertTrue(mTimePairPersist != null);
-        Assert.assertTrue(mDailyScheduleDialogTime != null);
+        Assert.assertTrue(mScheduleDialogTime != null);
+
+        mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
 
         updateTime();
     }
@@ -185,9 +207,9 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
             ScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
-            mDailyScheduleDialogTime.setText(customTimeData.Name);
+            mScheduleDialogTime.setText(customTimeData.Name);
         } else {
-            mDailyScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
+            mScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
         }
     }
 

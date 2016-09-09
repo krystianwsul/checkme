@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -78,9 +79,13 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
         }
     };
 
-    private Spinner mWeeklyScheduleDialogDay;
+    private TextInputLayout mScheduleDialogDateLayout;
+    private TextView mScheduleDialogDate;
 
-    private TextView mWeeklyScheduleDialogTime;
+    private Spinner mScheduleDialogDay;
+
+    private TextInputLayout mScheduleDialogTimeLayout;
+    private TextView mScheduleDialogTime;
 
     private DayOfWeek mDayOfWeek;
     private TimePairPersist mTimePairPersist;
@@ -105,7 +110,7 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
-                .customView(R.layout.row_weekly_schedule_dialog, false)
+                .customView(R.layout.fragment_schedule_dialog, false)
                 .negativeText(android.R.string.cancel)
                 .positiveText(android.R.string.ok)
                 .onPositive((dialog, which) -> {
@@ -116,14 +121,23 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
                 })
                 .build();
 
-        View weeklyScheduleRow = materialDialog.getCustomView();
-        Assert.assertTrue(weeklyScheduleRow != null);
+        View view = materialDialog.getCustomView();
+        Assert.assertTrue(view != null);
 
-        mWeeklyScheduleDialogDay = (Spinner) weeklyScheduleRow.findViewById(R.id.weekly_schedule_dialog_day);
-        Assert.assertTrue(mWeeklyScheduleDialogDay != null);
+        mScheduleDialogDateLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_date_layout);
+        Assert.assertTrue(mScheduleDialogDateLayout != null);
 
-        mWeeklyScheduleDialogTime = (TextView) weeklyScheduleRow.findViewById(R.id.weekly_schedule_dialog_time);
-        Assert.assertTrue(mWeeklyScheduleDialogTime != null);
+        mScheduleDialogDate = (TextView) view.findViewById(R.id.schedule_dialog_date);
+        Assert.assertTrue(mScheduleDialogDate != null);
+
+        mScheduleDialogDay = (Spinner) view.findViewById(R.id.schedule_dialog_day);
+        Assert.assertTrue(mScheduleDialogDay != null);
+
+        mScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_time_layout);
+        Assert.assertTrue(mScheduleDialogTimeLayout != null);
+
+        mScheduleDialogTime = (TextView) view.findViewById(R.id.schedule_dialog_time);
+        Assert.assertTrue(mScheduleDialogTime != null);
 
         return materialDialog;
     }
@@ -157,10 +171,10 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
         final ArrayAdapter<DayOfWeek> dayOfWeekAdapter = new ArrayAdapter<>(getContext(), R.layout.spinner_no_padding, DayOfWeek.values());
         dayOfWeekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        mWeeklyScheduleDialogDay.setAdapter(dayOfWeekAdapter);
-        mWeeklyScheduleDialogDay.setSelection(dayOfWeekAdapter.getPosition(mDayOfWeek));
+        mScheduleDialogDay.setAdapter(dayOfWeekAdapter);
+        mScheduleDialogDay.setSelection(dayOfWeekAdapter.getPosition(mDayOfWeek));
 
-        mWeeklyScheduleDialogDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mScheduleDialogDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 DayOfWeek dayOfWeek = dayOfWeekAdapter.getItem(position);
@@ -177,7 +191,7 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
             }
         });
 
-        mWeeklyScheduleDialogTime.setOnClickListener(v -> {
+        mScheduleDialogTime.setOnClickListener(v -> {
             Assert.assertTrue(mCustomTimeDatas != null);
 
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mCustomTimeDatas.values())
@@ -211,9 +225,9 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
             ScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
-            mWeeklyScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")");
+            mScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")");
         } else {
-            mWeeklyScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
+            mScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
         }
     }
 
@@ -239,6 +253,9 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
         Assert.assertTrue(mCustomTimeDatas != null);
         Assert.assertTrue(mWeeklyScheduleDialogListener != null);
         Assert.assertTrue(getActivity() != null);
+
+        mScheduleDialogDay.setVisibility(View.VISIBLE);
+        mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
 
         updateTime();
     }

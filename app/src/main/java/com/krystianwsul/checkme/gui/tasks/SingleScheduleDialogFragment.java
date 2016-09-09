@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.view.View;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -49,10 +50,13 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
     private Map<Integer, ScheduleLoader.CustomTimeData> mCustomTimeDatas;
     private SingleScheduleDialogListener mSingleScheduleDialogListener;
 
-    private TextInputLayout mSingleScheduleDialogDateLayout;
-    private TextView mSingleScheduleDialogDate;
-    private TextInputLayout mSingleScheduleDialogTimeLayout;
-    private TextView mSingleScheduleDialogTime;
+    private TextInputLayout mScheduleDialogDateLayout;
+    private TextView mScheduleDialogDate;
+
+    private Spinner mScheduleDialogDay;
+
+    private TextInputLayout mScheduleDialogTimeLayout;
+    private TextView mScheduleDialogTime;
 
     private Date mDate;
     private TimePairPersist mTimePairPersist;
@@ -110,7 +114,7 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
-                .customView(R.layout.fragment_single_schedule_dialog, false)
+                .customView(R.layout.fragment_schedule_dialog, false)
                 .negativeText(android.R.string.cancel)
                 .positiveText(android.R.string.ok)
                 .onPositive((dialog, which) -> {
@@ -125,17 +129,20 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
         View view = materialDialog.getCustomView();
         Assert.assertTrue(view != null);
 
-        mSingleScheduleDialogDateLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_dialog_date_layout);
-        Assert.assertTrue(mSingleScheduleDialogDateLayout != null);
+        mScheduleDialogDateLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_date_layout);
+        Assert.assertTrue(mScheduleDialogDateLayout != null);
 
-        mSingleScheduleDialogDate = (TextView) view.findViewById(R.id.single_schedule_dialog_date);
-        Assert.assertTrue(mSingleScheduleDialogDate != null);
+        mScheduleDialogDate = (TextView) view.findViewById(R.id.schedule_dialog_date);
+        Assert.assertTrue(mScheduleDialogDate != null);
 
-        mSingleScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.single_schedule_dialog_time_layout);
-        Assert.assertTrue(mSingleScheduleDialogTimeLayout != null);
+        mScheduleDialogDay = (Spinner) view.findViewById(R.id.schedule_dialog_day);
+        Assert.assertTrue(mScheduleDialogDay != null);
 
-        mSingleScheduleDialogTime = (TextView) view.findViewById(R.id.single_schedule_dialog_time);
-        Assert.assertTrue(mSingleScheduleDialogTime != null);
+        mScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_time_layout);
+        Assert.assertTrue(mScheduleDialogTimeLayout != null);
+
+        mScheduleDialogTime = (TextView) view.findViewById(R.id.schedule_dialog_time);
+        Assert.assertTrue(mScheduleDialogTime != null);
 
         mButton = materialDialog.getActionButton(DialogAction.POSITIVE);
         Assert.assertTrue(mButton != null);
@@ -177,8 +184,8 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
     }
 
     private void initialize() {
-        mSingleScheduleDialogDateLayout.setVisibility(View.VISIBLE);
-        mSingleScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+        mScheduleDialogDateLayout.setVisibility(View.VISIBLE);
+        mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
 
         updateDateText();
     }
@@ -187,7 +194,7 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mSingleScheduleDialogTime.setOnClickListener(v -> {
+        mScheduleDialogTime.setOnClickListener(v -> {
             Assert.assertTrue(mCustomTimeDatas != null);
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mCustomTimeDatas.values())
                     .sortBy(customTimeData -> customTimeData.HourMinutes.get(mDate.getDayOfWeek()))
@@ -214,7 +221,7 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
             mDate = new Date(year, monthOfYear + 1, dayOfMonth);
             updateDateText();
         };
-        mSingleScheduleDialogDate.setOnClickListener(v -> {
+        mScheduleDialogDate.setOnClickListener(v -> {
             MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
             calendarDatePickerDialogFragment.setDate(mDate);
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
@@ -267,9 +274,9 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
 
     private void updateDateText() {
         Assert.assertTrue(mDate != null);
-        Assert.assertTrue(mSingleScheduleDialogDate != null);
+        Assert.assertTrue(mScheduleDialogDate != null);
 
-        mSingleScheduleDialogDate.setText(mDate.getDisplayText(getContext()));
+        mScheduleDialogDate.setText(mDate.getDisplayText(getContext()));
 
         updateTimeText();
 
@@ -279,7 +286,7 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
     @SuppressLint("SetTextI18n")
     private void updateTimeText() {
         Assert.assertTrue(mTimePairPersist != null);
-        Assert.assertTrue(mSingleScheduleDialogTime != null);
+        Assert.assertTrue(mScheduleDialogTime != null);
         Assert.assertTrue(mCustomTimeDatas != null);
         Assert.assertTrue(mDate != null);
 
@@ -287,9 +294,9 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
             ScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
             Assert.assertTrue(customTimeData != null);
 
-            mSingleScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
+            mScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
         } else {
-            mSingleScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
+            mScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
         }
     }
 
@@ -320,17 +327,17 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
         if (isValidDateTime()) {
             mButton.setEnabled(true);
 
-            mSingleScheduleDialogDateLayout.setError(null);
-            mSingleScheduleDialogTimeLayout.setError(null);
+            mScheduleDialogDateLayout.setError(null);
+            mScheduleDialogTimeLayout.setError(null);
         } else {
             mButton.setEnabled(false);
 
             if (isValidDate()) {
-                mSingleScheduleDialogDateLayout.setError(null);
-                mSingleScheduleDialogTimeLayout.setError(getString(R.string.error_time));
+                mScheduleDialogDateLayout.setError(null);
+                mScheduleDialogTimeLayout.setError(getString(R.string.error_time));
             } else {
-                mSingleScheduleDialogDateLayout.setError(getString(R.string.error_date));
-                mSingleScheduleDialogTimeLayout.setError(null);
+                mScheduleDialogDateLayout.setError(getString(R.string.error_date));
+                mScheduleDialogTimeLayout.setError(null);
             }
         }
     }

@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.TextView;
 
@@ -25,7 +24,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class DailyScheduleDialogFragment extends DialogFragment {
+public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
     private static final String TIME_PICKER_TAG = "timePicker";
     private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
 

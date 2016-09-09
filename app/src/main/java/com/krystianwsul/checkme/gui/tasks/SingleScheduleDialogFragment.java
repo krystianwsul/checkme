@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.TextView;
 
@@ -36,7 +35,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class SingleScheduleDialogFragment extends DialogFragment {
+public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
     private static final String DATE_STATE_KEY = "date";
     private static final String TIME_PAIR_PERSIST_STATE_KEY = "timePairPersist";
 

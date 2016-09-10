@@ -93,17 +93,14 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     public static class TaskData {
         public final String Name;
         public final Integer ParentTaskId;
-        public final com.krystianwsul.checkme.utils.ScheduleType ScheduleType;
         public final List<ScheduleData> ScheduleDatas;
 
-        public TaskData(@NonNull String name, Integer parentTaskId, ScheduleType scheduleType, List<ScheduleData> scheduleDatas) {
+        public TaskData(@NonNull String name, Integer parentTaskId, List<ScheduleData> scheduleDatas) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue((parentTaskId == null) || (scheduleType == null));
-            Assert.assertTrue((scheduleType == null) == (scheduleDatas == null));
+            Assert.assertTrue((parentTaskId == null) || (scheduleDatas == null));
 
             Name = name;
             ParentTaskId = parentTaskId;
-            ScheduleType = scheduleType;
             ScheduleDatas = scheduleDatas;
         }
 
@@ -112,15 +109,12 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             int hash = 0;
             hash += Name.hashCode();
             if (ParentTaskId != null) {
-                Assert.assertTrue(ScheduleType == null);
                 Assert.assertTrue(ScheduleDatas == null);
 
                 hash += ParentTaskId;
             } else {
-                Assert.assertTrue(ScheduleType != null);
                 Assert.assertTrue(ScheduleDatas != null);
 
-                hash += ScheduleType.hashCode();
                 hash += ScheduleDatas.hashCode();
             }
             return hash;
@@ -147,12 +141,6 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if ((ParentTaskId != null) && !ParentTaskId.equals(taskData.ParentTaskId))
-                return false;
-
-            if ((ScheduleType == null) != (taskData.ScheduleType == null))
-                return false;
-
-            if ((ScheduleType != null) && !ScheduleType.equals(taskData.ScheduleType))
                 return false;
 
             if ((ScheduleDatas == null) != (taskData.ScheduleDatas == null))

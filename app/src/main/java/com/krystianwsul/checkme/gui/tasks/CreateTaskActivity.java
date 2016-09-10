@@ -638,7 +638,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     return true;
 
                 return false;
-            } else if (mData.TaskData.ScheduleType != null) {
+            } else if (mData.TaskData.ScheduleDatas != null) {
                 if (!hasValueSchedule())
                     return true;
 

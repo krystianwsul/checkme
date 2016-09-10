@@ -623,7 +623,6 @@ public class DomainFactory {
             Assert.assertTrue(task != null);
 
             Integer parentTaskId;
-            ScheduleType scheduleType;
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
 
             if (task.isRootTask(now)) {
@@ -632,25 +631,16 @@ public class DomainFactory {
 
                 parentTaskId = null;
 
-                if (schedules.isEmpty()) {
-                    scheduleType = null;
-                } else {
-                    scheduleType = schedules.get(0).getType();
-                    Assert.assertTrue(scheduleType != null);
+                if (!schedules.isEmpty()) {
+                    scheduleDatas = new ArrayList<>();
 
-                    Assert.assertTrue(Stream.of(schedules)
-                            .allMatch(schedule -> schedule.getType() == scheduleType));
-                    // todo schedule hack
+                    for (Schedule schedule : schedules) {
+                        Assert.assertTrue(schedule != null);
+                        Assert.assertTrue(schedule.current(now));
 
-                    switch (scheduleType) {
-                        case SINGLE:
-                            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.SINGLE)); // todo schedule hack;
-
-                            scheduleDatas = new ArrayList<>();
-                            for (Schedule schedule : schedules) {
+                        switch (schedule.getType()) {
+                            case SINGLE: {
                                 SingleSchedule singleSchedule = (SingleSchedule) schedule;
-                                Assert.assertTrue(singleSchedule != null);
-                                Assert.assertTrue(singleSchedule.current(now));
 
                                 Pair<Date, Time> pair = new Pair<>(singleSchedule.getDate(), singleSchedule.getTime());
 
@@ -659,33 +649,24 @@ public class DomainFactory {
                                 CustomTime weeklyCustomTime = pair.second.getPair().first;
                                 if (weeklyCustomTime != null)
                                     customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                                break;
                             }
-                            break;
-                        case DAILY:
-                            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.DAILY)); // todo schedule hack;
+                            case DAILY: {
+                                DailySchedule dailySchedule = (DailySchedule) schedule;
 
-                            List<Time> times = Stream.of(schedules)
-                                    .map(schedule -> (DailySchedule) schedule)
-                                    .map(DailySchedule::getTime)
-                                    .collect(Collectors.toList());
+                                Time time = dailySchedule.getTime();
+                                Assert.assertTrue(time != null);
 
-                            scheduleDatas = new ArrayList<>();
-                            for (Time time : times) {
                                 scheduleDatas.add(new CreateTaskLoader.DailyScheduleData(time.getTimePair()));
 
                                 CustomTime dailyCustomTime = time.getPair().first;
                                 if (dailyCustomTime != null)
                                     customTimes.put(dailyCustomTime.getId(), dailyCustomTime);
-                            }
-                            break;
-                        case WEEKLY:
-                            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.WEEKLY)); // todo schedule hack;
 
-                            scheduleDatas = new ArrayList<>();
-                            for (Schedule schedule : schedules) {
+                                break;
+                            }
+                            case WEEKLY: {
                                 WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
-                                Assert.assertTrue(weeklySchedule != null);
-                                Assert.assertTrue(weeklySchedule.current(now));
 
                                 Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
                                 Assert.assertTrue(pair != null);
@@ -695,10 +676,14 @@ public class DomainFactory {
                                 CustomTime weeklyCustomTime = pair.second.getPair().first;
                                 if (weeklyCustomTime != null)
                                     customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+
+                                break;
                             }
-                            break;
-                        default:
-                            throw new UnsupportedOperationException();
+                            default: {
+                                throw new UnsupportedOperationException();
+                            }
+                        }
+
                     }
                 }
             } else {
@@ -706,10 +691,9 @@ public class DomainFactory {
                 Assert.assertTrue(parentTask != null);
 
                 parentTaskId = parentTask.getId();
-                scheduleType = null;
             }
 
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleType, scheduleDatas);
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleDatas);
         }
 
         TreeMap<Integer, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskIds);
@@ -1995,6 +1979,6 @@ public class DomainFactory {
             mCustomTimes = customTimes;
             mTasks = tasks;
             mInstances = instances;
-    }
+        }
     }
 }

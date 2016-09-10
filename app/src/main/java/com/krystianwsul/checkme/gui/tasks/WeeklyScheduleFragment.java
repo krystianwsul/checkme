@@ -38,12 +38,12 @@ public class WeeklyScheduleFragment extends ScheduleFragment {
     protected ScheduleEntry firstScheduleEntry(boolean showDelete) {
         if (mScheduleHint != null) {
             if (mScheduleHint.mTimePair != null) {
-                return new WeeklyScheduleEntry(mScheduleHint.mDate.getDayOfWeek(), mScheduleHint.mTimePair, showDelete);
+                return new ScheduleEntry(mScheduleHint.mDate.getDayOfWeek(), mScheduleHint.mTimePair, showDelete);
             } else {
-                return new WeeklyScheduleEntry(mScheduleHint.mDate.getDayOfWeek(), showDelete);
+                return new ScheduleEntry(mScheduleHint.mDate.getDayOfWeek(), showDelete);
             }
         } else {
-            return new WeeklyScheduleEntry(DayOfWeek.today(), showDelete);
+            return new ScheduleEntry(DayOfWeek.today(), showDelete);
         }
     }
 

@@ -38,12 +38,12 @@ public class SingleScheduleFragment extends ScheduleFragment {
     protected ScheduleEntry firstScheduleEntry(boolean showDelete) {
         if (mScheduleHint != null) {
             if (mScheduleHint.mTimePair != null) {
-                return new SingleScheduleEntry(mScheduleHint.mDate, mScheduleHint.mTimePair, showDelete);
+                return new ScheduleEntry(mScheduleHint.mDate, mScheduleHint.mTimePair, showDelete);
             } else {
-                return new SingleScheduleEntry(mScheduleHint.mDate, showDelete);
+                return new ScheduleEntry(mScheduleHint.mDate, showDelete);
             }
         } else {
-            return new SingleScheduleEntry(Date.today(), showDelete);
+            return new ScheduleEntry(Date.today(), showDelete);
         }
     }
 

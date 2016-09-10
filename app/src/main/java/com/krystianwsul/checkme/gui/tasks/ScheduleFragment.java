@@ -49,9 +49,7 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
 
     private static final String SCHEDULE_ENTRY_KEY = "scheduleEntries";
 
-    private static final String SINGLE_SCHEDULE_DIALOG_TAG = "singleScheduleDialog";
-    private static final String DAILY_SCHEDULE_DIALOG_TAG = "dailyScheduleDialog";
-    private static final String WEEKLY_SCHEDULE_DIALOG_TAG = "weeklyScheduleDialog";
+    private static final String SCHEDULE_DIALOG_TAG = "scheduleDialog";
 
     private int mHourMinutePickerPosition = -1;
 
@@ -71,51 +69,19 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
 
     private List<ScheduleEntry> mScheduleEntries;
 
-    private final ScheduleDialogFragment.ScheduleDialogListener mSingleScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
+    private final ScheduleDialogFragment.ScheduleDialogListener mScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
         @Override
         public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
             Assert.assertTrue(mHourMinutePickerPosition != -1);
             Assert.assertTrue(mData != null);
 
-            SingleScheduleEntry singleScheduleEntry = (SingleScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
-            Assert.assertTrue(singleScheduleEntry != null);
+            ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
+            Assert.assertTrue(scheduleEntry != null);
 
-            singleScheduleEntry.mDate = scheduleDialogData.mDate;
-            singleScheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
-
-            mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
-
-            mHourMinutePickerPosition = -1;
-        }
-    };
-
-    private final ScheduleDialogFragment.ScheduleDialogListener mDailyScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
-        @Override
-        public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-            Assert.assertTrue(mHourMinutePickerPosition != -1);
-            Assert.assertTrue(mData != null);
-
-            DailyScheduleEntry dailyScheduleEntry = (DailyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
-            Assert.assertTrue(dailyScheduleEntry != null);
-
-            dailyScheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
-            mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
-
-            mHourMinutePickerPosition = -1;
-        }
-    };
-
-    private final ScheduleDialogFragment.ScheduleDialogListener mWeeklyScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
-        @Override
-        public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-            Assert.assertTrue(mHourMinutePickerPosition != -1);
-            Assert.assertTrue(mData != null);
-
-            WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
-            Assert.assertTrue(weeklyScheduleEntry != null);
-
-            weeklyScheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
-            weeklyScheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
+            scheduleEntry.mDate = scheduleDialogData.mDate;
+            scheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
+            scheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
+            scheduleEntry.mScheduleType = scheduleDialogData.mScheduleType;
 
             mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
@@ -208,11 +174,11 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                     .map(scheduleData -> {
                         switch (scheduleData.getScheduleType()) {
                             case SINGLE:
-                                return new SingleScheduleEntry(((ScheduleLoader.SingleScheduleData) scheduleData).Date, ((ScheduleLoader.SingleScheduleData) scheduleData).TimePair, showDelete);
+                                return new ScheduleEntry(((ScheduleLoader.SingleScheduleData) scheduleData).Date, ((ScheduleLoader.SingleScheduleData) scheduleData).TimePair, showDelete);
                             case DAILY:
-                                return new DailyScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete);
+                                return new ScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair, showDelete);
                             case WEEKLY:
-                                return new WeeklyScheduleEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair, showDelete);
+                                return new ScheduleEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair, showDelete);
                             default:
                                 throw new UnsupportedOperationException();
                         }
@@ -220,17 +186,9 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                     .collect(Collectors.toList());
         }
 
-        ScheduleDialogFragment singleScheduleDialogFragment = (ScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(SINGLE_SCHEDULE_DIALOG_TAG);
-        if (singleScheduleDialogFragment != null)
-            singleScheduleDialogFragment.initialize(mData.CustomTimeDatas, mSingleScheduleDialogListener);
-
-        ScheduleDialogFragment dailyScheduleDialogFragment = (ScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(DAILY_SCHEDULE_DIALOG_TAG);
-        if (dailyScheduleDialogFragment != null)
-            dailyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mDailyScheduleDialogListener);
-
-        ScheduleDialogFragment weeklyScheduleDialogFragment = (ScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(WEEKLY_SCHEDULE_DIALOG_TAG);
-        if (weeklyScheduleDialogFragment != null)
-            weeklyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mWeeklyScheduleDialogListener);
+        ScheduleDialogFragment singleDialogFragment = (ScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(SCHEDULE_DIALOG_TAG);
+        if (singleDialogFragment != null)
+            singleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
 
         mScheduleAdapter = new ScheduleAdapter(getContext());
         mScheduleTimes.setAdapter(mScheduleAdapter);
@@ -443,37 +401,9 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                 ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
                 Assert.assertTrue(scheduleEntry != null);
 
-                switch (scheduleEntry.getScheduleType()) {
-                    case SINGLE:
-                        SingleScheduleEntry singleScheduleEntry = (SingleScheduleEntry) scheduleEntry;
-
-                        ScheduleDialogFragment singleScheduleDialogFragment = ScheduleDialogFragment.newInstance(singleScheduleEntry.getScheduleDialogData(mScheduleHint));
-
-                        singleScheduleDialogFragment.initialize(mData.CustomTimeDatas, mSingleScheduleDialogListener);
-
-                        singleScheduleDialogFragment.show(getChildFragmentManager(), SINGLE_SCHEDULE_DIALOG_TAG);
-                        break;
-                    case DAILY:
-                        DailyScheduleEntry dailyScheduleEntry = (DailyScheduleEntry) scheduleEntry;
-
-                        ScheduleDialogFragment dailyScheduleDialogFragment = ScheduleDialogFragment.newInstance(dailyScheduleEntry.getScheduleDialogData(mScheduleHint));
-
-                        dailyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mDailyScheduleDialogListener);
-
-                        dailyScheduleDialogFragment.show(getChildFragmentManager(), DAILY_SCHEDULE_DIALOG_TAG);
-                        break;
-                    case WEEKLY:
-                        WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleEntry) scheduleEntry;
-
-                        ScheduleDialogFragment weeklyScheduleDialogFragment = ScheduleDialogFragment.newInstance(weeklyScheduleEntry.getScheduleDialogData(mScheduleHint));
-
-                        weeklyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mWeeklyScheduleDialogListener);
-
-                        weeklyScheduleDialogFragment.show(getChildFragmentManager(), WEEKLY_SCHEDULE_DIALOG_TAG);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException();
-                }
+                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(mScheduleHint));
+                scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
+                scheduleDialogFragment.show(getChildFragmentManager(), SCHEDULE_DIALOG_TAG);
             }
 
             public void delete() {
@@ -484,41 +414,184 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
         }
     }
 
-    public static abstract class ScheduleEntry implements Parcelable {
+    public static class ScheduleEntry implements Parcelable {
+        public Date mDate;
+        public DayOfWeek mDayOfWeek;
         public TimePairPersist mTimePairPersist;
+        private boolean mShowDelete = false;
+        public ScheduleType mScheduleType;
+
+        public ScheduleEntry(@NonNull Date date, boolean showDelete) {
+            mDate = date;
+            mDayOfWeek = mDate.getDayOfWeek();
+            mTimePairPersist = new TimePairPersist();
+            mShowDelete = showDelete;
+            mScheduleType = ScheduleType.SINGLE;
+        }
+
+        public ScheduleEntry(@NonNull Date date, @NonNull TimePair timePair, boolean showDelete) {
+            mDate = date;
+            mDayOfWeek = mDate.getDayOfWeek();
+            mTimePairPersist = new TimePairPersist(timePair);
+            mShowDelete = showDelete;
+            mScheduleType = ScheduleType.SINGLE;
+        }
+
+        public ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, boolean showDelete, @NonNull ScheduleType scheduleType) {
+            mDate = date;
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = timePairPersist;
+            mShowDelete = showDelete;
+            mScheduleType = scheduleType;
+        }
+
+        public ScheduleEntry(@NonNull TimePair timePair, boolean showDelete) {
+            mDate = Date.today();
+            mDayOfWeek = mDate.getDayOfWeek();
+            mTimePairPersist = new TimePairPersist(timePair);
+            mShowDelete = showDelete;
+            mScheduleType = ScheduleType.DAILY;
+        }
+
+        public ScheduleEntry(boolean showDelete) {
+            mDate = Date.today();
+            mDayOfWeek = mDate.getDayOfWeek();
+            mTimePairPersist = new TimePairPersist();
+            mShowDelete = showDelete;
+            mScheduleType = ScheduleType.DAILY;
+        }
+
+        public ScheduleEntry(@NonNull DayOfWeek dayOfWeek, boolean showDelete) {
+            mDate = Date.today();
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = new TimePairPersist();
+            mShowDelete = showDelete;
+            mScheduleType = ScheduleType.WEEKLY;
+        }
+
+        public ScheduleEntry(@NonNull DayOfWeek dayOfWeek, @NonNull TimePair timePair, boolean showDelete) {
+            mDate = Date.today();
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = new TimePairPersist(timePair);
+            mShowDelete = showDelete;
+            mScheduleType = ScheduleType.WEEKLY;
+        }
+
+        @NonNull
+        public String getText(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
+            switch (mScheduleType) {
+                case SINGLE:
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return mDate + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
+                    } else {
+                        return mDate + ", " + mTimePairPersist.getHourMinute().toString();
+                    }
+                case DAILY:
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return customTimeData.Name;
+                    } else {
+                        return mTimePairPersist.getHourMinute().toString();
+                    }
+                case WEEKLY:
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return mDayOfWeek + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")";
+                    } else {
+                        return mDayOfWeek + ", " + mTimePairPersist.getHourMinute().toString();
+                    }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        public void setShowDelete(boolean delete) {
+            mShowDelete = delete;
+        }
+
+        public boolean getShowDelete() {
+            return mShowDelete;
+        }
+
+        @NonNull
+        public ScheduleLoader.ScheduleData getScheduleData() {
+            switch (mScheduleType) {
+                case SINGLE:
+                    return new ScheduleLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
+                case DAILY:
+                    return new ScheduleLoader.DailyScheduleData(mTimePairPersist.getTimePair());
+                case WEEKLY:
+                    return new ScheduleLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @SuppressWarnings("unused")
+        @NonNull
+        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
+            switch (mScheduleType) {
+                case SINGLE: {
+                    return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), mTimePairPersist, ScheduleType.SINGLE);
+                }
+                case DAILY: {
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), mTimePairPersist, ScheduleType.DAILY);
+                }
+                case WEEKLY: {
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, mTimePairPersist, ScheduleType.WEEKLY);
+                }
+                default: {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        }
 
         @Override
         public int describeContents() {
             return 0;
         }
 
-        public abstract ScheduleType getScheduleType();
-
-        public abstract String getText(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas);
-
-        public abstract void setShowDelete(boolean delete);
-
-        public abstract boolean getShowDelete();
-
-        public abstract ScheduleLoader.ScheduleData getScheduleData();
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeParcelable(mDate, 0);
+            parcel.writeSerializable(mDayOfWeek);
+            parcel.writeParcelable(mTimePairPersist, 0);
+            parcel.writeInt(mShowDelete ? 1 : 0);
+            parcel.writeSerializable(mScheduleType);
+        }
 
         @SuppressWarnings("unused")
         public static final Creator<ScheduleEntry> CREATOR = new Creator<ScheduleEntry>() {
             @Override
             public ScheduleEntry createFromParcel(Parcel in) {
+                Date date = in.readParcelable(Date.class.getClassLoader());
+                Assert.assertTrue(date != null);
+
+                DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
+                Assert.assertTrue(dayOfWeek != null);
+
+                TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
+                Assert.assertTrue(timePairPersist != null);
+
+                int showDeleteInt = in.readInt();
+                Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
+                boolean showDelete = (showDeleteInt == 1);
+
                 ScheduleType scheduleType = (ScheduleType) in.readSerializable();
                 Assert.assertTrue(scheduleType != null);
 
-                switch (scheduleType) {
-                    case SINGLE:
-                        return new SingleScheduleEntry(in);
-                    case DAILY:
-                        return new DailyScheduleEntry(in);
-                    case WEEKLY:
-                        return new WeeklyScheduleEntry(in);
-                    default:
-                        throw new UnsupportedOperationException();
-                }
+                return new ScheduleEntry(date, dayOfWeek, timePairPersist, showDelete, scheduleType);
             }
 
             @Override
@@ -526,265 +599,5 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                 return new ScheduleEntry[size];
             }
         };
-
-        @SuppressWarnings("unused")
-        @NonNull
-        public abstract ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint);
-    }
-
-    public static class SingleScheduleEntry extends ScheduleFragment.ScheduleEntry {
-        public Date mDate;
-        private boolean mShowDelete = false;
-
-        SingleScheduleEntry(Date date, boolean showDelete) {
-            Assert.assertTrue(date != null);
-
-            mDate = date;
-            mTimePairPersist = new TimePairPersist();
-            mShowDelete = showDelete;
-        }
-
-        public SingleScheduleEntry(Date date, TimePair timePair, boolean showDelete) {
-            Assert.assertTrue(date != null);
-            Assert.assertTrue(timePair != null);
-
-            mDate = date;
-            mTimePairPersist = new TimePairPersist(timePair);
-            mShowDelete = showDelete;
-        }
-
-        public SingleScheduleEntry(Parcel parcel) {
-            Assert.assertTrue(parcel != null);
-
-            mDate = parcel.readParcelable(Date.class.getClassLoader());
-            Assert.assertTrue(mDate != null);
-
-            mTimePairPersist = parcel.readParcelable(TimePairPersist.class.getClassLoader());
-            Assert.assertTrue(mTimePairPersist != null);
-
-            int showDeleteInt = parcel.readInt();
-            Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
-            mShowDelete = (showDeleteInt == 1);
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            out.writeSerializable(ScheduleType.SINGLE);
-
-            out.writeParcelable(mDate, 0);
-            out.writeParcelable(mTimePairPersist, 0);
-            out.writeInt(mShowDelete ? 1 : 0);
-        }
-
-        @Override
-        public boolean getShowDelete() {
-            return mShowDelete;
-        }
-
-        @Override
-        public void setShowDelete(boolean delete) {
-            mShowDelete = delete;
-        }
-
-        @SuppressWarnings("unused")
-        public static final Creator<ScheduleEntry> CREATOR = ScheduleEntry.CREATOR;
-
-        @Override
-        public ScheduleType getScheduleType() {
-            return ScheduleType.SINGLE;
-        }
-
-        @Override
-        public String getText(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
-            Assert.assertTrue(customTimeDatas != null);
-
-            if (mTimePairPersist.getCustomTimeId() != null) {
-                ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
-                Assert.assertTrue(customTimeData != null);
-
-                return mDate + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
-            } else {
-                return mDate + ", " + mTimePairPersist.getHourMinute().toString();
-            }
-        }
-
-        @Override
-        public ScheduleLoader.ScheduleData getScheduleData() {
-            return new ScheduleLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
-        }
-
-        @NonNull
-        @Override
-        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
-            return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), mTimePairPersist, ScheduleType.SINGLE);
-        }
-    }
-
-    public static class DailyScheduleEntry extends ScheduleFragment.ScheduleEntry {
-        private boolean mShowDelete;
-
-        public DailyScheduleEntry(Parcel parcel) {
-            Assert.assertTrue(parcel != null);
-
-            mTimePairPersist = parcel.readParcelable(TimePair.class.getClassLoader());
-            Assert.assertTrue(mTimePairPersist != null);
-
-            int showDeleteInt = parcel.readInt();
-            Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
-            mShowDelete = (showDeleteInt == 1);
-        }
-
-        public DailyScheduleEntry(TimePair timePair, boolean showDelete) {
-            Assert.assertTrue(timePair != null);
-
-            mTimePairPersist = new TimePairPersist(timePair);
-            mShowDelete = showDelete;
-        }
-
-        DailyScheduleEntry(boolean showDelete) {
-            mTimePairPersist = new TimePairPersist();
-            mShowDelete = showDelete;
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            out.writeSerializable(ScheduleType.DAILY);
-
-            out.writeParcelable(mTimePairPersist, 0);
-            out.writeInt(mShowDelete ? 1 : 0);
-        }
-
-        @Override
-        public boolean getShowDelete() {
-            return mShowDelete;
-        }
-
-        @Override
-        public void setShowDelete(boolean delete) {
-            mShowDelete = delete;
-        }
-
-        public static final Creator<ScheduleEntry> CREATOR = ScheduleEntry.CREATOR;
-
-        @Override
-        public ScheduleType getScheduleType() {
-            return ScheduleType.DAILY;
-        }
-
-        @Override
-        public String getText(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
-            Assert.assertTrue(customTimeDatas != null);
-
-            if (mTimePairPersist.getCustomTimeId() != null) {
-                ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
-                Assert.assertTrue(customTimeData != null);
-
-                return customTimeData.Name;
-            } else {
-                return mTimePairPersist.getHourMinute().toString();
-            }
-        }
-
-        @Override
-        public ScheduleLoader.ScheduleData getScheduleData() {
-            return new ScheduleLoader.DailyScheduleData(mTimePairPersist.getTimePair());
-        }
-
-        @NonNull
-        @Override
-        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
-            Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
-
-            return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), mTimePairPersist, ScheduleType.DAILY);
-        }
-    }
-
-    public static class WeeklyScheduleEntry extends ScheduleFragment.ScheduleEntry {
-        public DayOfWeek mDayOfWeek;
-        private boolean mShowDelete = false;
-
-        public WeeklyScheduleEntry(DayOfWeek dayOfWeek, boolean showDelete) {
-            Assert.assertTrue(dayOfWeek != null);
-
-            mDayOfWeek = dayOfWeek;
-            mTimePairPersist = new TimePairPersist();
-            mShowDelete = showDelete;
-        }
-
-        public WeeklyScheduleEntry(DayOfWeek dayOfWeek, TimePair timePair, boolean showDelete) {
-            Assert.assertTrue(dayOfWeek != null);
-            Assert.assertTrue(timePair != null);
-
-            mDayOfWeek = dayOfWeek;
-            mTimePairPersist = new TimePairPersist(timePair);
-            mShowDelete = showDelete;
-        }
-
-        public WeeklyScheduleEntry(Parcel parcel) {
-            Assert.assertTrue(parcel != null);
-
-            mDayOfWeek = (DayOfWeek) parcel.readSerializable();
-            Assert.assertTrue(mDayOfWeek != null);
-
-            mTimePairPersist = parcel.readParcelable(TimePairPersist.class.getClassLoader());
-            Assert.assertTrue(mTimePairPersist != null);
-
-            int showDeleteInt = parcel.readInt();
-            Assert.assertTrue(showDeleteInt == 0 || showDeleteInt == 1);
-            mShowDelete = (showDeleteInt == 1);
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            out.writeSerializable(ScheduleType.WEEKLY);
-
-            out.writeSerializable(mDayOfWeek);
-            out.writeParcelable(mTimePairPersist, 0);
-            out.writeInt(mShowDelete ? 1 : 0);
-        }
-
-        @Override
-        public boolean getShowDelete() {
-            return mShowDelete;
-        }
-
-        @Override
-        public void setShowDelete(boolean delete) {
-            mShowDelete = delete;
-        }
-
-        public static final Creator<ScheduleEntry> CREATOR = ScheduleEntry.CREATOR;
-
-        @Override
-        public ScheduleType getScheduleType() {
-            return ScheduleType.WEEKLY;
-        }
-
-        @Override
-        public String getText(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
-            Assert.assertTrue(customTimeDatas != null);
-
-            if (mTimePairPersist.getCustomTimeId() != null) {
-                ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
-                Assert.assertTrue(customTimeData != null);
-
-                return mDayOfWeek + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")";
-            } else {
-                return mDayOfWeek + ", " + mTimePairPersist.getHourMinute().toString();
-            }
-        }
-
-        @Override
-        public ScheduleLoader.ScheduleData getScheduleData() {
-            return new ScheduleLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
-        }
-
-        @NonNull
-        @Override
-        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
-            Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
-
-            return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, mTimePairPersist, ScheduleType.WEEKLY);
-        }
     }
 }

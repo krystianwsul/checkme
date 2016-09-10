@@ -1,194 +1,55 @@
 package com.krystianwsul.checkme.gui.tasks;
 
-import android.app.Dialog;
-import android.content.Intent;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
 import android.view.View;
-import android.widget.Spinner;
-import android.widget.TextView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
-import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.MyCrashlytics;
-import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.gui.TimeDialogFragment;
-import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.ScheduleLoader;
-import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
-    private static final String TIME_PICKER_TAG = "timePicker";
-    private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
-
-    private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
-
-    private static final String TIME_PAIR_PERSIST_STATE_KEY = "timePairPersist";
-
-    private Map<Integer, ScheduleLoader.CustomTimeData> mCustomTimeDatas;
-
-    private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
-        @Override
-        public void onCustomTimeSelected(int customTimeId) {
-            Assert.assertTrue(mCustomTimeDatas != null);
-
-            mTimePairPersist.setCustomTimeId(customTimeId);
-
-            updateTime();
-        }
-
-        @Override
-        public void onOtherSelected() {
-            Assert.assertTrue(mCustomTimeDatas != null);
-            RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
-            radialTimePickerDialogFragment.setStartTime(mTimePairPersist.getHourMinute().getHour(), mTimePairPersist.getHourMinute().getMinute());
-            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
-            radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
-        }
-
-        @Override
-        public void onAddSelected() {
-            startActivityForResult(ShowCustomTimeActivity.getCreateIntent(getActivity()), ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
-        }
-    };
-
-    private final RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = new RadialTimePickerDialogFragment.OnTimeSetListener() {
-        @Override
-        public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-            Assert.assertTrue(mCustomTimeDatas != null);
-
-            mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
-
-            updateTime();
-        }
-    };
-
     private DailyScheduleDialogListener mScheduleDialogListener;
 
-    private TimePairPersist mTimePairPersist;
-
-    private TextInputLayout mScheduleDialogDateLayout;
-    private TextView mScheduleDialogDate;
-
-    private Spinner mScheduleDialogDay;
-
-    private TextInputLayout mScheduleDialogTimeLayout;
-    private TextView mScheduleDialogTime;
-
-    public static DailyScheduleDialogFragment newInstance(TimePairPersist timePairPersist) {
-        Assert.assertTrue(timePairPersist != null);
-
+    @NonNull
+    public static DailyScheduleDialogFragment newInstance(@NonNull TimePairPersist timePairPersist) {
         DailyScheduleDialogFragment dailyScheduleFragment = new DailyScheduleDialogFragment();
 
         Bundle args = new Bundle();
+        args.putParcelable(DATE_KEY, null);
+        args.putSerializable(DAY_OF_WEEK_KEY, null);
         args.putParcelable(TIME_PAIR_PERSIST_KEY, timePairPersist.copy());
         dailyScheduleFragment.setArguments(args);
 
         return dailyScheduleFragment;
     }
 
-    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
-                .customView(R.layout.fragment_schedule_dialog, false)
-                .negativeText(android.R.string.cancel)
-                .positiveText(android.R.string.ok)
-                .onPositive((dialog, which) -> {
-                    Assert.assertTrue(mCustomTimeDatas != null);
-                    Assert.assertTrue(mTimePairPersist != null);
+    protected void onPositive() {
+        Assert.assertTrue(mCustomTimeDatas != null);
+        Assert.assertTrue(mScheduleDialogListener != null);
+        Assert.assertTrue(mTimePairPersist != null);
 
-                    mScheduleDialogListener.onDailyScheduleDialogResult(mTimePairPersist);
-                })
-                .build();
-
-        View view = materialDialog.getCustomView();
-        Assert.assertTrue(view != null);
-
-        mScheduleDialogDateLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_date_layout);
-        Assert.assertTrue(mScheduleDialogDateLayout != null);
-
-        mScheduleDialogDate = (TextView) view.findViewById(R.id.schedule_dialog_date);
-        Assert.assertTrue(mScheduleDialogDate != null);
-
-        mScheduleDialogDay = (Spinner) view.findViewById(R.id.schedule_dialog_day);
-        Assert.assertTrue(mScheduleDialogDay != null);
-
-        mScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_time_layout);
-        Assert.assertTrue(mScheduleDialogTimeLayout != null);
-
-        mScheduleDialogTime = (TextView) view.findViewById(R.id.schedule_dialog_time);
-        Assert.assertTrue(mScheduleDialogTime != null);
-
-        return materialDialog;
+        mScheduleDialogListener.onDailyScheduleDialogResult(mTimePairPersist);
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void initialize(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas, @NonNull DailyScheduleDialogListener dailyScheduleDialogListener) {
+        initialize(customTimeDatas);
 
-        Bundle args = getArguments();
-        Assert.assertTrue(args != null);
-
-        if (savedInstanceState != null) {
-            Assert.assertTrue(savedInstanceState.containsKey(TIME_PAIR_PERSIST_STATE_KEY));
-            mTimePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_STATE_KEY);
-            Assert.assertTrue(mTimePairPersist != null);
-        } else {
-            Assert.assertTrue(args.containsKey(TIME_PAIR_PERSIST_KEY));
-            mTimePairPersist = args.getParcelable(TIME_PAIR_PERSIST_KEY);
-            Assert.assertTrue(mTimePairPersist != null);
-        }
-
-        mScheduleDialogTime.setOnClickListener(v -> {
-            Assert.assertTrue(mCustomTimeDatas != null);
-
-            ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = Stream.of(mCustomTimeDatas.values())
-                    .sortBy(customTimeData -> customTimeData.Id)
-                    .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name))
-                    .collect(Collectors.toCollection(ArrayList::new));
-
-            TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas);
-            Assert.assertTrue(timeDialogFragment != null);
-
-            timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
-
-            timeDialogFragment.show(getChildFragmentManager(), TIME_LIST_FRAGMENT_TAG);
-        });
-
-        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
-        if (radialTimePickerDialogFragment != null)
-            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
-
-        TimeDialogFragment timeDialogFragment = (TimeDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_LIST_FRAGMENT_TAG);
-        if (timeDialogFragment != null)
-            timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
-
-        if (mCustomTimeDatas != null)
-            initialize();
-    }
-
-    public void initialize(Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas, DailyScheduleDialogListener dailyScheduleDialogListener) {
-        Assert.assertTrue(customTimeDatas != null);
-        Assert.assertTrue(dailyScheduleDialogListener != null);
-
-        mCustomTimeDatas = customTimeDatas;
         mScheduleDialogListener = dailyScheduleDialogListener;
 
         if (getActivity() != null)
             initialize();
     }
 
-    private void initialize() {
+    @Override
+    protected void initialize() {
         Assert.assertTrue(mCustomTimeDatas != null);
         Assert.assertTrue(mScheduleDialogListener != null);
         Assert.assertTrue(mTimePairPersist != null);
@@ -196,10 +57,12 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
 
         mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
 
-        updateTime();
+        updateFields();
     }
 
-    private void updateTime() {
+    @SuppressLint("SetTextI18n")
+    @Override
+    protected void updateFields() {
         Assert.assertTrue(mCustomTimeDatas != null);
         Assert.assertTrue(mTimePairPersist != null);
 
@@ -220,26 +83,13 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
         super.onResume();
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        Assert.assertTrue(mTimePairPersist != null);
-
-        outState.putParcelable(TIME_PAIR_PERSIST_STATE_KEY, mTimePairPersist);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
-        Assert.assertTrue(resultCode >= 0);
-        Assert.assertTrue(data == null);
-
-        if (resultCode > 0)
-            mTimePairPersist.setCustomTimeId(resultCode);
-    }
-
     public interface DailyScheduleDialogListener {
-        void onDailyScheduleDialogResult(TimePairPersist timePairPersist);
+        void onDailyScheduleDialogResult(@NonNull TimePairPersist timePairPersist);
+    }
+
+    @Override
+    @NonNull
+    protected ScheduleType getScheduleType() {
+        return ScheduleType.DAILY;
     }
 }

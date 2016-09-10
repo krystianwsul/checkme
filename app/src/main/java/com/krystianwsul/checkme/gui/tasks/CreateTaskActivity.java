@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -17,23 +21,33 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
+import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
+import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +63,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private static final String PARENT_ID = "parentId";
     private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
 
+    private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
+    private static final String SCHEDULE_ENTRY_KEY = "scheduleEntries";
+
+    private static final String SCHEDULE_DIALOG_TAG = "scheduleDialog";
+
     private Bundle mSavedInstanceState;
 
     private TextInputLayout mToolbarLayout;
@@ -60,7 +79,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private ArrayList<Integer> mTaskIds;
 
     private CreateTaskActivity.ScheduleHint mScheduleHint;
-    Integer mParentTaskIdHint = null;
+    private Integer mParentTaskIdHint = null;
     private String mNameHint = null;
 
     private CreateTaskLoader.Data mData;
@@ -77,6 +96,37 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mParent = taskData;
         mCreateChildTaskParent.setText(taskData.Name);
+    };
+
+    private RecyclerView mScheduleTimes;
+    private ScheduleAdapter mScheduleAdapter;
+
+    private FloatingActionButton mScheduleFab;
+
+    private int mHourMinutePickerPosition = -1;
+
+    private List<ScheduleEntry> mScheduleEntries;
+
+    private boolean mFirst = true;
+
+    private final ScheduleDialogFragment.ScheduleDialogListener mScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
+        @Override
+        public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
+            Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mData != null);
+
+            ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
+            Assert.assertTrue(scheduleEntry != null);
+
+            scheduleEntry.mDate = scheduleDialogData.mDate;
+            scheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
+            scheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
+            scheduleEntry.mScheduleType = scheduleDialogData.mScheduleType;
+
+            mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
+
+            mHourMinutePickerPosition = -1;
+        }
     };
 
     public static Intent getCreateIntent(Context context) {
@@ -176,9 +226,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                        if (scheduleFragment != null) {
-                            if (scheduleFragment.updateRootTask(mTaskId, name))
+                        if (hasValueSchedule()) {
+                            if (updateScheduleRootTask(mTaskId, name))
                                 finish();
                         } else {
                             DomainFactory.getDomainFactory(this).updateRootTask(mData.DataId, mTaskId, name);
@@ -187,9 +236,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                        if (scheduleFragment != null) {
-                            if (scheduleFragment.createRootJoinTask(name, mTaskIds))
+                        if (hasValueSchedule()) {
+                            if (createScheduleRootJoinTask(name, mTaskIds))
                                 finish();
                         } else {
                             DomainFactory.getDomainFactory(this).createJoinRootTask(mData.DataId, name, mTaskIds);
@@ -198,9 +246,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                        if (scheduleFragment != null) {
-                            if (scheduleFragment.createRootTask(name))
+                        if (hasValueSchedule()) {
+                            if (createScheduleRootTask(name))
                                 finish();
                         } else {
                             DomainFactory.getDomainFactory(this).createRootTask(mData.DataId, name);
@@ -288,6 +335,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mCreateChildTaskParent = (TextView) findViewById(R.id.create_child_task_parent);
         Assert.assertTrue(mCreateChildTaskParent != null);
 
+        mScheduleTimes = (RecyclerView) findViewById(R.id.schedule_recycler);
+        Assert.assertTrue(mScheduleTimes != null);
+
+        mScheduleTimes.setLayoutManager(new LinearLayoutManager(this));
+
         Intent intent = getIntent();
         if (intent.hasExtra(TASK_ID_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
@@ -319,7 +371,24 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             }
         }
 
-        loadFragment();
+        if (savedInstanceState != null && savedInstanceState.containsKey(SCHEDULE_ENTRY_KEY)) {
+            mScheduleEntries = savedInstanceState.getParcelableArrayList(SCHEDULE_ENTRY_KEY);
+
+            mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
+            Assert.assertTrue(mHourMinutePickerPosition != -2);
+        } else {
+            mHourMinutePickerPosition = -1;
+        }
+
+        mScheduleFab = (FloatingActionButton) findViewById(R.id.schedule_fab);
+        Assert.assertTrue(mScheduleFab != null);
+
+        mScheduleFab.setOnClickListener(v -> {
+            Assert.assertTrue(mScheduleAdapter != null);
+
+            clearParent();
+            mScheduleAdapter.addScheduleEntry(firstScheduleEntry());
+        });
 
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
@@ -339,8 +408,15 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mData != null && mParent != null) {
-            outState.putInt(PARENT_ID, mParent.TaskId);
+        if (mData != null) {
+            Assert.assertTrue(mScheduleAdapter != null);
+
+            outState.putParcelableArrayList(SCHEDULE_ENTRY_KEY, new ArrayList<>(mScheduleEntries));
+            outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
+
+            if (mParent != null) {
+                outState.putInt(PARENT_ID, mParent.TaskId);
+            }
         }
     }
 
@@ -443,7 +519,48 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         invalidateOptionsMenu();
 
-        //Assert.assertTrue(!hasValueParent() || !hasValueSchedule()); todo schedule hack
+        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRY_KEY))) {
+            Assert.assertTrue(mScheduleEntries == null);
+
+            mFirst = false;
+
+            mScheduleEntries = new ArrayList<>();
+
+            if (mData.TaskData != null) {
+                if (mData.TaskData.ScheduleDatas != null) {
+                    Assert.assertTrue(!mData.TaskData.ScheduleDatas.isEmpty());
+
+                    mScheduleEntries = Stream.of(mData.TaskData.ScheduleDatas)
+                            .map(scheduleData -> {
+                                switch (scheduleData.getScheduleType()) {
+                                    case SINGLE:
+                                        return new ScheduleEntry(((CreateTaskLoader.SingleScheduleData) scheduleData).Date, ((CreateTaskLoader.SingleScheduleData) scheduleData).TimePair);
+                                    case DAILY:
+                                        return new ScheduleEntry(((CreateTaskLoader.DailyScheduleData) scheduleData).TimePair);
+                                    case WEEKLY:
+                                        return new ScheduleEntry(((CreateTaskLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((CreateTaskLoader.WeeklyScheduleData) scheduleData).TimePair);
+                                    default:
+                                        throw new UnsupportedOperationException();
+                                }
+                            })
+                            .collect(Collectors.toList());
+                }
+            } else {
+                if (mParentTaskIdHint == null)
+                    mScheduleEntries.add(firstScheduleEntry());
+            }
+        }
+
+        ScheduleDialogFragment singleDialogFragment = (ScheduleDialogFragment) getSupportFragmentManager().findFragmentByTag(SCHEDULE_DIALOG_TAG);
+        if (singleDialogFragment != null)
+            singleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
+
+        mScheduleAdapter = new ScheduleAdapter();
+        mScheduleTimes.setAdapter(mScheduleAdapter);
+
+        mScheduleFab.setVisibility(View.VISIBLE);
+
+        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
     }
 
     @Override
@@ -455,6 +572,24 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     public void onBackPressed() {
         if (tryClose())
             super.onBackPressed();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
+        Assert.assertTrue(resultCode >= 0);
+        Assert.assertTrue(data == null);
+
+        Assert.assertTrue(mHourMinutePickerPosition >= 0);
+
+        if (resultCode > 0) {
+            ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
+            Assert.assertTrue(scheduleEntry != null);
+
+            scheduleEntry.mTimePairPersist.setCustomTimeId(resultCode);
+        }
+
+        mHourMinutePickerPosition = -1;
     }
 
     private boolean tryClose() {
@@ -507,11 +642,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 if (!hasValueSchedule())
                     return true;
 
-                ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                if (scheduleFragment == null)
-                    return false;
-
-                if (scheduleFragment.dataChanged())
+                if (scheduleDataChanged())
                     return true;
 
                 return false;
@@ -539,11 +670,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 if (!hasValueSchedule())
                     return true;
 
-                ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                if (scheduleFragment == null)
-                    return true;
-
-                if (scheduleFragment.dataChanged())
+                if (scheduleDataChanged())
                     return true;
 
                 return false;
@@ -575,32 +702,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 .flatMap(stream -> stream);
     }
 
-    public void clearParent() {
+    private void clearParent() {
         mParent = null;
         mCreateChildTaskParent.setText(null);
-    }
-
-    private void loadFragment() {
-        ScheduleFragment fragment;
-        if (mScheduleHint != null) {
-            fragment = ScheduleFragment.newInstance(mScheduleHint);
-        } else if (mTaskId != null) {
-            fragment = ScheduleFragment.newInstance(mTaskId);
-        } else {
-            fragment = ScheduleFragment.newInstance();
-        }
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.schedule_picker_frame, fragment)
-                .commitAllowingStateLoss();
-    }
-
-    private void clearSchedules() {
-        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-        Assert.assertTrue(scheduleFragment != null);
-
-        scheduleFragment.clearSchedules();
     }
 
     private boolean hasValueParent() {
@@ -610,10 +714,113 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     private boolean hasValueSchedule() {
-        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-        Assert.assertTrue(scheduleFragment != null);
+        return !mScheduleEntries.isEmpty();
+    }
 
-        return !scheduleFragment.isEmpty();
+    private ScheduleEntry firstScheduleEntry() {
+        if (mScheduleHint != null) {
+            if (mScheduleHint.mTimePair != null) {
+                return new ScheduleEntry(mScheduleHint.mDate, mScheduleHint.mTimePair);
+            } else {
+                return new ScheduleEntry(mScheduleHint.mDate);
+            }
+        } else {
+            return new ScheduleEntry(Date.today());
+        }
+    }
+
+    private boolean createScheduleRootTask(String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
+
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        DomainFactory.getDomainFactory(this).createScheduleRootTask(mData.DataId, name, scheduleDatas);
+
+        TickService.startService(this);
+
+        return true;
+    }
+
+    private boolean updateScheduleRootTask(int rootTaskId, String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        if (mData == null)
+            return false;
+
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        DomainFactory.getDomainFactory(this).updateScheduleTask(mData.DataId, rootTaskId, name, scheduleDatas);
+
+        TickService.startService(this);
+
+        return true;
+    }
+
+    private boolean createScheduleRootJoinTask(String name, List<Integer> joinTaskIds) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        if (mData == null)
+            return false;
+
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList());
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(mData.DataId, name, scheduleDatas, joinTaskIds);
+
+        TickService.startService(this);
+
+        return true;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean scheduleDataChanged() {
+        if (mData == null)
+            return false;
+
+        Assert.assertTrue(mScheduleAdapter != null);
+
+        Multiset<CreateTaskLoader.ScheduleData> oldScheduleDatas;
+        if (mData.TaskData != null) {
+            if (mData.TaskData.ScheduleDatas != null) {
+                oldScheduleDatas = HashMultiset.create(mData.TaskData.ScheduleDatas);
+            } else {
+                oldScheduleDatas = HashMultiset.create();
+            }
+        } else {
+            oldScheduleDatas = HashMultiset.create(Collections.singletonList(firstScheduleEntry().getScheduleData()));
+        }
+
+        Multiset<CreateTaskLoader.ScheduleData> newScheduleDatas = HashMultiset.create(Stream.of(mScheduleEntries)
+                .map(ScheduleEntry::getScheduleData)
+                .collect(Collectors.toList()));
+
+        if (!oldScheduleDatas.equals(newScheduleDatas))
+            return true;
+
+        return false;
+    }
+
+    private void clearSchedules() {
+        int count = mScheduleEntries.size();
+
+        mScheduleEntries = new ArrayList<>();
+        mScheduleAdapter.notifyItemRangeRemoved(0, count);
     }
 
     public static class ScheduleHint implements Parcelable {
@@ -674,6 +881,233 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             @Override
             public ScheduleHint[] newArray(int size) {
                 return new ScheduleHint[size];
+            }
+        };
+    }
+
+    protected class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ScheduleHolder> {
+        @Override
+        public ScheduleHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View scheduleRow = getLayoutInflater().inflate(R.layout.row_schedule, parent, false);
+
+            TextView scheduleTime = (TextView) scheduleRow.findViewById(R.id.schedule_text);
+            Assert.assertTrue(scheduleTime != null);
+
+            ImageView scheduleImage = (ImageView) scheduleRow.findViewById(R.id.schedule_image);
+            Assert.assertTrue(scheduleImage != null);
+
+            return new ScheduleHolder(scheduleRow, scheduleTime, scheduleImage);
+        }
+
+        @Override
+        public void onBindViewHolder(final ScheduleHolder scheduleHolder, int position) {
+            final ScheduleEntry scheduleEntry = mScheduleEntries.get(position);
+            Assert.assertTrue(scheduleEntry != null);
+
+            scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas));
+
+            scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
+
+            scheduleHolder.mScheduleImage.setOnClickListener(v -> scheduleHolder.delete());
+        }
+
+        @Override
+        public int getItemCount() {
+            return mScheduleEntries.size();
+        }
+
+        public void addScheduleEntry(ScheduleEntry scheduleEntry) {
+            Assert.assertTrue(scheduleEntry != null);
+
+            int position = mScheduleEntries.size();
+
+            mScheduleEntries.add(scheduleEntry);
+            notifyItemInserted(position);
+        }
+
+        public class ScheduleHolder extends RecyclerView.ViewHolder {
+            public final TextView mScheduleText;
+            public final ImageView mScheduleImage;
+
+            public ScheduleHolder(View scheduleRow, TextView scheduleText, ImageView scheduleImage) {
+                super(scheduleRow);
+
+                Assert.assertTrue(scheduleText != null);
+                Assert.assertTrue(scheduleImage != null);
+
+                mScheduleText = scheduleText;
+                mScheduleImage = scheduleImage;
+            }
+
+            public void onTextClick() {
+                Assert.assertTrue(mData != null);
+
+                mHourMinutePickerPosition = getAdapterPosition();
+
+                ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
+                Assert.assertTrue(scheduleEntry != null);
+
+                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(mScheduleHint));
+                scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
+                scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
+            }
+
+            public void delete() {
+                int position = getAdapterPosition();
+                mScheduleEntries.remove(position);
+                notifyItemRemoved(position);
+            }
+        }
+    }
+
+    public static class ScheduleEntry implements Parcelable {
+        public Date mDate;
+        public DayOfWeek mDayOfWeek;
+        public TimePairPersist mTimePairPersist;
+        public ScheduleType mScheduleType;
+
+        public ScheduleEntry(@NonNull Date date) {
+            mDate = date;
+            mDayOfWeek = mDate.getDayOfWeek();
+            mTimePairPersist = new TimePairPersist();
+            mScheduleType = ScheduleType.SINGLE;
+        }
+
+        public ScheduleEntry(@NonNull Date date, @NonNull TimePair timePair) {
+            mDate = date;
+            mDayOfWeek = mDate.getDayOfWeek();
+            mTimePairPersist = new TimePairPersist(timePair);
+            mScheduleType = ScheduleType.SINGLE;
+        }
+
+        public ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+            mDate = date;
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = timePairPersist;
+            mScheduleType = scheduleType;
+        }
+
+        public ScheduleEntry(@NonNull TimePair timePair) {
+            mDate = Date.today();
+            mDayOfWeek = mDate.getDayOfWeek();
+            mTimePairPersist = new TimePairPersist(timePair);
+            mScheduleType = ScheduleType.DAILY;
+        }
+
+        public ScheduleEntry(@NonNull DayOfWeek dayOfWeek, @NonNull TimePair timePair) {
+            mDate = Date.today();
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = new TimePairPersist(timePair);
+            mScheduleType = ScheduleType.WEEKLY;
+        }
+
+        @NonNull
+        public String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas) {
+            switch (mScheduleType) {
+                case SINGLE:
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return mDate + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
+                    } else {
+                        return mDate + ", " + mTimePairPersist.getHourMinute().toString();
+                    }
+                case DAILY:
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return customTimeData.Name;
+                    } else {
+                        return mTimePairPersist.getHourMinute().toString();
+                    }
+                case WEEKLY:
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return mDayOfWeek + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")";
+                    } else {
+                        return mDayOfWeek + ", " + mTimePairPersist.getHourMinute().toString();
+                    }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @NonNull
+        public CreateTaskLoader.ScheduleData getScheduleData() {
+            switch (mScheduleType) {
+                case SINGLE:
+                    return new CreateTaskLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
+                case DAILY:
+                    return new CreateTaskLoader.DailyScheduleData(mTimePairPersist.getTimePair());
+                case WEEKLY:
+                    return new CreateTaskLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @SuppressWarnings("unused")
+        @NonNull
+        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
+            switch (mScheduleType) {
+                case SINGLE: {
+                    return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), mTimePairPersist, ScheduleType.SINGLE);
+                }
+                case DAILY: {
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), mTimePairPersist, ScheduleType.DAILY);
+                }
+                case WEEKLY: {
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, mTimePairPersist, ScheduleType.WEEKLY);
+                }
+                default: {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeParcelable(mDate, 0);
+            parcel.writeSerializable(mDayOfWeek);
+            parcel.writeParcelable(mTimePairPersist, 0);
+            parcel.writeSerializable(mScheduleType);
+        }
+
+        @SuppressWarnings("unused")
+        public static final Creator<ScheduleEntry> CREATOR = new Creator<ScheduleEntry>() {
+            @Override
+            public ScheduleEntry createFromParcel(Parcel in) {
+                Date date = in.readParcelable(Date.class.getClassLoader());
+                Assert.assertTrue(date != null);
+
+                DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
+                Assert.assertTrue(dayOfWeek != null);
+
+                TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
+                Assert.assertTrue(timePairPersist != null);
+
+                ScheduleType scheduleType = (ScheduleType) in.readSerializable();
+                Assert.assertTrue(scheduleType != null);
+
+                return new ScheduleEntry(date, dayOfWeek, timePairPersist, scheduleType);
+            }
+
+            @Override
+            public ScheduleEntry[] newArray(int size) {
+                return new ScheduleEntry[size];
             }
         };
     }

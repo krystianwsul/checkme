@@ -482,21 +482,14 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 ScheduleType scheduleType = mData.TaskData.ScheduleType;
 
-                Fragment fragment;
-                if (scheduleType == ScheduleType.SINGLE) {
-                    count++;
+                Fragment fragment = ScheduleFragment.newInstance(mTaskId);
 
-                    fragment = SingleScheduleFragment.newInstance(mTaskId);
+                count++;
+                if (scheduleType == ScheduleType.SINGLE) {
                     spinnerPosition = 0;
                 } else if (scheduleType == ScheduleType.DAILY) {
-                    count++;
-
-                    fragment = DailyScheduleFragment.newInstance(mTaskId);
                     spinnerPosition = 1;
                 } else if (scheduleType == ScheduleType.WEEKLY) {
-                    count++;
-
-                    fragment = WeeklyScheduleFragment.newInstance(mTaskId);
                     spinnerPosition = 2;
                 } else {
                     throw new IndexOutOfBoundsException("unknown schedule type");
@@ -644,7 +637,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
-            if (hasValueParent() || hasValueSchedule())
+            if (hasValueParent() || !hasValueSchedule())
                 return true;
 
             if (mParentTaskIdHint != null) {
@@ -663,9 +656,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
                 if (scheduleFragment == null)
-                    return true;
-
-                if (!(scheduleFragment instanceof SingleScheduleFragment))
                     return true;
 
                 if (scheduleFragment.dataChanged())
@@ -722,27 +712,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < 3);
 
-        switch (position) {
-            case 0:
-                if (mScheduleHint != null) {
-                    return SingleScheduleFragment.newInstance(mScheduleHint);
-                } else {
-                    return SingleScheduleFragment.newInstance();
-                }
-            case 1:
-                if (mScheduleHint != null) {
-                    return DailyScheduleFragment.newInstance(mScheduleHint);
-                } else {
-                    return DailyScheduleFragment.newInstance();
-                }
-            case 2:
-                if (mScheduleHint != null) {
-                    return WeeklyScheduleFragment.newInstance(mScheduleHint);
-                } else {
-                    return WeeklyScheduleFragment.newInstance();
-                }
-            default:
-                return null;
+        if (mScheduleHint != null) {
+            return ScheduleFragment.newInstance(mScheduleHint);
+        } else {
+            return ScheduleFragment.newInstance();
         }
     }
 

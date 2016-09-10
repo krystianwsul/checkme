@@ -94,6 +94,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         return new ScheduleFragment();
     }
 
+    @NonNull
     public static ScheduleFragment newInstance(CreateTaskActivity.ScheduleHint scheduleHint) {
         Assert.assertTrue(scheduleHint != null);
 
@@ -106,6 +107,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         return scheduleFragment;
     }
 
+    @NonNull
     public static ScheduleFragment newInstance(int rootTaskId) {
         ScheduleFragment scheduleFragment = new ScheduleFragment();
 
@@ -168,6 +170,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         mScheduleFab.setOnClickListener(v -> {
             Assert.assertTrue(mScheduleAdapter != null);
 
+            ((CreateTaskActivity) getActivity()).clearParent();
             mScheduleAdapter.addScheduleEntry(firstScheduleEntry());
         });
 
@@ -350,6 +353,17 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
             return true;
 
         return false;
+    }
+
+    public void clearSchedules() {
+        int count = mScheduleEntries.size();
+
+        mScheduleEntries = new ArrayList<>();
+        mScheduleAdapter.notifyItemRangeRemoved(0, count);
+    }
+
+    public boolean isEmpty() {
+        return mScheduleEntries.isEmpty();
     }
 
     protected class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ScheduleHolder> {

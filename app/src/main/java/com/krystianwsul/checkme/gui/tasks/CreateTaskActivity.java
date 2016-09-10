@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -18,10 +17,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -31,7 +27,6 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
@@ -53,9 +48,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     private static final String PARENT_ID = "parentId";
     private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
-
-    private static final String POSITION_KEY = "position";
-    private static final String SCHEDULE_TYPE_CHANGED_KEY = "scheduleTypeChanged";
 
     private Bundle mSavedInstanceState;
 
@@ -81,15 +73,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private final ParentPickerFragment.Listener mParentFragmentListener = taskData -> {
         Assert.assertTrue(taskData != null);
 
-        clearSchedule();
+        clearSchedules();
 
         mParent = taskData;
         mCreateChildTaskParent.setText(taskData.Name);
     };
-
-    private Spinner mCreateRootTaskSpinner;
-
-    private boolean mScheduleTypeChanged = false;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -300,13 +288,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mCreateChildTaskParent = (TextView) findViewById(R.id.create_child_task_parent);
         Assert.assertTrue(mCreateChildTaskParent != null);
 
-        mCreateRootTaskSpinner = (Spinner) findViewById(R.id.schedule_picker_spinner);
-        Assert.assertTrue(mCreateRootTaskSpinner != null);
-
-        ArrayAdapter<CharSequence> scheduleAdapter = ArrayAdapter.createFromResource(this, R.array.schedule_spinner, R.layout.spinner_no_padding);
-        scheduleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mCreateRootTaskSpinner.setAdapter(scheduleAdapter);
-
         Intent intent = getIntent();
         if (intent.hasExtra(TASK_ID_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
@@ -358,11 +339,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         if (mData != null && mParent != null) {
             outState.putInt(PARENT_ID, mParent.TaskId);
-        }
-
-        if (mData != null) {
-            outState.putInt(POSITION_KEY, mCreateRootTaskSpinner.getSelectedItemPosition());
-            outState.putBoolean(SCHEDULE_TYPE_CHANGED_KEY, mScheduleTypeChanged);
         }
     }
 
@@ -463,94 +439,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         if (parentPickerFragment != null)
             parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
 
-        mCreateRootTaskSpinner.setVisibility(View.VISIBLE);
-
-        int spinnerPosition;
-        int count = 0;
-        if (mSavedInstanceState != null && mSavedInstanceState.containsKey(POSITION_KEY)) {
-            count++;
-
-            spinnerPosition = mSavedInstanceState.getInt(POSITION_KEY, -1);
-            Assert.assertTrue(spinnerPosition != -1);
-            if (spinnerPosition > 0)
-                count++;
-
-            mScheduleTypeChanged = mSavedInstanceState.getBoolean(SCHEDULE_TYPE_CHANGED_KEY);
-        } else if (mData.TaskData != null) {
-            if (mData.TaskData.ScheduleType != null) {
-                Assert.assertTrue(mTaskId != null);
-
-                ScheduleType scheduleType = mData.TaskData.ScheduleType;
-
-                Fragment fragment = ScheduleFragment.newInstance(mTaskId);
-
-                count++;
-                if (scheduleType == ScheduleType.SINGLE) {
-                    spinnerPosition = 0;
-                } else if (scheduleType == ScheduleType.DAILY) {
-                    spinnerPosition = 1;
-                } else if (scheduleType == ScheduleType.WEEKLY) {
-                    spinnerPosition = 2;
-                } else {
-                    throw new IndexOutOfBoundsException("unknown schedule type");
-                }
-
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.schedule_picker_frame, fragment)
-                        .commitAllowingStateLoss();
-            } else {
-                spinnerPosition = 3;
-                count++;
-            }
-        } else {
-            if (mParentTaskIdHint != null) {
-                spinnerPosition = 3;
-                count++;
-            } else {
-                spinnerPosition = 0;
-                loadFragment(0);
-            }
-        }
-        final int finalCount = count;
-
-        mCreateRootTaskSpinner.setSelection(spinnerPosition);
-
-        mCreateRootTaskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private int mCount = finalCount;
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Assert.assertTrue(position >= 0);
-                Assert.assertTrue(position < 4);
-
-                if (mCount > 0) {
-                    mCount--;
-                    return;
-                }
-
-                mScheduleTypeChanged = true;
-
-                if (position < 3) {
-                    clearParent();
-
-                    loadFragment(position);
-                } else {
-                    Assert.assertTrue(position == 3);
-
-                    Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
-                    Assert.assertTrue(fragment != null);
-
-                    getSupportFragmentManager().beginTransaction()
-                            .remove(fragment)
-                            .commitAllowingStateLoss();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        loadFragment();
 
         invalidateOptionsMenu();
 
@@ -595,6 +484,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         if (mData == null)
             return false;
 
+        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+
         if (mTaskId != null) {
             Assert.assertTrue(mData.TaskData != null);
             Assert.assertTrue(mTaskIds == null);
@@ -616,9 +507,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 if (!hasValueSchedule())
                     return true;
 
-                if (mScheduleTypeChanged)
-                    return true;
-
                 ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
                 if (scheduleFragment == null)
                     return false;
@@ -637,7 +525,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
-            if (hasValueParent() || !hasValueSchedule())
+            if (hasValueParent())
                 return true;
 
             if (mParentTaskIdHint != null) {
@@ -690,37 +578,30 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 .flatMap(stream -> stream);
     }
 
-    private void clearParent() {
+    public void clearParent() {
         mParent = null;
         mCreateChildTaskParent.setText(null);
     }
 
-    private void loadFragment(int position) {
-        Assert.assertTrue(position >= 0);
-        Assert.assertTrue(position < 3);
-
-        Fragment fragment = createFragment(position);
-        Assert.assertTrue(fragment != null);
+    private void loadFragment() {
+        ScheduleFragment fragment;
+        if (mScheduleHint != null) {
+            fragment = ScheduleFragment.newInstance(mScheduleHint);
+        } else {
+            fragment = ScheduleFragment.newInstance();
+        }
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.schedule_picker_frame, fragment)
+                .add(R.id.schedule_picker_frame, fragment)
                 .commitAllowingStateLoss();
     }
 
-    private Fragment createFragment(int position) {
-        Assert.assertTrue(position >= 0);
-        Assert.assertTrue(position < 3);
+    private void clearSchedules() {
+        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
+        Assert.assertTrue(scheduleFragment != null);
 
-        if (mScheduleHint != null) {
-            return ScheduleFragment.newInstance(mScheduleHint);
-        } else {
-            return ScheduleFragment.newInstance();
-        }
-    }
-
-    private void clearSchedule() {
-        mCreateRootTaskSpinner.setSelection(3);
+        scheduleFragment.clearSchedules();
     }
 
     private boolean hasValueParent() {
@@ -730,9 +611,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     private boolean hasValueSchedule() {
-        Assert.assertTrue((mCreateRootTaskSpinner.getSelectedItemPosition() == 3) == (getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame) == null));
+        ScheduleFragment scheduleFragment = (ScheduleFragment) getSupportFragmentManager().findFragmentById(R.id.schedule_picker_frame);
+        Assert.assertTrue(scheduleFragment != null);
 
-        return (mCreateRootTaskSpinner.getSelectedItemPosition() != 3);
+        return !scheduleFragment.isEmpty();
     }
 
     public static class ScheduleHint implements Parcelable {

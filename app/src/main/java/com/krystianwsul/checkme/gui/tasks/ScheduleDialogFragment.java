@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -35,14 +36,15 @@ import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
+import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-public abstract class ScheduleDialogFragment extends DialogFragment {
-    static final String SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData";
+public class ScheduleDialogFragment extends DialogFragment {
+    private static final String SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData";
 
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
@@ -50,22 +52,20 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
 
     private Spinner mScheduleType;
 
-    TextInputLayout mScheduleDialogDateLayout;
-    TextView mScheduleDialogDate;
+    private TextInputLayout mScheduleDialogDateLayout;
+    private TextView mScheduleDialogDate;
 
-    Spinner mScheduleDialogDay;
+    private Spinner mScheduleDialogDay;
 
-    TextInputLayout mScheduleDialogTimeLayout;
-    TextView mScheduleDialogTime;
+    private TextInputLayout mScheduleDialogTimeLayout;
+    private TextView mScheduleDialogTime;
 
-    MDButton mButton;
+    private MDButton mButton;
 
-    Map<Integer, ScheduleLoader.CustomTimeData> mCustomTimeDatas;
-    ScheduleDialogListener mScheduleDialogListener;
+    private Map<Integer, ScheduleLoader.CustomTimeData> mCustomTimeDatas;
+    private ScheduleDialogListener mScheduleDialogListener;
 
-    Date mDate;
-    DayOfWeek mDayOfWeek;
-    TimePairPersist mTimePairPersist;
+    private ScheduleDialogData mScheduleDialogData;
 
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -74,7 +74,7 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
         public void onCustomTimeSelected(int customTimeId) {
             Assert.assertTrue(mCustomTimeDatas != null);
 
-            mTimePairPersist.setCustomTimeId(customTimeId);
+            mScheduleDialogData.mTimePairPersist.setCustomTimeId(customTimeId);
 
             updateFields();
         }
@@ -84,7 +84,7 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
             Assert.assertTrue(mCustomTimeDatas != null);
 
             RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
-            radialTimePickerDialogFragment.setStartTime(mTimePairPersist.getHourMinute().getHour(), mTimePairPersist.getHourMinute().getMinute());
+            radialTimePickerDialogFragment.setStartTime(mScheduleDialogData.mTimePairPersist.getHourMinute().getHour(), mScheduleDialogData.mTimePairPersist.getHourMinute().getMinute());
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
             radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
         }
@@ -98,9 +98,20 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
     private final RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = (dialog, hourOfDay, minute) -> {
         Assert.assertTrue(mCustomTimeDatas != null);
 
-        mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
+        mScheduleDialogData.mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
         updateFields();
     };
+
+    @NonNull
+    public static ScheduleDialogFragment newInstance(@NonNull ScheduleDialogData scheduleDialogData) {
+        ScheduleDialogFragment scheduleDialogFragment = new ScheduleDialogFragment();
+
+        Bundle args = new Bundle();
+        args.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData);
+        scheduleDialogFragment.setArguments(args);
+
+        return scheduleDialogFragment;
+    }
 
     @Override
     @NonNull
@@ -114,7 +125,7 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
                     Assert.assertTrue(mScheduleDialogListener != null);
                     Assert.assertTrue(isValid());
 
-                    mScheduleDialogListener.onScheduleDialogResult(new ScheduleDialogData(mDate, mTimePairPersist));
+                    mScheduleDialogListener.onScheduleDialogResult(mScheduleDialogData);
                 })
                 .build();
 
@@ -149,42 +160,16 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ScheduleDialogData scheduleDialogData;
         if (savedInstanceState != null) {
             Assert.assertTrue(savedInstanceState.containsKey(SCHEDULE_DIALOG_DATA_KEY));
 
-            scheduleDialogData = savedInstanceState.getParcelable(SCHEDULE_DIALOG_DATA_KEY);
+            mScheduleDialogData = savedInstanceState.getParcelable(SCHEDULE_DIALOG_DATA_KEY);
         } else {
             Bundle args = getArguments();
             Assert.assertTrue(args != null);
             Assert.assertTrue(args.containsKey(SCHEDULE_DIALOG_DATA_KEY));
 
-            scheduleDialogData = args.getParcelable(SCHEDULE_DIALOG_DATA_KEY);
-        }
-
-        Assert.assertTrue(scheduleDialogData != null);
-
-        mDate = scheduleDialogData.mDate;
-        mDayOfWeek = scheduleDialogData.mDayOfWeek;
-        mTimePairPersist = scheduleDialogData.mTimePairPersist;
-
-        switch (getScheduleType()) {
-            case SINGLE:
-                Assert.assertTrue(mDate != null);
-                Assert.assertTrue(mTimePairPersist != null);
-
-                break;
-            case DAILY:
-                Assert.assertTrue(mTimePairPersist != null);
-
-                break;
-            case WEEKLY:
-                Assert.assertTrue(mDayOfWeek != null);
-                Assert.assertTrue(mTimePairPersist != null);
-
-                break;
-            default:
-                throw new UnsupportedOperationException();
+            mScheduleDialogData = args.getParcelable(SCHEDULE_DIALOG_DATA_KEY);
         }
 
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.schedule_types, R.layout.spinner_no_padding);
@@ -192,18 +177,18 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mScheduleType.setAdapter(typeAdapter);
 
+        mScheduleType.setSelection(mScheduleDialogData.mScheduleType.ordinal());
+
         mScheduleDialogTime.setOnClickListener(v -> {
             Assert.assertTrue(mCustomTimeDatas != null);
 
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas;
 
-            switch (getScheduleType()) {
+            switch (mScheduleDialogData.mScheduleType) {
                 case SINGLE:
-                    Assert.assertTrue(mDate != null);
-
                     customTimeDatas = Stream.of(mCustomTimeDatas.values())
-                            .sortBy(customTimeData -> customTimeData.HourMinutes.get(mDate.getDayOfWeek()))
-                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
+                            .sortBy(customTimeData -> customTimeData.HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek()))
+                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek()) + ")"))
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
                 case DAILY:
@@ -213,11 +198,9 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
                 case WEEKLY:
-                    Assert.assertTrue(mDayOfWeek != null);
-
                     customTimeDatas = Stream.of(mCustomTimeDatas.values())
-                            .sortBy(customTimeData -> customTimeData.HourMinutes.get(mDayOfWeek))
-                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")"))
+                            .sortBy(customTimeData -> customTimeData.HourMinutes.get(mScheduleDialogData.mDayOfWeek))
+                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDayOfWeek) + ")"))
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
                 default:
@@ -241,25 +224,24 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
             radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
 
         final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = (dialog, year, monthOfYear, dayOfMonth) -> {
-            Assert.assertTrue(getScheduleType() == ScheduleType.SINGLE);
+            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
 
-            mDate = new Date(year, monthOfYear + 1, dayOfMonth);
+            mScheduleDialogData.mDate = new Date(year, monthOfYear + 1, dayOfMonth);
             updateFields();
         };
 
         mScheduleDialogDate.setOnClickListener(v -> {
-            Assert.assertTrue(getScheduleType() == ScheduleType.SINGLE);
-            Assert.assertTrue(mDate != null);
+            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
 
             MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
-            calendarDatePickerDialogFragment.setDate(mDate);
+            calendarDatePickerDialogFragment.setDate(mScheduleDialogData.mDate);
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
             calendarDatePickerDialogFragment.show(getChildFragmentManager(), DATE_FRAGMENT_TAG);
         });
 
         CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = (CalendarDatePickerDialogFragment) getChildFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
         if (calendarDatePickerDialogFragment != null) {
-            Assert.assertTrue(getScheduleType() == ScheduleType.SINGLE);
+            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
 
             calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
         }
@@ -276,7 +258,7 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
         dayOfWeekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mScheduleDialogDay.setAdapter(dayOfWeekAdapter);
-        mScheduleDialogDay.setSelection(dayOfWeekAdapter.getPosition(mDayOfWeek));
+        mScheduleDialogDay.setSelection(dayOfWeekAdapter.getPosition(mScheduleDialogData.mDayOfWeek));
 
         mScheduleDialogDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             private boolean mFirst = true;
@@ -287,12 +269,12 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
                     return;
                 }
 
-                Assert.assertTrue(getScheduleType() == ScheduleType.WEEKLY);
+                Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
 
                 DayOfWeek dayOfWeek = dayOfWeekAdapter.getItem(position);
                 Assert.assertTrue(dayOfWeek != null);
 
-                mDayOfWeek = dayOfWeek;
+                mScheduleDialogData.mDayOfWeek = dayOfWeek;
 
                 updateFields();
             }
@@ -327,7 +309,31 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
             initialize();
     }
 
-    protected abstract void initialize();
+    private void initialize() {
+        Assert.assertTrue(mCustomTimeDatas != null);
+        Assert.assertTrue(mScheduleDialogListener != null);
+        Assert.assertTrue(mScheduleDialogData != null);
+        Assert.assertTrue(mScheduleDialogTime != null);
+        Assert.assertTrue(getActivity() != null);
+
+        switch (mScheduleDialogData.mScheduleType) {
+            case SINGLE:
+                mScheduleDialogDateLayout.setVisibility(View.VISIBLE);
+                mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                break;
+            case DAILY:
+                mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                break;
+            case WEEKLY:
+                mScheduleDialogDay.setVisibility(View.VISIBLE);
+                mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+
+        updateFields();
+    }
 
     @Override
     public void onPause() {
@@ -340,26 +346,7 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        switch (getScheduleType()) {
-            case SINGLE:
-                Assert.assertTrue(mDate != null);
-                Assert.assertTrue(mTimePairPersist != null);
-
-                break;
-            case DAILY:
-                Assert.assertTrue(mTimePairPersist != null);
-
-                break;
-            case WEEKLY:
-                Assert.assertTrue(mDayOfWeek != null);
-                Assert.assertTrue(mTimePairPersist != null);
-
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-
-        outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, new ScheduleDialogData(mDate, mDayOfWeek, mTimePairPersist));
+        outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, mScheduleDialogData);
     }
 
     @Override
@@ -370,56 +357,117 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
 
         if (resultCode > 1) {
             mCustomTimeDatas = null;
-            mTimePairPersist.setCustomTimeId(resultCode);
+            mScheduleDialogData.mTimePairPersist.setCustomTimeId(resultCode);
         }
     }
 
-    @NonNull
-    protected abstract ScheduleType getScheduleType();
+    @SuppressLint("SetTextI18n")
+    private void updateFields() {
+        Assert.assertTrue(mScheduleDialogData != null);
+        Assert.assertTrue(mScheduleDialogDate != null);
+        Assert.assertTrue(mScheduleDialogTime != null);
+        Assert.assertTrue(mCustomTimeDatas != null);
 
-    protected abstract void updateFields();
+        switch (mScheduleDialogData.mScheduleType) {
+            case SINGLE:
+                mScheduleDialogDate.setText(mScheduleDialogData.mDate.getDisplayText(getContext()));
 
-    protected abstract boolean isValid();
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
+                    ScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                    Assert.assertTrue(customTimeData != null);
+
+                    mScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek()) + ")");
+                } else {
+                    mScheduleDialogTime.setText(mScheduleDialogData.mTimePairPersist.getHourMinute().toString());
+                }
+
+                if (isValid()) {
+                    mButton.setEnabled(true);
+
+                    mScheduleDialogDateLayout.setError(null);
+                    mScheduleDialogTimeLayout.setError(null);
+                } else {
+                    mButton.setEnabled(false);
+
+                    if (mScheduleDialogData.mDate.compareTo(Date.today()) >= 0) {
+                        mScheduleDialogDateLayout.setError(null);
+                        mScheduleDialogTimeLayout.setError(getString(R.string.error_time));
+                    } else {
+                        mScheduleDialogDateLayout.setError(getString(R.string.error_date));
+                        mScheduleDialogTimeLayout.setError(null);
+                    }
+                }
+
+                break;
+            case DAILY:
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
+                    ScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                    Assert.assertTrue(customTimeData != null);
+
+                    mScheduleDialogTime.setText(customTimeData.Name);
+                } else {
+                    mScheduleDialogTime.setText(mScheduleDialogData.mTimePairPersist.getHourMinute().toString());
+                }
+
+                break;
+            case WEEKLY:
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
+                    ScheduleLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                    Assert.assertTrue(customTimeData != null);
+
+                    mScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDayOfWeek) + ")");
+                } else {
+                    mScheduleDialogTime.setText(mScheduleDialogData.mTimePairPersist.getHourMinute().toString());
+                }
+
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    private boolean isValid() {
+        if (mCustomTimeDatas == null)
+            return false;
+
+        if (mScheduleDialogData == null)
+            return false;
+
+        if (mScheduleDialogData.mScheduleType != ScheduleType.SINGLE)
+            return true;
+
+        HourMinute hourMinute;
+        if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
+            if (!mCustomTimeDatas.containsKey(mScheduleDialogData.mTimePairPersist.getCustomTimeId()))
+                return false; //cached data doesn't contain new custom time
+
+            hourMinute = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId()).HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek());
+        } else {
+            hourMinute = mScheduleDialogData.mTimePairPersist.getHourMinute();
+        }
+
+        return (new TimeStamp(mScheduleDialogData.mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
+    }
 
     public static class ScheduleDialogData implements Parcelable {
-        public final Date mDate;
-        public final DayOfWeek mDayOfWeek;
+        public Date mDate;
+        public DayOfWeek mDayOfWeek;
         public final TimePairPersist mTimePairPersist;
+        public ScheduleType mScheduleType;
 
-        public ScheduleDialogData(@NonNull Date date, @NonNull TimePairPersist timePairPersist) {
-            mDate = date;
-            mDayOfWeek = null;
-            mTimePairPersist = timePairPersist.copy();
-        }
-
-        public ScheduleDialogData(@NonNull TimePairPersist timePairPersist) {
-            mDate = null;
-            mDayOfWeek = null;
-            mTimePairPersist = timePairPersist;
-        }
-
-        public ScheduleDialogData(@NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist) {
-            mDate = null;
-            mDayOfWeek = dayOfWeek;
-            mTimePairPersist = timePairPersist.copy();
-        }
-
-        private ScheduleDialogData(Date date, DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist) {
-            Assert.assertTrue((date == null) || (dayOfWeek == null));
-
+        public ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
             mDate = date;
             mDayOfWeek = dayOfWeek;
             mTimePairPersist = timePairPersist;
+            mScheduleType = scheduleType;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            Assert.assertTrue((mDate == null) || (mDayOfWeek == null));
-            Assert.assertTrue(mTimePairPersist != null);
-
             dest.writeParcelable(mDate, flags);
             dest.writeSerializable(mDayOfWeek);
             dest.writeParcelable(mTimePairPersist, flags);
+            dest.writeSerializable(mScheduleType);
         }
 
         @Override
@@ -434,10 +482,9 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
                 Date date = in.readParcelable(Date.class.getClassLoader());
                 DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
                 TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
+                ScheduleType scheduleType = (ScheduleType) in.readSerializable();
 
-                Assert.assertTrue(timePairPersist != null);
-
-                return new ScheduleDialogData(date, dayOfWeek, timePairPersist);
+                return new ScheduleDialogData(date, dayOfWeek, timePairPersist, scheduleType);
             }
 
             @Override

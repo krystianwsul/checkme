@@ -71,17 +71,21 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
 
     private List<ScheduleEntry> mScheduleEntries;
 
-    private final SingleScheduleDialogFragment.SingleScheduleDialogListener mSingleScheduleDialogListener = new SingleScheduleDialogFragment.SingleScheduleDialogListener() {
+    private final ScheduleDialogFragment.ScheduleDialogListener mSingleScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
         @Override
-        public void onSingleScheduleDialogResult(@NonNull Date date, @NonNull TimePairPersist timePairPersist) {
+        public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
             Assert.assertTrue(mHourMinutePickerPosition != -1);
             Assert.assertTrue(mData != null);
+
+            Assert.assertTrue(scheduleDialogData.mDate != null);
+            Assert.assertTrue(scheduleDialogData.mDayOfWeek == null);
+            Assert.assertTrue(scheduleDialogData.mTimePairPersist != null);
 
             SingleScheduleEntry singleScheduleEntry = (SingleScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
             Assert.assertTrue(singleScheduleEntry != null);
 
-            singleScheduleEntry.mDate = date;
-            singleScheduleEntry.mTimePairPersist = timePairPersist;
+            singleScheduleEntry.mDate = scheduleDialogData.mDate;
+            singleScheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
 
             mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
@@ -89,33 +93,41 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
         }
     };
 
-    private final DailyScheduleDialogFragment.DailyScheduleDialogListener mDailyScheduleDialogListener = new DailyScheduleDialogFragment.DailyScheduleDialogListener() {
+    private final ScheduleDialogFragment.ScheduleDialogListener mDailyScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
         @Override
-        public void onDailyScheduleDialogResult(@NonNull TimePairPersist timePairPersist) {
+        public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
             Assert.assertTrue(mHourMinutePickerPosition != -1);
             Assert.assertTrue(mData != null);
+
+            Assert.assertTrue(scheduleDialogData.mDate == null);
+            Assert.assertTrue(scheduleDialogData.mDayOfWeek == null);
+            Assert.assertTrue(scheduleDialogData.mTimePairPersist != null);
 
             DailyScheduleEntry dailyScheduleEntry = (DailyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
             Assert.assertTrue(dailyScheduleEntry != null);
 
-            dailyScheduleEntry.mTimePairPersist = timePairPersist;
+            dailyScheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
             mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
             mHourMinutePickerPosition = -1;
         }
     };
 
-    private final WeeklyScheduleDialogFragment.WeeklyScheduleDialogListener mWeeklyScheduleDialogListener = new WeeklyScheduleDialogFragment.WeeklyScheduleDialogListener() {
+    private final ScheduleDialogFragment.ScheduleDialogListener mWeeklyScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
         @Override
-        public void onWeeklyScheduleDialogResult(@NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist) {
+        public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
             Assert.assertTrue(mHourMinutePickerPosition != -1);
             Assert.assertTrue(mData != null);
+
+            Assert.assertTrue(scheduleDialogData.mDate == null);
+            Assert.assertTrue(scheduleDialogData.mDayOfWeek != null);
+            Assert.assertTrue(scheduleDialogData.mTimePairPersist != null);
 
             WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleEntry) mScheduleEntries.get(mHourMinutePickerPosition);
             Assert.assertTrue(weeklyScheduleEntry != null);
 
-            weeklyScheduleEntry.mDayOfWeek = dayOfWeek;
-            weeklyScheduleEntry.mTimePairPersist = timePairPersist;
+            weeklyScheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
+            weeklyScheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
 
             mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
@@ -220,8 +232,9 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                     .collect(Collectors.toList());
         }
 
-        mScheduleAdapter = new ScheduleAdapter(getContext());
-        mScheduleTimes.setAdapter(mScheduleAdapter);
+        SingleScheduleDialogFragment singleScheduleDialogFragment = (SingleScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(SINGLE_SCHEDULE_DIALOG_TAG);
+        if (singleScheduleDialogFragment != null)
+            singleScheduleDialogFragment.initialize(mData.CustomTimeDatas, mSingleScheduleDialogListener);
 
         DailyScheduleDialogFragment dailyScheduleDialogFragment = (DailyScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(DAILY_SCHEDULE_DIALOG_TAG);
         if (dailyScheduleDialogFragment != null)
@@ -229,7 +242,10 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
 
         WeeklyScheduleDialogFragment weeklyScheduleDialogFragment = (WeeklyScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(WEEKLY_SCHEDULE_DIALOG_TAG);
         if (weeklyScheduleDialogFragment != null)
-            weeklyScheduleDialogFragment.initialize(data.CustomTimeDatas, mWeeklyScheduleDialogListener);
+            weeklyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mWeeklyScheduleDialogListener);
+
+        mScheduleAdapter = new ScheduleAdapter(getContext());
+        mScheduleTimes.setAdapter(mScheduleAdapter);
 
         mScheduleFab.setVisibility(View.VISIBLE);
     }
@@ -443,7 +459,7 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                     case SINGLE:
                         SingleScheduleEntry singleScheduleEntry = (SingleScheduleEntry) scheduleEntry;
 
-                        SingleScheduleDialogFragment singleScheduleDialogFragment = SingleScheduleDialogFragment.newInstance(singleScheduleEntry.mDate, singleScheduleEntry.mTimePairPersist);
+                        SingleScheduleDialogFragment singleScheduleDialogFragment = SingleScheduleDialogFragment.newInstance(singleScheduleEntry.getScheduleDialogData());
 
                         singleScheduleDialogFragment.initialize(mData.CustomTimeDatas, mSingleScheduleDialogListener);
 
@@ -452,7 +468,7 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                     case DAILY:
                         DailyScheduleEntry dailyScheduleEntry = (DailyScheduleEntry) scheduleEntry;
 
-                        DailyScheduleDialogFragment dailyScheduleDialogFragment = DailyScheduleDialogFragment.newInstance(dailyScheduleEntry.mTimePairPersist);
+                        DailyScheduleDialogFragment dailyScheduleDialogFragment = DailyScheduleDialogFragment.newInstance(dailyScheduleEntry.getScheduleDialogData());
 
                         dailyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mDailyScheduleDialogListener);
 
@@ -461,7 +477,7 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                     case WEEKLY:
                         WeeklyScheduleEntry weeklyScheduleEntry = (WeeklyScheduleEntry) scheduleEntry;
 
-                        WeeklyScheduleDialogFragment weeklyScheduleDialogFragment = WeeklyScheduleDialogFragment.newInstance(weeklyScheduleEntry.mDayOfWeek, weeklyScheduleEntry.mTimePairPersist);
+                        WeeklyScheduleDialogFragment weeklyScheduleDialogFragment = WeeklyScheduleDialogFragment.newInstance(weeklyScheduleEntry.getScheduleDialogData());
 
                         weeklyScheduleDialogFragment.initialize(mData.CustomTimeDatas, mWeeklyScheduleDialogListener);
 
@@ -498,6 +514,7 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
 
         public abstract ScheduleLoader.ScheduleData getScheduleData();
 
+        @SuppressWarnings("unused")
         public static final Creator<ScheduleEntry> CREATOR = new Creator<ScheduleEntry>() {
             @Override
             public ScheduleEntry createFromParcel(Parcel in) {
@@ -521,13 +538,17 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
                 return new ScheduleEntry[size];
             }
         };
+
+        @SuppressWarnings("unused")
+        @NonNull
+        public abstract ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData();
     }
 
     public static class SingleScheduleEntry extends ScheduleFragment.ScheduleEntry {
         public Date mDate;
         private boolean mShowDelete = false;
 
-        public SingleScheduleEntry(Date date, boolean showDelete) {
+        SingleScheduleEntry(Date date, boolean showDelete) {
             Assert.assertTrue(date != null);
 
             mDate = date;
@@ -577,6 +598,7 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
             mShowDelete = delete;
         }
 
+        @SuppressWarnings("unused")
         public static final Creator<ScheduleEntry> CREATOR = ScheduleEntry.CREATOR;
 
         @Override
@@ -601,6 +623,12 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
         @Override
         public ScheduleLoader.ScheduleData getScheduleData() {
             return new ScheduleLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
+        }
+
+        @NonNull
+        @Override
+        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData() {
+            return new ScheduleDialogFragment.ScheduleDialogData(mDate, mTimePairPersist);
         }
     }
 
@@ -672,6 +700,12 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
         @Override
         public ScheduleLoader.ScheduleData getScheduleData() {
             return new ScheduleLoader.DailyScheduleData(mTimePairPersist.getTimePair());
+        }
+
+        @NonNull
+        @Override
+        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData() {
+            return new ScheduleDialogFragment.ScheduleDialogData(mTimePairPersist);
         }
     }
 
@@ -753,6 +787,12 @@ public abstract class ScheduleFragment extends Fragment implements LoaderManager
         @Override
         public ScheduleLoader.ScheduleData getScheduleData() {
             return new ScheduleLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
+        }
+
+        @NonNull
+        @Override
+        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData() {
+            return new ScheduleDialogFragment.ScheduleDialogData(mDayOfWeek, mTimePairPersist);
         }
     }
 }

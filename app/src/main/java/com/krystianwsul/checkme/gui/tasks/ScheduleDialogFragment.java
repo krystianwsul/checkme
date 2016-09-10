@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
@@ -40,33 +42,28 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public abstract class ScheduleDialogFragment extends DialogFragment {
-    private static final String DATE_STATE_KEY = "date";
-    private static final String DAY_OF_WEEK_STATE_KEY = "dayOfWeek";
-    private static final String TIME_PAIR_PERSIST_STATE_KEY = "timePairPersist";
-
-    protected static final String DATE_KEY = "date";
-    protected static final String DAY_OF_WEEK_KEY = "dayOfWeek";
-    protected static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
+    static final String SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData";
 
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
     private static final String TIME_PICKER_TAG = "timePicker";
 
-    protected TextInputLayout mScheduleDialogDateLayout;
-    protected TextView mScheduleDialogDate;
+    TextInputLayout mScheduleDialogDateLayout;
+    TextView mScheduleDialogDate;
 
-    protected Spinner mScheduleDialogDay;
+    Spinner mScheduleDialogDay;
 
-    protected TextInputLayout mScheduleDialogTimeLayout;
-    protected TextView mScheduleDialogTime;
+    TextInputLayout mScheduleDialogTimeLayout;
+    TextView mScheduleDialogTime;
 
-    protected MDButton mButton;
+    MDButton mButton;
 
-    protected Map<Integer, ScheduleLoader.CustomTimeData> mCustomTimeDatas;
+    Map<Integer, ScheduleLoader.CustomTimeData> mCustomTimeDatas;
+    ScheduleDialogListener mScheduleDialogListener;
 
-    protected Date mDate;
-    protected DayOfWeek mDayOfWeek;
-    protected TimePairPersist mTimePairPersist;
+    Date mDate;
+    DayOfWeek mDayOfWeek;
+    TimePairPersist mTimePairPersist;
 
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -110,7 +107,13 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
                 .customView(R.layout.fragment_schedule_dialog, false)
                 .negativeText(android.R.string.cancel)
                 .positiveText(android.R.string.ok)
-                .onPositive((dialog, which) -> onPositive())
+                .onPositive((dialog, which) -> {
+                    Assert.assertTrue(mCustomTimeDatas != null);
+                    Assert.assertTrue(mScheduleDialogListener != null);
+                    Assert.assertTrue(isValid());
+
+                    mScheduleDialogListener.onScheduleDialogResult(new ScheduleDialogData(mDate, mTimePairPersist));
+                })
                 .build();
 
         View view = materialDialog.getCustomView();
@@ -137,32 +140,28 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
         return materialDialog;
     }
 
-    protected abstract void onPositive();
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Bundle args = getArguments();
-        Assert.assertTrue(args != null);
-
+        ScheduleDialogData scheduleDialogData;
         if (savedInstanceState != null) {
-            Assert.assertTrue(savedInstanceState.containsKey(DATE_STATE_KEY));
-            Assert.assertTrue(savedInstanceState.containsKey(DAY_OF_WEEK_STATE_KEY));
-            Assert.assertTrue(savedInstanceState.containsKey(TIME_PAIR_PERSIST_STATE_KEY));
+            Assert.assertTrue(savedInstanceState.containsKey(SCHEDULE_DIALOG_DATA_KEY));
 
-            mDate = savedInstanceState.getParcelable(DATE_STATE_KEY);
-            mDayOfWeek = (DayOfWeek) savedInstanceState.getSerializable(DAY_OF_WEEK_STATE_KEY);
-            mTimePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_STATE_KEY);
+            scheduleDialogData = savedInstanceState.getParcelable(SCHEDULE_DIALOG_DATA_KEY);
         } else {
-            Assert.assertTrue(args.containsKey(DATE_KEY));
-            Assert.assertTrue(args.containsKey(DAY_OF_WEEK_KEY));
-            Assert.assertTrue(args.containsKey(TIME_PAIR_PERSIST_KEY));
+            Bundle args = getArguments();
+            Assert.assertTrue(args != null);
+            Assert.assertTrue(args.containsKey(SCHEDULE_DIALOG_DATA_KEY));
 
-            mDate = args.getParcelable(DATE_KEY);
-            mDayOfWeek = (DayOfWeek) args.getSerializable(DAY_OF_WEEK_KEY);
-            mTimePairPersist = args.getParcelable(TIME_PAIR_PERSIST_KEY);
+            scheduleDialogData = args.getParcelable(SCHEDULE_DIALOG_DATA_KEY);
         }
+
+        Assert.assertTrue(scheduleDialogData != null);
+
+        mDate = scheduleDialogData.mDate;
+        mDayOfWeek = scheduleDialogData.mDayOfWeek;
+        mTimePairPersist = scheduleDialogData.mTimePairPersist;
 
         switch (getScheduleType()) {
             case SINGLE:
@@ -293,20 +292,33 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
-        Assert.assertTrue(resultCode >= 0);
-        Assert.assertTrue(data == null);
+    public void onResume() {
+        super.onResume();
 
-        if (resultCode > 1)
-            mTimePairPersist.setCustomTimeId(resultCode);
+        MyCrashlytics.log("ScheduleDialogFragment.onResume");
+
+        getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+
+        if (mCustomTimeDatas != null)
+            updateFields();
     }
 
-    protected void initialize(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
+    public void initialize(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas, @NonNull ScheduleDialogListener scheduleDialogListener) {
         mCustomTimeDatas = customTimeDatas;
+        mScheduleDialogListener = scheduleDialogListener;
+
+        if (getActivity() != null)
+            initialize();
     }
 
     protected abstract void initialize();
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        getActivity().unregisterReceiver(mBroadcastReceiver);
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -331,9 +343,17 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
                 throw new UnsupportedOperationException();
         }
 
-        outState.putParcelable(DATE_STATE_KEY, mDate);
-        outState.putSerializable(DAY_OF_WEEK_STATE_KEY, mDayOfWeek);
-        outState.putParcelable(TIME_PAIR_PERSIST_STATE_KEY, mTimePairPersist);
+        outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, new ScheduleDialogData(mDate, mDayOfWeek, mTimePairPersist));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE);
+        Assert.assertTrue(resultCode >= 0);
+        Assert.assertTrue(data == null);
+
+        if (resultCode > 1)
+            mTimePairPersist.setCustomTimeId(resultCode);
     }
 
     @NonNull
@@ -341,21 +361,75 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
 
     protected abstract void updateFields();
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    protected abstract boolean isValid();
 
-        MyCrashlytics.log("ScheduleDialogFragment.onResume");
+    public static class ScheduleDialogData implements Parcelable {
+        public final Date mDate;
+        public final DayOfWeek mDayOfWeek;
+        public final TimePairPersist mTimePairPersist;
 
-        getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        public ScheduleDialogData(@NonNull Date date, @NonNull TimePairPersist timePairPersist) {
+            mDate = date;
+            mDayOfWeek = null;
+            mTimePairPersist = timePairPersist.copy();
+        }
 
-        updateFields();
+        public ScheduleDialogData(@NonNull TimePairPersist timePairPersist) {
+            mDate = null;
+            mDayOfWeek = null;
+            mTimePairPersist = timePairPersist;
+        }
+
+        public ScheduleDialogData(@NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist) {
+            mDate = null;
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = timePairPersist.copy();
+        }
+
+        private ScheduleDialogData(Date date, DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist) {
+            Assert.assertTrue((date == null) || (dayOfWeek == null));
+
+            mDate = date;
+            mDayOfWeek = dayOfWeek;
+            mTimePairPersist = timePairPersist;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            Assert.assertTrue((mDate == null) || (mDayOfWeek == null));
+            Assert.assertTrue(mTimePairPersist != null);
+
+            dest.writeParcelable(mDate, flags);
+            dest.writeSerializable(mDayOfWeek);
+            dest.writeParcelable(mTimePairPersist, flags);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @SuppressWarnings("unused")
+        public static final Creator<ScheduleDialogData> CREATOR = new Creator<ScheduleDialogData>() {
+            @Override
+            public ScheduleDialogData createFromParcel(Parcel in) {
+                Date date = in.readParcelable(Date.class.getClassLoader());
+                DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
+                TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
+
+                Assert.assertTrue(timePairPersist != null);
+
+                return new ScheduleDialogData(date, dayOfWeek, timePairPersist);
+            }
+
+            @Override
+            public ScheduleDialogData[] newArray(int size) {
+                return new ScheduleDialogData[size];
+            }
+        };
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        getActivity().unregisterReceiver(mBroadcastReceiver);
+    public interface ScheduleDialogListener {
+        void onScheduleDialogResult(@NonNull ScheduleDialogData scheduleDialogData);
     }
 }

@@ -8,44 +8,23 @@ import android.view.View;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
-import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
-import java.util.Map;
-
 public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
-    private DailyScheduleDialogListener mScheduleDialogListener;
-
     @NonNull
-    public static DailyScheduleDialogFragment newInstance(@NonNull TimePairPersist timePairPersist) {
+    public static DailyScheduleDialogFragment newInstance(@NonNull ScheduleDialogData scheduleDialogData) {
         DailyScheduleDialogFragment dailyScheduleFragment = new DailyScheduleDialogFragment();
 
+        Assert.assertTrue(scheduleDialogData.mDate == null);
+        Assert.assertTrue(scheduleDialogData.mDayOfWeek == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist != null);
+
         Bundle args = new Bundle();
-        args.putParcelable(DATE_KEY, null);
-        args.putSerializable(DAY_OF_WEEK_KEY, null);
-        args.putParcelable(TIME_PAIR_PERSIST_KEY, timePairPersist.copy());
+        args.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData);
         dailyScheduleFragment.setArguments(args);
 
         return dailyScheduleFragment;
-    }
-
-    @Override
-    protected void onPositive() {
-        Assert.assertTrue(mCustomTimeDatas != null);
-        Assert.assertTrue(mScheduleDialogListener != null);
-        Assert.assertTrue(mTimePairPersist != null);
-
-        mScheduleDialogListener.onDailyScheduleDialogResult(mTimePairPersist);
-    }
-
-    public void initialize(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas, @NonNull DailyScheduleDialogListener dailyScheduleDialogListener) {
-        initialize(customTimeDatas);
-
-        mScheduleDialogListener = dailyScheduleDialogListener;
-
-        if (getActivity() != null)
-            initialize();
     }
 
     @Override
@@ -54,6 +33,7 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
         Assert.assertTrue(mScheduleDialogListener != null);
         Assert.assertTrue(mTimePairPersist != null);
         Assert.assertTrue(mScheduleDialogTime != null);
+        Assert.assertTrue(getActivity() != null);
 
         mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
 
@@ -83,13 +63,14 @@ public class DailyScheduleDialogFragment extends ScheduleDialogFragment {
         super.onResume();
     }
 
-    public interface DailyScheduleDialogListener {
-        void onDailyScheduleDialogResult(@NonNull TimePairPersist timePairPersist);
-    }
-
     @Override
     @NonNull
     protected ScheduleType getScheduleType() {
         return ScheduleType.DAILY;
+    }
+
+    @Override
+    protected boolean isValid() {
+        return true;
     }
 }

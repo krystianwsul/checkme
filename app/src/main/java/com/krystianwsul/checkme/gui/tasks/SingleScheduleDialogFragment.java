@@ -11,60 +11,38 @@ import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.utils.time.TimePairPersist;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.Map;
-
 public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
-    private SingleScheduleDialogListener mScheduleDialogListener;
-
     @NonNull
-    public static SingleScheduleDialogFragment newInstance(@NonNull Date date, @NonNull TimePairPersist timePairPersist) {
+    public static SingleScheduleDialogFragment newInstance(@NonNull ScheduleDialogData scheduleDialogData) {
         SingleScheduleDialogFragment singleScheduleFragment = new SingleScheduleDialogFragment();
 
-        Bundle args = new Bundle();
-        args.putParcelable(DATE_KEY, date);
-        args.putSerializable(DAY_OF_WEEK_KEY, null);
-        args.putParcelable(TIME_PAIR_PERSIST_KEY, timePairPersist.copy());
+        Assert.assertTrue(scheduleDialogData.mDate != null);
+        Assert.assertTrue(scheduleDialogData.mDayOfWeek == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist != null);
 
+        Bundle args = new Bundle();
+        args.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData);
         singleScheduleFragment.setArguments(args);
+
         return singleScheduleFragment;
     }
 
     @Override
-    protected void onPositive() {
+    protected void initialize() {
         Assert.assertTrue(mCustomTimeDatas != null);
         Assert.assertTrue(mScheduleDialogListener != null);
-        Assert.assertTrue(isValidDateTime());
+        Assert.assertTrue(mTimePairPersist != null);
+        Assert.assertTrue(mScheduleDialogTime != null);
+        Assert.assertTrue(getActivity() != null);
 
-        mScheduleDialogListener.onSingleScheduleDialogResult(mDate, mTimePairPersist);
-    }
-
-    public void initialize(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas, @NonNull SingleScheduleDialogListener singleScheduleDialogListener) {
-        initialize(customTimeDatas);
-
-        mScheduleDialogListener = singleScheduleDialogListener;
-
-        if (getActivity() != null)
-            initialize();
-    }
-
-    @Override
-    protected void initialize() {
         mScheduleDialogDateLayout.setVisibility(View.VISIBLE);
         mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
 
         updateFields();
-    }
-
-    @Override
-    public void onResume() {
-        MyCrashlytics.log("SingleScheduleDialogFragment.onResume");
-
-        super.onResume();
     }
 
     @SuppressLint("SetTextI18n")
@@ -87,7 +65,7 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
             mScheduleDialogTime.setText(mTimePairPersist.getHourMinute().toString());
         }
 
-        if (isValidDateTime()) {
+        if (isValid()) {
             mButton.setEnabled(true);
 
             mScheduleDialogDateLayout.setError(null);
@@ -95,7 +73,7 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
         } else {
             mButton.setEnabled(false);
 
-            if (isValidDate()) {
+            if (mDate.compareTo(Date.today()) >= 0) {
                 mScheduleDialogDateLayout.setError(null);
                 mScheduleDialogTimeLayout.setError(getString(R.string.error_time));
             } else {
@@ -105,11 +83,21 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
         }
     }
 
-    private boolean isValidDate() {
-        return (mDate.compareTo(Date.today()) >= 0);
+    @Override
+    public void onResume() {
+        MyCrashlytics.log("SingleScheduleDialogFragment.onResume");
+
+        super.onResume();
     }
 
-    private boolean isValidDateTime() {
+    @Override
+    @NonNull
+    protected ScheduleType getScheduleType() {
+        return ScheduleType.SINGLE;
+    }
+
+    @Override
+    protected boolean isValid() {
         if (mCustomTimeDatas != null) {
             HourMinute hourMinute;
             if (mTimePairPersist.getCustomTimeId() != null) {
@@ -125,15 +113,5 @@ public class SingleScheduleDialogFragment extends ScheduleDialogFragment {
         } else {
             return false;
         }
-    }
-
-    public interface SingleScheduleDialogListener {
-        void onSingleScheduleDialogResult(@NonNull Date date, @NonNull TimePairPersist timePairPersist);
-    }
-
-    @Override
-    @NonNull
-    protected ScheduleType getScheduleType() {
-        return ScheduleType.SINGLE;
     }
 }

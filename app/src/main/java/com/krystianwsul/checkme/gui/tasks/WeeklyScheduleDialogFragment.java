@@ -8,50 +8,31 @@ import android.view.View;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
-import com.krystianwsul.checkme.utils.time.DayOfWeek;
-import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
-import java.util.Map;
-
 public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
-    private WeeklyScheduleDialogListener mWeeklyScheduleDialogListener;
-
     @NonNull
-    public static WeeklyScheduleDialogFragment newInstance(@NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist) {
+    public static WeeklyScheduleDialogFragment newInstance(@NonNull ScheduleDialogData scheduleDialogData) {
         WeeklyScheduleDialogFragment weeklyScheduleFragment = new WeeklyScheduleDialogFragment();
 
+        Assert.assertTrue(scheduleDialogData.mDate == null);
+        Assert.assertTrue(scheduleDialogData.mDayOfWeek != null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist != null);
+
         Bundle args = new Bundle();
-        args.putParcelable(DATE_KEY, null);
-        args.putSerializable(DAY_OF_WEEK_KEY, dayOfWeek);
-        args.putParcelable(TIME_PAIR_PERSIST_KEY, timePairPersist.copy());
+        args.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData);
         weeklyScheduleFragment.setArguments(args);
 
         return weeklyScheduleFragment;
     }
 
     @Override
-    protected void onPositive() {
-        Assert.assertTrue(mCustomTimeDatas != null);
-        Assert.assertTrue(mWeeklyScheduleDialogListener != null);
-
-        mWeeklyScheduleDialogListener.onWeeklyScheduleDialogResult(mDayOfWeek, mTimePairPersist);
-    }
-
-    public void initialize(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas, @NonNull WeeklyScheduleDialogListener weeklyScheduleDialogListener) {
-        initialize(customTimeDatas);
-
-        mWeeklyScheduleDialogListener = weeklyScheduleDialogListener;
-
-        if (getActivity() != null)
-            initialize();
-    }
-
-    @Override
     protected void initialize() {
         Assert.assertTrue(mCustomTimeDatas != null);
-        Assert.assertTrue(mWeeklyScheduleDialogListener != null);
+        Assert.assertTrue(mScheduleDialogListener != null);
+        Assert.assertTrue(mTimePairPersist != null);
+        Assert.assertTrue(mScheduleDialogTime != null);
         Assert.assertTrue(getActivity() != null);
 
         mScheduleDialogDay.setVisibility(View.VISIBLE);
@@ -80,13 +61,14 @@ public class WeeklyScheduleDialogFragment extends ScheduleDialogFragment {
         super.onResume();
     }
 
-    public interface WeeklyScheduleDialogListener {
-        void onWeeklyScheduleDialogResult(@NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist);
-    }
-
     @Override
     @NonNull
     protected ScheduleType getScheduleType() {
         return ScheduleType.WEEKLY;
+    }
+
+    @Override
+    protected boolean isValid() {
+        return true;
     }
 }

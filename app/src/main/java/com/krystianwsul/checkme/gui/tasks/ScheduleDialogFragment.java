@@ -179,6 +179,21 @@ public class ScheduleDialogFragment extends DialogFragment {
 
         mScheduleType.setSelection(mScheduleDialogData.mScheduleType.ordinal());
 
+        mScheduleType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mScheduleDialogData.mScheduleType = ScheduleType.values()[i];
+
+                if (getActivity() != null && mCustomTimeDatas != null)
+                    initialize();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
         mScheduleDialogTime.setOnClickListener(v -> {
             Assert.assertTrue(mCustomTimeDatas != null);
 
@@ -319,12 +334,16 @@ public class ScheduleDialogFragment extends DialogFragment {
         switch (mScheduleDialogData.mScheduleType) {
             case SINGLE:
                 mScheduleDialogDateLayout.setVisibility(View.VISIBLE);
+                mScheduleDialogDay.setVisibility(View.INVISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
                 break;
             case DAILY:
+                mScheduleDialogDateLayout.setVisibility(View.INVISIBLE);
+                mScheduleDialogDay.setVisibility(View.INVISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
                 break;
             case WEEKLY:
+                mScheduleDialogDateLayout.setVisibility(View.INVISIBLE);
                 mScheduleDialogDay.setVisibility(View.VISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
                 break;
@@ -381,23 +400,6 @@ public class ScheduleDialogFragment extends DialogFragment {
                     mScheduleDialogTime.setText(mScheduleDialogData.mTimePairPersist.getHourMinute().toString());
                 }
 
-                if (isValid()) {
-                    mButton.setEnabled(true);
-
-                    mScheduleDialogDateLayout.setError(null);
-                    mScheduleDialogTimeLayout.setError(null);
-                } else {
-                    mButton.setEnabled(false);
-
-                    if (mScheduleDialogData.mDate.compareTo(Date.today()) >= 0) {
-                        mScheduleDialogDateLayout.setError(null);
-                        mScheduleDialogTimeLayout.setError(getString(R.string.error_time));
-                    } else {
-                        mScheduleDialogDateLayout.setError(getString(R.string.error_date));
-                        mScheduleDialogTimeLayout.setError(null);
-                    }
-                }
-
                 break;
             case DAILY:
                 if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
@@ -423,6 +425,24 @@ public class ScheduleDialogFragment extends DialogFragment {
                 break;
             default:
                 throw new UnsupportedOperationException();
+        }
+
+        if (isValid()) {
+            mButton.setEnabled(true);
+
+            mScheduleDialogDateLayout.setError(null);
+            mScheduleDialogTimeLayout.setError(null);
+        } else {
+            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
+            mButton.setEnabled(false);
+
+            if (mScheduleDialogData.mDate.compareTo(Date.today()) >= 0) {
+                mScheduleDialogDateLayout.setError(null);
+                mScheduleDialogTimeLayout.setError(getString(R.string.error_time));
+            } else {
+                mScheduleDialogDateLayout.setError(getString(R.string.error_date));
+                mScheduleDialogTimeLayout.setError(null);
+            }
         }
     }
 

@@ -60,7 +60,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private ArrayList<Integer> mTaskIds;
 
     private CreateTaskActivity.ScheduleHint mScheduleHint;
-    private Integer mParentTaskIdHint = null;
+    Integer mParentTaskIdHint = null;
     private String mNameHint = null;
 
     private CreateTaskLoader.Data mData;

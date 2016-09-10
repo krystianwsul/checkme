@@ -27,7 +27,7 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
-import com.krystianwsul.checkme.loaders.ScheduleLoader;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -42,9 +42,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
-    static final String SCHEDULE_HINT_KEY = "scheduleHint";
-    static final String TASK_ID_KEY = "rootTaskId";
+public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
+    private static final String SCHEDULE_HINT_KEY = "scheduleHint";
+    private static final String TASK_ID_KEY = "rootTaskId";
 
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
 
@@ -62,7 +62,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     private Bundle mSavedInstanceState;
 
     private Integer mTaskId;
-    private ScheduleLoader.Data mData;
+    private CreateTaskLoader.Data mData;
 
     private FloatingActionButton mScheduleFab;
 
@@ -155,12 +155,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
             mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
-        } else if (args != null && args.containsKey(TASK_ID_KEY)) {
-            mHourMinutePickerPosition = -1;
         } else {
-            mScheduleEntries = new ArrayList<>();
-            mScheduleEntries.add(firstScheduleEntry());
-
             mHourMinutePickerPosition = -1;
         }
 
@@ -185,37 +180,44 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public Loader<ScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new ScheduleLoader(getActivity(), mTaskId);
+    public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new CreateTaskLoader(getActivity(), mTaskId, new ArrayList<>());
     }
 
     @Override
-    public void onLoadFinished(Loader<ScheduleLoader.Data> loader, ScheduleLoader.Data data) {
+    public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, CreateTaskLoader.Data data) {
         mData = data;
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRY_KEY))) {
+            Assert.assertTrue(mScheduleEntries == null);
+
             mFirst = false;
 
-            if (mData.ScheduleDatas != null) {
-                Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
-                Assert.assertTrue(mScheduleEntries == null);
+            mScheduleEntries = new ArrayList<>();
 
-                mScheduleEntries = Stream.of(mData.ScheduleDatas)
-                        .map(scheduleData -> {
-                            switch (scheduleData.getScheduleType()) {
-                                case SINGLE:
-                                    return new ScheduleEntry(((ScheduleLoader.SingleScheduleData) scheduleData).Date, ((ScheduleLoader.SingleScheduleData) scheduleData).TimePair);
-                                case DAILY:
-                                    return new ScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair);
-                                case WEEKLY:
-                                    return new ScheduleEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair);
-                                default:
-                                    throw new UnsupportedOperationException();
-                            }
-                        })
-                        .collect(Collectors.toList());
+            if (mData.TaskData != null) {
+                if (mData.TaskData.ScheduleDatas != null) {
+                    Assert.assertTrue(!mData.TaskData.ScheduleDatas.isEmpty());
+                    Assert.assertTrue(mScheduleEntries == null);
+
+                    mScheduleEntries = Stream.of(mData.TaskData.ScheduleDatas)
+                            .map(scheduleData -> {
+                                switch (scheduleData.getScheduleType()) {
+                                    case SINGLE:
+                                        return new ScheduleEntry(((CreateTaskLoader.SingleScheduleData) scheduleData).Date, ((CreateTaskLoader.SingleScheduleData) scheduleData).TimePair);
+                                    case DAILY:
+                                        return new ScheduleEntry(((CreateTaskLoader.DailyScheduleData) scheduleData).TimePair);
+                                    case WEEKLY:
+                                        return new ScheduleEntry(((CreateTaskLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((CreateTaskLoader.WeeklyScheduleData) scheduleData).TimePair);
+                                    default:
+                                        throw new UnsupportedOperationException();
+                                }
+                            })
+                            .collect(Collectors.toList());
+                }
             } else {
-                mScheduleEntries = new ArrayList<>();
+                if (((CreateTaskActivity) getActivity()).mParentTaskIdHint == null)
+                    mScheduleEntries.add(firstScheduleEntry());
             }
         }
 
@@ -230,7 +232,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onLoaderReset(Loader<ScheduleLoader.Data> loader) {
+    public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {
 
     }
 
@@ -270,7 +272,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         if (mData == null)
             return false;
 
-        List<ScheduleLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
                 .map(ScheduleEntry::getScheduleData)
                 .collect(Collectors.toList());
         Assert.assertTrue(scheduleDatas != null);
@@ -289,7 +291,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         if (mData == null)
             return false;
 
-        List<ScheduleLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
                 .map(ScheduleEntry::getScheduleData)
                 .collect(Collectors.toList());
         Assert.assertTrue(scheduleDatas != null);
@@ -310,7 +312,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         if (mData == null)
             return false;
 
-        List<ScheduleLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
                 .map(ScheduleEntry::getScheduleData)
                 .collect(Collectors.toList());
         Assert.assertTrue(scheduleDatas != null);
@@ -342,14 +344,18 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
         Assert.assertTrue(mScheduleAdapter != null);
 
-        Multiset<ScheduleLoader.ScheduleData> oldScheduleDatas;
-        if (mData.ScheduleDatas != null) {
-            oldScheduleDatas = HashMultiset.create(mData.ScheduleDatas);
+        Multiset<CreateTaskLoader.ScheduleData> oldScheduleDatas;
+        if (mData.TaskData != null) {
+            if (mData.TaskData.ScheduleDatas != null) {
+                oldScheduleDatas = HashMultiset.create(mData.TaskData.ScheduleDatas);
+            } else {
+                oldScheduleDatas = HashMultiset.create();
+            }
         } else {
             oldScheduleDatas = HashMultiset.create(Collections.singletonList(firstScheduleEntry().getScheduleData()));
         }
 
-        Multiset<ScheduleLoader.ScheduleData> newScheduleDatas = HashMultiset.create(Stream.of(mScheduleEntries)
+        Multiset<CreateTaskLoader.ScheduleData> newScheduleDatas = HashMultiset.create(Stream.of(mScheduleEntries)
                 .map(ScheduleEntry::getScheduleData)
                 .collect(Collectors.toList()));
 
@@ -509,11 +515,11 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         @NonNull
-        public String getText(@NonNull Map<Integer, ScheduleLoader.CustomTimeData> customTimeDatas) {
+        public String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas) {
             switch (mScheduleType) {
                 case SINGLE:
                     if (mTimePairPersist.getCustomTimeId() != null) {
-                        ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
                         Assert.assertTrue(customTimeData != null);
 
                         return mDate + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
@@ -522,7 +528,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                     }
                 case DAILY:
                     if (mTimePairPersist.getCustomTimeId() != null) {
-                        ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
                         Assert.assertTrue(customTimeData != null);
 
                         return customTimeData.Name;
@@ -531,7 +537,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
                     }
                 case WEEKLY:
                     if (mTimePairPersist.getCustomTimeId() != null) {
-                        ScheduleLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
                         Assert.assertTrue(customTimeData != null);
 
                         return mDayOfWeek + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")";
@@ -544,14 +550,14 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         @NonNull
-        public ScheduleLoader.ScheduleData getScheduleData() {
+        public CreateTaskLoader.ScheduleData getScheduleData() {
             switch (mScheduleType) {
                 case SINGLE:
-                    return new ScheduleLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
+                    return new CreateTaskLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
                 case DAILY:
-                    return new ScheduleLoader.DailyScheduleData(mTimePairPersist.getTimePair());
+                    return new CreateTaskLoader.DailyScheduleData(mTimePairPersist.getTimePair());
                 case WEEKLY:
-                    return new ScheduleLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
+                    return new CreateTaskLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
                 default:
                     throw new UnsupportedOperationException();
             }

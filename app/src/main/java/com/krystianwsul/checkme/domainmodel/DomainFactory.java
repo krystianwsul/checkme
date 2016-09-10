@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
-import com.krystianwsul.checkme.loaders.ScheduleLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
@@ -615,6 +614,9 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
+
         CreateTaskLoader.TaskData taskData = null;
         if (taskId != null) {
             Task task = mTasks.get(taskId);
@@ -622,6 +624,7 @@ public class DomainFactory {
 
             Integer parentTaskId;
             ScheduleType scheduleType;
+            List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
 
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
@@ -638,48 +641,6 @@ public class DomainFactory {
                     Assert.assertTrue(Stream.of(schedules)
                             .allMatch(schedule -> schedule.getType() == scheduleType));
                     // todo schedule hack
-                }
-            } else {
-                Task parentTask = task.getParentTask(now);
-                Assert.assertTrue(parentTask != null);
-
-                parentTaskId = parentTask.getId();
-                scheduleType = null;
-            }
-
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleType);
-        }
-
-        TreeMap<Integer, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskIds);
-        Assert.assertTrue(taskDatas != null);
-
-        return new CreateTaskLoader.Data(taskData, taskDatas);
-    }
-
-    public synchronized ScheduleLoader.Data getScheduleData(Integer taskId) {
-        fakeDelay();
-
-        MyCrashlytics.log("DomainFactory.getScheduleData");
-
-        List<ScheduleLoader.ScheduleData> scheduleDatas = null;
-
-        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
-
-        if (taskId != null) {
-            Task task = mTasks.get(taskId);
-            Assert.assertTrue(task != null);
-
-            ExactTimeStamp now = ExactTimeStamp.getNow();
-
-            if (task.isRootTask(now)) {
-                List<Schedule> schedules = task.getCurrentSchedules(now);
-                Assert.assertTrue(schedules != null);
-
-                if (!schedules.isEmpty()) {
-                    ScheduleType scheduleType = schedules.get(0).getType(); // todo schedule hack;
-                    Assert.assertTrue(Stream.of(schedules)
-                            .allMatch(schedule -> schedule.getType() == scheduleType));
 
                     switch (scheduleType) {
                         case SINGLE:
@@ -693,7 +654,7 @@ public class DomainFactory {
 
                                 Pair<Date, Time> pair = new Pair<>(singleSchedule.getDate(), singleSchedule.getTime());
 
-                                scheduleDatas.add(new ScheduleLoader.SingleScheduleData(pair.first, pair.second.getTimePair()));
+                                scheduleDatas.add(new CreateTaskLoader.SingleScheduleData(pair.first, pair.second.getTimePair()));
 
                                 CustomTime weeklyCustomTime = pair.second.getPair().first;
                                 if (weeklyCustomTime != null)
@@ -710,7 +671,7 @@ public class DomainFactory {
 
                             scheduleDatas = new ArrayList<>();
                             for (Time time : times) {
-                                scheduleDatas.add(new ScheduleLoader.DailyScheduleData(time.getTimePair()));
+                                scheduleDatas.add(new CreateTaskLoader.DailyScheduleData(time.getTimePair()));
 
                                 CustomTime dailyCustomTime = time.getPair().first;
                                 if (dailyCustomTime != null)
@@ -729,7 +690,7 @@ public class DomainFactory {
                                 Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
                                 Assert.assertTrue(pair != null);
 
-                                scheduleDatas.add(new ScheduleLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
+                                scheduleDatas.add(new CreateTaskLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
 
                                 CustomTime weeklyCustomTime = pair.second.getPair().first;
                                 if (weeklyCustomTime != null)
@@ -740,14 +701,25 @@ public class DomainFactory {
                             throw new UnsupportedOperationException();
                     }
                 }
+            } else {
+                Task parentTask = task.getParentTask(now);
+                Assert.assertTrue(parentTask != null);
+
+                parentTaskId = parentTask.getId();
+                scheduleType = null;
             }
+
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleType, scheduleDatas);
         }
 
-        HashMap<Integer, ScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : customTimes.values())
-            customTimeDatas.put(customTime.getId(), new ScheduleLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+        TreeMap<Integer, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskIds);
+        Assert.assertTrue(taskDatas != null);
 
-        return new ScheduleLoader.Data(scheduleDatas, customTimeDatas);
+        HashMap<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        for (CustomTime customTime : customTimes.values())
+            customTimeDatas.put(customTime.getId(), new CreateTaskLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+
+        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas);
     }
 
     public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, Context context) {
@@ -1070,7 +1042,7 @@ public class DomainFactory {
         return rootTask;
     }
 
-    public synchronized void createScheduleRootTask(int dataId, String name, List<ScheduleLoader.ScheduleData> scheduleDatas) {
+    public synchronized void createScheduleRootTask(int dataId, String name, List<CreateTaskLoader.ScheduleData> scheduleDatas) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1091,7 +1063,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void updateScheduleTask(int dataId, int taskId, String name, List<ScheduleLoader.ScheduleData> scheduleDatas) {
+    public synchronized void updateScheduleTask(int dataId, int taskId, String name, List<CreateTaskLoader.ScheduleData> scheduleDatas) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1128,7 +1100,7 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createScheduleJoinRootTask(int dataId, String name, List<ScheduleLoader.ScheduleData> scheduleDatas, List<Integer> joinTaskIds) {
+    public synchronized void createScheduleJoinRootTask(int dataId, String name, List<CreateTaskLoader.ScheduleData> scheduleDatas, List<Integer> joinTaskIds) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1774,7 +1746,7 @@ public class DomainFactory {
         return new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleDateTimeRecord);
     }
 
-    private List<Schedule> createSchedules(Task rootTask, List<ScheduleLoader.ScheduleData> scheduleDatas, ExactTimeStamp startExactTimeStamp) {
+    private List<Schedule> createSchedules(Task rootTask, List<CreateTaskLoader.ScheduleData> scheduleDatas, ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(rootTask != null);
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
@@ -1783,12 +1755,12 @@ public class DomainFactory {
 
         List<Schedule> schedules = new ArrayList<>();
 
-        for (ScheduleLoader.ScheduleData scheduleData : scheduleDatas) {
+        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
             Assert.assertTrue(scheduleData != null);
 
             switch (scheduleData.getScheduleType()) {
                 case SINGLE: {
-                    ScheduleLoader.SingleScheduleData singleScheduleData = (ScheduleLoader.SingleScheduleData) scheduleData;
+                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
 
                     Date date = singleScheduleData.Date;
                     Time time = getTime(singleScheduleData.TimePair);
@@ -1806,7 +1778,7 @@ public class DomainFactory {
                     break;
                 }
                 case DAILY: {
-                    ScheduleLoader.DailyScheduleData dailyScheduleData = (ScheduleLoader.DailyScheduleData) scheduleData;
+                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
 
                     Time time = getTime(dailyScheduleData.TimePair);
                     Assert.assertTrue(time != null);
@@ -1821,7 +1793,7 @@ public class DomainFactory {
                     break;
                 }
                 case WEEKLY: {
-                    ScheduleLoader.WeeklyScheduleData weeklyScheduleData = (ScheduleLoader.WeeklyScheduleData) scheduleData;
+                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
 
                     DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
                     Time time = getTime(weeklyScheduleData.TimePair);
@@ -2023,6 +1995,6 @@ public class DomainFactory {
             mCustomTimes = customTimes;
             mTasks = tasks;
             mInstances = instances;
-        }
+    }
     }
 }

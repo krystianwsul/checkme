@@ -44,7 +44,7 @@ import java.util.Map;
 
 public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCallbacks<ScheduleLoader.Data> {
     static final String SCHEDULE_HINT_KEY = "scheduleHint";
-    static final String ROOT_TASK_ID_KEY = "rootTaskId";
+    static final String TASK_ID_KEY = "rootTaskId";
 
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
 
@@ -61,7 +61,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     private Bundle mSavedInstanceState;
 
-    private Integer mRootTaskId;
+    private Integer mTaskId;
     private ScheduleLoader.Data mData;
 
     private FloatingActionButton mScheduleFab;
@@ -108,11 +108,11 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @NonNull
-    public static ScheduleFragment newInstance(int rootTaskId) {
+    public static ScheduleFragment newInstance(int taskId) {
         ScheduleFragment scheduleFragment = new ScheduleFragment();
 
         Bundle args = new Bundle();
-        args.putInt(ROOT_TASK_ID_KEY, rootTaskId);
+        args.putInt(TASK_ID_KEY, taskId);
 
         scheduleFragment.setArguments(args);
         return scheduleFragment;
@@ -137,11 +137,11 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
         Bundle args = getArguments();
         if (args != null) {
-            if (args.containsKey(ROOT_TASK_ID_KEY)) {
+            if (args.containsKey(TASK_ID_KEY)) {
                 Assert.assertTrue(!args.containsKey(SCHEDULE_HINT_KEY));
 
-                mRootTaskId = args.getInt(ROOT_TASK_ID_KEY, -1);
-                Assert.assertTrue(mRootTaskId != -1);
+                mTaskId = args.getInt(TASK_ID_KEY, -1);
+                Assert.assertTrue(mTaskId != -1);
             } else {
                 Assert.assertTrue(args.containsKey(SCHEDULE_HINT_KEY));
 
@@ -155,7 +155,7 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
             mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
             Assert.assertTrue(mHourMinutePickerPosition != -2);
-        } else if (args != null && args.containsKey(ROOT_TASK_ID_KEY)) {
+        } else if (args != null && args.containsKey(TASK_ID_KEY)) {
             mHourMinutePickerPosition = -1;
         } else {
             mScheduleEntries = new ArrayList<>();
@@ -186,33 +186,37 @@ public class ScheduleFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<ScheduleLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new ScheduleLoader(getActivity(), mRootTaskId);
+        return new ScheduleLoader(getActivity(), mTaskId);
     }
 
     @Override
     public void onLoadFinished(Loader<ScheduleLoader.Data> loader, ScheduleLoader.Data data) {
         mData = data;
 
-        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRY_KEY)) && mData.ScheduleDatas != null) {
-            Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
-            Assert.assertTrue(mScheduleEntries == null);
-
+        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRY_KEY))) {
             mFirst = false;
 
-            mScheduleEntries = Stream.of(mData.ScheduleDatas)
-                    .map(scheduleData -> {
-                        switch (scheduleData.getScheduleType()) {
-                            case SINGLE:
-                                return new ScheduleEntry(((ScheduleLoader.SingleScheduleData) scheduleData).Date, ((ScheduleLoader.SingleScheduleData) scheduleData).TimePair);
-                            case DAILY:
-                                return new ScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair);
-                            case WEEKLY:
-                                return new ScheduleEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair);
-                            default:
-                                throw new UnsupportedOperationException();
-                        }
-                    })
-                    .collect(Collectors.toList());
+            if (mData.ScheduleDatas != null) {
+                Assert.assertTrue(!mData.ScheduleDatas.isEmpty());
+                Assert.assertTrue(mScheduleEntries == null);
+
+                mScheduleEntries = Stream.of(mData.ScheduleDatas)
+                        .map(scheduleData -> {
+                            switch (scheduleData.getScheduleType()) {
+                                case SINGLE:
+                                    return new ScheduleEntry(((ScheduleLoader.SingleScheduleData) scheduleData).Date, ((ScheduleLoader.SingleScheduleData) scheduleData).TimePair);
+                                case DAILY:
+                                    return new ScheduleEntry(((ScheduleLoader.DailyScheduleData) scheduleData).TimePair);
+                                case WEEKLY:
+                                    return new ScheduleEntry(((ScheduleLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((ScheduleLoader.WeeklyScheduleData) scheduleData).TimePair);
+                                default:
+                                    throw new UnsupportedOperationException();
+                            }
+                        })
+                        .collect(Collectors.toList());
+            } else {
+                mScheduleEntries = new ArrayList<>();
+            }
         }
 
         ScheduleDialogFragment singleDialogFragment = (ScheduleDialogFragment) getChildFragmentManager().findFragmentByTag(SCHEDULE_DIALOG_TAG);

@@ -17,17 +17,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class ScheduleLoader extends DomainLoader<ScheduleLoader.Data> {
-    private final Integer mRootTaskId; // possibly null
+    private final Integer mTaskId; // possibly null
 
-    public ScheduleLoader(Context context, Integer rootTaskId) {
+    public ScheduleLoader(Context context, Integer taskId) {
         super(context);
 
-        mRootTaskId = rootTaskId;
+        mTaskId = taskId;
     }
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getScheduleData(mRootTaskId);
+        return DomainFactory.getDomainFactory(getContext()).getScheduleData(mTaskId);
     }
 
     public static class Data extends DomainLoader.Data {

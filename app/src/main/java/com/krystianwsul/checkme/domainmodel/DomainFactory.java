@@ -656,90 +656,91 @@ public class DomainFactory {
         return new CreateTaskLoader.Data(taskData, taskDatas);
     }
 
-    public synchronized ScheduleLoader.Data getScheduleData(Integer rootTaskId) {
+    public synchronized ScheduleLoader.Data getScheduleData(Integer taskId) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getScheduleData");
 
-        List<ScheduleLoader.ScheduleData> scheduleDatas;
+        List<ScheduleLoader.ScheduleData> scheduleDatas = null;
 
         Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
 
-        if (rootTaskId != null) {
-            Task rootTask = mTasks.get(rootTaskId);
-            Assert.assertTrue(rootTask != null);
+        if (taskId != null) {
+            Task task = mTasks.get(taskId);
+            Assert.assertTrue(task != null);
 
             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
-            Assert.assertTrue(schedules != null);
-            Assert.assertTrue(!schedules.isEmpty());
+            if (task.isRootTask(now)) {
+                List<Schedule> schedules = task.getCurrentSchedules(now);
+                Assert.assertTrue(schedules != null);
 
-            ScheduleType scheduleType = schedules.get(0).getType(); // todo schedule hack;
-            Assert.assertTrue(Stream.of(schedules)
-                    .allMatch(schedule -> schedule.getType() == scheduleType));
+                if (!schedules.isEmpty()) {
+                    ScheduleType scheduleType = schedules.get(0).getType(); // todo schedule hack;
+                    Assert.assertTrue(Stream.of(schedules)
+                            .allMatch(schedule -> schedule.getType() == scheduleType));
 
-            switch (scheduleType) {
-                case SINGLE:
-                    Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.SINGLE)); // todo schedule hack;
+                    switch (scheduleType) {
+                        case SINGLE:
+                            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.SINGLE)); // todo schedule hack;
 
-                    scheduleDatas = new ArrayList<>();
-                    for (Schedule schedule : schedules) {
-                        SingleSchedule singleSchedule = (SingleSchedule) schedule;
-                        Assert.assertTrue(singleSchedule != null);
-                        Assert.assertTrue(singleSchedule.current(now));
+                            scheduleDatas = new ArrayList<>();
+                            for (Schedule schedule : schedules) {
+                                SingleSchedule singleSchedule = (SingleSchedule) schedule;
+                                Assert.assertTrue(singleSchedule != null);
+                                Assert.assertTrue(singleSchedule.current(now));
 
-                        Pair<Date, Time> pair = new Pair<>(singleSchedule.getDate(), singleSchedule.getTime());
+                                Pair<Date, Time> pair = new Pair<>(singleSchedule.getDate(), singleSchedule.getTime());
 
-                        scheduleDatas.add(new ScheduleLoader.SingleScheduleData(pair.first, pair.second.getTimePair()));
+                                scheduleDatas.add(new ScheduleLoader.SingleScheduleData(pair.first, pair.second.getTimePair()));
 
-                        CustomTime weeklyCustomTime = pair.second.getPair().first;
-                        if (weeklyCustomTime != null)
-                            customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                                CustomTime weeklyCustomTime = pair.second.getPair().first;
+                                if (weeklyCustomTime != null)
+                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                            }
+                            break;
+                        case DAILY:
+                            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.DAILY)); // todo schedule hack;
+
+                            List<Time> times = Stream.of(schedules)
+                                    .map(schedule -> (DailySchedule) schedule)
+                                    .map(DailySchedule::getTime)
+                                    .collect(Collectors.toList());
+
+                            scheduleDatas = new ArrayList<>();
+                            for (Time time : times) {
+                                scheduleDatas.add(new ScheduleLoader.DailyScheduleData(time.getTimePair()));
+
+                                CustomTime dailyCustomTime = time.getPair().first;
+                                if (dailyCustomTime != null)
+                                    customTimes.put(dailyCustomTime.getId(), dailyCustomTime);
+                            }
+                            break;
+                        case WEEKLY:
+                            Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.WEEKLY)); // todo schedule hack;
+
+                            scheduleDatas = new ArrayList<>();
+                            for (Schedule schedule : schedules) {
+                                WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
+                                Assert.assertTrue(weeklySchedule != null);
+                                Assert.assertTrue(weeklySchedule.current(now));
+
+                                Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
+                                Assert.assertTrue(pair != null);
+
+                                scheduleDatas.add(new ScheduleLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
+
+                                CustomTime weeklyCustomTime = pair.second.getPair().first;
+                                if (weeklyCustomTime != null)
+                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                            }
+                            break;
+                        default:
+                            throw new UnsupportedOperationException();
                     }
-                    break;
-                case DAILY:
-                    Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.DAILY)); // todo schedule hack;
-
-                    List<Time> times = Stream.of(schedules)
-                            .map(schedule -> (DailySchedule) schedule)
-                            .map(DailySchedule::getTime)
-                            .collect(Collectors.toList());
-
-                    scheduleDatas = new ArrayList<>();
-                    for (Time time : times) {
-                        scheduleDatas.add(new ScheduleLoader.DailyScheduleData(time.getTimePair()));
-
-                        CustomTime dailyCustomTime = time.getPair().first;
-                        if (dailyCustomTime != null)
-                            customTimes.put(dailyCustomTime.getId(), dailyCustomTime);
-                    }
-                    break;
-                case WEEKLY:
-                    Assert.assertTrue(Stream.of(schedules).allMatch(schedule -> schedule.getType() == ScheduleType.WEEKLY)); // todo schedule hack;
-
-                    scheduleDatas = new ArrayList<>();
-                    for (Schedule schedule : schedules) {
-                        WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
-                        Assert.assertTrue(weeklySchedule != null);
-                        Assert.assertTrue(weeklySchedule.current(now));
-
-                        Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
-                        Assert.assertTrue(pair != null);
-
-                        scheduleDatas.add(new ScheduleLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
-
-                        CustomTime weeklyCustomTime = pair.second.getPair().first;
-                        if (weeklyCustomTime != null)
-                            customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
-                    }
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
+                }
             }
-        } else {
-            scheduleDatas = null;
         }
 
         HashMap<Integer, ScheduleLoader.CustomTimeData> customTimeDatas = new HashMap<>();

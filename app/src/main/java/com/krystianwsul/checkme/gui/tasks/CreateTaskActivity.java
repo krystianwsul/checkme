@@ -319,6 +319,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             }
         }
 
+        loadFragment();
+
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
@@ -439,11 +441,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         if (parentPickerFragment != null)
             parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
 
-        loadFragment();
-
         invalidateOptionsMenu();
 
-        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+        //Assert.assertTrue(!hasValueParent() || !hasValueSchedule()); todo schedule hack
     }
 
     @Override
@@ -525,9 +525,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (!TextUtils.isEmpty(mToolbarEditText.getText()))
                 return true;
 
-            if (hasValueParent())
-                return true;
-
             if (mParentTaskIdHint != null) {
                 Assert.assertTrue(mScheduleHint == null);
 
@@ -587,6 +584,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         ScheduleFragment fragment;
         if (mScheduleHint != null) {
             fragment = ScheduleFragment.newInstance(mScheduleHint);
+        } else if (mTaskId != null) {
+            fragment = ScheduleFragment.newInstance(mTaskId);
         } else {
             fragment = ScheduleFragment.newInstance();
         }

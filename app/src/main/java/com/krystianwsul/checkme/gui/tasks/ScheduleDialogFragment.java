@@ -48,6 +48,8 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
     private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
     private static final String TIME_PICKER_TAG = "timePicker";
 
+    private Spinner mScheduleType;
+
     TextInputLayout mScheduleDialogDateLayout;
     TextView mScheduleDialogDate;
 
@@ -119,6 +121,9 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
         View view = materialDialog.getCustomView();
         Assert.assertTrue(view != null);
 
+        mScheduleType = (Spinner) view.findViewById(R.id.schedule_type);
+        Assert.assertTrue(mScheduleType != null);
+
         mScheduleDialogDateLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_date_layout);
         Assert.assertTrue(mScheduleDialogDateLayout != null);
 
@@ -181,6 +186,11 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
             default:
                 throw new UnsupportedOperationException();
         }
+
+        ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.schedule_types, R.layout.spinner_no_padding);
+        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mScheduleType.setAdapter(typeAdapter);
 
         mScheduleDialogTime.setOnClickListener(v -> {
             Assert.assertTrue(mCustomTimeDatas != null);
@@ -269,8 +279,14 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
         mScheduleDialogDay.setSelection(dayOfWeekAdapter.getPosition(mDayOfWeek));
 
         mScheduleDialogDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            private boolean mFirst = true;
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (mFirst) {
+                    mFirst = false;
+                    return;
+                }
+
                 Assert.assertTrue(getScheduleType() == ScheduleType.WEEKLY);
 
                 DayOfWeek dayOfWeek = dayOfWeekAdapter.getItem(position);
@@ -352,8 +368,10 @@ public abstract class ScheduleDialogFragment extends DialogFragment {
         Assert.assertTrue(resultCode >= 0);
         Assert.assertTrue(data == null);
 
-        if (resultCode > 1)
+        if (resultCode > 1) {
+            mCustomTimeDatas = null;
             mTimePairPersist.setCustomTimeId(resultCode);
+        }
     }
 
     @NonNull

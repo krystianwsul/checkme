@@ -26,7 +26,11 @@
             android:inputType="text"
             android:textColor="@color/textPrimaryWhite"
             android:hint="@string/name_hint"
-            android:textColorHint="@color/textDisabledWhite"/>
+            android:textColorHint="@color/textDisabledWhite">
+
+            <requestFocus/>
+
+        </EditText>
 
     </android.support.design.widget.TextInputLayout>
 

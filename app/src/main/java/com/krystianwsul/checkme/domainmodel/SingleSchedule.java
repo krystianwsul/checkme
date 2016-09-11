@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
@@ -13,21 +14,14 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class SingleSchedule extends Schedule {
-    private final WeakReference<DomainFactory> mDomainFactoryReference;
-
     private final SingleScheduleRecord mSingleScheduleRecord;
 
-    SingleSchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, SingleScheduleRecord singleScheduleRecord) {
-        super(scheduleRecord, rootTask);
+    SingleSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull SingleScheduleRecord singleScheduleRecord) {
+        super(domainFactory, scheduleRecord);
 
-        Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(singleScheduleRecord != null);
-
-        mDomainFactoryReference = new WeakReference<>(domainFactory);
         mSingleScheduleRecord = singleScheduleRecord;
     }
 
@@ -35,13 +29,7 @@ public class SingleSchedule extends Schedule {
     String getTaskText(Context context) {
         Assert.assertTrue(mSingleScheduleRecord != null);
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        Task rootTask = mRootTaskReference.get();
-        Assert.assertTrue(rootTask != null);
-
-        Instance instance = domainFactory.getInstance(rootTask, getDateTime());
+        Instance instance = getDomainFactory().getInstance(getRootTask(), getDateTime());
 
         return instance.getInstanceDateTime().getDisplayText(context);
     }
@@ -49,10 +37,7 @@ public class SingleSchedule extends Schedule {
     Instance getInstance(Task task) {
         Assert.assertTrue(task != null);
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        Instance instance = domainFactory.getInstance(task, getDateTime());
+        Instance instance = getDomainFactory().getInstance(task, getDateTime());
         Assert.assertTrue(instance != null);
 
         return instance;
@@ -106,10 +91,7 @@ public class SingleSchedule extends Schedule {
     public Time getTime() {
         Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            CustomTime customTime = domainFactory.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
+            CustomTime customTime = getDomainFactory().getCustomTime(mSingleScheduleRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
             return customTime;
         } else {

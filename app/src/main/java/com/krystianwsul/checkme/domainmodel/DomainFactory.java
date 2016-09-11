@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -139,7 +140,7 @@ public class DomainFactory {
             Task childTask = mTasks.get(taskHierarchyRecord.getChildTaskId());
             Assert.assertTrue(childTask != null);
 
-            TaskHierarchy taskHierarchy = new TaskHierarchy(taskHierarchyRecord, parentTask, childTask);
+            TaskHierarchy taskHierarchy = new TaskHierarchy(this, taskHierarchyRecord);
 
             Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId()));
             mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
@@ -152,7 +153,7 @@ public class DomainFactory {
             Task task = mTasks.get(instanceRecord.getTaskId());
             Assert.assertTrue(task != null);
 
-            Instance instance = new Instance(this, task, instanceRecord);
+            Instance instance = new Instance(this, instanceRecord);
             mExistingInstances.add(instance);
         }
     }
@@ -1485,7 +1486,7 @@ public class DomainFactory {
         if (existingInstance != null) {
             return existingInstance;
         } else {
-            return new Instance(this, task, scheduleDateTime);
+            return new Instance(this, task.getId(), scheduleDateTime);
         }
     }
 
@@ -1617,7 +1618,7 @@ public class DomainFactory {
         SingleScheduleRecord singleScheduleRecord = mPersistenceManager.getSingleScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(singleScheduleRecord != null);
 
-        return new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleRecord);
+        return new SingleSchedule(this, scheduleRecord, singleScheduleRecord);
     }
 
     private DailySchedule loadDailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
@@ -1627,7 +1628,7 @@ public class DomainFactory {
         DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.getDailyScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(dailyScheduleRecord != null);
 
-        return new DailySchedule(scheduleRecord, rootTask, this, dailyScheduleRecord);
+        return new DailySchedule(this, scheduleRecord, dailyScheduleRecord);
     }
 
     private WeeklySchedule loadWeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
@@ -1637,7 +1638,7 @@ public class DomainFactory {
         WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.getWeeklyScheduleRecords(scheduleRecord.getId());
         Assert.assertTrue(weeklyScheduleRecord != null);
 
-        return new WeeklySchedule(scheduleRecord, rootTask, this, weeklyScheduleRecord);
+        return new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord);
     }
 
     private Task createRootTaskHelper(String name, ExactTimeStamp startExactTimeStamp) {
@@ -1709,7 +1710,7 @@ public class DomainFactory {
         TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentTask, childTask, startExactTimeStamp);
         Assert.assertTrue(taskHierarchyRecord != null);
 
-        TaskHierarchy taskHierarchy = new TaskHierarchy(taskHierarchyRecord, parentTask, childTask);
+        TaskHierarchy taskHierarchy = new TaskHierarchy(this, taskHierarchyRecord);
         Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId()));
         mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
     }
@@ -1727,7 +1728,7 @@ public class DomainFactory {
         SingleScheduleRecord singleScheduleDateTimeRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
         Assert.assertTrue(singleScheduleDateTimeRecord != null);
 
-        return new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleDateTimeRecord);
+        return new SingleSchedule(this, scheduleRecord, singleScheduleDateTimeRecord);
     }
 
     private List<Schedule> createSchedules(Task rootTask, List<CreateTaskLoader.ScheduleData> scheduleDatas, ExactTimeStamp startExactTimeStamp) {
@@ -1758,7 +1759,7 @@ public class DomainFactory {
                     SingleScheduleRecord singleScheduleRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
                     Assert.assertTrue(singleScheduleRecord != null);
 
-                    schedules.add(new SingleSchedule(scheduleRecord, rootTask, this, singleScheduleRecord));
+                    schedules.add(new SingleSchedule(this, scheduleRecord, singleScheduleRecord));
                     break;
                 }
                 case DAILY: {
@@ -1773,7 +1774,7 @@ public class DomainFactory {
                     DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
                     Assert.assertTrue(dailyScheduleRecord != null);
 
-                    schedules.add(new DailySchedule(scheduleRecord, rootTask, this, dailyScheduleRecord));
+                    schedules.add(new DailySchedule(this, scheduleRecord, dailyScheduleRecord));
                     break;
                 }
                 case WEEKLY: {
@@ -1791,7 +1792,7 @@ public class DomainFactory {
                     WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
                     Assert.assertTrue(weeklyScheduleRecord != null);
 
-                    schedules.add(new WeeklySchedule(scheduleRecord, rootTask, this, weeklyScheduleRecord));
+                    schedules.add(new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord));
                     break;
                 }
                 default:
@@ -1964,6 +1965,14 @@ public class DomainFactory {
         }
 
         return taskDatas;
+    }
+
+    @NonNull
+    Task getTask(int taskId) {
+        Task task = mTasks.get(taskId);
+        Assert.assertTrue(task != null);
+
+        return task;
     }
 
     static class Irrelevant {

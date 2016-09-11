@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import android.support.annotation.NonNull;
+
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
@@ -14,8 +16,8 @@ import java.util.Calendar;
 import java.util.List;
 
 abstract class RepeatingSchedule extends Schedule {
-    RepeatingSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
-        super(scheduleRecord, rootTask);
+    RepeatingSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
+        super(domainFactory, scheduleRecord);
     }
 
     @Override

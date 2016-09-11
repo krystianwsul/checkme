@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -13,17 +14,28 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 public abstract class Schedule {
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
+
     private final ScheduleRecord mScheduleRecord;
-    final WeakReference<Task> mRootTaskReference;
 
     abstract String getTaskText(Context context);
 
-    Schedule(ScheduleRecord scheduleRecord, Task rootTask) {
-        Assert.assertTrue(scheduleRecord != null);
-        Assert.assertTrue(rootTask != null);
-
+    Schedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
         mScheduleRecord = scheduleRecord;
-        mRootTaskReference = new WeakReference<>(rootTask);
+    }
+
+    @NonNull
+    DomainFactory getDomainFactory() {
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory;
+    }
+
+    @NonNull
+    Task getRootTask() {
+        return getDomainFactory().getTask(mScheduleRecord.getRootTaskId());
     }
 
     ExactTimeStamp getStartExactTimeStamp() {

@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import android.support.annotation.NonNull;
+
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -8,35 +10,35 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 
 class TaskHierarchy {
+    private final WeakReference<DomainFactory> mDomainFactoryReference;
+
     private final TaskHierarchyRecord mTaskHierarchyRecord;
 
-    private final WeakReference<Task> mParentTaskReference;
-    private final Task mChildTask;
-
-    TaskHierarchy(TaskHierarchyRecord taskHierarchyRecord, Task parentTask, Task childTask) {
-        Assert.assertTrue(taskHierarchyRecord != null);
-        Assert.assertTrue(parentTask != null);
-        Assert.assertTrue(childTask != null);
-
+    TaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull TaskHierarchyRecord taskHierarchyRecord) {
+        mDomainFactoryReference = new WeakReference<>(domainFactory);
         mTaskHierarchyRecord = taskHierarchyRecord;
+    }
 
-        mParentTaskReference = new WeakReference<>(parentTask);
-        mChildTask = childTask;
+    @NonNull
+    private DomainFactory getDomainFactory() {
+        DomainFactory domainFactory = mDomainFactoryReference.get();
+        Assert.assertTrue(domainFactory != null);
+
+        return domainFactory;
     }
 
     int getId() {
         return mTaskHierarchyRecord.getId();
     }
 
+    @NonNull
     Task getParentTask() {
-        Task parentTask = mParentTaskReference.get();
-        Assert.assertTrue(parentTask != null);
-
-        return parentTask;
+        return getDomainFactory().getTask(mTaskHierarchyRecord.getParentTaskId());
     }
 
+    @NonNull
     Task getChildTask() {
-        return mChildTask;
+        return getDomainFactory().getTask(mTaskHierarchyRecord.getChildTaskId());
     }
 
     private ExactTimeStamp getStartExactTimeStamp() {

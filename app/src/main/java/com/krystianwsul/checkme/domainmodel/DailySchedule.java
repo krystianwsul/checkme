@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
@@ -17,21 +18,14 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.Calendar;
 
 public class DailySchedule extends RepeatingSchedule {
-    private final WeakReference<DomainFactory> mDomainFactoryReference;
-
     private final DailyScheduleRecord mDailyScheduleRecord;
 
-    DailySchedule(ScheduleRecord scheduleRecord, Task rootTask, DomainFactory domainFactory, DailyScheduleRecord dailyScheduleRecord) {
-        super(scheduleRecord, rootTask);
+    DailySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull DailyScheduleRecord dailyScheduleRecord) {
+        super(domainFactory, scheduleRecord);
 
-        Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(dailyScheduleRecord != null);
-
-        mDomainFactoryReference = new WeakReference<>(domainFactory);
         mDailyScheduleRecord = dailyScheduleRecord;
     }
 
@@ -59,10 +53,7 @@ public class DailySchedule extends RepeatingSchedule {
         DateTime scheduleDateTime = new DateTime(date, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        return domainFactory.getInstance(task, scheduleDateTime);
+        return getDomainFactory().getInstance(task, scheduleDateTime);
     }
 
     @Override
@@ -102,10 +93,7 @@ public class DailySchedule extends RepeatingSchedule {
     public Time getTime() {
         Integer customTimeId = mDailyScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
-            DomainFactory domainFactory = mDomainFactoryReference.get();
-            Assert.assertTrue(domainFactory != null);
-
-            CustomTime customTime = domainFactory.getCustomTime(mDailyScheduleRecord.getCustomTimeId());
+            CustomTime customTime = getDomainFactory().getCustomTime(mDailyScheduleRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
 
             return customTime;

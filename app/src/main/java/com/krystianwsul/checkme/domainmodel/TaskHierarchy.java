@@ -75,4 +75,12 @@ class TaskHierarchy {
 
         mTaskHierarchyRecord.setEndTime(endExactTimeStamp.getLong());
     }
+
+    int getParentTaskId() {
+        return mTaskHierarchyRecord.getParentTaskId();
+    }
+
+    int getChildTaskId() {
+        return mTaskHierarchyRecord.getChildTaskId();
+    }
 }

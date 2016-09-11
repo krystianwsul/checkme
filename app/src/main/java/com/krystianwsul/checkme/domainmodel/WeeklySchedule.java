@@ -93,18 +93,6 @@ public class WeeklySchedule extends RepeatingSchedule {
         return (new DateTime(thisDate, getTime())).getTimeStamp();
     }
 
-    @SuppressWarnings("RedundantIfStatement")
-    @Override
-    public boolean usesCustomTime(CustomTime customTime) {
-        Assert.assertTrue(customTime != null);
-
-        Integer customTimeId = getTime().getTimePair().CustomTimeId;
-        if ((customTimeId != null) && (customTime.getId() == customTimeId))
-            return true;
-
-        return false;
-    }
-
     private Time getTime() {
         Integer customTimeId = mWeeklyScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
@@ -122,5 +110,10 @@ public class WeeklySchedule extends RepeatingSchedule {
 
     private DayOfWeek getDayOfWeek() {
         return DayOfWeek.values()[mWeeklyScheduleRecord.getDayOfWeek()];
+    }
+
+    @Override
+    public Integer getCustomTimeId() {
+        return mWeeklyScheduleRecord.getCustomTimeId();
     }
 }

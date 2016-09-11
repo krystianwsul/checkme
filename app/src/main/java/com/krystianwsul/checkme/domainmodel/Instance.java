@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -247,7 +246,7 @@ class Instance {
         return new ArrayList<>(childInstances);
     }
 
-    private Instance getParentInstance(ExactTimeStamp now) {
+    Instance getParentInstance(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
@@ -467,6 +466,10 @@ class Instance {
         return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
     }
 
+    TimePair getScheduleTimePair() {
+        return new TimePair(getScheduleCustomTimeId(), getScheduleHourMinute());
+    }
+
     boolean isVisible(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
@@ -504,6 +507,7 @@ class Instance {
         }
     }
 
+    /*
     boolean isRelevant(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
@@ -527,6 +531,7 @@ class Instance {
 
         return false;
     }
+    */
 
     boolean exists() {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
@@ -537,21 +542,5 @@ class Instance {
 
     public void setRelevant() {
         mInstanceRecord.setRelevant(false);
-    }
-
-    @SuppressWarnings("RedundantIfStatement")
-    public boolean usesCustomTime(CustomTime customTime) {
-        Assert.assertTrue(customTime != null);
-        Assert.assertTrue(exists());
-
-        Integer scheduleCustomTimeId = getScheduleCustomTimeId();
-        if ((scheduleCustomTimeId != null) && (customTime.getId() == scheduleCustomTimeId))
-            return true;
-
-        Integer instanceCustomTimeId = getInstanceCustomTimeId();
-        if ((instanceCustomTimeId != null) && (customTime.getId() == instanceCustomTimeId))
-            return true;
-
-        return false;
     }
 }

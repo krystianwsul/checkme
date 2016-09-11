@@ -61,7 +61,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(rootTask != null);
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
-        Assert.assertTrue(rootTask.isRelevant(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.isEmpty());
@@ -73,7 +72,6 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
-        Assert.assertTrue(rootInstance.isRelevant(startExactTimeStamp));
 
         Date doneDate = startDate;
         HourMili doneHourMili = new HourMili(1, 0, 0, 0);
@@ -118,9 +116,6 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(!rootInstance.isVisible(nextDayAfterExactTimeStamp));
 
-        Assert.assertTrue(!rootTask.isRelevant(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!rootInstance.isRelevant(nextDayAfterExactTimeStamp));
-
         domainFactory.removeIrrelevant(irrelevantAfter);
 
         Assert.assertTrue(domainFactory.getTaskListData(nextDayAfterExactTimeStamp, mContext, null).TaskDatas.isEmpty());
@@ -146,7 +141,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(rootTask != null);
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
-        Assert.assertTrue(rootTask.isRelevant(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.isEmpty());
@@ -155,7 +149,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(childTaskDone != null);
 
         Assert.assertTrue(childTaskDone.isVisible(startExactTimeStamp));
-        Assert.assertTrue(childTaskDone.isRelevant(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.size() == 1);
@@ -164,7 +157,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(childTaskExists != null);
 
         Assert.assertTrue(childTaskExists.isVisible(startExactTimeStamp));
-        Assert.assertTrue(childTaskExists.isRelevant(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.size() == 2);
@@ -173,7 +165,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(childTaskDoesntExist != null);
 
         Assert.assertTrue(childTaskDoesntExist.isVisible(startExactTimeStamp));
-        Assert.assertTrue(childTaskDoesntExist.isRelevant(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.size() == 3);
@@ -185,7 +176,6 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
-        Assert.assertTrue(rootInstance.isRelevant(startExactTimeStamp));
 
         Date doneDate = startDate;
         HourMili doneHourMili = new HourMili(1, 0, 0, 0);
@@ -202,7 +192,6 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(!childInstanceDone.exists());
         Assert.assertTrue(childInstanceDone.isVisible(doneExactTimeStamp));
-        Assert.assertTrue(childInstanceDone.isRelevant(doneExactTimeStamp));
 
         childInstanceDone = domainFactory.setInstanceDone(doneExactTimeStamp, childInstanceDone.getInstanceKey(), true);
         Assert.assertTrue(childInstanceDone != null);
@@ -214,7 +203,6 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(!childInstanceExists.exists());
         Assert.assertTrue(childInstanceExists.isVisible(doneExactTimeStamp));
-        Assert.assertTrue(childInstanceExists.isRelevant(doneExactTimeStamp));
 
         childInstanceExists = domainFactory.setInstanceDone(doneExactTimeStamp, childInstanceExists.getInstanceKey(), true);
         Assert.assertTrue(childInstanceExists != null);
@@ -231,7 +219,6 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(!childInstanceDoesntExist.exists());
         Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp));
-        Assert.assertTrue(childInstanceDoesntExist.isRelevant(doneExactTimeStamp));
 
         Date nextDayBeforeDate = new Date(2016, 1, 2);
         HourMili nextDayBeforeHourMili = new HourMili(0, 0, 0, 0);
@@ -275,13 +262,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(!childInstanceDone.isVisible(nextDayAfterExactTimeStamp));
         Assert.assertTrue(!childInstanceExists.isVisible(nextDayAfterExactTimeStamp));
         Assert.assertTrue(!childInstanceDoesntExist.isVisible(nextDayAfterExactTimeStamp));
-
-        Assert.assertTrue(!rootTask.isRelevant(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childTaskDone.isRelevant(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childInstanceDone.isRelevant(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childInstanceExists.isRelevant(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childInstanceDoesntExist.isRelevant(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!rootInstance.isRelevant(nextDayAfterExactTimeStamp));
 
         domainFactory.removeIrrelevant(irrelevantAfter);
 

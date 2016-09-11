@@ -69,5 +69,5 @@ public abstract class Schedule {
 
     protected abstract TimeStamp getNextAlarm(ExactTimeStamp now);
 
-    public abstract boolean usesCustomTime(CustomTime customTime);
+    public abstract Integer getCustomTimeId();
 }

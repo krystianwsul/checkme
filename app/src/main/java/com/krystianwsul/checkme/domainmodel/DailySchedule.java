@@ -78,18 +78,6 @@ public class DailySchedule extends RepeatingSchedule {
         return dailyScheduleDateTime.getTimeStamp();
     }
 
-    @SuppressWarnings("RedundantIfStatement")
-    @Override
-    public boolean usesCustomTime(CustomTime customTime) {
-        Assert.assertTrue(customTime != null);
-
-        Integer customTimeId = getTime().getTimePair().CustomTimeId;
-        if ((customTimeId != null) && (customTime.getId() == customTimeId))
-            return true;
-
-        return false;
-    }
-
     public Time getTime() {
         Integer customTimeId = mDailyScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
@@ -104,5 +92,10 @@ public class DailySchedule extends RepeatingSchedule {
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
         }
+    }
+
+    @Override
+    public Integer getCustomTimeId() {
+        return mDailyScheduleRecord.getCustomTimeId();
     }
 }

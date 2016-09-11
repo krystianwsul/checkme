@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
@@ -306,6 +305,7 @@ public class Task {
         return false;
     }
 
+    /*
     public boolean isRelevant(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
@@ -336,25 +336,9 @@ public class Task {
 
         return false;
     }
+    */
 
     public void setRelevant() {
         mTaskRecord.setRelevant(false);
-    }
-
-    public boolean usesCustomTime(ExactTimeStamp now, CustomTime customTime) {
-        Assert.assertTrue(now != null);
-        Assert.assertTrue(customTime != null);
-
-        if (!current(now))
-            return false;
-
-        if (!isRootTask(now))
-            return false;
-
-        List<Schedule> schedules = getCurrentSchedules(now);
-        Assert.assertTrue(schedules != null);
-
-        return Stream.of(schedules)
-                .anyMatch(schedule -> schedule.usesCustomTime(customTime));
     }
 }

@@ -55,17 +55,6 @@ public class SingleSchedule extends Schedule {
             return null;
     }
 
-    @SuppressWarnings("RedundantIfStatement")
-    public boolean usesCustomTime(CustomTime customTime) {
-        Assert.assertTrue(customTime != null);
-
-        Integer customTimeId = getTime().getTimePair().CustomTimeId;
-        if ((customTimeId != null) && (customTime.getId() == customTimeId))
-            return true;
-
-        return false;
-    }
-
     @Override
     ArrayList<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
         Assert.assertTrue(task != null);
@@ -109,5 +98,10 @@ public class SingleSchedule extends Schedule {
 
     private DateTime getDateTime() {
         return new DateTime(getDate(), getTime());
+    }
+
+    @Override
+    public Integer getCustomTimeId() {
+        return mSingleScheduleRecord.getCustomTimeId();
     }
 }

@@ -1085,16 +1085,13 @@ public class DomainFactory {
         save(dataId);
     }
 
-    public synchronized void createScheduleJoinRootTask(int dataId, String name, List<CreateTaskLoader.ScheduleData> scheduleDatas, List<Integer> joinTaskIds) {
-        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
-
+    private Task createScheduleJoinRootTask(ExactTimeStamp now, String name, List<CreateTaskLoader.ScheduleData> scheduleDatas, List<Integer> joinTaskIds) {
+        Assert.assertTrue(now != null);
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Task rootTask = createRootTaskHelper(name, now);
         Assert.assertTrue(rootTask != null);
@@ -1106,6 +1103,22 @@ public class DomainFactory {
         rootTask.addSchedules(schedules);
 
         joinTasks(rootTask, joinTaskIds, now);
+
+        return rootTask;
+    }
+
+    public synchronized void createScheduleJoinRootTask(int dataId, String name, List<CreateTaskLoader.ScheduleData> scheduleDatas, List<Integer> joinTaskIds) {
+        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(scheduleDatas != null);
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+        Assert.assertTrue(joinTaskIds != null);
+        Assert.assertTrue(joinTaskIds.size() > 1);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        createScheduleJoinRootTask(now, name, scheduleDatas, joinTaskIds);
 
         save(dataId);
     }
@@ -1327,34 +1340,79 @@ public class DomainFactory {
             task.updateOldestVisible(now);
 
         // relevant hack
-        List<Task> irrelevantTasks = Stream.of(mTasks.values())
-                .filter(task -> !task.isRelevant(now))
+        Map<Integer, TaskRelevance> taskRelevances = Stream.of(mTasks.values()).collect(Collectors.toMap(Task::getId, TaskRelevance::new));
+        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(mExistingInstances).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
+        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
+
+        Stream.of(mTasks.values())
+                .filter(task -> task.current(now))
+                .filter(task -> task.isRootTask(now))
+                .filter(task -> task.isVisible(now))
+                .map(Task::getId)
+                .map(taskRelevances::get)
+                .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+        Stream.of(getRootInstances(null, now.plusOne(), now))
+                .map(Instance::getInstanceKey)
+                .map(instanceRelevances::get)
+                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+        Stream.of(mExistingInstances)
+                .filter(instance -> instance.isRootInstance(now))
+                .filter(instance -> instance.isVisible(now))
+                .map(Instance::getInstanceKey)
+                .map(instanceRelevances::get)
+                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+        Stream.of(getCurrentCustomTimes())
+                .map(CustomTime::getId)
+                .map(customTimeRelevances::get)
+                .forEach(CustomTimeRelevance::setRelevant);
+
+        List<Task> relevantTasks = Stream.of(taskRelevances.values())
+                .filter(TaskRelevance::getRelevant)
+                .map(TaskRelevance::getTask)
                 .collect(Collectors.toList());
 
-        List<Instance> irrelevantInstances = Stream.of(mExistingInstances)
-                .filter(instance -> !instance.isRelevant(now))
+        List<Task> irrelevantTasks = new ArrayList<>(mTasks.values());
+        irrelevantTasks.removeAll(relevantTasks);
+
+        Assert.assertTrue(Stream.of(irrelevantTasks)
+                .noneMatch(task -> task.isVisible(now)));
+
+        List<Instance> relevantExistingInstances = Stream.of(instanceRelevances.values())
+                .filter(InstanceRelevance::getRelevant)
+                .map(InstanceRelevance::getInstance)
+                .filter(Instance::exists)
                 .collect(Collectors.toList());
 
-        List<Task> relevantTasks = new ArrayList<>(mTasks.values());
-        relevantTasks.removeAll(irrelevantTasks);
+        List<Instance> irrelevantExistingInstances = new ArrayList<>(mExistingInstances);
+        irrelevantExistingInstances.removeAll(relevantExistingInstances);
 
-        List<Instance> relevantInstances = new ArrayList<>(mExistingInstances);
-        relevantInstances.removeAll(irrelevantInstances);
+        Assert.assertTrue(Stream.of(irrelevantExistingInstances)
+                .noneMatch(instance -> instance.isVisible(now)));
 
-        List<CustomTime> irrelevantCustomTimes = Stream.of(mCustomTimes.values())
-                .filter(customTime -> !customTime.isRelevant(relevantTasks, relevantInstances, now))
+        List<CustomTime> relevantCustomTimes = Stream.of(customTimeRelevances.values())
+                .filter(CustomTimeRelevance::getRelevant)
+                .map(CustomTimeRelevance::getCustomTime)
                 .collect(Collectors.toList());
+
+        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mCustomTimes.values());
+        irrelevantCustomTimes.removeAll(relevantCustomTimes);
+
+        Assert.assertTrue(Stream.of(irrelevantCustomTimes)
+                .noneMatch(CustomTime::getCurrent));
 
         Stream.of(irrelevantTasks)
                 .forEach(Task::setRelevant);
 
-        Stream.of(irrelevantInstances)
+        Stream.of(irrelevantExistingInstances)
                 .forEach(Instance::setRelevant);
 
         Stream.of(irrelevantCustomTimes)
                 .forEach(CustomTime::setRelevant);
 
-        return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantInstances);
+        return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
     }
 
     void removeIrrelevant(Irrelevant irrelevant) {
@@ -1988,6 +2046,174 @@ public class DomainFactory {
             mCustomTimes = customTimes;
             mTasks = tasks;
             mInstances = instances;
+        }
+    }
+
+    private class TaskRelevance {
+        private final Task mTask;
+        private boolean mRelevant = false;
+
+        public TaskRelevance(@NonNull Task task) {
+            mTask = task;
+        }
+
+        public void setRelevant(@NonNull Map<Integer, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
+            if (mRelevant)
+                return;
+
+            mRelevant = true;
+
+            int taskId = mTask.getId();
+
+            // mark parents relevant
+            Stream.of(mTaskHierarchies.values())
+                    .filter(taskHierarchy -> taskHierarchy.getChildTaskId() == taskId)
+                    .map(TaskHierarchy::getParentTaskId)
+                    .map(taskRelevances::get)
+                    .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+            // mark children relevant
+            Stream.of(mTaskHierarchies.values())
+                    .filter(taskHierarchy -> taskHierarchy.getParentTaskId() == taskId)
+                    .map(TaskHierarchy::getChildTaskId)
+                    .map(taskRelevances::get)
+                    .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+            Date oldestVisible = mTask.getOldestVisible();
+            Assert.assertTrue(oldestVisible != null);
+
+            // mark instances relevant
+            Stream.of(getPastInstances(mTask, now))
+                    .filter(instance -> instance.getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
+                    .map(instance -> {
+                        InstanceKey instanceKey = instance.getInstanceKey();
+
+                        if (!instanceRelevances.containsKey(instanceKey))
+                            instanceRelevances.put(instanceKey, new InstanceRelevance(instance));
+
+                        return instanceRelevances.get(instanceKey);
+                    })
+                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+            Stream.of(getExistingInstances(mTask))
+                    .filter(instance -> instance.getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
+                    .map(Instance::getInstanceKey)
+                    .map(instanceRelevances::get)
+                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+            // mark custom times relevant
+            if (mTask.current(now))
+                Stream.of(mTask.getCurrentSchedules(now))
+                        .map(Schedule::getCustomTimeId)
+                        .filter(customTimeId -> customTimeId != null)
+                        .map(customTimeRelevances::get)
+                        .forEach(CustomTimeRelevance::setRelevant);
+        }
+
+        public boolean getRelevant() {
+            return mRelevant;
+        }
+
+        public Task getTask() {
+            return mTask;
+        }
+    }
+
+    private static class InstanceRelevance {
+        private final Instance mInstance;
+        private boolean mRelevant = false;
+
+        public InstanceRelevance(@NonNull Instance instance) {
+            mInstance = instance;
+        }
+
+        public void setRelevant(@NonNull Map<Integer, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
+            if (mRelevant)
+                return;
+
+            mRelevant = true;
+
+            // set task relevant
+            TaskRelevance taskRelevance = taskRelevances.get(mInstance.getTaskId());
+            Assert.assertTrue(taskRelevance != null);
+
+            taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now);
+
+            // set parent instance relevant
+            if (!mInstance.isRootInstance(now)) {
+                Instance parentInstance = mInstance.getParentInstance(now);
+                Assert.assertTrue(parentInstance != null);
+
+                InstanceKey parentInstanceKey = parentInstance.getInstanceKey();
+                Assert.assertTrue(parentInstanceKey != null);
+
+                if (!instanceRelevances.containsKey(parentInstanceKey))
+                    instanceRelevances.put(parentInstanceKey, new InstanceRelevance(parentInstance));
+
+                InstanceRelevance parentInstanceRelevance = instanceRelevances.get(parentInstanceKey);
+                Assert.assertTrue(parentInstanceRelevance != null);
+
+                parentInstanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now);
+            }
+
+            // set child instances relevant
+            Stream.of(mInstance.getChildInstances(now))
+                    .map(instance -> {
+                        InstanceKey instanceKey = instance.getInstanceKey();
+
+                        if (!instanceRelevances.containsKey(instanceKey))
+                            instanceRelevances.put(instanceKey, new InstanceRelevance(instance));
+
+                        return instanceRelevances.get(instanceKey);
+                    })
+                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+            // set custom time relevant
+            Integer scheduleCustomTimeId = mInstance.getScheduleTimePair().CustomTimeId;
+            if (scheduleCustomTimeId != null) {
+                CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(scheduleCustomTimeId);
+                Assert.assertTrue(customTimeRelevance != null);
+
+                customTimeRelevance.setRelevant();
+            }
+
+            // set custom time relevant
+            Integer instanceCustomTimeId = mInstance.getInstanceTimePair().CustomTimeId;
+            if (instanceCustomTimeId != null) {
+                CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(instanceCustomTimeId);
+                Assert.assertTrue(customTimeRelevance != null);
+
+                customTimeRelevance.setRelevant();
+            }
+        }
+
+        public boolean getRelevant() {
+            return mRelevant;
+        }
+
+        public Instance getInstance() {
+            return mInstance;
+        }
+    }
+
+    private static class CustomTimeRelevance {
+        private final CustomTime mCustomTime;
+        private boolean mRelevant = false;
+
+        public CustomTimeRelevance(@NonNull CustomTime customTime) {
+            mCustomTime = customTime;
+        }
+
+        public void setRelevant() {
+            mRelevant = true;
+        }
+
+        public boolean getRelevant() {
+            return mRelevant;
+        }
+
+        public CustomTime getCustomTime() {
+            return mCustomTime;
         }
     }
 }

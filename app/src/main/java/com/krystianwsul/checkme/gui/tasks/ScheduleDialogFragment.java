@@ -45,6 +45,7 @@ import java.util.Map;
 
 public class ScheduleDialogFragment extends DialogFragment {
     private static final String SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData";
+    private static final String SHOW_DELETE_KEY = "showDelete";
 
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
@@ -103,11 +104,12 @@ public class ScheduleDialogFragment extends DialogFragment {
     };
 
     @NonNull
-    public static ScheduleDialogFragment newInstance(@NonNull ScheduleDialogData scheduleDialogData) {
+    public static ScheduleDialogFragment newInstance(@NonNull ScheduleDialogData scheduleDialogData, boolean showDelete) {
         ScheduleDialogFragment scheduleDialogFragment = new ScheduleDialogFragment();
 
         Bundle args = new Bundle();
         args.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData);
+        args.putBoolean(SHOW_DELETE_KEY, showDelete);
         scheduleDialogFragment.setArguments(args);
 
         return scheduleDialogFragment;
@@ -116,7 +118,13 @@ public class ScheduleDialogFragment extends DialogFragment {
     @Override
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
+        Bundle args = getArguments();
+        Assert.assertTrue(args != null);
+        Assert.assertTrue(args.containsKey(SHOW_DELETE_KEY));
+
+        boolean showDelete = args.getBoolean(SHOW_DELETE_KEY);
+
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity())
                 .customView(R.layout.fragment_schedule_dialog, false)
                 .negativeText(android.R.string.cancel)
                 .positiveText(android.R.string.ok)
@@ -126,8 +134,13 @@ public class ScheduleDialogFragment extends DialogFragment {
                     Assert.assertTrue(isValid());
 
                     mScheduleDialogListener.onScheduleDialogResult(mScheduleDialogData);
-                })
-                .build();
+                });
+
+        if (showDelete)
+            builder.neutralText(R.string.delete)
+                    .onNeutral((dialog, which) -> mScheduleDialogListener.onScheduleDialogDelete());
+
+        MaterialDialog materialDialog = builder.build();
 
         View view = materialDialog.getCustomView();
         Assert.assertTrue(view != null);
@@ -516,5 +529,7 @@ public class ScheduleDialogFragment extends DialogFragment {
 
     public interface ScheduleDialogListener {
         void onScheduleDialogResult(@NonNull ScheduleDialogData scheduleDialogData);
+
+        void onScheduleDialogDelete();
     }
 }

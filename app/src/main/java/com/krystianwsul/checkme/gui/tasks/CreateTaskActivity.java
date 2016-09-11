@@ -127,6 +127,18 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             mHourMinutePickerPosition = -1;
         }
+
+        @Override
+        public void onScheduleDialogDelete() {
+            Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mData != null);
+
+            mScheduleEntries.remove(mHourMinutePickerPosition);
+
+            mScheduleAdapter.notifyItemRemoved(mHourMinutePickerPosition);
+
+            mHourMinutePickerPosition = -1;
+        }
     };
 
     public static Intent getCreateIntent(Context context) {
@@ -947,7 +959,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
                 Assert.assertTrue(scheduleEntry != null);
 
-                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(mScheduleHint));
+                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(mScheduleHint), true);
                 scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                 scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
             }

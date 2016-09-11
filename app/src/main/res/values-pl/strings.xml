@@ -50,4 +50,5 @@
     <string name="nameError">Wprowadź nazwę</string>
     <string name="add_task">Dodaj zadanie podrzędne</string>
     <string name="noReminder">Bez przypomnienia</string>
+    <string name="addReminderTime">Dodaj przypomnienie</string>
 </resources>

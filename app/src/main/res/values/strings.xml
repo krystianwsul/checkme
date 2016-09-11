@@ -50,4 +50,5 @@
     <string name="nameError">Enter a name</string>
     <string name="add_task">Add subtask</string>
     <string name="noReminder">No reminder</string>
+    <string name="addReminder">Add a reminder</string>
 </resources>

@@ -6,9 +6,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -99,8 +99,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     private RecyclerView mScheduleTimes;
     private ScheduleAdapter mScheduleAdapter;
-
-    private FloatingActionButton mScheduleFab;
 
     private Integer mHourMinutePickerPosition = null;
 
@@ -397,18 +395,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             }
         }
 
-        mScheduleFab = (FloatingActionButton) findViewById(R.id.schedule_fab);
-        Assert.assertTrue(mScheduleFab != null);
-
-        mScheduleFab.setOnClickListener(v -> {
-            Assert.assertTrue(mScheduleAdapter != null);
-            Assert.assertTrue(mHourMinutePickerPosition == null);
-
-            ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(mScheduleHint), false);
-            scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
-            scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
-        });
-
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
@@ -578,8 +564,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mScheduleAdapter = new ScheduleAdapter();
         mScheduleTimes.setAdapter(mScheduleAdapter);
-
-        mScheduleFab.setVisibility(View.VISIBLE);
 
         Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
     }
@@ -919,17 +903,36 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         @Override
         public void onBindViewHolder(final ScheduleHolder scheduleHolder, int position) {
-            final ScheduleEntry scheduleEntry = mScheduleEntries.get(position);
-            Assert.assertTrue(scheduleEntry != null);
+            if (position < mScheduleEntries.size()) {
+                ScheduleEntry scheduleEntry = mScheduleEntries.get(position);
+                Assert.assertTrue(scheduleEntry != null);
 
-            scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas));
+                scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas));
 
-            scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
+                scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
+
+                scheduleHolder.mScheduleText.setTextColor(ContextCompat.getColor(CreateTaskActivity.this, R.color.textPrimary));
+            } else {
+                Assert.assertTrue(position == mScheduleEntries.size());
+
+                scheduleHolder.mScheduleText.setText(getString(R.string.addReminder));
+
+                scheduleHolder.mScheduleText.setOnClickListener(v -> {
+                    Assert.assertTrue(mScheduleAdapter != null);
+                    Assert.assertTrue(mHourMinutePickerPosition == null);
+
+                    ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(mScheduleHint), false);
+                    scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
+                    scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
+                });
+
+                scheduleHolder.mScheduleText.setTextColor(ContextCompat.getColor(CreateTaskActivity.this, R.color.textDisabled));
+            }
         }
 
         @Override
         public int getItemCount() {
-            return mScheduleEntries.size();
+            return mScheduleEntries.size() + 1;
         }
 
         public void addScheduleEntry(ScheduleEntry scheduleEntry) {

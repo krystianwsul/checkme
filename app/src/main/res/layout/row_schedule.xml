@@ -12,17 +12,9 @@
     <TextView
         android:id="@+id/schedule_text"
         android:singleLine="true"
-        android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/textPrimary"
         style="@style/Widget.AppCompat.Spinner.Underlined"/>
-
-    <ImageView
-        android:id="@+id/schedule_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_delete_black_24dp"
-        android:contentDescription="@string/delete"/>
 
 </LinearLayout>

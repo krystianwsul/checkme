@@ -23,7 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -915,10 +914,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             TextView scheduleTime = (TextView) scheduleRow.findViewById(R.id.schedule_text);
             Assert.assertTrue(scheduleTime != null);
 
-            ImageView scheduleImage = (ImageView) scheduleRow.findViewById(R.id.schedule_image);
-            Assert.assertTrue(scheduleImage != null);
-
-            return new ScheduleHolder(scheduleRow, scheduleTime, scheduleImage);
+            return new ScheduleHolder(scheduleRow, scheduleTime);
         }
 
         @Override
@@ -929,8 +925,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas));
 
             scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
-
-            scheduleHolder.mScheduleImage.setOnClickListener(v -> scheduleHolder.delete());
         }
 
         @Override
@@ -949,16 +943,13 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         public class ScheduleHolder extends RecyclerView.ViewHolder {
             public final TextView mScheduleText;
-            public final ImageView mScheduleImage;
 
-            public ScheduleHolder(View scheduleRow, TextView scheduleText, ImageView scheduleImage) {
+            public ScheduleHolder(View scheduleRow, TextView scheduleText) {
                 super(scheduleRow);
 
                 Assert.assertTrue(scheduleText != null);
-                Assert.assertTrue(scheduleImage != null);
 
                 mScheduleText = scheduleText;
-                mScheduleImage = scheduleImage;
             }
 
             public void onTextClick() {
@@ -972,12 +963,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(mScheduleHint), true);
                 scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                 scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
-            }
-
-            public void delete() {
-                int position = getAdapterPosition();
-                mScheduleEntries.remove(position);
-                notifyItemRemoved(position);
             }
         }
     }

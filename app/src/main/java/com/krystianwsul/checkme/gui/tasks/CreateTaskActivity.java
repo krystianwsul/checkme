@@ -112,20 +112,25 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private final ScheduleDialogFragment.ScheduleDialogListener mScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
         @Override
         public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-            Assert.assertTrue(mHourMinutePickerPosition != null);
             Assert.assertTrue(mData != null);
 
-            ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
-            Assert.assertTrue(scheduleEntry != null);
+            if (mHourMinutePickerPosition == null) {
+                clearParent();
 
-            scheduleEntry.mDate = scheduleDialogData.mDate;
-            scheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
-            scheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
-            scheduleEntry.mScheduleType = scheduleDialogData.mScheduleType;
+                mScheduleAdapter.addScheduleEntry(new ScheduleEntry(scheduleDialogData.mDate, scheduleDialogData.mDayOfWeek, scheduleDialogData.mTimePairPersist, scheduleDialogData.mScheduleType));
+            } else {
+                ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
+                Assert.assertTrue(scheduleEntry != null);
 
-            mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
+                scheduleEntry.mDate = scheduleDialogData.mDate;
+                scheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
+                scheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
+                scheduleEntry.mScheduleType = scheduleDialogData.mScheduleType;
 
-            mHourMinutePickerPosition = null;
+                mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
+
+                mHourMinutePickerPosition = null;
+            }
         }
 
         @Override
@@ -398,9 +403,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         mScheduleFab.setOnClickListener(v -> {
             Assert.assertTrue(mScheduleAdapter != null);
+            Assert.assertTrue(mHourMinutePickerPosition == null);
 
-            clearParent();
-            mScheduleAdapter.addScheduleEntry(firstScheduleEntry());
+            ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(mScheduleHint), false);
+            scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
+            scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
         });
 
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);

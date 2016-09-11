@@ -64,7 +64,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
 
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
-    private static final String SCHEDULE_ENTRY_KEY = "scheduleEntries";
+    private static final String SCHEDULE_ENTRIES_KEY = "scheduleEntries";
 
     private static final String SCHEDULE_DIALOG_TAG = "scheduleDialog";
 
@@ -103,7 +103,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     private FloatingActionButton mScheduleFab;
 
-    private int mHourMinutePickerPosition = -1;
+    private Integer mHourMinutePickerPosition = null;
 
     private List<ScheduleEntry> mScheduleEntries;
 
@@ -112,7 +112,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private final ScheduleDialogFragment.ScheduleDialogListener mScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
         @Override
         public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-            Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mHourMinutePickerPosition != null);
             Assert.assertTrue(mData != null);
 
             ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition);
@@ -125,19 +125,19 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             mScheduleAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
-            mHourMinutePickerPosition = -1;
+            mHourMinutePickerPosition = null;
         }
 
         @Override
         public void onScheduleDialogDelete() {
-            Assert.assertTrue(mHourMinutePickerPosition != -1);
+            Assert.assertTrue(mHourMinutePickerPosition != null);
             Assert.assertTrue(mData != null);
 
-            mScheduleEntries.remove(mHourMinutePickerPosition);
+            mScheduleEntries.remove(mHourMinutePickerPosition.intValue());
 
             mScheduleAdapter.notifyItemRemoved(mHourMinutePickerPosition);
 
-            mHourMinutePickerPosition = -1;
+            mHourMinutePickerPosition = null;
         }
     };
 
@@ -383,13 +383,14 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             }
         }
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(SCHEDULE_ENTRY_KEY)) {
-            mScheduleEntries = savedInstanceState.getParcelableArrayList(SCHEDULE_ENTRY_KEY);
+        if (savedInstanceState != null && savedInstanceState.containsKey(SCHEDULE_ENTRIES_KEY)) {
+            mScheduleEntries = savedInstanceState.getParcelableArrayList(SCHEDULE_ENTRIES_KEY);
 
-            mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -2);
-            Assert.assertTrue(mHourMinutePickerPosition != -2);
-        } else {
-            mHourMinutePickerPosition = -1;
+            if (savedInstanceState.containsKey(HOUR_MINUTE_PICKER_POSITION_KEY)) {
+                mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1);
+
+                Assert.assertTrue(mHourMinutePickerPosition != -1);
+            }
         }
 
         mScheduleFab = (FloatingActionButton) findViewById(R.id.schedule_fab);
@@ -423,8 +424,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         if (mData != null) {
             Assert.assertTrue(mScheduleAdapter != null);
 
-            outState.putParcelableArrayList(SCHEDULE_ENTRY_KEY, new ArrayList<>(mScheduleEntries));
-            outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
+            outState.putParcelableArrayList(SCHEDULE_ENTRIES_KEY, new ArrayList<>(mScheduleEntries));
+
+            if (mHourMinutePickerPosition != null)
+                outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
 
             if (mParent != null) {
                 outState.putInt(PARENT_ID, mParent.TaskId);
@@ -531,7 +534,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         invalidateOptionsMenu();
 
-        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRY_KEY))) {
+        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(SCHEDULE_ENTRIES_KEY))) {
             Assert.assertTrue(mScheduleEntries == null);
 
             mFirst = false;
@@ -601,7 +604,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             scheduleEntry.mTimePairPersist.setCustomTimeId(resultCode);
         }
 
-        mHourMinutePickerPosition = -1;
+        mHourMinutePickerPosition = null;
     }
 
     private boolean tryClose() {

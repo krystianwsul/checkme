@@ -289,16 +289,8 @@ public class ScheduleDialogFragment extends DialogFragment {
         mScheduleDialogDay.setSelection(dayOfWeekAdapter.getPosition(mScheduleDialogData.mDayOfWeek));
 
         mScheduleDialogDay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private boolean mFirst = true;
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (mFirst) {
-                    mFirst = false;
-                    return;
-                }
-
-                Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
-
                 DayOfWeek dayOfWeek = dayOfWeekAdapter.getItem(position);
                 Assert.assertTrue(dayOfWeek != null);
 

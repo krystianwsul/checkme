@@ -1418,16 +1418,18 @@ public class DomainFactory {
     void removeIrrelevant(Irrelevant irrelevant) {
         Assert.assertTrue(irrelevant != null);
 
-        for (Task task : irrelevant.mTasks) {
+        List<TaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values())
+                .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
+                .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
+
+        for (TaskHierarchy irrelevantTaskHierarchy : irrelevantTaskHierarchies)
+            mTaskHierarchies.remove(irrelevantTaskHierarchy.getId());
+
+        for (Task task : irrelevant.mTasks)
             mTasks.remove(task.getId());
-
-            List<TaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values())
-                    .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
-                    .collect(Collectors.toList());
-
-            for (TaskHierarchy irrelevantTaskHierarchy : irrelevantTaskHierarchies)
-                mTaskHierarchies.remove(irrelevantTaskHierarchy.getId());
-        }
 
         Stream.of(irrelevant.mInstances)
                 .forEach(mExistingInstances::remove);

@@ -26,16 +26,16 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:id="@+id/edit_instance_layout"
         android:visibility="invisible"
         android:baselineAligned="false">
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/edit_instance_date_layout"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:errorEnabled="true">
 
             <EditText
                 android:id="@+id/edit_instance_date"
@@ -52,8 +52,7 @@
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/edit_instance_time_layout"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <EditText

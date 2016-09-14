@@ -893,7 +893,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 scheduleHolder.mScheduleLayout.setHint(null);
 
-                scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas));
+                scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas, CreateTaskActivity.this));
 
                 scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
             } else {
@@ -996,16 +996,16 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
 
         @NonNull
-        public String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas) {
+        public String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
             switch (mScheduleType) {
                 case SINGLE:
                     if (mTimePairPersist.getCustomTimeId() != null) {
                         CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
                         Assert.assertTrue(customTimeData != null);
 
-                        return mDate + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
+                        return mDate.getDisplayText(context) + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
                     } else {
-                        return mDate + ", " + mTimePairPersist.getHourMinute().toString();
+                        return mDate.getDisplayText(context) + ", " + mTimePairPersist.getHourMinute().toString();
                     }
                 case DAILY:
                     if (mTimePairPersist.getCustomTimeId() != null) {

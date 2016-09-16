@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.tree;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
@@ -56,12 +57,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
+    @NonNull
     public ModelNode getModelNode() {
         return mModelNode;
     }
 
-    public void setChildTreeNodes(List<TreeNode> childTreeNodes) {
-        Assert.assertTrue(childTreeNodes != null);
+    public void setChildTreeNodes(@NonNull List<TreeNode> childTreeNodes) {
         Assert.assertTrue(!mExpanded || !childTreeNodes.isEmpty());
 
         mChildTreeNodes = childTreeNodes;
@@ -141,10 +142,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     private void incrementSelected() {
-        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        treeViewAdapter.incrementSelected();
+        getTreeViewAdapter().incrementSelected();
     }
 
     private void decrementSelected() {
@@ -154,14 +152,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         treeViewAdapter.decrementSelected();
     }
 
+    @NonNull
     private TreeViewAdapter getTreeViewAdapter() {
-        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
-
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        return treeViewAdapter;
+        return getTreeNodeCollection().getTreeViewAdapter();
     }
 
     public int displayedSize() {
@@ -239,10 +232,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(!mSelected || mModelNode.selectable());
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
 
         if (mSelected) {
             Assert.assertTrue(mModelNode.selectable());
@@ -261,6 +252,28 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                     .forEach(TreeNode::unselect);
 
             treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+        }
+    }
+
+    public void selectAll() {
+        Assert.assertTrue(!mSelected);
+
+        TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+
+        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
+
+        if (mModelNode.selectable()) {
+            mSelected = true;
+
+            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+
+            treeViewAdapter.incrementSelected();
+        }
+
+        if (mExpanded) {
+            Assert.assertTrue(!mChildTreeNodes.isEmpty());
+
+            Stream.of(mChildTreeNodes).forEach(TreeNode::selectAll);
         }
     }
 
@@ -338,14 +351,11 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(childTreeNode != null);
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        Assert.assertTrue(mChildTreeNodes.contains(childTreeNode));
 
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
+        Assert.assertTrue(mChildTreeNodes.contains(childTreeNode));
 
         int childDisplayedSize = childTreeNode.displayedSize();
 
@@ -371,27 +381,38 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 if (oldParentPosition == 0) {
                     if (mModelNode.visibleWhenEmpty()) {
+                        Log.e("asdf", "notifyItemChanged(" + oldParentPosition + ")");
                         treeViewAdapter.notifyItemChanged(oldParentPosition);
+                        Log.e("asdf", "notifyItemRangeRemoved(" + (oldParentPosition + 1) + ", " + childDisplayedSize + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
+                        Log.e("asdf", "notifyItemRangeRemoved(" + (oldParentPosition + 1) + ", " + childDisplayedSize + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 } else {
                     if (mModelNode.visibleWhenEmpty()) {
+                        Log.e("asdf", "notifyItemRangeChanged(" + (oldParentPosition - 1) + ", " + 2 + ")");
                         treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
+                        Log.e("asdf", "notifyItemRangeRemoved(" + (oldParentPosition + 1) + ", " + childDisplayedSize + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
+                        Log.e("asdf", "notifyItemChanged(" + (oldParentPosition - 1) + ")");
                         treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                        Log.e("asdf", "notifyItemRangeRemoved(" + oldParentPosition + ", " + (1 + childDisplayedSize) + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 }
             } else {
+                Log.e("asdf", "notifyItemChanged(" + oldParentPosition + ")");
                 treeViewAdapter.notifyItemChanged(oldParentPosition);
+                Log.e("asdf", "notifyItemRangeRemoved(" + oldChildPosition + ", " + childDisplayedSize + ")");
                 treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
+                Log.e("asdf", "notifyItemChanged(" + (oldChildPosition - 1) + ")");
                 treeViewAdapter.notifyItemChanged(oldChildPosition - 1);
 
                 if (oldParentPosition > 0) {
+                    Log.e("asdf", "notifyItemChanged(" + (oldParentPosition - 1) + ")");
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
                 }
             }
@@ -432,10 +453,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(childTreeNode != null);
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
 
         if (mExpanded) {
             if (mModelNode.visibleWhenEmpty()) {
@@ -499,16 +518,22 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             Collections.sort(mChildTreeNodes);
 
-            int newParentPosition = treeNodeCollection.getPosition(this);
-            Assert.assertTrue(newParentPosition >= 0);
+            if (mModelNode.visibleDuringActionMode() || !hasActionMode()) {
+                int newParentPosition = treeNodeCollection.getPosition(this);
+                Assert.assertTrue(newParentPosition >= 0);
 
-            if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
-                treeViewAdapter.notifyItemInserted(newParentPosition);
+                if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
+                    Log.e("asdf", "notifyItemInserted(" + newParentPosition + ")");
+                    treeViewAdapter.notifyItemInserted(newParentPosition);
 
-                if (newParentPosition > 0)
-                    treeViewAdapter.notifyItemChanged(newParentPosition - 1);
-            } else {
-                treeViewAdapter.notifyItemChanged(newParentPosition);
+                    if (newParentPosition > 0) {
+                        Log.e("asdf", "notifyItemChanged(" + (newParentPosition - 1) + ")");
+                        treeViewAdapter.notifyItemChanged(newParentPosition - 1);
+                    }
+                } else {
+                    Log.e("asdf", "notifyItemChanged(" + newParentPosition + ")");
+                    treeViewAdapter.notifyItemChanged(newParentPosition);
+                }
             }
         }
     }
@@ -548,10 +573,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     public void onCreateActionMode() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
 
         int oldPosition = treeNodeCollection.getPosition(this);
         Assert.assertTrue(oldPosition >= 0);
@@ -578,10 +601,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     public void onDestroyActionMode() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
 
         int position = treeNodeCollection.getPosition(this);
         Assert.assertTrue(position >= 0);
@@ -606,6 +627,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         }
     }
 
+    @NonNull
     @Override
     public TreeNodeCollection getTreeNodeCollection() {
         NodeContainer parent = getParent();
@@ -619,5 +641,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     public List<TreeNode> getAllChildren() {
         return mChildTreeNodes;
+    }
+
+    @Override
+    public int getIndentation() {
+        return getParent().getIndentation() + 1;
     }
 }

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,8 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,6 +33,10 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.notifications.TickService;
 
 import junit.framework.Assert;
+
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
@@ -72,6 +79,32 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     private TimeRange mTimeRange = TimeRange.DAY;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_select_all, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_select_all).setVisible(mVisibleTab == INSTANCES_VISIBLE);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Assert.assertTrue(item.getItemId() == R.id.action_select_all);
+        Assert.assertTrue(mVisibleTab == INSTANCES_VISIBLE);
+
+        MyFragmentStatePagerAdapter myFragmentStatePagerAdapter = (MyFragmentStatePagerAdapter) mDaysPager.getAdapter();
+        Assert.assertTrue(myFragmentStatePagerAdapter != null);
+
+        myFragmentStatePagerAdapter.getCurrentItem().selectAll();
+
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -447,18 +480,35 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+        private Map<Integer, WeakReference<DayFragment>> mDayFragments = new HashMap<>();
+
         public MyFragmentStatePagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
         }
 
         @Override
         public Fragment getItem(int position) {
-            return DayFragment.newInstance(mTimeRange, position);
+            DayFragment dayFragment = DayFragment.newInstance(mTimeRange, position);
+
+            mDayFragments.put(position, new WeakReference<DayFragment>(dayFragment));
+
+            return dayFragment;
         }
 
         @Override
         public int getCount() {
             return Integer.MAX_VALUE;
+        }
+
+        @NonNull
+        public DayFragment getCurrentItem() {
+            int position = mDaysPager.getCurrentItem();
+            Assert.assertTrue(mDayFragments.containsKey(position));
+
+            DayFragment dayFragment = mDayFragments.get(position).get();
+            Assert.assertTrue(dayFragment != null);
+
+            return dayFragment;
         }
     }
 }

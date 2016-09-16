@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.gui.tree;
 
+import android.support.annotation.NonNull;
+
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 
@@ -61,6 +63,7 @@ public class TreeNodeCollection implements NodeContainer {
         Collections.sort(mNotDoneGroupTreeNodes);
     }
 
+    @NonNull
     TreeViewAdapter getTreeViewAdapter() {
         TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
         Assert.assertTrue(treeViewAdapter != null);
@@ -155,5 +158,14 @@ public class TreeNodeCollection implements NodeContainer {
     @Override
     public TreeNodeCollection getTreeNodeCollection() {
         return this;
+    }
+
+    public void selectAll() {
+        Stream.of(mNotDoneGroupTreeNodes).forEach(TreeNode::selectAll);
+    }
+
+    @Override
+    public int getIndentation() {
+        return 0;
     }
 }

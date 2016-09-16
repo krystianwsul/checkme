@@ -917,6 +917,25 @@ public class DomainFactory {
         save(dataId);
     }
 
+    public synchronized ExactTimeStamp setInstancesDone(int dataId, @NonNull List<InstanceKey> instanceKeys) {
+        MyCrashlytics.log("DomainFactory.setInstancesDone");
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        Stream.of(instanceKeys).forEach(instanceKey -> {
+            Assert.assertTrue(instanceKey != null);
+
+            Instance instance = getInstance(instanceKey);
+            Assert.assertTrue(instance != null);
+
+            instance.setDone(true, now);
+        });
+
+        save(dataId);
+
+        return now;
+    }
+
     public synchronized ExactTimeStamp setInstanceDone(int dataId, InstanceKey instanceKey, boolean done) {
         MyCrashlytics.log("DomainFactory.setInstanceDone");
 

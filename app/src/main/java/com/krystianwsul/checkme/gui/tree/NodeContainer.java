@@ -17,4 +17,6 @@ public interface NodeContainer {
     void remove(TreeNode treeNode);
 
     void add(TreeNode treeNode);
+
+    int getIndentation();
 }

@@ -51,4 +51,5 @@
     <string name="add_task">Dodaj zadanie podrzędne</string>
     <string name="noReminder">Bez przypomnienia</string>
     <string name="addReminder">Dodaj przypomnienie</string>
+    <string name="selectAll">Select wszystko</string>
 </resources>

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -26,6 +27,9 @@ public class DayFragment extends Fragment {
     private static final String POSITION_KEY = "position";
     private static final String TIME_RANGE_KEY = "timeRange";
 
+    private GroupListFragment mGroupListFragment;
+
+    @NonNull
     public static DayFragment newInstance(MainActivity.TimeRange timeRange, int day) {
         Assert.assertTrue(timeRange != null);
         Assert.assertTrue(day >= 0);
@@ -123,12 +127,16 @@ public class DayFragment extends Fragment {
         dayTabLayout.addTab(dayTabLayout.newTab().setText(title));
 
         FragmentManager fragmentManager = getChildFragmentManager();
-        GroupListFragment groupListFragment = (GroupListFragment) fragmentManager.findFragmentById(R.id.day_frame);
+        mGroupListFragment = (GroupListFragment) fragmentManager.findFragmentById(R.id.day_frame);
 
-        Assert.assertTrue((savedInstanceState == null) == (groupListFragment == null));
+        Assert.assertTrue((savedInstanceState == null) == (mGroupListFragment == null));
 
-        if (groupListFragment == null)
-            fragmentManager.beginTransaction().add(R.id.day_frame, GroupListFragment.getGroupInstance(timeRange, position)).commit();
+        if (mGroupListFragment == null) {
+            mGroupListFragment = GroupListFragment.getGroupInstance(timeRange, position);
+            fragmentManager.beginTransaction()
+                    .add(R.id.day_frame, mGroupListFragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -136,5 +144,9 @@ public class DayFragment extends Fragment {
         MyCrashlytics.log("DayFragment.onResume");
 
         super.onResume();
+    }
+
+    public void selectAll() {
+        mGroupListFragment.selectAll();
     }
 }

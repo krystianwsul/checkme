@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tree;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
@@ -46,6 +47,7 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return mTreeNodeCollection.getItemViewType(position);
     }
 
+    @NonNull
     public TreeModelAdapter getTreeModelAdapter() {
         return mTreeModelAdapter;
     }
@@ -90,5 +92,11 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public int displayedSize() {
         return mTreeNodeCollection.displayedSize();
+    }
+
+    public void selectAll() {
+        Assert.assertTrue(!mTreeModelAdapter.hasActionMode());
+
+        mTreeNodeCollection.selectAll();
     }
 }

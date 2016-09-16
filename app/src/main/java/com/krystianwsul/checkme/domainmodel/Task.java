@@ -288,19 +288,28 @@ public class Task {
             }
         }
 
+        /*
         DomainFactory domainFactory = mDomainFactoryReference.get();
         Assert.assertTrue(domainFactory != null);
 
         if (Stream.of(domainFactory.getExistingInstances(this))
                 .anyMatch(instance -> instance.isVisible(now))) {
+            if (getName().equals("agota"))
+                Log.e("asdf", "d");
             return true;
         }
 
         //noinspection RedundantIfStatement
         if (Stream.of(domainFactory.getPastInstances(this, now))
                 .anyMatch(instance -> instance.isVisible(now))) {
+            if (getName().equals("agota")) {
+                Log.e("asdf", "e");
+                Stream.of(domainFactory.getPastInstances(this, now))
+                        .filter(instance -> instance.isVisible(now)).forEach(instance -> Log.e("asdf", "instance exists? " + instance.exists()));
+            }
             return true;
         }
+        */
 
         return false;
     }

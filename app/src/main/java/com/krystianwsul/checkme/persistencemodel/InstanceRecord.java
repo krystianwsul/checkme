@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -200,8 +199,6 @@ public class InstanceRecord extends Record {
                                                     remove.addAll(removeThis);
                                                 });
                                     }));
-
-            Log.e("asdf", "size: " + remove.size());
 
             if (!remove.isEmpty())
                 sqLiteDatabase.delete(TABLE_INSTANCES, "_id IN (" + TextUtils.join(", ", remove) + ")", null);

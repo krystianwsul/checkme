@@ -49,10 +49,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     public void update() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
 
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
@@ -102,10 +100,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             return;
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
 
         NodeContainer parent = getParent();
         Assert.assertTrue(parent != null);
@@ -135,10 +131,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     private boolean hasActionMode() {
-        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        return treeViewAdapter.hasActionMode();
+        return getTreeViewAdapter().hasActionMode();
     }
 
     private void incrementSelected() {
@@ -146,10 +139,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     private void decrementSelected() {
-        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        treeViewAdapter.decrementSelected();
+        getTreeViewAdapter().decrementSelected();
     }
 
     @NonNull
@@ -297,10 +287,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             Assert.assertTrue(!mChildTreeNodes.isEmpty());
 
             TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-            Assert.assertTrue(treeNodeCollection != null);
 
             TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-            Assert.assertTrue(treeViewAdapter != null);
 
             Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode()));
 
@@ -545,7 +533,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(parent.expanded());
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
 
         int positionInCollection = treeNodeCollection.getPosition(this);
         Assert.assertTrue(positionInCollection >= 0);
@@ -646,5 +633,18 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     @Override
     public int getIndentation() {
         return getParent().getIndentation() + 1;
+    }
+
+    public void select() {
+        Assert.assertTrue(!mSelected);
+        Assert.assertTrue(mModelNode.selectable());
+
+        onLongClick();
+    }
+
+    public void deselect() {
+        Assert.assertTrue(mSelected);
+
+        onLongClick();
     }
 }

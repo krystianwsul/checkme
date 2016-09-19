@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui;
 
 import android.support.v7.view.ActionMode;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -76,8 +75,6 @@ public abstract class SelectionCallback implements ActionMode.Callback {
 
     public void incrementSelected() {
         mSelected++;
-
-        Log.e("asdf", "selected: " + mSelected);
 
         if (mSelected == 1) {
             Assert.assertTrue(mActionMode == null);

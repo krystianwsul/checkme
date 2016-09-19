@@ -51,11 +51,12 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         Intent intent = new Intent(context, ShowInstanceActivity.class);
         intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         intent.putExtra(SET_NOTIFIED_KEY, true);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return intent;
     }
 
     private boolean mFirst = false;
+
+    private GroupListFragment mGroupListFragment;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -84,6 +85,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         boolean deleteTask = (mData != null && !mData.Done && mData.TaskCurrent);
         menu.findItem(R.id.instance_menu_delete_task).setVisible(deleteTask);
+
+        boolean selectAll = (mData != null && mData.HasChildren);
+        menu.findItem(R.id.instance_menu_select_all).setVisible(selectAll);
 
         return true;
     }
@@ -146,6 +150,13 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
                 finish();
                 break;
+            case R.id.instance_menu_select_all: {
+                Assert.assertTrue(mGroupListFragment != null);
+
+                mGroupListFragment.selectAll();
+
+                break;
+            }
             default:
                 throw new UnsupportedOperationException();
         }
@@ -175,9 +186,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         mInstanceKey = intent.getParcelableExtra(INSTANCE_KEY);
         Assert.assertTrue(mInstanceKey != null);
 
-        GroupListFragment showInstanceList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
-        Assert.assertTrue(showInstanceList != null);
-        showInstanceList.setInstanceKey(mInstanceKey);
+        mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
+        Assert.assertTrue(mGroupListFragment != null);
+        mGroupListFragment.setInstanceKey(mInstanceKey);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }

@@ -32,8 +32,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final boolean TaskCurrent;
         public final boolean IsRootInstance;
         public final Boolean IsRootTask;
+        public final boolean HasChildren;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask) {
+        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean hasChildren) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -44,6 +45,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             TaskCurrent = taskCurrent;
             IsRootInstance = isRootInstance;
             IsRootTask = isRootTask;
+            HasChildren = hasChildren;
         }
 
         @Override
@@ -58,6 +60,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             hashCode += (IsRootInstance ? 1 : 0);
             if (IsRootTask != null)
             hashCode += (IsRootTask ? 2 : 1);
+            hashCode += (HasChildren ? 1 : 0);
             return hashCode;
         }
 
@@ -100,6 +103,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
                 return false;
 
             if (IsRootTask != null && !IsRootTask.equals(data.IsRootTask))
+                return false;
+
+            if (HasChildren != data.HasChildren)
                 return false;
 
             return true;

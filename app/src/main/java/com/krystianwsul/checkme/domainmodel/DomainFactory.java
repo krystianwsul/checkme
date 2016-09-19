@@ -602,7 +602,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask);
+        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask, !instance.getChildInstances(now).isEmpty());
     }
 
     public synchronized CreateTaskLoader.Data getCreateChildTaskData(Integer taskId, Context context, List<Integer> excludedTaskIds) {

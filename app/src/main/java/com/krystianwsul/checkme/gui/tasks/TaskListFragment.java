@@ -103,7 +103,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                         Assert.assertTrue(treeNode != null);
 
                         TaskAdapter.TaskWrapper taskWrapper = (TaskAdapter.TaskWrapper) treeNode.getModelNode();
-                        Assert.assertTrue(taskWrapper != null);
 
                         taskWrapper.removeFromParent();
 
@@ -186,6 +185,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
         }
 
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         private boolean containsLoop(List<TreeNode> treeNodes) {
             Assert.assertTrue(treeNodes != null);
             Assert.assertTrue(treeNodes.size() > 1);
@@ -414,6 +414,10 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     public void destroyLoader() {
         getLoaderManager().destroyLoader(0);
+    }
+
+    public void selectAll() {
+        mTreeViewAdapter.selectAll();
     }
 
     public interface TaskListListener {

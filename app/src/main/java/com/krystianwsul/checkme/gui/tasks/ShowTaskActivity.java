@@ -79,6 +79,8 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
         menu.findItem(R.id.task_menu_delete).setVisible(mData != null);
 
+        menu.findItem(R.id.task_menu_select_all).setVisible(mData != null && mData.HasChildren);
+
         return true;
     }
 
@@ -96,7 +98,7 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
                 Utils.share(mData.Name, this);
                 break;
-            case R.id.task_menu_delete:
+            case R.id.task_menu_delete: {
                 TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
                 Assert.assertTrue(taskListFragment != null);
 
@@ -111,6 +113,15 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
                 finish();
                 break;
+            }
+            case R.id.task_menu_select_all: {
+                TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
+                Assert.assertTrue(taskListFragment != null);
+
+                taskListFragment.selectAll();
+
+                break;
+            }
             default:
                 throw new UnsupportedOperationException();
         }

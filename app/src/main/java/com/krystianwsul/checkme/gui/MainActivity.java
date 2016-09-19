@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_select_all).setVisible(mVisibleTab == INSTANCES_VISIBLE);
+        menu.findItem(R.id.action_select_all).setVisible(mVisibleTab == INSTANCES_VISIBLE || mVisibleTab == TASKS_VISIBLE);
 
         return true;
     }
@@ -96,12 +96,20 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Assert.assertTrue(item.getItemId() == R.id.action_select_all);
-        Assert.assertTrue(mVisibleTab == INSTANCES_VISIBLE);
 
-        MyFragmentStatePagerAdapter myFragmentStatePagerAdapter = (MyFragmentStatePagerAdapter) mDaysPager.getAdapter();
-        Assert.assertTrue(myFragmentStatePagerAdapter != null);
+        if (mVisibleTab == INSTANCES_VISIBLE) {
+            MyFragmentStatePagerAdapter myFragmentStatePagerAdapter = (MyFragmentStatePagerAdapter) mDaysPager.getAdapter();
+            Assert.assertTrue(myFragmentStatePagerAdapter != null);
 
-        myFragmentStatePagerAdapter.getCurrentItem().selectAll();
+            myFragmentStatePagerAdapter.getCurrentItem().selectAll();
+        } else {
+            Assert.assertTrue(mVisibleTab == TASKS_VISIBLE);
+
+            TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.main_task_list_frame);
+            Assert.assertTrue(taskListFragment != null);
+
+            taskListFragment.selectAll();
+        }
 
         return true;
     }
@@ -480,7 +488,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
-        private Map<Integer, WeakReference<DayFragment>> mDayFragments = new HashMap<>();
+        private final Map<Integer, WeakReference<DayFragment>> mDayFragments = new HashMap<>();
 
         public MyFragmentStatePagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -490,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         public Fragment getItem(int position) {
             DayFragment dayFragment = DayFragment.newInstance(mTimeRange, position);
 
-            mDayFragments.put(position, new WeakReference<DayFragment>(dayFragment));
+            mDayFragments.put(position, new WeakReference<>(dayFragment));
 
             return dayFragment;
         }

@@ -720,7 +720,7 @@ public class DomainFactory {
         Assert.assertTrue(task != null);
         Assert.assertTrue(task.current(now));
 
-        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId());
+        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId(), !task.getChildTasks(now).isEmpty());
     }
 
     public synchronized TaskListLoader.Data getTaskListData(Context context, Integer taskId) {
@@ -1522,7 +1522,7 @@ public class DomainFactory {
 
     // internal
 
-    ArrayList<Instance> getExistingInstances(Task task) {
+    private ArrayList<Instance> getExistingInstances(Task task) {
         Assert.assertTrue(task != null);
 
         ArrayList<Instance> instances = new ArrayList<>();

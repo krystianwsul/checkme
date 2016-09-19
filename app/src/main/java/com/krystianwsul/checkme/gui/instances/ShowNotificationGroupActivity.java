@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 
 public class ShowNotificationGroupActivity extends AppCompatActivity implements GroupListFragment.GroupListListener {
     private static final String INSTANCES_KEY = "instanceKeys";
+
+    private GroupListFragment mGroupListFragment;
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
@@ -39,8 +43,8 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
 
         setSupportActionBar(toolbar);
 
-        GroupListFragment showNotificationGroupList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
-        Assert.assertTrue(showNotificationGroupList != null);
+        mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
+        Assert.assertTrue(mGroupListFragment != null);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INSTANCES_KEY));
@@ -48,7 +52,7 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        showNotificationGroupList.setInstanceKeys(instanceKeys);
+        mGroupListFragment.setInstanceKeys(instanceKeys);
     }
 
     @Override
@@ -66,5 +70,21 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
     @Override
     public void onDestroyGroupActionMode() {
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_select_all, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Assert.assertTrue(item.getItemId() == R.id.action_select_all);
+        Assert.assertTrue(mGroupListFragment != null);
+
+        mGroupListFragment.selectAll();
+
+        return true;
     }
 }

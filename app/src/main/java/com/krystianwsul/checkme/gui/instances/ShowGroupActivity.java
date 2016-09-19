@@ -9,6 +9,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
@@ -24,6 +26,8 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
     private static final String TIME_KEY = "time";
 
     private ActionBar mActionBar;
+
+    private GroupListFragment mGroupListFragment;
 
     public static Intent getIntent(ExactTimeStamp exactTimeStamp, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
@@ -50,9 +54,9 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         Assert.assertTrue(time != -1);
         mTimeStamp = new TimeStamp(time);
 
-        GroupListFragment showGroupList = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
-        Assert.assertTrue(showGroupList != null);
-        showGroupList.setTimeStamp(mTimeStamp);
+        mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
+        Assert.assertTrue(mGroupListFragment != null);
+        mGroupListFragment.setTimeStamp(mTimeStamp);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -89,5 +93,21 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
     @Override
     public void onDestroyGroupActionMode() {
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_select_all, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Assert.assertTrue(item.getItemId() == R.id.action_select_all);
+        Assert.assertTrue(mGroupListFragment != null);
+
+        mGroupListFragment.selectAll();
+
+        return true;
     }
 }

@@ -1634,7 +1634,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (singleInstance()) {
                         GroupListLoader.InstanceData instanceData = getSingleInstanceData();
 
-                        if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedChildren().size() > 0)) {
+                        if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (notDoneGroupTreeNode.getSelectedChildren().size() > 0 || notDoneGroupTreeNode.displayedSize() == 1))) {
                             return View.INVISIBLE;
                         } else {
                             return View.VISIBLE;
@@ -2126,7 +2126,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         GroupListFragment groupListFragment = getGroupListFragment();
 
-                        if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedChildren().size() > 0)) {
+                        if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.getSelectedChildren().size() > 0 || treeNode.displayedSize() == 1))) {
                             return View.INVISIBLE;
                         } else {
                             return View.VISIBLE;

@@ -23,8 +23,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
         targetSdkVersion 24
-        versionCode 9
-        versionName "0.1.7"
+        versionCode 10
+        versionName "0.1.9"
     }
     buildTypes {
         release {
@@ -62,10 +62,10 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.5.7@aar') {
         transitive = true;
     }
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
-    compile 'com.android.support:support-v4:24.2.0'
-    compile 'com.android.support:gridlayout-v7:24.2.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:design:24.2.1'
+    compile 'com.android.support:support-v4:24.2.1'
+    compile 'com.android.support:gridlayout-v7:24.2.1'
     compile 'com.code-troopers.betterpickers:library:2.5.2'
     compile 'com.annimon:stream:1.0.9'
     compile 'com.google.guava:guava:19.0'

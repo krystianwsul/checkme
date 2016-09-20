@@ -34,6 +34,8 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
     private ShowTaskLoader.Data mData;
 
+    private boolean mSelectAllVisible = false;
+
     public static Intent getIntent(int taskId, Context context) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
         intent.putExtra(INTENT_KEY, taskId);
@@ -79,7 +81,7 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
 
         menu.findItem(R.id.task_menu_delete).setVisible(mData != null);
 
-        menu.findItem(R.id.task_menu_select_all).setVisible(mData != null && mData.HasChildren);
+        menu.findItem(R.id.task_menu_select_all).setVisible(mSelectAllVisible);
 
         return true;
     }
@@ -166,5 +168,12 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onDestroyTaskActionMode() {
 
+    }
+
+    @Override
+    public void setTaskSelectAllVisibility(boolean selectAllVisible) {
+        mSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
     }
 }

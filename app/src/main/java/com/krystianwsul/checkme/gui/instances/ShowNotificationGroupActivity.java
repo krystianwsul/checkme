@@ -22,6 +22,8 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
 
     private GroupListFragment mGroupListFragment;
 
+    private boolean mSelectAllVisible = false;
+
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
@@ -73,8 +75,22 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
     }
 
     @Override
+    public void setGroupSelectAllVisibility(Integer position, boolean selectAllVisible) {
+        mSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_select_all, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_select_all).setVisible(mSelectAllVisible);
+
         return true;
     }
 

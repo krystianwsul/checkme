@@ -29,6 +29,8 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
 
     private GroupListFragment mGroupListFragment;
 
+    private boolean mSelectAllVisible = false;
+
     public static Intent getIntent(ExactTimeStamp exactTimeStamp, Context context) {
         Intent intent = new Intent(context, ShowGroupActivity.class);
         intent.putExtra(TIME_KEY, exactTimeStamp.getLong());
@@ -96,8 +98,22 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
     }
 
     @Override
+    public void setGroupSelectAllVisibility(Integer position, boolean selectAllVisible) {
+        mSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_select_all, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_select_all).setVisible(mSelectAllVisible);
+
         return true;
     }
 

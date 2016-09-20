@@ -111,6 +111,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                     DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
 
+                    updateSelectAll();
+
                     break;
                 case R.id.action_task_add:
                     Assert.assertTrue(selected.size() == 1);
@@ -373,6 +375,14 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mTaskListFragmentRecycler.setVisibility(View.VISIBLE);
             mEmptyText.setVisibility(View.GONE);
         }
+
+        updateSelectAll();
+    }
+
+    private void updateSelectAll() {
+        Assert.assertTrue(mTreeViewAdapter != null);
+
+        ((TaskListListener) getActivity()).setTaskSelectAllVisibility(mTreeViewAdapter.displayedSize() > 0);
     }
 
     @Override
@@ -423,6 +433,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
     public interface TaskListListener {
         void onCreateTaskActionMode(ActionMode actionMode);
         void onDestroyTaskActionMode();
+
+        void setTaskSelectAllVisibility(boolean selectAllVisible);
     }
 
     public static class TaskAdapter implements TreeModelAdapter, TaskParent {
@@ -433,7 +445,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         private WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
         private WeakReference<TreeNodeCollection> mTreeNodeCollectionReference;
 
-        public static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks, List<Integer> expandedTasks) {
+        static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks, List<Integer> expandedTasks) {
             Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
@@ -533,21 +545,21 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             treeNodeCollection.remove(treeNode);
         }
 
-        public TaskListFragment getTaskListFragment() {
+        TaskListFragment getTaskListFragment() {
             TaskListFragment taskListFragment = mTaskListFragmentReference.get();
             Assert.assertTrue(taskListFragment != null);
 
             return taskListFragment;
         }
 
-        public TreeViewAdapter getTreeViewAdapter() {
+        TreeViewAdapter getTreeViewAdapter() {
             TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
             Assert.assertTrue(treeViewAdapter != null);
 
             return treeViewAdapter;
         }
 
-        public TreeNodeCollection getTreeNodeCollection() {
+        TreeNodeCollection getTreeNodeCollection() {
             TreeNodeCollection treeNodeCollection = mTreeNodeCollectionReference.get();
             Assert.assertTrue(treeNodeCollection != null);
 
@@ -583,7 +595,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             return this;
         }
 
-        public ArrayList<Integer> getExpandedTaskIds() {
+        ArrayList<Integer> getExpandedTaskIds() {
             return Stream.of(mTaskWrappers)
                     .flatMap(TaskWrapper::getExpandedTaskIds)
                     .collect(Collectors.toCollection(ArrayList::new));
@@ -592,7 +604,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         private static class TaskWrapper implements ModelNode, TaskParent {
             private final WeakReference<TaskParent> mTaskParentReference;
 
-            public final TaskListLoader.TaskData mTaskData;
+            final TaskListLoader.TaskData mTaskData;
 
             private WeakReference<TreeNode> mTreeNodeReference;
 
@@ -601,7 +613,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             private final float mDensity;
             private final int mIndentation;
 
-            public TaskWrapper(float density, int indentation, WeakReference<TaskParent> taskParentReference, TaskListLoader.TaskData taskData) {
+            TaskWrapper(float density, int indentation, WeakReference<TaskParent> taskParentReference, TaskListLoader.TaskData taskData) {
                 Assert.assertTrue(taskParentReference != null);
                 Assert.assertTrue(taskData != null);
 
@@ -611,7 +623,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 mTaskData = taskData;
             }
 
-            public TreeNode initialize(List<Integer> selectedTasks, WeakReference<NodeContainer> nodeContainerReference, List<Integer> expandedTasks) {
+            TreeNode initialize(List<Integer> selectedTasks, WeakReference<NodeContainer> nodeContainerReference, List<Integer> expandedTasks) {
                 Assert.assertTrue(nodeContainerReference != null);
 
                 boolean selected = false;
@@ -780,7 +792,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 return comparison;
             }
 
-            public void removeFromParent() {
+            void removeFromParent() {
                 TaskParent taskParent = getTaskParent();
                 Assert.assertTrue(taskParent != null);
 
@@ -802,7 +814,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 treeNode.remove(childTreeNode);
             }
 
-            public Stream<Integer> getExpandedTaskIds() {
+            Stream<Integer> getExpandedTaskIds() {
                 List<Integer> expandedTaskIds = new ArrayList<>();
 
                 TreeNode treeNode = getTreeNode();
@@ -820,16 +832,16 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
         }
 
-        public class TaskHolder extends RecyclerView.ViewHolder {
-            public final View mShowTaskRow;
-            public final LinearLayout mTaskRowContainer;
-            public final TextView mTaskRowName;
-            public final TextView mTaskRowDetails;
-            public final TextView mTaskRowChildren;
-            public final ImageView mTaskRowImg;
-            public final View mTaskRowSeparator;
+        class TaskHolder extends RecyclerView.ViewHolder {
+            final View mShowTaskRow;
+            final LinearLayout mTaskRowContainer;
+            final TextView mTaskRowName;
+            final TextView mTaskRowDetails;
+            final TextView mTaskRowChildren;
+            final ImageView mTaskRowImg;
+            final View mTaskRowSeparator;
 
-            public TaskHolder(View showTaskRow, LinearLayout taskRowContainer, TextView taskRowName, TextView taskRowDetails, TextView taskRowChildren, ImageView taskRowImg, View taskRowSeparator) {
+            TaskHolder(View showTaskRow, LinearLayout taskRowContainer, TextView taskRowName, TextView taskRowDetails, TextView taskRowChildren, ImageView taskRowImg, View taskRowSeparator) {
                 super(showTaskRow);
 
                 Assert.assertTrue(taskRowContainer != null);

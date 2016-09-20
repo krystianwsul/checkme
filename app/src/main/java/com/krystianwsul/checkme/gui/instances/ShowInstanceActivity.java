@@ -58,6 +58,8 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     private GroupListFragment mGroupListFragment;
 
+    private boolean mSelectAllVisible = false;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.show_instance_menu, menu);
@@ -86,8 +88,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         boolean deleteTask = (mData != null && !mData.Done && mData.TaskCurrent);
         menu.findItem(R.id.instance_menu_delete_task).setVisible(deleteTask);
 
-        boolean selectAll = (mData != null && mData.HasChildren);
-        menu.findItem(R.id.instance_menu_select_all).setVisible(selectAll);
+        menu.findItem(R.id.instance_menu_select_all).setVisible(mSelectAllVisible);
 
         return true;
     }
@@ -247,5 +248,12 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     @Override
     public void onDestroyGroupActionMode() {
 
+    }
+
+    @Override
+    public void setGroupSelectAllVisibility(Integer position, boolean selectAllVisible) {
+        mSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
     }
 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
@@ -62,8 +63,11 @@ public class DomainFactory {
 
     private final PersistenceManger mPersistenceManager;
 
+    @SuppressLint("UseSparseArrays")
     private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
+    @SuppressLint("UseSparseArrays")
     private final HashMap<Integer, Task> mTasks = new HashMap<>();
+    @SuppressLint("UseSparseArrays")
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
@@ -388,7 +392,7 @@ public class DomainFactory {
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
                     .filter(task -> task.getCurrentSchedules(now).isEmpty())
-                    .map(task -> new GroupListLoader.TaskData(task.getId(), task.getName(), getChildTaskDatas(task, now), true))
+                    .map(task -> new GroupListLoader.TaskData(task.getId(), task.getName(), getChildTaskDatas(task, now)))
                     .collect(Collectors.toList());
         }
 
@@ -416,7 +420,7 @@ public class DomainFactory {
         Assert.assertTrue(now != null);
 
         return Stream.of(parentTask.getChildTasks(now))
-                .map(childTask -> new GroupListLoader.TaskData(childTask.getId(), childTask.getName(), getChildTaskDatas(childTask, now), false))
+                .map(childTask -> new GroupListLoader.TaskData(childTask.getId(), childTask.getName(), getChildTaskDatas(childTask, now)))
                 .collect(Collectors.toList());
     }
 
@@ -602,7 +606,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask, !instance.getChildInstances(now).isEmpty());
+        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask);
     }
 
     public synchronized CreateTaskLoader.Data getCreateChildTaskData(Integer taskId, Context context, List<Integer> excludedTaskIds) {
@@ -700,7 +704,7 @@ public class DomainFactory {
         TreeMap<Integer, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskIds);
         Assert.assertTrue(taskDatas != null);
 
-        HashMap<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        @SuppressLint("UseSparseArrays") HashMap<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getId(), new CreateTaskLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
@@ -720,7 +724,7 @@ public class DomainFactory {
         Assert.assertTrue(task != null);
         Assert.assertTrue(task.current(now));
 
-        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId(), !task.getChildTasks(now).isEmpty());
+        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId());
     }
 
     public synchronized TaskListLoader.Data getTaskListData(Context context, Integer taskId) {
@@ -2055,11 +2059,11 @@ public class DomainFactory {
     }
 
     static class Irrelevant {
-        public final List<CustomTime> mCustomTimes;
-        public final List<Task> mTasks;
-        public final List<Instance> mInstances;
+        final List<CustomTime> mCustomTimes;
+        final List<Task> mTasks;
+        final List<Instance> mInstances;
 
-        public Irrelevant(List<CustomTime> customTimes, List<Task> tasks, List<Instance> instances) {
+        Irrelevant(List<CustomTime> customTimes, List<Task> tasks, List<Instance> instances) {
             Assert.assertTrue(customTimes != null);
             Assert.assertTrue(tasks != null);
             Assert.assertTrue(instances != null);
@@ -2074,11 +2078,11 @@ public class DomainFactory {
         private final Task mTask;
         private boolean mRelevant = false;
 
-        public TaskRelevance(@NonNull Task task) {
+        TaskRelevance(@NonNull Task task) {
             mTask = task;
         }
 
-        public void setRelevant(@NonNull Map<Integer, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
+        void setRelevant(@NonNull Map<Integer, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
             if (mRelevant)
                 return;
 
@@ -2131,7 +2135,7 @@ public class DomainFactory {
                         .forEach(CustomTimeRelevance::setRelevant);
         }
 
-        public boolean getRelevant() {
+        boolean getRelevant() {
             return mRelevant;
         }
 
@@ -2144,11 +2148,11 @@ public class DomainFactory {
         private final Instance mInstance;
         private boolean mRelevant = false;
 
-        public InstanceRelevance(@NonNull Instance instance) {
+        InstanceRelevance(@NonNull Instance instance) {
             mInstance = instance;
         }
 
-        public void setRelevant(@NonNull Map<Integer, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
+        void setRelevant(@NonNull Map<Integer, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
             if (mRelevant)
                 return;
 
@@ -2208,7 +2212,7 @@ public class DomainFactory {
             }
         }
 
-        public boolean getRelevant() {
+        boolean getRelevant() {
             return mRelevant;
         }
 
@@ -2221,19 +2225,19 @@ public class DomainFactory {
         private final CustomTime mCustomTime;
         private boolean mRelevant = false;
 
-        public CustomTimeRelevance(@NonNull CustomTime customTime) {
+        CustomTimeRelevance(@NonNull CustomTime customTime) {
             mCustomTime = customTime;
         }
 
-        public void setRelevant() {
+        void setRelevant() {
             mRelevant = true;
         }
 
-        public boolean getRelevant() {
+        boolean getRelevant() {
             return mRelevant;
         }
 
-        public CustomTime getCustomTime() {
+        CustomTime getCustomTime() {
             return mCustomTime;
         }
     }

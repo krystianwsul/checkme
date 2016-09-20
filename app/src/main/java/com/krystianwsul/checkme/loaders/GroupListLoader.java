@@ -315,16 +315,14 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public final int TaskId;
         public final String Name;
         public final List<TaskData> Children;
-        public final boolean IsRootTask;
 
-        public TaskData(int taskId, String name, List<TaskData> children, boolean isRootTask) {
+        public TaskData(int taskId, String name, List<TaskData> children) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(children != null);
 
             TaskId = taskId;
             Name = name;
             Children = children;
-            IsRootTask = isRootTask;
         }
 
         @Override
@@ -333,7 +331,6 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             hashCode += TaskId;
             hashCode += Name.hashCode();
             hashCode += Children.hashCode();
-            hashCode += (IsRootTask ? 1 : 0);
             return hashCode;
         }
 
@@ -358,9 +355,6 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if (!Children.equals(taskData.Children))
-                return false;
-
-            if (IsRootTask != taskData.IsRootTask)
                 return false;
 
             return true;

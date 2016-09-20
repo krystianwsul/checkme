@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
@@ -7,6 +8,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -80,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     private TimeRange mTimeRange = TimeRange.DAY;
 
+    private final Map<Integer, Boolean> mGroupSelectAllVisible = new ArrayMap<>();
+    private boolean mTaskSelectAllVisible = false;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_select_all, menu);
@@ -88,7 +93,15 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_select_all).setVisible(mVisibleTab == INSTANCES_VISIBLE || mVisibleTab == TASKS_VISIBLE);
+        if (mVisibleTab == INSTANCES_VISIBLE) {
+            boolean visible = false;
+            if (mGroupSelectAllVisible.containsKey(mDaysPager.getCurrentItem()))
+                visible = mGroupSelectAllVisible.get(mDaysPager.getCurrentItem());
+
+            menu.findItem(R.id.action_select_all).setVisible(visible);
+        } else if (mVisibleTab == TASKS_VISIBLE) {
+            menu.findItem(R.id.action_select_all).setVisible(mTaskSelectAllVisible);
+        }
 
         return true;
     }
@@ -169,6 +182,9 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
                 if (newTimeRange != mTimeRange) {
                     mTimeRange = newTimeRange;
                     mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
+
+                    mGroupSelectAllVisible.clear();
+                    invalidateOptionsMenu();
                 }
             }
 
@@ -200,6 +216,23 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         Assert.assertTrue(mDaysPager != null);
 
         mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
+
+        mDaysPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         mMainTaskListFrame = (FrameLayout) findViewById(R.id.main_task_list_frame);
         Assert.assertTrue(mMainTaskListFrame != null);
@@ -392,6 +425,13 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     @Override
+    public void setTaskSelectAllVisibility(boolean selectAllVisible) {
+        mTaskSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
     public void onCreateGroupActionMode(final ActionMode actionMode) {
         Assert.assertTrue(mDrawerGroupListener == null);
         mDrawerGroupListener = new DrawerLayout.DrawerListener() {
@@ -453,6 +493,15 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     @Override
+    public void setGroupSelectAllVisibility(Integer position, boolean selectAllVisible) {
+        Assert.assertTrue(position != null);
+
+        mGroupSelectAllVisible.put(position, selectAllVisible);
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
     public void onCreateCustomTimesActionMode(ActionMode actionMode) {
         Assert.assertTrue(mDrawerCustomTimesListener == null);
         mDrawerCustomTimesListener = new DrawerLayout.DrawerListener() {
@@ -488,9 +537,10 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+        @SuppressLint("UseSparseArrays")
         private final Map<Integer, WeakReference<DayFragment>> mDayFragments = new HashMap<>();
 
-        public MyFragmentStatePagerAdapter(FragmentManager fragmentManager) {
+        MyFragmentStatePagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
         }
 
@@ -509,7 +559,7 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         }
 
         @NonNull
-        public DayFragment getCurrentItem() {
+        DayFragment getCurrentItem() {
             int position = mDaysPager.getCurrentItem();
             Assert.assertTrue(mDayFragments.containsKey(position));
 

@@ -14,11 +14,11 @@ import java.util.List;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 13;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
-    public static SQLiteDatabase getDatabase(Context applicationContext) {
+    static SQLiteDatabase getDatabase(Context applicationContext) {
         if (sSQLiteDatabase == null)
             sSQLiteDatabase = new MySQLiteHelper(applicationContext).getWritableDatabase();
         return sSQLiteDatabase;

@@ -112,9 +112,9 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
                 getSupportLoaderManager().destroyLoader(0);
 
                 if (mData != null) {
-                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(mData.DataId, mData.Id, name, mHourMinutes);
+                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(ShowCustomTimeActivity.this, mData.DataId, mData.Id, name, mHourMinutes);
                 } else {
-                    int customTimeId = DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(name, mHourMinutes);
+                    int customTimeId = DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(ShowCustomTimeActivity.this, name, mHourMinutes);
                     Assert.assertTrue(customTimeId > 0);
 
                     setResult(customTimeId);

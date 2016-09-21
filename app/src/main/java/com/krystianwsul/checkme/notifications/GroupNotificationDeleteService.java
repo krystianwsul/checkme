@@ -33,6 +33,6 @@ public class GroupNotificationDeleteService extends IntentService {
         ArrayList<InstanceKey> instanceKeys = intent.getParcelableArrayListExtra(INSTANCES_KEY);
         Assert.assertTrue(instanceKeys != null);
 
-        DomainFactory.getDomainFactory(this).setInstancesNotified(0, instanceKeys);
+        DomainFactory.getDomainFactory(this).setInstancesNotified(this, 0, instanceKeys);
     }
 }

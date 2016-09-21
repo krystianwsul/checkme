@@ -241,7 +241,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             if (updateScheduleRootTask(mTaskId, name))
                                 finish();
                         } else {
-                            DomainFactory.getDomainFactory(this).updateRootTask(mData.DataId, mTaskId, name);
+                            DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name);
                             finish();
                         }
                     } else if (mTaskIds != null) {
@@ -251,7 +251,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             if (createScheduleRootJoinTask(name, mTaskIds))
                                 finish();
                         } else {
-                            DomainFactory.getDomainFactory(this).createJoinRootTask(mData.DataId, name, mTaskIds);
+                            DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds);
                             finish();
                         }
                     } else {
@@ -261,7 +261,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             if (createScheduleRootTask(name))
                                 finish();
                         } else {
-                            DomainFactory.getDomainFactory(this).createRootTask(mData.DataId, name);
+                            DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name);
                             finish();
                         }
                     }
@@ -270,7 +270,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(this).updateChildTask(mData.DataId, mTaskId, name, mParent.TaskId);
+                        DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskId, name, mParent.TaskId);
                         finish();
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
@@ -278,12 +278,12 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(!TextUtils.isEmpty(name));
                         Assert.assertTrue(mTaskIds.size() > 1);
 
-                        DomainFactory.getDomainFactory(this).createJoinChildTask(mData.DataId, mParent.TaskId, name, mTaskIds);
+                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, mParent.TaskId, name, mTaskIds);
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createChildTask(mData.DataId, mParent.TaskId, name);
+                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name);
                         finish();
                     }
                 } else {
@@ -291,15 +291,15 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(this).updateRootTask(mData.DataId, mTaskId, name);
+                        DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name);
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createJoinRootTask(mData.DataId, name, mTaskIds);
+                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds);
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createRootTask(mData.DataId, name);
+                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name);
                     }
 
                     finish();
@@ -714,7 +714,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        DomainFactory.getDomainFactory(this).createScheduleRootTask(mData.DataId, name, scheduleDatas);
+        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, scheduleDatas);
 
         TickService.startService(this);
 
@@ -733,7 +733,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        DomainFactory.getDomainFactory(this).updateScheduleTask(mData.DataId, rootTaskId, name, scheduleDatas);
+        DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, rootTaskId, name, scheduleDatas);
 
         TickService.startService(this);
 
@@ -754,7 +754,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(mData.DataId, name, scheduleDatas, joinTaskIds);
+        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, scheduleDatas, joinTaskIds);
 
         TickService.startService(this);
 
@@ -797,8 +797,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     public static class ScheduleHint implements Parcelable {
-        public final Date mDate;
-        public final TimePair mTimePair;
+        final Date mDate;
+        final TimePair mTimePair;
 
         public ScheduleHint(Date date) {
             Assert.assertTrue(date != null);
@@ -919,7 +919,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             return mScheduleEntries.size() + 2;
         }
 
-        public void addScheduleEntry(ScheduleEntry scheduleEntry) {
+        void addScheduleEntry(ScheduleEntry scheduleEntry) {
             Assert.assertTrue(scheduleEntry != null);
 
             int position = mScheduleEntries.size() + 1;
@@ -928,18 +928,18 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             notifyItemInserted(position);
         }
 
-        public class ScheduleHolder extends RecyclerView.ViewHolder {
-            public final TextInputLayout mScheduleLayout;
-            public final EditText mScheduleText;
+        class ScheduleHolder extends RecyclerView.ViewHolder {
+            final TextInputLayout mScheduleLayout;
+            final EditText mScheduleText;
 
-            public ScheduleHolder(@NonNull View scheduleRow, @NonNull TextInputLayout scheduleLayout, @NonNull EditText scheduleText) {
+            ScheduleHolder(@NonNull View scheduleRow, @NonNull TextInputLayout scheduleLayout, @NonNull EditText scheduleText) {
                 super(scheduleRow);
 
                 mScheduleLayout = scheduleLayout;
                 mScheduleText = scheduleText;
             }
 
-            public void onTextClick() {
+            void onTextClick() {
                 Assert.assertTrue(mData != null);
 
                 mHourMinutePickerPosition = getAdapterPosition();
@@ -955,40 +955,40 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     public static class ScheduleEntry implements Parcelable {
-        public Date mDate;
-        public DayOfWeek mDayOfWeek;
-        public TimePairPersist mTimePairPersist;
-        public ScheduleType mScheduleType;
+        Date mDate;
+        DayOfWeek mDayOfWeek;
+        TimePairPersist mTimePairPersist;
+        ScheduleType mScheduleType;
 
-        public ScheduleEntry(@NonNull Date date) {
+        ScheduleEntry(@NonNull Date date) {
             mDate = date;
             mDayOfWeek = mDate.getDayOfWeek();
             mTimePairPersist = new TimePairPersist();
             mScheduleType = ScheduleType.SINGLE;
         }
 
-        public ScheduleEntry(@NonNull Date date, @NonNull TimePair timePair) {
+        ScheduleEntry(@NonNull Date date, @NonNull TimePair timePair) {
             mDate = date;
             mDayOfWeek = mDate.getDayOfWeek();
             mTimePairPersist = new TimePairPersist(timePair);
             mScheduleType = ScheduleType.SINGLE;
         }
 
-        public ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+        ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
             mDate = date;
             mDayOfWeek = dayOfWeek;
             mTimePairPersist = timePairPersist;
             mScheduleType = scheduleType;
         }
 
-        public ScheduleEntry(@NonNull TimePair timePair) {
+        ScheduleEntry(@NonNull TimePair timePair) {
             mDate = Date.today();
             mDayOfWeek = mDate.getDayOfWeek();
             mTimePairPersist = new TimePairPersist(timePair);
             mScheduleType = ScheduleType.DAILY;
         }
 
-        public ScheduleEntry(@NonNull DayOfWeek dayOfWeek, @NonNull TimePair timePair) {
+        ScheduleEntry(@NonNull DayOfWeek dayOfWeek, @NonNull TimePair timePair) {
             mDate = Date.today();
             mDayOfWeek = dayOfWeek;
             mTimePairPersist = new TimePairPersist(timePair);
@@ -996,7 +996,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
 
         @NonNull
-        public String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
+        String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
             switch (mScheduleType) {
                 case SINGLE:
                     if (mTimePairPersist.getCustomTimeId() != null) {
@@ -1031,7 +1031,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
 
         @NonNull
-        public CreateTaskLoader.ScheduleData getScheduleData() {
+        CreateTaskLoader.ScheduleData getScheduleData() {
             switch (mScheduleType) {
                 case SINGLE:
                     return new CreateTaskLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
@@ -1044,9 +1044,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             }
         }
 
-        @SuppressWarnings("unused")
         @NonNull
-        public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
+        ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
             switch (mScheduleType) {
                 case SINGLE: {
                     return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), mTimePairPersist, ScheduleType.SINGLE);

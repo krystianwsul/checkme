@@ -29,6 +29,7 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         mLong = calendar.getTimeInMillis();
     }
 
+    @NonNull
     public static ExactTimeStamp getNow() {
         return new ExactTimeStamp(Calendar.getInstance());
     }

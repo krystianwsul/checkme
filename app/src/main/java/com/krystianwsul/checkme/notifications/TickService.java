@@ -109,7 +109,7 @@ public class TickService extends IntentService {
                 .collect(Collectors.toList());
 
         if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
-            DomainFactory.getDomainFactory(this).updateInstancesShown(data.DataId, showInstanceKeys, hideInstanceKeys);
+            DomainFactory.getDomainFactory(this).updateInstancesShown(this, data.DataId, showInstanceKeys, hideInstanceKeys);
 
         if (registering) {
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
@@ -274,8 +274,9 @@ public class TickService extends IntentService {
 
         if (actions != null) {
             Assert.assertTrue(actions.size() <= 3);
-            for (NotificationCompat.Action action : actions)
-                builder.addAction(action);
+
+            Stream.of(actions)
+                    .forEach(builder::addAction);
         }
 
         if (when != null)
@@ -296,9 +297,9 @@ public class TickService extends IntentService {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final Map<InstanceKey, NotificationInstanceData> NotificationInstanceDatas;
-        public final Map<InstanceKey, ShownInstanceData> ShownInstanceDatas;
-        public final TimeStamp NextAlarm;
+        final Map<InstanceKey, NotificationInstanceData> NotificationInstanceDatas;
+        final Map<InstanceKey, ShownInstanceData> ShownInstanceDatas;
+        final TimeStamp NextAlarm;
 
         public Data(Map<InstanceKey, NotificationInstanceData> notificationInstanceDatas, Map<InstanceKey, ShownInstanceData> shownInstanceDatas, TimeStamp nextAlarm) {
             Assert.assertTrue(notificationInstanceDatas != null);
@@ -313,10 +314,10 @@ public class TickService extends IntentService {
     public static class NotificationInstanceData {
         public final InstanceKey InstanceKey;
         public final String Name;
-        public final int NotificationId;
-        public final String DisplayText;
-        public final TimeStamp InstanceTimeStamp;
-        public final List<String> Children;
+        final int NotificationId;
+        final String DisplayText;
+        final TimeStamp InstanceTimeStamp;
+        final List<String> Children;
 
         public NotificationInstanceData(InstanceKey instanceKey, String name, int notificationId, String displayText, TimeStamp instanceTimeStamp, List<String> children) {
             Assert.assertTrue(instanceKey != null);
@@ -335,7 +336,7 @@ public class TickService extends IntentService {
     }
 
     public static class ShownInstanceData {
-        public final int NotificationId;
+        final int NotificationId;
         public final InstanceKey InstanceKey;
 
         public ShownInstanceData(int notificationId, InstanceKey instanceKey) {

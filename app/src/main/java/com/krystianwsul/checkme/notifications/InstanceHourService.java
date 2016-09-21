@@ -43,7 +43,7 @@ public class InstanceHourService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);
 
-        DomainFactory.getDomainFactory(this).setInstanceAddHour(0, instanceKey);
+        DomainFactory.getDomainFactory(this).setInstanceAddHour(this, 0, instanceKey);
 
         TickService.startService(this);
     }

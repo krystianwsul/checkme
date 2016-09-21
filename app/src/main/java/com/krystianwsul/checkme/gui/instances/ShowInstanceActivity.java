@@ -145,7 +145,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mData.DataId);
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(dataIds, mData.InstanceKey.TaskId);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.InstanceKey.TaskId);
 
                 TickService.startService(this);
 
@@ -214,7 +214,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-            DomainFactory.getDomainFactory(this).setInstanceNotified(data.DataId, data.InstanceKey);
+            DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, data.InstanceKey);
         }
 
         mActionBar.setTitle(data.Name);
@@ -228,7 +228,7 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     }
 
     private void setDone(boolean done) {
-        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(mData.DataId, mData.InstanceKey, done);
+        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mData.DataId, mData.InstanceKey, done);
         mData.Done = done;
 
         TickService.startService(ShowInstanceActivity.this);

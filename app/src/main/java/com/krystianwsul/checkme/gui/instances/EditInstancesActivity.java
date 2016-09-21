@@ -143,9 +143,9 @@ public class EditInstancesActivity extends AppCompatActivity implements LoaderMa
                 if (!isValidDateTime())
                     break;
 
-                DomainFactory.getDomainFactory(EditInstancesActivity.this).setInstancesDateTime(mData.DataId, mData.InstanceDatas.keySet(), mDate, mTimePairPersist.getTimePair());
+                DomainFactory.getDomainFactory(this).setInstancesDateTime(this, mData.DataId, mData.InstanceDatas.keySet(), mDate, mTimePairPersist.getTimePair());
 
-                TickService.startService(EditInstancesActivity.this);
+                TickService.startService(this);
 
                 finish();
                 break;

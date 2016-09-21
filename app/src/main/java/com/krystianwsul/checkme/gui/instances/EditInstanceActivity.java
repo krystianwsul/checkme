@@ -140,7 +140,7 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
+                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(this, mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
 
                 TickService.startService(EditInstanceActivity.this);
 

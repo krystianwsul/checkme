@@ -110,7 +110,7 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mData.DataId);
                 dataIds.add(taskListFragment.getDataId());
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(dataIds, mData.TaskId);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.TaskId);
                 TickService.startService(this);
 
                 finish();

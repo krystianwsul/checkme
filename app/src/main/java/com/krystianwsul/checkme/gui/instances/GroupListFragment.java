@@ -176,7 +176,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         decrementSelected();
                     } while (!(selectedTreeNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskIds);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), ((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskIds);
 
                     updateSelectAll();
 
@@ -220,7 +220,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             .map(instanceData -> instanceData.InstanceKey)
                             .collect(Collectors.toList());
 
-                    ExactTimeStamp done = DomainFactory.getDomainFactory(getActivity()).setInstancesDone(mData.DataId, instanceKeys);
+                    ExactTimeStamp done = DomainFactory.getDomainFactory(getActivity()).setInstancesDone(getActivity(), mData.DataId, instanceKeys);
 
                     List<TreeNode> selectedTreeNodes = mTreeViewAdapter.getSelectedNodes();
                     Assert.assertTrue(selectedTreeNodes != null);
@@ -1726,7 +1726,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(!groupListFragment.mSelectionCallback.hasActionMode());
 
                     return v -> {
-                        instanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, instanceData.InstanceKey, true);
+                        instanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupListFragment.getActivity(), groupAdapter.mDataId, instanceData.InstanceKey, true);
                         Assert.assertTrue(instanceData.Done != null);
 
                         recursiveExists(instanceData);
@@ -2193,7 +2193,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         return v -> {
                             Assert.assertTrue(notDoneGroupTreeNode.expanded());
 
-                            mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, true);
+                            mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupListFragment.getActivity(), groupAdapter.mDataId, mInstanceData.InstanceKey, true);
                             Assert.assertTrue(mInstanceData.Done != null);
 
                             recursiveExists(mInstanceData);
@@ -2751,7 +2751,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     GroupListFragment groupListFragment = groupAdapter.getGroupListFragment();
 
                     return v -> {
-                        mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupAdapter.mDataId, mInstanceData.InstanceKey, false);
+                        mInstanceData.Done = DomainFactory.getDomainFactory(groupListFragment.getActivity()).setInstanceDone(groupListFragment.getActivity(), groupAdapter.mDataId, mInstanceData.InstanceKey, false);
                         Assert.assertTrue(mInstanceData.Done == null);
 
                         TickService.startService(groupListFragment.getActivity());

@@ -109,7 +109,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                         decrementSelected();
                     } while (!(selected = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(mData.DataId, taskIds);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mData.DataId, taskIds);
 
                     updateSelectAll();
 

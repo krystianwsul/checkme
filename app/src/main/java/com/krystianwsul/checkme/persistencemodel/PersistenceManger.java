@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.persistencemodel;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -43,8 +45,6 @@ public class PersistenceManger {
 
     private final List<InstanceRecord> mInstanceRecords;
 
-    private final Context mApplicationContext;
-
     private int mCustomTimeMaxId;
     private int mTaskMaxId;
     private int mTaskHierarchyMaxId;
@@ -58,12 +58,9 @@ public class PersistenceManger {
         return sInstance;
     }
 
-    private PersistenceManger(Context context) {
-        Assert.assertTrue(context != null);
-
-        mApplicationContext = context.getApplicationContext();
-
-        mSQLiteDatabase = MySQLiteHelper.getDatabase(mApplicationContext);
+    @SuppressLint("UseSparseArrays")
+    private PersistenceManger(@NonNull Context context) {
+        mSQLiteDatabase = MySQLiteHelper.getDatabase(context);
 
         mCustomTimeRecords = CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase);
         Assert.assertTrue(mCustomTimeRecords != null);
@@ -123,6 +120,7 @@ public class PersistenceManger {
         mInstanceMaxId = InstanceRecord.getMaxId(mSQLiteDatabase);
     }
 
+    @SuppressLint("UseSparseArrays")
     public PersistenceManger() {
         mSQLiteDatabase = null;
         mCustomTimeRecords = new ArrayList<>();
@@ -133,7 +131,6 @@ public class PersistenceManger {
         mDailyScheduleRecords = new HashMap<>();
         mWeeklyScheduleRecords = new HashMap<>();
         mInstanceRecords = new ArrayList<>();
-        mApplicationContext = null;
 
         mCustomTimeMaxId = 0;
         mTaskMaxId = 0;
@@ -182,7 +179,7 @@ public class PersistenceManger {
         return mInstanceRecords;
     }
 
-    public CustomTimeRecord createCustomTimeRecord(String name, HashMap<DayOfWeek, HourMinute> hourMinutes) {
+    public CustomTimeRecord createCustomTimeRecord(String name, Map<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
 
@@ -349,7 +346,7 @@ public class PersistenceManger {
         return instanceRecord;
     }
 
-    public void save() {
+    public void save(@NonNull Context context) {
         // save
 
         ArrayList<InsertCommand> insertCommands = new ArrayList<>();
@@ -422,7 +419,7 @@ public class PersistenceManger {
             if (instanceRecord.needsUpdate())
                 updateCommands.add(instanceRecord.getUpdateCommand());
 
-        SaveService.startService(mApplicationContext, insertCommands, updateCommands);
+        SaveService.startService(context, insertCommands, updateCommands);
     }
 
     SQLiteDatabase getSQLiteDatabase() {

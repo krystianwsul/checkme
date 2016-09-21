@@ -43,6 +43,6 @@ public class InstanceDoneService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);
 
-        DomainFactory.getDomainFactory(this).setInstanceNotificationDone(0, instanceKey);
+        DomainFactory.getDomainFactory(this).setInstanceNotificationDone(this, 0, instanceKey);
     }
 }

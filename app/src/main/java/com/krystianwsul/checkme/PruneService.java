@@ -20,6 +20,6 @@ public class PruneService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        DomainFactory.getDomainFactory(this).updateTaskOldestVisible();
+        DomainFactory.getDomainFactory(this).updateTaskOldestVisible(this);
     }
 }

@@ -31,6 +31,6 @@ public class InstanceNotificationDeleteService extends IntentService {
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
         Assert.assertTrue(instanceKey != null);
 
-        DomainFactory.getDomainFactory(this).setInstanceNotified(0, instanceKey);
+        DomainFactory.getDomainFactory(this).setInstanceNotified(this, 0, instanceKey);
     }
 }

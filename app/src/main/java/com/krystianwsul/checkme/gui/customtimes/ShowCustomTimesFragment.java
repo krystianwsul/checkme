@@ -213,7 +213,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
         private final WeakReference<ShowCustomTimesFragment> mShowCustomTimesFragmentReference;
 
-        public CustomTimesAdapter(ShowCustomTimesLoader.Data data, ShowCustomTimesFragment showCustomTimesFragment, ArrayList<Integer> selectedCustomTimeIds) {
+        CustomTimesAdapter(ShowCustomTimesLoader.Data data, ShowCustomTimesFragment showCustomTimesFragment, ArrayList<Integer> selectedCustomTimeIds) {
             Assert.assertTrue(data != null);
             Assert.assertTrue(showCustomTimesFragment != null);
 
@@ -230,13 +230,13 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
             return mCustomTimeWrappers.size();
         }
 
-        public void unselect() {
-            for (CustomTimeWrapper customTimeWrapper : mCustomTimeWrappers) {
-                if (customTimeWrapper.mSelected) {
-                    customTimeWrapper.mSelected = false;
-                    notifyItemChanged(mCustomTimeWrappers.indexOf(customTimeWrapper));
-                }
-            }
+        void unselect() {
+            Stream.of(mCustomTimeWrappers)
+                    .filter(customTimeWrapper -> customTimeWrapper.mSelected)
+                    .forEach(customTimeWrapper -> {
+                        customTimeWrapper.mSelected = false;
+                        notifyItemChanged(mCustomTimeWrappers.indexOf(customTimeWrapper));
+                    });
         }
 
         @Override
@@ -280,14 +280,14 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
             });
         }
 
-        public ArrayList<Integer> getSelected() {
+        ArrayList<Integer> getSelected() {
             return new ArrayList<>(Stream.of(mCustomTimeWrappers)
                 .filter(customTimeWrapper -> customTimeWrapper.mSelected)
                 .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
                 .collect(Collectors.toList()));
         }
 
-        public void removeSelected() {
+        void removeSelected() {
             ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
             Assert.assertTrue(showCustomTimesFragment != null);
 
@@ -305,14 +305,14 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
                     .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
                     .collect(Collectors.toList());
 
-            DomainFactory.getDomainFactory(showCustomTimesFragment.getActivity()).setCustomTimeCurrent(mDataId, selectedCustomTimeIds);
+            DomainFactory.getDomainFactory(showCustomTimesFragment.getActivity()).setCustomTimeCurrent(showCustomTimesFragment.getActivity(), mDataId, selectedCustomTimeIds);
         }
 
-        public class CustomTimeHolder extends RecyclerView.ViewHolder {
-            public final View mShowCustomTimeRow;
-            public final TextView mTimesRowName;
+        class CustomTimeHolder extends RecyclerView.ViewHolder {
+            final View mShowCustomTimeRow;
+            final TextView mTimesRowName;
 
-            public CustomTimeHolder(View showCustomTimesRow, TextView timesRowName) {
+            CustomTimeHolder(View showCustomTimesRow, TextView timesRowName) {
                 super(showCustomTimesRow);
 
                 Assert.assertTrue(timesRowName != null);
@@ -321,7 +321,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
                 mTimesRowName = timesRowName;
             }
 
-            public void onRowClick() {
+            void onRowClick() {
                 ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
                 Assert.assertTrue(showCustomTimesFragment != null);
 
@@ -331,7 +331,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
                 showCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.mCustomTimeData.Id, showCustomTimesFragment.getActivity()));
             }
 
-            public void onLongClick() {
+            void onLongClick() {
                 ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
                 Assert.assertTrue(showCustomTimesFragment != null);
 
@@ -354,10 +354,10 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
     }
 
     private static class CustomTimeWrapper {
-        public final ShowCustomTimesLoader.CustomTimeData mCustomTimeData;
-        public boolean mSelected = false;
+        final ShowCustomTimesLoader.CustomTimeData mCustomTimeData;
+        boolean mSelected = false;
 
-        public CustomTimeWrapper(ShowCustomTimesLoader.CustomTimeData customTimeData, ArrayList<Integer> selectedCustomTimeIds) {
+        CustomTimeWrapper(ShowCustomTimesLoader.CustomTimeData customTimeData, ArrayList<Integer> selectedCustomTimeIds) {
             Assert.assertTrue(customTimeData != null);
 
             mCustomTimeData = customTimeData;

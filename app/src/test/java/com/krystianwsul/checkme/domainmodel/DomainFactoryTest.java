@@ -57,7 +57,7 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.isEmpty());
 
-        Task rootTask = domainFactory.createSingleScheduleRootTask(startExactTimeStamp, "root task", scheduleDate, new TimePair(scheduleHourMinute));
+        Task rootTask = domainFactory.createSingleScheduleRootTask(startExactTimeStamp, "root task", scheduleDate, new TimePair(scheduleHourMinute), null);
         Assert.assertTrue(rootTask != null);
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
@@ -137,7 +137,7 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.isEmpty());
 
-        Task rootTask = domainFactory.createSingleScheduleRootTask(startExactTimeStamp, "root task", scheduleDate, new TimePair(scheduleHourMinute));
+        Task rootTask = domainFactory.createSingleScheduleRootTask(startExactTimeStamp, "root task", scheduleDate, new TimePair(scheduleHourMinute), null);
         Assert.assertTrue(rootTask != null);
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
@@ -145,7 +145,7 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.isEmpty());
 
-        Task childTaskDone = domainFactory.createChildTask(startExactTimeStamp, rootTask.getId(), "child task done");
+        Task childTaskDone = domainFactory.createChildTask(startExactTimeStamp, rootTask.getId(), "child task done", null);
         Assert.assertTrue(childTaskDone != null);
 
         Assert.assertTrue(childTaskDone.isVisible(startExactTimeStamp));
@@ -153,7 +153,7 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.size() == 1);
 
-        Task childTaskExists = domainFactory.createChildTask(startExactTimeStamp, rootTask.getId(), "child task exists");
+        Task childTaskExists = domainFactory.createChildTask(startExactTimeStamp, rootTask.getId(), "child task exists", null);
         Assert.assertTrue(childTaskExists != null);
 
         Assert.assertTrue(childTaskExists.isVisible(startExactTimeStamp));
@@ -161,7 +161,7 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).TaskDatas.get(0).Children.size() == 2);
 
-        Task childTaskDoesntExist = domainFactory.createChildTask(startExactTimeStamp, rootTask.getId(), "child task doesn't exist");
+        Task childTaskDoesntExist = domainFactory.createChildTask(startExactTimeStamp, rootTask.getId(), "child task doesn't exist", null);
         Assert.assertTrue(childTaskDoesntExist != null);
 
         Assert.assertTrue(childTaskDoesntExist.isVisible(startExactTimeStamp));

@@ -697,7 +697,7 @@ public class DomainFactory {
                 parentTaskId = parentTask.getId();
             }
 
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleDatas);
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleDatas, task.getNote());
         }
 
         TreeMap<Integer, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskIds);
@@ -1010,13 +1010,10 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    Task createSingleScheduleRootTask(ExactTimeStamp now, String name, Date date, TimePair timePair) {
-        Assert.assertTrue(now != null);
+    Task createSingleScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull Date date, @NonNull TimePair timePair, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(timePair != null);
 
-        Task rootTask = createRootTaskHelper(name, now);
+        Task rootTask = createRootTaskHelper(name, now, note);
         Assert.assertTrue(rootTask != null);
 
         Time time = getTime(timePair);
@@ -1029,7 +1026,7 @@ public class DomainFactory {
         return rootTask;
     }
 
-    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas) {
+    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1037,7 +1034,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task rootTask = createRootTaskHelper(name, now);
+        Task rootTask = createRootTaskHelper(name, now, note);
         Assert.assertTrue(rootTask != null);
 
         List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
@@ -1049,7 +1046,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void updateScheduleTask(@NonNull Context context, int dataId, int taskId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas) {
+    public synchronized void updateScheduleTask(@NonNull Context context, int dataId, int taskId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1061,7 +1058,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
         Assert.assertTrue(task.current(now));
 
-        task.setName(name);
+        task.setName(name, note);
 
         if (task.isRootTask(now)) {
             List<Schedule> schedules = task.getCurrentSchedules(now);
@@ -1085,15 +1082,12 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    private void createScheduleJoinRootTask(ExactTimeStamp now, String name, List<CreateTaskLoader.ScheduleData> scheduleDatas, List<Integer> joinTaskIds) {
-        Assert.assertTrue(now != null);
+    private void createScheduleJoinRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(joinTaskIds != null);
         Assert.assertTrue(joinTaskIds.size() > 1);
 
-        Task rootTask = createRootTaskHelper(name, now);
+        Task rootTask = createRootTaskHelper(name, now, note);
         Assert.assertTrue(rootTask != null);
 
         List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
@@ -1105,7 +1099,7 @@ public class DomainFactory {
         joinTasks(rootTask, joinTaskIds, now);
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<Integer> joinTaskIds) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1114,25 +1108,24 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createScheduleJoinRootTask(now, name, scheduleDatas, joinTaskIds);
+        createScheduleJoinRootTask(now, name, scheduleDatas, joinTaskIds, note);
 
         save(context, dataId);
     }
 
-    public synchronized void createChildTask(@NonNull Context context, int dataId, int parentTaskId, @NonNull String name) {
+    public synchronized void createChildTask(@NonNull Context context, int dataId, int parentTaskId, @NonNull String name, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createChildTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createChildTask(now, parentTaskId, name);
+        createChildTask(now, parentTaskId, name, note);
 
         save(context, dataId);
     }
 
-    Task createChildTask(ExactTimeStamp now, int parentTaskId, String name) {
-        Assert.assertTrue(now != null);
+    Task createChildTask(@NonNull ExactTimeStamp now, int parentTaskId, @NonNull String name, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task parentTask = mTasks.get(parentTaskId);
@@ -1140,7 +1133,7 @@ public class DomainFactory {
 
         Assert.assertTrue(parentTask.current(now));
 
-        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now);
+        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now, note);
         Assert.assertTrue(childTaskRecord != null);
 
         Task childTask = new Task(this, childTaskRecord);
@@ -1152,7 +1145,7 @@ public class DomainFactory {
         return childTask;
     }
 
-    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, int parentTaskId, @NonNull String name, @NonNull List<Integer> joinTaskIds) {
+    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, int parentTaskId, @NonNull String name, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createJoinChildTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1164,7 +1157,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
         Assert.assertTrue(parentTask.current(now));
 
-        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now);
+        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now, note);
         Assert.assertTrue(childTaskRecord != null);
 
         Task childTask = new Task(this, childTaskRecord);
@@ -1178,7 +1171,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void updateChildTask(@NonNull Context context, int dataId, int taskId, @NonNull String name, int parentTaskId) {
+    public synchronized void updateChildTask(@NonNull Context context, int dataId, int taskId, @NonNull String name, int parentTaskId, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.updateChildTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1188,7 +1181,7 @@ public class DomainFactory {
         Task task = mTasks.get(taskId);
         Assert.assertTrue(task != null);
 
-        task.setName(name);
+        task.setName(name, note);
 
         Task newParentTask = mTasks.get(parentTaskId);
         Assert.assertTrue(newParentTask != null);
@@ -1428,14 +1421,14 @@ public class DomainFactory {
                 .forEach(mCustomTimes::remove);
     }
 
-    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name) {
+    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now);
+        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
         Assert.assertTrue(taskRecord != null);
 
         Task childTask = new Task(this, taskRecord);
@@ -1445,7 +1438,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<Integer> joinTaskIds) {
+    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createJoinRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1453,7 +1446,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now);
+        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
         Assert.assertTrue(taskRecord != null);
 
         Task task = new Task(this, taskRecord);
@@ -1465,7 +1458,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void updateRootTask(@NonNull Context context, int dataId, int taskId, @NonNull String name) {
+    public synchronized void updateRootTask(@NonNull Context context, int dataId, int taskId, @NonNull String name, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.updateRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1475,7 +1468,7 @@ public class DomainFactory {
         Task task = mTasks.get(taskId);
         Assert.assertTrue(task != null);
 
-        task.setName(name);
+        task.setName(name, note);
 
         TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
         if (taskHierarchy != null)
@@ -1690,11 +1683,10 @@ public class DomainFactory {
         return new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord);
     }
 
-    private Task createRootTaskHelper(String name, ExactTimeStamp startExactTimeStamp) {
+    private Task createRootTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(startExactTimeStamp != null);
 
-        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, startExactTimeStamp);
+        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, startExactTimeStamp, note);
         Assert.assertTrue(taskRecord != null);
 
         Task rootTask = new Task(this, taskRecord);

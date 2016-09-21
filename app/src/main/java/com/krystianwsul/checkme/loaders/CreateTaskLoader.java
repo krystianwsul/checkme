@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -94,14 +95,16 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final String Name;
         public final Integer ParentTaskId;
         public final List<ScheduleData> ScheduleDatas;
+        public final String mNote;
 
-        public TaskData(@NonNull String name, Integer parentTaskId, List<ScheduleData> scheduleDatas) {
+        public TaskData(@NonNull String name, Integer parentTaskId, List<ScheduleData> scheduleDatas, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue((parentTaskId == null) || (scheduleDatas == null));
 
             Name = name;
             ParentTaskId = parentTaskId;
             ScheduleDatas = scheduleDatas;
+            mNote = note;
         }
 
         @Override
@@ -117,6 +120,8 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
                 hash += ScheduleDatas.hashCode();
             }
+            if (mNote != null)
+                hash += mNote.hashCode();
             return hash;
         }
 
@@ -147,6 +152,12 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if ((ScheduleDatas != null) && !ScheduleDatas.equals(taskData.ScheduleDatas))
+                return false;
+
+            if ((mNote == null) != (taskData.mNote == null))
+                return false;
+
+            if ((mNote != null) && !mNote.equals(taskData.mNote))
                 return false;
 
             return true;

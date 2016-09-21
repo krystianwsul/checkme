@@ -61,6 +61,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
     private static final String SCHEDULE_ENTRIES_KEY = "scheduleEntries";
+    private static final String NOTE_KEY = "note";
 
     private static final String SCHEDULE_DIALOG_TAG = "scheduleDialog";
 
@@ -139,6 +140,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             mHourMinutePickerPosition = null;
         }
     };
+
+    private String mNote = null;
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -241,7 +244,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             if (updateScheduleRootTask(mTaskId, name))
                                 finish();
                         } else {
-                            DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name);
+                            DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name, mNote);
                             finish();
                         }
                     } else if (mTaskIds != null) {
@@ -251,7 +254,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             if (createScheduleRootJoinTask(name, mTaskIds))
                                 finish();
                         } else {
-                            DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds);
+                            DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds, mNote);
                             finish();
                         }
                     } else {
@@ -261,7 +264,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                             if (createScheduleRootTask(name))
                                 finish();
                         } else {
-                            DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name);
+                            DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote);
                             finish();
                         }
                     }
@@ -270,7 +273,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskId, name, mParent.TaskId);
+                        DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskId, name, mParent.TaskId, mNote);
                         finish();
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
@@ -278,12 +281,12 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(!TextUtils.isEmpty(name));
                         Assert.assertTrue(mTaskIds.size() > 1);
 
-                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, mParent.TaskId, name, mTaskIds);
+                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, mParent.TaskId, name, mTaskIds, mNote);
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name);
+                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name, mNote);
                         finish();
                     }
                 } else {
@@ -291,15 +294,15 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name);
+                        DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name, mNote);
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds);
+                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds, mNote);
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name);
+                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote);
                     }
 
                     finish();
@@ -419,6 +422,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (mParent != null) {
                 outState.putInt(PARENT_ID, mParent.TaskId);
             }
+
+            if (!TextUtils.isEmpty(mNote))
+                outState.putString(NOTE_KEY, mNote);
         }
     }
 
@@ -491,6 +497,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 mParent = findTaskData(parentId);
                 Assert.assertTrue(mParent != null);
             }
+
+            if (mSavedInstanceState.containsKey(NOTE_KEY)) {
+                mNote = mSavedInstanceState.getString(NOTE_KEY);
+                Assert.assertTrue(!TextUtils.isEmpty(mNote));
+            }
         } else {
             if (mData.TaskData != null && mData.TaskData.ParentTaskId != null) {
                 Assert.assertTrue(mParentTaskIdHint == null);
@@ -503,6 +514,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 mParent = findTaskData(mParentTaskIdHint);
             }
+
+            if (mData.TaskData != null)
+                mNote = mData.TaskData.mNote;
         }
 
         ParentPickerFragment parentPickerFragment = (ParentPickerFragment) getSupportFragmentManager().findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG);
@@ -714,7 +728,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, scheduleDatas);
+        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, scheduleDatas, mNote);
 
         TickService.startService(this);
 
@@ -733,7 +747,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, rootTaskId, name, scheduleDatas);
+        DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, rootTaskId, name, scheduleDatas, mNote);
 
         TickService.startService(this);
 
@@ -754,7 +768,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         Assert.assertTrue(scheduleDatas != null);
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, scheduleDatas, joinTaskIds);
+        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, scheduleDatas, joinTaskIds, mNote);
 
         TickService.startService(this);
 
@@ -862,6 +876,23 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         private static final int TYPE_SCHEDULE = 0;
         private static final int TYPE_NOTE = 1;
 
+        private final TextWatcher mNameListener = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mNote = s.toString();
+            }
+        };
+
         @Override
         public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == TYPE_SCHEDULE) {
@@ -934,7 +965,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 NoteHolder noteHolder = (NoteHolder) holder;
 
-                noteHolder.mNoteText.setText(null);
+                noteHolder.mNoteText.setText(mNote);
+
+                noteHolder.mNoteText.removeTextChangedListener(mNameListener);
+                noteHolder.mNoteText.addTextChangedListener(mNameListener);
             }
         }
 

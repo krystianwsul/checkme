@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -206,13 +207,12 @@ public class PersistenceManger {
         return customTimeRecord;
     }
 
-    public TaskRecord createTaskRecord(String name, ExactTimeStamp startExactTimeStamp) {
+    public TaskRecord createTaskRecord(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(startExactTimeStamp != null);
 
         int id = ++mTaskMaxId;
 
-        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, true, null, null, null, null);
+        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, true, null, null, null, note);
         mTaskRecords.add(taskRecord);
 
         return taskRecord;

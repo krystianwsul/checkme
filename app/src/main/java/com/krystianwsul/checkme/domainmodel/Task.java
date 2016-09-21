@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
@@ -42,7 +44,7 @@ public class Task {
         mSchedules.add(schedule);
     }
 
-    public String getScheduleText(Context context, ExactTimeStamp exactTimeStamp) {
+    String getScheduleText(Context context, ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(context != null);
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
@@ -66,7 +68,7 @@ public class Task {
         }
     }
 
-    public List<Schedule> getCurrentSchedules(ExactTimeStamp exactTimeStamp) {
+    List<Schedule> getCurrentSchedules(ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
 
@@ -79,12 +81,14 @@ public class Task {
         return mTaskRecord.getName();
     }
 
-    void setName(String name) {
+    void setName(@NonNull String name, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+
         mTaskRecord.setName(name);
+        mTaskRecord.setNote(note);
     }
 
-    public List<Task> getChildTasks(ExactTimeStamp exactTimeStamp) {
+    List<Task> getChildTasks(ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
 
@@ -108,7 +112,7 @@ public class Task {
         return mTaskRecord.getId();
     }
 
-    public boolean isRootTask(ExactTimeStamp exactTimeStamp) {
+    boolean isRootTask(ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(current(exactTimeStamp));
 
@@ -119,7 +123,7 @@ public class Task {
         return new ExactTimeStamp(mTaskRecord.getStartTime());
     }
 
-    public ExactTimeStamp getEndExactTimeStamp() {
+    ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskRecord.getEndTime() != null)
             return new ExactTimeStamp(mTaskRecord.getEndTime());
         else
@@ -167,7 +171,7 @@ public class Task {
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    public boolean notDeleted(ExactTimeStamp exactTimeStamp) {
+    boolean notDeleted(ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
 
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
@@ -347,7 +351,12 @@ public class Task {
     }
     */
 
-    public void setRelevant() {
+    void setRelevant() {
         mTaskRecord.setRelevant(false);
+    }
+
+    @Nullable
+    String getNote() {
+        return mTaskRecord.getNote();
     }
 }

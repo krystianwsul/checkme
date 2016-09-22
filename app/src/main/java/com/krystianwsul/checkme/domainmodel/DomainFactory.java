@@ -743,6 +743,7 @@ public class DomainFactory {
         Assert.assertTrue(context != null);
 
         List<Task> tasks;
+        String note;
 
         if (taskId != null) {
             Task parentTask = mTasks.get(taskId);
@@ -750,6 +751,8 @@ public class DomainFactory {
 
             tasks = parentTask.getChildTasks(now);
             Assert.assertTrue(tasks != null);
+
+            note = parentTask.getNote();
         } else {
             tasks = new ArrayList<>();
             for (Task rootTask : mTasks.values()) {
@@ -764,17 +767,19 @@ public class DomainFactory {
 
                 tasks.add(rootTask);
             }
+
+            note = null;
         }
 
         Collections.sort(tasks, (Task lhs, Task rhs) -> Integer.valueOf(lhs.getId()).compareTo(rhs.getId()));
         if (taskId == null)
             Collections.reverse(tasks);
 
-        List<TaskListLoader.TaskData> taskDatas = Stream.of(tasks)
-                .map(task -> new TaskListLoader.TaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.isRootTask(now)))
+        List<TaskListLoader.ChildTaskData> childTaskDatas = Stream.of(tasks)
+                .map(task -> new TaskListLoader.ChildTaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context)))
                 .collect(Collectors.toList());
 
-        return new TaskListLoader.Data(taskDatas);
+        return new TaskListLoader.Data(childTaskDatas, note);
     }
 
     public synchronized TickService.Data getTickServiceData(Context context) {
@@ -1960,14 +1965,14 @@ public class DomainFactory {
         return instanceDatas;
     }
 
-    private List<TaskListLoader.TaskData> getChildTaskDatas(Task parentTask, ExactTimeStamp now, Context context) {
+    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(Task parentTask, ExactTimeStamp now, Context context) {
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(now != null);
         Assert.assertTrue(context != null);
 
         return Stream.of(parentTask.getChildTasks(now))
                 .sortBy(Task::getId)
-                .map(childTask -> new TaskListLoader.TaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.isRootTask(now)))
+                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context)))
                 .collect(Collectors.toList());
     }
 

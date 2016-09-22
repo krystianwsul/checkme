@@ -1,12 +1,13 @@
 package com.krystianwsul.checkme.gui.tree;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 public interface TreeModelAdapter {
-    RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
+    RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType);
 
-    void onBindViewHolder(RecyclerView.ViewHolder holder, int position);
+    void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position);
 
     boolean hasActionMode();
 

@@ -26,10 +26,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     private boolean mSelected = false;
 
-    public TreeNode(ModelNode modelNode, WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
-        Assert.assertTrue(modelNode != null);
-        Assert.assertTrue(parentReference != null);
-
+    public TreeNode(@NonNull ModelNode modelNode, @NonNull WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
         mModelNode = modelNode;
         mParentReference = parentReference;
 
@@ -39,11 +36,11 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(!mSelected || mModelNode.selectable());
     }
 
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
         mModelNode.onBindViewHolder(viewHolder);
     }
 
-    public int getItemViewType() {
+    int getItemViewType() {
         return mModelNode.getItemViewType();
     }
 
@@ -78,6 +75,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return mModelNode.compareTo(another.mModelNode);
     }
 
+    @NonNull
     public View.OnLongClickListener getOnLongClickListener() {
         return v -> {
             onLongClick();
@@ -85,6 +83,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         };
     }
 
+
+    @NonNull
     public View.OnClickListener getOnClickListener() {
         return v -> {
             if (hasActionMode()) {
@@ -104,7 +104,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
 
         NodeContainer parent = getParent();
-        Assert.assertTrue(parent != null);
 
         mSelected = !mSelected;
 
@@ -123,6 +122,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
+    @NonNull
     public NodeContainer getParent() {
         NodeContainer parent = mParentReference.get();
         Assert.assertTrue(parent != null);
@@ -171,7 +171,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         }
     }
 
-    public TreeNode getNode(int position) {
+    @NonNull
+    TreeNode getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(!mChildTreeNodes.isEmpty() || mModelNode.visibleWhenEmpty());
         Assert.assertTrue(mModelNode.visibleDuringActionMode() || !hasActionMode());
@@ -194,7 +195,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         throw new IndexOutOfBoundsException();
     }
 
-    public int getPosition(TreeNode treeNode) {
+    public int getPosition(@NonNull TreeNode treeNode) {
         if (treeNode == this)
             return 0;
 
@@ -267,7 +268,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         }
     }
 
-    public Stream<TreeNode> getSelectedNodes() {
+    @NonNull
+    Stream<TreeNode> getSelectedNodes() {
+        Assert.assertTrue(mChildTreeNodes != null);
+
         Assert.assertTrue(!mSelected || mModelNode.selectable());
 
         ArrayList<TreeNode> selectedTreeNodes = new ArrayList<>();
@@ -282,6 +286,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return Stream.of(selectedTreeNodes);
     }
 
+    @NonNull
     public View.OnClickListener getExpandListener() {
         return v -> {
             Assert.assertTrue(!mChildTreeNodes.isEmpty());
@@ -316,7 +321,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     private boolean visible() {
         NodeContainer nodeContainer = getParent();
-        Assert.assertTrue(nodeContainer != null);
 
         if (!mModelNode.visibleDuringActionMode() && hasActionMode())
             return false;
@@ -335,9 +339,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     @Override
-    public void remove(TreeNode childTreeNode) {
-        Assert.assertTrue(childTreeNode != null);
-
+    public void remove(@NonNull TreeNode childTreeNode) {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
@@ -437,9 +439,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     @Override
-    public void add(TreeNode childTreeNode) {
-        Assert.assertTrue(childTreeNode != null);
-
+    public void add(@NonNull TreeNode childTreeNode) {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
@@ -528,7 +528,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     public boolean getSeparatorVisibility() {
         NodeContainer parent = getParent();
-        Assert.assertTrue(parent != null);
 
         Assert.assertTrue(parent.expanded());
 
@@ -549,6 +548,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return (nextTreeNode.expanded());
     }
 
+    @NonNull
     @Override
     public List<TreeNode> getSelectedChildren() {
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
@@ -558,7 +558,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 .collect(Collectors.toList());
     }
 
-    public void onCreateActionMode() {
+    void onCreateActionMode() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
@@ -579,6 +579,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 } else {
                     treeViewAdapter.notifyItemRemoved(oldPosition);
                 }
+            } else {
+                treeViewAdapter.notifyItemRemoved(oldPosition);
             }
 
             if (oldPosition > 0)
@@ -586,7 +588,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         }
     }
 
-    public void onDestroyActionMode() {
+    void onDestroyActionMode() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
@@ -617,15 +619,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     @NonNull
     @Override
     public TreeNodeCollection getTreeNodeCollection() {
-        NodeContainer parent = getParent();
-        Assert.assertTrue(parent != null);
-
-        TreeNodeCollection treeNodeCollection = parent.getTreeNodeCollection();
-        Assert.assertTrue(treeNodeCollection != null);
-
-        return treeNodeCollection;
+        return getParent().getTreeNodeCollection();
     }
 
+    @NonNull
     public List<TreeNode> getAllChildren() {
         return mChildTreeNodes;
     }

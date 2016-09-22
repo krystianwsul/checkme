@@ -1,9 +1,10 @@
 package com.krystianwsul.checkme.gui.tree;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 
 public interface ModelNode extends Comparable<ModelNode> {
-    void onBindViewHolder(RecyclerView.ViewHolder viewHolder);
+    void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder);
 
     int getItemViewType();
 

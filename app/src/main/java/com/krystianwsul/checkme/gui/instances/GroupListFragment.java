@@ -164,7 +164,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                             .allMatch(instanceData -> instanceData.TaskCurrent));
 
                     List<TreeNode> selectedTreeNodes = mTreeViewAdapter.getSelectedNodes();
-                    Assert.assertTrue(selectedTreeNodes != null);
                     Assert.assertTrue(!selectedTreeNodes.isEmpty());
 
                     do {
@@ -223,7 +222,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     ExactTimeStamp done = DomainFactory.getDomainFactory(getActivity()).setInstancesDone(getActivity(), mData.DataId, instanceKeys);
 
                     List<TreeNode> selectedTreeNodes = mTreeViewAdapter.getSelectedNodes();
-                    Assert.assertTrue(selectedTreeNodes != null);
                     Assert.assertTrue(!selectedTreeNodes.isEmpty());
 
                     do {
@@ -832,7 +830,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             if (viewType == TYPE_GROUP) {
                 LinearLayout groupRow = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
@@ -854,7 +852,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
             Assert.assertTrue(position >= 0);
 
             TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
@@ -1268,7 +1266,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 abstract View.OnClickListener getOnClickListener();
 
                 @SuppressWarnings("unused")
-                public final void onBindViewHolder(RecyclerView.ViewHolder viewHolder) {
+                public final void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
                     final GroupAdapter.GroupHolder groupHolder = (GroupAdapter.GroupHolder) viewHolder;
 
                     int padding = 48 * mIndentation;

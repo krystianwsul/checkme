@@ -58,18 +58,19 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mTreeNodeCollection = treeNodeCollection;
     }
 
-    public boolean hasActionMode() {
+    boolean hasActionMode() {
         return mTreeModelAdapter.hasActionMode();
     }
 
-    public void incrementSelected() {
+    void incrementSelected() {
         mTreeModelAdapter.incrementSelected();
     }
 
-    public void decrementSelected() {
+    void decrementSelected() {
         mTreeModelAdapter.decrementSelected();
     }
 
+    @NonNull
     public List<TreeNode> getSelectedNodes() {
         return mTreeNodeCollection.getSelectedNodes();
     }
@@ -86,8 +87,12 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mTreeNodeCollection.unselect();
     }
 
+    @NonNull
     public TreeNode getNode(int position) {
-        return mTreeNodeCollection.getNode(position);
+        TreeNode treeNode = mTreeNodeCollection.getNode(position);
+        Assert.assertTrue(treeNode != null);
+
+        return treeNode;
     }
 
     public int displayedSize() {

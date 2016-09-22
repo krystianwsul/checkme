@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -23,18 +25,23 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final List<TaskData> TaskDatas;
+        public final List<ChildTaskData> mChildTaskDatas;
+        public final String mNote;
 
-        public Data(List<TaskData> taskDatas) {
-            Assert.assertTrue(taskDatas != null);
-            TaskDatas = taskDatas;
+        public Data(@NonNull List<ChildTaskData> childTaskDatas, @Nullable String note) {
+            mChildTaskDatas = childTaskDatas;
+            mNote = note;
         }
 
         @Override
         public int hashCode() {
-            return TaskDatas.hashCode();
+            int hashCode = mChildTaskDatas.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hashCode += mNote.hashCode();
+            return hashCode;
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -48,18 +55,26 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
             Data data = (Data) object;
 
-            return TaskDatas.equals(data.TaskDatas);
+            if (!mChildTaskDatas.equals(data.mChildTaskDatas))
+                return false;
+
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(data.mNote))
+                return false;
+
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(data.mNote))
+                return false;
+
+            return true;
         }
     }
 
-    public static class TaskData {
+    public static class ChildTaskData {
         public final int TaskId;
         public final String Name;
         public final String ScheduleText;
-        public final List<TaskData> Children;
-        public final boolean IsRootTask;
+        public final List<ChildTaskData> Children;
 
-        public TaskData(int taskId, String name, String scheduleText, List<TaskData> children, boolean isRootTask) {
+        public ChildTaskData(int taskId, String name, String scheduleText, List<ChildTaskData> children) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(children != null);
 
@@ -67,7 +82,6 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             Name = name;
             ScheduleText = scheduleText;
             Children = children;
-            IsRootTask = isRootTask;
         }
 
         @Override
@@ -78,7 +92,6 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
             hashCode += Children.hashCode();
-            hashCode += (IsRootTask ? 1 : 0);
             return hashCode;
         }
 
@@ -91,27 +104,24 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (object == this)
                 return true;
 
-            if (!(object instanceof TaskData))
+            if (!(object instanceof ChildTaskData))
                 return false;
 
-            TaskData taskData = (TaskData) object;
+            ChildTaskData childTaskData = (ChildTaskData) object;
 
-            if (TaskId != taskData.TaskId)
+            if (TaskId != childTaskData.TaskId)
                 return false;
 
-            if (!Name.equals(taskData.Name))
+            if (!Name.equals(childTaskData.Name))
                 return false;
 
-            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskData.ScheduleText))
+            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(childTaskData.ScheduleText))
                 return false;
 
-            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskData.ScheduleText))
+            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(childTaskData.ScheduleText))
                 return false;
 
-            if (!Children.equals(taskData.Children))
-                return false;
-
-            if (IsRootTask != taskData.IsRootTask)
+            if (!Children.equals(childTaskData.Children))
                 return false;
 
             return true;

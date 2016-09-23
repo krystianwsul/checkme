@@ -421,6 +421,11 @@ public class ParentPickerFragment extends DialogFragment {
             }
 
             @Override
+            public boolean separatorVisibleWhenNotExapanded() {
+                return false;
+            }
+
+            @Override
             public int compareTo(@NonNull ModelNode another) {
                 int comparison = Integer.valueOf(mTaskTreeData.TaskId).compareTo(((TaskWrapper) another).mTaskTreeData.TaskId);
                 if (mIndentation == 0)

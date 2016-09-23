@@ -757,6 +757,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             @Override
+            public boolean separatorVisibleWhenNotExapanded() {
+                return false;
+            }
+
+            @Override
             public int compareTo(@NonNull ModelNode another) {
                 if (another instanceof TaskWrapper) {
                     TaskListFragment taskListFragment = getTaskListFragment();
@@ -810,6 +815,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         private static class NoteNode implements ModelNode {
             private final String mNote;
 
+            private WeakReference<TreeNode> mTreeNodeReference;
+
             NoteNode(@NonNull String note) {
                 Assert.assertTrue(!TextUtils.isEmpty(note));
 
@@ -819,8 +826,17 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             @NonNull
             TreeNode initialize(@NonNull TreeNodeCollection treeNodeCollection) {
                 TreeNode treeNode = new TreeNode(this, new WeakReference<>(treeNodeCollection), false, false);
+                mTreeNodeReference = new WeakReference<>(treeNode);
 
                 treeNode.setChildTreeNodes(new ArrayList<>());
+
+                return treeNode;
+            }
+
+            @NonNull
+            private TreeNode getTreeNode() {
+                TreeNode treeNode = mTreeNodeReference.get();
+                Assert.assertTrue(treeNode != null);
 
                 return treeNode;
             }
@@ -828,6 +844,8 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
                 TaskHolder taskHolder = (TaskHolder) viewHolder;
+
+                TreeNode treeNode = getTreeNode();
 
                 taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
 
@@ -844,7 +862,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
                 taskHolder.mTaskRowChildren.setVisibility(View.GONE);
 
-                taskHolder.mTaskRowSeparator.setVisibility(View.VISIBLE);
+                taskHolder.mTaskRowSeparator.setVisibility(treeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
 
                 taskHolder.mShowTaskRow.setOnClickListener(null);
             }
@@ -872,6 +890,11 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             @Override
             public boolean visibleDuringActionMode() {
                 return false;
+            }
+
+            @Override
+            public boolean separatorVisibleWhenNotExapanded() {
+                return true;
             }
 
             @Override

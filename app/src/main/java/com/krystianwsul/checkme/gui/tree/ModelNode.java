@@ -15,4 +15,6 @@ public interface ModelNode extends Comparable<ModelNode> {
     boolean visibleWhenEmpty();
 
     boolean visibleDuringActionMode();
+
+    boolean separatorVisibleWhenNotExapanded();
 }

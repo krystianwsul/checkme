@@ -1328,6 +1328,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 private final String mNote;
 
+                private WeakReference<TreeNode> mTreeNodeReference;
+
                 NoteNode(float density, @NonNull String note, @NonNull GroupAdapter groupAdapter) {
                     super(density, 0);
 
@@ -1340,7 +1342,17 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @NonNull
                 TreeNode initialize(@NonNull WeakReference<NodeContainer> nodeContainerReference) {
                     TreeNode treeNode = new TreeNode(this, nodeContainerReference, false, false);
+                    mTreeNodeReference = new WeakReference<>(treeNode);
+
                     treeNode.setChildTreeNodes(new ArrayList<>());
+                    return treeNode;
+                }
+
+                @NonNull
+                TreeNode getTreeNode() {
+                    TreeNode treeNode = mTreeNodeReference.get();
+                    Assert.assertTrue(treeNode != null);
+
                     return treeNode;
                 }
 
@@ -1439,7 +1451,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getSeparatorVisibility() {
-                    return View.VISIBLE;
+                    return (getTreeNode().getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
                 }
 
                 @Override
@@ -1478,6 +1490,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
+                public boolean separatorVisibleWhenNotExapanded() {
+                    return true;
+                }
+
+                @Override
                 public int compareTo(@NonNull ModelNode o) {
                     Assert.assertTrue(o instanceof NotDoneGroupNode || o instanceof UnscheduledNode || o instanceof DividerNode);
 
@@ -1488,7 +1505,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             static class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollectionParent {
                 private final WeakReference<NotDoneGroupCollection> mNotDoneGroupCollectionReference;
 
-                private WeakReference<TreeNode> mNotDoneGroupTreeNodeReference;
+                private WeakReference<TreeNode> mTreeNodeReference;
 
                 private final List<GroupListLoader.InstanceData> mInstanceDatas;
 
@@ -1539,7 +1556,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     boolean selected = (mInstanceDatas.size() == 1 && selectedNodes != null && selectedNodes.contains(mInstanceDatas.get(0).InstanceKey));
 
                     TreeNode notDoneGroupTreeNode = new TreeNode(this, nodeContainerReference, expanded, selected);
-                    mNotDoneGroupTreeNodeReference = new WeakReference<>(notDoneGroupTreeNode);
+                    mTreeNodeReference = new WeakReference<>(notDoneGroupTreeNode);
 
                     if (mInstanceDatas.size() == 1) {
                         mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(notDoneGroupTreeNode), null);
@@ -1895,10 +1912,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getSeparatorVisibility() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
-                    Assert.assertTrue(notDoneGroupTreeNode != null);
-
-                    return (notDoneGroupTreeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
+                    return (getTreeNode().getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
                 }
 
                 @Override
@@ -1919,7 +1933,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 View.OnLongClickListener getOnLongClickListener() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode notDoneGroupTreeNode = mTreeNodeReference.get();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
                     return notDoneGroupTreeNode.getOnLongClickListener();
@@ -1927,7 +1941,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 View.OnClickListener getOnClickListener() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode notDoneGroupTreeNode = mTreeNodeReference.get();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
                     return notDoneGroupTreeNode.getOnClickListener();
@@ -2029,7 +2043,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     Assert.assertTrue(instanceData != null);
                     Assert.assertTrue(instanceData.InstanceTimeStamp.toExactTimeStamp().equals(mExactTimeStamp));
 
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode notDoneGroupTreeNode = mTreeNodeReference.get();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
                     Assert.assertTrue(!mInstanceDatas.isEmpty());
@@ -2044,7 +2058,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(mDensity, mIndentation, instanceData1, new WeakReference<>(NotDoneGroupNode.this), mSelectable);
                         mNotDoneInstanceNodes.add(notDoneInstanceNode);
 
-                        TreeNode childTreeNode = notDoneInstanceNode.initialize(null, null, mNotDoneGroupTreeNodeReference);
+                        TreeNode childTreeNode = notDoneInstanceNode.initialize(null, null, mTreeNodeReference);
 
                         notDoneGroupTreeNode.add(childTreeNode);
                     }
@@ -2059,11 +2073,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 TreeNode newChildTreeNode(GroupListLoader.InstanceData instanceData, HashMap<InstanceKey, Boolean> expandedInstances, ArrayList<InstanceKey> selectedNodes) {
                     Assert.assertTrue(instanceData != null);
-                    Assert.assertTrue(mNotDoneGroupTreeNodeReference != null);
+                    Assert.assertTrue(mTreeNodeReference != null);
 
                     GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = new GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode(mDensity, mIndentation, instanceData, new WeakReference<>(this), mSelectable);
 
-                    TreeNode childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selectedNodes, mNotDoneGroupTreeNodeReference);
+                    TreeNode childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selectedNodes, mTreeNodeReference);
 
                     mNotDoneInstanceNodes.add(notDoneInstanceNode);
 
@@ -2071,7 +2085,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 public boolean expanded() {
-                    TreeNode notDoneGroupTreeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode notDoneGroupTreeNode = mTreeNodeReference.get();
                     Assert.assertTrue(notDoneGroupTreeNode != null);
 
                     return notDoneGroupTreeNode.expanded();
@@ -2092,9 +2106,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return true;
                 }
 
+                @Override
+                public boolean separatorVisibleWhenNotExapanded() {
+                    return false;
+                }
+
                 @NonNull
                 TreeNode getTreeNode() {
-                    TreeNode treeNode = mNotDoneGroupTreeNodeReference.get();
+                    TreeNode treeNode = mTreeNodeReference.get();
                     Assert.assertTrue(treeNode != null);
 
                     return treeNode;
@@ -2431,6 +2450,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         return true;
                     }
 
+                    @Override
+                    public boolean separatorVisibleWhenNotExapanded() {
+                        return false;
+                    }
+
                     void removeFromParent() {
                         getParentNotDoneGroupNode().remove(this);
                     }
@@ -2680,6 +2704,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 public boolean visibleDuringActionMode() {
+                    return false;
+                }
+
+                @Override
+                public boolean separatorVisibleWhenNotExapanded() {
                     return false;
                 }
 
@@ -2968,6 +2997,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     return true;
                 }
 
+                @Override
+                public boolean separatorVisibleWhenNotExapanded() {
+                    return false;
+                }
+
                 void removeFromParent() {
                     getDividerNode().remove(this);
                 }
@@ -3182,6 +3216,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 public boolean visibleDuringActionMode() {
+                    return false;
+                }
+
+                @Override
+                public boolean separatorVisibleWhenNotExapanded() {
                     return false;
                 }
             }
@@ -3437,6 +3476,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 public boolean visibleDuringActionMode() {
                     return true;
+                }
+
+                @Override
+                public boolean separatorVisibleWhenNotExapanded() {
+                    return false;
                 }
             }
         }

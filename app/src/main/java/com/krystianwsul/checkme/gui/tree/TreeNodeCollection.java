@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TreeNodeCollection implements NodeContainer {
-    private List<TreeNode> mNotDoneGroupTreeNodes;
+    private List<TreeNode> mTreeNodes;
 
     private final WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
 
@@ -26,11 +26,11 @@ public class TreeNodeCollection implements NodeContainer {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
 
-        for (TreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
-            if (position < notDoneGroupTreeNode.displayedSize())
-                return notDoneGroupTreeNode.getNode(position);
+        for (TreeNode treeNode : mTreeNodes) {
+            if (position < treeNode.displayedSize())
+                return treeNode.getNode(position);
 
-            position = position - notDoneGroupTreeNode.displayedSize();
+            position = position - treeNode.displayedSize();
         }
 
         throw new IndexOutOfBoundsException();
@@ -38,7 +38,7 @@ public class TreeNodeCollection implements NodeContainer {
 
     public int getPosition(@NonNull TreeNode treeNode) {
         int offset = 0;
-        for (TreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes) {
+        for (TreeNode notDoneGroupTreeNode : mTreeNodes) {
             int position = notDoneGroupTreeNode.getPosition(treeNode);
             if (position >= 0)
                 return offset + position;
@@ -58,9 +58,9 @@ public class TreeNodeCollection implements NodeContainer {
     public void setNodes(List<TreeNode> rootTreeNodes) {
         Assert.assertTrue(rootTreeNodes != null);
 
-        mNotDoneGroupTreeNodes = rootTreeNodes;
+        mTreeNodes = rootTreeNodes;
 
-        Collections.sort(mNotDoneGroupTreeNodes);
+        Collections.sort(mTreeNodes);
     }
 
     @NonNull
@@ -73,38 +73,38 @@ public class TreeNodeCollection implements NodeContainer {
 
     public int displayedSize() {
         int displayedSize = 0;
-        for (TreeNode notDoneGroupTreeNode : mNotDoneGroupTreeNodes)
+        for (TreeNode notDoneGroupTreeNode : mTreeNodes)
             displayedSize += notDoneGroupTreeNode.displayedSize();
         return displayedSize;
     }
 
     @NonNull
     List<TreeNode> getSelectedNodes() {
-        return Stream.of(mNotDoneGroupTreeNodes)
+        return Stream.of(mTreeNodes)
                 .flatMap(TreeNode::getSelectedNodes)
                 .collect(Collectors.toList());
     }
 
     void onCreateActionMode() {
-        Stream.of(mNotDoneGroupTreeNodes)
+        Stream.of(mTreeNodes)
                 .forEach(TreeNode::onCreateActionMode);
     }
 
     void onDestroyActionMode() {
-        Stream.of(mNotDoneGroupTreeNodes)
+        Stream.of(mTreeNodes)
                 .forEach(TreeNode::onDestroyActionMode);
     }
 
     void unselect() {
-        Stream.of(mNotDoneGroupTreeNodes)
+        Stream.of(mTreeNodes)
                 .forEach(TreeNode::unselect);
     }
 
     @Override
     public void add(@NonNull TreeNode notDoneGroupTreeNode) {
-        mNotDoneGroupTreeNodes.add(notDoneGroupTreeNode);
+        mTreeNodes.add(notDoneGroupTreeNode);
 
-        Collections.sort(mNotDoneGroupTreeNodes);
+        Collections.sort(mTreeNodes);
 
         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
 
@@ -119,7 +119,7 @@ public class TreeNodeCollection implements NodeContainer {
 
     @Override
     public void remove(@NonNull TreeNode notDoneGroupTreeNode) {
-        Assert.assertTrue(mNotDoneGroupTreeNodes.contains(notDoneGroupTreeNode));
+        Assert.assertTrue(mTreeNodes.contains(notDoneGroupTreeNode));
 
         TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
 
@@ -128,7 +128,7 @@ public class TreeNodeCollection implements NodeContainer {
 
         int displayedSize = notDoneGroupTreeNode.displayedSize();
 
-        mNotDoneGroupTreeNodes.remove(notDoneGroupTreeNode);
+        mTreeNodes.remove(notDoneGroupTreeNode);
 
         treeViewAdapter.notifyItemRangeRemoved(oldPosition, displayedSize);
 
@@ -159,7 +159,7 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     public void selectAll() {
-        Stream.of(mNotDoneGroupTreeNodes).forEach(TreeNode::selectAll);
+        Stream.of(mTreeNodes).forEach(TreeNode::selectAll);
     }
 
     @Override

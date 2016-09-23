@@ -353,7 +353,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
         mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds, mExpandedTaskIds);
 
-        mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter);
+        mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
@@ -378,8 +378,9 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void updateSelectAll() {
         Assert.assertTrue(mTreeViewAdapter != null);
+        TaskAdapter taskAdapter = (TaskAdapter) mTreeViewAdapter.getTreeModelAdapter();
 
-        ((TaskListListener) getActivity()).setTaskSelectAllVisibility(mTreeViewAdapter.displayedSize() > 0);
+        ((TaskListListener) getActivity()).setTaskSelectAllVisibility(!taskAdapter.mTaskWrappers.isEmpty());
     }
 
     @Override

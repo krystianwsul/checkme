@@ -114,9 +114,8 @@ public class ParentPickerFragment extends DialogFragment {
         }
 
         mTreeViewAdapter = TaskAdapter.getAdapter(this, mTaskDatas, mExpandedTaskIds);
-        Assert.assertTrue(mTreeViewAdapter != null);
 
-        mRecyclerView.setAdapter(mTreeViewAdapter);
+        mRecyclerView.setAdapter(mTreeViewAdapter.getAdapter());
     }
 
     @Override
@@ -138,6 +137,7 @@ public class ParentPickerFragment extends DialogFragment {
 
         private WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
 
+        @NonNull
         static TreeViewAdapter getAdapter(ParentPickerFragment parentPickerFragment, TreeMap<Integer, CreateTaskLoader.TaskTreeData> taskDatas, List<Integer> expandedTasks) {
             Assert.assertTrue(parentPickerFragment != null);
             Assert.assertTrue(taskDatas != null);
@@ -155,6 +155,7 @@ public class ParentPickerFragment extends DialogFragment {
             mParentFragmentReference = new WeakReference<>(parentPickerFragment);
         }
 
+        @NonNull
         private TreeViewAdapter initialize(float density, TreeMap<Integer, CreateTaskLoader.TaskTreeData> taskDatas, List<Integer> expandedTasks) {
             Assert.assertTrue(taskDatas != null);
 

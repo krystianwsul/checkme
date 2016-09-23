@@ -716,9 +716,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
 
         mTreeViewAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, useGroups(), showFab, data.InstanceDatas.values(), mExpansionState, mSelectedNodes, data.TaskDatas, data.mNote);
-        Assert.assertTrue(mTreeViewAdapter != null);
 
-        mGroupListRecycler.setAdapter(mTreeViewAdapter);
+        mGroupListRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
@@ -769,6 +768,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         private final float mDensity;
 
+        @NonNull
         static TreeViewAdapter getAdapter(GroupListFragment groupListFragment, int dataId, List<GroupListLoader.CustomTimeData> customTimeDatas, boolean useGroups, boolean showFab, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, List<GroupListLoader.TaskData> taskDatas, @Nullable String note) {
             Assert.assertTrue(groupListFragment != null);
             Assert.assertTrue(customTimeDatas != null);
@@ -791,6 +791,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mDensity = groupListFragment.getActivity().getResources().getDisplayMetrics().density;
         }
 
+        @NonNull
         private TreeViewAdapter initialize(boolean useGroups, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, List<GroupListLoader.TaskData> taskDatas, @Nullable String note) {
             Assert.assertTrue(instanceDatas != null);
 
@@ -923,14 +924,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         @Override
         public GroupAdapter getGroupAdapter() {
             return this;
-        }
-
-        @NonNull
-        TreeViewAdapter getTreeViewAdapter() {
-            TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
-            Assert.assertTrue(treeViewAdapter != null);
-
-            return treeViewAdapter;
         }
 
         static class GroupHolder extends RecyclerView.ViewHolder {
@@ -1240,6 +1233,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 abstract String getName();
                 abstract int getNameColor();
 
+                abstract boolean getNameSingleLine();
+
                 abstract int getDetailsVisibility();
                 abstract String getDetails();
                 abstract int getDetailsColor();
@@ -1277,6 +1272,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (nameVisibility == View.VISIBLE) {
                         groupHolder.mGroupRowName.setText(getName());
                         groupHolder.mGroupRowName.setTextColor(getNameColor());
+                        groupHolder.mGroupRowName.setSingleLine(getNameSingleLine());
                     }
 
                     int detailsVisibility = getDetailsVisibility();
@@ -1374,6 +1370,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 int getNameColor() {
                     return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textPrimary);
+                }
+
+                @Override
+                boolean getNameSingleLine() {
+                    return false;
                 }
 
                 @Override
@@ -1663,6 +1664,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary);
                     }
+                }
+
+                @Override
+                boolean getNameSingleLine() {
+                    return true;
                 }
 
                 @Override
@@ -2219,6 +2225,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     }
 
                     @Override
+                    boolean getNameSingleLine() {
+                        return true;
+                    }
+
+                    @Override
                     int getDetailsVisibility() {
                         return View.GONE;
                     }
@@ -2498,6 +2509,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 int getNameColor() {
                     return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textPrimary);
+                }
+
+                @Override
+                boolean getNameSingleLine() {
+                    return true;
                 }
 
                 @Override
@@ -2783,6 +2799,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
+                boolean getNameSingleLine() {
+                    return true;
+                }
+
+                @Override
                 int getDetailsVisibility() {
                     if (TextUtils.isEmpty(mInstanceData.DisplayText)) {
                         return View.GONE;
@@ -3057,6 +3078,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
+                boolean getNameSingleLine() {
+                    return true;
+                }
+
+                @Override
                 int getDetailsVisibility() {
                     return View.GONE;
                 }
@@ -3278,6 +3304,11 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 int getNameColor() {
                     return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textPrimary);
+                }
+
+                @Override
+                boolean getNameSingleLine() {
+                    return true;
                 }
 
                 @Override

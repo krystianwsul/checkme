@@ -371,40 +371,28 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 if (oldParentPosition == 0) {
                     if (mModelNode.visibleWhenEmpty()) {
-                        Log.e("asdf", "notifyItemChanged(" + oldParentPosition + ")");
                         treeViewAdapter.notifyItemChanged(oldParentPosition);
-                        Log.e("asdf", "notifyItemRangeRemoved(" + (oldParentPosition + 1) + ", " + childDisplayedSize + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
-                        Log.e("asdf", "notifyItemRangeRemoved(" + (oldParentPosition + 1) + ", " + childDisplayedSize + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 } else {
                     if (mModelNode.visibleWhenEmpty()) {
-                        Log.e("asdf", "notifyItemRangeChanged(" + (oldParentPosition - 1) + ", " + 2 + ")");
                         treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
-                        Log.e("asdf", "notifyItemRangeRemoved(" + (oldParentPosition + 1) + ", " + childDisplayedSize + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
-                        Log.e("asdf", "notifyItemChanged(" + (oldParentPosition - 1) + ")");
                         treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                        Log.e("asdf", "notifyItemRangeRemoved(" + oldParentPosition + ", " + (1 + childDisplayedSize) + ")");
                         treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 }
             } else {
-                Log.e("asdf", "notifyItemChanged(" + oldParentPosition + ")");
                 treeViewAdapter.notifyItemChanged(oldParentPosition);
-                Log.e("asdf", "notifyItemRangeRemoved(" + oldChildPosition + ", " + childDisplayedSize + ")");
                 treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
-                Log.e("asdf", "notifyItemChanged(" + (oldChildPosition - 1) + ")");
                 treeViewAdapter.notifyItemChanged(oldChildPosition - 1);
 
-                if (oldParentPosition > 0) {
-                    Log.e("asdf", "notifyItemChanged(" + (oldParentPosition - 1) + ")");
+                if (oldParentPosition > 0)
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                }
             }
         } else {
             if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
@@ -425,9 +413,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             } else {
                 treeViewAdapter.notifyItemChanged(oldParentPosition);
 
-                if (oldParentPosition > 0) {
+                if (oldParentPosition > 0)
                     treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                }
             }
         }
     }
@@ -563,11 +550,11 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
 
-        int oldPosition = treeNodeCollection.getPosition(this);
-        Assert.assertTrue(oldPosition >= 0);
+        int position = treeNodeCollection.getPosition(this);
+        Assert.assertTrue(position >= 0);
 
         if (mModelNode.visibleDuringActionMode()) {
-            treeViewAdapter.notifyItemChanged(oldPosition);
+            treeViewAdapter.notifyItemChanged(position);
 
             if (mExpanded)
                 Stream.of(mChildTreeNodes)
@@ -575,16 +562,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
-                    treeViewAdapter.notifyItemRangeRemoved(oldPosition, visibleSize());
+                    treeViewAdapter.notifyItemRangeRemoved(position, visibleSize());
                 } else {
-                    treeViewAdapter.notifyItemRemoved(oldPosition);
+                    treeViewAdapter.notifyItemRemoved(position);
                 }
-            } else {
-                treeViewAdapter.notifyItemRemoved(oldPosition);
+            } else if (mModelNode.visibleWhenEmpty()) {
+                treeViewAdapter.notifyItemRemoved(position);
             }
 
-            if (oldPosition > 0)
-                treeViewAdapter.notifyItemChanged(oldPosition - 1);
+            if (position > 0)
+                treeViewAdapter.notifyItemChanged(position - 1);
         }
     }
 
@@ -609,6 +596,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 } else {
                     treeViewAdapter.notifyItemInserted(position);
                 }
+            } else if (mModelNode.visibleWhenEmpty()) {
+                treeViewAdapter.notifyItemInserted(position);
             }
 
             if (position > 0)

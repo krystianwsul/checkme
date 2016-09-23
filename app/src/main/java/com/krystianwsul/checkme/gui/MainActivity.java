@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
             menu.findItem(R.id.action_select_all).setVisible(visible);
         } else if (mVisibleTab == TASKS_VISIBLE) {
             menu.findItem(R.id.action_select_all).setVisible(mTaskSelectAllVisible);
+        } else {
+            menu.findItem(R.id.action_select_all).setVisible(false);
         }
 
         return true;

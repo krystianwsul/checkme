@@ -395,7 +395,7 @@ public class DomainFactory {
                     .collect(Collectors.toList());
         }
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, taskDatas);
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, taskDatas, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
@@ -483,7 +483,7 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null);
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
@@ -524,7 +524,7 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null);
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
 
         ArrayList<Instance> childInstances = instance.getChildInstances(now);
         for (Instance childInstance : childInstances) {
@@ -569,7 +569,7 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null);
+        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : instances) {

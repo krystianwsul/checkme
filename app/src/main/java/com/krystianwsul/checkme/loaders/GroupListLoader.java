@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -72,13 +74,13 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public final List<CustomTimeData> CustomTimeDatas;
         public final Boolean TaskEditable;
         public final List<TaskData> TaskDatas;
+        public final String mNote;
 
-        public Data(List<CustomTimeData> customTimeDatas, Boolean taskEditable, List<TaskData> taskDatas) {
-            Assert.assertTrue(customTimeDatas != null);
-
+        public Data(@NonNull List<CustomTimeData> customTimeDatas, @Nullable Boolean taskEditable, @Nullable List<TaskData> taskDatas, @Nullable String note) {
             CustomTimeDatas = customTimeDatas;
             TaskEditable = taskEditable;
             TaskDatas = taskDatas;
+            mNote = note;
         }
 
         public void setInstanceDatas(HashMap<InstanceKey, InstanceData> instanceDatas) {
@@ -95,6 +97,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 hashCode += (TaskEditable ? 2 : 1);
             if (TaskDatas != null)
                 hashCode += TaskDatas.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hashCode += mNote.hashCode();
             return hashCode;
         }
 
@@ -128,6 +132,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if ((TaskDatas != null) && !TaskDatas.equals(data.TaskDatas))
+                return false;
+
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(data.mNote))
+                return false;
+
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(data.mNote))
                 return false;
 
             return true;

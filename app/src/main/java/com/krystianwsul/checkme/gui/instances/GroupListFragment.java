@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -714,14 +715,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mFirst = false;
         }
 
-        mTreeViewAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, useGroups(), showFab, data.InstanceDatas.values(), mExpansionState, mSelectedNodes, data.TaskDatas);
+        mTreeViewAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, useGroups(), showFab, data.InstanceDatas.values(), mExpansionState, mSelectedNodes, data.TaskDatas, data.mNote);
         Assert.assertTrue(mTreeViewAdapter != null);
 
         mGroupListRecycler.setAdapter(mTreeViewAdapter);
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
-        if (data.InstanceDatas.isEmpty()) {
+        if (data.InstanceDatas.isEmpty() && TextUtils.isEmpty(data.mNote)) {
             mGroupListRecycler.setVisibility(View.GONE);
 
             if (emptyTextId != null) {
@@ -768,14 +769,14 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
         private final float mDensity;
 
-        static TreeViewAdapter getAdapter(GroupListFragment groupListFragment, int dataId, List<GroupListLoader.CustomTimeData> customTimeDatas, boolean useGroups, boolean showFab, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, List<GroupListLoader.TaskData> taskDatas) {
+        static TreeViewAdapter getAdapter(GroupListFragment groupListFragment, int dataId, List<GroupListLoader.CustomTimeData> customTimeDatas, boolean useGroups, boolean showFab, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, List<GroupListLoader.TaskData> taskDatas, @Nullable String note) {
             Assert.assertTrue(groupListFragment != null);
             Assert.assertTrue(customTimeDatas != null);
             Assert.assertTrue(instanceDatas != null);
 
             GroupAdapter groupAdapter = new GroupAdapter(groupListFragment, dataId, customTimeDatas, showFab);
 
-            return groupAdapter.initialize(useGroups, instanceDatas, expansionState, selectedNodes, taskDatas);
+            return groupAdapter.initialize(useGroups, instanceDatas, expansionState, selectedNodes, taskDatas, note);
         }
 
         private GroupAdapter(GroupListFragment groupListFragment, int dataId, List<GroupListLoader.CustomTimeData> customTimeDatas, boolean showFab) {
@@ -790,7 +791,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             mDensity = groupListFragment.getActivity().getResources().getDisplayMetrics().density;
         }
 
-        private TreeViewAdapter initialize(boolean useGroups, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, List<GroupListLoader.TaskData> taskDatas) {
+        private TreeViewAdapter initialize(boolean useGroups, Collection<GroupListLoader.InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, List<GroupListLoader.TaskData> taskDatas, @Nullable String note) {
             Assert.assertTrue(instanceDatas != null);
 
             TreeViewAdapter treeViewAdapter = new TreeViewAdapter(mShowFab, this);
@@ -798,7 +799,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             TreeNodeCollection treeNodeCollection = new TreeNodeCollection(new WeakReference<>(treeViewAdapter));
 
-            mNodeCollection = new NodeCollection(mDensity, 0, new WeakReference<>(this), useGroups, new WeakReference<>(treeNodeCollection));
+            mNodeCollection = new NodeCollection(mDensity, 0, new WeakReference<>(this), useGroups, new WeakReference<>(treeNodeCollection), note);
 
             List<TimeStamp> expandedGroups = null;
             HashMap<InstanceKey, Boolean> expandedInstances = null;
@@ -822,7 +823,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 unscheduledExpanded = false;
             }
 
-            treeNodeCollection.setNodes(mNodeCollection.initialize(treeViewAdapter, instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTasks));
+            treeNodeCollection.setNodes(mNodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTasks));
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection);
 
@@ -983,22 +984,19 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             private final float mDensity;
             private final int mIndentation;
 
-            private NodeCollection(float density, int indentation, WeakReference<NodeCollectionParent> nodeCollectionParentReference, boolean useGroups, WeakReference<NodeContainer> nodeContainerReference) {
-                Assert.assertTrue(nodeCollectionParentReference != null);
-                Assert.assertTrue(nodeContainerReference != null);
+            private final String mNote;
 
+            private NodeCollection(float density, int indentation, @NonNull WeakReference<NodeCollectionParent> nodeCollectionParentReference, boolean useGroups, @NonNull WeakReference<NodeContainer> nodeContainerReference, @Nullable String note) {
                 mDensity = density;
                 mIndentation = indentation;
                 mNodeCollectionParentReference = nodeCollectionParentReference;
                 mUseGroups = useGroups;
                 mNodeContainerReference = nodeContainerReference;
+                mNote = note;
             }
 
             @NonNull
-            private List<TreeNode> initialize(TreeViewAdapter treeViewAdapter, Collection<GroupListLoader.InstanceData> instanceDatas, List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, boolean doneExpanded, ArrayList<InstanceKey> selectedNodes, boolean selectable, List<GroupListLoader.TaskData> taskDatas, boolean unscheduledExpanded, List<Integer> expandedTasks) {
-                Assert.assertTrue(treeViewAdapter != null);
-                Assert.assertTrue(instanceDatas != null);
-
+            private List<TreeNode> initialize(@NonNull Collection<GroupListLoader.InstanceData> instanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, boolean doneExpanded, @Nullable ArrayList<InstanceKey> selectedNodes, boolean selectable, @Nullable List<GroupListLoader.TaskData> taskDatas, boolean unscheduledExpanded, @Nullable List<Integer> expandedTasks) {
                 ArrayList<GroupListLoader.InstanceData> notDoneInstanceDatas = new ArrayList<>();
                 ArrayList<GroupListLoader.InstanceData> doneInstanceDatas = new ArrayList<>();
                 for (GroupListLoader.InstanceData instanceData : instanceDatas) {
@@ -1008,17 +1006,23 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         doneInstanceDatas.add(instanceData);
                 }
 
+                List<TreeNode> rootTreeNodes = new ArrayList<>();
+
+                if (!TextUtils.isEmpty(mNote)) {
+                    Assert.assertTrue(mIndentation == 0);
+
+                    rootTreeNodes.add(new NoteNode(mDensity, mNote, getGroupAdapter()).initialize(mNodeContainerReference));
+                }
+
                 mNotDoneGroupCollection = new NotDoneGroupCollection(mDensity, mIndentation, new WeakReference<>(this), mNodeContainerReference, selectable);
 
-                List<TreeNode> rootTreeNodes = mNotDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, expandedInstances, selectedNodes);
-                Assert.assertTrue(rootTreeNodes != null);
+                rootTreeNodes.addAll(mNotDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, expandedInstances, selectedNodes));
 
                 Assert.assertTrue((mIndentation == 0) || (taskDatas == null));
                 if (taskDatas != null && !taskDatas.isEmpty()) {
                     mUnscheduledNode = new UnscheduledNode(mDensity, new WeakReference<>(this));
 
                     TreeNode unscheduledTreeNode = mUnscheduledNode.initialize(unscheduledExpanded, mNodeContainerReference, taskDatas, expandedTasks);
-                    Assert.assertTrue(unscheduledTreeNode != null);
 
                     rootTreeNodes.add(unscheduledTreeNode);
                 }
@@ -1054,11 +1058,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
             @NonNull
             private GroupAdapter getGroupAdapter() {
                 return getNodeCollectionParent().getGroupAdapter();
-            }
-
-            @NonNull
-            private TreeViewAdapter getTreeViewAdapter() {
-                return getGroupAdapter().getTreeViewAdapter();
             }
 
             List<TimeStamp> getExpandedGroups() {
@@ -1107,9 +1106,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mSelectable = selectable;
                 }
 
-                private List<TreeNode> initialize(List<GroupListLoader.InstanceData> notDoneInstanceDatas, List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, ArrayList<InstanceKey> selectedNodes) {
-                    Assert.assertTrue(notDoneInstanceDatas != null);
-
+                @NonNull
+                private List<TreeNode> initialize(@NonNull List<GroupListLoader.InstanceData> notDoneInstanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, @Nullable ArrayList<InstanceKey> selectedNodes) {
                     ArrayList<TreeNode> notDoneGroupTreeNodes = new ArrayList<>();
 
                     NodeCollection nodeCollection = getNodeCollection();
@@ -1329,6 +1327,163 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
             }
 
+            static class NoteNode extends GroupHolderNode implements ModelNode {
+                private final WeakReference<GroupAdapter> mGroupAdapterReference;
+
+                private final String mNote;
+
+                NoteNode(float density, @NonNull String note, @NonNull GroupAdapter groupAdapter) {
+                    super(density, 0);
+
+                    Assert.assertTrue(!TextUtils.isEmpty(note));
+
+                    mNote = note;
+                    mGroupAdapterReference = new WeakReference<>(groupAdapter);
+                }
+
+                @NonNull
+                TreeNode initialize(@NonNull WeakReference<NodeContainer> nodeContainerReference) {
+                    TreeNode treeNode = new TreeNode(this, nodeContainerReference, false, false);
+                    treeNode.setChildTreeNodes(new ArrayList<>());
+                    return treeNode;
+                }
+
+                @NonNull
+                GroupAdapter getGroupAdapter() {
+                    GroupAdapter groupAdapter = mGroupAdapterReference.get();
+                    Assert.assertTrue(groupAdapter != null);
+
+                    return groupAdapter;
+                }
+
+                @NonNull
+                private GroupListFragment getGroupListFragment() {
+                    return getGroupAdapter().getGroupListFragment();
+                }
+
+                @Override
+                int getNameVisibility() {
+                    return View.VISIBLE;
+                }
+
+                @Override
+                String getName() {
+                    return mNote;
+                }
+
+                @Override
+                int getNameColor() {
+                    return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textPrimary);
+                }
+
+                @Override
+                int getDetailsVisibility() {
+                    return View.GONE;
+                }
+
+                @Override
+                String getDetails() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                int getDetailsColor() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                int getChildrenVisibility() {
+                    return View.GONE;
+                }
+
+                @Override
+                String getChildren() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                int getChildrenColor() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                int getExpandVisibility() {
+                    return View.GONE;
+                }
+
+                @Override
+                int getExpandImageResource() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                View.OnClickListener getExpandOnClickListener() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                int getCheckBoxVisibility() {
+                    return View.GONE;
+                }
+
+                @Override
+                boolean getCheckBoxChecked() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                View.OnClickListener getCheckBoxOnClickListener() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                int getSeparatorVisibility() {
+                    return View.VISIBLE;
+                }
+
+                @Override
+                int getBackgroundColor() {
+                    return Color.TRANSPARENT;
+                }
+
+                @Override
+                View.OnLongClickListener getOnLongClickListener() {
+                    return null;
+                }
+
+                @Override
+                View.OnClickListener getOnClickListener() {
+                    return null;
+                }
+
+                @Override
+                public boolean selectable() {
+                    return false;
+                }
+
+                @Override
+                public void onClick() {
+
+                }
+
+                @Override
+                public boolean visibleWhenEmpty() {
+                    return true;
+                }
+
+                @Override
+                public boolean visibleDuringActionMode() {
+                    return false;
+                }
+
+                @Override
+                public int compareTo(@NonNull ModelNode o) {
+                    Assert.assertTrue(o instanceof NotDoneGroupNode || o instanceof UnscheduledNode || o instanceof DividerNode);
+
+                    return -1;
+                }
+            }
+
             static class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollectionParent {
                 private final WeakReference<NotDoneGroupCollection> mNotDoneGroupCollectionReference;
 
@@ -1386,11 +1541,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mNotDoneGroupTreeNodeReference = new WeakReference<>(notDoneGroupTreeNode);
 
                     if (mInstanceDatas.size() == 1) {
-                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(notDoneGroupTreeNode));
+                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(notDoneGroupTreeNode), null);
 
-                        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-
-                        notDoneGroupTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceDatas.get(0).Children.values(), expandedGroups, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
+                        notDoneGroupTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceDatas.get(0).Children.values(), expandedGroups, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
                     } else {
                         List<TreeNode> notDoneInstanceTreeNodes = Stream.of(mInstanceDatas)
                                 .map(instanceData -> newChildTreeNode(instanceData, expandedInstances, selectedNodes))
@@ -1478,11 +1631,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @NonNull
                 private NodeCollection getNodeCollection() {
                     return getNotDoneGroupCollection().getNodeCollection();
-                }
-
-                @NonNull
-                private TreeViewAdapter getTreeViewAdapter() {
-                    return getNodeCollection().getTreeViewAdapter();
                 }
 
                 @NonNull
@@ -1834,11 +1982,9 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                         notDoneGroupTreeNode.remove(childTreeNode1);
 
-                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(notDoneGroupTreeNode));
+                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(notDoneGroupTreeNode), null);
 
-                        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-
-                        List<TreeNode> childTreeNodes = mNodeCollection.initialize(treeViewAdapter, mInstanceDatas.get(0).Children.values(), null, null, false, null, mSelectable, null, false, null);
+                        List<TreeNode> childTreeNodes = mNodeCollection.initialize(mInstanceDatas.get(0).Children.values(), null, null, false, null, mSelectable, null, false, null);
 
                         Stream.of(childTreeNodes)
                                 .forEach(notDoneGroupTreeNode::add);
@@ -1850,20 +1996,26 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 public int compareTo(@NonNull ModelNode another) {
-                    Assert.assertTrue(another instanceof NotDoneGroupNode || another instanceof UnscheduledNode || another instanceof DividerNode);
-                    if (another instanceof UnscheduledNode || another instanceof DividerNode)
+                    if (another instanceof NoteNode) {
+                        return 1;
+                    } else if (another instanceof NotDoneGroupNode) {
+                        NotDoneGroupNode notDoneGroupNode = (NotDoneGroupNode) another;
+
+                        int timeStampComparison = mExactTimeStamp.compareTo(notDoneGroupNode.mExactTimeStamp);
+                        if (timeStampComparison != 0) {
+                            return timeStampComparison;
+                        } else {
+                            Assert.assertTrue(singleInstance());
+                            Assert.assertTrue(notDoneGroupNode.singleInstance());
+
+                            return Integer.valueOf(getSingleInstanceData().InstanceKey.TaskId).compareTo(notDoneGroupNode.getSingleInstanceData().InstanceKey.TaskId);
+                        }
+                    } else if (another instanceof UnscheduledNode) {
                         return -1;
-
-                    NotDoneGroupNode notDoneGroupNode = (NotDoneGroupNode) another;
-
-                    int timeStampComparison = mExactTimeStamp.compareTo(notDoneGroupNode.mExactTimeStamp);
-                    if (timeStampComparison != 0) {
-                        return timeStampComparison;
                     } else {
-                        Assert.assertTrue(singleInstance());
-                        Assert.assertTrue(notDoneGroupNode.singleInstance());
+                        Assert.assertTrue(another instanceof DividerNode);
 
-                        return Integer.valueOf(getSingleInstanceData().InstanceKey.TaskId).compareTo(notDoneGroupNode.getSingleInstanceData().InstanceKey.TaskId);
+                        return -1;
                     }
                 }
 
@@ -1971,8 +2123,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     TreeNode initialize(HashMap<InstanceKey, Boolean> expandedInstances, ArrayList<InstanceKey> selectedNodes, WeakReference<TreeNode> notDoneGroupTreeNodeReference) {
                         Assert.assertTrue(notDoneGroupTreeNodeReference != null);
 
-                        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-
                         TreeNode notDoneGroupTreeNode = notDoneGroupTreeNodeReference.get();
 
                         boolean selected = (selectedNodes != null && selectedNodes.contains(mInstanceData.InstanceKey));
@@ -1987,8 +2137,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                         TreeNode childTreeNode = new TreeNode(this, new WeakReference<>(notDoneGroupTreeNode), expanded, selected);
                         mTreeNodeReference = new WeakReference<>(childTreeNode);
 
-                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(childTreeNode));
-                        childTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
+                        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(childTreeNode), null);
+                        childTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceData.Children.values(), null, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
 
                         return childTreeNode;
                     }
@@ -2017,11 +2167,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     @NonNull
                     private NodeCollection getParentNodeCollection() {
                         return getParentNotDoneGroupCollection().getNodeCollection();
-                    }
-
-                    @NonNull
-                    private TreeViewAdapter getTreeViewAdapter() {
-                        return getParentNodeCollection().getTreeViewAdapter();
                     }
 
                     private boolean expanded() {
@@ -2508,7 +2653,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 public int compareTo(@NonNull ModelNode another) {
-                    Assert.assertTrue(another instanceof NotDoneGroupNode || another instanceof UnscheduledNode);
+                    Assert.assertTrue(another instanceof NoteNode || another instanceof NotDoneGroupNode || another instanceof UnscheduledNode);
                     return 1;
                 }
 
@@ -2551,8 +2696,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 TreeNode initialize(@NonNull TreeNode dividerTreeNode, HashMap<InstanceKey, Boolean> expandedInstances) {
-                    TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
-
                     boolean expanded = false;
                     boolean doneExpanded = false;
                     if (expandedInstances != null && expandedInstances.containsKey(mInstanceData.InstanceKey) && !mInstanceData.Children.isEmpty()) {
@@ -2563,8 +2706,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     TreeNode doneTreeNode = new TreeNode(this, new WeakReference<>(dividerTreeNode), expanded, false);
                     mTreeNodeReference = new WeakReference<>(doneTreeNode);
 
-                    mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(doneTreeNode));
-                    doneTreeNode.setChildTreeNodes(mNodeCollection.initialize(treeViewAdapter, mInstanceData.Children.values(), null, expandedInstances, doneExpanded, null, false, null, false, null));
+                    mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, new WeakReference<>(this), false, new WeakReference<>(doneTreeNode), null);
+                    doneTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceData.Children.values(), null, expandedInstances, doneExpanded, null, false, null, false, null));
 
                     return doneTreeNode;
                 }
@@ -2588,11 +2731,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @NonNull
                 private NodeCollection getParentNodeCollection() {
                     return getDividerNode().getNodeCollection();
-                }
-
-                @NonNull
-                private TreeViewAdapter getTreeViewAdapter() {
-                    return getParentNodeCollection().getTreeViewAdapter();
                 }
 
                 private boolean expanded() {
@@ -2829,6 +2967,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     mNodeCollectionReference = nodeCollectionReference;
                 }
 
+                @NonNull
                 private TreeNode initialize(boolean expanded, WeakReference<NodeContainer> nodeContainerReference, List<GroupListLoader.TaskData> taskDatas, List<Integer> expandedTasks) {
                     Assert.assertTrue(!expanded || !taskDatas.isEmpty());
 

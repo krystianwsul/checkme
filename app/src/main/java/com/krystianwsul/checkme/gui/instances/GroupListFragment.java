@@ -1755,7 +1755,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     if (singleInstance()) {
                         GroupListLoader.InstanceData instanceData = getSingleInstanceData();
 
-                        if (instanceData.Children.isEmpty() || expanded()) {
+                        if ((instanceData.Children.isEmpty() || expanded()) && TextUtils.isEmpty(instanceData.mNote)) {
                             return View.GONE;
                         } else {
                             return View.VISIBLE;
@@ -1768,29 +1768,29 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 String getChildren() {
                     Assert.assertTrue(singleInstance());
-                    Assert.assertTrue(!expanded());
 
                     GroupListLoader.InstanceData instanceData = getSingleInstanceData();
 
-                    Assert.assertTrue(!instanceData.Children.isEmpty());
-                    return getChildrenText(instanceData.Children.values());
+                    Assert.assertTrue((!instanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(instanceData.mNote));
+
+                    return getChildrenText(expanded(), instanceData.Children.values(), instanceData.mNote);
                 }
 
                 @Override
                 int getChildrenColor() {
                     Assert.assertTrue(singleInstance());
-                    Assert.assertTrue(!expanded());
-
-                    GroupListFragment groupListFragment = getGroupListFragment();
 
                     GroupListLoader.InstanceData instanceData = getSingleInstanceData();
 
-                    Assert.assertTrue(!instanceData.Children.isEmpty());
+                    Assert.assertTrue((!instanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(instanceData.mNote));
+
+                    Activity activity = getGroupListFragment().getActivity();
+                    Assert.assertTrue(activity != null);
 
                     if (!instanceData.TaskCurrent) {
-                        return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled);
+                        return ContextCompat.getColor(activity, R.color.textDisabled);
                     } else {
-                        return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary);
+                        return ContextCompat.getColor(activity, R.color.textSecondary);
                     }
                 }
 
@@ -2265,7 +2265,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     int getChildrenVisibility() {
-                        if (mInstanceData.Children.isEmpty() || expanded()) {
+                        if ((mInstanceData.Children.isEmpty() || expanded()) && TextUtils.isEmpty(mInstanceData.mNote)) {
                             return View.GONE;
                         } else {
                             return View.VISIBLE;
@@ -2274,22 +2274,22 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                     @Override
                     String getChildren() {
-                        Assert.assertTrue(!expanded());
-                        Assert.assertTrue(!mInstanceData.Children.isEmpty());
-                        return getChildrenText(mInstanceData.Children.values());
+                        Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
+
+                        return getChildrenText(expanded(), mInstanceData.Children.values(), mInstanceData.mNote);
                     }
 
                     @Override
                     int getChildrenColor() {
-                        GroupListFragment groupListFragment = getGroupListFragment();
+                        Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
 
-                        Assert.assertTrue(!expanded());
-                        Assert.assertTrue(!mInstanceData.Children.isEmpty());
+                        Activity activity = getGroupListFragment().getActivity();
+                        Assert.assertTrue(activity != null);
 
                         if (!mInstanceData.TaskCurrent) {
-                            return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled);
+                            return ContextCompat.getColor(activity, R.color.textDisabled);
                         } else {
-                            return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textSecondary);
+                            return ContextCompat.getColor(activity, R.color.textSecondary);
                         }
                     }
 
@@ -2864,7 +2864,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 int getChildrenVisibility() {
-                    if (mInstanceData.Children.isEmpty() || expanded()) {
+                    if ((mInstanceData.Children.isEmpty() || expanded()) && TextUtils.isEmpty(mInstanceData.mNote)) {
                         return View.GONE;
                     } else {
                         return View.VISIBLE;
@@ -2873,20 +2873,22 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
                 @Override
                 String getChildren() {
-                    Assert.assertTrue(!expanded());
-                    Assert.assertTrue(!mInstanceData.Children.isEmpty());
-                    return getChildrenText(mInstanceData.Children.values());
+                    Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
+
+                    return getChildrenText(expanded(), mInstanceData.Children.values(), mInstanceData.mNote);
                 }
 
                 @Override
                 int getChildrenColor() {
-                    Assert.assertTrue(!expanded());
-                    Assert.assertTrue(!mInstanceData.Children.isEmpty());
+                    Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
+
+                    Activity activity = getGroupListFragment().getActivity();
+                    Assert.assertTrue(activity != null);
 
                     if (!mInstanceData.TaskCurrent) {
-                        return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textDisabled);
+                        return ContextCompat.getColor(activity, R.color.textDisabled);
                     } else {
-                        return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textSecondary);
+                        return ContextCompat.getColor(activity, R.color.textSecondary);
                     }
                 }
 
@@ -3635,21 +3637,24 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         }
     }
 
-    private static String getChildrenText(Collection<GroupListLoader.InstanceData> instanceDatas) {
-        Assert.assertTrue(instanceDatas != null);
-        Assert.assertTrue(!instanceDatas.isEmpty());
+    private static String getChildrenText(boolean expanded, @NonNull Collection<GroupListLoader.InstanceData> instanceDatas, @Nullable String note) {
+        if (!instanceDatas.isEmpty() && !expanded) {
+            Stream<GroupListLoader.InstanceData> notDone = Stream.of(instanceDatas)
+                    .filter(instanceData -> instanceData.Done == null)
+                    .sortBy(instanceData -> instanceData.InstanceKey.TaskId);
 
-        Stream<GroupListLoader.InstanceData> notDone = Stream.of(instanceDatas)
-                .filter(instanceData -> instanceData.Done == null)
-                .sortBy(instanceData -> instanceData.InstanceKey.TaskId);
+            Stream<GroupListLoader.InstanceData> done = Stream.of(instanceDatas)
+                    .filter(instanceData -> instanceData.Done != null)
+                    .sortBy(instanceData -> -instanceData.Done.getLong());
 
-        Stream<GroupListLoader.InstanceData> done = Stream.of(instanceDatas)
-                .filter(instanceData -> instanceData.Done != null)
-                .sortBy(instanceData -> -instanceData.Done.getLong());
+            return Stream.concat(notDone, done)
+                    .map(instanceData -> instanceData.Name)
+                    .collect(Collectors.joining(", "));
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(note));
 
-        return Stream.concat(notDone, done)
-                .map(instanceData -> instanceData.Name)
-                .collect(Collectors.joining(", "));
+            return note;
+        }
     }
 
     public void selectAll() {

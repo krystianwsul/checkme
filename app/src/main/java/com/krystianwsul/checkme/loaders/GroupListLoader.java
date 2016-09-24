@@ -164,15 +164,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public Boolean IsRootTask;
         public boolean Exists;
         public final TimePair InstanceTimePair;
+        public final String mNote;
 
         public final WeakReference<InstanceDataParent> InstanceDataParentReference;
 
-        public InstanceData(ExactTimeStamp done, InstanceKey instanceKey, String displayText, String name, TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask, boolean exists, WeakReference<InstanceDataParent> instanceDataParentReference, TimePair instanceTimePair) {
-            Assert.assertTrue(instanceKey != null);
+        public InstanceData(@Nullable ExactTimeStamp done, @NonNull InstanceKey instanceKey, @Nullable String displayText, @NonNull String name, @NonNull TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, @Nullable Boolean isRootTask, boolean exists, @NonNull WeakReference<InstanceDataParent> instanceDataParentReference, @NonNull TimePair instanceTimePair, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(instanceTimeStamp != null);
-            Assert.assertTrue(instanceDataParentReference != null);
-            Assert.assertTrue(instanceTimePair != null);
 
             Done = done;
             InstanceKey = instanceKey;
@@ -184,8 +181,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             IsRootTask = isRootTask;
             Exists = exists;
             InstanceTimePair = instanceTimePair;
-
             InstanceDataParentReference = instanceDataParentReference;
+            mNote = note;
         }
 
         @Override
@@ -205,6 +202,8 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 hashCode += (IsRootTask ? 2 : 1);
             hashCode += (Exists ? 1 : 0);
             hashCode += InstanceTimePair.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hashCode += mNote.hashCode();
             return hashCode;
         }
 
@@ -268,6 +267,12 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if (!InstanceTimePair.equals(instanceData.InstanceTimePair))
+                return false;
+
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(instanceData.mNote))
+                return false;
+
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(instanceData.mNote))
                 return false;
 
             return true;

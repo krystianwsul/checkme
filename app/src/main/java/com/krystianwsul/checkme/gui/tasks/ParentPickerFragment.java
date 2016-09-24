@@ -282,6 +282,7 @@ public class ParentPickerFragment extends DialogFragment {
                 mTaskTreeData = taskTreeData;
             }
 
+            @NonNull
             TreeNode initialize(@NonNull WeakReference<NodeContainer> nodeContainerReference, @Nullable List<Integer> expandedTasks) {
                 boolean expanded = false;
                 if (expandedTasks != null) {
@@ -377,13 +378,25 @@ public class ParentPickerFragment extends DialogFragment {
                     taskHolder.mTaskRowDetails.setText(mTaskTreeData.ScheduleText);
                 }
 
-                if (mTaskTreeData.TaskDatas.isEmpty() || treeNode.expanded()) {
+                if ((mTaskTreeData.TaskDatas.isEmpty() || treeNode.expanded()) && TextUtils.isEmpty(mTaskTreeData.mNote)) {
                     taskHolder.mTaskRowChildren.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
-                    taskHolder.mTaskRowChildren.setText(Stream.of(mTaskTreeData.TaskDatas.values())
-                            .map(taskData -> taskData.Name)
-                            .collect(Collectors.joining(", ")));
+
+                    String text;
+                    if (!mTaskTreeData.TaskDatas.isEmpty() && !treeNode.expanded()) {
+                        text = Stream.of(mTaskTreeData.TaskDatas.values())
+                                .map(taskData -> taskData.Name)
+                                .collect(Collectors.joining(", "));
+                    } else {
+                        Assert.assertTrue(!TextUtils.isEmpty(mTaskTreeData.mNote));
+
+                        text = mTaskTreeData.mNote;
+                    }
+
+                    Assert.assertTrue(!TextUtils.isEmpty(text));
+
+                    taskHolder.mTaskRowChildren.setText(text);
                 }
 
                 taskHolder.mTaskRowSeparator.setVisibility(treeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);

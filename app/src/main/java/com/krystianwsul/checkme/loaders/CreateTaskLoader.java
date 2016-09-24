@@ -169,15 +169,16 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final TreeMap<Integer, TaskTreeData> TaskDatas;
         public final int TaskId;
         public final String ScheduleText;
+        public final String mNote;
 
-        public TaskTreeData(String name, TreeMap<Integer, TaskTreeData> taskDatas, int taskId, String scheduleText) {
+        public TaskTreeData(@NonNull String name, @NonNull TreeMap<Integer, TaskTreeData> taskDatas, int taskId, @Nullable String scheduleText, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(taskDatas != null);
 
             Name = name;
             TaskDatas = taskDatas;
             TaskId = taskId;
             ScheduleText = scheduleText;
+            mNote = note;
         }
 
         @Override
@@ -188,6 +189,8 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             hash += TaskId;
             if (!TextUtils.isEmpty(ScheduleText))
                 hash += ScheduleText.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hash += mNote.hashCode();
             return hash;
         }
 
@@ -218,6 +221,12 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskTreeData.ScheduleText))
+                return false;
+
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(taskTreeData.mNote))
+                return false;
+
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(taskTreeData.mNote))
                 return false;
 
             return true;

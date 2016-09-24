@@ -721,14 +721,20 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 } else {
                     taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
 
-                    List<String> elements = Stream.of(mChildTaskData.Children)
-                            .map(taskData -> taskData.Name)
-                            .collect(Collectors.toList());
+                    String text;
+                    if (!mChildTaskData.Children.isEmpty() && !treeNode.expanded()) {
+                        text = Stream.of(mChildTaskData.Children)
+                                .map(taskData -> taskData.Name)
+                                .collect(Collectors.joining(", "));
+                    } else {
+                        Assert.assertTrue(!TextUtils.isEmpty(mChildTaskData.mNote));
 
-                    if (!TextUtils.isEmpty(mChildTaskData.mNote))
-                        elements.add(mChildTaskData.mNote);
+                        text = mChildTaskData.mNote;
+                    }
 
-                    taskHolder.mTaskRowChildren.setText(TextUtils.join(", ", elements));
+                    Assert.assertTrue(!TextUtils.isEmpty(text));
+
+                    taskHolder.mTaskRowChildren.setText(text);
                 }
 
                 taskHolder.mTaskRowSeparator.setVisibility(treeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);

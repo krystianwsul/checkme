@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -14,8 +13,7 @@
         android:layout_marginBottom="5dp"
         android:layout_marginTop="5dp"
         android:hint="@string/parentTask"
-        android:textColorHint="@color/textDisabled"
-        app:hintAnimationEnabled="false">
+        android:textColorHint="@color/textDisabled">
 
         <EditText
             android:id="@+id/schedule_text"
@@ -27,7 +25,7 @@
             android:focusableInTouchMode="false"
             android:singleLine="true"
             android:textSize="@dimen/textPrimary"
-            tools:ignore="LabelFor,TextFields"/>
+            tools:ignore="Deprecated,LabelFor,TextFields"/>
 
     </android.support.design.widget.TextInputLayout>
 

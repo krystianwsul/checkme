@@ -100,7 +100,14 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         clearSchedules();
 
         mParent = taskData;
-        mCreateTaskAdapter.notifyItemChanged(0);
+
+        View view = mScheduleTimes.getChildAt(0);
+        Assert.assertTrue(view != null);
+
+        CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
+        Assert.assertTrue(scheduleHolder != null);
+
+        scheduleHolder.mScheduleText.setText(mParent.Name);
     };
 
     private final ScheduleDialogFragment.ScheduleDialogListener mScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {

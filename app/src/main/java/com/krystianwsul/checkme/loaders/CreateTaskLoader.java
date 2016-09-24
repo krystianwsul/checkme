@@ -120,7 +120,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
                 hash += ScheduleDatas.hashCode();
             }
-            if (mNote != null)
+            if (!TextUtils.isEmpty(mNote))
                 hash += mNote.hashCode();
             return hash;
         }
@@ -154,10 +154,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if ((ScheduleDatas != null) && !ScheduleDatas.equals(taskData.ScheduleDatas))
                 return false;
 
-            if ((mNote == null) != (taskData.mNote == null))
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(taskData.mNote))
                 return false;
 
-            if ((mNote != null) && !mNote.equals(taskData.mNote))
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(taskData.mNote))
                 return false;
 
             return true;

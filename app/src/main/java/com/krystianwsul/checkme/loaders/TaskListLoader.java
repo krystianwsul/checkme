@@ -73,15 +73,16 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
         public final String Name;
         public final String ScheduleText;
         public final List<ChildTaskData> Children;
+        public final String mNote;
 
-        public ChildTaskData(int taskId, String name, String scheduleText, List<ChildTaskData> children) {
+        public ChildTaskData(int taskId, @NonNull String name, @Nullable String scheduleText, @NonNull List<ChildTaskData> children, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(children != null);
 
             TaskId = taskId;
             Name = name;
             ScheduleText = scheduleText;
             Children = children;
+            mNote = note;
         }
 
         @Override
@@ -92,6 +93,8 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
             hashCode += Children.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hashCode += mNote.hashCode();
             return hashCode;
         }
 
@@ -122,6 +125,12 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
                 return false;
 
             if (!Children.equals(childTaskData.Children))
+                return false;
+
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(childTaskData.mNote))
+                return false;
+
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(childTaskData.mNote))
                 return false;
 
             return true;

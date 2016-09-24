@@ -421,7 +421,7 @@ public class ParentPickerFragment extends DialogFragment {
             }
 
             @Override
-            public boolean separatorVisibleWhenNotExapanded() {
+            public boolean separatorVisibleWhenNotExpanded() {
                 return false;
             }
 

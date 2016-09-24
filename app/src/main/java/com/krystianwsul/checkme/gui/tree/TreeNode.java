@@ -532,7 +532,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         TreeNode nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1);
         Assert.assertTrue(nextTreeNode != null);
 
-        return (nextTreeNode.expanded() || mModelNode.separatorVisibleWhenNotExapanded());
+        return (nextTreeNode.expanded() || mModelNode.separatorVisibleWhenNotExpanded());
     }
 
     @NonNull

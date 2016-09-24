@@ -776,7 +776,7 @@ public class DomainFactory {
             Collections.reverse(tasks);
 
         List<TaskListLoader.ChildTaskData> childTaskDatas = Stream.of(tasks)
-                .map(task -> new TaskListLoader.ChildTaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context)))
+                .map(task -> new TaskListLoader.ChildTaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote()))
                 .collect(Collectors.toList());
 
         return new TaskListLoader.Data(childTaskDatas, note);
@@ -1965,14 +1965,11 @@ public class DomainFactory {
         return instanceDatas;
     }
 
-    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(Task parentTask, ExactTimeStamp now, Context context) {
-        Assert.assertTrue(parentTask != null);
-        Assert.assertTrue(now != null);
-        Assert.assertTrue(context != null);
-
+    @NonNull
+    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
         return Stream.of(parentTask.getChildTasks(now))
                 .sortBy(Task::getId)
-                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context)))
+                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote()))
                 .collect(Collectors.toList());
     }
 

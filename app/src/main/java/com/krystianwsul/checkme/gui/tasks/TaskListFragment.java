@@ -460,6 +460,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             mTaskListFragmentReference = new WeakReference<>(taskListFragment);
         }
 
+        @NonNull
         private TreeViewAdapter initialize(float density, @NonNull TaskListLoader.Data data, List<Integer> selectedTasks, List<Integer> expandedTasks) {
             TreeViewAdapter treeViewAdapter = new TreeViewAdapter(false, this);
             mTreeViewAdapterReference = new WeakReference<>(treeViewAdapter);
@@ -612,6 +613,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 mChildTaskData = childTaskData;
             }
 
+            @NonNull
             TreeNode initialize(@Nullable List<Integer> selectedTasks, @NonNull WeakReference<NodeContainer> nodeContainerReference, @Nullable List<Integer> expandedTasks) {
                 boolean selected = false;
                 if (selectedTasks != null) {
@@ -714,13 +716,19 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     taskHolder.mTaskRowDetails.setText(mChildTaskData.ScheduleText);
                 }
 
-                if (mChildTaskData.Children.isEmpty() || treeNode.expanded()) {
+                if ((mChildTaskData.Children.isEmpty() || treeNode.expanded()) && TextUtils.isEmpty(mChildTaskData.mNote)) {
                     taskHolder.mTaskRowChildren.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
-                    taskHolder.mTaskRowChildren.setText(Stream.of(mChildTaskData.Children)
+
+                    List<String> elements = Stream.of(mChildTaskData.Children)
                             .map(taskData -> taskData.Name)
-                            .collect(Collectors.joining(", ")));
+                            .collect(Collectors.toList());
+
+                    if (!TextUtils.isEmpty(mChildTaskData.mNote))
+                        elements.add(mChildTaskData.mNote);
+
+                    taskHolder.mTaskRowChildren.setText(TextUtils.join(", ", elements));
                 }
 
                 taskHolder.mTaskRowSeparator.setVisibility(treeNode.getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
@@ -757,7 +765,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             @Override
-            public boolean separatorVisibleWhenNotExapanded() {
+            public boolean separatorVisibleWhenNotExpanded() {
                 return false;
             }
 
@@ -893,7 +901,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             @Override
-            public boolean separatorVisibleWhenNotExapanded() {
+            public boolean separatorVisibleWhenNotExpanded() {
                 return true;
             }
 

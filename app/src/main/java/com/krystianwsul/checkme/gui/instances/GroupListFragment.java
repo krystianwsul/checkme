@@ -1490,7 +1490,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
-                public boolean separatorVisibleWhenNotExapanded() {
+                public boolean separatorVisibleWhenNotExpanded() {
                     return true;
                 }
 
@@ -2107,7 +2107,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
-                public boolean separatorVisibleWhenNotExapanded() {
+                public boolean separatorVisibleWhenNotExpanded() {
                     return false;
                 }
 
@@ -2451,7 +2451,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                     }
 
                     @Override
-                    public boolean separatorVisibleWhenNotExapanded() {
+                    public boolean separatorVisibleWhenNotExpanded() {
                         return false;
                     }
 
@@ -2708,7 +2708,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
-                public boolean separatorVisibleWhenNotExapanded() {
+                public boolean separatorVisibleWhenNotExpanded() {
                     return false;
                 }
 
@@ -2998,7 +2998,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
-                public boolean separatorVisibleWhenNotExapanded() {
+                public boolean separatorVisibleWhenNotExpanded() {
                     return false;
                 }
 
@@ -3220,7 +3220,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
-                public boolean separatorVisibleWhenNotExapanded() {
+                public boolean separatorVisibleWhenNotExpanded() {
                     return false;
                 }
             }
@@ -3479,7 +3479,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
                 @Override
-                public boolean separatorVisibleWhenNotExapanded() {
+                public boolean separatorVisibleWhenNotExpanded() {
                     return false;
                 }
             }

@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
@@ -197,9 +199,24 @@ public class TickService extends IntentService {
         PendingIntent pendingHourIntent = PendingIntent.getService(this, notificationInstanceData.NotificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, getString(R.string.hour), pendingHourIntent).build());
 
-        NotificationCompat.InboxStyle inboxStyle = (notificationInstanceData.Children.isEmpty() ? null : getInboxStyle(notificationInstanceData.Children));
+        String text;
+        NotificationCompat.Style style;
+        if (!notificationInstanceData.Children.isEmpty()) {
+            text = TextUtils.join(", ", notificationInstanceData.Children);
+            style = getInboxStyle(notificationInstanceData.Children);
+        } else if (!TextUtils.isEmpty(notificationInstanceData.mNote)) {
+            text = notificationInstanceData.mNote;
 
-        notify(notificationInstanceData.Name, TextUtils.join(", ", notificationInstanceData.Children), notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), inboxStyle, true);
+            NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+            bigTextStyle.bigText(notificationInstanceData.mNote);
+
+            style = bigTextStyle;
+        } else {
+            text = null;
+            style = null;
+        }
+
+        notify(notificationInstanceData.Name, text, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), style, true);
     }
 
     private void notifyGroup(Collection<NotificationInstanceData> notificationInstanceDatas, boolean silent) {
@@ -230,18 +247,20 @@ public class TickService extends IntentService {
                 .map(notificationInstanceData -> notificationInstanceData.Name + " (" + notificationInstanceData.DisplayText + ")")
                 .collect(Collectors.toList()));
 
-        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, null, null, inboxStyle, false);
+        notify(notificationInstanceDatas.size() + " " + getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, new ArrayList<>(), null, inboxStyle, false);
     }
 
-    private NotificationCompat.InboxStyle getInboxStyle(List<String> lines) {
-        Assert.assertTrue(lines != null);
+    @NonNull
+    private NotificationCompat.InboxStyle getInboxStyle(@NonNull List<String> lines) {
         Assert.assertTrue(!lines.isEmpty());
 
         int max = 5;
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
 
-        Stream.of(lines).limit(max).forEach(inboxStyle::addLine);
+        Stream.of(lines)
+                .limit(max)
+                .forEach(inboxStyle::addLine);
 
         int extraCount = lines.size() - max;
 
@@ -251,10 +270,8 @@ public class TickService extends IntentService {
         return inboxStyle;
     }
 
-    private void notify(String title, String text, int notificationId, PendingIntent deleteIntent, PendingIntent contentIntent, boolean silent, ArrayList<NotificationCompat.Action> actions, Long when, NotificationCompat.InboxStyle inboxStyle, boolean autoCancel) {
+    private void notify(@NonNull String title, @Nullable String text, int notificationId, @NonNull PendingIntent deleteIntent, @NonNull PendingIntent contentIntent, boolean silent, @NonNull List<NotificationCompat.Action> actions, @Nullable Long when, @Nullable NotificationCompat.Style style, boolean autoCancel) {
         Assert.assertTrue(!TextUtils.isEmpty(title));
-        Assert.assertTrue(deleteIntent != null);
-        Assert.assertTrue(contentIntent != null);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -272,18 +289,16 @@ public class TickService extends IntentService {
         if (!silent)
             builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
 
-        if (actions != null) {
-            Assert.assertTrue(actions.size() <= 3);
+        Assert.assertTrue(actions.size() <= 3);
 
-            Stream.of(actions)
-                    .forEach(builder::addAction);
-        }
+        Stream.of(actions)
+                .forEach(builder::addAction);
 
         if (when != null)
             builder.setWhen(when);
 
-        if (inboxStyle != null)
-            builder.setStyle(inboxStyle);
+        if (style != null)
+            builder.setStyle(style);
 
         if (autoCancel)
             builder.setAutoCancel(true);
@@ -318,13 +333,11 @@ public class TickService extends IntentService {
         final String DisplayText;
         final TimeStamp InstanceTimeStamp;
         final List<String> Children;
+        final String mNote;
 
-        public NotificationInstanceData(InstanceKey instanceKey, String name, int notificationId, String displayText, TimeStamp instanceTimeStamp, List<String> children) {
-            Assert.assertTrue(instanceKey != null);
+        public NotificationInstanceData(@NonNull InstanceKey instanceKey, @NonNull String name, int notificationId, @NonNull String displayText, @NonNull TimeStamp instanceTimeStamp, @NonNull List<String> children, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
-            Assert.assertTrue(instanceTimeStamp != null);
-            Assert.assertTrue(children != null);
 
             InstanceKey = instanceKey;
             Name = name;
@@ -332,6 +345,7 @@ public class TickService extends IntentService {
             DisplayText = displayText;
             InstanceTimeStamp = instanceTimeStamp;
             Children = children;
+            mNote = note;
         }
     }
 

@@ -526,8 +526,7 @@ public class DomainFactory {
 
         GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
 
-        ArrayList<Instance> childInstances = instance.getChildInstances(now);
-        for (Instance childInstance : childInstances) {
+        for (Instance childInstance : instance.getChildInstances(now)) {
             Task childTask = mTasks.get(childInstance.getTaskId());
             Assert.assertTrue(childTask != null);
 
@@ -794,8 +793,12 @@ public class DomainFactory {
         Map<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = Stream.of(rootInstances)
                 .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> {
+                    Assert.assertTrue(instance != null);
+
+                    Task task = mTasks.get(instance.getTaskId());
+                    Assert.assertTrue(task != null);
+
                     List<Instance> childInstances = instance.getChildInstances(now);
-                    Assert.assertTrue(childInstances != null);
 
                     Stream<Instance> notDone = Stream.of(childInstances)
                             .filter(childInstance -> childInstance.getDone() == null)
@@ -809,7 +812,7 @@ public class DomainFactory {
                             .map(Instance::getName)
                             .collect(Collectors.toList());
 
-                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), children);
+                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), children, task.getNote());
                 }));
 
         Map<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = Stream.of(mExistingInstances)
@@ -1950,8 +1953,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
-        ArrayList<Instance> childInstances = instance.getChildInstances(now);
-        for (Instance childInstance : childInstances) {
+        for (Instance childInstance : instance.getChildInstances(now)) {
             Task childTask = mTasks.get(childInstance.getTaskId());
             Assert.assertTrue(childTask != null);
 

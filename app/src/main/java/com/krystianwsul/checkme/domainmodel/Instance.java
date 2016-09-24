@@ -122,11 +122,11 @@ class Instance {
         }
     }
 
-    public DateTime getScheduleDateTime() {
+    DateTime getScheduleDateTime() {
         return new DateTime(getScheduleDate(), getScheduleTime());
     }
 
-    public Date getInstanceDate() {
+    Date getInstanceDate() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);
@@ -171,7 +171,7 @@ class Instance {
         }
     }
 
-    public DateTime getInstanceDateTime() {
+    DateTime getInstanceDateTime() {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
@@ -214,7 +214,8 @@ class Instance {
         }
     }
 
-    public ArrayList<Instance> getChildInstances(ExactTimeStamp now) {
+    @NonNull
+    List<Instance> getChildInstances(ExactTimeStamp now) {
         Assert.assertTrue(now != null);
 
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
@@ -387,7 +388,7 @@ class Instance {
         4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
      */
 
-    public int getNotificationId() {
+    int getNotificationId() {
         Date scheduleDate = getScheduleDate();
 
         Integer scheduleCustomTimeId = getScheduleCustomTimeId();
@@ -462,7 +463,7 @@ class Instance {
         return new InstanceKey(getTaskId(), getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute());
     }
 
-    public TimePair getInstanceTimePair() {
+    TimePair getInstanceTimePair() {
         return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
     }
 
@@ -540,7 +541,7 @@ class Instance {
         return (mInstanceRecord != null);
     }
 
-    public void setRelevant() {
+    void setRelevant() {
         mInstanceRecord.setRelevant(false);
     }
 }

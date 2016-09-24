@@ -139,6 +139,15 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             mHourMinutePickerPosition = null;
         }
+
+        @Override
+        public void onScheduleDialogCancel() {
+            if (mHourMinutePickerPosition != null) {
+                Assert.assertTrue(mHourMinutePickerPosition > 0);
+
+                mHourMinutePickerPosition = null;
+            }
+        }
     };
 
     private String mNote = null;
@@ -1016,6 +1025,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             void onTextClick() {
                 Assert.assertTrue(mData != null);
+                Assert.assertTrue(mHourMinutePickerPosition == null);
 
                 mHourMinutePickerPosition = getAdapterPosition();
 

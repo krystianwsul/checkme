@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -128,6 +129,7 @@ public class ScheduleDialogFragment extends DialogFragment {
                 .customView(R.layout.fragment_schedule_dialog, false)
                 .negativeText(android.R.string.cancel)
                 .positiveText(android.R.string.ok)
+                .onNegative(((dialog, which) -> dialog.cancel()))
                 .onPositive((dialog, which) -> {
                     Assert.assertTrue(mCustomTimeDatas != null);
                     Assert.assertTrue(mScheduleDialogListener != null);
@@ -474,13 +476,22 @@ public class ScheduleDialogFragment extends DialogFragment {
         return (new TimeStamp(mScheduleDialogData.mDate, hourMinute).compareTo(TimeStamp.getNow()) > 0);
     }
 
-    public static class ScheduleDialogData implements Parcelable {
-        public Date mDate;
-        public DayOfWeek mDayOfWeek;
-        public final TimePairPersist mTimePairPersist;
-        public ScheduleType mScheduleType;
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        super.onCancel(dialog);
 
-        public ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+        Assert.assertTrue(mScheduleDialogListener != null);
+
+        mScheduleDialogListener.onScheduleDialogCancel();
+    }
+
+    public static class ScheduleDialogData implements Parcelable {
+        Date mDate;
+        DayOfWeek mDayOfWeek;
+        final TimePairPersist mTimePairPersist;
+        ScheduleType mScheduleType;
+
+        ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
             mDate = date;
             mDayOfWeek = dayOfWeek;
             mTimePairPersist = timePairPersist;
@@ -523,5 +534,7 @@ public class ScheduleDialogFragment extends DialogFragment {
         void onScheduleDialogResult(@NonNull ScheduleDialogData scheduleDialogData);
 
         void onScheduleDialogDelete();
+
+        void onScheduleDialogCancel();
     }
 }

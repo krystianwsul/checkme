@@ -42,7 +42,7 @@
 
         <activity
             android:name=".gui.tasks.CreateTaskActivity"
-            android:windowSoftInputMode="stateVisible">
+            android:windowSoftInputMode="stateHidden"> <!-- keyboard hack -->
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

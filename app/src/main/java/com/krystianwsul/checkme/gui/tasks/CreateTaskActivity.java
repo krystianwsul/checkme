@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.annimon.stream.Collectors;
@@ -62,6 +63,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
     private static final String SCHEDULE_ENTRIES_KEY = "scheduleEntries";
     private static final String NOTE_KEY = "note";
+    private static final String NOTE_HAS_FOCUS_KEY = "noteHasFocus";
 
     private static final String SCHEDULE_DIALOG_TAG = "scheduleDialog";
 
@@ -151,6 +153,30 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     };
 
     private String mNote = null;
+
+    private boolean mNoteHasFocus = false; // keyboard hack
+
+    private final RecyclerView.OnChildAttachStateChangeListener mOnChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() { // keyboard hack
+        @Override
+        public void onChildViewAttachedToWindow(View view) {
+            EditText noteText = (EditText) view.findViewById(R.id.note_text);
+            if (noteText != null) {
+                removeListenerHelper();
+
+                noteText.requestFocus();
+
+                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+                //InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                //imm.showSoftInput(noteText, InputMethodManager.SHOW_FORCED);
+            }
+        }
+
+        @Override
+        public void onChildViewDetachedFromWindow(View view) {
+
+        }
+    };
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -403,6 +429,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         if (discardDialogFragment != null)
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
 
+        if (!mNoteHasFocus) { // keyboard hack
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+
         getSupportLoaderManager().initLoader(0, null, this);
     }
 
@@ -434,6 +464,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             if (!TextUtils.isEmpty(mNote))
                 outState.putString(NOTE_KEY, mNote);
+
+            outState.putBoolean(NOTE_HAS_FOCUS_KEY, mNoteHasFocus);
         }
     }
 
@@ -511,6 +543,10 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 mNote = mSavedInstanceState.getString(NOTE_KEY);
                 Assert.assertTrue(!TextUtils.isEmpty(mNote));
             }
+
+            Assert.assertTrue(mSavedInstanceState.containsKey(NOTE_HAS_FOCUS_KEY));
+
+            mNoteHasFocus = mSavedInstanceState.getBoolean(NOTE_HAS_FOCUS_KEY);
         } else {
             if (mData.TaskData != null && mData.TaskData.ParentTaskId != null) {
                 Assert.assertTrue(mParentTaskIdHint == null);
@@ -573,8 +609,19 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mCreateTaskAdapter = new CreateTaskAdapter();
         mScheduleTimes.setAdapter(mCreateTaskAdapter);
 
+        if (mNoteHasFocus) { // keyboard hack
+            int notePosition = mScheduleEntries.size() + 2;
+
+            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mScheduleTimes.getLayoutManager();
+
+            mScheduleTimes.addOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
+
+            linearLayoutManager.scrollToPosition(notePosition);
+        }
+
         Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
     }
+
 
     @Override
     public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {
@@ -819,6 +866,12 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         mCreateTaskAdapter.notifyItemRangeRemoved(1, count);
     }
 
+    private void removeListenerHelper() { // keyboard hack
+        Assert.assertTrue(mScheduleTimes != null);
+
+        mScheduleTimes.removeOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
+    }
+
     public static class ScheduleHint implements Parcelable {
         final Date mDate;
         final TimePair mTimePair;
@@ -978,6 +1031,8 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 noteHolder.mNoteText.removeTextChangedListener(mNameListener);
                 noteHolder.mNoteText.addTextChangedListener(mNameListener);
+
+                noteHolder.mNoteText.setOnFocusChangeListener((v, hasFocus) -> mNoteHasFocus = hasFocus);
             }
         }
 

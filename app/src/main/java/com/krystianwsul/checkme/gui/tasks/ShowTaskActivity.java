@@ -55,6 +55,8 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
         mActionBar = getSupportActionBar();
         Assert.assertTrue(mActionBar != null);
 
+        mActionBar.setTitle(null);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INTENT_KEY));
         mTaskId = intent.getIntExtra(INTENT_KEY, -1);

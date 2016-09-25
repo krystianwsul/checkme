@@ -50,6 +50,8 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         mActionBar = getSupportActionBar();
         Assert.assertTrue(mActionBar != null);
 
+        mActionBar.setTitle(null);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(TIME_KEY));
         long time = intent.getLongExtra(TIME_KEY, -1);

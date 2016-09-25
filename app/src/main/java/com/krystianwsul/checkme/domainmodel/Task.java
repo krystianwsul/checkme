@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMili;
+import com.krystianwsul.checkme.utils.time.HourMilli;
 
 import junit.framework.Assert;
 
@@ -200,7 +200,7 @@ public class Task {
         if (startExactTimeStamp == null) { // 24 hack
             Date oldestVisible = getOldestVisible();
             if (oldestVisible != null) {
-                HourMili zero = new HourMili(0, 0, 0, 0);
+                HourMilli zero = new HourMilli(0, 0, 0, 0);
                 startExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
             }
         }
@@ -292,64 +292,8 @@ public class Task {
             }
         }
 
-        /*
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        if (Stream.of(domainFactory.getExistingInstances(this))
-                .anyMatch(instance -> instance.isVisible(now))) {
-            if (getName().equals("agota"))
-                Log.e("asdf", "d");
-            return true;
-        }
-
-        //noinspection RedundantIfStatement
-        if (Stream.of(domainFactory.getPastInstances(this, now))
-                .anyMatch(instance -> instance.isVisible(now))) {
-            if (getName().equals("agota")) {
-                Log.e("asdf", "e");
-                Stream.of(domainFactory.getPastInstances(this, now))
-                        .filter(instance -> instance.isVisible(now)).forEach(instance -> Log.e("asdf", "instance exists? " + instance.exists()));
-            }
-            return true;
-        }
-        */
-
         return false;
     }
-
-    /*
-    public boolean isRelevant(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
-        if (isVisible(now))
-            return true;
-
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        //noinspection RedundantIfStatement
-        if (Stream.of(domainFactory.getChildTaskHierarchies(this))
-                .anyMatch(taskHierarchy -> taskHierarchy.getChildTask().isRelevant(now))) {
-            return true;
-        }
-
-        if (Stream.of(domainFactory.getExistingInstances(this))
-                .anyMatch(instance -> instance.isRelevant(now))) {
-            Log.e("asdf", getName() + " is relevant a");
-            return true;
-        }
-
-        //noinspection RedundantIfStatement
-        if (Stream.of(domainFactory.getPastInstances(this, now))
-                .anyMatch(instance -> instance.isRelevant(now))) {
-            Log.e("asdf", getName() + " is relevant b");
-            return true;
-        }
-
-        return false;
-    }
-    */
 
     void setRelevant() {
         mTaskRecord.setRelevant(false);

@@ -38,7 +38,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMili;
+import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
@@ -353,7 +353,7 @@ public class DomainFactory {
                     throw new UnsupportedOperationException();
             }
 
-            startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMili(0, 0, 0, 0));
+            startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMilli(0, 0, 0, 0));
         }
 
         Calendar endCalendar = Calendar.getInstance();
@@ -374,7 +374,7 @@ public class DomainFactory {
                 throw new UnsupportedOperationException();
         }
 
-        endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMili(0, 0, 0, 0));
+        endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMilli(0, 0, 0, 0));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 

@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMili;
+import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
@@ -20,7 +20,7 @@ import junit.framework.Assert;
 
 import java.util.Calendar;
 
-public class DailySchedule extends RepeatingSchedule {
+class DailySchedule extends RepeatingSchedule {
     private final DailyScheduleRecord mDailyScheduleRecord;
 
     DailySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull DailyScheduleRecord dailyScheduleRecord) {
@@ -35,7 +35,7 @@ public class DailySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected Instance getInstanceInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
+    protected Instance getInstanceInDate(Task task, Date date, HourMilli startHourMilli, HourMilli endHourMilli) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(date != null);
 
@@ -44,10 +44,10 @@ public class DailySchedule extends RepeatingSchedule {
         HourMinute hourMinute = getTime().getHourMinute(day);
         Assert.assertTrue(hourMinute != null);
 
-        if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
+        if (startHourMilli != null && startHourMilli.compareTo(hourMinute.toHourMilli()) > 0)
             return null;
 
-        if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
+        if (endHourMilli != null && endHourMilli.compareTo(hourMinute.toHourMilli()) <= 0)
             return null;
 
         DateTime scheduleDateTime = new DateTime(date, getTime());

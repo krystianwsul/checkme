@@ -9,18 +9,18 @@ import java.util.Calendar;
 public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
     private final Long mLong;
 
-    public ExactTimeStamp(Date date, HourMili hourMili) {
+    public ExactTimeStamp(Date date, HourMilli hourMilli) {
         Assert.assertTrue(date != null);
-        Assert.assertTrue(hourMili != null);
+        Assert.assertTrue(hourMilli != null);
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, date.getYear());
         calendar.set(Calendar.MONTH, date.getMonth() - 1);
         calendar.set(Calendar.DAY_OF_MONTH, date.getDay());
-        calendar.set(Calendar.HOUR_OF_DAY, hourMili.getHour());
-        calendar.set(Calendar.MINUTE, hourMili.getMinute());
-        calendar.set(Calendar.SECOND, hourMili.getSecond());
-        calendar.set(Calendar.MILLISECOND, hourMili.getMili());
+        calendar.set(Calendar.HOUR_OF_DAY, hourMilli.getHour());
+        calendar.set(Calendar.MINUTE, hourMilli.getMinute());
+        calendar.set(Calendar.SECOND, hourMilli.getSecond());
+        calendar.set(Calendar.MILLISECOND, hourMilli.getMilli());
         mLong = calendar.getTimeInMillis();
     }
 
@@ -34,8 +34,8 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         return new ExactTimeStamp(Calendar.getInstance());
     }
 
-    public ExactTimeStamp(long milis) {
-        mLong = milis;
+    public ExactTimeStamp(long millis) {
+        mLong = millis;
     }
 
     public Calendar getCalendar() {
@@ -48,8 +48,8 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         return new Date(getCalendar());
     }
 
-    public HourMili getHourMili() {
-        return new HourMili(getCalendar());
+    public HourMilli getHourMilli() {
+        return new HourMilli(getCalendar());
     }
 
     public int compareTo(@NonNull ExactTimeStamp exactTimeStamp) {
@@ -97,6 +97,6 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
     }
 
     public String toString() {
-        return getDate().toString() + " " + getHourMili().toString();
+        return getDate().toString() + " " + getHourMilli().toString();
     }
 }

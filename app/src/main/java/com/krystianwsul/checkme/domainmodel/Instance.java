@@ -508,32 +508,6 @@ class Instance {
         }
     }
 
-    /*
-    boolean isRelevant(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
-        if (isVisible(now))
-            return true;
-
-        if (Stream.of(getChildInstances(now))
-                .anyMatch(instance -> instance.isRelevant(now)))
-            return true;
-
-        Task task = getTask();
-
-        Date oldestVisible = task.getOldestVisible();
-
-        if (oldestVisible == null)
-            return true;
-
-        //noinspection RedundantIfStatement
-        if (getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
-            return true;
-
-        return false;
-    }
-    */
-
     boolean exists() {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
         Assert.assertTrue((mTaskId == null) == (mScheduleDateTime == null));

@@ -7,7 +7,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMili;
+import com.krystianwsul.checkme.utils.time.HourMilli;
 
 import junit.framework.Assert;
 
@@ -49,9 +49,9 @@ abstract class RepeatingSchedule extends Schedule {
         Assert.assertTrue(startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
 
         if (startExactTimeStamp.getDate().equals(endExactTimeStamp.getDate())) {
-            instances.add(getInstanceInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), endExactTimeStamp.getHourMili()));
+            instances.add(getInstanceInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMilli(), endExactTimeStamp.getHourMilli()));
         } else {
-            instances.add(getInstanceInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMili(), null));
+            instances.add(getInstanceInDate(task, startExactTimeStamp.getDate(), startExactTimeStamp.getHourMilli(), null));
 
             Calendar loopStartCalendar = startExactTimeStamp.getDate().getCalendar();
             loopStartCalendar.add(Calendar.DATE, 1);
@@ -60,7 +60,7 @@ abstract class RepeatingSchedule extends Schedule {
             for (; loopStartCalendar.before(loopEndCalendar); loopStartCalendar.add(Calendar.DATE, 1))
                 instances.add(getInstanceInDate(task, new Date(loopStartCalendar), null, null));
 
-            instances.add(getInstanceInDate(task, endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMili()));
+            instances.add(getInstanceInDate(task, endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMilli()));
         }
 
         return Stream.of(instances)
@@ -68,5 +68,5 @@ abstract class RepeatingSchedule extends Schedule {
                 .collect(Collectors.toList());
     }
 
-    protected abstract Instance getInstanceInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili);
+    protected abstract Instance getInstanceInDate(Task task, Date date, HourMilli startHourMilli, HourMilli endHourMilli);
 }

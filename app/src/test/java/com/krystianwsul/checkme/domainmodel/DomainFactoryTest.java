@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMili;
+import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.TimePair;
@@ -24,6 +24,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+@SuppressWarnings("UnnecessaryLocalVariable")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TextUtils.class, android.util.Log.class, Context.class})
 public class DomainFactoryTest {
@@ -48,9 +49,9 @@ public class DomainFactoryTest {
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
         Date startDate = new Date(2016, 1, 1);
-        HourMili startHourMili = new HourMili(0, 0, 0, 0);
+        HourMilli startHourMilli = new HourMilli(0, 0, 0, 0);
 
-        ExactTimeStamp startExactTimeStamp = new ExactTimeStamp(startDate, startHourMili);
+        ExactTimeStamp startExactTimeStamp = new ExactTimeStamp(startDate, startHourMilli);
 
         Date scheduleDate = startDate;
         HourMinute scheduleHourMinute = new HourMinute(2, 0);
@@ -74,9 +75,9 @@ public class DomainFactoryTest {
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
 
         Date doneDate = startDate;
-        HourMili doneHourMili = new HourMili(1, 0, 0, 0);
+        HourMilli doneHourMilli = new HourMilli(1, 0, 0, 0);
 
-        ExactTimeStamp doneExactTimeStamp = new ExactTimeStamp(doneDate, doneHourMili);
+        ExactTimeStamp doneExactTimeStamp = new ExactTimeStamp(doneDate, doneHourMilli);
 
         rootInstance = domainFactory.setInstanceDone(doneExactTimeStamp, rootInstance.getInstanceKey(), true);
         Assert.assertTrue(rootInstance != null);
@@ -84,9 +85,9 @@ public class DomainFactoryTest {
         Assert.assertTrue(rootInstance.exists());
 
         Date nextDayBeforeDate = new Date(2016, 1, 2);
-        HourMili nextDayBeforeHourMili = new HourMili(0, 0, 0, 0);
+        HourMilli nextDayBeforeHourMilli = new HourMilli(0, 0, 0, 0);
 
-        ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMili);
+        ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli);
 
         DomainFactory.Irrelevant irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp);
         Assert.assertTrue(irrelevantBefore != null);
@@ -100,9 +101,9 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getTaskListData(nextDayBeforeExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.isEmpty());
 
         Date nextDayAfterDate = nextDayBeforeDate;
-        HourMili nextDayAfterHourMili = new HourMili(2, 0, 0, 0);
+        HourMilli nextDayAfterHourMilli = new HourMilli(2, 0, 0, 0);
 
-        ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMili);
+        ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMilli);
 
         DomainFactory.Irrelevant irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp);
         Assert.assertTrue(irrelevantAfter != null);
@@ -128,9 +129,9 @@ public class DomainFactoryTest {
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
         Date startDate = new Date(2016, 1, 1);
-        HourMili startHourMili = new HourMili(0, 0, 0, 0);
+        HourMilli startHourMilli = new HourMilli(0, 0, 0, 0);
 
-        ExactTimeStamp startExactTimeStamp = new ExactTimeStamp(startDate, startHourMili);
+        ExactTimeStamp startExactTimeStamp = new ExactTimeStamp(startDate, startHourMilli);
 
         Date scheduleDate = startDate;
         HourMinute scheduleHourMinute = new HourMinute(2, 0);
@@ -178,9 +179,9 @@ public class DomainFactoryTest {
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
 
         Date doneDate = startDate;
-        HourMili doneHourMili = new HourMili(1, 0, 0, 0);
+        HourMilli doneHourMilli = new HourMilli(1, 0, 0, 0);
 
-        ExactTimeStamp doneExactTimeStamp = new ExactTimeStamp(doneDate, doneHourMili);
+        ExactTimeStamp doneExactTimeStamp = new ExactTimeStamp(doneDate, doneHourMilli);
 
         rootInstance = domainFactory.setInstanceDone(doneExactTimeStamp, rootInstance.getInstanceKey(), true);
         Assert.assertTrue(rootInstance != null);
@@ -221,9 +222,9 @@ public class DomainFactoryTest {
         Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp));
 
         Date nextDayBeforeDate = new Date(2016, 1, 2);
-        HourMili nextDayBeforeHourMili = new HourMili(0, 0, 0, 0);
+        HourMilli nextDayBeforeHourMilli = new HourMilli(0, 0, 0, 0);
 
-        ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMili);
+        ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli);
 
         DomainFactory.Irrelevant irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp);
         Assert.assertTrue(irrelevantBefore != null);
@@ -238,9 +239,9 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getTaskListData(nextDayBeforeExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.size() == 3);
 
         Date nextDayAfterDate = nextDayBeforeDate;
-        HourMili nextDayAfterHourMili = new HourMili(2, 0, 0, 0);
+        HourMilli nextDayAfterHourMilli = new HourMilli(2, 0, 0, 0);
 
-        ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMili);
+        ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMilli);
 
         DomainFactory.Irrelevant irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp);
         Assert.assertTrue(irrelevantAfter != null);

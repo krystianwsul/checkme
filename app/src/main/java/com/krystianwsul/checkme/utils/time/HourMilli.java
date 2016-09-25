@@ -7,24 +7,24 @@ import android.support.annotation.NonNull;
 
 import java.util.Calendar;
 
-public class HourMili implements Comparable<HourMili>, Parcelable {
+public class HourMilli implements Comparable<HourMilli>, Parcelable {
     private final int mHour;
     private final int mMinute;
     private final int mSecond;
-    private final int mMili;
+    private final int mMilli;
 
-    public HourMili(int hour, int minute, int second, int mili) {
+    public HourMilli(int hour, int minute, int second, int milli) {
         mHour = hour;
         mMinute = minute;
         mSecond = second;
-        mMili = mili;
+        mMilli = milli;
     }
 
-    public HourMili(Calendar calendar) {
+    HourMilli(Calendar calendar) {
         mHour = calendar.get(Calendar.HOUR_OF_DAY);
         mMinute = calendar.get(Calendar.MINUTE);
         mSecond = calendar.get(Calendar.SECOND);
-        mMili = calendar.get(Calendar.MILLISECOND);
+        mMilli = calendar.get(Calendar.MILLISECOND);
     }
 
     public int getHour() {
@@ -35,46 +35,46 @@ public class HourMili implements Comparable<HourMili>, Parcelable {
         return mMinute;
     }
 
-    public int getSecond() {
+    int getSecond() {
         return mSecond;
     }
 
-    public int getMili() {
-        return mMili;
+    int getMilli() {
+        return mMilli;
     }
 
-    public int compareTo(@NonNull HourMili hourMili) {
-        int comparisonHour = Integer.valueOf(mHour).compareTo(hourMili.getHour());
+    public int compareTo(@NonNull HourMilli hourMilli) {
+        int comparisonHour = Integer.valueOf(mHour).compareTo(hourMilli.getHour());
 
         if (comparisonHour != 0)
             return comparisonHour;
 
-        int comparisonMinute = Integer.valueOf(mMinute).compareTo(hourMili.getMinute());
+        int comparisonMinute = Integer.valueOf(mMinute).compareTo(hourMilli.getMinute());
 
         if (comparisonMinute != 0)
             return comparisonMinute;
 
-        int comparisonSecond = Integer.valueOf(mSecond).compareTo(hourMili.getSecond());
+        int comparisonSecond = Integer.valueOf(mSecond).compareTo(hourMilli.getSecond());
 
         if (comparisonSecond != 0)
             return comparisonSecond;
 
-        return Integer.valueOf(mMili).compareTo(hourMili.getMili());
+        return Integer.valueOf(mMilli).compareTo(hourMilli.getMilli());
     }
 
     @Override
     public int hashCode() {
-        return mHour + mMinute + mSecond + mMili;
+        return mHour + mMinute + mSecond + mMilli;
     }
 
     @Override
     public boolean equals(Object object) {
-        return ((object != null) && (object instanceof HourMili) && (object == this || compareTo((HourMili) object) == 0));
+        return ((object != null) && (object instanceof HourMilli) && (object == this || compareTo((HourMilli) object) == 0));
     }
 
     @SuppressLint("DefaultLocale")
     public String toString() {
-        return String.format("%02d", mHour) + ":" + String.format("%02d", mMinute) + ":" + String.format("%02d", mSecond) + ":" + String.format("%03d", mMili);
+        return String.format("%02d", mHour) + ":" + String.format("%02d", mMinute) + ":" + String.format("%02d", mSecond) + ":" + String.format("%03d", mMilli);
     }
 
     @Override
@@ -87,23 +87,23 @@ public class HourMili implements Comparable<HourMili>, Parcelable {
         out.writeInt(mHour);
         out.writeInt(mMinute);
         out.writeInt(mSecond);
-        out.writeInt(mMili);
+        out.writeInt(mMilli);
     }
 
-    public static final Parcelable.Creator<HourMili> CREATOR = new Creator<HourMili>() {
+    public static final Parcelable.Creator<HourMilli> CREATOR = new Creator<HourMilli>() {
         @Override
-        public HourMili createFromParcel(Parcel source) {
+        public HourMilli createFromParcel(Parcel source) {
             int hour = source.readInt();
             int minute = source.readInt();
             int second = source.readInt();
-            int mili = source.readInt();
+            int milli = source.readInt();
 
-            return new HourMili(hour, minute, second, mili);
+            return new HourMilli(hour, minute, second, milli);
         }
 
         @Override
-        public HourMili[] newArray(int size) {
-            return new HourMili[size];
+        public HourMilli[] newArray(int size) {
+            return new HourMilli[size];
         }
     };
 }

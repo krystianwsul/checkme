@@ -31,9 +31,9 @@ public class TimeStamp implements Comparable<TimeStamp>, Parcelable {
         mLong = new GregorianCalendar(date.getYear(), date.getMonth() - 1, date.getDay(), hourMinute.getHour(), hourMinute.getMinute()).getTimeInMillis();
     }
 
-    public TimeStamp(long milis) {
+    public TimeStamp(long millis) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(milis);
+        calendar.setTimeInMillis(millis);
         calendar.set(Calendar.MILLISECOND ,0);
         mLong = calendar.getTimeInMillis();
     }

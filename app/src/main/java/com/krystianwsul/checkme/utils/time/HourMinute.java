@@ -16,7 +16,7 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
         return TimeStamp.getNow().getHourMinute();
     }
 
-    public static HourMinute getNextHour() {
+    static HourMinute getNextHour() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         calendar.set(Calendar.MINUTE, 0);
@@ -93,7 +93,7 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
         }
     };
 
-    public HourMili toHourMili() {
-        return new HourMili(mHour, mMinute, 0, 0);
+    public HourMilli toHourMilli() {
+        return new HourMilli(mHour, mMinute, 0, 0);
     }
 }

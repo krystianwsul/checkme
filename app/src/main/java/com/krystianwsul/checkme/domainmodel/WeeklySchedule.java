@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMili;
+import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
@@ -20,7 +20,7 @@ import junit.framework.Assert;
 
 import java.util.Calendar;
 
-public class WeeklySchedule extends RepeatingSchedule {
+class WeeklySchedule extends RepeatingSchedule {
     private final WeeklyScheduleRecord mWeeklyScheduleRecord;
 
     WeeklySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull WeeklyScheduleRecord weeklyScheduleRecord) {
@@ -47,7 +47,7 @@ public class WeeklySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected Instance getInstanceInDate(Task task, Date date, HourMili startHourMili, HourMili endHourMili) {
+    protected Instance getInstanceInDate(Task task, Date date, HourMilli startHourMilli, HourMilli endHourMilli) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(date != null);
 
@@ -59,10 +59,10 @@ public class WeeklySchedule extends RepeatingSchedule {
         HourMinute hourMinute = getTime().getHourMinute(day);
         Assert.assertTrue(hourMinute != null);
 
-        if (startHourMili != null && startHourMili.compareTo(hourMinute.toHourMili()) > 0)
+        if (startHourMilli != null && startHourMilli.compareTo(hourMinute.toHourMilli()) > 0)
             return null;
 
-        if (endHourMili != null && endHourMili.compareTo(hourMinute.toHourMili()) <= 0)
+        if (endHourMilli != null && endHourMilli.compareTo(hourMinute.toHourMilli()) <= 0)
             return null;
 
         DateTime scheduleDateTime = new DateTime(date, getTime());
@@ -71,7 +71,7 @@ public class WeeklySchedule extends RepeatingSchedule {
         return getDomainFactory().getInstance(task, scheduleDateTime);
     }
 
-    public Pair<DayOfWeek, Time> getDayOfWeekTime() {
+    Pair<DayOfWeek, Time> getDayOfWeekTime() {
         return new Pair<>(getDayOfWeek(), getTime());
     }
 

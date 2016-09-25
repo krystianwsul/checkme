@@ -129,6 +129,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 scheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
                 scheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
                 scheduleEntry.mScheduleType = scheduleDialogData.mScheduleType;
+                scheduleEntry.mError = null;
 
                 mCreateTaskAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
@@ -269,11 +270,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 Assert.assertTrue(mData != null);
                 Assert.assertTrue(mToolbarEditText != null);
 
-                updateError();
+                if (updateError())
+                    break;
 
                 String name = mToolbarEditText.getText().toString().trim();
-                if (TextUtils.isEmpty(name))
-                    break;
+                Assert.assertTrue(!TextUtils.isEmpty(name));
 
                 if (hasValueSchedule()) {
                     Assert.assertTrue(!hasValueParent());
@@ -641,11 +642,78 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
     }
 
-    private void updateError() {
+    private boolean updateError() {
+        Assert.assertTrue(mData != null);
+        Assert.assertTrue(mScheduleEntries != null);
+        Assert.assertTrue(mToolbarEditText != null);
+        Assert.assertTrue(mToolbarLayout != null);
+        Assert.assertTrue(mScheduleTimes != null);
+
+        boolean hasError = false;
+
         if (TextUtils.isEmpty(mToolbarEditText.getText())) {
             mToolbarLayout.setError(getString(R.string.nameError));
+
+            hasError = true;
         } else {
             mToolbarLayout.setError(null);
+        }
+
+        for (ScheduleEntry scheduleEntry : mScheduleEntries) {
+            Assert.assertTrue(scheduleEntry != null);
+
+            if (scheduleEntry.mScheduleType != ScheduleType.SINGLE)
+                continue;
+
+            Assert.assertTrue(scheduleEntry.mDate != null);
+
+            if ((mData.TaskData != null) && (mData.TaskData.ScheduleDatas != null) && mData.TaskData.ScheduleDatas.contains(scheduleEntry.getScheduleData()))
+                continue;
+
+            if (scheduleEntry.mDate.compareTo(Date.today()) < 0) {
+                setScheduleEntryError(scheduleEntry, R.string.error_date);
+
+                hasError = true;
+                continue;
+            }
+
+            HourMinute hourMinute;
+            TimePair timePair = scheduleEntry.mTimePairPersist.getTimePair();
+            if (timePair.CustomTimeId != null) {
+                Assert.assertTrue(timePair.HourMinute == null);
+
+                hourMinute = mData.CustomTimeDatas.get(timePair.CustomTimeId).HourMinutes.get(scheduleEntry.mDate.getDayOfWeek());
+            } else {
+                Assert.assertTrue(timePair.HourMinute != null);
+
+                hourMinute = timePair.HourMinute;
+            }
+
+            Assert.assertTrue(hourMinute != null);
+
+            if (hourMinute.compareTo(HourMinute.getNow()) <= 0) {
+                setScheduleEntryError(scheduleEntry, R.string.error_time);
+
+                hasError = true;
+            }
+        }
+
+        return hasError;
+    }
+
+    private void setScheduleEntryError(@NonNull ScheduleEntry scheduleEntry, int stringId) {
+        scheduleEntry.mError = getString(stringId);
+        Assert.assertTrue(!TextUtils.isEmpty(scheduleEntry.mError));
+
+        int index = mScheduleEntries.indexOf(scheduleEntry);
+        Assert.assertTrue(index >= 0);
+
+        View view = mScheduleTimes.getChildAt(index + 1);
+        if (view != null) {
+            CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
+            Assert.assertTrue(scheduleHolder != null);
+
+            scheduleHolder.mScheduleLayout.setError(scheduleEntry.mError);
         }
     }
 
@@ -930,6 +998,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 scheduleHolder.mScheduleLayout.setHint(getString(R.string.parentTask));
+                scheduleHolder.mScheduleLayout.setError(null);
 
                 if (mParent != null)
                     scheduleHolder.mScheduleText.setText(mParent.Name);
@@ -948,6 +1017,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 Assert.assertTrue(scheduleEntry != null);
 
                 scheduleHolder.mScheduleLayout.setHint(null);
+                scheduleHolder.mScheduleLayout.setError(scheduleEntry.mError);
 
                 scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas, CreateTaskActivity.this));
 
@@ -956,6 +1026,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 scheduleHolder.mScheduleLayout.setHint(getString(R.string.addReminder));
+                scheduleHolder.mScheduleLayout.setError(null);
 
                 scheduleHolder.mScheduleText.setText(null);
 
@@ -1054,6 +1125,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         DayOfWeek mDayOfWeek;
         TimePairPersist mTimePairPersist;
         ScheduleType mScheduleType;
+        String mError;
 
         ScheduleEntry(@NonNull Date date) {
             mDate = date;

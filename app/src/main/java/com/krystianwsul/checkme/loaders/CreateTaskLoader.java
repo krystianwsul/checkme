@@ -97,7 +97,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final List<ScheduleData> ScheduleDatas;
         public final String mNote;
 
-        public TaskData(@NonNull String name, Integer parentTaskId, List<ScheduleData> scheduleDatas, @Nullable String note) {
+        public TaskData(@NonNull String name, @Nullable Integer parentTaskId, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue((parentTaskId == null) || (scheduleDatas == null));
 

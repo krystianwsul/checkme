@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.utils.time;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import junit.framework.Assert;
 
@@ -26,12 +27,7 @@ public class TimePairPersist implements Parcelable {
             mHourMinute = timePair.HourMinute;
     }
 
-    public TimePairPersist(HourMinute hourMinute) {
-        Assert.assertTrue(hourMinute != null);
-        mHourMinute = hourMinute;
-    }
-
-    public TimePairPersist(TimePairPersist timePairPersist) {
+    private TimePairPersist(TimePairPersist timePairPersist) {
         Assert.assertTrue(timePairPersist != null);
 
         mCustomTimeId = timePairPersist.mCustomTimeId;
@@ -57,6 +53,7 @@ public class TimePairPersist implements Parcelable {
         return mCustomTimeId;
     }
 
+    @NonNull
     public TimePair getTimePair() {
         Assert.assertTrue(mHourMinute != null);
         if (mCustomTimeId != null)

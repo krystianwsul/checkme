@@ -670,6 +670,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if ((mData.TaskData != null) && (mData.TaskData.ScheduleDatas != null) && mData.TaskData.ScheduleDatas.contains(scheduleEntry.getScheduleData()))
                 continue;
 
+            if (scheduleEntry.mDate.compareTo(Date.today()) > 0)
+                continue;
+
             if (scheduleEntry.mDate.compareTo(Date.today()) < 0) {
                 setScheduleEntryError(scheduleEntry, R.string.error_date);
 

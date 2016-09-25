@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -118,7 +119,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (mHourMinutePickerPosition == null) {
                 clearParent();
 
-                mCreateTaskAdapter.addScheduleEntry(new ScheduleEntry(scheduleDialogData.mDate, scheduleDialogData.mDayOfWeek, scheduleDialogData.mTimePairPersist, scheduleDialogData.mScheduleType));
+                mCreateTaskAdapter.addScheduleEntry(new ScheduleEntry(scheduleDialogData.mDate, scheduleDialogData.mDayOfWeek, scheduleDialogData.mTimePairPersist, scheduleDialogData.mScheduleType, null));
             } else {
                 Assert.assertTrue(mHourMinutePickerPosition > 0);
 
@@ -1141,11 +1142,12 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             mScheduleType = ScheduleType.SINGLE;
         }
 
-        ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+        ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType, @Nullable String error) {
             mDate = date;
             mDayOfWeek = dayOfWeek;
             mTimePairPersist = timePairPersist;
             mScheduleType = scheduleType;
+            mError = error;
         }
 
         ScheduleEntry(@NonNull TimePair timePair) {
@@ -1244,6 +1246,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             parcel.writeSerializable(mDayOfWeek);
             parcel.writeParcelable(mTimePairPersist, 0);
             parcel.writeSerializable(mScheduleType);
+            parcel.writeString(mError);
         }
 
         @SuppressWarnings("unused")
@@ -1262,7 +1265,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 ScheduleType scheduleType = (ScheduleType) in.readSerializable();
                 Assert.assertTrue(scheduleType != null);
 
-                return new ScheduleEntry(date, dayOfWeek, timePairPersist, scheduleType);
+                String error = in.readString();
+
+                return new ScheduleEntry(date, dayOfWeek, timePairPersist, scheduleType, error);
             }
 
             @Override

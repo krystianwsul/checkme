@@ -781,10 +781,8 @@ public class DomainFactory {
         return new TaskListLoader.Data(childTaskDatas, note);
     }
 
-    public synchronized TickService.Data getTickServiceData(Context context) {
+    public synchronized TickService.Data getTickServiceData(@NonNull Context context, @Nullable Integer taskId) {
         MyCrashlytics.log("DomainFactory.getTickServiceData");
-
-        Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -812,7 +810,14 @@ public class DomainFactory {
                             .map(Instance::getName)
                             .collect(Collectors.toList());
 
-                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), children, task.getNote());
+                    boolean update;
+                    //noinspection SimplifiableIfStatement
+                    if (taskId != null)
+                        update = ((task.getId() == taskId) || Stream.of(childInstances).anyMatch(childInstance -> childInstance.getTaskId() == taskId));
+                    else
+                        update = false;
+
+                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), children, task.getNote(), update);
                 }));
 
         Map<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = Stream.of(mExistingInstances)

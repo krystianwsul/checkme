@@ -296,7 +296,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote);
                     }
 
-                    TickService.startService(this);
+                    TickService.startService(this, mTaskId);
 
                     finish();
                 } else if (hasValueParent()) {
@@ -316,7 +316,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name, mNote);
                     }
 
-                    TickService.startService(this);
+                    TickService.startService(this, mTaskId);
 
                     finish();
                 } else {  // no reminder
@@ -616,7 +616,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
         Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
     }
-
 
     @Override
     public void onLoaderReset(Loader<CreateTaskLoader.Data> loader) {

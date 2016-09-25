@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -40,34 +41,37 @@ public class TickService extends IntentService {
 
     private static final String SILENT_KEY = "silent";
     private static final String REGISTERING_KEY = "registering";
+    private static final String TASK_ID_KEY = "taskId";
 
     public static final String TICK_PREFERENCES = "tickPreferences";
     public static final String LAST_TICK_KEY = "lastTick";
 
     // DON'T HOLD STATE IN STATIC VARIABLES
 
-    public static void register(Context context) {
-        context.startService(getIntent(context, true, true));
+    public static void register(@NonNull Context context) {
+        context.startService(getIntent(context, true, true, null));
     }
 
-    public static void startService(Context context) {
-        Assert.assertTrue(context != null);
-
-        context.startService(getIntent(context, true, false));
+    public static void startService(@NonNull Context context) {
+        context.startService(getIntent(context, true, false, null));
     }
 
-    public static void startServiceDebug(Context context) {
-        Assert.assertTrue(context != null);
-
-        context.startService(getIntent(context, false, false));
+    public static void startService(@NonNull Context context, @Nullable Integer taskId) {
+        context.startService(getIntent(context, true, false, taskId));
     }
 
-    private static Intent getIntent(Context context, boolean silent, boolean registering) {
-        Assert.assertTrue(context != null);
+    public static void startServiceDebug(@NonNull Context context) {
+        context.startService(getIntent(context, false, false, null));
+    }
+
+    private static Intent getIntent(@NonNull Context context, boolean silent, boolean registering, @Nullable Integer taskId) {
+        Assert.assertTrue(!registering || silent);
 
         Intent intent = new Intent(context, TickService.class);
         intent.putExtra(SILENT_KEY, silent);
         intent.putExtra(REGISTERING_KEY, registering);
+        if (taskId != null)
+            intent.putExtra(TASK_ID_KEY, taskId);
         return intent;
     }
 
@@ -83,14 +87,18 @@ public class TickService extends IntentService {
         boolean silent = intent.getBooleanExtra(SILENT_KEY, false);
         boolean registering = intent.getBooleanExtra(REGISTERING_KEY, false);
 
+        Integer taskId = (intent.hasExtra(TASK_ID_KEY) ? intent.getIntExtra(TASK_ID_KEY, -1) : null);
+        Assert.assertTrue((taskId == null) || (taskId != -1));
+
         if (!silent) {
             SharedPreferences sharedPreferences = getSharedPreferences(TICK_PREFERENCES, MODE_PRIVATE);
             sharedPreferences.edit().putLong(LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
         }
 
-        Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this);
+        Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this, taskId);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Assert.assertTrue(notificationManager != null);
 
         List<InstanceKey> shownInstanceKeys = Stream.of(data.ShownInstanceDatas.values())
                 .map(shownInstanceData -> shownInstanceData.InstanceKey)
@@ -113,33 +121,49 @@ public class TickService extends IntentService {
         if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
             DomainFactory.getDomainFactory(this).updateInstancesShown(this, data.DataId, showInstanceKeys, hideInstanceKeys);
 
+        Log.e("asdf", "a");
         if (registering) {
+            Log.e("asdf", "b");
+            Assert.assertTrue(silent);
+
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
-                notifyGroup(data.NotificationInstanceDatas.values(), silent);
+                notifyGroup(data.NotificationInstanceDatas.values(), true);
             } else { // show instances
                 for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values()) {
                     Assert.assertTrue(notificationInstanceData != null);
-                    notifyInstance(notificationInstanceData, silent);
+                    notifyInstance(notificationInstanceData, true);
                 }
             }
         } else {
+            Log.e("asdf", "c");
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
+                Log.e("asdf", "d");
                 if (data.ShownInstanceDatas.size() > MAX_NOTIFICATIONS) { // group shown
-                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
+                    Log.e("asdf", "e");
+                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
+                        Log.e("asdf", "f");
                         notifyGroup(data.NotificationInstanceDatas.values(), silent);
+                    } else if (Stream.of(data.NotificationInstanceDatas.values()).anyMatch(notificationInstanceData -> notificationInstanceData.mUpdate)) {
+                        Log.e("asdf", "updating group");
+                        notifyGroup(data.NotificationInstanceDatas.values(), true);
+                    }
                 } else { // instances shown
+                    Log.e("asdf", "g");
                     for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
                         notificationManager.cancel(shownInstanceData.NotificationId);
 
                     notifyGroup(data.NotificationInstanceDatas.values(), silent);
                 }
             } else { // show instances
+                Log.e("asdf", "h");
                 if (data.ShownInstanceDatas.size() > MAX_NOTIFICATIONS) { // group shown
+                    Log.e("asdf", "i");
                     notificationManager.cancel(0);
 
                     for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values())
                         notifyInstance(notificationInstanceData, silent);
                 } else { // instances shown
+                    Log.e("asdf", "j");
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                         ShownInstanceData shownInstanceData = data.ShownInstanceDatas.get(hideInstanceKey);
                         Assert.assertTrue(shownInstanceData != null);
@@ -153,12 +177,17 @@ public class TickService extends IntentService {
 
                         notifyInstance(notificationInstanceData, silent);
                     }
+
+                    Stream.of(data.NotificationInstanceDatas.values())
+                            .filter(notificationInstanceData -> notificationInstanceData.mUpdate)
+                            .filter(notificationInstanceData -> !showInstanceKeys.contains(notificationInstanceData.InstanceKey))
+                            .forEach(notificationInstanceData -> notifyInstance(notificationInstanceData, true));
                 }
             }
         }
 
         if (data.NextAlarm != null) {
-            Intent nextIntent = getIntent(this, false, false);
+            Intent nextIntent = getIntent(this, false, false, null);
 
             PendingIntent pendingIntent = PendingIntent.getService(this, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -334,8 +363,9 @@ public class TickService extends IntentService {
         final TimeStamp InstanceTimeStamp;
         final List<String> Children;
         final String mNote;
+        final boolean mUpdate;
 
-        public NotificationInstanceData(@NonNull InstanceKey instanceKey, @NonNull String name, int notificationId, @NonNull String displayText, @NonNull TimeStamp instanceTimeStamp, @NonNull List<String> children, @Nullable String note) {
+        public NotificationInstanceData(@NonNull InstanceKey instanceKey, @NonNull String name, int notificationId, @NonNull String displayText, @NonNull TimeStamp instanceTimeStamp, @NonNull List<String> children, @Nullable String note, boolean update) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
 
@@ -346,6 +376,7 @@ public class TickService extends IntentService {
             InstanceTimeStamp = instanceTimeStamp;
             Children = children;
             mNote = note;
+            mUpdate = update;
         }
     }
 

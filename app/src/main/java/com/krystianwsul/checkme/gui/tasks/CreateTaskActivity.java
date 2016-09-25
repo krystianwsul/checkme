@@ -282,56 +282,42 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        if (hasValueSchedule()) {
-                            if (updateScheduleRootTask(mTaskId, name))
-                                finish();
-                        } else {
-                            DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name, mNote);
-                            finish();
-                        }
+                        DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskId, name, getScheduleDatas(), mNote);
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
+                        Assert.assertTrue(mTaskIds.size() > 1);
 
-                        if (hasValueSchedule()) {
-                            if (createScheduleRootJoinTask(name, mTaskIds))
-                                finish();
-                        } else {
-                            DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds, mNote);
-                            finish();
-                        }
+                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, getScheduleDatas(), mTaskIds, mNote);
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        if (hasValueSchedule()) {
-                            if (createScheduleRootTask(name))
-                                finish();
-                        } else {
-                            DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote);
-                            finish();
-                        }
+                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote);
                     }
+
+                    TickService.startService(this);
+
+                    finish();
                 } else if (hasValueParent()) {
                     if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
                         DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskId, name, mParent.TaskId, mNote);
-                        finish();
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
-
-                        Assert.assertTrue(!TextUtils.isEmpty(name));
                         Assert.assertTrue(mTaskIds.size() > 1);
 
                         DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, mParent.TaskId, name, mTaskIds, mNote);
-                        finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
                         DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name, mNote);
-                        finish();
                     }
-                } else {
+
+                    TickService.startService(this);
+
+                    finish();
+                } else {  // no reminder
                     if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
@@ -779,63 +765,15 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
     }
 
-    private boolean createScheduleRootTask(String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        if (mData == null)
-            return false;
-
+    @NonNull
+    private List<CreateTaskLoader.ScheduleData> getScheduleDatas() {
         List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
                 .map(ScheduleEntry::getScheduleData)
                 .collect(Collectors.toList());
-        Assert.assertTrue(scheduleDatas != null);
+
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, scheduleDatas, mNote);
-
-        TickService.startService(this);
-
-        return true;
-    }
-
-    private boolean updateScheduleRootTask(int rootTaskId, String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        if (mData == null)
-            return false;
-
-        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
-                .map(ScheduleEntry::getScheduleData)
-                .collect(Collectors.toList());
-        Assert.assertTrue(scheduleDatas != null);
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-
-        DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, rootTaskId, name, scheduleDatas, mNote);
-
-        TickService.startService(this);
-
-        return true;
-    }
-
-    private boolean createScheduleRootJoinTask(String name, List<Integer> joinTaskIds) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        if (mData == null)
-            return false;
-
-        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(mScheduleEntries)
-                .map(ScheduleEntry::getScheduleData)
-                .collect(Collectors.toList());
-        Assert.assertTrue(scheduleDatas != null);
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-
-        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, scheduleDatas, joinTaskIds, mNote);
-
-        TickService.startService(this);
-
-        return true;
+        return scheduleDatas;
     }
 
     @SuppressWarnings("RedundantIfStatement")

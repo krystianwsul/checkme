@@ -15,7 +15,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -121,9 +120,7 @@ public class TickService extends IntentService {
         if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
             DomainFactory.getDomainFactory(this).updateInstancesShown(this, data.DataId, showInstanceKeys, hideInstanceKeys);
 
-        Log.e("asdf", "a");
         if (registering) {
-            Log.e("asdf", "b");
             Assert.assertTrue(silent);
 
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
@@ -135,35 +132,26 @@ public class TickService extends IntentService {
                 }
             }
         } else {
-            Log.e("asdf", "c");
             if (data.NotificationInstanceDatas.size() > MAX_NOTIFICATIONS) { // show group
-                Log.e("asdf", "d");
                 if (data.ShownInstanceDatas.size() > MAX_NOTIFICATIONS) { // group shown
-                    Log.e("asdf", "e");
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        Log.e("asdf", "f");
                         notifyGroup(data.NotificationInstanceDatas.values(), silent);
                     } else if (Stream.of(data.NotificationInstanceDatas.values()).anyMatch(notificationInstanceData -> notificationInstanceData.mUpdate)) {
-                        Log.e("asdf", "updating group");
                         notifyGroup(data.NotificationInstanceDatas.values(), true);
                     }
                 } else { // instances shown
-                    Log.e("asdf", "g");
                     for (ShownInstanceData shownInstanceData : data.ShownInstanceDatas.values())
                         notificationManager.cancel(shownInstanceData.NotificationId);
 
                     notifyGroup(data.NotificationInstanceDatas.values(), silent);
                 }
             } else { // show instances
-                Log.e("asdf", "h");
                 if (data.ShownInstanceDatas.size() > MAX_NOTIFICATIONS) { // group shown
-                    Log.e("asdf", "i");
                     notificationManager.cancel(0);
 
                     for (NotificationInstanceData notificationInstanceData : data.NotificationInstanceDatas.values())
                         notifyInstance(notificationInstanceData, silent);
                 } else { // instances shown
-                    Log.e("asdf", "j");
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                         ShownInstanceData shownInstanceData = data.ShownInstanceDatas.get(hideInstanceKey);
                         Assert.assertTrue(shownInstanceData != null);

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tree;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
 import com.annimon.stream.Collectors;
@@ -498,15 +497,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 Assert.assertTrue(newParentPosition >= 0);
 
                 if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
-                    Log.e("asdf", "notifyItemInserted(" + newParentPosition + ")");
                     treeViewAdapter.notifyItemInserted(newParentPosition);
 
                     if (newParentPosition > 0) {
-                        Log.e("asdf", "notifyItemChanged(" + (newParentPosition - 1) + ")");
                         treeViewAdapter.notifyItemChanged(newParentPosition - 1);
                     }
                 } else {
-                    Log.e("asdf", "notifyItemChanged(" + newParentPosition + ")");
                     treeViewAdapter.notifyItemChanged(newParentPosition);
                 }
             }

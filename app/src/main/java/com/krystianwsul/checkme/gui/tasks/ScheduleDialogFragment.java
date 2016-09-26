@@ -16,6 +16,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -58,6 +59,9 @@ public class ScheduleDialogFragment extends DialogFragment {
     private TextView mScheduleDialogDate;
 
     private Spinner mScheduleDialogDay;
+
+    private LinearLayout mScheduleDialogMonthLayout;
+    private TextView mScheduleDialogDayMonth;
 
     private TextInputLayout mScheduleDialogTimeLayout;
     private TextView mScheduleDialogTime;
@@ -158,6 +162,12 @@ public class ScheduleDialogFragment extends DialogFragment {
 
         mScheduleDialogDay = (Spinner) view.findViewById(R.id.schedule_dialog_day);
         Assert.assertTrue(mScheduleDialogDay != null);
+
+        mScheduleDialogMonthLayout = (LinearLayout) view.findViewById(R.id.schedule_dialog_month_layout);
+        Assert.assertTrue(mScheduleDialogMonthLayout != null);
+
+        mScheduleDialogDayMonth = (TextView) view.findViewById(R.id.schedule_dialog_day_month);
+        Assert.assertTrue(mScheduleDialogDayMonth != null);
 
         mScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_time_layout);
         Assert.assertTrue(mScheduleDialogTimeLayout != null);
@@ -307,6 +317,8 @@ public class ScheduleDialogFragment extends DialogFragment {
             }
         });
 
+        mScheduleDialogDayMonth.setText(Integer.valueOf(mScheduleDialogData.mDayOfMonth).toString());
+
         if (mCustomTimeDatas != null)
             initialize();
     }
@@ -342,16 +354,25 @@ public class ScheduleDialogFragment extends DialogFragment {
             case SINGLE:
                 mScheduleDialogDateLayout.setVisibility(View.VISIBLE);
                 mScheduleDialogDay.setVisibility(View.INVISIBLE);
+                mScheduleDialogMonthLayout.setVisibility(View.INVISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
                 break;
             case DAILY:
                 mScheduleDialogDateLayout.setVisibility(View.INVISIBLE);
                 mScheduleDialogDay.setVisibility(View.INVISIBLE);
+                mScheduleDialogMonthLayout.setVisibility(View.INVISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
                 break;
             case WEEKLY:
                 mScheduleDialogDateLayout.setVisibility(View.INVISIBLE);
                 mScheduleDialogDay.setVisibility(View.VISIBLE);
+                mScheduleDialogMonthLayout.setVisibility(View.INVISIBLE);
+                mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                break;
+            case MONTHLY:
+                mScheduleDialogDateLayout.setVisibility(View.INVISIBLE);
+                mScheduleDialogDay.setVisibility(View.INVISIBLE);
+                mScheduleDialogMonthLayout.setVisibility(View.VISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
                 break;
             default:
@@ -430,6 +451,17 @@ public class ScheduleDialogFragment extends DialogFragment {
                 }
 
                 break;
+            case MONTHLY:
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
+                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                    Assert.assertTrue(customTimeData != null);
+
+                    mScheduleDialogTime.setText(customTimeData.Name);
+                } else {
+                    mScheduleDialogTime.setText(mScheduleDialogData.mTimePairPersist.getHourMinute().toString());
+                }
+
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -488,12 +520,17 @@ public class ScheduleDialogFragment extends DialogFragment {
     public static class ScheduleDialogData implements Parcelable {
         Date mDate;
         DayOfWeek mDayOfWeek;
+        int mDayOfMonth;
         final TimePairPersist mTimePairPersist;
         ScheduleType mScheduleType;
 
-        ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+        ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, int dayOfMonth, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+            Assert.assertTrue(dayOfMonth > 0);
+            Assert.assertTrue(dayOfMonth < 29);
+
             mDate = date;
             mDayOfWeek = dayOfWeek;
+            mDayOfMonth = dayOfMonth;
             mTimePairPersist = timePairPersist;
             mScheduleType = scheduleType;
         }
@@ -502,6 +539,7 @@ public class ScheduleDialogFragment extends DialogFragment {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(mDate, flags);
             dest.writeSerializable(mDayOfWeek);
+            dest.writeInt(mDayOfMonth);
             dest.writeParcelable(mTimePairPersist, flags);
             dest.writeSerializable(mScheduleType);
         }
@@ -517,10 +555,11 @@ public class ScheduleDialogFragment extends DialogFragment {
             public ScheduleDialogData createFromParcel(Parcel in) {
                 Date date = in.readParcelable(Date.class.getClassLoader());
                 DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
+                int dayOfMonth = in.readInt();
                 TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
                 ScheduleType scheduleType = (ScheduleType) in.readSerializable();
 
-                return new ScheduleDialogData(date, dayOfWeek, timePairPersist, scheduleType);
+                return new ScheduleDialogData(date, dayOfWeek, dayOfMonth, timePairPersist, scheduleType);
             }
 
             @Override

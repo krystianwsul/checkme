@@ -4,5 +4,6 @@
         <item>Single</item>
         <item>Daily</item>
         <item>Weekly</item>
+        <item>Monthly</item>
     </string-array>
 </resources>

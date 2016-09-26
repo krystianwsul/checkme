@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="month">
+        <item>start</item>
+        <item>end</item>
+    </string-array>
+</resources>

@@ -53,5 +53,6 @@
     <string name="addReminder">Dodaj przypomnienie</string>
     <string name="selectAll">Zaznacz wszystko</string>
     <string name="note">Notatka</string>
-    <string name="monthDay">dzień</string>
+    <string name="monthDay">dzień od</string>
+    <string name="monthDayEnd">miesiąca</string>
 </resources>

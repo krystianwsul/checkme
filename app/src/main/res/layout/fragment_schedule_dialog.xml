@@ -70,8 +70,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/textPrimary"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/textPrimary"
                 android:text="@string/monthDay"/>
+
+            <Spinner
+                android:id="@+id/schedule_dialog_month_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Widget.AppCompat.Spinner.Underlined"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/textPrimary"
+                android:textColor="@color/textPrimary"
+                android:text="@string/monthDayEnd"/>
 
         </LinearLayout>
 
@@ -94,7 +107,7 @@
             android:focusableInTouchMode="false"
             android:singleLine="true"
             android:textSize="@dimen/textPrimary"
-            tools:ignore="LabelFor,TextFields"/>
+            tools:ignore="Deprecated,LabelFor,TextFields"/>
 
     </android.support.design.widget.TextInputLayout>
 

@@ -26,6 +26,8 @@ import com.afollestad.materialdialogs.internal.MDButton;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
+import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder;
+import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
@@ -42,8 +44,12 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Vector;
 
 public class ScheduleDialogFragment extends DialogFragment {
     private static final String SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData";
@@ -52,6 +58,8 @@ public class ScheduleDialogFragment extends DialogFragment {
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_LIST_FRAGMENT_TAG = "timeListFragment";
     private static final String TIME_PICKER_TAG = "timePicker";
+
+    private static final String NUMBER_PICKER_TAG = "number_dialog";
 
     private Spinner mScheduleType;
 
@@ -62,6 +70,7 @@ public class ScheduleDialogFragment extends DialogFragment {
 
     private LinearLayout mScheduleDialogMonthLayout;
     private TextView mScheduleDialogDayMonth;
+    private Spinner mScheduleDialogMonthEnd;
 
     private TextInputLayout mScheduleDialogTimeLayout;
     private TextView mScheduleDialogTime;
@@ -106,6 +115,14 @@ public class ScheduleDialogFragment extends DialogFragment {
 
         mScheduleDialogData.mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
         updateFields();
+    };
+
+    private final NumberPickerDialogFragment.NumberPickerDialogHandlerV2 mNumberPickerDialogHandlerV2 = new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
+        @Override
+        public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
+            mScheduleDialogData.mDayOfMonth = fullNumber.intValue();
+            updateFields();
+        }
     };
 
     @NonNull
@@ -169,6 +186,9 @@ public class ScheduleDialogFragment extends DialogFragment {
         mScheduleDialogDayMonth = (TextView) view.findViewById(R.id.schedule_dialog_day_month);
         Assert.assertTrue(mScheduleDialogDayMonth != null);
 
+        mScheduleDialogMonthEnd = (Spinner) view.findViewById(R.id.schedule_dialog_month_end);
+        Assert.assertTrue(mScheduleDialogMonthEnd != null);
+
         mScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_time_layout);
         Assert.assertTrue(mScheduleDialogTimeLayout != null);
 
@@ -181,6 +201,7 @@ public class ScheduleDialogFragment extends DialogFragment {
         return materialDialog;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -198,7 +219,6 @@ public class ScheduleDialogFragment extends DialogFragment {
         }
 
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.schedule_types, R.layout.spinner_no_padding);
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mScheduleType.setAdapter(typeAdapter);
 
@@ -317,7 +337,39 @@ public class ScheduleDialogFragment extends DialogFragment {
             }
         });
 
-        mScheduleDialogDayMonth.setText(Integer.valueOf(mScheduleDialogData.mDayOfMonth).toString());
+        mScheduleDialogDayMonth.setOnClickListener(v -> new NumberPickerBuilder()
+                .setPlusMinusVisibility(View.GONE)
+                .setDecimalVisibility(View.GONE)
+                .setMinNumber(BigDecimal.ONE)
+                .setMaxNumber(new BigDecimal(28))
+                .setStyleResId(R.style.BetterPickersDialogFragment_Light)
+                .setFragmentManager(getChildFragmentManager())
+                .addNumberPickerDialogHandler(mNumberPickerDialogHandlerV2)
+                .show());
+
+        NumberPickerDialogFragment numberPickerDialogFragment = (NumberPickerDialogFragment) getChildFragmentManager().findFragmentByTag(NUMBER_PICKER_TAG);
+        if (numberPickerDialogFragment != null)
+            numberPickerDialogFragment.setNumberPickerDialogHandlersV2(new Vector<>(Collections.singletonList(mNumberPickerDialogHandlerV2)));
+
+        ArrayAdapter<CharSequence> monthEndAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.month, R.layout.spinner_no_padding);
+        monthEndAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mScheduleDialogMonthEnd.setAdapter(monthEndAdapter);
+
+        mScheduleDialogMonthEnd.setSelection(mScheduleDialogData.mBeginningOfMonth ? 0 : 1);
+
+        mScheduleDialogMonthEnd.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Assert.assertTrue(position == 0 || position == 1);
+
+                mScheduleDialogData.mBeginningOfMonth = (position == 0);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         if (mCustomTimeDatas != null)
             initialize();
@@ -452,6 +504,8 @@ public class ScheduleDialogFragment extends DialogFragment {
 
                 break;
             case MONTHLY:
+                mScheduleDialogDayMonth.setText(Integer.valueOf(mScheduleDialogData.mDayOfMonth).toString());
+
                 if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
                     CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
                     Assert.assertTrue(customTimeData != null);
@@ -521,16 +575,18 @@ public class ScheduleDialogFragment extends DialogFragment {
         Date mDate;
         DayOfWeek mDayOfWeek;
         int mDayOfMonth;
+        boolean mBeginningOfMonth;
         final TimePairPersist mTimePairPersist;
         ScheduleType mScheduleType;
 
-        ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, int dayOfMonth, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+        ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, int dayOfMonth, boolean beginningOfMonth, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
             Assert.assertTrue(dayOfMonth > 0);
             Assert.assertTrue(dayOfMonth < 29);
 
             mDate = date;
             mDayOfWeek = dayOfWeek;
             mDayOfMonth = dayOfMonth;
+            mBeginningOfMonth = beginningOfMonth;
             mTimePairPersist = timePairPersist;
             mScheduleType = scheduleType;
         }
@@ -540,6 +596,7 @@ public class ScheduleDialogFragment extends DialogFragment {
             dest.writeParcelable(mDate, flags);
             dest.writeSerializable(mDayOfWeek);
             dest.writeInt(mDayOfMonth);
+            dest.writeInt(mBeginningOfMonth ? 1 : 0);
             dest.writeParcelable(mTimePairPersist, flags);
             dest.writeSerializable(mScheduleType);
         }
@@ -556,10 +613,11 @@ public class ScheduleDialogFragment extends DialogFragment {
                 Date date = in.readParcelable(Date.class.getClassLoader());
                 DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
                 int dayOfMonth = in.readInt();
+                boolean beginningOfMonth = (in.readInt() == 1);
                 TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
                 ScheduleType scheduleType = (ScheduleType) in.readSerializable();
 
-                return new ScheduleDialogData(date, dayOfWeek, dayOfMonth, timePairPersist, scheduleType);
+                return new ScheduleDialogData(date, dayOfWeek, dayOfMonth, beginningOfMonth, timePairPersist, scheduleType);
             }
 
             @Override

@@ -95,20 +95,36 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
     private boolean mFirst = true;
 
-    private final ParentPickerFragment.Listener mParentFragmentListener = taskData -> {
-        Assert.assertTrue(taskData != null);
+    private final ParentPickerFragment.Listener mParentFragmentListener = new ParentPickerFragment.Listener() {
+        @Override
+        public void onTaskSelected(@NonNull CreateTaskLoader.TaskTreeData taskTreeData) {
+            clearSchedules();
 
-        clearSchedules();
+            mParent = taskTreeData;
 
-        mParent = taskData;
+            View view = mScheduleTimes.getChildAt(0);
+            Assert.assertTrue(view != null);
 
-        View view = mScheduleTimes.getChildAt(0);
-        Assert.assertTrue(view != null);
+            CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
+            Assert.assertTrue(scheduleHolder != null);
 
-        CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
-        Assert.assertTrue(scheduleHolder != null);
+            scheduleHolder.mScheduleText.setText(mParent.Name);
+        }
 
-        scheduleHolder.mScheduleText.setText(mParent.Name);
+        @Override
+        public void onTaskDeleted() {
+            Assert.assertTrue(mParent != null);
+
+            mParent = null;
+
+            View view = mScheduleTimes.getChildAt(0);
+            Assert.assertTrue(view != null);
+
+            CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
+            Assert.assertTrue(scheduleHolder != null);
+
+            scheduleHolder.mScheduleText.setText(null);
+        }
     };
 
     private final ScheduleDialogFragment.ScheduleDialogListener mScheduleDialogListener = new ScheduleDialogFragment.ScheduleDialogListener() {
@@ -1009,7 +1025,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     scheduleHolder.mScheduleText.setText(null);
 
                 scheduleHolder.mScheduleText.setOnClickListener(v -> {
-                    ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance();
+                    ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance(mParent != null);
                     parentPickerFragment.show(getSupportFragmentManager(), PARENT_PICKER_FRAGMENT_TAG);
                     parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
                 });

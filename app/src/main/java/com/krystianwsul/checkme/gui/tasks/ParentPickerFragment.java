@@ -40,6 +40,8 @@ import java.util.TreeMap;
 public class ParentPickerFragment extends DialogFragment {
     private static final String EXPANDED_TASKS_KEY = "expandedTasks";
 
+    private static final String SHOW_DELETE_KEY = "showDelete";
+
     private RecyclerView mRecyclerView;
 
     private TreeMap<Integer, CreateTaskLoader.TaskTreeData> mTaskDatas;
@@ -48,8 +50,14 @@ public class ParentPickerFragment extends DialogFragment {
     private TreeViewAdapter mTreeViewAdapter;
     private List<Integer> mExpandedTaskIds;
 
-    public static ParentPickerFragment newInstance() {
-        return new ParentPickerFragment();
+    public static ParentPickerFragment newInstance(boolean showDelete) {
+        ParentPickerFragment parentPickerFragment = new ParentPickerFragment();
+
+        Bundle args = new Bundle();
+        args.putBoolean(SHOW_DELETE_KEY, showDelete);
+        parentPickerFragment.setArguments(args);
+
+        return parentPickerFragment;
     }
 
     public ParentPickerFragment() {
@@ -67,10 +75,22 @@ public class ParentPickerFragment extends DialogFragment {
             }
         }
 
-        MaterialDialog materialDialog = new MaterialDialog.Builder(getActivity())
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity())
                 .title(R.string.parent_dialog_title)
                 .customView(R.layout.fragment_parent_picker, false)
-                .build();
+                .negativeText(android.R.string.cancel);
+
+        Bundle args = getArguments();
+        Assert.assertTrue(args != null);
+        Assert.assertTrue(args.containsKey(SHOW_DELETE_KEY));
+
+        boolean showDelete = args.getBoolean(SHOW_DELETE_KEY);
+
+        if (showDelete)
+            builder.neutralText(R.string.delete)
+                    .onNeutral((dialog, which) -> mListener.onTaskDeleted());
+
+        MaterialDialog materialDialog = builder.build();
 
         mRecyclerView = (RecyclerView) materialDialog.getCustomView();
         Assert.assertTrue(mRecyclerView != null);
@@ -493,6 +513,8 @@ public class ParentPickerFragment extends DialogFragment {
     }
 
     public interface Listener {
-        void onTaskSelected(CreateTaskLoader.TaskTreeData taskTreeData);
+        void onTaskSelected(@NonNull CreateTaskLoader.TaskTreeData taskTreeData);
+
+        void onTaskDeleted();
     }
 }

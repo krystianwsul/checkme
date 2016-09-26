@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="schedule_spinner">
-        <item>Single</item>
-        <item>Daily</item>
-        <item>Weekly</item>
-        <item>No reminder</item>
-    </string-array>
-</resources>

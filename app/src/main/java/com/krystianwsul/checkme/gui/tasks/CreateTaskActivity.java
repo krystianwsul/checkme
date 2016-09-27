@@ -1249,17 +1249,17 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
             switch (mScheduleType) {
                 case SINGLE: {
-                    return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), 1, true, mTimePairPersist, ScheduleType.SINGLE); // todo monthly
+                    return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), true, 1, 1, DayOfWeek.SUNDAY, true, mTimePairPersist, ScheduleType.SINGLE); // todo monthly
                 }
                 case DAILY: {
                     Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
 
-                    return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), 1, true, mTimePairPersist, ScheduleType.DAILY); // todo monthly
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, 1, 1, DayOfWeek.SUNDAY, true, mTimePairPersist, ScheduleType.DAILY); // todo monthly
                 }
                 case WEEKLY: {
                     Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
 
-                    return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, 1, true, mTimePairPersist, ScheduleType.WEEKLY); // todo monthly
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, true, 1, 1, DayOfWeek.SUNDAY, true, mTimePairPersist, ScheduleType.WEEKLY); // todo monthly
                 }
                 default: { // todo monthly
                     throw new UnsupportedOperationException();

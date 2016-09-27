@@ -40,7 +40,8 @@ public class TickService extends IntentService {
 
     private static final String SILENT_KEY = "silent";
     private static final String REGISTERING_KEY = "registering";
-    private static final String TASK_ID_KEY = "taskId";
+    private static final String TASK_IDS_KEY = "taskIds";
+    private static final String TASK_UPDATED_KEY = "taskUpdated";
 
     public static final String TICK_PREFERENCES = "tickPreferences";
     public static final String LAST_TICK_KEY = "lastTick";
@@ -48,29 +49,28 @@ public class TickService extends IntentService {
     // DON'T HOLD STATE IN STATIC VARIABLES
 
     public static void register(@NonNull Context context) {
-        context.startService(getIntent(context, true, true, null));
+        context.startService(getIntent(context, true, true, new ArrayList<>()));
     }
 
     public static void startService(@NonNull Context context) {
-        context.startService(getIntent(context, true, false, null));
+        context.startService(getIntent(context, true, false, new ArrayList<>()));
     }
 
-    public static void startService(@NonNull Context context, @Nullable Integer taskId) {
-        context.startService(getIntent(context, true, false, taskId));
+    public static void startService(@NonNull Context context, @NonNull ArrayList<Integer> taskIds) {
+        context.startService(getIntent(context, true, false, taskIds));
     }
 
     public static void startServiceDebug(@NonNull Context context) {
-        context.startService(getIntent(context, false, false, null));
+        context.startService(getIntent(context, false, false, new ArrayList<>()));
     }
 
-    private static Intent getIntent(@NonNull Context context, boolean silent, boolean registering, @Nullable Integer taskId) {
+    private static Intent getIntent(@NonNull Context context, boolean silent, boolean registering, @NonNull ArrayList<Integer> taskIds) {
         Assert.assertTrue(!registering || silent);
 
         Intent intent = new Intent(context, TickService.class);
         intent.putExtra(SILENT_KEY, silent);
         intent.putExtra(REGISTERING_KEY, registering);
-        if (taskId != null)
-            intent.putExtra(TASK_ID_KEY, taskId);
+        intent.putExtra(TASK_IDS_KEY, taskIds);
         return intent;
     }
 
@@ -82,19 +82,20 @@ public class TickService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
         Assert.assertTrue(intent.hasExtra(REGISTERING_KEY));
+        Assert.assertTrue(intent.hasExtra(TASK_IDS_KEY));
 
         boolean silent = intent.getBooleanExtra(SILENT_KEY, false);
         boolean registering = intent.getBooleanExtra(REGISTERING_KEY, false);
 
-        Integer taskId = (intent.hasExtra(TASK_ID_KEY) ? intent.getIntExtra(TASK_ID_KEY, -1) : null);
-        Assert.assertTrue((taskId == null) || (taskId != -1));
+        List<Integer> taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
+        Assert.assertTrue(taskIds != null);
 
         if (!silent) {
             SharedPreferences sharedPreferences = getSharedPreferences(TICK_PREFERENCES, MODE_PRIVATE);
             sharedPreferences.edit().putLong(LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
         }
 
-        Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this, taskId);
+        Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this, taskIds);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Assert.assertTrue(notificationManager != null);
@@ -175,7 +176,7 @@ public class TickService extends IntentService {
         }
 
         if (data.NextAlarm != null) {
-            Intent nextIntent = getIntent(this, false, false, null);
+            Intent nextIntent = getIntent(this, false, false, new ArrayList<>());
 
             PendingIntent pendingIntent = PendingIntent.getService(this, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 

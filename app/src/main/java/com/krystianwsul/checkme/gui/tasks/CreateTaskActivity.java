@@ -311,11 +311,9 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                         DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote);
                     }
-
-                    TickService.startService(this, mTaskId);
-
-                    finish();
                 } else if (hasValueParent()) {
+                    Assert.assertTrue(mParent != null);
+
                     if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
@@ -331,10 +329,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                         DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name, mNote);
                     }
-
-                    TickService.startService(this, mTaskId);
-
-                    finish();
                 } else {  // no reminder
                     if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
@@ -350,9 +344,29 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                         DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote);
                     }
-
-                    finish();
                 }
+
+                ArrayList<Integer> taskIds = new ArrayList<>();
+
+                // this task
+                if (mTaskId != null)
+                    taskIds.add(mTaskId);
+
+                // new parent
+                if (mParent != null)
+                    taskIds.add(mParent.TaskId);
+
+                // old parent of single task
+                if (mData.TaskData != null && mData.TaskData.ParentTaskId != null)
+                    taskIds.add(mData.TaskData.ParentTaskId);
+
+                // old parent of multiple tasks
+                if (mParentTaskIdHint != null)
+                    taskIds.add(mParentTaskIdHint);
+
+                TickService.startService(this, taskIds);
+
+                finish();
 
                 break;
             case android.R.id.home:

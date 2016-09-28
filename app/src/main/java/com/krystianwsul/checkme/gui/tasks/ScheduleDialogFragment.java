@@ -13,9 +13,11 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Spinner;
@@ -74,12 +76,15 @@ public class ScheduleDialogFragment extends DialogFragment {
 
     private RadioButton mScheduleDialogMonthDayRadio;
     private TextView mScheduleDialogMonthDayNumber;
+    private TextView mScheduleDialogMonthDayLabel;
 
     private RadioButton mScheduleDialogMonthWeekRadio;
     private TextView mScheduleDialogMonthWeekNumber;
     private Spinner mScheduleDialogMonthWeekDay;
 
     private Spinner mScheduleDialogMonthEnd;
+
+    private View mScheduleDialogDailyPadding;
 
     private TextInputLayout mScheduleDialogTimeLayout;
     private TextView mScheduleDialogTime;
@@ -212,6 +217,9 @@ public class ScheduleDialogFragment extends DialogFragment {
         mScheduleDialogMonthDayNumber = (TextView) view.findViewById(R.id.schedule_dialog_month_day_number);
         Assert.assertTrue(mScheduleDialogMonthDayNumber != null);
 
+        mScheduleDialogMonthDayLabel = (TextView) view.findViewById(R.id.schedule_dialog_month_day_label);
+        Assert.assertTrue(mScheduleDialogMonthDayLabel != null);
+
         mScheduleDialogMonthWeekRadio = (RadioButton) view.findViewById(R.id.schedule_dialog_month_week_radio);
         Assert.assertTrue(mScheduleDialogMonthWeekRadio != null);
 
@@ -223,6 +231,9 @@ public class ScheduleDialogFragment extends DialogFragment {
 
         mScheduleDialogMonthEnd = (Spinner) view.findViewById(R.id.schedule_dialog_month_end);
         Assert.assertTrue(mScheduleDialogMonthEnd != null);
+
+        mScheduleDialogDailyPadding = view.findViewById(R.id.schedule_dialog_daily_padding);
+        Assert.assertTrue(mScheduleDialogDailyPadding != null);
 
         mScheduleDialogTimeLayout = (TextInputLayout) view.findViewById(R.id.schedule_dialog_time_layout);
         Assert.assertTrue(mScheduleDialogTimeLayout != null);
@@ -370,8 +381,11 @@ public class ScheduleDialogFragment extends DialogFragment {
             }
         });
 
-        mScheduleDialogMonthDayRadio.setOnClickListener(v -> {
-            if (!mScheduleDialogMonthDayRadio.isChecked())
+        int textPrimary = ContextCompat.getColor(getActivity(), R.color.textPrimary);
+        int textDisabledSpinner = ContextCompat.getColor(getActivity(), R.color.textDisabledSpinner);
+
+        mScheduleDialogMonthDayRadio.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked)
                 return;
 
             mScheduleDialogMonthWeekRadio.setChecked(false);
@@ -379,9 +393,12 @@ public class ScheduleDialogFragment extends DialogFragment {
             mScheduleDialogData.mMonthDay = true;
 
             mScheduleDialogMonthDayNumber.setEnabled(true);
+            mScheduleDialogMonthDayLabel.setTextColor(textPrimary);
+
             mScheduleDialogMonthWeekNumber.setEnabled(false);
             mScheduleDialogMonthWeekDay.setEnabled(false);
         });
+
         mScheduleDialogMonthDayRadio.setChecked(mScheduleDialogData.mMonthDay);
 
         mScheduleDialogMonthDayNumber.setOnClickListener(v -> new NumberPickerBuilder()
@@ -398,8 +415,8 @@ public class ScheduleDialogFragment extends DialogFragment {
         if (dayNumberPickerDialogFragment != null)
             dayNumberPickerDialogFragment.setNumberPickerDialogHandlersV2(new Vector<>(Collections.singletonList(mDayNumberPickerDialogHandlerV2)));
 
-        mScheduleDialogMonthWeekRadio.setOnClickListener(v -> {
-            if (!mScheduleDialogMonthWeekRadio.isChecked())
+        mScheduleDialogMonthWeekRadio.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
+            if (!isChecked)
                 return;
 
             mScheduleDialogMonthDayRadio.setChecked(false);
@@ -407,9 +424,12 @@ public class ScheduleDialogFragment extends DialogFragment {
             mScheduleDialogData.mMonthDay = false;
 
             mScheduleDialogMonthDayNumber.setEnabled(false);
+            mScheduleDialogMonthDayLabel.setTextColor(textDisabledSpinner);
+
             mScheduleDialogMonthWeekNumber.setEnabled(true);
             mScheduleDialogMonthWeekDay.setEnabled(true);
         });
+
         mScheduleDialogMonthWeekRadio.setChecked(!mScheduleDialogData.mMonthDay);
 
         mScheduleDialogMonthWeekNumber.setOnClickListener(v -> new NumberPickerBuilder()
@@ -503,25 +523,33 @@ public class ScheduleDialogFragment extends DialogFragment {
                 mScheduleDialogDateLayout.setVisibility(View.VISIBLE);
                 mScheduleDialogDay.setVisibility(View.GONE);
                 mScheduleDialogMonthLayout.setVisibility(View.GONE);
+                mScheduleDialogDailyPadding.setVisibility(View.GONE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                mScheduleDialogTimeLayout.setErrorEnabled(true);
                 break;
             case DAILY:
                 mScheduleDialogDateLayout.setVisibility(View.GONE);
                 mScheduleDialogDay.setVisibility(View.GONE);
                 mScheduleDialogMonthLayout.setVisibility(View.GONE);
+                mScheduleDialogDailyPadding.setVisibility(View.VISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                mScheduleDialogTimeLayout.setErrorEnabled(false);
                 break;
             case WEEKLY:
                 mScheduleDialogDateLayout.setVisibility(View.GONE);
                 mScheduleDialogDay.setVisibility(View.VISIBLE);
                 mScheduleDialogMonthLayout.setVisibility(View.GONE);
+                mScheduleDialogDailyPadding.setVisibility(View.VISIBLE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                mScheduleDialogTimeLayout.setErrorEnabled(false);
                 break;
             case MONTHLY:
                 mScheduleDialogDateLayout.setVisibility(View.GONE);
                 mScheduleDialogDay.setVisibility(View.GONE);
                 mScheduleDialogMonthLayout.setVisibility(View.VISIBLE);
+                mScheduleDialogDailyPadding.setVisibility(View.GONE);
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
+                mScheduleDialogTimeLayout.setErrorEnabled(false);
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -600,8 +628,8 @@ public class ScheduleDialogFragment extends DialogFragment {
 
                 break;
             case MONTHLY:
-                mScheduleDialogMonthDayRadio.setText(Integer.valueOf(mScheduleDialogData.mMonthDayNumber).toString());
-                mScheduleDialogMonthWeekRadio.setText(Integer.valueOf(mScheduleDialogData.mMonthWeekNumber).toString());
+                mScheduleDialogMonthDayNumber.setText(Integer.valueOf(mScheduleDialogData.mMonthDayNumber).toString());
+                mScheduleDialogMonthWeekNumber.setText(Integer.valueOf(mScheduleDialogData.mMonthWeekNumber).toString());
 
                 if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
                     CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());

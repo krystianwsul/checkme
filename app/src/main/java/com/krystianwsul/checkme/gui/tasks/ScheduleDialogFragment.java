@@ -50,6 +50,7 @@ import junit.framework.Assert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Vector;
@@ -63,7 +64,6 @@ public class ScheduleDialogFragment extends DialogFragment {
     private static final String TIME_PICKER_TAG = "timePicker";
 
     private static final String DAY_NUMBER_PICKER_TAG = "day_number_dialog";
-    private static final String WEEK_NUMBER_PICKER_TAG = "day_number_dialog";
 
     private Spinner mScheduleType;
 
@@ -79,7 +79,7 @@ public class ScheduleDialogFragment extends DialogFragment {
     private TextView mScheduleDialogMonthDayLabel;
 
     private RadioButton mScheduleDialogMonthWeekRadio;
-    private TextView mScheduleDialogMonthWeekNumber;
+    private Spinner mScheduleDialogMonthWeekNumber;
     private Spinner mScheduleDialogMonthWeekDay;
 
     private Spinner mScheduleDialogMonthEnd;
@@ -137,17 +137,6 @@ public class ScheduleDialogFragment extends DialogFragment {
             mScheduleDialogData.mMonthDayNumber = fullNumber.intValue();
             Assert.assertTrue(mScheduleDialogData.mMonthDayNumber > 0);
             Assert.assertTrue(mScheduleDialogData.mMonthDayNumber < 29);
-
-            updateFields();
-        }
-    };
-
-    private final NumberPickerDialogFragment.NumberPickerDialogHandlerV2 mWeekNumberPickerDialogHandlerV2 = new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
-        @Override
-        public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
-            mScheduleDialogData.mMonthWeekNumber = fullNumber.intValue();
-            Assert.assertTrue(mScheduleDialogData.mMonthWeekNumber > 0);
-            Assert.assertTrue(mScheduleDialogData.mMonthWeekNumber < 5);
 
             updateFields();
         }
@@ -223,7 +212,7 @@ public class ScheduleDialogFragment extends DialogFragment {
         mScheduleDialogMonthWeekRadio = (RadioButton) view.findViewById(R.id.schedule_dialog_month_week_radio);
         Assert.assertTrue(mScheduleDialogMonthWeekRadio != null);
 
-        mScheduleDialogMonthWeekNumber = (TextView) view.findViewById(R.id.schedule_dialog_month_week_number);
+        mScheduleDialogMonthWeekNumber = (Spinner) view.findViewById(R.id.schedule_dialog_month_week_number);
         Assert.assertTrue(mScheduleDialogMonthWeekNumber != null);
 
         mScheduleDialogMonthWeekDay = (Spinner) view.findViewById(R.id.schedule_dialog_month_week_day);
@@ -432,19 +421,24 @@ public class ScheduleDialogFragment extends DialogFragment {
 
         mScheduleDialogMonthWeekRadio.setChecked(!mScheduleDialogData.mMonthDay);
 
-        mScheduleDialogMonthWeekNumber.setOnClickListener(v -> new NumberPickerBuilder()
-                .setPlusMinusVisibility(View.GONE)
-                .setDecimalVisibility(View.GONE)
-                .setMinNumber(BigDecimal.ONE)
-                .setMaxNumber(new BigDecimal(4))
-                .setStyleResId(R.style.BetterPickersDialogFragment_Light)
-                .setFragmentManager(getChildFragmentManager())
-                .addNumberPickerDialogHandler(mWeekNumberPickerDialogHandlerV2)
-                .show());
+        ArrayAdapter<Integer> monthWeekNumberAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_no_padding, Arrays.asList(1, 2, 3, 4));
+        monthWeekNumberAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mScheduleDialogMonthWeekNumber.setAdapter(monthWeekNumberAdapter);
+        mScheduleDialogMonthWeekNumber.setSelection(mScheduleDialogData.mMonthWeekNumber - 1);
+        mScheduleDialogMonthWeekNumber.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Assert.assertTrue(position >= 0);
+                Assert.assertTrue(position <= 3);
 
-        NumberPickerDialogFragment weekNumberPickerDialogFragment = (NumberPickerDialogFragment) getChildFragmentManager().findFragmentByTag(WEEK_NUMBER_PICKER_TAG);
-        if (weekNumberPickerDialogFragment != null)
-            weekNumberPickerDialogFragment.setNumberPickerDialogHandlersV2(new Vector<>(Collections.singletonList(mWeekNumberPickerDialogHandlerV2)));
+                mScheduleDialogData.mMonthWeekNumber = position + 1;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         ArrayAdapter<DayOfWeek> monthWeekDayAdapter = new ArrayAdapter<>(getContext(), R.layout.spinner_no_padding, DayOfWeek.values());
         monthWeekDayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -629,7 +623,6 @@ public class ScheduleDialogFragment extends DialogFragment {
                 break;
             case MONTHLY:
                 mScheduleDialogMonthDayNumber.setText(Integer.valueOf(mScheduleDialogData.mMonthDayNumber).toString());
-                mScheduleDialogMonthWeekNumber.setText(Integer.valueOf(mScheduleDialogData.mMonthWeekNumber).toString());
 
                 if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
                     CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());

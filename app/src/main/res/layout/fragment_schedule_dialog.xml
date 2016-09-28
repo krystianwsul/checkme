@@ -89,12 +89,10 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <Spinner
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:text="@string/monthDayStart"/>
+                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
 
                     <Spinner
                         android:layout_width="wrap_content"
@@ -213,16 +211,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
-                    <EditText
+                    <Spinner
                         android:id="@+id/schedule_dialog_month_week_number"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:textSize="@dimen/textPrimary"
-                        tools:ignore="LabelFor,TextFields"/>
+                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
 
                     <Spinner
                         android:id="@+id/schedule_dialog_month_week_day"

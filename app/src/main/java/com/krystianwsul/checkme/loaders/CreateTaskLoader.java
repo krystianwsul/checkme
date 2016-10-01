@@ -19,13 +19,14 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
+    @Nullable
     private final Integer mTaskId;
+
+    @NonNull
     private final List<Integer> mExcludedTaskIds;
 
-    public CreateTaskLoader(Context context, Integer taskId, List<Integer> excludedTaskIds) {
+    public CreateTaskLoader(@NonNull Context context, @Nullable Integer taskId, @NonNull List<Integer> excludedTaskIds) {
         super(context);
-
-        Assert.assertTrue(excludedTaskIds != null);
 
         mTaskId = taskId;
         mExcludedTaskIds = excludedTaskIds;

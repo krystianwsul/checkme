@@ -29,6 +29,7 @@ class WeeklySchedule extends RepeatingSchedule {
         mWeeklyScheduleRecord = weeklyScheduleRecord;
     }
 
+    @NonNull
     @Override
     String getTaskText(Context context) {
         return getDayOfWeek() + ": " + getTime();
@@ -76,7 +77,7 @@ class WeeklySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected TimeStamp getNextAlarm(ExactTimeStamp now) {
+    protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         Date today = Date.today();
 
         DayOfWeek dayOfWeek = today.getDayOfWeek();

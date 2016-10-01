@@ -20,11 +20,9 @@ abstract class RepeatingSchedule extends Schedule {
         super(domainFactory, scheduleRecord);
     }
 
+    @NonNull
     @Override
-    List<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(givenExactEndTimeStamp != null);
-
+    List<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
         ExactTimeStamp myStartTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp myEndTimeStamp = getEndExactTimeStamp();
 

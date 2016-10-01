@@ -29,6 +29,7 @@ class DailySchedule extends RepeatingSchedule {
         mDailyScheduleRecord = dailyScheduleRecord;
     }
 
+    @NonNull
     @Override
     String getTaskText(Context context) {
         return context.getString(R.string.daily) + " " + getTime().toString();
@@ -57,7 +58,7 @@ class DailySchedule extends RepeatingSchedule {
     }
 
     @Override
-    protected TimeStamp getNextAlarm(ExactTimeStamp now) {
+    protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         Date today = Date.today();
 
         Calendar calendar = Calendar.getInstance();

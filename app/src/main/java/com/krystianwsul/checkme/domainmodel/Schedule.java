@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -13,11 +14,12 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public abstract class Schedule {
+abstract class Schedule {
     private final WeakReference<DomainFactory> mDomainFactoryReference;
 
     private final ScheduleRecord mScheduleRecord;
 
+    @NonNull
     abstract String getTaskText(Context context);
 
     Schedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
@@ -38,10 +40,12 @@ public abstract class Schedule {
         return getDomainFactory().getTask(mScheduleRecord.getRootTaskId());
     }
 
+    @NonNull
     ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mScheduleRecord.getStartTime());
     }
 
+    @Nullable
     ExactTimeStamp getEndExactTimeStamp() {
         if (mScheduleRecord.getEndTime() == null)
             return null;
@@ -49,25 +53,31 @@ public abstract class Schedule {
             return new ExactTimeStamp(mScheduleRecord.getEndTime());
     }
 
-    void setEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
-        Assert.assertTrue(endExactTimeStamp != null);
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         mScheduleRecord.setEndTime(endExactTimeStamp.getLong());
     }
 
-    public boolean current(ExactTimeStamp exactTimeStamp) {
+    public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    public ScheduleType getType() {
-        return ScheduleType.values()[mScheduleRecord.getType()];
+    @NonNull
+    ScheduleType getType() {
+        ScheduleType scheduleType = ScheduleType.values()[mScheduleRecord.getType()];
+        Assert.assertTrue(scheduleType != null);
+
+        return scheduleType;
     }
 
-    abstract List<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp);
+    @NonNull
+    abstract List<Instance> getInstances(@NonNull Task task, @Nullable ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
 
-    protected abstract TimeStamp getNextAlarm(ExactTimeStamp now);
+    @Nullable
+    protected abstract TimeStamp getNextAlarm(@NonNull ExactTimeStamp now);
 
+    @Nullable
     public abstract Integer getCustomTimeId();
 }

@@ -44,13 +44,11 @@ public class Task {
         mSchedules.add(schedule);
     }
 
-    String getScheduleText(Context context, ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(exactTimeStamp != null);
+    @Nullable
+    String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         List<Schedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
-        Assert.assertTrue(currentSchedules != null);
 
         if (isRootTask(exactTimeStamp)) {
             if (currentSchedules.isEmpty())
@@ -68,8 +66,8 @@ public class Task {
         }
     }
 
-    List<Schedule> getCurrentSchedules(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
+    @NonNull
+    List<Schedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return Stream.of(mSchedules)
@@ -130,13 +128,11 @@ public class Task {
             return null;
     }
 
-    void setEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
-        Assert.assertTrue(endExactTimeStamp != null);
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         if (isRootTask(endExactTimeStamp)) {
             List<Schedule> schedules = getCurrentSchedules(endExactTimeStamp);
-            Assert.assertTrue(schedules != null);
 
             if (schedules.isEmpty()) {
                 Assert.assertTrue(Stream.of(schedules)
@@ -268,14 +264,11 @@ public class Task {
             return parentTask.getRootTask(exactTimeStamp);
     }
 
-    boolean isVisible(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
+    boolean isVisible(@NonNull ExactTimeStamp now) {
         if (current(now)) {
             Task rootTask = getRootTask(now);
 
             List<Schedule> schedules = rootTask.getCurrentSchedules(now);
-            Assert.assertTrue(schedules != null);
 
             if (schedules.isEmpty()) {
                 return true;

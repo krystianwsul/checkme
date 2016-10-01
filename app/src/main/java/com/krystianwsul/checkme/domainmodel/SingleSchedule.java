@@ -25,6 +25,7 @@ class SingleSchedule extends Schedule {
         mSingleScheduleRecord = singleScheduleRecord;
     }
 
+    @NonNull
     @Override
     String getTaskText(Context context) {
         Assert.assertTrue(mSingleScheduleRecord != null);
@@ -44,9 +45,8 @@ class SingleSchedule extends Schedule {
     }
 
     @Override
-    protected TimeStamp getNextAlarm(ExactTimeStamp now) {
+    protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         Assert.assertTrue(mSingleScheduleRecord != null);
-        Assert.assertTrue(now != null);
 
         TimeStamp timeStamp = getDateTime().getTimeStamp();
         if (timeStamp.toExactTimeStamp().compareTo(now) > 0)
@@ -55,11 +55,9 @@ class SingleSchedule extends Schedule {
             return null;
     }
 
+    @NonNull
     @Override
-    ArrayList<Instance> getInstances(Task task, ExactTimeStamp givenStartExactTimeStamp, ExactTimeStamp givenExactEndTimeStamp) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(givenExactEndTimeStamp != null);
-
+    ArrayList<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
         ArrayList<Instance> instances = new ArrayList<>();
 
         ExactTimeStamp singleScheduleExactTimeStamp = getDateTime().getTimeStamp().toExactTimeStamp();

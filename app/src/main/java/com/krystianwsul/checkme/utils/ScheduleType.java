@@ -4,5 +4,6 @@ public enum ScheduleType {
     SINGLE,
     DAILY,
     WEEKLY,
-    MONTHLY
+    MONTHLY_DAY,
+    MONTHLY_WEEK
 }

@@ -205,7 +205,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
                                 .get();
 
                         Date date = firstInstanceData.InstanceTimeStamp.getDate();
-                        Assert.assertTrue(date != null);
 
                         TimePair timePair = firstInstanceData.InstanceTimePair;
 
@@ -3575,6 +3574,7 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
         GroupAdapter getGroupAdapter();
     }
 
+    @NonNull
     private static Date rangePositionToDate(MainActivity.TimeRange timeRange, int position) {
         Assert.assertTrue(timeRange != null);
         Assert.assertTrue(position >= 0);

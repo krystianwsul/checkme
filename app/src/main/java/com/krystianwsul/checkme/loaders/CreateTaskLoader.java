@@ -234,13 +234,13 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     public static class SingleScheduleData implements ScheduleData {
+        @NonNull
         public final com.krystianwsul.checkme.utils.time.Date Date;
+
+        @NonNull
         public final com.krystianwsul.checkme.utils.time.TimePair TimePair;
 
-        public SingleScheduleData(Date date, TimePair timePair) {
-            Assert.assertTrue(date != null);
-            Assert.assertTrue(timePair != null);
-
+        public SingleScheduleData(@NonNull Date date, @NonNull TimePair timePair) {
             Date = date;
             TimePair = timePair;
         }
@@ -317,10 +317,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     public static class DailyScheduleData implements ScheduleData {
+        @NonNull
         public final TimePair TimePair;
 
-        public DailyScheduleData(TimePair timePair) {
-            Assert.assertTrue(timePair != null);
+        public DailyScheduleData(@NonNull TimePair timePair) {
             TimePair = timePair;
         }
 
@@ -352,13 +352,13 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     public static class WeeklyScheduleData implements ScheduleData {
+        @NonNull
         public final DayOfWeek DayOfWeek;
+
+        @NonNull
         public final TimePair TimePair;
 
-        public WeeklyScheduleData(DayOfWeek dayOfWeek, TimePair timePair) {
-            Assert.assertTrue(dayOfWeek != null);
-            Assert.assertTrue(timePair != null);
-
+        public WeeklyScheduleData(@NonNull DayOfWeek dayOfWeek, @NonNull TimePair timePair) {
             DayOfWeek = dayOfWeek;
             TimePair = timePair;
         }

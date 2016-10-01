@@ -257,11 +257,49 @@ public class ScheduleDialogFragment extends DialogFragment {
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mScheduleType.setAdapter(typeAdapter);
 
-        mScheduleType.setSelection(mScheduleDialogData.mScheduleType.ordinal());
+        switch (mScheduleDialogData.mScheduleType) {
+            case SINGLE:
+                mScheduleType.setSelection(0);
+                break;
+            case DAILY:
+                mScheduleType.setSelection(1);
+                break;
+            case WEEKLY:
+                mScheduleType.setSelection(2);
+                break;
+            case MONTHLY_DAY:
+                mScheduleType.setSelection(3);
+                break;
+            case MONTHLY_WEEK:
+                mScheduleType.setSelection(3);
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
 
         mScheduleType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i) {
+                    case 0:
+                        mScheduleDialogData.mScheduleType = ScheduleType.SINGLE;
+                        break;
+                    case 1:
+                        mScheduleDialogData.mScheduleType = ScheduleType.DAILY;
+                        break;
+                    case 2:
+                        mScheduleDialogData.mScheduleType = ScheduleType.WEEKLY;
+                        break;
+                    case 3:
+                        if (mScheduleDialogData.mMonthlyDay)
+                            mScheduleDialogData.mScheduleType = ScheduleType.MONTHLY_DAY;
+                        else
+                            mScheduleDialogData.mScheduleType = ScheduleType.MONTHLY_WEEK;
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+                }
+
                 mScheduleDialogData.mScheduleType = ScheduleType.values()[i];
 
                 if (getActivity() != null && mCustomTimeDatas != null)
@@ -287,6 +325,8 @@ public class ScheduleDialogFragment extends DialogFragment {
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
                 case DAILY:
+                case MONTHLY_DAY:
+                case MONTHLY_WEEK:
                     customTimeDatas = Stream.of(mCustomTimeDatas.values())
                             .sortBy(customTimeData -> customTimeData.Id)
                             .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name))
@@ -377,9 +417,11 @@ public class ScheduleDialogFragment extends DialogFragment {
             if (!isChecked)
                 return;
 
+            mScheduleDialogData.mScheduleType = ScheduleType.MONTHLY_DAY;
+
             mScheduleDialogMonthWeekRadio.setChecked(false);
 
-            mScheduleDialogData.mMonthDay = true;
+            mScheduleDialogData.mMonthlyDay = true;
 
             mScheduleDialogMonthDayNumber.setEnabled(true);
             mScheduleDialogMonthDayLabel.setTextColor(textPrimary);
@@ -388,7 +430,7 @@ public class ScheduleDialogFragment extends DialogFragment {
             mScheduleDialogMonthWeekDay.setEnabled(false);
         });
 
-        mScheduleDialogMonthDayRadio.setChecked(mScheduleDialogData.mMonthDay);
+        mScheduleDialogMonthDayRadio.setChecked(mScheduleDialogData.mMonthlyDay);
 
         mScheduleDialogMonthDayNumber.setOnClickListener(v -> new NumberPickerBuilder()
                 .setPlusMinusVisibility(View.GONE)
@@ -408,9 +450,11 @@ public class ScheduleDialogFragment extends DialogFragment {
             if (!isChecked)
                 return;
 
+            mScheduleDialogData.mScheduleType = ScheduleType.MONTHLY_WEEK;
+
             mScheduleDialogMonthDayRadio.setChecked(false);
 
-            mScheduleDialogData.mMonthDay = false;
+            mScheduleDialogData.mMonthlyDay = false;
 
             mScheduleDialogMonthDayNumber.setEnabled(false);
             mScheduleDialogMonthDayLabel.setTextColor(textDisabledSpinner);
@@ -419,7 +463,7 @@ public class ScheduleDialogFragment extends DialogFragment {
             mScheduleDialogMonthWeekDay.setEnabled(true);
         });
 
-        mScheduleDialogMonthWeekRadio.setChecked(!mScheduleDialogData.mMonthDay);
+        mScheduleDialogMonthWeekRadio.setChecked(!mScheduleDialogData.mMonthlyDay);
 
         ArrayAdapter<Integer> monthWeekNumberAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_no_padding, Arrays.asList(1, 2, 3, 4));
         monthWeekNumberAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -537,7 +581,8 @@ public class ScheduleDialogFragment extends DialogFragment {
                 mScheduleDialogTimeLayout.setVisibility(View.VISIBLE);
                 mScheduleDialogTimeLayout.setErrorEnabled(false);
                 break;
-            case MONTHLY:
+            case MONTHLY_DAY:
+            case MONTHLY_WEEK:
                 mScheduleDialogDateLayout.setVisibility(View.GONE);
                 mScheduleDialogDay.setVisibility(View.GONE);
                 mScheduleDialogMonthLayout.setVisibility(View.VISIBLE);
@@ -621,7 +666,8 @@ public class ScheduleDialogFragment extends DialogFragment {
                 }
 
                 break;
-            case MONTHLY:
+            case MONTHLY_DAY:
+            case MONTHLY_WEEK:
                 mScheduleDialogMonthDayNumber.setText(Integer.valueOf(mScheduleDialogData.mMonthDayNumber).toString());
 
                 if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
@@ -690,17 +736,28 @@ public class ScheduleDialogFragment extends DialogFragment {
     }
 
     public static class ScheduleDialogData implements Parcelable {
+        @NonNull
         Date mDate;
+
+        @NonNull
         DayOfWeek mDayOfWeek;
-        boolean mMonthDay;
+
+        boolean mMonthlyDay;
         int mMonthDayNumber;
         int mMonthWeekNumber;
+
+        @NonNull
         DayOfWeek mMonthWeekDay;
+
         boolean mBeginningOfMonth;
+
+        @NonNull
         final TimePairPersist mTimePairPersist;
+
+        @NonNull
         ScheduleType mScheduleType;
 
-        ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, boolean monthDay, int monthDayNumber, int monthWeekNumber, @NonNull DayOfWeek monthWeekDay, boolean beginningOfMonth, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
+        ScheduleDialogData(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, boolean monthDaily, int monthDayNumber, int monthWeekNumber, @NonNull DayOfWeek monthWeekDay, boolean beginningOfMonth, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType) {
             Assert.assertTrue(monthDayNumber > 0);
             Assert.assertTrue(monthDayNumber < 29);
             Assert.assertTrue(monthWeekNumber > 0);
@@ -708,7 +765,7 @@ public class ScheduleDialogFragment extends DialogFragment {
 
             mDate = date;
             mDayOfWeek = dayOfWeek;
-            mMonthDay = monthDay;
+            mMonthlyDay = monthDaily;
             mMonthDayNumber = monthDayNumber;
             mMonthWeekNumber = monthWeekNumber;
             mMonthWeekDay = monthWeekDay;
@@ -721,7 +778,7 @@ public class ScheduleDialogFragment extends DialogFragment {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(mDate, flags);
             dest.writeSerializable(mDayOfWeek);
-            dest.writeInt(mMonthDay ? 1 : 0);
+            dest.writeInt(mMonthlyDay ? 1 : 0);
             dest.writeInt(mMonthDayNumber);
             dest.writeInt(mMonthWeekNumber);
             dest.writeSerializable(mMonthWeekDay);

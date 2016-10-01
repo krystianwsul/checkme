@@ -44,10 +44,12 @@ public class TimeStamp implements Comparable<TimeStamp>, Parcelable {
         return calendar;
     }
 
+    @NonNull
     public Date getDate() {
         return new Date(getCalendar());
     }
 
+    @NonNull
     public HourMinute getHourMinute() {
         return new HourMinute(getCalendar());
     }

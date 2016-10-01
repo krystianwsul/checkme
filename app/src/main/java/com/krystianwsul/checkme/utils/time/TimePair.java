@@ -2,28 +2,33 @@ package com.krystianwsul.checkme.utils.time;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
 import java.io.Serializable;
 
 public class TimePair implements Parcelable, Serializable {
+    @Nullable
     public final Integer CustomTimeId;
+
+    @Nullable
     public final HourMinute HourMinute;
 
-    public TimePair(Integer customTimeId, HourMinute hourMinute) {
+    public TimePair(@Nullable Integer customTimeId, @Nullable HourMinute hourMinute) {
         Assert.assertTrue((customTimeId == null) != (hourMinute == null));
 
         CustomTimeId = customTimeId;
         HourMinute = hourMinute;
     }
 
-    public TimePair(Integer customTimeId) {
+    public TimePair(int customTimeId) {
         CustomTimeId = customTimeId;
         HourMinute = null;
     }
 
-    public TimePair(HourMinute hourMinute) {
+    public TimePair(@NonNull HourMinute hourMinute) {
         CustomTimeId = null;
         HourMinute = hourMinute;
     }

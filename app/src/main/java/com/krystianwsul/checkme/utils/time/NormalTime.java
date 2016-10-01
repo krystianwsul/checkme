@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.utils.time;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.domainmodel.CustomTime;
@@ -27,11 +28,13 @@ public class NormalTime implements Time {
         return mHourMinute.toString();
     }
 
+    @NonNull
     @Override
     public Pair<CustomTime, HourMinute> getPair() {
         return new Pair<>(null, mHourMinute);
     }
 
+    @NonNull
     @Override
     public TimePair getTimePair() {
         return new TimePair(null, mHourMinute);

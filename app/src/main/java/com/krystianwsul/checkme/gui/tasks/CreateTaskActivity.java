@@ -45,7 +45,9 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +80,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     private Integer mTaskId;
     private ArrayList<Integer> mTaskIds;
 
+    @Nullable
     private CreateTaskActivity.ScheduleHint mScheduleHint;
     private Integer mParentTaskIdHint = null;
     private String mNameHint = null;
@@ -126,21 +129,20 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
             Assert.assertTrue(mData != null);
 
+            if (scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_DAY) {
+                Assert.assertTrue(scheduleDialogData.mMonthlyDay);
+            } else if (scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_WEEK) {
+                Assert.assertTrue(!scheduleDialogData.mMonthlyDay);
+            }
+
             if (mHourMinutePickerPosition == null) {
                 clearParent();
 
-                mCreateTaskAdapter.addScheduleEntry(new ScheduleEntry(scheduleDialogData.mDate, scheduleDialogData.mDayOfWeek, scheduleDialogData.mTimePairPersist, scheduleDialogData.mScheduleType, null));
+                mCreateTaskAdapter.addScheduleEntry(new ScheduleEntry(scheduleDialogData));
             } else {
                 Assert.assertTrue(mHourMinutePickerPosition > 0);
 
-                ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition - 1);
-                Assert.assertTrue(scheduleEntry != null);
-
-                scheduleEntry.mDate = scheduleDialogData.mDate;
-                scheduleEntry.mDayOfWeek = scheduleDialogData.mDayOfWeek;
-                scheduleEntry.mTimePairPersist = scheduleDialogData.mTimePairPersist;
-                scheduleEntry.mScheduleType = scheduleDialogData.mScheduleType;
-                scheduleEntry.mError = null;
+                mScheduleEntries.set(mHourMinutePickerPosition - 1, new ScheduleEntry(scheduleDialogData));
 
                 mCreateTaskAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
@@ -601,14 +603,17 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     Assert.assertTrue(!mData.TaskData.ScheduleDatas.isEmpty());
 
                     mScheduleEntries = Stream.of(mData.TaskData.ScheduleDatas)
-                            .map(scheduleData -> {
+                            .map(scheduleData -> { // todo monthly
                                 switch (scheduleData.getScheduleType()) {
                                     case SINGLE:
-                                        return new ScheduleEntry(((CreateTaskLoader.SingleScheduleData) scheduleData).Date, ((CreateTaskLoader.SingleScheduleData) scheduleData).TimePair);
+                                        CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
+                                        return new ScheduleEntry(singleScheduleData);
                                     case DAILY:
-                                        return new ScheduleEntry(((CreateTaskLoader.DailyScheduleData) scheduleData).TimePair);
+                                        CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
+                                        return new ScheduleEntry(dailyScheduleData);
                                     case WEEKLY:
-                                        return new ScheduleEntry(((CreateTaskLoader.WeeklyScheduleData) scheduleData).DayOfWeek, ((CreateTaskLoader.WeeklyScheduleData) scheduleData).TimePair);
+                                        CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
+                                        return new ScheduleEntry(weeklyScheduleData);
                                     default:
                                         throw new UnsupportedOperationException();
                                 }
@@ -688,8 +693,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
             if (scheduleEntry.mScheduleType != ScheduleType.SINGLE)
                 continue;
-
-            Assert.assertTrue(scheduleEntry.mDate != null);
 
             if ((mData.TaskData != null) && (mData.TaskData.ScheduleDatas != null) && mData.TaskData.ScheduleDatas.contains(scheduleEntry.getScheduleData()))
                 continue;
@@ -860,15 +863,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     private ScheduleEntry firstScheduleEntry() {
-        if (mScheduleHint != null) {
-            if (mScheduleHint.mTimePair != null) {
-                return new ScheduleEntry(mScheduleHint.mDate, mScheduleHint.mTimePair);
-            } else {
-                return new ScheduleEntry(mScheduleHint.mDate);
-            }
-        } else {
-            return new ScheduleEntry(Date.today());
-        }
+        return new ScheduleEntry(mScheduleHint);
     }
 
     @NonNull
@@ -924,27 +919,23 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     public static class ScheduleHint implements Parcelable {
+        @NonNull
         final Date mDate;
+
+        @Nullable
         final TimePair mTimePair;
 
-        public ScheduleHint(Date date) {
-            Assert.assertTrue(date != null);
-
+        public ScheduleHint(@NonNull Date date) { // root group list
             mDate = date;
             mTimePair = null;
         }
 
-        public ScheduleHint(Date date, HourMinute hourMinute) {
-            Assert.assertTrue(date != null);
-            Assert.assertTrue(hourMinute != null);
-
+        public ScheduleHint(@NonNull Date date, @NonNull HourMinute hourMinute) { // group list for group
             mDate = date;
             mTimePair = new TimePair(hourMinute);
         }
 
-        public ScheduleHint(Date date, TimePair timePair) {
-            Assert.assertTrue(date != null);
-
+        public ScheduleHint(@NonNull Date date, @Nullable TimePair timePair) { // join instances, parcelable
             mDate = date;
             mTimePair = timePair;
         }
@@ -1072,7 +1063,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     Assert.assertTrue(mCreateTaskAdapter != null);
                     Assert.assertTrue(mHourMinutePickerPosition == null);
 
-                    ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(mScheduleHint), false);
+                    ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), mScheduleHint), false);
                     scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                     scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
                 });
@@ -1141,7 +1132,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition - 1);
                 Assert.assertTrue(scheduleEntry != null);
 
-                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(mScheduleHint), true);
+                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), mScheduleHint), true);
                 scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                 scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
             }
@@ -1159,46 +1150,87 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     public static class ScheduleEntry implements Parcelable {
-        Date mDate;
-        DayOfWeek mDayOfWeek;
-        TimePairPersist mTimePairPersist;
-        ScheduleType mScheduleType;
+        @NonNull
+        final Date mDate;
+
+        final DayOfWeek mDayOfWeek;
+        boolean mMonthlyDay;
+        int mMonthDayNumber;
+        int mMonthWeekNumber;
+        DayOfWeek mMonthWeekDay;
+        boolean mBeginningOfMonth;
+
+        @NonNull
+        final TimePairPersist mTimePairPersist;
+        final ScheduleType mScheduleType;
+
+        @Nullable
         String mError;
 
-        ScheduleEntry(@NonNull Date date) {
-            mDate = date;
+        ScheduleEntry(@NonNull CreateTaskLoader.SingleScheduleData singleScheduleData) {
+            mDate = singleScheduleData.Date;
             mDayOfWeek = mDate.getDayOfWeek();
-            mTimePairPersist = new TimePairPersist();
+            mTimePairPersist = new TimePairPersist(singleScheduleData.TimePair);
             mScheduleType = ScheduleType.SINGLE;
         }
 
-        ScheduleEntry(@NonNull Date date, @NonNull TimePair timePair) {
-            mDate = date;
+        ScheduleEntry(@NonNull CreateTaskLoader.DailyScheduleData dailyScheduleData) {
+            mDate = Date.today();
             mDayOfWeek = mDate.getDayOfWeek();
-            mTimePairPersist = new TimePairPersist(timePair);
-            mScheduleType = ScheduleType.SINGLE;
+            mTimePairPersist = new TimePairPersist(dailyScheduleData.TimePair);
+            mScheduleType = ScheduleType.DAILY;
         }
 
-        ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType, @Nullable String error) {
+        ScheduleEntry(@NonNull CreateTaskLoader.WeeklyScheduleData weeklyScheduleData) {
+            mDate = Date.today();
+            mDayOfWeek = weeklyScheduleData.DayOfWeek;
+            mTimePairPersist = new TimePairPersist(weeklyScheduleData.TimePair);
+            mScheduleType = ScheduleType.WEEKLY;
+        }
+
+        ScheduleEntry(@Nullable ScheduleHint scheduleHint) {
+            if (scheduleHint == null) { // new for task
+                mDate = Date.today();
+                mDayOfWeek = mDate.getDayOfWeek();
+                mTimePairPersist = new TimePairPersist();
+                mScheduleType = ScheduleType.SINGLE;
+            } else if (scheduleHint.mTimePair != null) { // for instance group or instance join
+                mDate = scheduleHint.mDate;
+                mDayOfWeek = mDate.getDayOfWeek();
+                mTimePairPersist = new TimePairPersist(scheduleHint.mTimePair);
+                mScheduleType = ScheduleType.SINGLE;
+            } else { // for group root
+                mDate = scheduleHint.mDate;
+                mDayOfWeek = mDate.getDayOfWeek();
+                mTimePairPersist = new TimePairPersist();
+                mScheduleType = ScheduleType.SINGLE;
+            }
+        }
+
+        private ScheduleEntry(@NonNull Date date, @NonNull DayOfWeek dayOfWeek, boolean monthlyDay, int monthDayNumber, int monthWeekNumber, DayOfWeek monthWeekDay, boolean beginningOfMonth, @NonNull TimePairPersist timePairPersist, @NonNull ScheduleType scheduleType, @Nullable String error) { // replace with more specific
             mDate = date;
             mDayOfWeek = dayOfWeek;
+            mMonthlyDay = monthlyDay;
+            mMonthDayNumber = monthDayNumber;
+            mMonthWeekNumber = monthWeekNumber;
+            mMonthWeekDay = monthWeekDay;
+            mBeginningOfMonth = beginningOfMonth;
             mTimePairPersist = timePairPersist;
             mScheduleType = scheduleType;
             mError = error;
         }
 
-        ScheduleEntry(@NonNull TimePair timePair) {
-            mDate = Date.today();
-            mDayOfWeek = mDate.getDayOfWeek();
-            mTimePairPersist = new TimePairPersist(timePair);
-            mScheduleType = ScheduleType.DAILY;
-        }
-
-        ScheduleEntry(@NonNull DayOfWeek dayOfWeek, @NonNull TimePair timePair) {
-            mDate = Date.today();
-            mDayOfWeek = dayOfWeek;
-            mTimePairPersist = new TimePairPersist(timePair);
-            mScheduleType = ScheduleType.WEEKLY;
+        ScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
+            mDate = scheduleDialogData.mDate;
+            mDayOfWeek = scheduleDialogData.mDayOfWeek;
+            mMonthlyDay = scheduleDialogData.mMonthlyDay;
+            mMonthDayNumber = scheduleDialogData.mMonthDayNumber;
+            mMonthWeekNumber = scheduleDialogData.mMonthWeekNumber;
+            mMonthWeekDay = scheduleDialogData.mMonthWeekDay;
+            mBeginningOfMonth = scheduleDialogData.mBeginningOfMonth;
+            mTimePairPersist = scheduleDialogData.mTimePairPersist;
+            mScheduleType = scheduleDialogData.mScheduleType;
+            mError = null;
         }
 
         @NonNull
@@ -1231,6 +1263,34 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     } else {
                         return mDayOfWeek + ", " + mTimePairPersist.getHourMinute().toString();
                     }
+                case MONTHLY_DAY: {
+                    Assert.assertTrue(mMonthlyDay);
+
+                    String day = mMonthDayNumber + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mBeginningOfMonth ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
+
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return day + ", " + customTimeData.Name;
+                    } else {
+                        return day + ", " + mTimePairPersist.getHourMinute();
+                    }
+                }
+                case MONTHLY_WEEK: {
+                    Assert.assertTrue(!mMonthlyDay);
+
+                    String day = mMonthWeekNumber + " " + mMonthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mBeginningOfMonth ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
+
+                    if (mTimePairPersist.getCustomTimeId() != null) {
+                        CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+                        Assert.assertTrue(customTimeData != null);
+
+                        return day + ", " + customTimeData.Name;
+                    } else {
+                        return day + ", " + mTimePairPersist.getHourMinute();
+                    }
+                }
                 default:
                     throw new UnsupportedOperationException();
             }
@@ -1251,25 +1311,80 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
 
         @NonNull
-        ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(CreateTaskActivity.ScheduleHint scheduleHint) {
+        ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
             switch (mScheduleType) {
                 case SINGLE: {
-                    return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), true, 1, 1, DayOfWeek.SUNDAY, true, mTimePairPersist, ScheduleType.SINGLE); // todo monthly
+                    int monthDayNumber = mDate.getDay();
+                    boolean beginningOfMonth = true;
+                    if (monthDayNumber > 28) {
+                        monthDayNumber = getDaysInMonth(mDate) - monthDayNumber + 1;
+                        beginningOfMonth = false;
+                    }
+                    int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), true, monthDayNumber, monthWeekNumber, mDate.getDayOfWeek(), beginningOfMonth, mTimePairPersist, ScheduleType.SINGLE);
                 }
                 case DAILY: {
-                    Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : today);
 
-                    return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, 1, 1, DayOfWeek.SUNDAY, true, mTimePairPersist, ScheduleType.DAILY); // todo monthly
+                    int monthDayNumber = date.getDay();
+                    boolean beginningOfMonth = true;
+                    if (monthDayNumber > 28) {
+                        monthDayNumber = getDaysInMonth(date) - monthDayNumber + 1;
+                        beginningOfMonth = false;
+                    }
+                    int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, mTimePairPersist, ScheduleType.DAILY);
                 }
                 case WEEKLY: {
-                    Date date = (scheduleHint != null ? scheduleHint.mDate : Date.today());
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : today);
 
-                    return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, true, 1, 1, DayOfWeek.SUNDAY, true, mTimePairPersist, ScheduleType.WEEKLY); // todo monthly
+                    int monthDayNumber = date.getDay();
+                    boolean beginningOfMonth = true;
+                    if (monthDayNumber > 28) {
+                        monthDayNumber = getDaysInMonth(date) - monthDayNumber + 1;
+                        beginningOfMonth = false;
+                    }
+                    int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, mTimePairPersist, ScheduleType.WEEKLY);
                 }
-                default: { // todo monthly
+                case MONTHLY_DAY: {
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : today);
+
+                    if (mBeginningOfMonth) {
+                        date = new Date(date.getYear(), date.getMonth(), mMonthDayNumber);
+                    } else {
+                        date = new Date(date.getYear(), date.getMonth(), getDaysInMonth(date) - mMonthDayNumber + 1);
+                    }
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, mMonthDayNumber, (mMonthDayNumber - 1) / 7 + 1, date.getDayOfWeek(), mBeginningOfMonth, mTimePairPersist, ScheduleType.MONTHLY_DAY);
+                }
+                case MONTHLY_WEEK: {
+                    Date date = (scheduleHint != null ? scheduleHint.mDate : today);
+
+                    if (mBeginningOfMonth) {
+                        Date first = new Date(date.getYear(), date.getMonth(), 1);
+                        int day = mMonthWeekNumber * 7 - (first.getDayOfWeek().ordinal() - mMonthWeekDay.ordinal());
+                        date = new Date(date.getYear(), date.getMonth(), day);
+                    } else {
+                        Date last = new Date(date.getYear(), date.getMonth(), 1);
+                        int day = mMonthWeekNumber * 7 + (last.getDayOfWeek().ordinal() - mMonthWeekDay.ordinal());
+                        date = new Date(date.getYear(), date.getMonth(), getDaysInMonth(date) - day + 1);
+                    }
+
+                    return new ScheduleDialogFragment.ScheduleDialogData(date, mMonthWeekDay, false, date.getDay(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePairPersist, ScheduleType.MONTHLY_WEEK);
+                }
+                default: {
                     throw new UnsupportedOperationException();
                 }
             }
+        }
+
+        private int getDaysInMonth(@NonNull Date date) {
+            Calendar calendar = new GregorianCalendar(date.getYear(), date.getMonth() - 1, 1);
+            return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         }
 
         @Override
@@ -1281,6 +1396,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         public void writeToParcel(Parcel parcel, int i) {
             parcel.writeParcelable(mDate, 0);
             parcel.writeSerializable(mDayOfWeek);
+            parcel.writeInt(mMonthlyDay ? 1 : 0);
+            parcel.writeInt(mMonthDayNumber);
+            parcel.writeInt(mMonthWeekNumber);
+            parcel.writeSerializable(mMonthWeekDay);
+            parcel.writeInt(mBeginningOfMonth ? 1 : 0);
             parcel.writeParcelable(mTimePairPersist, 0);
             parcel.writeSerializable(mScheduleType);
             parcel.writeString(mError);
@@ -1296,6 +1416,17 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                 DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
                 Assert.assertTrue(dayOfWeek != null);
 
+                boolean monthlyDay = (in.readInt() == 1);
+
+                int monthDayNumber = in.readInt();
+
+                int monthWeekNumber = in.readInt();
+
+                DayOfWeek monthWeekDay = (DayOfWeek) in.readSerializable();
+                Assert.assertTrue(monthWeekDay != null);
+
+                boolean beginningOfMonth = (in.readInt() == 1);
+
                 TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
                 Assert.assertTrue(timePairPersist != null);
 
@@ -1304,7 +1435,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
 
                 String error = in.readString();
 
-                return new ScheduleEntry(date, dayOfWeek, timePairPersist, scheduleType, error);
+                return new ScheduleEntry(date, dayOfWeek, monthlyDay, monthDayNumber, monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist, scheduleType, error);
             }
 
             @Override

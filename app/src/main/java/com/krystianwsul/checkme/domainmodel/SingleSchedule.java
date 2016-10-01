@@ -16,7 +16,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class SingleSchedule extends Schedule {
+class SingleSchedule extends Schedule {
     private final SingleScheduleRecord mSingleScheduleRecord;
 
     SingleSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull SingleScheduleRecord singleScheduleRecord) {
@@ -77,11 +77,13 @@ public class SingleSchedule extends Schedule {
         return instances;
     }
 
+    @NonNull
     public Time getTime() {
         Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
             CustomTime customTime = getDomainFactory().getCustomTime(mSingleScheduleRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
+
             return customTime;
         } else {
             Integer hour = mSingleScheduleRecord.getHour();
@@ -92,6 +94,7 @@ public class SingleSchedule extends Schedule {
         }
     }
 
+    @NonNull
     Date getDate() {
         return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
     }

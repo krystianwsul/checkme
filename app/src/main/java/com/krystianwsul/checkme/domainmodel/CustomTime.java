@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
@@ -54,7 +55,7 @@ public class CustomTime implements Time {
         }
     }
 
-    public TreeMap<DayOfWeek, HourMinute> getHourMinutes() {
+    TreeMap<DayOfWeek, HourMinute> getHourMinutes() {
         TreeMap<DayOfWeek, HourMinute> hourMinutes = new TreeMap<>();
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
             hourMinutes.put(dayOfWeek, getHourMinute(dayOfWeek));
@@ -107,6 +108,7 @@ public class CustomTime implements Time {
         return mCustomTimeRecord.getId();
     }
 
+    @NonNull
     @Override
     public Pair<CustomTime, HourMinute> getPair() {
         return new Pair<>(this, null);
@@ -120,12 +122,13 @@ public class CustomTime implements Time {
         mCustomTimeRecord.setCurrent(false);
     }
 
+    @NonNull
     @Override
     public TimePair getTimePair() {
         return new TimePair(mCustomTimeRecord.getId(), null);
     }
 
-    public void setRelevant() {
+    void setRelevant() {
         mCustomTimeRecord.setRelevant(false);
     }
 }

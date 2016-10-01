@@ -645,11 +645,9 @@ public class DomainFactory {
                             case SINGLE: {
                                 SingleSchedule singleSchedule = (SingleSchedule) schedule;
 
-                                Pair<Date, Time> pair = new Pair<>(singleSchedule.getDate(), singleSchedule.getTime());
+                                scheduleDatas.add(new CreateTaskLoader.SingleScheduleData(singleSchedule.getDate(), singleSchedule.getTime().getTimePair()));
 
-                                scheduleDatas.add(new CreateTaskLoader.SingleScheduleData(pair.first, pair.second.getTimePair()));
-
-                                CustomTime weeklyCustomTime = pair.second.getPair().first;
+                                CustomTime weeklyCustomTime = singleSchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
                                     customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
                                 break;
@@ -1611,7 +1609,6 @@ public class DomainFactory {
         Assert.assertTrue(timePair != null);
 
         Time time = getTime(timePair);
-        Assert.assertTrue(time != null);
 
         return new DateTime(date, time);
     }
@@ -1705,9 +1702,8 @@ public class DomainFactory {
         return rootTask;
     }
 
-    private Time getTime(TimePair timePair) {
-        Assert.assertTrue(timePair != null);
-
+    @NonNull
+    private Time getTime(@NonNull TimePair timePair) {
         if (timePair.CustomTimeId != null) {
             Assert.assertTrue(timePair.HourMinute == null);
 
@@ -1799,9 +1795,6 @@ public class DomainFactory {
                     Date date = singleScheduleData.Date;
                     Time time = getTime(singleScheduleData.TimePair);
 
-                    Assert.assertTrue(date != null);
-                    Assert.assertTrue(time != null);
-
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startExactTimeStamp);
                     Assert.assertTrue(scheduleRecord != null);
 
@@ -1815,7 +1808,6 @@ public class DomainFactory {
                     CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
 
                     Time time = getTime(dailyScheduleData.TimePair);
-                    Assert.assertTrue(time != null);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.DAILY, startExactTimeStamp);
                     Assert.assertTrue(scheduleRecord != null);
@@ -1831,9 +1823,6 @@ public class DomainFactory {
 
                     DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
                     Time time = getTime(weeklyScheduleData.TimePair);
-
-                    Assert.assertTrue(dayOfWeek != null);
-                    Assert.assertTrue(time != null);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.WEEKLY, startExactTimeStamp);
                     Assert.assertTrue(scheduleRecord != null);

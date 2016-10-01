@@ -21,7 +21,7 @@ public class TimePairPersist implements Parcelable {
         mHourMinute = hourMinute;
     }
 
-    public TimePairPersist(TimePair timePair) {
+    public TimePairPersist(@NonNull TimePair timePair) {
         mCustomTimeId = timePair.CustomTimeId;
         if (timePair.HourMinute != null)
             mHourMinute = timePair.HourMinute;
@@ -60,10 +60,6 @@ public class TimePairPersist implements Parcelable {
             return new TimePair(mCustomTimeId);
         else
             return new TimePair(mHourMinute);
-    }
-
-    public TimePairPersist copy() {
-        return new TimePairPersist(this);
     }
 
     @Override

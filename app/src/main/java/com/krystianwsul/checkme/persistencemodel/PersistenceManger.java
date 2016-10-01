@@ -43,6 +43,8 @@ public class PersistenceManger {
     private final Map<Integer, SingleScheduleRecord> mSingleScheduleRecords;
     private final Map<Integer, DailyScheduleRecord> mDailyScheduleRecords;
     private final Map<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords;
+    private final Map<Integer, MonthlyDayScheduleRecord> mMonthlyDayScheduleRecords;
+    private final Map<Integer, MonthlyWeekScheduleRecord> mMonthlyWeekScheduleRecords;
 
     private final List<InstanceRecord> mInstanceRecords;
 
@@ -115,6 +117,18 @@ public class PersistenceManger {
             mWeeklyScheduleRecords = Stream.of(WeeklyScheduleRecord.getWeeklyScheduleRecords(mSQLiteDatabase, scheduleIds))
                     .collect(Collectors.toMap(WeeklyScheduleRecord::getScheduleId, weeklyScheduleRecord -> weeklyScheduleRecord));
 
+        if (scheduleIds.isEmpty())
+            mMonthlyDayScheduleRecords = new HashMap<>();
+        else
+            mMonthlyDayScheduleRecords = Stream.of(MonthlyDayScheduleRecord.getMonthlyDayScheduleRecords(mSQLiteDatabase, scheduleIds))
+                    .collect(Collectors.toMap(MonthlyDayScheduleRecord::getScheduleId, monthlyDayScheduleRecord -> monthlyDayScheduleRecord));
+
+        if (scheduleIds.isEmpty())
+            mMonthlyWeekScheduleRecords = new HashMap<>();
+        else
+            mMonthlyWeekScheduleRecords = Stream.of(MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(mSQLiteDatabase, scheduleIds))
+                    .collect(Collectors.toMap(MonthlyWeekScheduleRecord::getScheduleId, monthlyWeekScheduleRecord -> monthlyWeekScheduleRecord));
+
         mInstanceRecords = InstanceRecord.getInstanceRecords(mSQLiteDatabase);
         Assert.assertTrue(mInstanceRecords != null);
 
@@ -131,6 +145,8 @@ public class PersistenceManger {
         mSingleScheduleRecords = new HashMap<>();
         mDailyScheduleRecords = new HashMap<>();
         mWeeklyScheduleRecords = new HashMap<>();
+        mMonthlyDayScheduleRecords = new HashMap<>();
+        mMonthlyWeekScheduleRecords = new HashMap<>();
         mInstanceRecords = new ArrayList<>();
 
         mCustomTimeMaxId = 0;
@@ -164,16 +180,29 @@ public class PersistenceManger {
                 .collect(Collectors.toList());
     }
 
+    @Nullable
     public SingleScheduleRecord getSingleScheduleRecord(int scheduleId) {
         return mSingleScheduleRecords.get(scheduleId);
     }
 
+    @Nullable
     public DailyScheduleRecord getDailyScheduleRecord(int scheduleId) {
         return mDailyScheduleRecords.get(scheduleId);
     }
 
-    public WeeklyScheduleRecord getWeeklyScheduleRecords(int scheduleId) {
+    @Nullable
+    public WeeklyScheduleRecord getWeeklyScheduleRecord(int scheduleId) {
         return mWeeklyScheduleRecords.get(scheduleId);
+    }
+
+    @Nullable
+    public MonthlyDayScheduleRecord getMonthlyDayScheduleRecord(int scheduleId) {
+        return mMonthlyDayScheduleRecords.get(scheduleId);
+    }
+
+    @Nullable
+    public MonthlyWeekScheduleRecord getMonthlyWeekScheduleRecord(int scheduleId) {
+        return mMonthlyWeekScheduleRecords.get(scheduleId);
     }
 
     public Collection<InstanceRecord> getInstanceRecords() {
@@ -232,10 +261,8 @@ public class PersistenceManger {
         return taskHierarchyRecord;
     }
 
-    public ScheduleRecord createScheduleRecord(Task rootTask, ScheduleType scheduleType, ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(scheduleType != null);
-        Assert.assertTrue(startExactTimeStamp != null);
+    @NonNull
+    public ScheduleRecord createScheduleRecord(@NonNull Task rootTask, @NonNull ScheduleType scheduleType, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(rootTask.current(startExactTimeStamp));
 
         int id = ++mScheduleMaxId;
@@ -246,12 +273,13 @@ public class PersistenceManger {
         return scheduleRecord;
     }
 
-    public SingleScheduleRecord createSingleScheduleRecord(int scheduleId, Date date, Time time) {
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(time != null);
+    @NonNull
+    public SingleScheduleRecord createSingleScheduleRecord(int scheduleId, @NonNull Date date, @NonNull Time time) {
         Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
         Pair<CustomTime, HourMinute> pair = time.getPair();
 
@@ -271,11 +299,13 @@ public class PersistenceManger {
         return singleScheduleRecord;
     }
 
-    public DailyScheduleRecord createDailyScheduleRecord(int scheduleId, Time time) {
-        Assert.assertTrue(time != null);
+    @NonNull
+    public DailyScheduleRecord createDailyScheduleRecord(int scheduleId, @NonNull Time time) {
         Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
         Pair<CustomTime, HourMinute> pair = time.getPair();
 
@@ -295,12 +325,13 @@ public class PersistenceManger {
         return dailyScheduleRecord;
     }
 
-    public WeeklyScheduleRecord createWeeklyScheduleRecord(int scheduleId, DayOfWeek dayOfWeek, Time time) {
-        Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(time != null);
+    @NonNull
+    public WeeklyScheduleRecord createWeeklyScheduleRecord(int scheduleId, @NonNull DayOfWeek dayOfWeek, @NonNull Time time) {
         Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
         Pair<CustomTime, HourMinute> pair = time.getPair();
 
@@ -318,6 +349,58 @@ public class PersistenceManger {
         mWeeklyScheduleRecords.put(scheduleId, weeklyScheduleRecord);
 
         return weeklyScheduleRecord;
+    }
+
+    @NonNull
+    public MonthlyDayScheduleRecord createMonthlyDayScheduleRecord(int scheduleId, int dayOfMonth, boolean beginningOfMonth, @NonNull Time time) {
+        Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
+
+        Pair<CustomTime, HourMinute> pair = time.getPair();
+
+        CustomTime customTime = pair.first;
+        HourMinute hourMinute = pair.second;
+
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+
+        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
+        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+
+        MonthlyDayScheduleRecord monthlyDayScheduleRecord = new MonthlyDayScheduleRecord(false, scheduleId, dayOfMonth, beginningOfMonth, customTimeId, hour, minute);
+        mMonthlyDayScheduleRecords.put(scheduleId, monthlyDayScheduleRecord);
+
+        return monthlyDayScheduleRecord;
+    }
+
+    @NonNull
+    public MonthlyWeekScheduleRecord createMonthlyWeekScheduleRecord(int scheduleId, int dayOfMonth, @NonNull DayOfWeek dayOfWeek, boolean beginningOfMonth, @NonNull Time time) {
+        Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
+        Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
+
+        Pair<CustomTime, HourMinute> pair = time.getPair();
+
+        CustomTime customTime = pair.first;
+        HourMinute hourMinute = pair.second;
+
+        Assert.assertTrue((customTime == null) != (hourMinute == null));
+
+        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+
+        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
+        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+
+        MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = new MonthlyWeekScheduleRecord(false, scheduleId, dayOfMonth, dayOfWeek.ordinal(), beginningOfMonth, customTimeId, hour, minute);
+        mMonthlyWeekScheduleRecords.put(scheduleId, monthlyWeekScheduleRecord);
+
+        return monthlyWeekScheduleRecord;
     }
 
     public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime, ExactTimeStamp now) {
@@ -379,6 +462,14 @@ public class PersistenceManger {
             if (weeklyScheduleRecord.needsInsert())
                 insertCommands.add(weeklyScheduleRecord.getInsertCommand());
 
+        for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : mMonthlyDayScheduleRecords.values())
+            if (monthlyDayScheduleRecord.needsInsert())
+                insertCommands.add(monthlyDayScheduleRecord.getInsertCommand());
+
+        for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : mMonthlyWeekScheduleRecords.values())
+            if (monthlyWeekScheduleRecord.needsInsert())
+                insertCommands.add(monthlyWeekScheduleRecord.getInsertCommand());
+
         for (InstanceRecord instanceRecord : mInstanceRecords)
             if (instanceRecord.needsInsert())
                 insertCommands.add(instanceRecord.getInsertCommand());
@@ -414,6 +505,14 @@ public class PersistenceManger {
         for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values())
             if (weeklyScheduleRecord.needsUpdate())
                 updateCommands.add(weeklyScheduleRecord.getUpdateCommand());
+
+        for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : mMonthlyDayScheduleRecords.values())
+            if (monthlyDayScheduleRecord.needsUpdate())
+                updateCommands.add(monthlyDayScheduleRecord.getUpdateCommand());
+
+        for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : mMonthlyWeekScheduleRecords.values())
+            if (monthlyWeekScheduleRecord.needsUpdate())
+                updateCommands.add(monthlyWeekScheduleRecord.getUpdateCommand());
 
         for (InstanceRecord instanceRecord : mInstanceRecords)
             if (instanceRecord.needsUpdate())

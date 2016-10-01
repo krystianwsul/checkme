@@ -1005,18 +1005,19 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    Task createSingleScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull Date date, @NonNull TimePair timePair, @Nullable String note) {
+    @NonNull
+    Task createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task rootTask = createRootTaskHelper(name, now, note);
         Assert.assertTrue(rootTask != null);
 
-        Time time = getTime(timePair);
+        List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
+        Assert.assertTrue(schedules != null);
+        Assert.assertTrue(!schedules.isEmpty());
 
-        Schedule schedule = createSingleSchedule(rootTask, date, time, now);
-        Assert.assertTrue(schedule != null);
-
-        rootTask.addSchedule(schedule);
+        rootTask.addSchedules(schedules);
 
         return rootTask;
     }
@@ -1029,14 +1030,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task rootTask = createRootTaskHelper(name, now, note);
-        Assert.assertTrue(rootTask != null);
-
-        List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
-        Assert.assertTrue(schedules != null);
-        Assert.assertTrue(!schedules.isEmpty());
-
-        rootTask.addSchedules(schedules);
+        createScheduleRootTask(now, name, scheduleDatas, note);
 
         save(context, dataId);
     }
@@ -1662,7 +1656,7 @@ public class DomainFactory {
         Assert.assertTrue(scheduleRecord != null);
         Assert.assertTrue(rootTask != null);
 
-        WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.getWeeklyScheduleRecords(scheduleRecord.getId());
+        WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.getWeeklyScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(weeklyScheduleRecord != null);
 
         return new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord);
@@ -1735,27 +1729,8 @@ public class DomainFactory {
         mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
     }
 
-    private SingleSchedule createSingleSchedule(Task rootTask, Date date, Time time, ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(time != null);
-        Assert.assertTrue(startExactTimeStamp != null);
-        Assert.assertTrue(new DateTime(date, time).getTimeStamp().toExactTimeStamp().compareTo(startExactTimeStamp) >= 0);
-
-        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startExactTimeStamp);
-        Assert.assertTrue(scheduleRecord != null);
-
-        SingleScheduleRecord singleScheduleDateTimeRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
-        Assert.assertTrue(singleScheduleDateTimeRecord != null);
-
-        return new SingleSchedule(this, scheduleRecord, singleScheduleDateTimeRecord);
-    }
-
-    private List<Schedule> createSchedules(Task rootTask, List<CreateTaskLoader.ScheduleData> scheduleDatas, ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(rootTask != null);
-        Assert.assertTrue(scheduleDatas != null);
+    private List<Schedule> createSchedules(@NonNull Task rootTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(startExactTimeStamp != null);
         Assert.assertTrue(rootTask.current(startExactTimeStamp));
 
         List<Schedule> schedules = new ArrayList<>();
@@ -1771,10 +1746,8 @@ public class DomainFactory {
                     Time time = getTime(singleScheduleData.TimePair);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startExactTimeStamp);
-                    Assert.assertTrue(scheduleRecord != null);
 
                     SingleScheduleRecord singleScheduleRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
-                    Assert.assertTrue(singleScheduleRecord != null);
 
                     schedules.add(new SingleSchedule(this, scheduleRecord, singleScheduleRecord));
                     break;
@@ -1785,10 +1758,8 @@ public class DomainFactory {
                     Time time = getTime(dailyScheduleData.TimePair);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.DAILY, startExactTimeStamp);
-                    Assert.assertTrue(scheduleRecord != null);
 
                     DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
-                    Assert.assertTrue(dailyScheduleRecord != null);
 
                     schedules.add(new DailySchedule(this, scheduleRecord, dailyScheduleRecord));
                     break;
@@ -1800,10 +1771,8 @@ public class DomainFactory {
                     Time time = getTime(weeklyScheduleData.TimePair);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.WEEKLY, startExactTimeStamp);
-                    Assert.assertTrue(scheduleRecord != null);
 
                     WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
-                    Assert.assertTrue(weeklyScheduleRecord != null);
 
                     schedules.add(new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord));
                     break;

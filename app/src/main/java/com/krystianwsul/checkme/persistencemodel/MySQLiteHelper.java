@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.utils.ScheduleType;
 
@@ -14,10 +15,11 @@ import java.util.List;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 14;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
+    @NonNull
     static SQLiteDatabase getDatabase(Context applicationContext) {
         if (sSQLiteDatabase == null)
             sSQLiteDatabase = new MySQLiteHelper(applicationContext).getWritableDatabase();
@@ -39,6 +41,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         SingleScheduleRecord.onCreate(sqLiteDatabase);
         DailyScheduleRecord.onCreate(sqLiteDatabase);
         WeeklyScheduleRecord.onCreate(sqLiteDatabase);
+        MonthlyDayScheduleRecord.onCreate(sqLiteDatabase);
+        MonthlyWeekScheduleRecord.onCreate(sqLiteDatabase);
 
         InstanceRecord.onCreate(sqLiteDatabase);
     }
@@ -105,6 +109,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
                             int i = 0;
                             while (!dailyCursor.isAfterLast()) {
+                                //noinspection UnusedAssignment
                                 int dailyId = dailyCursor.getInt(0);
                                 int dailyScheduleId = dailyCursor.getInt(1);
                                 Integer dailyCustomTimeId = (dailyCursor.isNull(2) ? null : dailyCursor.getInt(2));
@@ -134,6 +139,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
                             int j = 0;
                             while (!weeklyCursor.isAfterLast()) {
+                                //noinspection UnusedAssignment
                                 int weeklyId = weeklyCursor.getInt(0);
                                 int weeklyScheduleId = weeklyCursor.getInt(1);
                                 int weeklyDayOfWeek = weeklyCursor.getInt(2);
@@ -196,6 +202,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
             SingleScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
             DailyScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
             WeeklyScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+            MonthlyDayScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+            MonthlyWeekScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
             InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 

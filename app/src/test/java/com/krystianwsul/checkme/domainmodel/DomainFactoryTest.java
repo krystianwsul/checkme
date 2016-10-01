@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -24,6 +25,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.Collections;
+
 @SuppressWarnings("UnnecessaryLocalVariable")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TextUtils.class, android.util.Log.class, Context.class})
@@ -37,6 +40,7 @@ public class DomainFactoryTest {
         PowerMockito.mockStatic(Log.class);
     }
 
+    @SuppressWarnings("EmptyMethod")
     @After
     public void tearDown() throws Exception {
 
@@ -58,8 +62,7 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
 
-        Task rootTask = domainFactory.createSingleScheduleRootTask(startExactTimeStamp, "root task", scheduleDate, new TimePair(scheduleHourMinute), null);
-        Assert.assertTrue(rootTask != null);
+        Task rootTask = domainFactory.createScheduleRootTask(startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
 
@@ -90,7 +93,6 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli);
 
         DomainFactory.Irrelevant irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp);
-        Assert.assertTrue(irrelevantBefore != null);
         Assert.assertTrue(irrelevantBefore.mCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantBefore.mTasks.isEmpty());
         Assert.assertTrue(irrelevantBefore.mInstances.isEmpty());
@@ -106,7 +108,6 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMilli);
 
         DomainFactory.Irrelevant irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp);
-        Assert.assertTrue(irrelevantAfter != null);
         Assert.assertTrue(irrelevantAfter.mCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 1);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 1);
@@ -138,8 +139,7 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
 
-        Task rootTask = domainFactory.createSingleScheduleRootTask(startExactTimeStamp, "root task", scheduleDate, new TimePair(scheduleHourMinute), null);
-        Assert.assertTrue(rootTask != null);
+        Task rootTask = domainFactory.createScheduleRootTask(startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
 
@@ -227,7 +227,6 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli);
 
         DomainFactory.Irrelevant irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp);
-        Assert.assertTrue(irrelevantBefore != null);
         Assert.assertTrue(irrelevantBefore.mCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantBefore.mTasks.isEmpty());
         Assert.assertTrue(irrelevantBefore.mInstances.isEmpty());
@@ -244,7 +243,6 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMilli);
 
         DomainFactory.Irrelevant irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp);
-        Assert.assertTrue(irrelevantAfter != null);
         Assert.assertTrue(irrelevantAfter.mCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 4);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 3);

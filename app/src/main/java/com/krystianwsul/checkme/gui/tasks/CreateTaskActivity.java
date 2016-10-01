@@ -134,11 +134,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             if (mHourMinutePickerPosition == null) {
                 clearParent();
 
-                mCreateTaskAdapter.addScheduleEntry(new ScheduleEntry(scheduleDialogData));
+                mCreateTaskAdapter.addScheduleEntry(ScheduleEntry.fromScheduleDialogData(scheduleDialogData));
             } else {
                 Assert.assertTrue(mHourMinutePickerPosition > 0);
 
-                mScheduleEntries.set(mHourMinutePickerPosition - 1, new ScheduleEntry(scheduleDialogData));
+                mScheduleEntries.set(mHourMinutePickerPosition - 1, ScheduleEntry.fromScheduleDialogData(scheduleDialogData));
 
                 mCreateTaskAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
@@ -603,13 +603,13 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                                 switch (scheduleData.getScheduleType()) {
                                     case SINGLE:
                                         CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
-                                        return new ScheduleEntry(singleScheduleData);
+                                        return new SingleScheduleEntry(singleScheduleData);
                                     case DAILY:
                                         CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
-                                        return new ScheduleEntry(dailyScheduleData);
+                                        return new DailyScheduleEntry(dailyScheduleData);
                                     case WEEKLY:
                                         CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
-                                        return new ScheduleEntry(weeklyScheduleData);
+                                        return new WeeklyScheduleEntry(weeklyScheduleData);
                                     default:
                                         throw new UnsupportedOperationException();
                                 }
@@ -687,16 +687,18 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         for (ScheduleEntry scheduleEntry : mScheduleEntries) {
             Assert.assertTrue(scheduleEntry != null);
 
-            if (scheduleEntry.mScheduleType != ScheduleType.SINGLE)
+            if (scheduleEntry.getScheduleType() != ScheduleType.SINGLE)
                 continue;
+
+            SingleScheduleEntry singleScheduleEntry = (SingleScheduleEntry) scheduleEntry;
 
             if ((mData.TaskData != null) && (mData.TaskData.ScheduleDatas != null) && mData.TaskData.ScheduleDatas.contains(scheduleEntry.getScheduleData()))
                 continue;
 
-            if (scheduleEntry.mDate.compareTo(Date.today()) > 0)
+            if (singleScheduleEntry.mDate.compareTo(Date.today()) > 0)
                 continue;
 
-            if (scheduleEntry.mDate.compareTo(Date.today()) < 0) {
+            if (singleScheduleEntry.mDate.compareTo(Date.today()) < 0) {
                 setScheduleEntryError(scheduleEntry, R.string.error_date);
 
                 hasError = true;
@@ -704,11 +706,11 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             }
 
             HourMinute hourMinute;
-            TimePair timePair = scheduleEntry.mTimePairPersist.getTimePair();
+            TimePair timePair = singleScheduleEntry.mTimePairPersist.getTimePair();
             if (timePair.CustomTimeId != null) {
                 Assert.assertTrue(timePair.HourMinute == null);
 
-                hourMinute = mData.CustomTimeDatas.get(timePair.CustomTimeId).HourMinutes.get(scheduleEntry.mDate.getDayOfWeek());
+                hourMinute = mData.CustomTimeDatas.get(timePair.CustomTimeId).HourMinutes.get(singleScheduleEntry.mDate.getDayOfWeek());
             } else {
                 Assert.assertTrue(timePair.HourMinute != null);
 
@@ -859,7 +861,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
     }
 
     private ScheduleEntry firstScheduleEntry() {
-        return new ScheduleEntry(mScheduleHint);
+        return new SingleScheduleEntry(mScheduleHint);
     }
 
     @NonNull

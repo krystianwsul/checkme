@@ -46,7 +46,7 @@ public class ScheduleEntryTest {
     public void testSingle_2016_9_30() {
         Date today = new Date(2016, 9, 30); // last friday of the month
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(scheduleHint);
+        ScheduleEntry scheduleEntry = new ScheduleEntry(scheduleHint);
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -64,7 +64,7 @@ public class ScheduleEntryTest {
     public void testSingle_2016_9_1() {
         Date today = new Date(2016, 9, 1); // first thursday of the month
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(scheduleHint);
+        ScheduleEntry scheduleEntry = new ScheduleEntry(scheduleHint);
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -82,7 +82,7 @@ public class ScheduleEntryTest {
     public void testSingle_2016_9_7() {
         Date today = new Date(2016, 9, 7); // first wednesday of the month
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(scheduleHint);
+        ScheduleEntry scheduleEntry = new ScheduleEntry(scheduleHint);
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -100,7 +100,7 @@ public class ScheduleEntryTest {
     public void testSingle_2016_9_8() {
         Date today = new Date(2016, 9, 8); // second thursday of the month
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(scheduleHint);
+        ScheduleEntry scheduleEntry = new ScheduleEntry(scheduleHint);
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -118,7 +118,7 @@ public class ScheduleEntryTest {
     public void testSingle_2016_9_28() {
         Date today = new Date(2016, 9, 28); // fourth wednesday of the month
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(scheduleHint);
+        ScheduleEntry scheduleEntry = new ScheduleEntry(scheduleHint);
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -136,7 +136,7 @@ public class ScheduleEntryTest {
     public void testSingle_2016_9_29() {
         Date today = new Date(2016, 9, 29); // last thursday of the month
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(scheduleHint);
+        ScheduleEntry scheduleEntry = new ScheduleEntry(scheduleHint);
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -157,7 +157,7 @@ public class ScheduleEntryTest {
         Date hintDate = new Date(2016, 9, 29); // last thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(hintDate, hourMinute);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(scheduleHint);
+        ScheduleEntry scheduleEntry = new ScheduleEntry(scheduleHint);
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), scheduleHint);
 
@@ -179,7 +179,7 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_30_noon() {
         Date scheduleDate = new Date(2016, 9, 30); // last friday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
@@ -199,7 +199,7 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_1_noon() {
         Date scheduleDate = new Date(2016, 9, 1); // first thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
@@ -219,7 +219,7 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_7_noon() {
         Date scheduleDate = new Date(2016, 9, 7); // first wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
@@ -239,7 +239,7 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_8_noon() {
         Date scheduleDate = new Date(2016, 9, 8); // second thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
@@ -259,7 +259,7 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_28_noon() {
         Date scheduleDate = new Date(2016, 9, 28); // fourth wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
@@ -279,7 +279,7 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_29_noon() {
         Date scheduleDate = new Date(2016, 9, 29); // last thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
@@ -302,7 +302,7 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 30); // last friday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -323,7 +323,7 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 1); // first thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -344,7 +344,7 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 7); // first wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -365,7 +365,7 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 8); // second thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -386,7 +386,7 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 28); // fourth wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -407,7 +407,7 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 29); // last thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -431,7 +431,7 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.FRIDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -453,7 +453,7 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.FRIDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -475,7 +475,7 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.THURSDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -497,7 +497,7 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.SATURDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -519,7 +519,7 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.SUNDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
@@ -541,7 +541,7 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.MONDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        CreateTaskActivity.ScheduleEntry scheduleEntry = new CreateTaskActivity.ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new ScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 

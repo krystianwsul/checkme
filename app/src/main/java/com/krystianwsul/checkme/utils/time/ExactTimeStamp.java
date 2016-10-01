@@ -38,12 +38,14 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         mLong = millis;
     }
 
+    @NonNull
     public Calendar getCalendar() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(mLong);
         return calendar;
     }
 
+    @NonNull
     public Date getDate() {
         return new Date(getCalendar());
     }

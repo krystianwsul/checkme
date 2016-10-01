@@ -27,7 +27,7 @@ class SingleSchedule extends Schedule {
 
     @NonNull
     @Override
-    String getTaskText(Context context) {
+    String getScheduleText(@NonNull Context context) {
         Assert.assertTrue(mSingleScheduleRecord != null);
 
         Instance instance = getDomainFactory().getInstance(getRootTask(), getDateTime());

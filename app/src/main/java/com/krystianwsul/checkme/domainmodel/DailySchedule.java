@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
@@ -31,15 +32,12 @@ class DailySchedule extends RepeatingSchedule {
 
     @NonNull
     @Override
-    String getTaskText(Context context) {
+    String getScheduleText(@NonNull Context context) {
         return context.getString(R.string.daily) + " " + getTime().toString();
     }
 
     @Override
-    protected Instance getInstanceInDate(Task task, Date date, HourMilli startHourMilli, HourMilli endHourMilli) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(date != null);
-
+    protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         DayOfWeek day = date.getDayOfWeek();
 
         HourMinute hourMinute = getTime().getHourMinute(day);

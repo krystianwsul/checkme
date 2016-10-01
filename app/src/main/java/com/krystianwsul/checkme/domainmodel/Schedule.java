@@ -20,7 +20,7 @@ abstract class Schedule {
     private final ScheduleRecord mScheduleRecord;
 
     @NonNull
-    abstract String getTaskText(Context context);
+    abstract String getScheduleText(@NonNull Context context);
 
     Schedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
         mDomainFactoryReference = new WeakReference<>(domainFactory);

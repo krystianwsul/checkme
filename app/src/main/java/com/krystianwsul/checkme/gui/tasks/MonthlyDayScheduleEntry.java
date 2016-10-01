@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
@@ -65,11 +66,7 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
         Date date = (scheduleHint != null ? scheduleHint.mDate : today);
 
-        if (mBeginningOfMonth) {
-            date = new Date(date.getYear(), date.getMonth(), mMonthDayNumber);
-        } else {
-            date = new Date(date.getYear(), date.getMonth(), getDaysInMonth(date) - mMonthDayNumber + 1);
-        }
+        date = Utils.getDateInMonth(date.getYear(), date.getMonth(), mMonthDayNumber, mBeginningOfMonth);
 
         return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, mMonthDayNumber, (mMonthDayNumber - 1) / 7 + 1, date.getDayOfWeek(), mBeginningOfMonth, mTimePairPersist, ScheduleType.MONTHLY_DAY);
     }

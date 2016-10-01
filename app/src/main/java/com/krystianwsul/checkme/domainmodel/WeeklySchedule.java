@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
@@ -31,27 +32,12 @@ class WeeklySchedule extends RepeatingSchedule {
 
     @NonNull
     @Override
-    String getTaskText(Context context) {
+    String getScheduleText(@NonNull Context context) {
         return getDayOfWeek() + ": " + getTime();
-
-        /*
-        return Stream.of(mWeeklyScheduleDayOfWeekTime)
-                .groupBy(weeklyScheduleDayOfWeekTimes -> weeklyScheduleDayOfWeekTimes.getTime().toString())
-                .sortBy(Map.Entry::getKey)
-                .map(entry -> Stream.of(entry.getValue())
-                    .map(WeeklyScheduleDayOfWeekTime::getDayOfWeek)
-                    .sortBy(dayOfWeek -> dayOfWeek)
-                    .map(DayOfWeek::toString)
-                    .collect(Collectors.joining(", ")) + ": " + entry.getKey())
-                .collect(Collectors.joining("; "));
-                */
     }
 
     @Override
-    protected Instance getInstanceInDate(Task task, Date date, HourMilli startHourMilli, HourMilli endHourMilli) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(date != null);
-
+    protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         DayOfWeek day = date.getDayOfWeek();
 
         if (getDayOfWeek() != day)
@@ -94,11 +80,13 @@ class WeeklySchedule extends RepeatingSchedule {
         return (new DateTime(thisDate, getTime())).getTimeStamp();
     }
 
+    @NonNull
     private Time getTime() {
         Integer customTimeId = mWeeklyScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
             CustomTime customTime = getDomainFactory().getCustomTime(mWeeklyScheduleRecord.getCustomTimeId());
             Assert.assertTrue(customTime != null);
+
             return customTime;
         } else {
             Integer hour = mWeeklyScheduleRecord.getHour();
@@ -109,8 +97,12 @@ class WeeklySchedule extends RepeatingSchedule {
         }
     }
 
+    @NonNull
     private DayOfWeek getDayOfWeek() {
-        return DayOfWeek.values()[mWeeklyScheduleRecord.getDayOfWeek()];
+        DayOfWeek dayOfWeek = DayOfWeek.values()[mWeeklyScheduleRecord.getDayOfWeek()];
+        Assert.assertTrue(dayOfWeek != null);
+
+        return dayOfWeek;
     }
 
     @Override

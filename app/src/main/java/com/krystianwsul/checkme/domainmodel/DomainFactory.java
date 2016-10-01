@@ -125,7 +125,6 @@ public class DomainFactory {
             Task task = new Task(this, taskRecord);
 
             ArrayList<Schedule> schedules = loadSchedules(task);
-            Assert.assertTrue(schedules != null);
 
             task.addSchedules(schedules);
 
@@ -1011,10 +1010,8 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task rootTask = createRootTaskHelper(name, now, note);
-        Assert.assertTrue(rootTask != null);
 
         List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
-        Assert.assertTrue(schedules != null);
         Assert.assertTrue(!schedules.isEmpty());
 
         rootTask.addSchedules(schedules);
@@ -1062,7 +1059,6 @@ public class DomainFactory {
         }
 
         List<Schedule> schedules = createSchedules(task, scheduleDatas, now);
-        Assert.assertTrue(schedules != null);
         Assert.assertTrue(!schedules.isEmpty());
 
         task.addSchedules(schedules);
@@ -1076,10 +1072,8 @@ public class DomainFactory {
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         Task rootTask = createRootTaskHelper(name, now, note);
-        Assert.assertTrue(rootTask != null);
 
         List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
-        Assert.assertTrue(schedules != null);
         Assert.assertTrue(!schedules.isEmpty());
 
         rootTask.addSchedules(schedules);
@@ -1600,9 +1594,8 @@ public class DomainFactory {
         return instance;
     }
 
-    private ArrayList<Schedule> loadSchedules(Task task) {
-        Assert.assertTrue(task != null);
-
+    @NonNull
+    private ArrayList<Schedule> loadSchedules(@NonNull Task task) {
         List<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(task);
         Assert.assertTrue(scheduleRecords != null);
 
@@ -1662,6 +1655,7 @@ public class DomainFactory {
         return new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord);
     }
 
+    @NonNull
     private Task createRootTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1729,6 +1723,7 @@ public class DomainFactory {
         mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
     }
 
+    @NonNull
     private List<Schedule> createSchedules(@NonNull Task rootTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(rootTask.current(startExactTimeStamp));

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
@@ -61,7 +62,7 @@ class DailyScheduleEntry extends ScheduleEntry {
         int monthDayNumber = date.getDay();
         boolean beginningOfMonth = true;
         if (monthDayNumber > 28) {
-            monthDayNumber = getDaysInMonth(date) - monthDayNumber + 1;
+            monthDayNumber = Utils.getDaysInMonth(date.getYear(), date.getMonth()) - monthDayNumber + 1;
             beginningOfMonth = false;
         }
         int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;

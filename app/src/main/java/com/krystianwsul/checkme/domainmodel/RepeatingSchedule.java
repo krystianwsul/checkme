@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -66,5 +67,6 @@ abstract class RepeatingSchedule extends Schedule {
                 .collect(Collectors.toList());
     }
 
-    protected abstract Instance getInstanceInDate(Task task, Date date, HourMilli startHourMilli, HourMilli endHourMilli);
+    @Nullable
+    protected abstract Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli);
 }

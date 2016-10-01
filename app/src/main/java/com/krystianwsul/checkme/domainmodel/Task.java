@@ -34,14 +34,8 @@ public class Task {
         mTaskRecord = taskRecord;
     }
 
-    void addSchedules(List<Schedule> schedules) {
-        Assert.assertTrue(schedules != null);
+    void addSchedules(@NonNull List<Schedule> schedules) {
         mSchedules.addAll(schedules);
-    }
-
-    void addSchedule(Schedule schedule) {
-        Assert.assertTrue(schedule != null);
-        mSchedules.add(schedule);
     }
 
     @Nullable
@@ -58,7 +52,7 @@ public class Task {
                     .allMatch(schedule -> schedule.current(exactTimeStamp)));
 
             return Stream.of(currentSchedules)
-                    .map(schedule -> schedule.getTaskText(context))
+                    .map(schedule -> schedule.getScheduleText(context))
                     .collect(Collectors.joining(", "));
         } else {
             Assert.assertTrue(currentSchedules.isEmpty());

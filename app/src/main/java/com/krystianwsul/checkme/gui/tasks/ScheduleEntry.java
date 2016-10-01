@@ -9,8 +9,6 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Map;
 
 abstract class ScheduleEntry implements Parcelable {
@@ -53,9 +51,4 @@ abstract class ScheduleEntry implements Parcelable {
 
     @NonNull
     abstract ScheduleType getScheduleType();
-
-    static int getDaysInMonth(@NonNull Date date) {
-        Calendar calendar = new GregorianCalendar(date.getYear(), date.getMonth() - 1, 1);
-        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-    }
 }

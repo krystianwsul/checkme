@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
@@ -72,15 +73,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
         Date date = (scheduleHint != null ? scheduleHint.mDate : today);
 
-        if (mBeginningOfMonth) {
-            Date first = new Date(date.getYear(), date.getMonth(), 1);
-            int day = mMonthWeekNumber * 7 - (first.getDayOfWeek().ordinal() - mMonthWeekDay.ordinal());
-            date = new Date(date.getYear(), date.getMonth(), day);
-        } else {
-            Date last = new Date(date.getYear(), date.getMonth(), 1);
-            int day = mMonthWeekNumber * 7 + (last.getDayOfWeek().ordinal() - mMonthWeekDay.ordinal());
-            date = new Date(date.getYear(), date.getMonth(), getDaysInMonth(date) - day + 1);
-        }
+        date = Utils.getDateInMonth(date.getYear(), date.getMonth(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth);
 
         return new ScheduleDialogFragment.ScheduleDialogData(date, mMonthWeekDay, false, date.getDay(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePairPersist, ScheduleType.MONTHLY_WEEK);
     }

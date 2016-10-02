@@ -145,6 +145,9 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mData.DataId);
 
+                getSupportLoaderManager().destroyLoader(0);
+                mGroupListFragment.destroyLoader();
+
                 DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.InstanceKey.TaskId);
 
                 TickService.startService(this);

@@ -617,7 +617,7 @@ public class ScheduleDialogFragment extends DialogFragment {
         Assert.assertTrue(resultCode >= 0);
         Assert.assertTrue(data == null);
 
-        if (resultCode > 1) {
+        if (resultCode > 0) {
             mCustomTimeDatas = null;
             mScheduleDialogData.mTimePairPersist.setCustomTimeId(resultCode);
         }

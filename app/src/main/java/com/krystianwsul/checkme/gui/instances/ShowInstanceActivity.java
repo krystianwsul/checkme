@@ -36,7 +36,8 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     private InstanceKey mInstanceKey;
 
-    private ShowInstanceLoader.Data mData;
+    private Integer mDataId;
+    private ShowInstanceLoader.InstanceData mInstanceData;
 
     public static Intent getIntent(Context context, InstanceKey instanceKey) {
         Assert.assertTrue(context != null);
@@ -68,24 +69,24 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean check = (mData != null && !mData.Done);
+        boolean check = (mInstanceData != null && !mInstanceData.Done);
         menu.findItem(R.id.instance_menu_check).setVisible(check);
 
-        boolean uncheck = (mData != null && mData.Done);
+        boolean uncheck = (mInstanceData != null && mInstanceData.Done);
         menu.findItem(R.id.instance_menu_uncheck).setVisible(uncheck);
 
-        boolean editInstance = (mData != null && !mData.Done && mData.IsRootInstance);
+        boolean editInstance = (mInstanceData != null && !mInstanceData.Done && mInstanceData.IsRootInstance);
         menu.findItem(R.id.instance_menu_edit_instance).setVisible(editInstance);
 
-        menu.findItem(R.id.instance_menu_share).setVisible(mData != null);
+        menu.findItem(R.id.instance_menu_share).setVisible(mInstanceData != null);
 
-        boolean showTask = (mData != null && !mData.Done && mData.TaskCurrent);
+        boolean showTask = (mInstanceData != null && !mInstanceData.Done && mInstanceData.TaskCurrent);
         menu.findItem(R.id.instance_menu_show_task).setVisible(showTask);
 
-        boolean editTask = (mData != null && !mData.Done && mData.TaskCurrent);
+        boolean editTask = (mInstanceData != null && !mInstanceData.Done && mInstanceData.TaskCurrent);
         menu.findItem(R.id.instance_menu_edit_task).setVisible(editTask);
 
-        boolean deleteTask = (mData != null && !mData.Done && mData.TaskCurrent);
+        boolean deleteTask = (mInstanceData != null && !mInstanceData.Done && mInstanceData.TaskCurrent);
         menu.findItem(R.id.instance_menu_delete_task).setVisible(deleteTask);
 
         menu.findItem(R.id.instance_menu_select_all).setVisible(mSelectAllVisible);
@@ -97,55 +98,58 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.instance_menu_check:
-                Assert.assertTrue(mData != null);
-                Assert.assertTrue(!mData.Done);
+                Assert.assertTrue(mInstanceData != null);
+                Assert.assertTrue(!mInstanceData.Done);
 
                 setDone(true);
                 break;
             case R.id.instance_menu_uncheck:
-                Assert.assertTrue(mData != null);
-                Assert.assertTrue(mData.Done);
+                Assert.assertTrue(mInstanceData != null);
+                Assert.assertTrue(mInstanceData.Done);
 
                 setDone(false);
                 break;
             case R.id.instance_menu_edit_instance:
-                Assert.assertTrue(mData != null);
-                Assert.assertTrue(!mData.Done);
-                Assert.assertTrue(mData.IsRootInstance);
+                Assert.assertTrue(mInstanceData != null);
+                Assert.assertTrue(!mInstanceData.Done);
+                Assert.assertTrue(mInstanceData.IsRootInstance);
 
-                startActivity(EditInstanceActivity.getIntent(this, mData.InstanceKey));
+                startActivity(EditInstanceActivity.getIntent(this, mInstanceData.InstanceKey));
                 break;
             case R.id.instance_menu_share:
-                Assert.assertTrue(mData != null);
+                Assert.assertTrue(mInstanceData != null);
 
-                Utils.share(mData.Name, this);
+                Utils.share(mInstanceData.Name, this);
                 break;
             case R.id.instance_menu_show_task:
-                Assert.assertTrue(mData != null);
-                Assert.assertTrue(!mData.Done);
-                Assert.assertTrue(mData.TaskCurrent);
+                Assert.assertTrue(mInstanceData != null);
+                Assert.assertTrue(!mInstanceData.Done);
+                Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                startActivity(ShowTaskActivity.getIntent(mData.InstanceKey.TaskId, this));
+                startActivity(ShowTaskActivity.getIntent(mInstanceData.InstanceKey.TaskId, this));
                 break;
             case R.id.instance_menu_edit_task:
-                Assert.assertTrue(mData != null);
-                Assert.assertTrue(!mData.Done);
-                Assert.assertTrue(mData.TaskCurrent);
+                Assert.assertTrue(mInstanceData != null);
+                Assert.assertTrue(!mInstanceData.Done);
+                Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                if (mData.IsRootTask)
-                    startActivity(CreateTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                if (mInstanceData.IsRootTask)
+                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.TaskId));
                 else
-                    startActivity(CreateTaskActivity.getEditIntent(this, mData.InstanceKey.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.TaskId));
                 break;
             case R.id.instance_menu_delete_task:
-                Assert.assertTrue(mData != null);
-                Assert.assertTrue(!mData.Done);
-                Assert.assertTrue(mData.TaskCurrent);
+                Assert.assertTrue(mInstanceData != null);
+                Assert.assertTrue(!mInstanceData.Done);
+                Assert.assertTrue(mInstanceData.TaskCurrent);
 
                 ArrayList<Integer> dataIds = new ArrayList<>();
-                dataIds.add(mData.DataId);
+                dataIds.add(mDataId);
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.InstanceKey.TaskId);
+                getSupportLoaderManager().destroyLoader(0);
+                mGroupListFragment.destroyLoader();
+
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceData.InstanceKey.TaskId);
 
                 TickService.startService(this);
 
@@ -208,28 +212,34 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public void onLoadFinished(Loader<ShowInstanceLoader.Data> loader, final ShowInstanceLoader.Data data) {
-        mData = data;
+        if (data.mInstanceData == null) {
+            finish();
+            return;
+        }
+
+        mDataId = data.DataId;
+        mInstanceData = data.mInstanceData;
 
         Intent intent = getIntent();
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-            DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, data.InstanceKey);
+            DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, mInstanceData.InstanceKey);
         }
 
-        mActionBar.setTitle(data.Name);
+        mActionBar.setTitle(mInstanceData.Name);
 
-        if (TextUtils.isEmpty(data.DisplayText))
+        if (TextUtils.isEmpty(mInstanceData.DisplayText))
             mActionBar.setSubtitle(null);
         else
-            mActionBar.setSubtitle(data.DisplayText);
+            mActionBar.setSubtitle(mInstanceData.DisplayText);
 
         invalidateOptionsMenu();
     }
 
     private void setDone(boolean done) {
-        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mData.DataId, mData.InstanceKey, done);
-        mData.Done = done;
+        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mDataId, mInstanceData.InstanceKey, done);
+        mInstanceData.Done = done;
 
         TickService.startService(ShowInstanceActivity.this);
 

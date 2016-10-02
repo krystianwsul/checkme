@@ -3660,4 +3660,8 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
     public void selectAll() {
         mTreeViewAdapter.selectAll();
     }
+
+    public void destroyLoader() {
+        getLoaderManager().destroyLoader(0);
+    }
 }

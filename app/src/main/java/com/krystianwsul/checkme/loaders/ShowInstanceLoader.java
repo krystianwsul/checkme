@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -25,6 +26,46 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
+        @Nullable
+        public final InstanceData mInstanceData;
+
+        public Data(@Nullable InstanceData instanceData) {
+            mInstanceData = instanceData;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            if (mInstanceData != null)
+                hashCode += mInstanceData.hashCode();
+            return hashCode;
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            if ((mInstanceData == null) != (data.mInstanceData == null))
+                return false;
+
+            if ((mInstanceData != null) && !mInstanceData.equals(data.mInstanceData))
+                return false;
+
+            return true;
+        }
+    }
+
+    public static class InstanceData {
         public final InstanceKey InstanceKey;
         public final String Name;
         public final String DisplayText;
@@ -33,7 +74,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final boolean IsRootInstance;
         public final Boolean IsRootTask;
 
-        public Data(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask) {
+        public InstanceData(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, Boolean isRootTask) {
             Assert.assertTrue(instanceKey != null);
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -57,7 +98,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             hashCode += (TaskCurrent ? 1 : 0);
             hashCode += (IsRootInstance ? 1 : 0);
             if (IsRootTask != null)
-            hashCode += (IsRootTask ? 2 : 1);
+                hashCode += (IsRootTask ? 2 : 1);
             return hashCode;
         }
 
@@ -70,36 +111,36 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             if (object == this)
                 return true;
 
-            if (!(object instanceof Data))
+            if (!(object instanceof InstanceData))
                 return false;
 
-            Data data = (Data) object;
+            InstanceData instanceData = (InstanceData) object;
 
-            if (!InstanceKey.equals(data.InstanceKey))
+            if (!InstanceKey.equals(instanceData.InstanceKey))
                 return false;
 
-            if (!Name.equals(data.Name))
+            if (!Name.equals(instanceData.Name))
                 return false;
 
-            if (TextUtils.isEmpty(DisplayText) != TextUtils.isEmpty(data.DisplayText))
+            if (TextUtils.isEmpty(DisplayText) != TextUtils.isEmpty(instanceData.DisplayText))
                 return false;
 
-            if (!TextUtils.isEmpty(data.DisplayText) && !DisplayText.equals(data.DisplayText))
+            if (!TextUtils.isEmpty(instanceData.DisplayText) && !DisplayText.equals(instanceData.DisplayText))
                 return false;
 
-            if (Done != data.Done)
+            if (Done != instanceData.Done)
                 return false;
 
-            if (TaskCurrent != data.TaskCurrent)
+            if (TaskCurrent != instanceData.TaskCurrent)
                 return false;
 
-            if (IsRootInstance != data.IsRootInstance)
+            if (IsRootInstance != instanceData.IsRootInstance)
                 return false;
 
-            if ((IsRootTask == null) != (data.IsRootTask == null))
+            if ((IsRootTask == null) != (instanceData.IsRootTask == null))
                 return false;
 
-            if (IsRootTask != null && !IsRootTask.equals(data.IsRootTask))
+            if (IsRootTask != null && !IsRootTask.equals(instanceData.IsRootTask))
                 return false;
 
             return true;

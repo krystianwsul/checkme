@@ -236,10 +236,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
     public static class SingleScheduleData implements ScheduleData {
         @NonNull
-        public final com.krystianwsul.checkme.utils.time.Date Date;
+        public final Date Date;
 
         @NonNull
-        public final com.krystianwsul.checkme.utils.time.TimePair TimePair;
+        public final TimePair TimePair;
 
         public SingleScheduleData(@NonNull Date date, @NonNull TimePair timePair) {
             Date = date;
@@ -248,7 +248,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @Override
         public int hashCode() {
-            return TimePair.hashCode();
+            return (Date.hashCode() + TimePair.hashCode());
         }
 
         @Override
@@ -366,7 +366,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @Override
         public int hashCode() {
-            return TimePair.hashCode();
+            return (DayOfWeek.hashCode() + TimePair.hashCode());
         }
 
         @Override
@@ -388,6 +388,121 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @Override
         public ScheduleType getScheduleType() {
             return ScheduleType.WEEKLY;
+        }
+    }
+
+    public static class MonthlyDayScheduleData implements ScheduleData {
+        public final int mDayOfMonth;
+        public final boolean mBeginningOfMonth;
+
+        @NonNull
+        public final TimePair TimePair;
+
+        public MonthlyDayScheduleData(int dayOfMonth, boolean beginningOfMonth, @NonNull TimePair timePair) {
+            mDayOfMonth = dayOfMonth;
+            mBeginningOfMonth = beginningOfMonth;
+            TimePair = timePair;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = mDayOfMonth;
+            hashCode += (mBeginningOfMonth ? 1 : 0);
+            hashCode += TimePair.hashCode();
+            return hashCode;
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof MonthlyDayScheduleData))
+                return false;
+
+            MonthlyDayScheduleData monthlyDayScheduleData = (MonthlyDayScheduleData) object;
+
+            if (mDayOfMonth != monthlyDayScheduleData.mDayOfMonth)
+                return false;
+
+            if (mBeginningOfMonth != monthlyDayScheduleData.mBeginningOfMonth)
+                return false;
+
+            if (!TimePair.equals(monthlyDayScheduleData.TimePair))
+                return false;
+
+            return true;
+        }
+
+        @Override
+        public ScheduleType getScheduleType() {
+            return ScheduleType.MONTHLY_DAY;
+        }
+    }
+
+    public static class MonthlyWeekScheduleData implements ScheduleData {
+        public final int mDayOfMonth;
+
+        @NonNull
+        public final DayOfWeek mDayOfWeek;
+
+        public final boolean mBeginningOfMonth;
+
+        @NonNull
+        public final TimePair TimePair;
+
+        public MonthlyWeekScheduleData(int dayOfMonth, @NonNull DayOfWeek dayOfWeek, boolean beginningOfMonth, @NonNull TimePair timePair) {
+            mDayOfMonth = dayOfMonth;
+            mDayOfWeek = dayOfWeek;
+            mBeginningOfMonth = beginningOfMonth;
+            TimePair = timePair;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = mDayOfMonth;
+            hashCode += mDayOfWeek.hashCode();
+            hashCode += (mBeginningOfMonth ? 1 : 0);
+            hashCode += TimePair.hashCode();
+            return hashCode;
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof MonthlyWeekScheduleData))
+                return false;
+
+            MonthlyWeekScheduleData monthlyWeekScheduleData = (MonthlyWeekScheduleData) object;
+
+            if (mDayOfMonth != monthlyWeekScheduleData.mDayOfMonth)
+                return false;
+
+            if (mBeginningOfMonth != monthlyWeekScheduleData.mBeginningOfMonth)
+                return false;
+
+            if (!mDayOfWeek.equals(monthlyWeekScheduleData.mDayOfWeek))
+                return false;
+
+            if (!TimePair.equals(monthlyWeekScheduleData.TimePair))
+                return false;
+
+            return true;
+        }
+
+        @Override
+        public ScheduleType getScheduleType() {
+            return ScheduleType.MONTHLY_WEEK;
         }
     }
 }

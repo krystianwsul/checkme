@@ -28,6 +28,13 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     @NonNull
     private final TimePairPersist mTimePairPersist;
 
+    MonthlyWeekScheduleEntry(@NonNull CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData) {
+        mMonthWeekNumber = monthlyWeekScheduleData.mDayOfMonth;
+        mMonthWeekDay = monthlyWeekScheduleData.mDayOfWeek;
+        mBeginningOfMonth = monthlyWeekScheduleData.mBeginningOfMonth;
+        mTimePairPersist = new TimePairPersist(monthlyWeekScheduleData.TimePair);
+    }
+
     private MonthlyWeekScheduleEntry(int monthWeekNumber, @NonNull DayOfWeek monthWeekDay, boolean beginningOfMonth, @NonNull TimePairPersist timePairPersist, @Nullable String error) {
         super(error);
 
@@ -65,7 +72,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        throw new UnsupportedOperationException();
+        return new CreateTaskLoader.MonthlyWeekScheduleData(mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePairPersist.getTimePair());
     }
 
     @NonNull

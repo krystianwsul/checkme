@@ -21,7 +21,7 @@ import junit.framework.Assert;
 
 import java.util.Calendar;
 
-public class MonthlyDaySchedule extends RepeatingSchedule {
+class MonthlyDaySchedule extends RepeatingSchedule {
     private final MonthlyDayScheduleRecord mMonthlyDayScheduleRecord;
 
     MonthlyDaySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull MonthlyDayScheduleRecord monthlyDayScheduleRecord) {
@@ -91,8 +91,16 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
         }
     }
 
+    int getDayOfMonth() {
+        return mMonthlyDayScheduleRecord.getDayOfMonth();
+    }
+
+    boolean getBeginningOfMonth() {
+        return mMonthlyDayScheduleRecord.getBeginningOfMonth();
+    }
+
     @NonNull
-    private Time getTime() {
+    Time getTime() {
         Integer customTimeId = mMonthlyDayScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
             CustomTime customTime = getDomainFactory().getCustomTime(mMonthlyDayScheduleRecord.getCustomTimeId());

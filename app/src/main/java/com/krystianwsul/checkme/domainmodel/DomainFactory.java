@@ -26,6 +26,8 @@ import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
+import com.krystianwsul.checkme.persistencemodel.MonthlyDayScheduleRecord;
+import com.krystianwsul.checkme.persistencemodel.MonthlyWeekScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
@@ -670,6 +672,28 @@ public class DomainFactory {
                                 scheduleDatas.add(new CreateTaskLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
 
                                 CustomTime weeklyCustomTime = pair.second.getPair().first;
+                                if (weeklyCustomTime != null)
+                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+
+                                break;
+                            }
+                            case MONTHLY_DAY: {
+                                MonthlyDaySchedule monthlyDaySchedule = (MonthlyDaySchedule) schedule;
+
+                                scheduleDatas.add(new CreateTaskLoader.MonthlyDayScheduleData(monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), monthlyDaySchedule.getTime().getTimePair()));
+
+                                CustomTime weeklyCustomTime = monthlyDaySchedule.getTime().getPair().first;
+                                if (weeklyCustomTime != null)
+                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+
+                                break;
+                            }
+                            case MONTHLY_WEEK: {
+                                MonthlyWeekSchedule monthlyWeekSchedule = (MonthlyWeekSchedule) schedule;
+
+                                scheduleDatas.add(new CreateTaskLoader.MonthlyWeekScheduleData(monthlyWeekSchedule.getDayOfMonth(), monthlyWeekSchedule.getDayOfWeek(), monthlyWeekSchedule.getBeginningOfMonth(), monthlyWeekSchedule.getTime().getTimePair()));
+
+                                CustomTime weeklyCustomTime = monthlyWeekSchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
                                     customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
 
@@ -1617,6 +1641,12 @@ public class DomainFactory {
                 case WEEKLY:
                     schedules.add(loadWeeklySchedule(scheduleRecord, task));
                     break;
+                case MONTHLY_DAY:
+                    schedules.add(loadMonthlyDaySchedule(scheduleRecord, task));
+                    break;
+                case MONTHLY_WEEK:
+                    schedules.add(loadMonthlyWeekSchedule(scheduleRecord, task));
+                    break;
                 default:
                     throw new IndexOutOfBoundsException("unknown schedule type");
             }
@@ -1653,6 +1683,26 @@ public class DomainFactory {
         Assert.assertTrue(weeklyScheduleRecord != null);
 
         return new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord);
+    }
+
+    private MonthlyDaySchedule loadMonthlyDaySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
+        Assert.assertTrue(rootTask != null);
+
+        MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.getMonthlyDayScheduleRecord(scheduleRecord.getId());
+        Assert.assertTrue(monthlyDayScheduleRecord != null);
+
+        return new MonthlyDaySchedule(this, scheduleRecord, monthlyDayScheduleRecord);
+    }
+
+    private MonthlyWeekSchedule loadMonthlyWeekSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+        Assert.assertTrue(scheduleRecord != null);
+        Assert.assertTrue(rootTask != null);
+
+        MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.getMonthlyWeekScheduleRecord(scheduleRecord.getId());
+        Assert.assertTrue(monthlyWeekScheduleRecord != null);
+
+        return new MonthlyWeekSchedule(this, scheduleRecord, monthlyWeekScheduleRecord);
     }
 
     @NonNull
@@ -1772,6 +1822,26 @@ public class DomainFactory {
                     schedules.add(new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord));
                     break;
                 }
+                case MONTHLY_DAY: {
+                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
+
+                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
+
+                    schedules.add(new MonthlyDaySchedule(this, scheduleRecord, monthlyDayScheduleRecord));
+                    break;
+                }
+                case MONTHLY_WEEK: {
+                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
+
+                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
+
+                    schedules.add(new MonthlyWeekSchedule(this, scheduleRecord, monthlyWeekScheduleRecord));
+                    break;
+                }
                 default:
                     throw new UnsupportedOperationException();
             }
@@ -1801,6 +1871,7 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
+    @NonNull
     List<TaskHierarchy> getParentTaskHierarchies(Task childTask) {
         Assert.assertTrue(childTask != null);
 

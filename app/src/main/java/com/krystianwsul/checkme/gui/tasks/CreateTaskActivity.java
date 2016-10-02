@@ -610,6 +610,12 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                                     case WEEKLY:
                                         CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
                                         return new WeeklyScheduleEntry(weeklyScheduleData);
+                                    case MONTHLY_DAY:
+                                        CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
+                                        return new MonthlyDayScheduleEntry(monthlyDayScheduleData);
+                                    case MONTHLY_WEEK:
+                                        CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
+                                        return new MonthlyWeekScheduleEntry(monthlyWeekScheduleData);
                                     default:
                                         throw new UnsupportedOperationException();
                                 }

@@ -34,7 +34,7 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
     @NonNull
     @Override
     String getScheduleText(@NonNull Context context) {
-        String day = mMonthlyWeekScheduleRecord.getDayOfMonth() + " " + getDayOfWeekNew() + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mMonthlyWeekScheduleRecord.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
+        String day = mMonthlyWeekScheduleRecord.getDayOfMonth() + " " + getDayOfWeek() + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mMonthlyWeekScheduleRecord.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
         return day + ": " + getTime();
     }
@@ -92,7 +92,7 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
     }
 
     @NonNull
-    private Time getTime() {
+    Time getTime() {
         Integer customTimeId = mMonthlyWeekScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
             CustomTime customTime = getDomainFactory().getCustomTime(mMonthlyWeekScheduleRecord.getCustomTimeId());
@@ -108,17 +108,25 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
         }
     }
 
+    int getDayOfMonth() {
+        return mMonthlyWeekScheduleRecord.getDayOfMonth();
+    }
+
     @NonNull
-    private DayOfWeek getDayOfWeekNew() {
+    DayOfWeek getDayOfWeek() {
         DayOfWeek dayOfWeek = DayOfWeek.values()[mMonthlyWeekScheduleRecord.getDayOfWeek()];
         Assert.assertTrue(dayOfWeek != null);
 
         return dayOfWeek;
     }
 
+    boolean getBeginningOfMonth() {
+        return mMonthlyWeekScheduleRecord.getBeginningOfMonth();
+    }
+
     @NonNull
     private Date getDate(int year, int month) {
-        return Utils.getDateInMonth(year, month, mMonthlyWeekScheduleRecord.getDayOfMonth(), getDayOfWeekNew(), mMonthlyWeekScheduleRecord.getBeginningOfMonth());
+        return Utils.getDateInMonth(year, month, mMonthlyWeekScheduleRecord.getDayOfMonth(), getDayOfWeek(), mMonthlyWeekScheduleRecord.getBeginningOfMonth());
     }
 
     @Override

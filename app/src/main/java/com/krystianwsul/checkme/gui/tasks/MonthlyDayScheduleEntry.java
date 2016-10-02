@@ -23,6 +23,12 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     @NonNull
     private final TimePairPersist mTimePairPersist;
 
+    MonthlyDayScheduleEntry(@NonNull CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData) {
+        mMonthDayNumber = monthlyDayScheduleData.mDayOfMonth;
+        mBeginningOfMonth = monthlyDayScheduleData.mBeginningOfMonth;
+        mTimePairPersist = new TimePairPersist(monthlyDayScheduleData.TimePair);
+    }
+
     private MonthlyDayScheduleEntry(int monthDayNumber, boolean beginningOfMonth, @NonNull TimePairPersist timePairPersist, @Nullable String error) {
         super(error);
 
@@ -58,7 +64,7 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        throw new UnsupportedOperationException();
+        return new CreateTaskLoader.MonthlyDayScheduleData(mMonthDayNumber, mBeginningOfMonth, mTimePairPersist.getTimePair());
     }
 
     @NonNull

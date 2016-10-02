@@ -510,12 +510,6 @@ public class DomainFactory {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
-        Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
-
-        Task task = mTasks.get(instance.getTaskId());
-        Assert.assertTrue(task != null);
-
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
@@ -524,22 +518,34 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
+        Task task = mTasks.get(instanceKey.TaskId);
+        if (task != null) {
+            Instance instance = getInstance(instanceKey);
+            Assert.assertTrue(instance != null);
 
-        for (Instance childInstance : instance.getChildInstances(now)) {
-            Task childTask = mTasks.get(childInstance.getTaskId());
-            Assert.assertTrue(childTask != null);
+            GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
 
-            Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
+            for (Instance childInstance : instance.getChildInstances(now)) {
+                Task childTask = mTasks.get(childInstance.getTaskId());
+                Assert.assertTrue(childTask != null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), new WeakReference<>(data), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote());
-            instanceData.setChildren(getChildInstanceDatas(childInstance, now, new WeakReference<>(instanceData)));
-            instanceDatas.put(childInstance.getInstanceKey(), instanceData);
+                Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
+
+                GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), new WeakReference<>(data), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote());
+                instanceData.setChildren(getChildInstanceDatas(childInstance, now, new WeakReference<>(instanceData)));
+                instanceDatas.put(childInstance.getInstanceKey(), instanceData);
+            }
+
+            data.setInstanceDatas(instanceDatas);
+
+            return data;
+        } else { // todo probably should wrap all data in this loader in a nullable object at some point
+            GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, false, null, null);
+
+            data.setInstanceDatas(new HashMap<>());
+
+            return data;
         }
-
-        data.setInstanceDatas(instanceDatas);
-
-        return data;
     }
 
     public synchronized GroupListLoader.Data getGroupListData(Context context, ArrayList<InstanceKey> instanceKeys) {
@@ -595,16 +601,17 @@ public class DomainFactory {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKey != null);
 
+        Task task = mTasks.get(instanceKey.TaskId);
+        if (task == null)
+            return new ShowInstanceLoader.Data(null);
+
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
-
-        Task task = mTasks.get(instance.getTaskId());
-        Assert.assertTrue(task != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-        return new ShowInstanceLoader.Data(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask);
+        return new ShowInstanceLoader.Data(new ShowInstanceLoader.InstanceData(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask));
     }
 
     public synchronized CreateTaskLoader.Data getCreateChildTaskData(Integer taskId, Context context, List<Integer> excludedTaskIds) {

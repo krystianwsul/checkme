@@ -111,10 +111,12 @@ public class Task {
         return (getParentTask(exactTimeStamp) == null);
     }
 
+    @NonNull
     private ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mTaskRecord.getStartTime());
     }
 
+    @Nullable
     ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskRecord.getEndTime() != null)
             return new ExactTimeStamp(mTaskRecord.getEndTime());
@@ -203,7 +205,6 @@ public class Task {
         Assert.assertTrue(domainFactory != null);
 
         List<TaskHierarchy> taskHierarchies = domainFactory.getParentTaskHierarchies(this);
-        Assert.assertTrue(taskHierarchies != null);
 
         ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
 

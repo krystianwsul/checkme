@@ -234,8 +234,8 @@ public class DomainFactory {
         Assert.assertTrue(instance.isRootInstance(now));
         Assert.assertTrue(instance.getDone() == null);
 
-        if (instance.getInstanceTimePair().CustomTimeId != null) {
-            CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().CustomTimeId);
+        if (instance.getInstanceTimePair().mCustomTimeId != null) {
+            CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
             Assert.assertTrue(customTime != null);
 
             currentCustomTimes.put(customTime.getId(), customTime);
@@ -271,8 +271,8 @@ public class DomainFactory {
 
             instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDate(), instance.getName()));
 
-            if (instance.getInstanceTimePair().CustomTimeId != null) {
-                CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().CustomTimeId);
+            if (instance.getInstanceTimePair().mCustomTimeId != null) {
+                CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
                 Assert.assertTrue(customTime != null);
 
                 currentCustomTimes.put(customTime.getId(), customTime);
@@ -929,7 +929,7 @@ public class DomainFactory {
 
         instance.setDone(true, now);
         instance.setNotificationShown(false, now);
-        instance.setNotified(true, now);
+        instance.setNotified(now);
 
         save(context, dataId);
     }
@@ -986,7 +986,7 @@ public class DomainFactory {
             Instance instance = getInstance(instanceKey);
             Assert.assertTrue(instance != null);
 
-            instance.setNotified(true, now);
+            instance.setNotified(now);
             instance.setNotificationShown(false, now);
         }
 
@@ -1001,7 +1001,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        instance.setNotified(true, now);
+        instance.setNotified(now);
         instance.setNotificationShown(false, now);
 
         save(context, dataId);
@@ -1729,16 +1729,16 @@ public class DomainFactory {
 
     @NonNull
     private Time getTime(@NonNull TimePair timePair) {
-        if (timePair.CustomTimeId != null) {
-            Assert.assertTrue(timePair.HourMinute == null);
+        if (timePair.mCustomTimeId != null) {
+            Assert.assertTrue(timePair.mHourMinute == null);
 
-            CustomTime customTime = mCustomTimes.get(timePair.CustomTimeId);
+            CustomTime customTime = mCustomTimes.get(timePair.mCustomTimeId);
             Assert.assertTrue(customTime != null);
 
             return customTime;
         } else {
-            Assert.assertTrue(timePair.HourMinute != null);
-            return new NormalTime(timePair.HourMinute);
+            Assert.assertTrue(timePair.mHourMinute != null);
+            return new NormalTime(timePair.mHourMinute);
         }
     }
 
@@ -2156,7 +2156,7 @@ public class DomainFactory {
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // set custom time relevant
-            Integer scheduleCustomTimeId = mInstance.getScheduleTimePair().CustomTimeId;
+            Integer scheduleCustomTimeId = mInstance.getScheduleTimePair().mCustomTimeId;
             if (scheduleCustomTimeId != null) {
                 CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(scheduleCustomTimeId);
                 Assert.assertTrue(customTimeRelevance != null);
@@ -2165,7 +2165,7 @@ public class DomainFactory {
             }
 
             // set custom time relevant
-            Integer instanceCustomTimeId = mInstance.getInstanceTimePair().CustomTimeId;
+            Integer instanceCustomTimeId = mInstance.getInstanceTimePair().mCustomTimeId;
             if (instanceCustomTimeId != null) {
                 CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(instanceCustomTimeId);
                 Assert.assertTrue(customTimeRelevance != null);

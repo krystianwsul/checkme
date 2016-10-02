@@ -27,7 +27,7 @@ public class InstanceKey implements Parcelable, Serializable {
 
     @Override
     public int hashCode() {
-        return TaskId + ScheduleDate.hashCode() + (ScheduleTimePair.CustomTimeId != null ? ScheduleTimePair.CustomTimeId : 0) + (ScheduleTimePair.HourMinute != null ? ScheduleTimePair.HourMinute.hashCode() : 0);
+        return TaskId + ScheduleDate.hashCode() + (ScheduleTimePair.mCustomTimeId != null ? ScheduleTimePair.mCustomTimeId : 0) + (ScheduleTimePair.mHourMinute != null ? ScheduleTimePair.mHourMinute.hashCode() : 0);
     }
 
     @Override
@@ -49,10 +49,14 @@ public class InstanceKey implements Parcelable, Serializable {
         if (!ScheduleDate.equals(instanceKey.ScheduleDate))
             return false;
 
-        if (ScheduleTimePair.CustomTimeId == null) {
-            return (instanceKey.ScheduleTimePair.CustomTimeId == null && ScheduleTimePair.HourMinute.equals(instanceKey.ScheduleTimePair.HourMinute));
+        if (ScheduleTimePair.mCustomTimeId == null) {
+            Assert.assertTrue(ScheduleTimePair.mHourMinute != null);
+
+            return (instanceKey.ScheduleTimePair.mCustomTimeId == null && ScheduleTimePair.mHourMinute.equals(instanceKey.ScheduleTimePair.mHourMinute));
         } else {
-            return (instanceKey.ScheduleTimePair.CustomTimeId != null && ScheduleTimePair.CustomTimeId.equals(instanceKey.ScheduleTimePair.CustomTimeId));
+            Assert.assertTrue(ScheduleTimePair.mHourMinute == null);
+
+            return (instanceKey.ScheduleTimePair.mCustomTimeId != null && ScheduleTimePair.mCustomTimeId.equals(instanceKey.ScheduleTimePair.mCustomTimeId));
         }
     }
 
@@ -79,8 +83,8 @@ public class InstanceKey implements Parcelable, Serializable {
             TimePair scheduleTimePair = source.readParcelable(TimePair.class.getClassLoader());
             Assert.assertTrue(scheduleTimePair != null);
 
-            Integer scheduleCustomTimeId = scheduleTimePair.CustomTimeId;
-            HourMinute scheduleHourMinute = scheduleTimePair.HourMinute;
+            Integer scheduleCustomTimeId = scheduleTimePair.mCustomTimeId;
+            HourMinute scheduleHourMinute = scheduleTimePair.mHourMinute;
             Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
 
             return new InstanceKey(taskId, scheduleDate, scheduleCustomTimeId, scheduleHourMinute);

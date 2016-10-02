@@ -9,6 +9,8 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
@@ -20,57 +22,61 @@ class SingleScheduleEntry extends ScheduleEntry {
     final Date mDate;
 
     @NonNull
-    final TimePairPersist mTimePairPersist;
+    final TimePair mTimePair;
 
     SingleScheduleEntry(@NonNull CreateTaskLoader.SingleScheduleData singleScheduleData) {
         mDate = singleScheduleData.Date;
-        mTimePairPersist = new TimePairPersist(singleScheduleData.TimePair);
+        mTimePair = singleScheduleData.TimePair.copy();
     }
 
     SingleScheduleEntry(@Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
         if (scheduleHint == null) { // new for task
             mDate = Date.today();
-            mTimePairPersist = new TimePairPersist();
+            mTimePair = new TimePair(HourMinute.getNextHour());
         } else if (scheduleHint.mTimePair != null) { // for instance group or instance join
             mDate = scheduleHint.mDate;
-            mTimePairPersist = new TimePairPersist(scheduleHint.mTimePair);
+            mTimePair = scheduleHint.mTimePair.copy();
         } else { // for group root
             mDate = scheduleHint.mDate;
-            mTimePairPersist = new TimePairPersist();
+            mTimePair = new TimePair(HourMinute.getNextHour());
         }
     }
 
-    private SingleScheduleEntry(@NonNull Date date, @NonNull TimePairPersist timePairPersist, @Nullable String error) {
+    private SingleScheduleEntry(@NonNull Date date, @NonNull TimePair timePair, @Nullable String error) {
         super(error);
 
         mDate = date;
-        mTimePairPersist = timePairPersist;
+        mTimePair = timePair;
     }
 
     SingleScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
 
         mDate = scheduleDialogData.mDate;
-        mTimePairPersist = scheduleDialogData.mTimePairPersist;
+        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
     }
 
     @NonNull
     @Override
     String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
-        if (mTimePairPersist.getCustomTimeId() != null) {
-            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+        if (mTimePair.mCustomTimeId != null) {
+            Assert.assertTrue(mTimePair.mHourMinute == null);
+
+            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeId);
             Assert.assertTrue(customTimeData != null);
 
             return mDate.getDisplayText(context) + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
         } else {
-            return mDate.getDisplayText(context) + ", " + mTimePairPersist.getHourMinute().toString();
+            Assert.assertTrue(mTimePair.mHourMinute != null);
+
+            return mDate.getDisplayText(context) + ", " + mTimePair.mHourMinute.toString();
         }
     }
 
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.SingleScheduleData(mDate, mTimePairPersist.getTimePair());
+        return new CreateTaskLoader.SingleScheduleData(mDate, mTimePair);
     }
 
     @NonNull
@@ -84,7 +90,7 @@ class SingleScheduleEntry extends ScheduleEntry {
         }
         int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;
 
-        return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), true, monthDayNumber, monthWeekNumber, mDate.getDayOfWeek(), beginningOfMonth, mTimePairPersist, ScheduleType.SINGLE);
+        return new ScheduleDialogFragment.ScheduleDialogData(mDate, mDate.getDayOfWeek(), true, monthDayNumber, monthWeekNumber, mDate.getDayOfWeek(), beginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.SINGLE);
     }
 
     @NonNull
@@ -101,7 +107,7 @@ class SingleScheduleEntry extends ScheduleEntry {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeParcelable(mDate, 0);
-        parcel.writeParcelable(mTimePairPersist, 0);
+        parcel.writeParcelable(mTimePair, 0);
         parcel.writeString(mError);
     }
 
@@ -112,12 +118,12 @@ class SingleScheduleEntry extends ScheduleEntry {
             Date date = in.readParcelable(Date.class.getClassLoader());
             Assert.assertTrue(date != null);
 
-            TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
-            Assert.assertTrue(timePairPersist != null);
+            TimePair timePair = in.readParcelable(TimePair.class.getClassLoader());
+            Assert.assertTrue(timePair != null);
 
             String error = in.readString();
 
-            return new SingleScheduleEntry(date, timePairPersist, error);
+            return new SingleScheduleEntry(date, timePair, error);
         }
 
         @Override

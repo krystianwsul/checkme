@@ -22,16 +22,9 @@ public class TimePairPersist implements Parcelable {
     }
 
     public TimePairPersist(@NonNull TimePair timePair) {
-        mCustomTimeId = timePair.CustomTimeId;
-        if (timePair.HourMinute != null)
-            mHourMinute = timePair.HourMinute;
-    }
-
-    private TimePairPersist(TimePairPersist timePairPersist) {
-        Assert.assertTrue(timePairPersist != null);
-
-        mCustomTimeId = timePairPersist.mCustomTimeId;
-        mHourMinute = timePairPersist.mHourMinute;
+        mCustomTimeId = timePair.mCustomTimeId;
+        if (timePair.mHourMinute != null)
+            mHourMinute = timePair.mHourMinute;
     }
 
     public void setCustomTimeId(int customTimeId) {

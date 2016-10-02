@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
@@ -17,41 +18,45 @@ import java.util.Map;
 
 class DailyScheduleEntry extends ScheduleEntry {
     @NonNull
-    private final TimePairPersist mTimePairPersist;
+    private final TimePair mTimePair;
 
     DailyScheduleEntry(@NonNull CreateTaskLoader.DailyScheduleData dailyScheduleData) {
-        mTimePairPersist = new TimePairPersist(dailyScheduleData.TimePair);
+        mTimePair = dailyScheduleData.TimePair.copy();
     }
 
-    private DailyScheduleEntry(@NonNull TimePairPersist timePairPersist, @Nullable String error) { // replace with more specific
+    private DailyScheduleEntry(@NonNull TimePair timePair, @Nullable String error) {
         super(error);
 
-        mTimePairPersist = timePairPersist;
+        mTimePair = timePair;
     }
 
     DailyScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
 
-        mTimePairPersist = scheduleDialogData.mTimePairPersist;
+        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
     }
 
     @NonNull
     @Override
     String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
-        if (mTimePairPersist.getCustomTimeId() != null) {
-            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+        if (mTimePair.mCustomTimeId != null) {
+            Assert.assertTrue(mTimePair.mHourMinute == null);
+
+            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeId);
             Assert.assertTrue(customTimeData != null);
 
             return customTimeData.Name;
         } else {
-            return mTimePairPersist.getHourMinute().toString();
+            Assert.assertTrue(mTimePair.mHourMinute != null);
+
+            return mTimePair.mHourMinute.toString();
         }
     }
 
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.DailyScheduleData(mTimePairPersist.getTimePair());
+        return new CreateTaskLoader.DailyScheduleData(mTimePair);
     }
 
     @NonNull
@@ -67,7 +72,7 @@ class DailyScheduleEntry extends ScheduleEntry {
         }
         int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;
 
-        return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, mTimePairPersist, ScheduleType.DAILY);
+        return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.DAILY);
     }
 
     @NonNull
@@ -83,7 +88,7 @@ class DailyScheduleEntry extends ScheduleEntry {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeParcelable(mTimePairPersist, 0);
+        parcel.writeParcelable(mTimePair, 0);
         parcel.writeString(mError);
     }
 
@@ -91,12 +96,12 @@ class DailyScheduleEntry extends ScheduleEntry {
     public static final Creator<DailyScheduleEntry> CREATOR = new Creator<DailyScheduleEntry>() {
         @Override
         public DailyScheduleEntry createFromParcel(Parcel in) {
-            TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
-            Assert.assertTrue(timePairPersist != null);
+            TimePair timePair = in.readParcelable(TimePair.class.getClassLoader());
+            Assert.assertTrue(timePair != null);
 
             String error = in.readString();
 
-            return new DailyScheduleEntry(timePairPersist, error);
+            return new DailyScheduleEntry(timePair, error);
         }
 
         @Override

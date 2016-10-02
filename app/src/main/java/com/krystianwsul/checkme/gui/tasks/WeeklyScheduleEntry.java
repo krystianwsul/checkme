@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
@@ -21,44 +22,48 @@ class WeeklyScheduleEntry extends ScheduleEntry {
     private final DayOfWeek mDayOfWeek;
 
     @NonNull
-    private final TimePairPersist mTimePairPersist;
+    private final TimePair mTimePair;
 
     WeeklyScheduleEntry(@NonNull CreateTaskLoader.WeeklyScheduleData weeklyScheduleData) {
         mDayOfWeek = weeklyScheduleData.DayOfWeek;
-        mTimePairPersist = new TimePairPersist(weeklyScheduleData.TimePair);
+        mTimePair = weeklyScheduleData.TimePair.copy();
     }
 
-    private WeeklyScheduleEntry(@NonNull DayOfWeek dayOfWeek, @NonNull TimePairPersist timePairPersist, @Nullable String error) {
+    private WeeklyScheduleEntry(@NonNull DayOfWeek dayOfWeek, @NonNull TimePair timePair, @Nullable String error) {
         super(error);
 
         mDayOfWeek = dayOfWeek;
-        mTimePairPersist = timePairPersist;
+        mTimePair = timePair;
     }
 
     WeeklyScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
 
         mDayOfWeek = scheduleDialogData.mDayOfWeek;
-        mTimePairPersist = scheduleDialogData.mTimePairPersist;
+        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
     }
 
     @NonNull
     @Override
     String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
-        if (mTimePairPersist.getCustomTimeId() != null) {
-            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePairPersist.getCustomTimeId());
+        if (mTimePair.mCustomTimeId != null) {
+            Assert.assertTrue(mTimePair.mHourMinute == null);
+
+            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeId);
             Assert.assertTrue(customTimeData != null);
 
-            return mDayOfWeek + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek) + ")";
+            return mDayOfWeek.toString() + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek).toString() + ")";
         } else {
-            return mDayOfWeek + ", " + mTimePairPersist.getHourMinute().toString();
+            Assert.assertTrue(mTimePair.mHourMinute != null);
+
+            return mDayOfWeek.toString() + ", " + mTimePair.mHourMinute.toString();
         }
     }
 
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.WeeklyScheduleData(mDayOfWeek, mTimePairPersist.getTimePair());
+        return new CreateTaskLoader.WeeklyScheduleData(mDayOfWeek, mTimePair);
     }
 
     @NonNull
@@ -74,7 +79,7 @@ class WeeklyScheduleEntry extends ScheduleEntry {
         }
         int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;
 
-        return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, mTimePairPersist, ScheduleType.WEEKLY);
+        return new ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.WEEKLY);
     }
 
     @NonNull
@@ -91,7 +96,7 @@ class WeeklyScheduleEntry extends ScheduleEntry {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeSerializable(mDayOfWeek);
-        parcel.writeParcelable(mTimePairPersist, 0);
+        parcel.writeParcelable(mTimePair, 0);
         parcel.writeString(mError);
     }
 
@@ -102,12 +107,12 @@ class WeeklyScheduleEntry extends ScheduleEntry {
             DayOfWeek dayOfWeek = (DayOfWeek) in.readSerializable();
             Assert.assertTrue(dayOfWeek != null);
 
-            TimePairPersist timePairPersist = in.readParcelable(TimePairPersist.class.getClassLoader());
-            Assert.assertTrue(timePairPersist != null);
+            TimePair timePair = in.readParcelable(TimePair.class.getClassLoader());
+            Assert.assertTrue(timePair != null);
 
             String error = in.readString();
 
-            return new WeeklyScheduleEntry(dayOfWeek, timePairPersist, error);
+            return new WeeklyScheduleEntry(dayOfWeek, timePair, error);
         }
 
         @Override

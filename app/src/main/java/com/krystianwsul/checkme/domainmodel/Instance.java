@@ -188,17 +188,17 @@ class Instance {
         mInstanceRecord.setInstanceMonth(date.getMonth());
         mInstanceRecord.setInstanceDay(date.getDay());
 
-        if (timePair.CustomTimeId != null) {
-            Assert.assertTrue(timePair.HourMinute == null);
-            mInstanceRecord.setInstanceCustomTimeId(timePair.CustomTimeId);
+        if (timePair.mCustomTimeId != null) {
+            Assert.assertTrue(timePair.mHourMinute == null);
+            mInstanceRecord.setInstanceCustomTimeId(timePair.mCustomTimeId);
             mInstanceRecord.setInstanceHour(null);
             mInstanceRecord.setInstanceMinute(null);
         } else {
-            Assert.assertTrue(timePair.HourMinute != null);
+            Assert.assertTrue(timePair.mHourMinute != null);
 
             mInstanceRecord.setInstanceCustomTimeId(null);
-            mInstanceRecord.setInstanceHour(timePair.HourMinute.getHour());
-            mInstanceRecord.setInstanceMinute(timePair.HourMinute.getMinute());
+            mInstanceRecord.setInstanceHour(timePair.mHourMinute.getHour());
+            mInstanceRecord.setInstanceMinute(timePair.mHourMinute.getMinute());
         }
 
         mInstanceRecord.setNotified(false);
@@ -370,14 +370,12 @@ class Instance {
         return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }
 
-    void setNotified(boolean notified, ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
+    void setNotified(@NonNull ExactTimeStamp now) {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now);
 
         Assert.assertTrue(mInstanceRecord != null);
-        mInstanceRecord.setNotified(notified);
+        mInstanceRecord.setNotified(true);
     }
 
     /*

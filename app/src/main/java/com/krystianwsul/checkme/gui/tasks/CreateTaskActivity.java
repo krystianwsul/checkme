@@ -599,7 +599,7 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
                     Assert.assertTrue(!mData.TaskData.ScheduleDatas.isEmpty());
 
                     mScheduleEntries = Stream.of(mData.TaskData.ScheduleDatas)
-                            .map(scheduleData -> { // todo monthly
+                            .map(scheduleData -> {
                                 switch (scheduleData.getScheduleType()) {
                                     case SINGLE:
                                         CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
@@ -712,15 +712,15 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
             }
 
             HourMinute hourMinute;
-            TimePair timePair = singleScheduleEntry.mTimePairPersist.getTimePair();
-            if (timePair.CustomTimeId != null) {
-                Assert.assertTrue(timePair.HourMinute == null);
+            TimePair timePair = singleScheduleEntry.mTimePair;
+            if (timePair.mCustomTimeId != null) {
+                Assert.assertTrue(timePair.mHourMinute == null);
 
-                hourMinute = mData.CustomTimeDatas.get(timePair.CustomTimeId).HourMinutes.get(singleScheduleEntry.mDate.getDayOfWeek());
+                hourMinute = mData.CustomTimeDatas.get(timePair.mCustomTimeId).HourMinutes.get(singleScheduleEntry.mDate.getDayOfWeek());
             } else {
-                Assert.assertTrue(timePair.HourMinute != null);
+                Assert.assertTrue(timePair.mHourMinute != null);
 
-                hourMinute = timePair.HourMinute;
+                hourMinute = timePair.mHourMinute;
             }
 
             Assert.assertTrue(hourMinute != null);

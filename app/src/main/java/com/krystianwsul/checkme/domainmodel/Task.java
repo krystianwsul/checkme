@@ -138,13 +138,11 @@ public class Task {
             List<Schedule> schedules = getCurrentSchedules(endExactTimeStamp);
             Assert.assertTrue(schedules != null);
 
-            if (schedules.isEmpty()) {
-                Assert.assertTrue(Stream.of(schedules)
-                        .allMatch(schedule -> schedule.current(endExactTimeStamp)));
+            Assert.assertTrue(Stream.of(schedules)
+                    .allMatch(schedule -> schedule.current(endExactTimeStamp)));
 
-                Stream.of(schedules)
-                        .forEach(schedule -> schedule.setEndExactTimeStamp(endExactTimeStamp));
-            }
+            Stream.of(schedules)
+                    .forEach(schedule -> schedule.setEndExactTimeStamp(endExactTimeStamp));
         } else {
             Assert.assertTrue(getCurrentSchedules(endExactTimeStamp).isEmpty());
         }

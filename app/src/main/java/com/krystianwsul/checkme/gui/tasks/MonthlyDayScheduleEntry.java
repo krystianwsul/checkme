@@ -50,7 +50,7 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
-        String day = mMonthDayNumber + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mBeginningOfMonth ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
+        String day = Utils.ordinal(mMonthDayNumber) + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mBeginningOfMonth ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
         if (mTimePair.mCustomTimeId != null) {
             Assert.assertTrue(mTimePair.mHourMinute == null);

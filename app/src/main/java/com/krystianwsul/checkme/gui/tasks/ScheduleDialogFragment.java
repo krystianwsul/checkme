@@ -39,6 +39,7 @@ import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -465,7 +466,9 @@ public class ScheduleDialogFragment extends DialogFragment {
 
         mScheduleDialogMonthWeekRadio.setChecked(!mScheduleDialogData.mMonthlyDay);
 
-        ArrayAdapter<Integer> monthWeekNumberAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_no_padding, Arrays.asList(1, 2, 3, 4));
+        ArrayAdapter<String> monthWeekNumberAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_no_padding, Stream.of(Arrays.asList(1, 2, 3, 4))
+                .map(Utils::ordinal)
+                .collect(Collectors.toList()));
         monthWeekNumberAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mScheduleDialogMonthWeekNumber.setAdapter(monthWeekNumberAdapter);
         mScheduleDialogMonthWeekNumber.setSelection(mScheduleDialogData.mMonthWeekNumber - 1);
@@ -668,7 +671,7 @@ public class ScheduleDialogFragment extends DialogFragment {
                 break;
             case MONTHLY_DAY:
             case MONTHLY_WEEK:
-                mScheduleDialogMonthDayNumber.setText(Integer.valueOf(mScheduleDialogData.mMonthDayNumber).toString());
+                mScheduleDialogMonthDayNumber.setText(Utils.ordinal(mScheduleDialogData.mMonthDayNumber));
 
                 if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
                     CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());

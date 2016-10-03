@@ -13,6 +13,7 @@ import junit.framework.Assert;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 public class Utils {
     public static void share(@NonNull String text, @NonNull Activity activity) {
@@ -66,5 +67,30 @@ public class Utils {
 
             return new Date(year, month, daysInMonth - day + 1);
         }
+    }
+
+    @NonNull
+    public static String ordinal(int number) {
+        String ret = String.valueOf(number);
+
+        if (!Locale.getDefault().getLanguage().equals("pl")) {
+            int mod = number % 10;
+            switch (mod) {
+                case 1:
+                    ret += "st";
+                    break;
+                case 2:
+                    ret += "nd";
+                    break;
+                case 3:
+                    ret += "rd";
+                    break;
+                default:
+                    ret += "th";
+                    break;
+            }
+        }
+
+        return ret;
     }
 }

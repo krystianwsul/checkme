@@ -11,7 +11,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -29,9 +28,9 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
@@ -47,7 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class CreateTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
+public class CreateTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
     private static final String DISCARD_TAG = "discard";
 
     private static final String TASK_ID_KEY = "taskId";
@@ -451,13 +450,6 @@ public class CreateTaskActivity extends AppCompatActivity implements LoaderManag
         }
 
         getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("CreateTaskActivity.onResume");
-
-        super.onResume();
     }
 
     @Override

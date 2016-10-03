@@ -3,21 +3,20 @@ package com.krystianwsul.checkme.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowNotificationGroupActivity extends AppCompatActivity implements GroupListFragment.GroupListListener {
+public class ShowNotificationGroupActivity extends AbstractActivity implements GroupListFragment.GroupListListener {
     private static final String INSTANCES_KEY = "instanceKeys";
 
     private GroupListFragment mGroupListFragment;
@@ -55,13 +54,6 @@ public class ShowNotificationGroupActivity extends AppCompatActivity implements 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         mGroupListFragment.setInstanceKeys(instanceKeys);
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("ShowNotificationGroupActivity.onResume");
-
-        super.onResume();
     }
 
     @Override

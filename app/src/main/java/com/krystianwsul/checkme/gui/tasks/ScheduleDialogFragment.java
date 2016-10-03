@@ -12,7 +12,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.AdapterView;
@@ -32,8 +31,8 @@ import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialo
 import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.gui.AbstractDialogFragment;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
@@ -56,7 +55,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Vector;
 
-public class ScheduleDialogFragment extends DialogFragment {
+public class ScheduleDialogFragment extends AbstractDialogFragment {
     private static final String SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData";
     private static final String SHOW_DELETE_KEY = "showDelete";
 
@@ -535,8 +534,6 @@ public class ScheduleDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        MyCrashlytics.log("ScheduleDialogFragment.onResume");
 
         getActivity().registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 

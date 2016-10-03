@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
@@ -26,9 +25,9 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.gui.tree.NodeContainer;
@@ -44,7 +43,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskListFragment extends Fragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
+public class TaskListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
     private static final String SELECTED_TASKS_KEY = "selectedTasks";
     private static final String EXPANDED_TASKS_KEY = "expandedTasks";
 
@@ -303,13 +302,6 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
         Assert.assertTrue(mEmptyText != null);
 
         getLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    public void onResume() {
-        MyCrashlytics.log("TaskListFragment.onResume");
-
-        super.onResume();
     }
 
     @Override

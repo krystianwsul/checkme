@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +21,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-public class DebugFragment extends Fragment {
+public class DebugFragment extends AbstractFragment {
     public static DebugFragment newInstance() {
         return new DebugFragment();
     }
@@ -113,12 +112,5 @@ public class DebugFragment extends Fragment {
         Assert.assertTrue(debugDiffText != null);
 
         debugDiffButton.setOnClickListener(v -> debugDiffText.setText(DataDiff.getDiff()));
-    }
-
-    @Override
-    public void onResume() {
-        MyCrashlytics.log("DebugFragment.onResume");
-
-        super.onResume();
     }
 }

@@ -7,16 +7,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.Utils;
@@ -25,7 +24,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowTaskActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
+public class ShowTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
     private static final String INTENT_KEY = "taskId";
 
     private int mTaskId;
@@ -130,13 +129,6 @@ public class ShowTaskActivity extends AppCompatActivity implements LoaderManager
                 throw new UnsupportedOperationException();
         }
         return true;
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("ShowTaskActivity.onResume");
-
-        super.onResume();
     }
 
     @Override

@@ -15,7 +15,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -26,7 +25,6 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -40,7 +38,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener {
+public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
@@ -313,13 +311,6 @@ public class MainActivity extends AppCompatActivity implements TaskListFragment.
         showTab(mVisibleTab);
 
         TickService.register(this);
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("MainActivity.onResume");
-
-        super.onResume();
     }
 
     @Override

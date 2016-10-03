@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +21,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.gui.AbstractDialogFragment;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.gui.tree.NodeContainer;
 import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-public class ParentPickerFragment extends DialogFragment {
+public class ParentPickerFragment extends AbstractDialogFragment {
     private static final String EXPANDED_TASKS_KEY = "expandedTasks";
 
     private static final String SHOW_DELETE_KEY = "showDelete";

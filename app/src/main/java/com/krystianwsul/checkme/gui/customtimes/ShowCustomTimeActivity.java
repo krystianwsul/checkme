@@ -7,7 +7,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -20,9 +19,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -32,7 +31,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.Data> {
+public class ShowCustomTimeActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.Data> {
     private static final String CUSTOM_TIME_ID_KEY = "customTimeId";
     private static final String NEW_KEY = "new";
 
@@ -214,13 +213,6 @@ public class ShowCustomTimeActivity extends AppCompatActivity implements LoaderM
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("ShowCustomTimeActivity.onResume");
-
-        super.onResume();
     }
 
     private void extractKey(String key, DayOfWeek dayOfWeek) {

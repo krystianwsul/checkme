@@ -9,7 +9,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
@@ -33,10 +32,10 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.DataDiff;
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
@@ -67,7 +66,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GroupListFragment extends Fragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
+public class GroupListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private final static String POSITION_KEY = "position";
     private static final String TIME_RANGE_KEY = "timeRange";
 
@@ -519,13 +518,6 @@ public class GroupListFragment extends Fragment implements LoaderManager.LoaderC
 
             setAll(timeRange, position);
         }
-    }
-
-    @Override
-    public void onResume() {
-        MyCrashlytics.log("GroupListFragment.onResume");
-
-        super.onResume();
     }
 
     private void setAll(MainActivity.TimeRange timeRange, int position) {

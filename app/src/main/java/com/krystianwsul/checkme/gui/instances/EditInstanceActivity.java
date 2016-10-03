@@ -11,7 +11,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,9 +22,9 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
@@ -42,7 +41,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class EditInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<EditInstanceLoader.Data> {
+public class EditInstanceActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<EditInstanceLoader.Data> {
     private static final String INSTANCE_KEY = "instanceKey";
 
     private static final String DATE_KEY = "date";
@@ -231,8 +230,6 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
 
     @Override
     public void onResume() {
-        MyCrashlytics.log("EditInstanceActivity.onResume");
-
         super.onResume();
 
         registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));

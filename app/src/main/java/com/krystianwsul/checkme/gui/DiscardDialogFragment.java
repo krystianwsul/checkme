@@ -3,14 +3,13 @@ package com.krystianwsul.checkme.gui;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.krystianwsul.checkme.R;
 
 import junit.framework.Assert;
 
-public class DiscardDialogFragment extends DialogFragment {
+public class DiscardDialogFragment extends AbstractDialogFragment {
     private DiscardDialogListener mDiscardDialogListener;
 
     public static DiscardDialogFragment newInstance() {

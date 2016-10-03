@@ -7,16 +7,15 @@ import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
@@ -28,7 +27,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 
-public class ShowInstanceActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data>, GroupListFragment.GroupListListener {
+public class ShowInstanceActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data>, GroupListFragment.GroupListListener {
     private static final String INSTANCE_KEY = "instanceKey";
     private static final String SET_NOTIFIED_KEY = "setNotified";
 
@@ -196,13 +195,6 @@ public class ShowInstanceActivity extends AppCompatActivity implements LoaderMan
         mGroupListFragment.setInstanceKey(mInstanceKey);
 
         getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("ShowInstanceActivity.onResume");
-
-        super.onResume();
     }
 
     @Override

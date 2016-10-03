@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -18,7 +17,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TimeDialogFragment extends DialogFragment {
+public class TimeDialogFragment extends AbstractDialogFragment {
     private static final String CUSTOM_TIMES_KEY = "customTimes";
 
     private TimeDialogListener mTimeDialogListener;

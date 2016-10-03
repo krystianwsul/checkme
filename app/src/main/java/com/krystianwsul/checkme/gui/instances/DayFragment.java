@@ -5,14 +5,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.utils.time.Date;
 
@@ -23,7 +22,7 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class DayFragment extends Fragment {
+public class DayFragment extends AbstractFragment {
     private static final String POSITION_KEY = "position";
     private static final String TIME_RANGE_KEY = "timeRange";
 
@@ -137,13 +136,6 @@ public class DayFragment extends Fragment {
                     .add(R.id.day_frame, mGroupListFragment)
                     .commit();
         }
-    }
-
-    @Override
-    public void onResume() {
-        MyCrashlytics.log("DayFragment.onResume");
-
-        super.onResume();
     }
 
     public void selectAll() {

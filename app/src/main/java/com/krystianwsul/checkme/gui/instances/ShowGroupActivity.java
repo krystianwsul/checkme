@@ -6,21 +6,20 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-public class ShowGroupActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data>, GroupListFragment.GroupListListener {
+public class ShowGroupActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowGroupLoader.Data>, GroupListFragment.GroupListListener {
     private TimeStamp mTimeStamp;
 
     private static final String TIME_KEY = "time";
@@ -63,13 +62,6 @@ public class ShowGroupActivity extends AppCompatActivity implements LoaderManage
         mGroupListFragment.setTimeStamp(mTimeStamp);
 
         getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    protected void onResume() {
-        MyCrashlytics.log("ShowGroupActivity.onResume");
-
-        super.onResume();
     }
 
     @Override

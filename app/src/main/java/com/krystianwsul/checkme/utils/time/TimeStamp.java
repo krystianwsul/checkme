@@ -84,6 +84,7 @@ public class TimeStamp implements Comparable<TimeStamp>, Parcelable {
         return mLong.equals(other.getLong());
     }
 
+    @NonNull
     public ExactTimeStamp toExactTimeStamp() {
         return new ExactTimeStamp(mLong);
     }

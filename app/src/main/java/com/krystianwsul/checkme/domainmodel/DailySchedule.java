@@ -22,6 +22,7 @@ import junit.framework.Assert;
 import java.util.Calendar;
 
 class DailySchedule extends RepeatingSchedule {
+    @NonNull
     private final DailyScheduleRecord mDailyScheduleRecord;
 
     DailySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull DailyScheduleRecord dailyScheduleRecord) {
@@ -36,6 +37,7 @@ class DailySchedule extends RepeatingSchedule {
         return context.getString(R.string.daily) + " " + getTime().toString();
     }
 
+    @Nullable
     @Override
     protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         DayOfWeek day = date.getDayOfWeek();
@@ -52,7 +54,7 @@ class DailySchedule extends RepeatingSchedule {
         DateTime scheduleDateTime = new DateTime(date, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return getDomainFactory().getInstance(task, scheduleDateTime);
+        return mDomainFactory.getInstance(task, scheduleDateTime);
     }
 
     @Override
@@ -77,13 +79,11 @@ class DailySchedule extends RepeatingSchedule {
         return dailyScheduleDateTime.getTimeStamp();
     }
 
+    @NonNull
     public Time getTime() {
         Integer customTimeId = mDailyScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = getDomainFactory().getCustomTime(mDailyScheduleRecord.getCustomTimeId());
-            Assert.assertTrue(customTime != null);
-
-            return customTime;
+            return mDomainFactory.getCustomTime(mDailyScheduleRecord.getCustomTimeId());
         } else {
             Integer hour = mDailyScheduleRecord.getHour();
             Integer minute = mDailyScheduleRecord.getMinute();

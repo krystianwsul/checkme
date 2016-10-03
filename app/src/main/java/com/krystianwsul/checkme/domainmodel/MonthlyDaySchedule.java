@@ -22,6 +22,7 @@ import junit.framework.Assert;
 import java.util.Calendar;
 
 class MonthlyDaySchedule extends RepeatingSchedule {
+    @NonNull
     private final MonthlyDayScheduleRecord mMonthlyDayScheduleRecord;
 
     MonthlyDaySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull MonthlyDayScheduleRecord monthlyDayScheduleRecord) {
@@ -38,6 +39,7 @@ class MonthlyDaySchedule extends RepeatingSchedule {
         return day + ": " + getTime();
     }
 
+    @Nullable
     @Override
     protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         Date dateThisMonth = getDate(date.getYear(), date.getMonth());
@@ -57,7 +59,7 @@ class MonthlyDaySchedule extends RepeatingSchedule {
         DateTime scheduleDateTime = new DateTime(date, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return getDomainFactory().getInstance(task, scheduleDateTime);
+        return mDomainFactory.getInstance(task, scheduleDateTime);
     }
 
     @Nullable
@@ -103,9 +105,7 @@ class MonthlyDaySchedule extends RepeatingSchedule {
     Time getTime() {
         Integer customTimeId = mMonthlyDayScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = getDomainFactory().getCustomTime(mMonthlyDayScheduleRecord.getCustomTimeId());
-            Assert.assertTrue(customTime != null);
-            return customTime;
+            return mDomainFactory.getCustomTime(mMonthlyDayScheduleRecord.getCustomTimeId());
         } else {
             Integer hour = mMonthlyDayScheduleRecord.getHour();
             Integer minute = mMonthlyDayScheduleRecord.getMinute();
@@ -120,6 +120,7 @@ class MonthlyDaySchedule extends RepeatingSchedule {
         return Utils.getDateInMonth(year, month, mMonthlyDayScheduleRecord.getDayOfMonth(), mMonthlyDayScheduleRecord.getBeginningOfMonth());
     }
 
+    @Nullable
     @Override
     public Integer getCustomTimeId() {
         return mMonthlyDayScheduleRecord.getCustomTimeId();

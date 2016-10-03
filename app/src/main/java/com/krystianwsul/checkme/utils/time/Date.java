@@ -71,6 +71,7 @@ public class Date implements Comparable<Date>, Parcelable, Serializable {
         return ((object != null) && (object instanceof Date) && ((object == this) || (compareTo((Date) object) == 0)));
     }
 
+    @NonNull
     public DayOfWeek getDayOfWeek() {
         return DayOfWeek.getDayFromCalendar(new GregorianCalendar(mYear, mMonth - 1, mDay));
     }

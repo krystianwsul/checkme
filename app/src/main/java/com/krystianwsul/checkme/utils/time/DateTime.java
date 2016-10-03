@@ -6,10 +6,13 @@ import android.support.annotation.NonNull;
 import junit.framework.Assert;
 
 public class DateTime implements Comparable<DateTime> {
+    @NonNull
     private final Date mDate;
+
+    @NonNull
     private final Time mTime;
 
-    public DateTime(Date date, Time time) {
+    public DateTime(@NonNull Date date, @NonNull Time time) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(time != null);
         Assert.assertTrue(time.getHourMinute(date.getDayOfWeek()) != null);
@@ -18,10 +21,12 @@ public class DateTime implements Comparable<DateTime> {
         mTime = time;
     }
 
+    @NonNull
     public Date getDate() {
         return mDate;
     }
 
+    @NonNull
     public Time getTime() {
         return mTime;
     }
@@ -51,14 +56,17 @@ public class DateTime implements Comparable<DateTime> {
         return ((object != null) && (object instanceof DateTime) && (object == this || compareTo((DateTime) object) == 0));
     }
 
+    @NonNull
     public String toString() {
         return mDate.toString() + " " + mTime.toString();
     }
 
+    @NonNull
     public String getDisplayText(Context context) {
         return mDate.getDisplayText(context) + ", " + mTime.toString();
     }
 
+    @NonNull
     public TimeStamp getTimeStamp() {
         return new TimeStamp(mDate, mTime.getHourMinute(mDate.getDayOfWeek()));
     }

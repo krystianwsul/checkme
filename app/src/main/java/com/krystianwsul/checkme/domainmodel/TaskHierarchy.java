@@ -1,30 +1,23 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
-
 class TaskHierarchy {
-    private final WeakReference<DomainFactory> mDomainFactoryReference;
+    @NonNull
+    private final DomainFactory mDomainFactory;
 
+    @NonNull
     private final TaskHierarchyRecord mTaskHierarchyRecord;
 
     TaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull TaskHierarchyRecord taskHierarchyRecord) {
-        mDomainFactoryReference = new WeakReference<>(domainFactory);
+        mDomainFactory = domainFactory;
         mTaskHierarchyRecord = taskHierarchyRecord;
-    }
-
-    @NonNull
-    private DomainFactory getDomainFactory() {
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        return domainFactory;
     }
 
     int getId() {
@@ -33,18 +26,20 @@ class TaskHierarchy {
 
     @NonNull
     Task getParentTask() {
-        return getDomainFactory().getTask(mTaskHierarchyRecord.getParentTaskId());
+        return mDomainFactory.getTask(mTaskHierarchyRecord.getParentTaskId());
     }
 
     @NonNull
     Task getChildTask() {
-        return getDomainFactory().getTask(mTaskHierarchyRecord.getChildTaskId());
+        return mDomainFactory.getTask(mTaskHierarchyRecord.getChildTaskId());
     }
 
+    @NonNull
     private ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mTaskHierarchyRecord.getStartTime());
     }
 
+    @Nullable
     private ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskHierarchyRecord.getEndTime() != null)
             return new ExactTimeStamp(mTaskHierarchyRecord.getEndTime());
@@ -52,25 +47,20 @@ class TaskHierarchy {
             return null;
     }
 
-    boolean current(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
-
+    boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    boolean notDeleted(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
-
+    boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
-    void setEndExactTimeStamp(ExactTimeStamp endExactTimeStamp) {
-        Assert.assertTrue(endExactTimeStamp != null);
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         mTaskHierarchyRecord.setEndTime(endExactTimeStamp.getLong());

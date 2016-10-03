@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -16,12 +17,12 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> {
+    @NonNull
     private final ArrayList<InstanceKey> mInstanceKeys;
 
-    public EditInstancesLoader(Context context, ArrayList<InstanceKey> instanceKeys) {
+    public EditInstancesLoader(@NonNull Context context, @NonNull ArrayList<InstanceKey> instanceKeys) {
         super(context);
 
-        Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(instanceKeys.size() > 1);
 
         mInstanceKeys = instanceKeys;

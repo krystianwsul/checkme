@@ -16,21 +16,21 @@ import com.krystianwsul.checkme.utils.time.HourMilli;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Task {
-    private final WeakReference<DomainFactory> mDomainFactoryReference;
+    @NonNull
+    private final DomainFactory mDomainFactory;
 
+    @NonNull
     private final TaskRecord mTaskRecord;
+
+    @NonNull
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
 
-    Task(DomainFactory domainFactory, TaskRecord taskRecord) {
-        Assert.assertTrue(domainFactory != null);
-        Assert.assertTrue(taskRecord != null);
-
-        mDomainFactoryReference = new WeakReference<>(domainFactory);
+    Task(@NonNull DomainFactory domainFactory, @NonNull TaskRecord taskRecord) {
+        mDomainFactory = domainFactory;
         mTaskRecord = taskRecord;
     }
 
@@ -69,6 +69,7 @@ public class Task {
                 .collect(Collectors.toList());
     }
 
+    @NonNull
     public String getName() {
         return mTaskRecord.getName();
     }
@@ -80,32 +81,25 @@ public class Task {
         mTaskRecord.setNote(note);
     }
 
-    List<Task> getChildTasks(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
+    @NonNull
+    List<Task> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        return domainFactory.getChildTasks(this, exactTimeStamp);
+        return mDomainFactory.getChildTasks(this, exactTimeStamp);
     }
 
-    Task getParentTask(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
+    @Nullable
+    Task getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        return domainFactory.getParentTask(this, exactTimeStamp);
+        return mDomainFactory.getParentTask(this, exactTimeStamp);
     }
 
     public int getId() {
         return mTaskRecord.getId();
     }
 
-    boolean isRootTask(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
+    boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return (getParentTask(exactTimeStamp) == null);
@@ -144,31 +138,25 @@ public class Task {
             childTask.setEndExactTimeStamp(endExactTimeStamp);
         }
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        domainFactory.setParentHierarchyEndTimeStamp(this, endExactTimeStamp);
+        mDomainFactory.setParentHierarchyEndTimeStamp(this, endExactTimeStamp);
 
         mTaskRecord.setEndTime(endExactTimeStamp.getLong());
     }
 
-    public boolean current(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
-
+    public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    boolean notDeleted(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
-
+    boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
+    @Nullable
     Date getOldestVisible() {
         if (mTaskRecord.getOldestVisibleYear() != null) {
             Assert.assertTrue(mTaskRecord.getOldestVisibleMonth() != null);
@@ -183,10 +171,8 @@ public class Task {
         }
     }
 
-    List<Instance> getInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
-        Assert.assertTrue(endExactTimeStamp != null);
-        Assert.assertTrue(now != null);
-
+    @NonNull
+    List<Instance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
         if (startExactTimeStamp == null) { // 24 hack
             Date oldestVisible = getOldestVisible();
             if (oldestVisible != null) {
@@ -199,10 +185,7 @@ public class Task {
         for (Schedule schedule : mSchedules)
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        List<TaskHierarchy> taskHierarchies = domainFactory.getParentTaskHierarchies(this);
+        List<TaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
 
         ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
 
@@ -218,14 +201,9 @@ public class Task {
         return instances;
     }
 
-    void updateOldestVisible(ExactTimeStamp now) {
-        Assert.assertTrue(now != null);
-
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
+    void updateOldestVisible(@NonNull ExactTimeStamp now) {
         // 24 hack
-        List<Instance> instances = domainFactory.getPastInstances(this, now);
+        List<Instance> instances = mDomainFactory.getPastInstances(this, now);
 
         Optional<Instance> optional = Stream.of(instances)
                 .filter(instance -> instance.isVisible(now))
@@ -247,9 +225,8 @@ public class Task {
         mTaskRecord.setOldestVisibleDay(oldestVisible.getDay());
     }
 
-    private Task getRootTask(ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
-
+    @NonNull
+    private Task getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Task parentTask = getParentTask(exactTimeStamp);
         if (parentTask == null)
             return this;

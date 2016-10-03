@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -15,12 +16,11 @@ import junit.framework.Assert;
 import java.util.TreeMap;
 
 public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
+    @NonNull
     private final InstanceKey mInstanceKey;
 
-    public EditInstanceLoader(Context context, InstanceKey instanceKey) {
+    public EditInstanceLoader(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         super(context);
-
-        Assert.assertTrue(instanceKey != null);
 
         mInstanceKey = instanceKey;
     }

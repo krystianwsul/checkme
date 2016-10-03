@@ -49,7 +49,6 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -217,12 +216,11 @@ public class DomainFactory {
         */
     }
 
-    public synchronized EditInstanceLoader.Data getEditInstanceData(InstanceKey instanceKey) {
+    @NonNull
+    public synchronized EditInstanceLoader.Data getEditInstanceData(@NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getEditInstanceData");
-
-        Assert.assertTrue(instanceKey != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -248,12 +246,12 @@ public class DomainFactory {
         return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas);
     }
 
-    public synchronized EditInstancesLoader.Data getEditInstancesData(ArrayList<InstanceKey> instanceKeys) {
+    @NonNull
+    public synchronized EditInstancesLoader.Data getEditInstancesData(@NonNull ArrayList<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getEditInstancesData");
 
-        Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(instanceKeys.size() > 1);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -286,6 +284,7 @@ public class DomainFactory {
         return new EditInstancesLoader.Data(instanceDatas, customTimeDatas);
     }
 
+    @NonNull
     public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
         fakeDelay();
 
@@ -295,16 +294,13 @@ public class DomainFactory {
         Assert.assertTrue(customTime != null);
 
         HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
-        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-            HourMinute hourMinute = customTime.getHourMinute(dayOfWeek);
-            Assert.assertTrue(hourMinute != null);
-
-            hourMinutes.put(dayOfWeek, hourMinute);
-        }
+        for (DayOfWeek dayOfWeek : DayOfWeek.values())
+            hourMinutes.put(dayOfWeek, customTime.getHourMinute(dayOfWeek));
 
         return new ShowCustomTimeLoader.Data(customTime.getId(), customTime.getName(), hourMinutes);
     }
 
+    @NonNull
     public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
         fakeDelay();
 
@@ -322,13 +318,13 @@ public class DomainFactory {
         return new ShowCustomTimesLoader.Data(entries);
     }
 
-    public synchronized GroupListLoader.Data getGroupListData(Context context, int position, MainActivity.TimeRange timeRange) {
+    @NonNull
+    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getGroupListData");
 
         Assert.assertTrue(position >= 0);
-        Assert.assertTrue(timeRange != null);
 
         ExactTimeStamp startExactTimeStamp;
         ExactTimeStamp endExactTimeStamp;
@@ -405,8 +401,8 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), new WeakReference<>(data), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote());
-            instanceData.setChildren(getChildInstanceDatas(instance, now, new WeakReference<>(instanceData)));
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), data, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote());
+            instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instanceData.InstanceKey, instanceData);
         }
 
@@ -415,10 +411,8 @@ public class DomainFactory {
         return data;
     }
 
-    private List<GroupListLoader.TaskData> getChildTaskDatas(Task parentTask, ExactTimeStamp now) {
-        Assert.assertTrue(parentTask != null);
-        Assert.assertTrue(now != null);
-
+    @NonNull
+    private List<GroupListLoader.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
         return Stream.of(parentTask.getChildTasks(now))
                 .map(childTask -> new GroupListLoader.TaskData(childTask.getId(), childTask.getName(), getChildTaskDatas(childTask, now)))
                 .collect(Collectors.toList());
@@ -460,13 +454,11 @@ public class DomainFactory {
         return new ShowGroupLoader.Data(displayText, !currentInstances.isEmpty());
     }
 
-    public synchronized GroupListLoader.Data getGroupListData(Context context, TimeStamp timeStamp) {
+    @NonNull
+    public synchronized GroupListLoader.Data getGroupListData(@NonNull TimeStamp timeStamp) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getGroupListData");
-
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(timeStamp != null);
 
         Calendar endCalendar = timeStamp.getCalendar();
         endCalendar.add(Calendar.MINUTE, 1);
@@ -493,8 +485,8 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), new WeakReference<>(data), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote());
-            instanceData.setChildren(getChildInstanceDatas(instance, now, new WeakReference<>(instanceData)));
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), data, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote());
+            instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
 
@@ -503,13 +495,11 @@ public class DomainFactory {
         return data;
     }
 
-    public synchronized GroupListLoader.Data getGroupListData(Context context, InstanceKey instanceKey) {
+    @NonNull
+    public synchronized GroupListLoader.Data getGroupListData(@NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getGroupListData");
-
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(instanceKey != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -522,7 +512,6 @@ public class DomainFactory {
         Task task = mTasks.get(instanceKey.TaskId);
         if (task != null) {
             Instance instance = getInstance(instanceKey);
-            Assert.assertTrue(instance != null);
 
             GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
 
@@ -532,8 +521,8 @@ public class DomainFactory {
 
                 Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
-                GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), new WeakReference<>(data), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote());
-                instanceData.setChildren(getChildInstanceDatas(childInstance, now, new WeakReference<>(instanceData)));
+                GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), data, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote());
+                instanceData.setChildren(getChildInstanceDatas(childInstance, now, instanceData));
                 instanceDatas.put(childInstance.getInstanceKey(), instanceData);
             }
 
@@ -549,13 +538,12 @@ public class DomainFactory {
         }
     }
 
-    public synchronized GroupListLoader.Data getGroupListData(Context context, ArrayList<InstanceKey> instanceKeys) {
+    @NonNull
+    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, @NonNull ArrayList<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getGroupListData");
 
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -584,8 +572,8 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), new WeakReference<>(data), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote());
-            instanceData.setChildren(getChildInstanceDatas(instance, now, new WeakReference<>(instanceData)));
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), data, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote());
+            instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
 
@@ -594,13 +582,11 @@ public class DomainFactory {
         return data;
     }
 
-    public synchronized ShowInstanceLoader.Data getShowInstanceData(Context context, InstanceKey instanceKey) {
+    @NonNull
+    public synchronized ShowInstanceLoader.Data getShowInstanceData(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getShowInstanceData");
-
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(instanceKey != null);
 
         Task task = mTasks.get(instanceKey.TaskId);
         if (task == null)
@@ -660,7 +646,6 @@ public class DomainFactory {
                                 DailySchedule dailySchedule = (DailySchedule) schedule;
 
                                 Time time = dailySchedule.getTime();
-                                Assert.assertTrue(time != null);
 
                                 scheduleDatas.add(new CreateTaskLoader.DailyScheduleData(time.getTimePair()));
 
@@ -674,7 +659,6 @@ public class DomainFactory {
                                 WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
 
                                 Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
-                                Assert.assertTrue(pair != null);
 
                                 scheduleDatas.add(new CreateTaskLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
 
@@ -732,6 +716,7 @@ public class DomainFactory {
         return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas);
     }
 
+    @NonNull
     public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, @NonNull Context context) {
         fakeDelay();
 
@@ -758,6 +743,7 @@ public class DomainFactory {
         return getTaskListData(now, context, taskId);
     }
 
+    @NonNull
     TaskListLoader.Data getTaskListData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable Integer taskId) {
         List<Task> tasks;
         String note;
@@ -767,7 +753,6 @@ public class DomainFactory {
             Assert.assertTrue(parentTask != null);
 
             tasks = parentTask.getChildTasks(now);
-            Assert.assertTrue(tasks != null);
 
             note = parentTask.getNote();
         } else {
@@ -799,6 +784,7 @@ public class DomainFactory {
         return new TaskListLoader.Data(childTaskDatas, note);
     }
 
+    @NonNull
     public synchronized TickService.Data getTickServiceData(@NonNull Context context, @NonNull List<Integer> taskIds) {
         MyCrashlytics.log("DomainFactory.getTickServiceData");
 
@@ -830,7 +816,10 @@ public class DomainFactory {
 
                     boolean update = (taskIds.contains(task.getId()) || Stream.of(childInstances).anyMatch(childInstance -> taskIds.contains(childInstance.getTaskId())));
 
-                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), instance.getDisplayText(context, now), instance.getInstanceDateTime().getTimeStamp(), children, task.getNote(), update);
+                    String displayText = instance.getDisplayText(context, now);
+                    Assert.assertTrue(!TextUtils.isEmpty(displayText));
+
+                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), displayText, instance.getInstanceDateTime().getTimeStamp(), children, task.getNote(), update);
                 }));
 
         Map<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = Stream.of(mExistingInstances)
@@ -934,6 +923,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
+    @NonNull
     public synchronized ExactTimeStamp setInstancesDone(@NonNull Context context, int dataId, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstancesDone");
 
@@ -966,6 +956,7 @@ public class DomainFactory {
         return instance.getDone();
     }
 
+    @NonNull
     Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull InstanceKey instanceKey, boolean done) {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance != null);
@@ -1138,6 +1129,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
+    @NonNull
     Task createChildTask(@NonNull ExactTimeStamp now, int parentTaskId, @NonNull String name, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1147,7 +1139,6 @@ public class DomainFactory {
         Assert.assertTrue(parentTask.current(now));
 
         TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now, note);
-        Assert.assertTrue(childTaskRecord != null);
 
         Task childTask = new Task(this, childTaskRecord);
         Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
@@ -1171,7 +1162,6 @@ public class DomainFactory {
         Assert.assertTrue(parentTask.current(now));
 
         TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now, note);
-        Assert.assertTrue(childTaskRecord != null);
 
         Task childTask = new Task(this, childTaskRecord);
         Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
@@ -1437,7 +1427,6 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
-        Assert.assertTrue(taskRecord != null);
 
         Task childTask = new Task(this, taskRecord);
         Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
@@ -1455,7 +1444,6 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
-        Assert.assertTrue(taskRecord != null);
 
         Task task = new Task(this, taskRecord);
         Assert.assertTrue(!mTasks.containsKey(task.getId()));
@@ -1524,7 +1512,8 @@ public class DomainFactory {
         }
     }
 
-    Instance getInstance(Task task, DateTime scheduleDateTime) {
+    @NonNull
+    Instance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);
 
@@ -1537,7 +1526,8 @@ public class DomainFactory {
         }
     }
 
-    List<Instance> getPastInstances(Task task, ExactTimeStamp now) {
+    @NonNull
+    List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(now != null);
 
@@ -1553,7 +1543,8 @@ public class DomainFactory {
         return new ArrayList<>(allInstances);
     }
 
-    private List<Instance> getRootInstances(ExactTimeStamp startExactTimeStamp, ExactTimeStamp endExactTimeStamp, ExactTimeStamp now) {
+    @NonNull
+    private List<Instance> getRootInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
         Assert.assertTrue(now != null);
@@ -1603,7 +1594,8 @@ public class DomainFactory {
         return mPersistenceManager.createInstanceRecord(task, scheduleDateTime, now);
     }
 
-    private DateTime getDateTime(Date date, TimePair timePair) {
+    @NonNull
+    private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
         Assert.assertTrue(date != null);
         Assert.assertTrue(timePair != null);
 
@@ -1617,12 +1609,8 @@ public class DomainFactory {
         Assert.assertTrue(task != null);
 
         DateTime scheduleDateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
-        Assert.assertTrue(scheduleDateTime != null);
 
-        Instance instance = getInstance(task, scheduleDateTime);
-        Assert.assertTrue(instance != null);
-
-        return instance;
+        return getInstance(task, scheduleDateTime);
     }
 
     @NonNull
@@ -1717,7 +1705,6 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, startExactTimeStamp, note);
-        Assert.assertTrue(taskRecord != null);
 
         Task rootTask = new Task(this, taskRecord);
 
@@ -1765,11 +1752,8 @@ public class DomainFactory {
         }
     }
 
-    private void createTaskHierarchy(Task parentTask, Task childTask, ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(startExactTimeStamp != null);
-        Assert.assertTrue(parentTask != null);
+    private void createTaskHierarchy(@NonNull Task parentTask, @NonNull Task childTask, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(parentTask.current(startExactTimeStamp));
-        Assert.assertTrue(childTask != null);
         Assert.assertTrue(childTask.current(startExactTimeStamp));
 
         TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentTask, childTask, startExactTimeStamp);
@@ -1857,7 +1841,8 @@ public class DomainFactory {
         return schedules;
     }
 
-    List<Task> getChildTasks(Task parentTask, ExactTimeStamp exactTimeStamp) {
+    @NonNull
+    List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(parentTask != null);
         Assert.assertTrue(parentTask.current(exactTimeStamp));
@@ -1887,7 +1872,8 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    Task getParentTask(Task childTask, ExactTimeStamp exactTimeStamp) {
+    @Nullable
+    Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(childTask != null);
         Assert.assertTrue(childTask.current(exactTimeStamp));
@@ -1903,7 +1889,8 @@ public class DomainFactory {
         }
     }
 
-    private TaskHierarchy getParentTaskHierarchy(Task childTask, ExactTimeStamp exactTimeStamp) {
+    @Nullable
+    private TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask != null);
         Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(childTask.current(exactTimeStamp));
@@ -1929,7 +1916,7 @@ public class DomainFactory {
         }
     }
 
-    void setParentHierarchyEndTimeStamp(Task childTask, ExactTimeStamp exactEndTimeStamp) {
+    void setParentHierarchyEndTimeStamp(@NonNull Task childTask, @NonNull ExactTimeStamp exactEndTimeStamp) {
         Assert.assertTrue(childTask != null);
         Assert.assertTrue(exactEndTimeStamp != null);
         Assert.assertTrue(childTask.current(exactEndTimeStamp));
@@ -1941,9 +1928,14 @@ public class DomainFactory {
         }
     }
 
+    @NonNull
     CustomTime getCustomTime(int customTimeId) {
         Assert.assertTrue(mCustomTimes.containsKey(customTimeId));
-        return mCustomTimes.get(customTimeId);
+
+        CustomTime customTime = mCustomTimes.get(customTimeId);
+        Assert.assertTrue(customTime != null);
+
+        return customTime;
     }
 
     private List<CustomTime> getCurrentCustomTimes() {
@@ -1952,10 +1944,11 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    private HashMap<InstanceKey, GroupListLoader.InstanceData> getChildInstanceDatas(Instance instance, ExactTimeStamp now, WeakReference<GroupListLoader.InstanceDataParent> instanceDataParentReference) {
+    @NonNull
+    private HashMap<InstanceKey, GroupListLoader.InstanceData> getChildInstanceDatas(@NonNull Instance instance, @NonNull ExactTimeStamp now, @NonNull GroupListLoader.InstanceDataParent instanceDataParent) {
         Assert.assertTrue(instance != null);
         Assert.assertTrue(now != null);
-        Assert.assertTrue(instanceDataParentReference != null);
+        Assert.assertTrue(instanceDataParent != null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
@@ -1965,8 +1958,8 @@ public class DomainFactory {
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), instanceDataParentReference, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote());
-            instanceData.setChildren(getChildInstanceDatas(childInstance, now, new WeakReference<>(instanceData)));
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), instanceDataParent, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote());
+            instanceData.setChildren(getChildInstanceDatas(childInstance, now, instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }
 
@@ -2132,7 +2125,6 @@ public class DomainFactory {
                 Assert.assertTrue(parentInstance != null);
 
                 InstanceKey parentInstanceKey = parentInstance.getInstanceKey();
-                Assert.assertTrue(parentInstanceKey != null);
 
                 if (!instanceRelevances.containsKey(parentInstanceKey))
                     instanceRelevances.put(parentInstanceKey, new InstanceRelevance(parentInstance));

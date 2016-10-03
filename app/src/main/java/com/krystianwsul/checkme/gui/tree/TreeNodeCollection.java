@@ -7,21 +7,20 @@ import com.annimon.stream.Stream;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
 public class TreeNodeCollection implements NodeContainer {
     private List<TreeNode> mTreeNodes;
 
-    private final WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
+    @NonNull
+    final TreeViewAdapter mTreeViewAdapter;
 
-    public TreeNodeCollection(WeakReference<TreeViewAdapter> treeViewAdapterReference) {
-        Assert.assertTrue(treeViewAdapterReference != null);
-
-        mTreeViewAdapterReference = treeViewAdapterReference;
+    public TreeNodeCollection(@NonNull TreeViewAdapter treeViewAdapter) {
+        mTreeViewAdapter = treeViewAdapter;
     }
 
+    @NonNull
     TreeNode getNode(int position) {
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
@@ -50,7 +49,6 @@ public class TreeNodeCollection implements NodeContainer {
 
     int getItemViewType(int position) {
         TreeNode treeNode = getNode(position);
-        Assert.assertTrue(treeNode != null);
 
         return treeNode.getItemViewType();
     }
@@ -61,14 +59,6 @@ public class TreeNodeCollection implements NodeContainer {
         mTreeNodes = rootTreeNodes;
 
         Collections.sort(mTreeNodes);
-    }
-
-    @NonNull
-    TreeViewAdapter getTreeViewAdapter() {
-        TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
-        Assert.assertTrue(treeViewAdapter != null);
-
-        return treeViewAdapter;
     }
 
     public int displayedSize() {
@@ -106,7 +96,7 @@ public class TreeNodeCollection implements NodeContainer {
 
         Collections.sort(mTreeNodes);
 
-        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        TreeViewAdapter treeViewAdapter = mTreeViewAdapter;
 
         int newPosition = getPosition(notDoneGroupTreeNode);
         Assert.assertTrue(newPosition >= 0);
@@ -121,7 +111,7 @@ public class TreeNodeCollection implements NodeContainer {
     public void remove(@NonNull TreeNode notDoneGroupTreeNode) {
         Assert.assertTrue(mTreeNodes.contains(notDoneGroupTreeNode));
 
-        TreeViewAdapter treeViewAdapter = getTreeViewAdapter();
+        TreeViewAdapter treeViewAdapter = mTreeViewAdapter;
 
         int oldPosition = getPosition(notDoneGroupTreeNode);
         Assert.assertTrue(oldPosition >= 0);

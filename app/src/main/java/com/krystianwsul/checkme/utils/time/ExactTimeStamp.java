@@ -86,6 +86,7 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         return mLong.equals(other.getLong());
     }
 
+    @NonNull
     public ExactTimeStamp plusOne() {
         return new ExactTimeStamp(mLong + 1);
     }

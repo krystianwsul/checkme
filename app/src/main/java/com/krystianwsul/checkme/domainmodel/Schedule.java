@@ -11,33 +11,26 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 abstract class Schedule {
-    private final WeakReference<DomainFactory> mDomainFactoryReference;
+    @NonNull
+    final DomainFactory mDomainFactory;
 
+    @NonNull
     private final ScheduleRecord mScheduleRecord;
 
     @NonNull
     abstract String getScheduleText(@NonNull Context context);
 
     Schedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
-        mDomainFactoryReference = new WeakReference<>(domainFactory);
+        mDomainFactory = domainFactory;
         mScheduleRecord = scheduleRecord;
     }
 
     @NonNull
-    DomainFactory getDomainFactory() {
-        DomainFactory domainFactory = mDomainFactoryReference.get();
-        Assert.assertTrue(domainFactory != null);
-
-        return domainFactory;
-    }
-
-    @NonNull
     Task getRootTask() {
-        return getDomainFactory().getTask(mScheduleRecord.getRootTaskId());
+        return mDomainFactory.getTask(mScheduleRecord.getRootTaskId());
     }
 
     @NonNull

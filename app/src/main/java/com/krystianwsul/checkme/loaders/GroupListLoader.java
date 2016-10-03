@@ -16,20 +16,28 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
+    @Nullable
     private final Integer mPosition;
+
+    @Nullable
     private final MainActivity.TimeRange mTimeRange;
+
+    @Nullable
     private final TimeStamp mTimeStamp;
+
+    @Nullable
     private final InstanceKey mInstanceKey;
+
+    @Nullable
     private final ArrayList<InstanceKey> mInstanceKeys;
 
-    public GroupListLoader(Context context, TimeStamp timeStamp, InstanceKey instanceKey, ArrayList<InstanceKey> instanceKeys, Integer position, MainActivity.TimeRange timeRange) {
+    public GroupListLoader(@NonNull Context context, @Nullable TimeStamp timeStamp, @Nullable InstanceKey instanceKey, @Nullable ArrayList<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
         super(context);
 
         Assert.assertTrue((position == null) == (timeRange == null));
@@ -56,11 +64,11 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mTimeStamp);
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(mTimeStamp);
         } else if (mInstanceKey != null) {
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mInstanceKey);
+            return DomainFactory.getDomainFactory(getContext()).getGroupListData(mInstanceKey);
         } else {
             Assert.assertTrue(mInstanceKeys != null);
             Assert.assertTrue(!mInstanceKeys.isEmpty());
@@ -71,9 +79,17 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     public static class Data extends DomainLoader.Data implements InstanceDataParent {
         public HashMap<InstanceKey, InstanceData> InstanceDatas;
+
+        @NonNull
         public final List<CustomTimeData> CustomTimeDatas;
+
+        @Nullable
         public final Boolean TaskEditable;
+
+        @Nullable
         public final List<TaskData> TaskDatas;
+
+        @Nullable
         public final String mNote;
 
         public Data(@NonNull List<CustomTimeData> customTimeDatas, @Nullable Boolean taskEditable, @Nullable List<TaskData> taskDatas, @Nullable String note) {
@@ -166,9 +182,10 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         public final TimePair InstanceTimePair;
         public final String mNote;
 
-        public final WeakReference<InstanceDataParent> InstanceDataParentReference;
+        @NonNull
+        public final InstanceDataParent mInstanceDataParent;
 
-        public InstanceData(@Nullable ExactTimeStamp done, @NonNull InstanceKey instanceKey, @Nullable String displayText, @NonNull String name, @NonNull TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, @Nullable Boolean isRootTask, boolean exists, @NonNull WeakReference<InstanceDataParent> instanceDataParentReference, @NonNull TimePair instanceTimePair, @Nullable String note) {
+        public InstanceData(@Nullable ExactTimeStamp done, @NonNull InstanceKey instanceKey, @Nullable String displayText, @NonNull String name, @NonNull TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, @Nullable Boolean isRootTask, boolean exists, @NonNull InstanceDataParent instanceDataParent, @NonNull TimePair instanceTimePair, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Done = done;
@@ -181,7 +198,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             IsRootTask = isRootTask;
             Exists = exists;
             InstanceTimePair = instanceTimePair;
-            InstanceDataParentReference = instanceDataParentReference;
+            mInstanceDataParent = instanceDataParent;
             mNote = note;
         }
 

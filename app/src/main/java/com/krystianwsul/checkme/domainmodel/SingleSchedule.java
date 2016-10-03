@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
@@ -17,6 +18,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 class SingleSchedule extends Schedule {
+    @NonNull
     private final SingleScheduleRecord mSingleScheduleRecord;
 
     SingleSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull SingleScheduleRecord singleScheduleRecord) {
@@ -28,26 +30,19 @@ class SingleSchedule extends Schedule {
     @NonNull
     @Override
     String getScheduleText(@NonNull Context context) {
-        Assert.assertTrue(mSingleScheduleRecord != null);
-
-        Instance instance = getDomainFactory().getInstance(getRootTask(), getDateTime());
+        Instance instance = mDomainFactory.getInstance(getRootTask(), getDateTime());
 
         return instance.getInstanceDateTime().getDisplayText(context);
     }
 
-    Instance getInstance(Task task) {
-        Assert.assertTrue(task != null);
-
-        Instance instance = getDomainFactory().getInstance(task, getDateTime());
-        Assert.assertTrue(instance != null);
-
-        return instance;
+    @NonNull
+    Instance getInstance(@NonNull Task task) {
+        return mDomainFactory.getInstance(task, getDateTime());
     }
 
+    @Nullable
     @Override
     protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
-        Assert.assertTrue(mSingleScheduleRecord != null);
-
         TimeStamp timeStamp = getDateTime().getTimeStamp();
         if (timeStamp.toExactTimeStamp().compareTo(now) > 0)
             return timeStamp;
@@ -79,10 +74,7 @@ class SingleSchedule extends Schedule {
     public Time getTime() {
         Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = getDomainFactory().getCustomTime(mSingleScheduleRecord.getCustomTimeId());
-            Assert.assertTrue(customTime != null);
-
-            return customTime;
+            return mDomainFactory.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
         } else {
             Integer hour = mSingleScheduleRecord.getHour();
             Integer minute = mSingleScheduleRecord.getMinute();
@@ -97,10 +89,12 @@ class SingleSchedule extends Schedule {
         return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
     }
 
+    @NonNull
     private DateTime getDateTime() {
         return new DateTime(getDate(), getTime());
     }
 
+    @Nullable
     @Override
     public Integer getCustomTimeId() {
         return mSingleScheduleRecord.getCustomTimeId();

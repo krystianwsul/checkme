@@ -465,7 +465,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             TreeViewAdapter treeViewAdapter = new TreeViewAdapter(false, this);
             mTreeViewAdapterReference = new WeakReference<>(treeViewAdapter);
 
-            TreeNodeCollection treeNodeCollection = new TreeNodeCollection(new WeakReference<>(treeViewAdapter));
+            TreeNodeCollection treeNodeCollection = new TreeNodeCollection(treeViewAdapter);
             mTreeNodeCollectionReference = new WeakReference<>(treeNodeCollection);
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection);
@@ -483,7 +483,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             for (TaskListLoader.ChildTaskData childTaskData : data.mChildTaskDatas) {
                 TaskWrapper taskWrapper = new TaskWrapper(density, 0, new WeakReference<>(this), childTaskData);
 
-                treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNodeCollection), expandedTasks));
+                treeNodes.add(taskWrapper.initialize(selectedTasks, treeNodeCollection, expandedTasks));
 
                 mTaskWrappers.add(taskWrapper);
             }
@@ -614,7 +614,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
             }
 
             @NonNull
-            TreeNode initialize(@Nullable List<Integer> selectedTasks, @NonNull WeakReference<NodeContainer> nodeContainerReference, @Nullable List<Integer> expandedTasks) {
+            TreeNode initialize(@Nullable List<Integer> selectedTasks, @NonNull NodeContainer nodeContainer, @Nullable List<Integer> expandedTasks) {
                 boolean selected = false;
                 if (selectedTasks != null) {
                     Assert.assertTrue(!selectedTasks.isEmpty());
@@ -627,7 +627,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                     expanded = expandedTasks.contains(mChildTaskData.TaskId);
                 }
 
-                TreeNode treeNode = new TreeNode(this, nodeContainerReference, expanded, selected);
+                TreeNode treeNode = new TreeNode(this, nodeContainer, expanded, selected);
 
                 mTreeNodeReference = new WeakReference<>(treeNode);
 
@@ -638,7 +638,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
                 for (TaskListLoader.ChildTaskData childTaskData : mChildTaskData.Children) {
                     TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, new WeakReference<>(this), childTaskData);
 
-                    treeNodes.add(taskWrapper.initialize(selectedTasks, new WeakReference<>(treeNode), expandedTasks));
+                    treeNodes.add(taskWrapper.initialize(selectedTasks, treeNode, expandedTasks));
 
                     mTaskWrappers.add(taskWrapper);
                 }
@@ -839,7 +839,7 @@ public class TaskListFragment extends Fragment implements LoaderManager.LoaderCa
 
             @NonNull
             TreeNode initialize(@NonNull TreeNodeCollection treeNodeCollection) {
-                TreeNode treeNode = new TreeNode(this, new WeakReference<>(treeNodeCollection), false, false);
+                TreeNode treeNode = new TreeNode(this, treeNodeCollection, false, false);
                 mTreeNodeReference = new WeakReference<>(treeNode);
 
                 treeNode.setChildTreeNodes(new ArrayList<>());

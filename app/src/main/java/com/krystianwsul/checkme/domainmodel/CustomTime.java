@@ -15,26 +15,26 @@ import junit.framework.Assert;
 import java.util.TreeMap;
 
 public class CustomTime implements Time {
+    @NonNull
     private final CustomTimeRecord mCustomTimeRecord;
 
-    CustomTime(CustomTimeRecord customTimeRecord) {
-        Assert.assertTrue(customTimeRecord != null);
+    CustomTime(@NonNull CustomTimeRecord customTimeRecord) {
         mCustomTimeRecord = customTimeRecord;
     }
 
+    @NonNull
     public String getName() {
         return mCustomTimeRecord.getName();
     }
 
-    void setName(String name) {
+    void setName(@NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         mCustomTimeRecord.setName(name);
     }
 
+    @NonNull
     @Override
-    public HourMinute getHourMinute(DayOfWeek dayOfWeek) {
-        Assert.assertTrue(dayOfWeek != null);
-
+    public HourMinute getHourMinute(@NonNull DayOfWeek dayOfWeek) {
         switch (dayOfWeek) {
             case SUNDAY:
                 return new HourMinute(mCustomTimeRecord.getSundayHour(), mCustomTimeRecord.getSundayMinute());
@@ -55,6 +55,7 @@ public class CustomTime implements Time {
         }
     }
 
+    @NonNull
     TreeMap<DayOfWeek, HourMinute> getHourMinutes() {
         TreeMap<DayOfWeek, HourMinute> hourMinutes = new TreeMap<>();
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
@@ -62,10 +63,7 @@ public class CustomTime implements Time {
         return hourMinutes;
     }
 
-    void setHourMinute(DayOfWeek dayOfWeek, HourMinute hourMinute) {
-        Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(hourMinute != null);
-
+    void setHourMinute(@NonNull DayOfWeek dayOfWeek, @NonNull HourMinute hourMinute) {
         switch (dayOfWeek) {
             case SUNDAY:
                 mCustomTimeRecord.setSundayHour(hourMinute.getHour());
@@ -100,6 +98,7 @@ public class CustomTime implements Time {
         }
     }
 
+    @NonNull
     public String toString() {
         return getName();
     }

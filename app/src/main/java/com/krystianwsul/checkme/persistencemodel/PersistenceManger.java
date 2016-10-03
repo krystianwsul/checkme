@@ -236,6 +236,7 @@ public class PersistenceManger {
         return customTimeRecord;
     }
 
+    @NonNull
     public TaskRecord createTaskRecord(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -247,11 +248,8 @@ public class PersistenceManger {
         return taskRecord;
     }
 
-    public TaskHierarchyRecord createTaskHierarchyRecord(Task parentTask, Task childTask, ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(startExactTimeStamp != null);
-        Assert.assertTrue(parentTask != null);
+    public TaskHierarchyRecord createTaskHierarchyRecord(@NonNull Task parentTask, @NonNull Task childTask, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(parentTask.current(startExactTimeStamp));
-        Assert.assertTrue(childTask != null);
         Assert.assertTrue(childTask.current(startExactTimeStamp));
 
         int id = ++mTaskHierarchyMaxId;

@@ -9,7 +9,6 @@ import com.annimon.stream.Stream;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,15 +18,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     private List<TreeNode> mChildTreeNodes;
 
-    private final WeakReference<NodeContainer> mParentReference;
+    @NonNull
+    private final NodeContainer mParent;
 
     private boolean mExpanded;
 
     private boolean mSelected = false;
 
-    public TreeNode(@NonNull ModelNode modelNode, @NonNull WeakReference<NodeContainer> parentReference, boolean expanded, boolean selected) {
+    public TreeNode(@NonNull ModelNode modelNode, @NonNull NodeContainer parent, boolean expanded, boolean selected) {
         mModelNode = modelNode;
-        mParentReference = parentReference;
+        mParent = parent;
 
         mExpanded = expanded;
         mSelected = selected;
@@ -46,9 +46,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public void update() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
-        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
     @NonNull
@@ -100,8 +98,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
         NodeContainer parent = getParent();
 
         mSelected = !mSelected;
@@ -118,15 +114,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 parent.update();
         }
 
-        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
     @NonNull
     public NodeContainer getParent() {
-        NodeContainer parent = mParentReference.get();
-        Assert.assertTrue(parent != null);
-
-        return parent;
+        return mParent;
     }
 
     private boolean hasActionMode() {
@@ -143,7 +136,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @NonNull
     private TreeViewAdapter getTreeViewAdapter() {
-        return getTreeNodeCollection().getTreeViewAdapter();
+        return getTreeNodeCollection().mTreeViewAdapter;
     }
 
     public int displayedSize() {
@@ -223,13 +216,11 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
         if (mSelected) {
             Assert.assertTrue(mModelNode.selectable());
 
             mSelected = false;
-            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         }
 
         List<TreeNode> selected = getSelectedNodes()
@@ -241,7 +232,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             Stream.of(selected)
                     .forEach(TreeNode::unselect);
 
-            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         }
     }
 
@@ -250,14 +241,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
         if (mModelNode.selectable()) {
             mSelected = true;
 
-            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
 
-            treeViewAdapter.incrementSelected();
+            treeNodeCollection.mTreeViewAdapter.incrementSelected();
         }
 
         if (mExpanded) {
@@ -292,8 +281,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-            TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
             Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode()));
 
             int position = treeNodeCollection.getPosition(this);
@@ -304,16 +291,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 int displayedSize = displayedSize();
                 mExpanded = false;
-                treeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
+                treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
             } else { // showing
                 mExpanded = true;
-                treeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
+                treeNodeCollection.mTreeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
             }
 
             if (position > 0) {
-                treeViewAdapter.notifyItemRangeChanged(position - 1, 2);
+                treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(position - 1, 2);
             } else {
-                treeViewAdapter.notifyItemChanged(position);
+                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
             }
         };
     }
@@ -340,8 +327,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     @Override
     public void remove(@NonNull TreeNode childTreeNode) {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
-
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
 
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
         Assert.assertTrue(mChildTreeNodes.contains(childTreeNode));
@@ -370,50 +355,50 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 if (oldParentPosition == 0) {
                     if (mModelNode.visibleWhenEmpty()) {
-                        treeViewAdapter.notifyItemChanged(oldParentPosition);
-                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
-                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 } else {
                     if (mModelNode.visibleWhenEmpty()) {
-                        treeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
-                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
-                        treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                        treeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 }
             } else {
-                treeViewAdapter.notifyItemChanged(oldParentPosition);
-                treeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
+                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
+                treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
-                treeViewAdapter.notifyItemChanged(oldChildPosition - 1);
+                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldChildPosition - 1);
 
                 if (oldParentPosition > 0)
-                    treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
             }
         } else {
             if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
                 if (oldParentPosition == 0) {
                     if (mModelNode.visibleWhenEmpty()) {
-                        treeViewAdapter.notifyItemChanged(oldParentPosition);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
                     } else {
-                        treeViewAdapter.notifyItemRemoved(oldParentPosition);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(oldParentPosition);
                     }
                 } else {
                     if (mModelNode.visibleWhenEmpty()) {
-                        treeViewAdapter.notifyItemChanged(oldParentPosition);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
                     } else {
-                        treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                        treeViewAdapter.notifyItemRemoved(oldParentPosition);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(oldParentPosition);
                     }
                 }
             } else {
-                treeViewAdapter.notifyItemChanged(oldParentPosition);
+                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
 
                 if (oldParentPosition > 0)
-                    treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
             }
         }
     }
@@ -428,8 +413,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public void add(@NonNull TreeNode childTreeNode) {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
         if (mExpanded) {
             if (mModelNode.visibleWhenEmpty()) {
                 int oldParentPosition = treeNodeCollection.getPosition(this);
@@ -442,16 +425,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 int newChildPosition = treeNodeCollection.getPosition(childTreeNode);
                 Assert.assertTrue(newChildPosition >= 0);
 
-                treeViewAdapter.notifyItemChanged(oldParentPosition);
-                treeViewAdapter.notifyItemInserted(newChildPosition);
+                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
+                treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newChildPosition);
 
                 boolean last = (oldParentPosition + displayedSize() - 1 == newChildPosition);
 
                 if (last)
-                    treeViewAdapter.notifyItemChanged(newChildPosition - 1);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newChildPosition - 1);
 
                 if (oldParentPosition > 0)
-                    treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
             } else {
                 if (mChildTreeNodes.isEmpty()) {
                     mChildTreeNodes.add(childTreeNode);
@@ -460,10 +443,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                     int newParentPosition = treeNodeCollection.getPosition(this);
 
-                    treeViewAdapter.notifyItemInserted(newParentPosition + 1);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newParentPosition + 1);
 
                     if (newParentPosition > 0)
-                        treeViewAdapter.notifyItemChanged(newParentPosition - 1);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition - 1);
                 } else {
                     int oldParentPosition = treeNodeCollection.getPosition(this);
                     Assert.assertTrue(oldParentPosition >= 0);
@@ -475,16 +458,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                     int newChildPosition = treeNodeCollection.getPosition(childTreeNode);
                     Assert.assertTrue(newChildPosition >= 0);
 
-                    treeViewAdapter.notifyItemChanged(oldParentPosition);
-                    treeViewAdapter.notifyItemInserted(newChildPosition);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newChildPosition);
 
                     boolean last = (oldParentPosition + displayedSize() - 1 == newChildPosition);
 
                     if (last)
-                        treeViewAdapter.notifyItemChanged(newChildPosition - 1);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newChildPosition - 1);
 
                     if (oldParentPosition > 0)
-                        treeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
                 }
             }
         } else {
@@ -497,13 +480,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 Assert.assertTrue(newParentPosition >= 0);
 
                 if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
-                    treeViewAdapter.notifyItemInserted(newParentPosition);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newParentPosition);
 
-                    if (newParentPosition > 0) {
-                        treeViewAdapter.notifyItemChanged(newParentPosition - 1);
-                    }
+                    if (newParentPosition > 0)
+                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition - 1);
                 } else {
-                    treeViewAdapter.notifyItemChanged(newParentPosition);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition);
                 }
             }
         }
@@ -526,7 +508,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             return true;
 
         TreeNode nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1);
-        Assert.assertTrue(nextTreeNode != null);
 
         return (nextTreeNode.expanded() || mModelNode.separatorVisibleWhenNotExpanded());
     }
@@ -544,13 +525,11 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     void onCreateActionMode() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
         int position = treeNodeCollection.getPosition(this);
         Assert.assertTrue(position >= 0);
 
         if (mModelNode.visibleDuringActionMode()) {
-            treeViewAdapter.notifyItemChanged(position);
+            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
 
             if (mExpanded)
                 Stream.of(mChildTreeNodes)
@@ -558,29 +537,27 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
-                    treeViewAdapter.notifyItemRangeRemoved(position, visibleSize());
+                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position, visibleSize());
                 } else {
-                    treeViewAdapter.notifyItemRemoved(position);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(position);
                 }
             } else if (mModelNode.visibleWhenEmpty()) {
-                treeViewAdapter.notifyItemRemoved(position);
+                treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(position);
             }
 
             if (position > 0)
-                treeViewAdapter.notifyItemChanged(position - 1);
+                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position - 1);
         }
     }
 
     void onDestroyActionMode() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        TreeViewAdapter treeViewAdapter = treeNodeCollection.getTreeViewAdapter();
-
         int position = treeNodeCollection.getPosition(this);
         Assert.assertTrue(position >= 0);
 
         if (mModelNode.visibleDuringActionMode()) {
-            treeViewAdapter.notifyItemChanged(position);
+            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
 
             if (mExpanded)
                 Stream.of(mChildTreeNodes)
@@ -588,16 +565,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
-                    treeViewAdapter.notifyItemRangeInserted(position, displayedSize());
+                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeInserted(position, displayedSize());
                 } else {
-                    treeViewAdapter.notifyItemInserted(position);
+                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(position);
                 }
             } else if (mModelNode.visibleWhenEmpty()) {
-                treeViewAdapter.notifyItemInserted(position);
+                treeNodeCollection.mTreeViewAdapter.notifyItemInserted(position);
             }
 
             if (position > 0)
-                treeViewAdapter.notifyItemChanged(position - 1);
+                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position - 1);
         }
     }
 

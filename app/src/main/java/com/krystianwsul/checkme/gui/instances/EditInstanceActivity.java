@@ -265,7 +265,9 @@ public class EditInstanceActivity extends AppCompatActivity implements LoaderMan
     public Loader<EditInstanceLoader.Data> onCreateLoader(int id, Bundle args) {
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INSTANCE_KEY));
+
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
+        Assert.assertTrue(instanceKey != null);
 
         return new EditInstanceLoader(this, instanceKey);
     }

@@ -23,6 +23,7 @@ import junit.framework.Assert;
 import java.util.Calendar;
 
 class MonthlyWeekSchedule extends RepeatingSchedule {
+    @NonNull
     private final MonthlyWeekScheduleRecord mMonthlyWeekScheduleRecord;
 
     MonthlyWeekSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull MonthlyWeekScheduleRecord monthlyWeekScheduleRecord) {
@@ -39,6 +40,7 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
         return day + ": " + getTime();
     }
 
+    @Nullable
     @Override
     protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         Date dateThisMonth = getDate(date.getYear(), date.getMonth());
@@ -58,9 +60,10 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
         DateTime scheduleDateTime = new DateTime(date, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return getDomainFactory().getInstance(task, scheduleDateTime);
+        return mDomainFactory.getInstance(task, scheduleDateTime);
     }
 
+    @Nullable
     @Override
     protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         Date today = now.getDate();
@@ -95,10 +98,7 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
     Time getTime() {
         Integer customTimeId = mMonthlyWeekScheduleRecord.getCustomTimeId();
         if (customTimeId != null) {
-            CustomTime customTime = getDomainFactory().getCustomTime(mMonthlyWeekScheduleRecord.getCustomTimeId());
-            Assert.assertTrue(customTime != null);
-
-            return customTime;
+            return mDomainFactory.getCustomTime(mMonthlyWeekScheduleRecord.getCustomTimeId());
         } else {
             Integer hour = mMonthlyWeekScheduleRecord.getHour();
             Integer minute = mMonthlyWeekScheduleRecord.getMinute();

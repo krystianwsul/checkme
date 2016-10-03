@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -10,12 +11,11 @@ import com.krystianwsul.checkme.utils.InstanceKey;
 import junit.framework.Assert;
 
 public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
+    @NonNull
     private final InstanceKey mInstanceKey;
 
-    public ShowInstanceLoader(Context context, InstanceKey instanceKey) {
+    public ShowInstanceLoader(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         super(context);
-
-        Assert.assertTrue(instanceKey != null);
 
         mInstanceKey = instanceKey;
     }

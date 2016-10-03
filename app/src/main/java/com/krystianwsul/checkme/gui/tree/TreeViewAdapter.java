@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class TreeViewAdapter {
@@ -32,7 +31,7 @@ public class TreeViewAdapter {
     public RecyclerView.Adapter<RecyclerView.ViewHolder> getAdapter() {
         Assert.assertTrue(mAdapter == null);
 
-        mAdapter = new Adapter(new WeakReference<>(this));
+        mAdapter = new Adapter(this);
         return mAdapter;
     }
 
@@ -82,10 +81,7 @@ public class TreeViewAdapter {
 
     @NonNull
     public TreeNode getNode(int position) {
-        TreeNode treeNode = mTreeNodeCollection.getNode(position);
-        Assert.assertTrue(treeNode != null);
-
-        return treeNode;
+        return mTreeNodeCollection.getNode(position);
     }
 
     public int displayedSize() {
@@ -147,18 +143,16 @@ public class TreeViewAdapter {
     }
 
     private static class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        private WeakReference<TreeViewAdapter> mTreeViewAdapterReference;
+        @NonNull
+        private final TreeViewAdapter mTreeViewAdapter;
 
-        Adapter(@NonNull WeakReference<TreeViewAdapter> treeViewAdapterReference) {
-            mTreeViewAdapterReference = treeViewAdapterReference;
+        Adapter(@NonNull TreeViewAdapter treeViewAdapter) {
+            mTreeViewAdapter = treeViewAdapter;
         }
 
         @NonNull
         private TreeViewAdapter getTreeViewAdapter() {
-            TreeViewAdapter treeViewAdapter = mTreeViewAdapterReference.get();
-            Assert.assertTrue(treeViewAdapter != null);
-
-            return treeViewAdapter;
+            return mTreeViewAdapter;
         }
 
         @Override

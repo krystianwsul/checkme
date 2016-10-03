@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -186,7 +185,7 @@ public class ParentPickerFragment extends DialogFragment {
             List<TreeNode> treeNodes = new ArrayList<>();
 
             for (CreateTaskLoader.TaskTreeData taskTreeData : taskDatas.values()) {
-                TaskWrapper taskWrapper = new TaskWrapper(density, 0, new WeakReference<>(this), taskTreeData);
+                TaskWrapper taskWrapper = new TaskWrapper(density, 0, this, taskTreeData);
 
                 treeNodes.add(taskWrapper.initialize(treeNodeCollection, expandedTasks));
 
@@ -264,21 +263,22 @@ public class ParentPickerFragment extends DialogFragment {
         }
 
         private static class TaskWrapper implements ModelNode, TaskParent {
-            private final WeakReference<TaskParent> mTaskParentReference;
+            @NonNull
+            private final TaskParent mTaskParent;
 
             final CreateTaskLoader.TaskTreeData mTaskTreeData;
 
-            private WeakReference<TreeNode> mTreeNodeReference;
+            private TreeNode mTreeNode;
 
             private List<TaskWrapper> mTaskWrappers;
 
             private final float mDensity;
             private final int mIndentation;
 
-            TaskWrapper(float density, int indentation, @NonNull WeakReference<TaskParent> taskParentReference, @NonNull CreateTaskLoader.TaskTreeData taskTreeData) {
+            TaskWrapper(float density, int indentation, @NonNull TaskParent taskParent, @NonNull CreateTaskLoader.TaskTreeData taskTreeData) {
                 mDensity = density;
                 mIndentation = indentation;
-                mTaskParentReference = taskParentReference;
+                mTaskParent = taskParent;
                 mTaskTreeData = taskTreeData;
             }
 
@@ -290,41 +290,35 @@ public class ParentPickerFragment extends DialogFragment {
                     expanded = expandedTasks.contains(mTaskTreeData.TaskId);
                 }
 
-                TreeNode treeNode = new TreeNode(this, nodeContainer, expanded, false);
-
-                mTreeNodeReference = new WeakReference<>(treeNode);
+                mTreeNode = new TreeNode(this, nodeContainer, expanded, false);
 
                 mTaskWrappers = new ArrayList<>();
 
                 List<TreeNode> treeNodes = new ArrayList<>();
 
                 for (CreateTaskLoader.TaskTreeData taskTreeData : mTaskTreeData.TaskDatas.values()) {
-                    TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, new WeakReference<>(this), taskTreeData);
+                    TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, this, taskTreeData);
 
-                    treeNodes.add(taskWrapper.initialize(treeNode, expandedTasks));
+                    treeNodes.add(taskWrapper.initialize(mTreeNode, expandedTasks));
 
                     mTaskWrappers.add(taskWrapper);
                 }
 
-                treeNode.setChildTreeNodes(treeNodes);
+                mTreeNode.setChildTreeNodes(treeNodes);
 
-                return treeNode;
+                return mTreeNode;
             }
 
             @NonNull
             private TreeNode getTreeNode() {
-                TreeNode treeNode = mTreeNodeReference.get();
-                Assert.assertTrue(treeNode != null);
+                Assert.assertTrue(mTreeNode != null);
 
-                return treeNode;
+                return mTreeNode;
             }
 
             @NonNull
             private TaskParent getTaskParent() {
-                TaskParent taskParent = mTaskParentReference.get();
-                Assert.assertTrue(taskParent != null);
-
-                return taskParent;
+                return mTaskParent;
             }
 
             @NonNull

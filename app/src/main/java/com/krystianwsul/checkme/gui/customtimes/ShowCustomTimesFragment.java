@@ -4,6 +4,7 @@ package com.krystianwsul.checkme.gui.customtimes;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -30,7 +31,6 @@ import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 
 import junit.framework.Assert;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,6 +167,8 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<ShowCustomTimesLoader.Data> loader, ShowCustomTimesLoader.Data data) {
+        Assert.assertTrue(data != null);
+
         if (mCustomTimesAdapter != null) {
             ArrayList<Integer> selectedCustomTimeIds = mCustomTimesAdapter.getSelected();
             if (selectedCustomTimeIds.isEmpty())
@@ -211,18 +213,16 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
         private final int mDataId;
         private final List<CustomTimeWrapper> mCustomTimeWrappers;
 
-        private final WeakReference<ShowCustomTimesFragment> mShowCustomTimesFragmentReference;
+        @NonNull
+        private final ShowCustomTimesFragment mShowCustomTimesFragment;
 
-        CustomTimesAdapter(ShowCustomTimesLoader.Data data, ShowCustomTimesFragment showCustomTimesFragment, ArrayList<Integer> selectedCustomTimeIds) {
-            Assert.assertTrue(data != null);
-            Assert.assertTrue(showCustomTimesFragment != null);
-
+        CustomTimesAdapter(@NonNull ShowCustomTimesLoader.Data data, @NonNull ShowCustomTimesFragment showCustomTimesFragment, @Nullable ArrayList<Integer> selectedCustomTimeIds) {
             mDataId = data.DataId;
             mCustomTimeWrappers = Stream.of(data.Entries)
                     .map(customTimeData -> new CustomTimeWrapper(customTimeData, selectedCustomTimeIds))
                     .collect(Collectors.toList());
 
-            mShowCustomTimesFragmentReference = new WeakReference<>(showCustomTimesFragment);
+            mShowCustomTimesFragment = showCustomTimesFragment;
         }
 
         @Override
@@ -241,10 +241,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
         @Override
         public CustomTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
-            Assert.assertTrue(showCustomTimesFragment != null);
-
-            LayoutInflater layoutInflater = LayoutInflater.from(showCustomTimesFragment.getActivity());
+            LayoutInflater layoutInflater = LayoutInflater.from(mShowCustomTimesFragment.getActivity());
             View showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false);
 
             TextView timesRowName = (TextView) showCustomTimesRow.findViewById(R.id.times_row_name);
@@ -254,16 +251,13 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
 
         @Override
         public void onBindViewHolder(final CustomTimeHolder customTimeHolder, int position) {
-            ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
-            Assert.assertTrue(showCustomTimesFragment != null);
-
             CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
             Assert.assertTrue(customTimeWrapper != null);
 
             customTimeHolder.mTimesRowName.setText(customTimeWrapper.mCustomTimeData.Name);
 
             if (customTimeWrapper.mSelected)
-                customTimeHolder.mShowCustomTimeRow.setBackgroundColor(ContextCompat.getColor(showCustomTimesFragment.getActivity(), R.color.selected));
+                customTimeHolder.mShowCustomTimeRow.setBackgroundColor(ContextCompat.getColor(mShowCustomTimesFragment.getActivity(), R.color.selected));
             else
                 customTimeHolder.mShowCustomTimeRow.setBackgroundColor(Color.TRANSPARENT);
 
@@ -273,7 +267,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
             });
 
             customTimeHolder.mShowCustomTimeRow.setOnClickListener(v -> {
-                if (showCustomTimesFragment.mSelectionCallback.hasActionMode())
+                if (mShowCustomTimesFragment.mSelectionCallback.hasActionMode())
                     customTimeHolder.onLongClick();
                 else
                     customTimeHolder.onRowClick();
@@ -288,9 +282,6 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
         }
 
         void removeSelected() {
-            ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
-            Assert.assertTrue(showCustomTimesFragment != null);
-
             List<CustomTimeWrapper> selectedCustomTimeWrappers = Stream.of(mCustomTimeWrappers)
                     .filter(customTimeWrapper -> customTimeWrapper.mSelected)
                     .collect(Collectors.toList());
@@ -305,7 +296,7 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
                     .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
                     .collect(Collectors.toList());
 
-            DomainFactory.getDomainFactory(showCustomTimesFragment.getActivity()).setCustomTimeCurrent(showCustomTimesFragment.getActivity(), mDataId, selectedCustomTimeIds);
+            DomainFactory.getDomainFactory(mShowCustomTimesFragment.getActivity()).setCustomTimeCurrent(mShowCustomTimesFragment.getActivity(), mDataId, selectedCustomTimeIds);
         }
 
         class CustomTimeHolder extends RecyclerView.ViewHolder {
@@ -322,19 +313,13 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
             }
 
             void onRowClick() {
-                ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
-                Assert.assertTrue(showCustomTimesFragment != null);
-
                 CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(getAdapterPosition());
                 Assert.assertTrue(customTimeWrapper != null);
 
-                showCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.mCustomTimeData.Id, showCustomTimesFragment.getActivity()));
+                mShowCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.mCustomTimeData.Id, mShowCustomTimesFragment.getActivity()));
             }
 
             void onLongClick() {
-                ShowCustomTimesFragment showCustomTimesFragment = mShowCustomTimesFragmentReference.get();
-                Assert.assertTrue(showCustomTimesFragment != null);
-
                 int position = getAdapterPosition();
 
                 CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
@@ -343,9 +328,9 @@ public class ShowCustomTimesFragment extends Fragment implements LoaderManager.L
                 customTimeWrapper.mSelected = !customTimeWrapper.mSelected;
 
                 if (customTimeWrapper.mSelected) {
-                    showCustomTimesFragment.mSelectionCallback.incrementSelected();
+                    mShowCustomTimesFragment.mSelectionCallback.incrementSelected();
                 } else {
-                    showCustomTimesFragment.mSelectionCallback.decrementSelected();
+                    mShowCustomTimesFragment.mSelectionCallback.decrementSelected();
                 }
 
                 notifyItemChanged(position);

@@ -228,7 +228,6 @@ public class DomainFactory {
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
 
         Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
         Assert.assertTrue(instance.isRootInstance(now));
         Assert.assertTrue(instance.getDone() == null);
 
@@ -263,7 +262,6 @@ public class DomainFactory {
 
         for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey);
-            Assert.assertTrue(instance != null);
             Assert.assertTrue(instance.isRootInstance(now));
             Assert.assertTrue(instance.getDone() == null);
 
@@ -418,7 +416,7 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    public synchronized ShowGroupLoader.Data getShowGroupData(Context context, TimeStamp timeStamp) {
+    public synchronized ShowGroupLoader.Data getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getShowGroupData");
@@ -551,7 +549,6 @@ public class DomainFactory {
         ArrayList<Instance> instances = new ArrayList<>();
         for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey);
-            Assert.assertTrue(instance != null);
 
             if (instance.isRootInstance(now))
                 instances.add(instance);
@@ -593,7 +590,6 @@ public class DomainFactory {
             return new ShowInstanceLoader.Data(null);
 
         Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -863,7 +859,6 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.setInstanceDateTime");
 
         Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -881,8 +876,6 @@ public class DomainFactory {
 
         for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey);
-            Assert.assertTrue(instance != null);
-
             instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
         }
 
@@ -893,7 +886,6 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.setInstanceAddHour");
 
         Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
         Calendar calendar = now.getCalendar();
@@ -912,7 +904,6 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
 
         Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -933,7 +924,6 @@ public class DomainFactory {
             Assert.assertTrue(instanceKey != null);
 
             Instance instance = getInstance(instanceKey);
-            Assert.assertTrue(instance != null);
 
             instance.setDone(true, now);
         });
@@ -959,7 +949,6 @@ public class DomainFactory {
     @NonNull
     Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull InstanceKey instanceKey, boolean done) {
         Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
 
         instance.setDone(done, now);
 
@@ -975,7 +964,6 @@ public class DomainFactory {
 
         for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey);
-            Assert.assertTrue(instance != null);
 
             instance.setNotified(now);
             instance.setNotificationShown(false, now);
@@ -988,7 +976,6 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.setInstanceNotified");
 
         Instance instance = getInstance(instanceKey);
-        Assert.assertTrue(instance != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1008,7 +995,6 @@ public class DomainFactory {
                 Assert.assertTrue(showInstanceKey != null);
 
                 Instance showInstance = getInstance(showInstanceKey);
-                Assert.assertTrue(showInstance != null);
 
                 showInstance.setNotificationShown(true, now);
             }
@@ -1018,7 +1004,6 @@ public class DomainFactory {
             Assert.assertTrue(hideInstanceKey != null);
 
             Instance hideInstance = getInstance(hideInstanceKey);
-            Assert.assertTrue(hideInstance != null);
 
             hideInstance.setNotificationShown(false, now);
         }
@@ -1528,9 +1513,6 @@ public class DomainFactory {
 
     @NonNull
     List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(now != null);
-
         HashSet<Instance> allInstances = new HashSet<>();
 
         allInstances.addAll(Stream.of(mExistingInstances)
@@ -1545,9 +1527,7 @@ public class DomainFactory {
 
     @NonNull
     private List<Instance> getRootInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(endExactTimeStamp != null);
         Assert.assertTrue(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
-        Assert.assertTrue(now != null);
 
         HashSet<Instance> allInstances = new HashSet<>();
 
@@ -1604,7 +1584,8 @@ public class DomainFactory {
         return new DateTime(date, time);
     }
 
-    private Instance getInstance(InstanceKey instanceKey) {
+    @NonNull
+    private Instance getInstance(@NonNull InstanceKey instanceKey) {
         Task task = mTasks.get(instanceKey.TaskId);
         Assert.assertTrue(task != null);
 
@@ -1946,10 +1927,6 @@ public class DomainFactory {
 
     @NonNull
     private HashMap<InstanceKey, GroupListLoader.InstanceData> getChildInstanceDatas(@NonNull Instance instance, @NonNull ExactTimeStamp now, @NonNull GroupListLoader.InstanceDataParent instanceDataParent) {
-        Assert.assertTrue(instance != null);
-        Assert.assertTrue(now != null);
-        Assert.assertTrue(instanceDataParent != null);
-
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
         for (Instance childInstance : instance.getChildInstances(now)) {

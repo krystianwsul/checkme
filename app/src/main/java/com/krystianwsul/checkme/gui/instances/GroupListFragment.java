@@ -59,10 +59,13 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,7 +106,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         protected void onMenuClick(MenuItem menuItem) {
             Assert.assertTrue(mTreeViewAdapter != null);
 
-            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(mTreeViewAdapter.getSelectedNodes());
+            List<TreeNode> treeNodes = mTreeViewAdapter.getSelectedNodes();
+
+            List<GroupListLoader.InstanceData> instanceDatas = nodesToInstanceDatas(treeNodes);
             Assert.assertTrue(instanceDatas != null);
             Assert.assertTrue(!instanceDatas.isEmpty());
 
@@ -131,9 +136,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     break;
                 }
                 case R.id.action_group_share: {
-                    Assert.assertTrue(instanceDatas.size() == 1);
-
-                    Utils.share(instanceDatas.get(0).Name, getActivity());
+                    Utils.share(getShareData(instanceDatas), getActivity());
                     break;
                 }
                 case R.id.action_group_show_task: {
@@ -397,7 +400,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                 menu.findItem(R.id.action_group_edit_instance).setVisible(Stream.of(instanceDatas)
                         .allMatch(instanceData -> instanceData.IsRootInstance));
-                menu.findItem(R.id.action_group_share).setVisible(false);
+                menu.findItem(R.id.action_group_share).setVisible(true);
                 menu.findItem(R.id.action_group_show_task).setVisible(false);
                 menu.findItem(R.id.action_group_edit_task).setVisible(false);
                 menu.findItem(R.id.action_group_add_task).setVisible(false);
@@ -447,6 +450,68 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             addParents(parents, parent);
         }
     };
+
+    @NonNull
+    private String getShareData(@NonNull List<GroupListLoader.InstanceData> instanceDatas) {
+        Assert.assertTrue(!instanceDatas.isEmpty());
+
+        /*
+        Multimap<Integer, GroupListLoader.InstanceData> instanceDatas = Multimaps.newMultimap(new TreeMap<Integer, Collection<GroupListLoader.InstanceData>>(), () -> new ArrayList<>());
+
+        for (TreeNode treeNode : treeNodes) {
+            Assert.assertTrue(treeNode != null);
+
+            ModelNode modelNode = treeNode.getModelNode();
+
+            if (modelNode instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
+                GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = (GroupAdapter.NodeCollection.NotDoneGroupNode) modelNode;
+                Assert.assertTrue(notDoneGroupNode.singleInstance());
+
+                instanceDatas.put(notDoneGroupNode.mIndentation, notDoneGroupNode.getSingleInstanceData());
+            } else {
+                Assert.assertTrue(modelNode instanceof GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode);
+                GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = (GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) modelNode;
+
+                instanceDatas.put(notDoneInstanceNode.mIndentation, notDoneInstanceNode.mInstanceData);
+            }
+        }*/
+
+        Map<InstanceKey, GroupListLoader.InstanceData> tree = new LinkedHashMap<>();
+
+        for (GroupListLoader.InstanceData instanceData : instanceDatas) {
+            Assert.assertTrue(instanceData != null);
+
+            if (!inTree(tree, instanceData))
+                tree.put(instanceData.InstanceKey, instanceData);
+        }
+
+        List<String> lines = new ArrayList<>();
+
+        for (GroupListLoader.InstanceData instanceData : tree.values())
+            printTree(lines, 0, instanceData);
+
+        return TextUtils.join("\n", lines);
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean inTree(@NonNull Map<InstanceKey, GroupListLoader.InstanceData> shareTree, @NonNull GroupListLoader.InstanceData instanceData) {
+        if (shareTree.isEmpty())
+            return false;
+
+        if (shareTree.containsKey(instanceData.InstanceKey))
+            return true;
+
+        return Stream.of(shareTree.values())
+                .anyMatch(currInstanceData -> inTree(currInstanceData.Children, instanceData));
+    }
+
+    private void printTree(@NonNull List<String> lines, int indentation, @NonNull GroupListLoader.InstanceData instanceData) {
+        lines.add(StringUtils.repeat("-", indentation) + instanceData.Name);
+
+        Stream.of(instanceData.Children.values())
+                .sortBy(child -> child.InstanceKey.TaskId)
+                .forEach(child -> printTree(lines, indentation + 1, child));
+    }
 
     @NonNull
     public static GroupListFragment getGroupInstance(MainActivity.TimeRange timeRange, int position) {
@@ -2843,7 +2908,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                 @Override
                 public int compareTo(@NonNull ModelNode another) {
-                    return -mInstanceData.Done.compareTo(((DoneInstanceNode) another).mInstanceData.Done); // negate
+                    Assert.assertTrue(mInstanceData.Done != null);
+
+                    DoneInstanceNode doneInstanceNode = (DoneInstanceNode) another;
+                    Assert.assertTrue(doneInstanceNode.mInstanceData.Done != null);
+
+                    return -mInstanceData.Done.compareTo(doneInstanceNode.mInstanceData.Done); // negate
                 }
 
                 @Override
@@ -3494,6 +3564,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     .filter(instanceData -> instanceData.Done == null)
                     .sortBy(instanceData -> instanceData.InstanceKey.TaskId);
 
+            //noinspection ConstantConditions
             Stream<GroupListLoader.InstanceData> done = Stream.of(instanceDatas)
                     .filter(instanceData -> instanceData.Done != null)
                     .sortBy(instanceData -> -instanceData.Done.getLong());

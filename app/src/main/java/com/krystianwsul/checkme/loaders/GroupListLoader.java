@@ -167,17 +167,35 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     }
 
     public static class InstanceData implements InstanceDataParent {
+        @Nullable
         public ExactTimeStamp Done;
+
+        @NonNull
         public final InstanceKey InstanceKey;
+
+        @Nullable
         public final String DisplayText;
+
         public HashMap<InstanceKey, InstanceData> Children;
+
+        @NonNull
         public final String Name;
+
+        @NonNull
         public final TimeStamp InstanceTimeStamp;
+
         public boolean TaskCurrent;
         public final boolean IsRootInstance;
+
+        @Nullable
         public Boolean IsRootTask;
+
         public boolean Exists;
+
+        @NonNull
         public final TimePair InstanceTimePair;
+
+        @Nullable
         public final String mNote;
 
         @NonNull
@@ -222,9 +240,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             return hashCode;
         }
 
-        public void setChildren(HashMap<InstanceKey, InstanceData> children) {
-            Assert.assertTrue(children != null);
-
+        public void setChildren(@NonNull HashMap<InstanceKey, InstanceData> children) {
             Children = children;
         }
 

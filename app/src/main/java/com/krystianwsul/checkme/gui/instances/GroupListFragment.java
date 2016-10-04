@@ -389,7 +389,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 Assert.assertTrue(instanceData != null);
 
                 menu.findItem(R.id.action_group_edit_instance).setVisible(instanceData.IsRootInstance);
-                menu.findItem(R.id.action_group_share).setVisible(true);
                 menu.findItem(R.id.action_group_show_task).setVisible(instanceData.TaskCurrent);
                 menu.findItem(R.id.action_group_edit_task).setVisible(instanceData.TaskCurrent);
                 menu.findItem(R.id.action_group_join).setVisible(false);
@@ -400,7 +399,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                 menu.findItem(R.id.action_group_edit_instance).setVisible(Stream.of(instanceDatas)
                         .allMatch(instanceData -> instanceData.IsRootInstance));
-                menu.findItem(R.id.action_group_share).setVisible(true);
                 menu.findItem(R.id.action_group_show_task).setVisible(false);
                 menu.findItem(R.id.action_group_edit_task).setVisible(false);
                 menu.findItem(R.id.action_group_add_task).setVisible(false);
@@ -454,27 +452,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     @NonNull
     private String getShareData(@NonNull List<GroupListLoader.InstanceData> instanceDatas) {
         Assert.assertTrue(!instanceDatas.isEmpty());
-
-        /*
-        Multimap<Integer, GroupListLoader.InstanceData> instanceDatas = Multimaps.newMultimap(new TreeMap<Integer, Collection<GroupListLoader.InstanceData>>(), () -> new ArrayList<>());
-
-        for (TreeNode treeNode : treeNodes) {
-            Assert.assertTrue(treeNode != null);
-
-            ModelNode modelNode = treeNode.getModelNode();
-
-            if (modelNode instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
-                GroupAdapter.NodeCollection.NotDoneGroupNode notDoneGroupNode = (GroupAdapter.NodeCollection.NotDoneGroupNode) modelNode;
-                Assert.assertTrue(notDoneGroupNode.singleInstance());
-
-                instanceDatas.put(notDoneGroupNode.mIndentation, notDoneGroupNode.getSingleInstanceData());
-            } else {
-                Assert.assertTrue(modelNode instanceof GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode);
-                GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode notDoneInstanceNode = (GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) modelNode;
-
-                instanceDatas.put(notDoneInstanceNode.mIndentation, notDoneInstanceNode.mInstanceData);
-            }
-        }*/
 
         Map<InstanceKey, GroupListLoader.InstanceData> tree = new LinkedHashMap<>();
 

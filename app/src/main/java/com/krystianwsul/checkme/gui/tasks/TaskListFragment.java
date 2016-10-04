@@ -40,6 +40,8 @@ import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,16 +73,22 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
             Assert.assertTrue(!selected.isEmpty());
 
-            ArrayList<Integer> taskIds = Stream.of(selected)
-                    .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mChildTaskData.TaskId)
+            List<TaskAdapter.TaskWrapper> taskWrappers = Stream.of(selected)
+                    .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()))
+                    .collect(Collectors.toList());
+
+            List<TaskListLoader.ChildTaskData> childTaskDatas = Stream.of(taskWrappers)
+                    .map(taskWrapper -> taskWrapper.mChildTaskData)
+                    .collect(Collectors.toList());
+
+            ArrayList<Integer> taskIds = Stream.of(childTaskDatas)
+                    .map(childTaskData -> childTaskData.TaskId)
                     .collect(Collectors.toCollection(ArrayList::new));
-            Assert.assertTrue(!taskIds.isEmpty());
 
             switch (menuItem.getItemId()) {
                 case R.id.action_task_share:
-                    Assert.assertTrue(selected.size() == 1);
+                    Utils.share(getShareData(childTaskDatas), getActivity());
 
-                    Utils.share(((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData.Name, getActivity());
                     break;
                 case R.id.action_task_edit:
                     Assert.assertTrue(selected.size() == 1);
@@ -140,7 +148,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         @Override
         protected void onSecondAdded() {
-            mActionMode.getMenu().findItem(R.id.action_task_share).setVisible(false);
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(false);
 
@@ -171,7 +178,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         @Override
         protected void onSecondToLastRemoved() {
-            mActionMode.getMenu().findItem(R.id.action_task_share).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(false);
             mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(true);
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(true);
@@ -223,6 +229,46 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             addParents(parents, parentNode);
         }
     };
+
+    @NonNull
+    private String getShareData(@NonNull List<TaskListLoader.ChildTaskData> childTaskDatas) {
+        Assert.assertTrue(!childTaskDatas.isEmpty());
+
+        List<TaskListLoader.ChildTaskData> tree = new ArrayList<>();
+
+        for (TaskListLoader.ChildTaskData childTaskData : childTaskDatas) {
+            Assert.assertTrue(childTaskData != null);
+
+            if (!inTree(tree, childTaskData))
+                tree.add(childTaskData);
+        }
+
+        List<String> lines = new ArrayList<>();
+
+        for (TaskListLoader.ChildTaskData childTaskData : tree)
+            printTree(lines, 0, childTaskData);
+
+        return TextUtils.join("\n", lines);
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean inTree(@NonNull List<TaskListLoader.ChildTaskData> shareTree, @NonNull TaskListLoader.ChildTaskData childTaskData) {
+        if (shareTree.isEmpty())
+            return false;
+
+        if (shareTree.contains(childTaskData))
+            return true;
+
+        return Stream.of(shareTree)
+                .anyMatch(currChildTaskData -> inTree(currChildTaskData.Children, childTaskData));
+    }
+
+    private void printTree(@NonNull List<String> lines, int indentation, @NonNull TaskListLoader.ChildTaskData childTaskData) {
+        lines.add(StringUtils.repeat("-", indentation) + childTaskData.Name);
+
+        Stream.of(childTaskData.Children)
+                .forEach(child -> printTree(lines, indentation + 1, child));
+    }
 
     private List<Integer> mSelectedTaskIds;
     private List<Integer> mExpandedTaskIds;

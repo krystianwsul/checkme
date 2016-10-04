@@ -705,7 +705,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
-        if (data.InstanceDatas.isEmpty() && TextUtils.isEmpty(data.mNote)) {
+        if (data.InstanceDatas.isEmpty() && TextUtils.isEmpty(data.mNote) && (data.TaskDatas == null || data.TaskDatas.isEmpty())) {
             mGroupListRecycler.setVisibility(View.GONE);
 
             if (emptyTextId != null) {

@@ -99,9 +99,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             mNote = note;
         }
 
-        public void setInstanceDatas(HashMap<InstanceKey, InstanceData> instanceDatas) {
-            Assert.assertTrue(instanceDatas != null);
-
+        public void setInstanceDatas(@NonNull HashMap<InstanceKey, InstanceData> instanceDatas) {
             InstanceDatas = instanceDatas;
         }
 

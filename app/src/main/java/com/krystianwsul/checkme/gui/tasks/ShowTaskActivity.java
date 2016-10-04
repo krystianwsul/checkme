@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -35,6 +34,8 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
     private boolean mSelectAllVisible = false;
 
+    private TaskListFragment mTaskListFragment;
+
     public static Intent getIntent(int taskId, Context context) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
         intent.putExtra(INTENT_KEY, taskId);
@@ -61,9 +62,14 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         mTaskId = intent.getIntExtra(INTENT_KEY, -1);
         Assert.assertTrue(mTaskId != -1);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.findFragmentById(R.id.show_task_fragment) == null)
-            fragmentManager.beginTransaction().add(R.id.show_task_fragment, TaskListFragment.getInstance(mTaskId)).commit();
+        mTaskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
+        if (mTaskListFragment == null) {
+            mTaskListFragment = TaskListFragment.getInstance(mTaskId);
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.show_task_fragment, mTaskListFragment)
+                    .commit();
+        }
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -98,6 +104,13 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
                 break;
             case R.id.task_menu_share:
                 Assert.assertTrue(mData != null);
+                Assert.assertTrue(mTaskListFragment != null);
+
+                String shareData = mTaskListFragment.getShareData();
+                if (TextUtils.isEmpty(shareData))
+                    Utils.share(mData.Name, this);
+                else
+                    Utils.share(mData.Name + "\n" + shareData, this);
 
                 Utils.share(mData.Name, this);
                 break;

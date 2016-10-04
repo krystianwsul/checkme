@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -9,12 +10,12 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
+    @NonNull
     private final TimeStamp mTimeStamp;
 
-    public ShowGroupLoader(Context context, TimeStamp timeStamp) {
+    public ShowGroupLoader(@NonNull Context context, @NonNull TimeStamp timeStamp) {
         super(context);
 
-        Assert.assertTrue(timeStamp != null);
         mTimeStamp = timeStamp;
     }
 

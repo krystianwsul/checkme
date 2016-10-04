@@ -401,9 +401,8 @@ public class PersistenceManger {
         return monthlyWeekScheduleRecord;
     }
 
-    public InstanceRecord createInstanceRecord(Task task, DateTime scheduleDateTime, ExactTimeStamp now) {
-        Assert.assertTrue(task != null);
-
+    @NonNull
+    public InstanceRecord createInstanceRecord(@NonNull Task task, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
         Date scheduleDate = scheduleDateTime.getDate();
         Time scheduleTime = scheduleDateTime.getTime();
 

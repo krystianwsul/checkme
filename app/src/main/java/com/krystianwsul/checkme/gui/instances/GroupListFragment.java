@@ -64,6 +64,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -466,6 +467,28 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
         for (GroupListLoader.InstanceData instanceData : tree.values())
             printTree(lines, 0, instanceData);
+
+        return TextUtils.join("\n", lines);
+    }
+
+    @Nullable
+    public String getShareData() {
+        Assert.assertTrue(mData != null);
+        List<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>(mData.InstanceDatas.values());
+
+        Collections.sort(instanceDatas, (lhs, rhs) -> {
+            int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
+            if (timeStampComparison != 0) {
+                return timeStampComparison;
+            } else {
+                return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
+            }
+        });
+
+        List<String> lines = new ArrayList<>();
+
+        for (GroupListLoader.InstanceData instanceData : instanceDatas)
+            printTree(lines, 1, instanceData);
 
         return TextUtils.join("\n", lines);
     }
@@ -1215,25 +1238,35 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 }
 
                 abstract int getNameVisibility();
+
                 abstract String getName();
+
                 abstract int getNameColor();
 
                 abstract boolean getNameSingleLine();
 
                 abstract int getDetailsVisibility();
+
                 abstract String getDetails();
+
                 abstract int getDetailsColor();
 
                 abstract int getChildrenVisibility();
+
                 abstract String getChildren();
+
                 abstract int getChildrenColor();
 
                 abstract int getExpandVisibility();
+
                 abstract int getExpandImageResource();
+
                 abstract View.OnClickListener getExpandOnClickListener();
 
                 abstract int getCheckBoxVisibility();
+
                 abstract boolean getCheckBoxChecked();
+
                 abstract View.OnClickListener getCheckBoxOnClickListener();
 
                 abstract int getSeparatorVisibility();
@@ -1241,6 +1274,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 abstract int getBackgroundColor();
 
                 abstract View.OnLongClickListener getOnLongClickListener();
+
                 abstract View.OnClickListener getOnClickListener();
 
                 @SuppressWarnings("unused")
@@ -1677,7 +1711,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     } else {
                         return View.VISIBLE;
                     }
-               }
+                }
 
                 @Override
                 String getDetails() {
@@ -3463,6 +3497,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
     public interface GroupListListener {
         void onCreateGroupActionMode(ActionMode actionMode);
+
         void onDestroyGroupActionMode();
 
         void setGroupSelectAllVisibility(Integer position, boolean selectAllVisible);

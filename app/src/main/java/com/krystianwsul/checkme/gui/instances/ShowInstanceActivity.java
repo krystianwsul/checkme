@@ -117,8 +117,14 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 break;
             case R.id.instance_menu_share:
                 Assert.assertTrue(mInstanceData != null);
+                Assert.assertTrue(mGroupListFragment != null);
 
-                Utils.share(mInstanceData.Name, this);
+                String shareData = mGroupListFragment.getShareData();
+                if (TextUtils.isEmpty(shareData))
+                    Utils.share(mInstanceData.Name, this);
+                else
+                    Utils.share(mInstanceData.Name + "\n" + shareData, this);
+
                 break;
             case R.id.instance_menu_show_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -192,6 +198,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
         Assert.assertTrue(mGroupListFragment != null);
+
         mGroupListFragment.setInstanceKey(mInstanceKey);
 
         getSupportLoaderManager().initLoader(0, null, this);

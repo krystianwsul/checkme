@@ -15,6 +15,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -251,6 +252,20 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         return TextUtils.join("\n", lines);
     }
 
+    @Nullable
+    public String getShareData() {
+        Assert.assertTrue(mData != null);
+
+        List<String> lines = new ArrayList<>();
+
+        for (TaskListLoader.ChildTaskData childTaskData : mData.mChildTaskDatas)
+            printTree(lines, 1, childTaskData);
+
+        Log.e("asdf", "test:\n" + TextUtils.join("\n", lines));
+
+        return TextUtils.join("\n", lines);
+    }
+
     @SuppressWarnings("SimplifiableIfStatement")
     private boolean inTree(@NonNull List<TaskListLoader.ChildTaskData> shareTree, @NonNull TaskListLoader.ChildTaskData childTaskData) {
         if (shareTree.isEmpty())
@@ -283,6 +298,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         return taskListFragment;
     }
 
+    @NonNull
     public static TaskListFragment getInstance(int taskId) {
         TaskListFragment taskListFragment = new TaskListFragment();
 

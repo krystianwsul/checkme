@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.utils;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -13,10 +14,14 @@ import java.io.Serializable;
 
 public class InstanceKey implements Parcelable, Serializable {
     public final int TaskId;
+
+    @NonNull
     public final Date ScheduleDate;
+
+    @NonNull
     public final TimePair ScheduleTimePair;
 
-    public InstanceKey(int taskId, Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
+    public InstanceKey(int taskId, @NonNull Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
         Assert.assertTrue(scheduleDate != null);
         Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
 

@@ -293,10 +293,6 @@ class Instance {
     }
 
     private void createInstanceRecord(@NonNull ExactTimeStamp now) {
-        Assert.assertTrue(mInstanceRecord == null);
-        Assert.assertTrue(mTaskId != null);
-        Assert.assertTrue(mScheduleDateTime != null);
-
         Task task = getTask();
 
         DateTime scheduleDateTime = getScheduleDateTime();

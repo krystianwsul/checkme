@@ -421,9 +421,6 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getShowGroupData");
 
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(timeStamp != null);
-
         Calendar endCalendar = timeStamp.getCalendar();
         endCalendar.add(Calendar.MINUTE, 1);
         TimeStamp endTimeStamp = new TimeStamp(endCalendar);
@@ -802,6 +799,7 @@ public class DomainFactory {
                             .filter(childInstance -> childInstance.getDone() == null)
                             .sortBy(Instance::getTaskId);
 
+                    //noinspection ConstantConditions
                     Stream<Instance> done = Stream.of(childInstances)
                             .filter(childInstance -> childInstance.getDone() != null)
                             .sortBy(childInstance -> -childInstance.getDone().getLong());
@@ -939,7 +937,6 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Instance instance = setInstanceDone(now, instanceKey, done);
-        Assert.assertTrue(instance != null);
 
         save(context, dataId);
 
@@ -1463,7 +1460,8 @@ public class DomainFactory {
 
     // internal
 
-    private ArrayList<Instance> getExistingInstances(Task task) {
+    @NonNull
+    private ArrayList<Instance> getExistingInstances(@NonNull Task task) {
         Assert.assertTrue(task != null);
 
         ArrayList<Instance> instances = new ArrayList<>();
@@ -1476,7 +1474,8 @@ public class DomainFactory {
         return instances;
     }
 
-    Instance getExistingInstance(Task task, DateTime scheduleDateTime) {
+    @Nullable
+    Instance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
         Assert.assertTrue(task != null);
         Assert.assertTrue(scheduleDateTime != null);
 
@@ -1499,9 +1498,6 @@ public class DomainFactory {
 
     @NonNull
     Instance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(scheduleDateTime != null);
-
         Instance existingInstance = getExistingInstance(task, scheduleDateTime);
 
         if (existingInstance != null) {
@@ -1563,12 +1559,8 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    InstanceRecord createInstanceRecord(Task task, Instance instance, DateTime scheduleDateTime, ExactTimeStamp now) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(instance != null);
-        Assert.assertTrue(scheduleDateTime != null);
-        Assert.assertTrue(now != null);
-
+    @NonNull
+    InstanceRecord createInstanceRecord(@NonNull Task task, @NonNull Instance instance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
         mExistingInstances.add(instance);
 
         return mPersistenceManager.createInstanceRecord(task, scheduleDateTime, now);
@@ -1576,9 +1568,6 @@ public class DomainFactory {
 
     @NonNull
     private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(timePair != null);
-
         Time time = getTime(timePair);
 
         return new DateTime(date, time);
@@ -1824,8 +1813,6 @@ public class DomainFactory {
 
     @NonNull
     List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
-        Assert.assertTrue(parentTask != null);
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
         return Stream.of(getChildTaskHierarchies(parentTask))
@@ -1855,8 +1842,6 @@ public class DomainFactory {
 
     @Nullable
     Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(exactTimeStamp != null);
-        Assert.assertTrue(childTask != null);
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
@@ -1872,8 +1857,6 @@ public class DomainFactory {
 
     @Nullable
     private TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(childTask != null);
-        Assert.assertTrue(exactTimeStamp != null);
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
@@ -1898,8 +1881,6 @@ public class DomainFactory {
     }
 
     void setParentHierarchyEndTimeStamp(@NonNull Task childTask, @NonNull ExactTimeStamp exactEndTimeStamp) {
-        Assert.assertTrue(childTask != null);
-        Assert.assertTrue(exactEndTimeStamp != null);
         Assert.assertTrue(childTask.current(exactEndTimeStamp));
 
         TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactEndTimeStamp);

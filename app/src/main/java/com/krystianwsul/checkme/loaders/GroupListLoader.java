@@ -71,9 +71,17 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     public static class Data extends DomainLoader.Data implements InstanceDataParent {
         public HashMap<InstanceKey, InstanceData> InstanceDatas;
+
+        @NonNull
         public final List<CustomTimeData> CustomTimeDatas;
+
+        @Nullable
         public final Boolean TaskEditable;
+
+        @Nullable
         public final List<TaskData> TaskDatas;
+
+        @Nullable
         public final String mNote;
 
         public Data(@NonNull List<CustomTimeData> customTimeDatas, @Nullable Boolean taskEditable, @Nullable List<TaskData> taskDatas, @Nullable String note) {
@@ -83,9 +91,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             mNote = note;
         }
 
-        public void setInstanceDatas(HashMap<InstanceKey, InstanceData> instanceDatas) {
-            Assert.assertTrue(instanceDatas != null);
-
+        public void setInstanceDatas(@NonNull HashMap<InstanceKey, InstanceData> instanceDatas) {
             InstanceDatas = instanceDatas;
         }
 

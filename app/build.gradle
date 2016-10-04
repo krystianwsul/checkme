@@ -70,4 +70,7 @@ dependencies {
     compile 'com.annimon:stream:1.0.9'
     compile 'com.google.guava:guava:19.0'
     compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'com.google.android.gms:play-services-auth:9.6.1'
 }
+
+apply plugin: 'com.google.gms.google-services'

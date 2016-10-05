@@ -58,4 +58,6 @@
     <string name="monthDayEnd">miesiąca</string>
     <string name="signIn">Zaloguj się</string>
     <string name="signOut">Wyloguj się</string>
+    <string name="signInFailed">Logowanie nie powiodło się.</string>
+    <string name="signInAs">Zalogowano jako</string>
 </resources>

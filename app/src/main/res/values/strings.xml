@@ -58,4 +58,6 @@
     <string name="monthDayEnd">of the month</string>
     <string name="signIn">Sign in</string>
     <string name="signOut">Sign out</string>
+    <string name="signInFailed">Sign in failed.</string>
+    <string name="signInAs">Signed in as</string>
 </resources>

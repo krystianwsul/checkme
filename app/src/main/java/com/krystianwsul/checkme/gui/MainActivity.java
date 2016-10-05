@@ -1,7 +1,10 @@
 package com.krystianwsul.checkme.gui;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
@@ -17,6 +20,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +29,12 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -42,6 +52,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
+
+    private static final int RC_SIGN_IN = 1000;
+    private static final String SIGNED_IN_KEY = "signedIn";
 
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
@@ -82,6 +95,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private final Map<Integer, Boolean> mGroupSelectAllVisible = new ArrayMap<>();
     private boolean mTaskSelectAllVisible = false;
+
+    private GoogleApiClient mGoogleApiClient;
+
+    private SharedPreferences mSharedPreferences;
+
+    private NavigationView mMainActivityNavigation;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -243,10 +262,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mMainDebugFrame = (FrameLayout) findViewById(R.id.main_debug_frame);
         Assert.assertTrue(mMainDebugFrame != null);
 
-        NavigationView mainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
-        Assert.assertTrue(mainActivityNavigation != null);
+        mMainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
+        Assert.assertTrue(mMainActivityNavigation != null);
 
-        mainActivityNavigation.setNavigationItemSelectedListener(item -> {
+        mMainActivityNavigation.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.main_drawer_instances:
                     if (mDrawerTaskListener != null) {
@@ -277,6 +296,19 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                     showTab(CUSTOM_TIMES_VISIBLE);
                     break;
+                case R.id.main_drawer_sign_in:
+                    if (mSharedPreferences.getBoolean(SIGNED_IN_KEY, false)) {
+                        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+
+                        mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn);
+                        mSharedPreferences.edit()
+                                .putBoolean(SIGNED_IN_KEY, false)
+                                .apply();
+                    } else {
+                        startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient), RC_SIGN_IN);
+                    }
+
+                    break;
                 case R.id.main_drawer_debug:
                     if (mDrawerTaskListener != null) {
                         mMainActivityDrawer.removeDrawerListener(mDrawerTaskListener);
@@ -300,17 +332,31 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             return true;
         });
 
-        View headerView = mainActivityNavigation.getHeaderView(0);
+        View headerView = mMainActivityNavigation.getHeaderView(0);
         Assert.assertTrue(headerView != null);
 
         headerView.setOnLongClickListener(v -> {
-            mainActivityNavigation.getMenu().findItem(R.id.main_drawer_debug).setVisible(true);
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_debug).setVisible(true);
             return true;
         });
 
         showTab(mVisibleTab);
 
         TickService.register(this);
+
+        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, (@NonNull ConnectionResult connectionResult) -> mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setVisible(false))
+                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
+                .build();
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean signedIn = mSharedPreferences.getBoolean(SIGNED_IN_KEY, false);
+        if (signedIn)
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut);
     }
 
     @Override
@@ -527,6 +573,29 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         mMainActivityDrawer.removeDrawerListener(mDrawerCustomTimesListener);
         mDrawerCustomTimesListener = null;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            Assert.assertTrue(googleSignInResult != null);
+
+            if (googleSignInResult.isSuccess()) {
+                GoogleSignInAccount googleSignInAccount = googleSignInResult.getSignInAccount();
+                Assert.assertTrue(googleSignInAccount != null);
+
+                Log.e("asdf", "display name: " + googleSignInAccount.getDisplayName());
+                Log.e("asdf", "display name: " + googleSignInAccount.getEmail());
+
+                mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut);
+                mSharedPreferences.edit()
+                        .putBoolean(SIGNED_IN_KEY, true)
+                        .apply();
+            }
+        }
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {

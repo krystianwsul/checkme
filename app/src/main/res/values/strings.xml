@@ -56,4 +56,6 @@
     <string name="monthDay">day</string>
     <string name="monthDayStart">from the</string>
     <string name="monthDayEnd">of the month</string>
+    <string name="signIn">Sign in</string>
+    <string name="signOut">Sign out</string>
 </resources>

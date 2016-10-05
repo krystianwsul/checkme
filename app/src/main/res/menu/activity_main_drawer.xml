@@ -18,7 +18,8 @@
         <item
             android:id="@+id/main_drawer_sign_in"
             android:title="@string/signIn"
-            android:icon="@drawable/ic_account_circle_black_24dp"/>
+            android:icon="@drawable/ic_account_circle_black_24dp"
+            android:checkable="false"/>
         <item
             tools:ignore="HardcodedText"
             android:id="@+id/main_drawer_debug"

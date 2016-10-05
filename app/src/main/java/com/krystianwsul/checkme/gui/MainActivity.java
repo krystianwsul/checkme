@@ -20,7 +20,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -55,11 +56,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private static final int RC_SIGN_IN = 1000;
     private static final String SIGNED_IN_KEY = "signedIn";
+    private static final String DISPLAY_NAME_KEY = "displayName";
+    private static final String EMAIL_KEY = "email";
 
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
     private static final int CUSTOM_TIMES_VISIBLE = 2;
-    private static final int DEBUG_VISIBLE = 3;
+    private static final int DEBUG_VISIBLE = 4;
 
     private static final float NORMAL_ELEVATION = 6;
     private static final float INSTANCES_ELEVATION = 0;
@@ -101,6 +104,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private SharedPreferences mSharedPreferences;
 
     private NavigationView mMainActivityNavigation;
+    private TextView mNavHeaderName;
+    private TextView mNavHeaderEmail;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -265,6 +270,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mMainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
         Assert.assertTrue(mMainActivityNavigation != null);
 
+        mMainActivityNavigation.setCheckedItem(R.id.main_drawer_instances);
+
         mMainActivityNavigation.setNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.main_drawer_instances:
@@ -300,10 +307,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                     if (mSharedPreferences.getBoolean(SIGNED_IN_KEY, false)) {
                         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
 
-                        mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn);
                         mSharedPreferences.edit()
                                 .putBoolean(SIGNED_IN_KEY, false)
+                                .putString(DISPLAY_NAME_KEY, null)
+                                .putString(EMAIL_KEY, null)
                                 .apply();
+
+                        updateSignInState();
                     } else {
                         startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient), RC_SIGN_IN);
                     }
@@ -340,6 +350,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             return true;
         });
 
+        mNavHeaderName = (TextView) headerView.findViewById(R.id.nav_header_name);
+        Assert.assertTrue(mNavHeaderName != null);
+
+        mNavHeaderEmail = (TextView) headerView.findViewById(R.id.nav_header_email);
+        Assert.assertTrue(mNavHeaderEmail != null);
+
         showTab(mVisibleTab);
 
         TickService.register(this);
@@ -354,9 +370,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 .build();
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean signedIn = mSharedPreferences.getBoolean(SIGNED_IN_KEY, false);
-        if (signedIn)
-            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut);
+
+        updateSignInState();
     }
 
     @Override
@@ -587,14 +602,52 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 GoogleSignInAccount googleSignInAccount = googleSignInResult.getSignInAccount();
                 Assert.assertTrue(googleSignInAccount != null);
 
-                Log.e("asdf", "display name: " + googleSignInAccount.getDisplayName());
-                Log.e("asdf", "display name: " + googleSignInAccount.getEmail());
+                String displayName = googleSignInAccount.getDisplayName();
+                Assert.assertTrue(!TextUtils.isEmpty(displayName));
+                Assert.assertTrue(!displayName.equals("null"));
 
-                mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut);
+                String email = googleSignInAccount.getEmail();
+                Assert.assertTrue(!TextUtils.isEmpty(email));
+                Assert.assertTrue(!email.equals("null"));
+
                 mSharedPreferences.edit()
                         .putBoolean(SIGNED_IN_KEY, true)
+                        .putString(DISPLAY_NAME_KEY, displayName)
+                        .putString(EMAIL_KEY, email)
                         .apply();
+
+                updateSignInState();
             }
+        }
+    }
+
+    private void updateSignInState() {
+        Assert.assertTrue(mSharedPreferences != null);
+
+        boolean signedIn = mSharedPreferences.getBoolean(SIGNED_IN_KEY, false);
+
+        if (signedIn) {
+            Assert.assertTrue(mSharedPreferences.contains(DISPLAY_NAME_KEY));
+            Assert.assertTrue(mSharedPreferences.contains(EMAIL_KEY));
+
+            String displayName = mSharedPreferences.getString(DISPLAY_NAME_KEY, null);
+            Assert.assertTrue(!TextUtils.isEmpty(displayName));
+
+            String email = mSharedPreferences.getString(EMAIL_KEY, null);
+            Assert.assertTrue(!TextUtils.isEmpty(email));
+
+            mNavHeaderName.setText(displayName);
+            mNavHeaderEmail.setText(email);
+
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut);
+        } else {
+            Assert.assertTrue(!mSharedPreferences.contains(DISPLAY_NAME_KEY));
+            Assert.assertTrue(!mSharedPreferences.contains(EMAIL_KEY));
+
+            mNavHeaderName.setText(null);
+            mNavHeaderEmail.setText(null);
+
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn);
         }
     }
 

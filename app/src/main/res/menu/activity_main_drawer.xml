@@ -16,6 +16,10 @@
             android:title="@string/times"
             android:icon="@drawable/ic_access_time_black_24dp"/>
         <item
+            android:id="@+id/main_drawer_friends"
+            android:title="@string/friends"
+            android:icon="@drawable/ic_people_black_24dp"/>
+        <item
             android:id="@+id/main_drawer_sign_in"
             android:title="@string/signIn"
             android:icon="@drawable/ic_account_circle_black_24dp"

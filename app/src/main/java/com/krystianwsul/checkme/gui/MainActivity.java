@@ -68,10 +68,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private static final int RC_SIGN_IN = 1000;
 
-    private static final int INSTANCES_VISIBLE = 0;
-    private static final int TASKS_VISIBLE = 1;
-    private static final int CUSTOM_TIMES_VISIBLE = 2;
-    private static final int DEBUG_VISIBLE = 4;
+    private enum Tab {
+        INSTANCES,
+        TASKS,
+        CUSTOM_TIMES,
+        FRIENDS,
+        DEBUG
+    }
 
     private static final float NORMAL_ELEVATION = 6;
     private static final float INSTANCES_ELEVATION = 0;
@@ -94,7 +97,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private DrawerLayout.DrawerListener mDrawerCustomTimesListener;
 
-    private int mVisibleTab = INSTANCES_VISIBLE;
+    private Tab mVisibleTab = Tab.INSTANCES;
     private boolean mIgnoreFirst = false;
 
     public enum TimeRange {
@@ -115,12 +118,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private TextView mNavHeaderEmail;
 
     private FirebaseAuth mFirebaseAuth;
-    private boolean mSignedIn = false;
+    private static boolean sSignedIn = false;
 
     private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
-            mSignedIn = true;
+            sSignedIn = true;
 
             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
             DatabaseReference databaseReference = firebaseDatabase.getReference();
@@ -144,7 +147,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
             Log.e("asdf", "firebase logged in");
         } else {
-            mSignedIn = false;
+            sSignedIn = false;
 
             Log.e("asdf", "firebase logged out");
         }
@@ -159,13 +162,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (mVisibleTab == INSTANCES_VISIBLE) {
+        if (mVisibleTab == Tab.INSTANCES) {
             boolean visible = false;
             if (mGroupSelectAllVisible.containsKey(mDaysPager.getCurrentItem()))
                 visible = mGroupSelectAllVisible.get(mDaysPager.getCurrentItem());
 
             menu.findItem(R.id.action_select_all).setVisible(visible);
-        } else if (mVisibleTab == TASKS_VISIBLE) {
+        } else if (mVisibleTab == Tab.TASKS) {
             menu.findItem(R.id.action_select_all).setVisible(mTaskSelectAllVisible);
         } else {
             menu.findItem(R.id.action_select_all).setVisible(false);
@@ -178,13 +181,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     public boolean onOptionsItemSelected(MenuItem item) {
         Assert.assertTrue(item.getItemId() == R.id.action_select_all);
 
-        if (mVisibleTab == INSTANCES_VISIBLE) {
+        if (mVisibleTab == Tab.INSTANCES) {
             MyFragmentStatePagerAdapter myFragmentStatePagerAdapter = (MyFragmentStatePagerAdapter) mDaysPager.getAdapter();
             Assert.assertTrue(myFragmentStatePagerAdapter != null);
 
             myFragmentStatePagerAdapter.getCurrentItem().selectAll();
         } else {
-            Assert.assertTrue(mVisibleTab == TASKS_VISIBLE);
+            Assert.assertTrue(mVisibleTab == Tab.TASKS);
 
             TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.main_task_list_frame);
             Assert.assertTrue(taskListFragment != null);
@@ -211,10 +214,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         if (savedInstanceState != null) {
             Assert.assertTrue(savedInstanceState.containsKey(VISIBLE_TAB_KEY));
-            mVisibleTab = savedInstanceState.getInt(VISIBLE_TAB_KEY);
+            mVisibleTab = (Tab) savedInstanceState.getSerializable(VISIBLE_TAB_KEY);
 
             if (savedInstanceState.containsKey(IGNORE_FIRST_KEY)) {
-                Assert.assertTrue(mVisibleTab == 0);
+                Assert.assertTrue(mVisibleTab == Tab.INSTANCES);
                 mIgnoreFirst = true;
             }
 
@@ -240,7 +243,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mMainActivitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Assert.assertTrue(mVisibleTab == INSTANCES_VISIBLE);
+                Assert.assertTrue(mVisibleTab == Tab.INSTANCES);
 
                 Assert.assertTrue(position >= 0);
                 Assert.assertTrue(position < 3);
@@ -324,7 +327,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                         mDrawerTaskListener = null;
                     }
 
-                    showTab(INSTANCES_VISIBLE);
+                    showTab(Tab.INSTANCES);
 
                     break;
                 case R.id.main_drawer_tasks:
@@ -333,7 +336,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                         mDrawerGroupListener = null;
                     }
 
-                    showTab(TASKS_VISIBLE);
+                    showTab(Tab.TASKS);
+
                     break;
                 case R.id.main_drawer_custom_times:
                     if (mDrawerTaskListener != null) {
@@ -345,13 +349,23 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                         mDrawerGroupListener = null;
                     }
 
-                    showTab(CUSTOM_TIMES_VISIBLE);
+                    showTab(Tab.CUSTOM_TIMES);
+
+                    break;
+                case R.id.main_drawer_friends:
+                    showTab(Tab.FRIENDS);
+
                     break;
                 case R.id.main_drawer_sign_in:
-                    if (mSignedIn) {
+                    if (sSignedIn) {
                         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
 
                         mFirebaseAuth.signOut();
+
+                        if (mVisibleTab == Tab.FRIENDS) {
+                            mMainActivityNavigation.setCheckedItem(R.id.main_drawer_instances);
+                            showTab(Tab.INSTANCES);
+                        }
                     } else {
                         startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient), RC_SIGN_IN);
                     }
@@ -367,7 +381,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                         mDrawerGroupListener = null;
                     }
 
-                    showTab(DEBUG_VISIBLE);
+                    showTab(Tab.DEBUG);
                     break;
                 default:
                     throw new IndexOutOfBoundsException();
@@ -437,9 +451,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(VISIBLE_TAB_KEY, mVisibleTab);
+        outState.putSerializable(VISIBLE_TAB_KEY, mVisibleTab);
 
-        if (mVisibleTab == INSTANCES_VISIBLE) {
+        if (mVisibleTab == Tab.INSTANCES) {
             Assert.assertTrue(mDaysPager.getVisibility() == View.VISIBLE);
             if (mDaysPager.getCurrentItem() != 0 && mOnPageChangeListener != null)
                 outState.putInt(IGNORE_FIRST_KEY, 1);
@@ -448,11 +462,11 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         outState.putSerializable(TIME_RANGE_KEY, mTimeRange);
     }
 
-    private void showTab(int tab) {
+    private void showTab(@NonNull Tab tab) {
         float density = getResources().getDisplayMetrics().density;
 
         switch (tab) {
-            case INSTANCES_VISIBLE:
+            case INSTANCES:
                 mActionBar.setTitle(null);
                 mDaysPager.setVisibility(View.VISIBLE);
                 mMainTaskListFrame.setVisibility(View.GONE);
@@ -460,8 +474,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
+
                 break;
-            case TASKS_VISIBLE:
+            case TASKS:
                 mActionBar.setTitle(getString(R.string.tasks));
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.VISIBLE);
@@ -469,8 +484,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
+
                 break;
-            case CUSTOM_TIMES_VISIBLE:
+            case CUSTOM_TIMES:
                 mActionBar.setTitle(getString(R.string.times));
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
@@ -478,8 +494,19 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
+
                 break;
-            case DEBUG_VISIBLE:
+            case FRIENDS:
+                mActionBar.setTitle(R.string.friends);
+                mDaysPager.setVisibility(View.GONE);
+                mMainTaskListFrame.setVisibility(View.GONE);
+                mMainCustomTimesFrame.setVisibility(View.GONE);
+                mMainDebugFrame.setVisibility(View.GONE);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
+                mMainActivitySpinner.setVisibility(View.GONE);
+
+                break;
+            case DEBUG:
                 mActionBar.setTitle("Debug");
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
@@ -487,6 +514,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.VISIBLE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
+
                 break;
             default:
                 throw new IllegalArgumentException();
@@ -696,12 +724,18 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             mNavHeaderEmail.setText(email);
 
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut);
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_friends).setEnabled(true);
         } else {
             mNavHeaderName.setText(null);
             mNavHeaderEmail.setText(null);
 
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn);
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_friends).setEnabled(false);
         }
+    }
+
+    public static boolean getSignedIn() {
+        return sSignedIn;
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {

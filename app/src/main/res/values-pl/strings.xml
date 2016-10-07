@@ -60,4 +60,5 @@
     <string name="signOut">Wyloguj się</string>
     <string name="signInFailed">Logowanie nie powiodło się.</string>
     <string name="signInAs">Zalogowano jako</string>
+    <string name="friends">Znajomi</string>
 </resources>

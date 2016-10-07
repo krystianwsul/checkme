@@ -42,7 +42,13 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.firebase.User;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
@@ -61,9 +67,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private static final String TIME_RANGE_KEY = "timeRange";
 
     private static final int RC_SIGN_IN = 1000;
-    private static final String SIGNED_IN_KEY = "signedIn";
-    private static final String DISPLAY_NAME_KEY = "displayName";
-    private static final String EMAIL_KEY = "email";
 
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
@@ -114,10 +117,30 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private FirebaseAuth mFirebaseAuth;
     private boolean mSignedIn = false;
 
-    private FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
+    private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
             mSignedIn = true;
+
+            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+            DatabaseReference databaseReference = firebaseDatabase.getReference();
+
+            User user = new User(firebaseUser);
+            String key = User.getKey(user.email);
+
+            databaseReference.child("users").child(key).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.e("asdf", "onDataChange " + dataSnapshot);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("asdf", "onCancelled " + databaseError.getDetails());
+                }
+            });
+
+            databaseReference.child("users").child(key).setValue(user);
 
             Log.e("asdf", "firebase logged in");
         } else {
@@ -637,6 +660,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                             Log.e("asdf", "signInWithCredential:onComplete:" + task.isSuccessful());
 
                             if (!task.isSuccessful()) {
+                                //noinspection ThrowableResultOfMethodCallIgnored
                                 Log.e("asdf", "firebase signin error: " + task.getException());
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();

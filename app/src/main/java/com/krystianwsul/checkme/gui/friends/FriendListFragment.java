@@ -145,7 +145,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         mFriendListFab = (FloatingActionButton) mFriendListLayout.findViewById(R.id.friend_list_fab);
         Assert.assertTrue(mFriendListFab != null);
 
-        mFriendListFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
+        mFriendListFab.setOnClickListener(v -> startActivity(FindFriendActivity.newIntent(getActivity())));
 
         mEmptyText = (TextView) mFriendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
@@ -186,12 +186,10 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         mFriendListFab.setVisibility(View.VISIBLE);
 
         if (data.Entries.isEmpty()) {
-            Log.e("asdf", "empty");
             mFriendListRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
             mEmptyText.setText(R.string.friends_empty);
         } else {
-            Log.e("asdf", "not empty");
             mFriendListRecycler.setVisibility(View.VISIBLE);
             mEmptyText.setVisibility(View.GONE);
         }
@@ -213,14 +211,12 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     }
 
     public void show() {
-        Log.e("asdf", "show");
         Assert.assertTrue(mFriendListLayout != null);
 
         mFriendListLayout.setVisibility(View.VISIBLE);
     }
 
     public void hide() {
-        Log.e("asdf", "hide");
         Assert.assertTrue(mFriendListLayout != null);
 
         mFriendListLayout.setVisibility(View.GONE);
@@ -258,20 +254,17 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         @Override
         public CustomTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            Log.e("asdf", "creating viewholder");
-
             LayoutInflater layoutInflater = LayoutInflater.from(mShowCustomTimesFragment.getActivity());
             View showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false);
 
             TextView timesRowName = (TextView) showCustomTimesRow.findViewById(R.id.times_row_name);
+            Assert.assertTrue(timesRowName != null);
 
             return new CustomTimeHolder(showCustomTimesRow, timesRowName);
         }
 
         @Override
         public void onBindViewHolder(final CustomTimeHolder customTimeHolder, int position) {
-            Log.e("asdf", "binding viewholder");
-
             CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
             Assert.assertTrue(customTimeWrapper != null);
 

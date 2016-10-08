@@ -62,4 +62,6 @@
     <string name="signInAs">Zalogowano jako</string>
     <string name="friends">Znajomi</string>
     <string name="friends_empty">Dodaj znajomych klikając w plusa na dole.</string>
+    <string name="email_hint">Email</string>
+    <string name="search">Szukaj</string>
 </resources>

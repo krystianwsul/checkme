@@ -62,4 +62,6 @@
     <string name="signInAs">Signed in as</string>
     <string name="friends">Friends</string>
     <string name="friends_empty">Add a friend by clicking the plus at the bottom.</string>
+    <string name="email_hint">Email</string>
+    <string name="search">Search</string>
 </resources>

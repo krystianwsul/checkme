@@ -31,7 +31,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -47,6 +46,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.firebase.User;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
@@ -709,7 +709,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
 
-                                Crashlytics.logException(task.getException());
+                                MyCrashlytics.logException(task.getException());
 
                                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                             } else {
@@ -723,7 +723,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
 
-                Crashlytics.logException(new Exception(message));
+                MyCrashlytics.logException(new Exception(message));
             }
         }
     }

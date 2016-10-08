@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui;
 
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
-import com.crashlytics.android.Crashlytics;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.utils.time.Date;
 
 import java.util.Calendar;
@@ -22,6 +22,6 @@ public class MyCalendarFragment extends CalendarDatePickerDialogFragment {
     public void onResume() {
         super.onResume();
 
-        Crashlytics.log("MyCalendarFragment.onResume");
+        MyCrashlytics.log("MyCalendarFragment.onResume");
     }
 }

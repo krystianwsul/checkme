@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.krystianwsul.checkme">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.krystianwsul.checkme">
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:name=".OrganizatorApplication"
@@ -17,99 +16,86 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-
         <activity
             android:name=".gui.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
-
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
         </activity>
-
-        <activity android:name=".gui.tasks.ShowTaskActivity" />
-        <activity android:name=".gui.instances.ShowGroupActivity" />
-
+        <activity android:name=".gui.tasks.ShowTaskActivity"/>
+        <activity android:name=".gui.instances.ShowGroupActivity"/>
         <activity
             android:name=".gui.instances.ShowNotificationGroupActivity"
-            android:launchMode="singleTask" />
-
-        <activity android:name=".gui.instances.ShowInstanceActivity" />
-        <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
-
+            android:launchMode="singleTask"/>
+        <activity android:name=".gui.instances.ShowInstanceActivity"/>
+        <activity android:name=".gui.customtimes.ShowCustomTimeActivity"/>
         <activity
             android:name=".gui.tasks.CreateTaskActivity"
             android:windowSoftInputMode="stateHidden"> <!-- keyboard hack -->
 
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
+                <action android:name="android.intent.action.SEND"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:mimeType="text/plain"/>
             </intent-filter>
-
         </activity>
-
-        <activity android:name=".gui.instances.EditInstanceActivity" />
-        <activity android:name=".gui.instances.EditInstancesActivity" />
+        <activity android:name=".gui.instances.EditInstanceActivity"/>
+        <activity android:name=".gui.instances.EditInstancesActivity"/>
 
         <receiver
             android:name=".notifications.BootReceiver"
             android:enabled="true"
             android:exported="true">
-
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
-
         </receiver>
 
         <service
             android:name=".notifications.TickService"
-            android:exported="false" />
-
+            android:exported="false"/>
         <service
             android:name=".persistencemodel.SaveService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <receiver
             android:name=".notifications.TimeChangeReceiver"
             android:enabled="true"
             android:exported="true">
-
             <intent-filter>
-                <action android:name="android.intent.action.TIME_SET" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET"/>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
             </intent-filter>
-
         </receiver>
 
         <service
             android:name=".notifications.GroupNotificationDeleteService"
-            android:exported="false" />
-
+            android:exported="false"/>
         <service
             android:name=".notifications.InstanceDoneService"
-            android:exported="false" />
-
+            android:exported="false"/>
         <service
             android:name=".notifications.InstanceHourService"
-            android:exported="false" />
-
+            android:exported="false"/>
         <service
             android:name=".notifications.InstanceNotificationDeleteService"
-            android:exported="false" />
-
+            android:exported="false"/>
         <service
             android:name=".PruneService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="e6ad996c53b8b11ff453660591b423b7ac73008d" />
+            android:value="e6ad996c53b8b11ff453660591b423b7ac73008d"/>
 
+        <activity android:name=".gui.friends.FindFriendActivity">
+        </activity>
     </application>
 
 </manifest>

@@ -29,6 +29,7 @@ import junit.framework.Assert;
 
 public class FindFriendActivity extends AppCompatActivity {
     private static final String USER_KEY = "user";
+    private static final String LOADING_KEY = "loading";
 
     private EditText mFindFriendEmail;
 
@@ -38,7 +39,11 @@ public class FindFriendActivity extends AppCompatActivity {
 
     private LinearLayout mFindFriendProgress;
 
+    private boolean mLoading = false;
     private User mUser = null;
+
+    private DatabaseReference mDatabaseReference;
+    private ValueEventListener mValueEventListener;
 
     @NonNull
     public static Intent newIntent(@NonNull Context context) {
@@ -58,48 +63,12 @@ public class FindFriendActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(mFindFriendEmail.getText()))
                     break;
 
+                mLoading = true;
                 mUser = null;
 
-                mFindFriendEmail.setEnabled(false);
-                mFindFriendUserLayout.setVisibility(View.GONE);
-                mFindFriendProgress.setVisibility(View.VISIBLE);
+                updateLayout();
 
-                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-
-                String key = User.getKey(mFindFriendEmail.getText().toString());
-
-                Log.e("asdf", "starting");
-
-                databaseReference.child("users").child(key).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Log.e("asdf", "onDataChange");
-
-                        mFindFriendEmail.setEnabled(true);
-                        mFindFriendProgress.setVisibility(View.GONE);
-
-                        if (dataSnapshot.exists()) {
-                            mUser = dataSnapshot.getValue(User.class);
-                            Assert.assertTrue(mUser != null);
-
-                            setUserLayout();
-                        } else {
-                            Toast.makeText(FindFriendActivity.this, R.string.userNotFound, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        mFindFriendEmail.setEnabled(true);
-                        mFindFriendProgress.setVisibility(View.GONE);
-
-                        MyCrashlytics.logException(databaseError.toException());
-
-                        Log.e("asdf", "onCancelled", databaseError.toException());
-
-                        Toast.makeText(FindFriendActivity.this, R.string.connectionError, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                loadUser();
 
                 break;
             default:
@@ -113,6 +82,8 @@ public class FindFriendActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_find_friend);
+
+        Log.e("asdf", "onCreate " + hashCode());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.find_friend_toolbar);
         Assert.assertTrue(toolbar != null);
@@ -133,26 +104,135 @@ public class FindFriendActivity extends AppCompatActivity {
 
         mFindFriendProgress = (LinearLayout) findViewById(R.id.find_friend_progress);
         Assert.assertTrue(mFindFriendProgress != null);
+    }
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(USER_KEY)) {
-            mUser = (User) savedInstanceState.getSerializable(USER_KEY);
-            Assert.assertTrue(mUser != null);
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
 
-            setUserLayout();
+        if (savedInstanceState != null) {
+            Assert.assertTrue(savedInstanceState.containsKey(LOADING_KEY));
+            mLoading = savedInstanceState.getBoolean(LOADING_KEY);
+
+            if (savedInstanceState.containsKey(USER_KEY)) {
+                mUser = (User) savedInstanceState.getSerializable(USER_KEY);
+                Assert.assertTrue(mUser != null);
+            }
+        }
+
+        updateLayout();
+
+        if (mLoading)
+            loadUser();
+    }
+
+    private void loadUser() {
+        Assert.assertTrue(mLoading);
+        Assert.assertTrue(mUser == null);
+        Assert.assertTrue(!TextUtils.isEmpty(mFindFriendEmail.getText()));
+
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        String key = User.getKey(mFindFriendEmail.getText().toString());
+
+        Log.e("asdf", "starting");
+
+        mValueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.e("asdf", "onDataChange " + hashCode());
+
+                Assert.assertTrue(dataSnapshot != null);
+
+                mDatabaseReference.removeEventListener(mValueEventListener);
+
+                mLoading = false;
+                mValueEventListener = null;
+                mDatabaseReference = null;
+
+                if (dataSnapshot.exists()) {
+                    mUser = dataSnapshot.getValue(User.class);
+                    Assert.assertTrue(mUser != null);
+                } else {
+                    Toast.makeText(FindFriendActivity.this, R.string.userNotFound, Toast.LENGTH_SHORT).show();
+                }
+
+                updateLayout();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Assert.assertTrue(databaseError != null);
+
+                mDatabaseReference.removeEventListener(mValueEventListener);
+
+                mLoading = false;
+                mValueEventListener = null;
+                mDatabaseReference = null;
+
+                updateLayout();
+
+                MyCrashlytics.logException(databaseError.toException());
+
+                Log.e("asdf", "onCancelled", databaseError.toException());
+
+                Toast.makeText(FindFriendActivity.this, R.string.connectionError, Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        mDatabaseReference = databaseReference.child("users").child(key);
+
+        Log.e("asdf", "addValueEventListener " + mValueEventListener.hashCode());
+        mDatabaseReference.addValueEventListener(mValueEventListener);
+    }
+
+    private void updateLayout() {
+        Log.e("asdf", "updateLayout " + hashCode());
+
+        if (mUser != null) {
+            Assert.assertTrue(!mLoading);
+
+            mFindFriendEmail.setEnabled(true);
+            mFindFriendUserLayout.setVisibility(View.VISIBLE);
+            mFindFriendProgress.setVisibility(View.GONE);
+
+            mFindFriendUserName.setText(mUser.displayName);
+            mFindFriendUserEmail.setText(mUser.email);
+        } else if (mLoading) {
+            mFindFriendEmail.setEnabled(false);
+            mFindFriendUserLayout.setVisibility(View.GONE);
+            mFindFriendProgress.setVisibility(View.VISIBLE);
+        } else {
+            mFindFriendEmail.setEnabled(true);
+            mFindFriendUserLayout.setVisibility(View.GONE);
+            mFindFriendProgress.setVisibility(View.GONE);
         }
     }
 
-    private void setUserLayout() {
-        Assert.assertTrue(mUser != null);
+    @Override
+    protected void onStop() {
+        super.onStop();
 
-        mFindFriendUserLayout.setVisibility(View.VISIBLE);
-        mFindFriendUserName.setText(mUser.displayName);
-        mFindFriendUserEmail.setText(mUser.email);
+        Log.e("asdf", "onStop");
+
+        if (mLoading) {
+            Assert.assertTrue(mDatabaseReference != null);
+            Assert.assertTrue(mValueEventListener != null);
+
+            Log.e("asdf", "removing listener " + mValueEventListener.hashCode());
+
+            mDatabaseReference.removeEventListener(mValueEventListener);
+        } else {
+            Assert.assertTrue(mDatabaseReference == null);
+            Assert.assertTrue(mValueEventListener == null);
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        outState.putBoolean(LOADING_KEY, mLoading);
 
         if (mUser != null)
             outState.putSerializable(USER_KEY, mUser);

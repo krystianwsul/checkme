@@ -9,9 +9,9 @@
     android:visibility="gone">
 
     <android.support.v7.widget.RecyclerView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/friend_list_recycler"/>
+        android:id="@+id/friend_list_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <include layout="@layout/empty_text"/>
 

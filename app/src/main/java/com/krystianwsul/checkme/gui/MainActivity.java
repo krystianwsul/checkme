@@ -129,8 +129,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         if (firebaseUser != null) {
             sSignedIn = true;
 
-            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-            DatabaseReference databaseReference = firebaseDatabase.getReference();
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
             User user = new User(firebaseUser);
             String key = User.getKey(user.email);
@@ -143,7 +142,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.e("asdf", "onCancelled " + databaseError.getDetails());
+                    MyCrashlytics.logException(databaseError.toException());
+
+                    Log.e("asdf", "onCancelled", databaseError.toException());
                 }
             });
 

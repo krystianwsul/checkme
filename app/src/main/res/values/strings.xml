@@ -64,4 +64,6 @@
     <string name="friends_empty">Add a friend by clicking the plus at the bottom.</string>
     <string name="email_hint">Email</string>
     <string name="search">Search</string>
+    <string name="connectionError">A connection error occurred.</string>
+    <string name="userNotFound">User not found.</string>
 </resources>

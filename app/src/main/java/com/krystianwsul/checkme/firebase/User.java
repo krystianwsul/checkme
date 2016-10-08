@@ -8,10 +8,11 @@ import com.google.firebase.auth.FirebaseUser;
 
 import junit.framework.Assert;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
 @SuppressWarnings("WeakerAccess")
-public class User {
+public class User implements Serializable {
     public String email;
     public String displayName;
 
@@ -33,7 +34,7 @@ public class User {
         Assert.assertTrue(!TextUtils.isEmpty(email));
 
         try {
-            byte[] encoded = email.getBytes("UTF-8");
+            byte[] encoded = email.trim().toLowerCase().getBytes("UTF-8");
             return Base64.encodeToString(encoded, Base64.URL_SAFE | Base64.NO_WRAP);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);

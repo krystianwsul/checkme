@@ -50,6 +50,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.firebase.User;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
+import com.krystianwsul.checkme.gui.friends.FriendListFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
@@ -86,6 +87,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private ViewPager mDaysPager;
     private FrameLayout mMainTaskListFrame;
     private FrameLayout mMainCustomTimesFrame;
+    private FriendListFragment mFriendListFragment;
     private FrameLayout mMainDebugFrame;
 
     private DrawerLayout mMainActivityDrawer;
@@ -119,6 +121,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private FirebaseAuth mFirebaseAuth;
     private static boolean sSignedIn = false;
+
+    private boolean mFirst = true;
 
     private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
@@ -213,6 +217,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         Assert.assertTrue(mActionBar != null);
 
         if (savedInstanceState != null) {
+            mFirst = false;
+
             Assert.assertTrue(savedInstanceState.containsKey(VISIBLE_TAB_KEY));
             mVisibleTab = (Tab) savedInstanceState.getSerializable(VISIBLE_TAB_KEY);
 
@@ -282,6 +288,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
                     .add(R.id.main_debug_frame, DebugFragment.newInstance())
                     .commit();
+
+        mFriendListFragment = (FriendListFragment) fragmentManager.findFragmentById(R.id.main_friend_list_fragment);
+        Assert.assertTrue(mFriendListFragment != null);
 
         mDaysPager = (ViewPager) findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);
@@ -475,6 +484,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
 
+                if (!mFirst)
+                    mFriendListFragment.hide();
+
                 break;
             case TASKS:
                 mActionBar.setTitle(getString(R.string.tasks));
@@ -484,6 +496,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
+                mFriendListFragment.hide();
 
                 break;
             case CUSTOM_TIMES:
@@ -494,6 +507,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
+                mFriendListFragment.hide();
 
                 break;
             case FRIENDS:
@@ -504,6 +518,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
+                mFriendListFragment.show();
 
                 break;
             case DEBUG:
@@ -514,6 +529,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.VISIBLE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
+                mFriendListFragment.hide();
 
                 break;
             default:

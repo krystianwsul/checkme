@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.firebase.User;
+import com.krystianwsul.checkme.gui.MainActivity;
 
 import junit.framework.Assert;
 
@@ -95,6 +96,23 @@ public class FindFriendActivity extends AppCompatActivity {
 
         mFindFriendUserLayout = (LinearLayout) findViewById(R.id.find_friend_user_layout);
         Assert.assertTrue(mFindFriendUserLayout != null);
+
+        mFindFriendUserLayout.setOnClickListener(v -> {
+            Assert.assertTrue(mUser != null);
+            Assert.assertTrue(!mLoading);
+
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+
+            User myUser = MainActivity.getUser();
+            Assert.assertTrue(myUser != null);
+
+            String myKey = User.getKey(myUser.email);
+            String friendKey = User.getKey(mUser.email);
+
+            databaseReference.child("friends").child(myKey).child(friendKey).setValue(true);
+
+            finish();
+        });
 
         mFindFriendUserName = (TextView) findViewById(R.id.find_friend_user_name);
         Assert.assertTrue(mFindFriendUserName != null);

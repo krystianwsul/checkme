@@ -117,25 +117,23 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private TextView mNavHeaderEmail;
 
     private FirebaseAuth mFirebaseAuth;
-    private static boolean sSignedIn = false;
+    private static User sUser = null;
 
     private boolean mFirst = true;
 
     private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
-            sSignedIn = true;
-
             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
-            User user = new User(firebaseUser);
-            String key = User.getKey(user.email);
+            sUser = new User(firebaseUser);
+            String key = User.getKey(sUser.email);
 
-            databaseReference.child("users").child(key).setValue(user);
+            databaseReference.child("users").child(key).setValue(sUser);
 
             Log.e("asdf", "firebase logged in");
         } else {
-            sSignedIn = false;
+            sUser = null;
 
             Log.e("asdf", "firebase logged out");
         }
@@ -350,7 +348,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                     break;
                 case R.id.main_drawer_sign_in:
-                    if (sSignedIn) {
+                    if (sUser != null) {
                         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
 
                         mFirebaseAuth.signOut();
@@ -693,7 +691,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
 
-                                MyCrashlytics.logException(task.getException());
+                                Exception exception = task.getException();
+                                Assert.assertTrue(exception != null);
+
+                                MyCrashlytics.logException(exception);
 
                                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                             } else {
@@ -734,8 +735,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         }
     }
 
-    public static boolean getSignedIn() {
-        return sSignedIn;
+    public static User getUser() {
+        return sUser;
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {

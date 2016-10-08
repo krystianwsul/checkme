@@ -139,6 +139,11 @@ public class FindFriendActivity extends AppCompatActivity {
         }
 
         updateLayout();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         if (mLoading)
             loadUser();

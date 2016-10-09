@@ -18,15 +18,18 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.FriendListLoader;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 
@@ -40,6 +43,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
 
     private RelativeLayout mFriendListLayout;
+    private ProgressBar mFriendListProgress;
     private RecyclerView mFriendListRecycler;
     private FloatingActionButton mFriendListFab;
     private TextView mEmptyText;
@@ -110,10 +114,6 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
     private boolean mVisible = false;
 
-    public static FriendListFragment newInstance() {
-        return new FriendListFragment();
-    }
-
     public FriendListFragment() {
 
     }
@@ -138,6 +138,9 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         mFriendListLayout = (RelativeLayout) getView();
         Assert.assertTrue(mFriendListLayout != null);
+
+        mFriendListProgress = (ProgressBar) mFriendListLayout.findViewById(R.id.friend_list_progress);
+        Assert.assertTrue(mFriendListProgress != null);
 
         mFriendListRecycler = (RecyclerView) mFriendListLayout.findViewById(R.id.friend_list_recycler);
         Assert.assertTrue(mFriendListRecycler != null);
@@ -185,11 +188,12 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
                 mSelectedUserDataEmails = selectedUserDataKeys;
         }
 
-        mFriendListAdapter = new FriendListAdapter(userDatas, this, mSelectedUserDataEmails);
+        mFriendListAdapter = new FriendListAdapter(userDatas, mSelectedUserDataEmails);
         mFriendListRecycler.setAdapter(mFriendListAdapter);
 
         mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
 
+        mFriendListProgress.setVisibility(View.GONE);
         mFriendListFab.setVisibility(View.VISIBLE);
 
         if (userDatas.isEmpty()) {
@@ -238,18 +242,18 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         mFriendListLayout.setVisibility(mVisible ? View.VISIBLE : View.GONE);
     }
 
-    public static class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.CustomTimeHolder> {
-        private final List<UserDataWrapper> mUserDataWrappers;
+    public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
+        @NonNull
+        private final List<UserData> mUserDatas;
 
         @NonNull
-        private final FriendListFragment mShowCustomTimesFragment;
+        private final List<UserDataWrapper> mUserDataWrappers;
 
-        FriendListAdapter(@NonNull List<UserData> userDatas, @NonNull FriendListFragment showCustomTimesFragment, @Nullable ArrayList<String> selectedUserDataIds) {
-            mUserDataWrappers = Stream.of(userDatas)
-                    .map(userData -> new UserDataWrapper(userData, selectedUserDataIds))
+        FriendListAdapter(@NonNull List<UserData> userDatas, @Nullable ArrayList<String> selectedUserDataEmails) {
+            mUserDatas = userDatas;
+            mUserDataWrappers = Stream.of(mUserDatas)
+                    .map(userData -> new UserDataWrapper(userData, selectedUserDataEmails))
                     .collect(Collectors.toList());
-
-            mShowCustomTimesFragment = showCustomTimesFragment;
         }
 
         @Override
@@ -267,38 +271,42 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         }
 
         @Override
-        public CustomTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(mShowCustomTimesFragment.getActivity());
-            View showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false);
+        public FriendHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            View friendRow = layoutInflater.inflate(R.layout.row_friend, parent, false);
 
-            TextView timesRowName = (TextView) showCustomTimesRow.findViewById(R.id.times_row_name);
-            Assert.assertTrue(timesRowName != null);
+            TextView friendName = (TextView) friendRow.findViewById(R.id.friend_name);
+            Assert.assertTrue(friendName != null);
 
-            return new CustomTimeHolder(showCustomTimesRow, timesRowName);
+            TextView friendEmail = (TextView) friendRow.findViewById(R.id.friend_email);
+            Assert.assertTrue(friendEmail != null);
+
+            return new FriendHolder(friendRow, friendName, friendEmail);
         }
 
         @Override
-        public void onBindViewHolder(final CustomTimeHolder customTimeHolder, int position) {
+        public void onBindViewHolder(final FriendHolder friendHolder, int position) {
             UserDataWrapper userDataWrapper = mUserDataWrappers.get(position);
             Assert.assertTrue(userDataWrapper != null);
 
-            customTimeHolder.mTimesRowName.setText(userDataWrapper.mUserData.displayName);
+            friendHolder.mFriendName.setText(userDataWrapper.mUserData.displayName);
+            friendHolder.mFriendEmail.setText(userDataWrapper.mUserData.email);
 
             if (userDataWrapper.mSelected)
-                customTimeHolder.mShowCustomTimeRow.setBackgroundColor(ContextCompat.getColor(mShowCustomTimesFragment.getActivity(), R.color.selected));
+                friendHolder.mFriendRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
             else
-                customTimeHolder.mShowCustomTimeRow.setBackgroundColor(Color.TRANSPARENT);
+                friendHolder.mFriendRow.setBackgroundColor(Color.TRANSPARENT);
 
-            customTimeHolder.mShowCustomTimeRow.setOnLongClickListener(v -> {
-                customTimeHolder.onLongClick();
+            friendHolder.mFriendRow.setOnLongClickListener(v -> {
+                friendHolder.onLongClick();
                 return true;
             });
 
-            customTimeHolder.mShowCustomTimeRow.setOnClickListener(v -> {
-                if (mShowCustomTimesFragment.mSelectionCallback.hasActionMode())
-                    customTimeHolder.onLongClick();
+            friendHolder.mFriendRow.setOnClickListener(v -> {
+                if (mSelectionCallback.hasActionMode())
+                    friendHolder.onLongClick();
                 else
-                    customTimeHolder.onRowClick();
+                    friendHolder.onRowClick();
             });
         }
 
@@ -315,29 +323,30 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
                     .collect(Collectors.toList());
 
             for (UserDataWrapper userDataWrapper : selectedUserDataWrappers) {
+                mUserDatas.remove(userDataWrapper.mUserData);
+
                 int position = mUserDataWrappers.indexOf(userDataWrapper);
                 mUserDataWrappers.remove(position);
                 notifyItemRemoved(position);
             }
 
-            List<String> selectedUserDataEmails = Stream.of(selectedUserDataWrappers)
-                    .map(customTimeWrapper -> customTimeWrapper.mUserData.email)
-                    .collect(Collectors.toList());
+            UserData userData = MainActivity.getUser();
+            Assert.assertTrue(userData != null);
 
-            //DomainFactory.getDomainFactory(mShowCustomTimesFragment.getActivity()).setCustomTimeCurrent(mShowCustomTimesFragment.getActivity(), mDataId, selectedUserDataEmails);
+            Stream.of(selectedUserDataWrappers).forEach(userDataWrapper -> DatabaseWrapper.removeFriend(userData, userDataWrapper.mUserData));
         }
 
-        class CustomTimeHolder extends RecyclerView.ViewHolder {
-            final View mShowCustomTimeRow;
-            final TextView mTimesRowName;
+        class FriendHolder extends RecyclerView.ViewHolder {
+            final View mFriendRow;
+            final TextView mFriendName;
+            final TextView mFriendEmail;
 
-            CustomTimeHolder(View showCustomTimesRow, TextView timesRowName) {
-                super(showCustomTimesRow);
+            FriendHolder(@NonNull View friendRow, @NonNull TextView friendName, @NonNull TextView friendEmail) {
+                super(friendRow);
 
-                Assert.assertTrue(timesRowName != null);
-
-                mShowCustomTimeRow = showCustomTimesRow;
-                mTimesRowName = timesRowName;
+                mFriendRow = friendRow;
+                mFriendName = friendName;
+                mFriendEmail = friendEmail;
             }
 
             void onRowClick() {
@@ -356,9 +365,9 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
                 userDataWrapper.mSelected = !userDataWrapper.mSelected;
 
                 if (userDataWrapper.mSelected) {
-                    mShowCustomTimesFragment.mSelectionCallback.incrementSelected();
+                    mSelectionCallback.incrementSelected();
                 } else {
-                    mShowCustomTimesFragment.mSelectionCallback.decrementSelected();
+                    mSelectionCallback.decrementSelected();
                 }
 
                 notifyItemChanged(position);

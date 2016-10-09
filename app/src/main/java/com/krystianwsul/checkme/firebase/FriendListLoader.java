@@ -19,7 +19,7 @@ import junit.framework.Assert;
 import java.util.List;
 
 public class FriendListLoader extends Loader<List<UserData>> {
-    private Query mQuery;
+    private final Query mQuery;
     private ValueEventListener mValueEventListener;
 
     private List<UserData> mUserDatas;
@@ -97,13 +97,21 @@ public class FriendListLoader extends Loader<List<UserData>> {
         if (isReset())
             return;
 
-        mUserDatas = userDatas;
+        Log.e("asdf", "mUserDatas null? " + (mUserDatas == null));
+        if (mUserDatas != null)
+            Log.e("asdf", "data equal? " + mUserDatas.equals(userDatas));
 
-        if (isStarted()) {
+        if ((mUserDatas == null) || !mUserDatas.equals(userDatas)) {
             Log.e("asdf", "FriendListLoader.deliverResult delivering");
-            super.deliverResult(userDatas);
+            mUserDatas = userDatas;
+
+            if (isStarted()) {
+                super.deliverResult(mUserDatas);
+            } else {
+                Log.e("asdf", "FriendListLoader.deliverResult skipping (stopped)");
+            }
         } else {
-            Log.e("asdf", "FriendListLoader.deliverResult skipping");
+            Log.e("asdf", "FriendListLoader.deliverResult skipping (no change)");
         }
     }
 }

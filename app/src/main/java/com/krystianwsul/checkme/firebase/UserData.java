@@ -40,4 +40,32 @@ public class UserData implements Serializable {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public int hashCode() {
+        return (email.hashCode() + displayName.hashCode());
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+
+        if (obj == this)
+            return true;
+
+        if (!(obj instanceof UserData))
+            return false;
+
+        UserData userData = (UserData) obj;
+
+        if (!email.equals(userData.email))
+            return false;
+
+        if (!displayName.equals(userData.displayName))
+            return false;
+
+        return true;
+    }
 }

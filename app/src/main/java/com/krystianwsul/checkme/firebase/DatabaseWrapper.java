@@ -6,7 +6,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class DatabaseWrapper {
-    private static DatabaseReference sDatabaseReference = FirebaseDatabase.getInstance().getReference();
+    private static final DatabaseReference sDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
     public static void setUserData(@NonNull UserData userData) {
         String key = UserData.getKey(userData.email);
@@ -22,5 +22,12 @@ public class DatabaseWrapper {
         String friendKey = UserData.getKey(friendUserData.email);
 
         sDatabaseReference.child("users").child(friendKey).child("friendOf").child(myKey).setValue(true);
+    }
+
+    public static void removeFriend(@NonNull UserData userData, @NonNull UserData friendUserData) {
+        String myKey = UserData.getKey(userData.email);
+        String friendKey = UserData.getKey(friendUserData.email);
+
+        sDatabaseReference.child("users").child(friendKey).child("friendOf").child(myKey).setValue(null);
     }
 }

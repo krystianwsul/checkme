@@ -94,8 +94,9 @@
             android:name="io.fabric.ApiKey"
             android:value="e6ad996c53b8b11ff453660591b423b7ac73008d"/>
 
-        <activity android:name=".gui.friends.FindFriendActivity">
-        </activity>
+        <activity
+            android:name=".gui.friends.FindFriendActivity"
+            android:windowSoftInputMode="stateVisible"/>
     </application>
 
 </manifest>

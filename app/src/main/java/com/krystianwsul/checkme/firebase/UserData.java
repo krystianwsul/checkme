@@ -12,16 +12,16 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
 @SuppressWarnings("WeakerAccess")
-public class User implements Serializable {
+public class UserData implements Serializable {
     public String email;
     public String displayName;
 
     @SuppressWarnings("unused")
-    public User() {
+    public UserData() {
 
     }
 
-    public User(@NonNull FirebaseUser firebaseUser) {
+    public UserData(@NonNull FirebaseUser firebaseUser) {
         email = firebaseUser.getEmail();
         Assert.assertTrue(!TextUtils.isEmpty(email));
 

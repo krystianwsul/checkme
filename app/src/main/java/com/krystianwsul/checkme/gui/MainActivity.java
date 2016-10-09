@@ -41,11 +41,10 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.firebase.User;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.friends.FriendListFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -117,23 +116,20 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private TextView mNavHeaderEmail;
 
     private FirebaseAuth mFirebaseAuth;
-    private static User sUser = null;
+    private static UserData sUserData = null;
 
     private boolean mFirst = true;
 
     private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            sUserData = new UserData(firebaseUser);
 
-            sUser = new User(firebaseUser);
-            String key = User.getKey(sUser.email);
-
-            databaseReference.child("users").child(key).setValue(sUser);
+            DatabaseWrapper.setUserData(sUserData);
 
             Log.e("asdf", "firebase logged in");
         } else {
-            sUser = null;
+            sUserData = null;
 
             Log.e("asdf", "firebase logged out");
         }
@@ -348,7 +344,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                     break;
                 case R.id.main_drawer_sign_in:
-                    if (sUser != null) {
+                    if (sUserData != null) {
                         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
 
                         mFirebaseAuth.signOut();
@@ -735,8 +731,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         }
     }
 
-    public static User getUser() {
-        return sUser;
+    public static UserData getUser() {
+        return sUserData;
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {

@@ -19,11 +19,11 @@ import android.widget.Toast;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.firebase.User;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 
 import junit.framework.Assert;
@@ -41,7 +41,7 @@ public class FindFriendActivity extends AppCompatActivity {
     private LinearLayout mFindFriendProgress;
 
     private boolean mLoading = false;
-    private User mUser = null;
+    private UserData mUserData = null;
 
     private DatabaseReference mDatabaseReference;
     private ValueEventListener mValueEventListener;
@@ -65,7 +65,7 @@ public class FindFriendActivity extends AppCompatActivity {
                     break;
 
                 mLoading = true;
-                mUser = null;
+                mUserData = null;
 
                 updateLayout();
 
@@ -98,18 +98,13 @@ public class FindFriendActivity extends AppCompatActivity {
         Assert.assertTrue(mFindFriendUserLayout != null);
 
         mFindFriendUserLayout.setOnClickListener(v -> {
-            Assert.assertTrue(mUser != null);
+            Assert.assertTrue(mUserData != null);
             Assert.assertTrue(!mLoading);
 
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            UserData myUserData = MainActivity.getUser();
+            Assert.assertTrue(myUserData != null);
 
-            User myUser = MainActivity.getUser();
-            Assert.assertTrue(myUser != null);
-
-            String myKey = User.getKey(myUser.email);
-            String friendKey = User.getKey(mUser.email);
-
-            databaseReference.child("friends").child(myKey).child(friendKey).setValue(true);
+            DatabaseWrapper.addFriend(myUserData, mUserData);
 
             finish();
         });
@@ -133,8 +128,8 @@ public class FindFriendActivity extends AppCompatActivity {
             mLoading = savedInstanceState.getBoolean(LOADING_KEY);
 
             if (savedInstanceState.containsKey(USER_KEY)) {
-                mUser = (User) savedInstanceState.getSerializable(USER_KEY);
-                Assert.assertTrue(mUser != null);
+                mUserData = (UserData) savedInstanceState.getSerializable(USER_KEY);
+                Assert.assertTrue(mUserData != null);
             }
         }
 
@@ -151,12 +146,10 @@ public class FindFriendActivity extends AppCompatActivity {
 
     private void loadUser() {
         Assert.assertTrue(mLoading);
-        Assert.assertTrue(mUser == null);
+        Assert.assertTrue(mUserData == null);
         Assert.assertTrue(!TextUtils.isEmpty(mFindFriendEmail.getText()));
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-
-        String key = User.getKey(mFindFriendEmail.getText().toString());
+        String key = UserData.getKey(mFindFriendEmail.getText().toString());
 
         Log.e("asdf", "starting");
 
@@ -174,8 +167,8 @@ public class FindFriendActivity extends AppCompatActivity {
                 mDatabaseReference = null;
 
                 if (dataSnapshot.exists()) {
-                    mUser = dataSnapshot.getValue(User.class);
-                    Assert.assertTrue(mUser != null);
+                    mUserData = dataSnapshot.getValue(UserData.class);
+                    Assert.assertTrue(mUserData != null);
                 } else {
                     Toast.makeText(FindFriendActivity.this, R.string.userNotFound, Toast.LENGTH_SHORT).show();
                 }
@@ -203,7 +196,7 @@ public class FindFriendActivity extends AppCompatActivity {
             }
         };
 
-        mDatabaseReference = databaseReference.child("users").child(key);
+        mDatabaseReference = DatabaseWrapper.getUserDataDatabaseReference(key);
 
         Log.e("asdf", "addValueEventListener " + mValueEventListener.hashCode());
         mDatabaseReference.addValueEventListener(mValueEventListener);
@@ -212,15 +205,15 @@ public class FindFriendActivity extends AppCompatActivity {
     private void updateLayout() {
         Log.e("asdf", "updateLayout " + hashCode());
 
-        if (mUser != null) {
+        if (mUserData != null) {
             Assert.assertTrue(!mLoading);
 
             mFindFriendEmail.setEnabled(true);
             mFindFriendUserLayout.setVisibility(View.VISIBLE);
             mFindFriendProgress.setVisibility(View.GONE);
 
-            mFindFriendUserName.setText(mUser.displayName);
-            mFindFriendUserEmail.setText(mUser.email);
+            mFindFriendUserName.setText(mUserData.displayName);
+            mFindFriendUserEmail.setText(mUserData.email);
         } else if (mLoading) {
             mFindFriendEmail.setEnabled(false);
             mFindFriendUserLayout.setVisibility(View.GONE);
@@ -257,7 +250,7 @@ public class FindFriendActivity extends AppCompatActivity {
 
         outState.putBoolean(LOADING_KEY, mLoading);
 
-        if (mUser != null)
-            outState.putSerializable(USER_KEY, mUser);
+        if (mUserData != null)
+            outState.putSerializable(USER_KEY, mUserData);
     }
 }

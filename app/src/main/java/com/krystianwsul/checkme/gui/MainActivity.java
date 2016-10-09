@@ -728,6 +728,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         }
     }
 
+    @Nullable
     public static UserData getUserData() {
         return sUserData;
     }

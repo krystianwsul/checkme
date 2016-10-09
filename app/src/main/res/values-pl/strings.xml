@@ -67,4 +67,5 @@
     <string name="connectionError">Wystąpił błąd połączenia.</string>
     <string name="userNotFound">Nie znaleziono użytkownika.</string>
     <string name="addFriend">Dodaj znajomych</string>
+    <string name="friend_dialog_title">Wybierz znajomego</string>
 </resources>

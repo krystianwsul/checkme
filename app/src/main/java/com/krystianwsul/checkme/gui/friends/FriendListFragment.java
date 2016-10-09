@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -41,6 +42,7 @@ import java.util.List;
 public class FriendListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<List<UserData>> {
     private static final String USER_DATA_KEY = "userData";
     private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
+    private static final String ERROR_KEY = "error";
 
     private RelativeLayout mFriendListLayout;
     private ProgressBar mFriendListProgress;
@@ -115,6 +117,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     @Nullable
     private UserData mUserData = null;
 
+    private boolean mError = false;
+
     public FriendListFragment() {
 
     }
@@ -157,6 +161,9 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null) {
+            Assert.assertTrue(savedInstanceState.containsKey(ERROR_KEY));
+            mError = savedInstanceState.getBoolean(ERROR_KEY);
+
             if (savedInstanceState.containsKey(USER_DATA_KEY)) {
                 mUserData = savedInstanceState.getParcelable(USER_DATA_KEY);
                 Assert.assertTrue(mUserData != null);
@@ -180,32 +187,44 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     }
 
     @Override
-    public void onLoadFinished(Loader<List<UserData>> loader, List<UserData> userDatas) {
-        Assert.assertTrue(userDatas != null);
-
-        if (mFriendListAdapter != null) {
-            ArrayList<String> selectedUserDataKeys = mFriendListAdapter.getSelected();
-            if (selectedUserDataKeys.isEmpty())
-                mSelectedUserDataEmails = null;
-            else
-                mSelectedUserDataEmails = selectedUserDataKeys;
-        }
-
-        mFriendListAdapter = new FriendListAdapter(userDatas, mSelectedUserDataEmails);
-        mFriendListRecycler.setAdapter(mFriendListAdapter);
-
-        mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
-
-        mFriendListProgress.setVisibility(View.GONE);
-        mFriendListFab.setVisibility(View.VISIBLE);
-
-        if (userDatas.isEmpty()) {
+    public void onLoadFinished(Loader<List<UserData>> loader, @Nullable List<UserData> userDatas) {
+        if (userDatas == null) {
+            mFriendListProgress.setVisibility(View.GONE);
             mFriendListRecycler.setVisibility(View.GONE);
-            mEmptyText.setVisibility(View.VISIBLE);
-            mEmptyText.setText(R.string.friends_empty);
-        } else {
-            mFriendListRecycler.setVisibility(View.VISIBLE);
             mEmptyText.setVisibility(View.GONE);
+            mFriendListFab.setVisibility(View.GONE);
+
+            if (!mError) {
+                mError = true;
+                Toast.makeText(getActivity(), R.string.connectionError, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            mError = false;
+
+            if (mFriendListAdapter != null) {
+                ArrayList<String> selectedUserDataKeys = mFriendListAdapter.getSelected();
+                if (selectedUserDataKeys.isEmpty())
+                    mSelectedUserDataEmails = null;
+                else
+                    mSelectedUserDataEmails = selectedUserDataKeys;
+            }
+
+            mFriendListAdapter = new FriendListAdapter(userDatas, mSelectedUserDataEmails);
+            mFriendListRecycler.setAdapter(mFriendListAdapter);
+
+            mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
+
+            mFriendListProgress.setVisibility(View.GONE);
+            mFriendListFab.setVisibility(View.VISIBLE);
+
+            if (userDatas.isEmpty()) {
+                mFriendListRecycler.setVisibility(View.GONE);
+                mEmptyText.setVisibility(View.VISIBLE);
+                mEmptyText.setText(R.string.friends_empty);
+            } else {
+                mFriendListRecycler.setVisibility(View.VISIBLE);
+                mEmptyText.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -216,6 +235,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        outState.putBoolean(ERROR_KEY, mError);
 
         if (mUserData != null)
             outState.putParcelable(USER_DATA_KEY, mUserData);
@@ -229,6 +250,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
     public void show(@NonNull UserData userData) {
         mUserData = userData;
+        mError = false;
 
         updateVisibility();
     }
@@ -245,9 +267,15 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         if (mUserData == null) {
             mFriendListLayout.setVisibility(View.GONE);
+
             getLoaderManager().destroyLoader(0);
         } else {
             mFriendListLayout.setVisibility(View.VISIBLE);
+            mFriendListProgress.setVisibility(View.VISIBLE);
+            mFriendListRecycler.setVisibility(View.GONE);
+            mEmptyText.setVisibility(View.GONE);
+            mFriendListFab.setVisibility(View.GONE);
+
             getLoaderManager().initLoader(0, null, this);
         }
     }

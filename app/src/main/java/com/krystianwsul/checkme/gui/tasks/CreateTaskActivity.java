@@ -1168,7 +1168,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                     mFriendPosition = friendPosition;
 
-                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(true);
+                    ArrayList<String> chosenEmails = Stream.of(mFriendEntries)
+                            .map(userData -> userData.email)
+                            .collect(Collectors.toCollection(ArrayList::new));
+
+                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(true, chosenEmails);
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
             } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
@@ -1185,7 +1189,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     Assert.assertTrue(mCreateTaskAdapter != null);
                     Assert.assertTrue(mFriendPosition == null);
 
-                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
+                    ArrayList<String> chosenEmails = Stream.of(mFriendEntries)
+                            .map(friendEntry -> friendEntry.email)
+                            .collect(Collectors.toCollection(ArrayList::new));
+
+                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false, chosenEmails);
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
             } else {

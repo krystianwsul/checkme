@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ public class FriendListLoader extends Loader<List<UserData>> {
     private ValueEventListener mValueEventListener;
 
     private List<UserData> mUserDatas;
+    private boolean mFirst = true;
 
     public FriendListLoader(@NonNull Context context, @NonNull UserData userData) {
         super(context);
@@ -91,22 +93,19 @@ public class FriendListLoader extends Loader<List<UserData>> {
                 MyCrashlytics.logException(databaseError.toException());
 
                 Log.e("asdf", "FriendListLoader.mValueEventListener.onCancelled", databaseError.toException());
+
+                deliverResult(null);
             }
         };
         mQuery.addValueEventListener(mValueEventListener);
     }
 
     @Override
-    public void deliverResult(List<UserData> userDatas) {
+    public void deliverResult(@Nullable List<UserData> userDatas) {
         Log.e("asdf", "FriendListLoader.deliverResult starting");
-        Assert.assertTrue(userDatas != null);
 
         if (isReset())
             return;
-
-        Log.e("asdf", "mUserDatas null? " + (mUserDatas == null));
-        if (mUserDatas != null)
-            Log.e("asdf", "data equal? " + mUserDatas.equals(userDatas));
 
         if ((mUserDatas == null) || !mUserDatas.equals(userDatas)) {
             Log.e("asdf", "FriendListLoader.deliverResult delivering");

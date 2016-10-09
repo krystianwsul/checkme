@@ -101,7 +101,7 @@ public class FindFriendActivity extends AppCompatActivity {
             Assert.assertTrue(mUserData != null);
             Assert.assertTrue(!mLoading);
 
-            UserData myUserData = MainActivity.getUser();
+            UserData myUserData = MainActivity.getUserData();
             Assert.assertTrue(myUserData != null);
 
             DatabaseWrapper.addFriend(myUserData, mUserData);

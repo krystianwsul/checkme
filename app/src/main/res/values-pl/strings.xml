@@ -66,4 +66,5 @@
     <string name="search">Szukaj</string>
     <string name="connectionError">Wystąpił błąd połączenia.</string>
     <string name="userNotFound">Nie znaleziono użytkownika.</string>
+    <string name="addFriend">Dodaj znajomych</string>
 </resources>

@@ -32,6 +32,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
+import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -193,6 +194,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         }
     };
+
+    private List<Integer> mFriendEntries = new ArrayList<>(); // todo friend
 
     public static Intent getCreateIntent(Context context) {
         Assert.assertTrue(context != null);
@@ -1030,12 +1033,14 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 else
                     scheduleHolder.mScheduleText.setText(null);
 
+                scheduleHolder.mScheduleText.setEnabled(true);
+
                 scheduleHolder.mScheduleText.setOnClickListener(v -> {
                     ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance(mParent != null);
                     parentPickerFragment.show(getSupportFragmentManager(), PARENT_PICKER_FRAGMENT_TAG);
                     parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
                 });
-            } else if (position < mScheduleEntries.size() + 1) {
+            } else if (position < 1 + mScheduleEntries.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 ScheduleEntry scheduleEntry = mScheduleEntries.get(position - 1);
@@ -1046,14 +1051,18 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                 scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas, CreateTaskActivity.this));
 
+                scheduleHolder.mScheduleText.setEnabled(true);
+
                 scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
-            } else if (position == mScheduleEntries.size() + 1) {
+            } else if (position == 1 + mScheduleEntries.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 scheduleHolder.mScheduleLayout.setHint(getString(R.string.addReminder));
                 scheduleHolder.mScheduleLayout.setError(null);
 
                 scheduleHolder.mScheduleText.setText(null);
+
+                scheduleHolder.mScheduleText.setEnabled(true);
 
                 scheduleHolder.mScheduleText.setOnClickListener(v -> {
                     Assert.assertTrue(mCreateTaskAdapter != null);
@@ -1063,8 +1072,26 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                     scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
                 });
+            } else if (position < 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
+                throw new UnsupportedOperationException(); // todo friends
+            } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
+                ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
+
+                scheduleHolder.mScheduleLayout.setHint(getString(R.string.addFriend));
+                scheduleHolder.mScheduleLayout.setError(null);
+
+                scheduleHolder.mScheduleText.setText(null);
+
+                scheduleHolder.mScheduleText.setEnabled(MainActivity.getUserData() != null);
+
+                scheduleHolder.mScheduleText.setOnClickListener(v -> {
+                    Assert.assertTrue(mCreateTaskAdapter != null);
+                    Assert.assertTrue(mHourMinutePickerPosition == null);
+
+                    // todo friends
+                });
             } else {
-                Assert.assertTrue(position == mScheduleEntries.size() + 2);
+                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size() + 1);
 
                 NoteHolder noteHolder = (NoteHolder) holder;
 
@@ -1079,15 +1106,23 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         @Override
         public int getItemCount() {
-            return mScheduleEntries.size() + 3;
+            return (1 + mScheduleEntries.size() + 1 + mFriendEntries.size() + 1 + 1);
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (position < mScheduleEntries.size() + 2) {
+            if (position == 0) {
+                return TYPE_SCHEDULE;
+            } else if (position < 1 + mScheduleEntries.size()) {
+                return TYPE_SCHEDULE;
+            } else if (position == 1 + mScheduleEntries.size()) {
+                return TYPE_SCHEDULE;
+            } else if (position < 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
+                throw new UnsupportedOperationException(); // todo friends
+            } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
                 return TYPE_SCHEDULE;
             } else {
-                Assert.assertTrue(position == mScheduleEntries.size() + 2);
+                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size() + 1);
 
                 return TYPE_NOTE;
             }
@@ -1144,5 +1179,4 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             }
         }
     }
-
 }

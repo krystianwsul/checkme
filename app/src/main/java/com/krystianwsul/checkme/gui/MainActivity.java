@@ -350,6 +350,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                             showTab(Tab.INSTANCES);
                         }
                     } else {
+                        // todo block gui until sign in complete
                         startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient), RC_SIGN_IN);
                     }
 
@@ -727,7 +728,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         }
     }
 
-    public static UserData getUser() {
+    public static UserData getUserData() {
         return sUserData;
     }
 

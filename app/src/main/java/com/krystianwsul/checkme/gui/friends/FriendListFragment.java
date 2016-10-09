@@ -340,7 +340,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
                 notifyItemRemoved(position);
             }
 
-            UserData userData = MainActivity.getUser();
+            UserData userData = MainActivity.getUserData();
             Assert.assertTrue(userData != null);
 
             Stream.of(selectedUserDataWrappers).forEach(userDataWrapper -> DatabaseWrapper.removeFriend(userData, userDataWrapper.mUserData));

@@ -21,6 +21,6 @@ public class DatabaseWrapper {
         String myKey = UserData.getKey(userData.email);
         String friendKey = UserData.getKey(friendUserData.email);
 
-        sDatabaseReference.child("users").child(myKey).child("friends").child(friendKey).setValue(true);
+        sDatabaseReference.child("users").child(friendKey).child("friendOf").child(myKey).setValue(true);
     }
 }

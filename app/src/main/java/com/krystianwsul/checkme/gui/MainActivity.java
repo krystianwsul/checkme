@@ -118,8 +118,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private FirebaseAuth mFirebaseAuth;
     private static UserData sUserData = null;
 
-    private boolean mFirst = true;
-
     private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
@@ -195,8 +193,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         Assert.assertTrue(mActionBar != null);
 
         if (savedInstanceState != null) {
-            mFirst = false;
-
             Assert.assertTrue(savedInstanceState.containsKey(VISIBLE_TAB_KEY));
             mVisibleTab = (Tab) savedInstanceState.getSerializable(VISIBLE_TAB_KEY);
 
@@ -461,9 +457,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
-
-                if (!mFirst)
-                    mFriendListFragment.hide();
+                mFriendListFragment.hide();
 
                 break;
             case TASKS:

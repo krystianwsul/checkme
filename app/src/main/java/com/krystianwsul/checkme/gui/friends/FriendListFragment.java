@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FriendListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<List<UserData>> {
-    private static final String VISIBILITY_KEY = "visibilityKey";
+    private static final String USER_DATA_KEY = "userData";
     private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
 
     private RelativeLayout mFriendListLayout;
@@ -112,7 +112,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         }
     };
 
-    private boolean mVisible = false;
+    @Nullable
+    private UserData mUserData = null;
 
     public FriendListFragment() {
 
@@ -156,8 +157,10 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null) {
-            Assert.assertTrue(savedInstanceState.containsKey(VISIBILITY_KEY));
-            mVisible = savedInstanceState.getBoolean(VISIBILITY_KEY);
+            if (savedInstanceState.containsKey(USER_DATA_KEY)) {
+                mUserData = savedInstanceState.getParcelable(USER_DATA_KEY);
+                Assert.assertTrue(mUserData != null);
+            }
 
             if (savedInstanceState.containsKey(SELECTED_USER_DATA_EMAILS_KEY)) {
                 mSelectedUserDataEmails = savedInstanceState.getStringArrayList(SELECTED_USER_DATA_EMAILS_KEY);
@@ -167,13 +170,13 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         }
 
         updateVisibility();
-
-        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     public Loader<List<UserData>> onCreateLoader(int id, Bundle args) {
-        return new FriendListLoader(getActivity());
+        Assert.assertTrue(mUserData != null);
+
+        return new FriendListLoader(getActivity(), mUserData);
     }
 
     @Override
@@ -214,7 +217,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putBoolean(VISIBILITY_KEY, mVisible);
+        if (mUserData != null)
+            outState.putParcelable(USER_DATA_KEY, mUserData);
 
         if (mFriendListAdapter != null) {
             ArrayList<String> selectedUserDataEmails = mFriendListAdapter.getSelected();
@@ -223,14 +227,14 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         }
     }
 
-    public void show() {
-        mVisible = true;
+    public void show(@NonNull UserData userData) {
+        mUserData = userData;
 
         updateVisibility();
     }
 
     public void hide() {
-        mVisible = false;
+        mUserData = null;
 
         updateVisibility();
     }
@@ -239,7 +243,13 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         if (mFriendListLayout == null)
             return;
 
-        mFriendListLayout.setVisibility(mVisible ? View.VISIBLE : View.GONE);
+        if (mUserData == null) {
+            mFriendListLayout.setVisibility(View.GONE);
+            getLoaderManager().destroyLoader(0);
+        } else {
+            mFriendListLayout.setVisibility(View.VISIBLE);
+            getLoaderManager().initLoader(0, null, this);
+        }
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {

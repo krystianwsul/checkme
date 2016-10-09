@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.content.Loader;
 import android.util.Log;
 
@@ -24,12 +25,13 @@ public class FriendListLoader extends Loader<List<UserData>> {
 
     private List<UserData> mUserDatas;
 
-    public FriendListLoader(Context context) {
+    public FriendListLoader(@NonNull Context context, @NonNull UserData userData) {
         super(context);
 
+        Log.e("asdf", "FriendListLoader.construct");
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        //String key = UserData.getKey(MainActivity.getUser().email);
-        String key = UserData.getKey("krystianwsul@gmail.com");
+        String key = UserData.getKey(userData.email);
 
         mQuery = databaseReference.child("users").orderByChild("friendOf/" + key).equalTo(true);
     }
@@ -58,6 +60,11 @@ public class FriendListLoader extends Loader<List<UserData>> {
     @Override
     protected void onReset() {
         Log.e("asdf", "FriendListLoader.onReset");
+
+        if (mValueEventListener != null) {
+            mQuery.removeEventListener(mValueEventListener);
+            mValueEventListener = null;
+        }
 
         if (mUserDatas != null)
             mUserDatas = null;

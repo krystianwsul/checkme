@@ -128,7 +128,7 @@ public class FindFriendActivity extends AppCompatActivity {
             mLoading = savedInstanceState.getBoolean(LOADING_KEY);
 
             if (savedInstanceState.containsKey(USER_KEY)) {
-                mUserData = (UserData) savedInstanceState.getSerializable(USER_KEY);
+                mUserData = savedInstanceState.getParcelable(USER_KEY);
                 Assert.assertTrue(mUserData != null);
             }
         }
@@ -251,6 +251,6 @@ public class FindFriendActivity extends AppCompatActivity {
         outState.putBoolean(LOADING_KEY, mLoading);
 
         if (mUserData != null)
-            outState.putSerializable(USER_KEY, mUserData);
+            outState.putParcelable(USER_KEY, mUserData);
     }
 }

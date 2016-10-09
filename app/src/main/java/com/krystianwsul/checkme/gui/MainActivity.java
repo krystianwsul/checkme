@@ -483,6 +483,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                 break;
             case FRIENDS:
+                Assert.assertTrue(sUserData != null);
+
                 mActionBar.setTitle(R.string.friends);
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
@@ -490,7 +492,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
-                mFriendListFragment.show();
+                mFriendListFragment.show(sUserData);
 
                 break;
             case DEBUG:

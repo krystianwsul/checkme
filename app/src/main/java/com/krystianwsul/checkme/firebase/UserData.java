@@ -1,18 +1,20 @@
 package com.krystianwsul.checkme.firebase;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Base64;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.IgnoreExtraProperties;
 
 import junit.framework.Assert;
 
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
-@SuppressWarnings("WeakerAccess")
-public class UserData implements Serializable {
+@IgnoreExtraProperties
+public class UserData implements Parcelable {
     public String email;
     public String displayName;
 
@@ -27,6 +29,14 @@ public class UserData implements Serializable {
 
         displayName = firebaseUser.getDisplayName();
         Assert.assertTrue(!TextUtils.isEmpty(displayName));
+    }
+
+    private UserData(@NonNull String email, @NonNull String displayName) {
+        Assert.assertTrue(!TextUtils.isEmpty(email));
+        Assert.assertTrue(!TextUtils.isEmpty(displayName));
+
+        this.email = email;
+        this.displayName = displayName;
     }
 
     @NonNull
@@ -68,4 +78,33 @@ public class UserData implements Serializable {
 
         return true;
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(email);
+        dest.writeString(displayName);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<UserData> CREATOR = new Creator<UserData>() {
+        @Override
+        public UserData createFromParcel(Parcel in) {
+            String email = in.readString();
+            Assert.assertTrue(!TextUtils.isEmpty(email));
+
+            String displayName = in.readString();
+            Assert.assertTrue(!TextUtils.isEmpty(displayName));
+
+            return new UserData(email, displayName);
+        }
+
+        @Override
+        public UserData[] newArray(int size) {
+            return new UserData[size];
+        }
+    };
 }

@@ -7,58 +7,54 @@ import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.R;
 
-import junit.framework.Assert;
-
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class Date implements Comparable<Date>, Parcelable, Serializable {
-    private final Integer mYear;
-    private final Integer mMonth;
-    private final Integer mDay;
+    private final int mYear;
+    private final int mMonth;
+    private final int mDay;
 
     public static Date today() {
         return new Date(Calendar.getInstance());
     }
 
-    public Date(Integer year, Integer month, Integer day) {
+    public Date(int year, int month, int day) {
         mYear = year;
         mMonth = month;
         mDay = day;
     }
 
-    public Date(Calendar calendar) {
-        Assert.assertTrue(calendar != null);
-
+    public Date(@NonNull Calendar calendar) {
         mYear = calendar.get(Calendar.YEAR);
         mMonth = calendar.get(Calendar.MONTH) + 1;
         mDay = calendar.get(Calendar.DAY_OF_MONTH);
     }
 
-    public Integer getYear() {
+    public int getYear() {
         return mYear;
     }
 
-    public Integer getMonth() {
+    public int getMonth() {
         return mMonth;
     }
 
-    public Integer getDay() {
+    public int getDay() {
         return mDay;
     }
 
     public int compareTo(@NonNull Date date) {
-        int yearComparison = mYear.compareTo(date.getYear());
+        int yearComparison = Integer.valueOf(mYear).compareTo(date.getYear());
         if (yearComparison != 0)
             return yearComparison;
 
-        int monthComparison = mMonth.compareTo(date.getMonth());
+        int monthComparison = Integer.valueOf(mMonth).compareTo(date.getMonth());
         if (monthComparison != 0)
             return monthComparison;
 
-        return mDay.compareTo(date.getDay());
+        return Integer.valueOf(mDay).compareTo(date.getDay());
     }
 
     @Override
@@ -82,7 +78,8 @@ public class Date implements Comparable<Date>, Parcelable, Serializable {
         return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(javaDate);
     }
 
-    public String getDisplayText(Context context) {
+    @NonNull
+    public String getDisplayText(@NonNull Context context) {
         Calendar todayCalendar = Calendar.getInstance();
         Date todayDate = new Date(todayCalendar);
 
@@ -104,6 +101,7 @@ public class Date implements Comparable<Date>, Parcelable, Serializable {
             return getDayOfWeek().toString() + ", " + toString();
     }
 
+    @NonNull
     public Calendar getCalendar() {
         return new GregorianCalendar(mYear, mMonth - 1, mDay);
     }

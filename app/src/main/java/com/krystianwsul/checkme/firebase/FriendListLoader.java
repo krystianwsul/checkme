@@ -10,8 +10,6 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
@@ -32,10 +30,7 @@ public class FriendListLoader extends Loader<List<UserData>> {
 
         Log.e("asdf", "FriendListLoader.construct");
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        String key = UserData.getKey(userData.email);
-
-        mQuery = databaseReference.child("users").orderByChild("friendOf/" + key).equalTo(true);
+        mQuery = DatabaseWrapper.getFriendsQuery(userData);
     }
 
     @Override

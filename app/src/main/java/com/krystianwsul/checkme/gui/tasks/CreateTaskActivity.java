@@ -30,6 +30,14 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.RemoteDailyScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteMonthlyDayScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteMonthlyWeekScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteSingleScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
+import com.krystianwsul.checkme.firebase.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
@@ -38,6 +46,8 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.DayOfWeek;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
@@ -299,20 +309,37 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
+                        Assert.assertTrue(!hasValueFriends()); // todo friends
 
                         DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskId, name, getScheduleDatas(), mNote);
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskIds.size() > 1);
+                        Assert.assertTrue(!hasValueFriends()); // todo friends
 
                         DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, getScheduleDatas(), mTaskIds, mNote);
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote);
+                        if (hasValueFriends()) {
+                            ExactTimeStamp now = ExactTimeStamp.getNow();
+
+                            List<RemoteScheduleRecord> remoteScheduleRecords = createRemoteScheduleRecords(getScheduleDatas(), now);
+                            Assert.assertTrue(!remoteScheduleRecords.isEmpty());
+
+                            RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(name, now.getLong(), null, true, null, null, null, mNote, remoteScheduleRecords);
+
+                            UserData userData = MainActivity.getUserData();
+                            Assert.assertTrue(userData != null);
+
+                            DatabaseWrapper.addTask(userData, remoteTaskRecord, mFriendEntries);
+                        } else {
+                            DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote);
+                        }
                     }
                 } else if (hasValueParent()) {
                     Assert.assertTrue(mParent != null);
+                    Assert.assertTrue(!hasValueFriends());
 
                     if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
@@ -330,6 +357,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name, mNote);
                     }
                 } else {  // no reminder
+                    Assert.assertTrue(!hasValueFriends()); // todo friends
+
                     if (mTaskId != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
@@ -778,6 +807,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             return false;
 
         Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+        Assert.assertTrue(!hasValueParent() || !hasValueFriends());
+
+        if (hasValueFriends()) // todo friend
+            return true;
 
         if (mTaskId != null) {
             Assert.assertTrue(mData.TaskData != null);
@@ -887,6 +920,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         return !mScheduleEntries.isEmpty();
     }
 
+    private boolean hasValueFriends() {
+        return !mFriendEntries.isEmpty();
+    }
+
     private ScheduleEntry firstScheduleEntry() {
         return new SingleScheduleEntry(mScheduleHint);
     }
@@ -987,6 +1024,79 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
             mFriendPosition = null;
         }
+    }
+
+    @NonNull
+    private List<RemoteScheduleRecord> createRemoteScheduleRecords(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        List<RemoteScheduleRecord> remoteScheduleRecords = new ArrayList<>();
+
+        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
+            Assert.assertTrue(scheduleData != null);
+
+            switch (scheduleData.getScheduleType()) {
+                case SINGLE: {
+                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
+
+                    Date date = singleScheduleData.Date;
+
+                    Assert.assertTrue(singleScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = singleScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteScheduleRecords.add(new RemoteSingleScheduleRecord(startExactTimeStamp.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case DAILY: {
+                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
+
+                    Assert.assertTrue(dailyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+
+                    HourMinute hourMinute = dailyScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteScheduleRecords.add(new RemoteDailyScheduleRecord(startExactTimeStamp.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case WEEKLY: {
+                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
+
+                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
+
+                    Assert.assertTrue(weeklyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = weeklyScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteScheduleRecords.add(new RemoteWeeklyScheduleRecord(startExactTimeStamp.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case MONTHLY_DAY: {
+                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
+
+                    Assert.assertTrue(monthlyDayScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = monthlyDayScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteScheduleRecords.add(new RemoteMonthlyDayScheduleRecord(startExactTimeStamp.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case MONTHLY_WEEK: {
+                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
+
+                    Assert.assertTrue(monthlyWeekScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = monthlyWeekScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteScheduleRecords.add(new RemoteMonthlyWeekScheduleRecord(startExactTimeStamp.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        return remoteScheduleRecords;
     }
 
     public static class ScheduleHint implements Parcelable {

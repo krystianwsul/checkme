@@ -22,9 +22,7 @@ public class TimeStamp implements Comparable<TimeStamp>, Parcelable {
         mLong = new GregorianCalendar(date.getYear(), date.getMonth() - 1, date.getDay(), hourMinute.getHour(), hourMinute.getMinute()).getTimeInMillis();
     }
 
-    public TimeStamp(Calendar calendar) {
-        Assert.assertTrue(calendar != null);
-
+    public TimeStamp(@NonNull Calendar calendar) {
         Date date = new Date(calendar);
         HourMinute hourMinute = new HourMinute(calendar);
 
@@ -38,6 +36,7 @@ public class TimeStamp implements Comparable<TimeStamp>, Parcelable {
         mLong = calendar.getTimeInMillis();
     }
 
+    @NonNull
     public Calendar getCalendar() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(mLong);

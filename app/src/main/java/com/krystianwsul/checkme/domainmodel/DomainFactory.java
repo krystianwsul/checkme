@@ -1462,8 +1462,6 @@ public class DomainFactory {
 
     @NonNull
     private ArrayList<Instance> getExistingInstances(@NonNull Task task) {
-        Assert.assertTrue(task != null);
-
         ArrayList<Instance> instances = new ArrayList<>();
         for (Instance instance : mExistingInstances) {
             Assert.assertTrue(instance != null);
@@ -1476,9 +1474,6 @@ public class DomainFactory {
 
     @Nullable
     Instance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(scheduleDateTime != null);
-
         ArrayList<Instance> taskInstances = getExistingInstances(task);
 
         ArrayList<Instance> instances = new ArrayList<>();
@@ -1988,6 +1983,7 @@ public class DomainFactory {
     }
 
     private class TaskRelevance {
+        @NonNull
         private final Task mTask;
         private boolean mRelevant = false;
 

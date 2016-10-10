@@ -136,7 +136,7 @@ public class TaskRecord extends Record {
         Integer oldestVisibleDay = (cursor.isNull(8) ? null : cursor.getInt(8));
         String note = cursor.getString(9);
 
-        Assert.assertTrue(name != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));
@@ -152,7 +152,7 @@ public class TaskRecord extends Record {
     TaskRecord(boolean created, int id, String name, long startTime, Long endTime, boolean relevant, Integer oldestVisibleYear, Integer oldestVisibleMonth, Integer oldestVisibleDay, String note) {
         super(created);
 
-        Assert.assertTrue(name != null);
+        Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));

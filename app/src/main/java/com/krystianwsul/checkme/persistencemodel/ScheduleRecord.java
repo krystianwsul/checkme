@@ -41,7 +41,7 @@ public class ScheduleRecord extends Record {
 
     }
 
-    public static ArrayList<ScheduleRecord> getScheduleRecords(SQLiteDatabase sqLiteDatabase, List<Integer> taskIds) {
+    static ArrayList<ScheduleRecord> getScheduleRecords(SQLiteDatabase sqLiteDatabase, List<Integer> taskIds) {
         Assert.assertTrue(sqLiteDatabase != null);
         Assert.assertTrue(taskIds != null);
         Assert.assertTrue(!taskIds.isEmpty());
@@ -78,8 +78,8 @@ public class ScheduleRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_SCHEDULES, COLUMN_ID);
     }
 
-    ScheduleRecord(boolean current, int id, int rootTaskId, long startTime, Long endTime, int type) {
-        super(current);
+    ScheduleRecord(boolean created, int id, int rootTaskId, long startTime, Long endTime, int type) {
+        super(created);
 
         Assert.assertTrue((endTime == null) || startTime <= endTime);
 

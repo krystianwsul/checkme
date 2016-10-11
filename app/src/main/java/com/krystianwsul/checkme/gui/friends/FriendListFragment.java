@@ -13,7 +13,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -126,8 +125,6 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-        Log.e("asdf", "context: " + context);
 
         Assert.assertTrue(context instanceof ShowCustomTimesFragment.CustomTimesListListener);
     }

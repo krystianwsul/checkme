@@ -257,6 +257,8 @@ public class DomainFactory {
         Assert.assertTrue(mUserData == null);
         Assert.assertTrue(mQuery == null);
 
+        mUserData = userData;
+
         mQuery = DatabaseWrapper.getTaskRecordsQuery(userData);
         mQuery.addChildEventListener(mChildEventListener);
     }

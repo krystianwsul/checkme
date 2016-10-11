@@ -49,6 +49,7 @@ import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -146,7 +147,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
                     Assert.assertTrue(instanceData.TaskCurrent);
 
-                    startActivity(ShowTaskActivity.getIntent(instanceData.InstanceKey.TaskId, getActivity()));
+                    startActivity(ShowTaskActivity.getIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
                     break;
                 }
                 case R.id.action_group_edit_task: {
@@ -155,14 +156,14 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
                     Assert.assertTrue(instanceData.TaskCurrent);
 
-                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), instanceData.InstanceKey.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
                     break;
                 }
                 case R.id.action_group_delete_task: {
-                    ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(instanceDatas)
-                            .map(instanceData -> instanceData.InstanceKey.TaskId)
+                    ArrayList<TaskKey> taskKeys = new ArrayList<>(Stream.of(instanceDatas)
+                            .map(instanceData -> new TaskKey(instanceData.InstanceKey.TaskId))
                             .collect(Collectors.toList()));
-                    Assert.assertTrue(!taskIds.isEmpty());
+                    Assert.assertTrue(!taskKeys.isEmpty());
                     Assert.assertTrue(Stream.of(instanceDatas)
                             .allMatch(instanceData -> instanceData.TaskCurrent));
 
@@ -178,7 +179,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                         decrementSelected();
                     } while (!(selectedTreeNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), ((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskIds);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), ((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskKeys);
 
                     updateSelectAll();
 
@@ -192,7 +193,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
                     Assert.assertTrue(instanceData.TaskCurrent);
 
-                    getActivity().startActivity(CreateTaskActivity.getCreateIntent(getActivity(), instanceData.InstanceKey.TaskId));
+                    getActivity().startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
                     break;
                 }
                 case R.id.action_group_join: {
@@ -200,6 +201,11 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                             .map(instanceData -> instanceData.InstanceKey.TaskId)
                             .collect(Collectors.toList()));
                     Assert.assertTrue(taskIds.size() > 1);
+
+                    ArrayList<TaskKey> taskKeys = new ArrayList<>(Stream.of(instanceDatas)
+                            .map(instanceData -> new TaskKey(instanceData.InstanceKey.TaskId))
+                            .collect(Collectors.toList()));
+                    Assert.assertTrue(taskKeys.size() > 1);
 
                     if (mInstanceKey == null) {
                         GroupListLoader.InstanceData firstInstanceData = Stream.of(instanceDatas)
@@ -212,7 +218,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                         startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, new CreateTaskActivity.ScheduleHint(date, timePair)));
                     } else {
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, mInstanceKey.TaskId));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mInstanceKey.TaskId));
                     }
                     break;
                 }
@@ -741,7 +747,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
             if (data.TaskEditable) {
                 showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, mInstanceKey.TaskId)));
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new TaskKey(mInstanceKey.TaskId))));
 
                 emptyTextId = R.string.empty_child;
             } else {
@@ -3404,7 +3410,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 public void onClick() {
                     GroupListFragment groupListFragment = getGroupListFragment();
 
-                    groupListFragment.getActivity().startActivity(ShowTaskActivity.getIntent(mTaskData.TaskId, groupListFragment.getActivity()));
+                    groupListFragment.getActivity().startActivity(ShowTaskActivity.getIntent(groupListFragment.getActivity(), new TaskKey(mTaskData.TaskId)));
                 }
 
                 @Override

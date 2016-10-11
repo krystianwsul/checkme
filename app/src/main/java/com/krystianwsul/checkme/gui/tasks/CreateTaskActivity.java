@@ -44,6 +44,7 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -227,26 +228,44 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         return intent;
     }
 
-    public static Intent getCreateIntent(Context context, int parentTaskIdHint) {
+    public static Intent getCreateIntent(@NonNull Context context, @NonNull TaskKey parentTaskKeyHint) {
         Intent intent = new Intent(context, CreateTaskActivity.class);
+
+        //todo firebase
+
+        Integer parentTaskIdHint = parentTaskKeyHint.mLocalTaskId;
+        Assert.assertTrue(parentTaskIdHint != null);
+
         intent.putExtra(PARENT_TASK_ID_HINT_KEY, parentTaskIdHint);
         return intent;
     }
 
-    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
+    public static Intent getJoinIntent(@NonNull Context context, @NonNull ArrayList<TaskKey> joinTaskKeys) {
+        Assert.assertTrue(joinTaskKeys.size() > 1);
+
+        //todo firebase
+
+        ArrayList<Integer> joinTaskIds = Stream.of(joinTaskKeys).map(joinTaskKey -> {
+            Assert.assertTrue(joinTaskKey.mLocalTaskId != null);
+
+            return joinTaskKey.mLocalTaskId;
+        }).collect(Collectors.toCollection(ArrayList::new));
 
         Intent intent = new Intent(context, CreateTaskActivity.class);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
         return intent;
     }
 
-    public static Intent getJoinIntent(Context context, ArrayList<Integer> joinTaskIds, int parentTaskIdHint) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(joinTaskIds != null);
-        Assert.assertTrue(joinTaskIds.size() > 1);
+    public static Intent getJoinIntent(@NonNull Context context, @NonNull ArrayList<TaskKey> joinTaskKeys, int parentTaskIdHint) {
+        Assert.assertTrue(joinTaskKeys.size() > 1);
+
+        //todo firebase
+
+        ArrayList<Integer> joinTaskIds = Stream.of(joinTaskKeys).map(joinTaskKey -> {
+            Assert.assertTrue(joinTaskKey.mLocalTaskId != null);
+
+            return joinTaskKey.mLocalTaskId;
+        }).collect(Collectors.toCollection(ArrayList::new));
 
         Intent intent = new Intent(context, CreateTaskActivity.class);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
@@ -266,8 +285,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         return intent;
     }
 
-    public static Intent getEditIntent(Context context, int taskId) {
+    public static Intent getEditIntent(@NonNull Context context, @NonNull TaskKey taskKey) {
         Intent intent = new Intent(context, CreateTaskActivity.class);
+        // todo firebase
+
+        Integer taskId = taskKey.mLocalTaskId;
+        Assert.assertTrue(taskId != null);
+
         intent.putExtra(TASK_ID_KEY, taskId);
         return intent;
     }

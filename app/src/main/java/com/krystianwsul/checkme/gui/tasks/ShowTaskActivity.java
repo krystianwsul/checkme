@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -17,6 +18,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
@@ -36,7 +38,12 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
     private TaskListFragment mTaskListFragment;
 
-    public static Intent getIntent(int taskId, Context context) {
+    public static Intent getIntent(@NonNull Context context, @NonNull TaskKey taskKey) {
+        // todo firebase
+
+        Integer taskId = taskKey.mLocalTaskId;
+        Assert.assertTrue(taskId != null);
+
         Intent intent = new Intent(context, ShowTaskActivity.class);
         intent.putExtra(INTENT_KEY, taskId);
         return intent;
@@ -98,9 +105,9 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         switch (item.getItemId()) {
             case R.id.task_menu_edit:
                 if (mData.IsRootTask)
-                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, new TaskKey(mData.TaskId)));
                 else
-                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, new TaskKey(mData.TaskId)));
                 break;
             case R.id.task_menu_share:
                 Assert.assertTrue(mData != null);

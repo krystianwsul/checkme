@@ -45,6 +45,7 @@ import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -856,13 +857,14 @@ public class DomainFactory {
             note = null;
         }
 
-        Collections.sort(tasks, (Task lhs, Task rhs) -> lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));
-        if (taskId == null)
-            Collections.reverse(tasks);
-
         List<TaskListLoader.ChildTaskData> childTaskDatas = Stream.of(tasks)
-                .map(task -> new TaskListLoader.ChildTaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp()))
+                .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
                 .collect(Collectors.toList());
+
+
+        Collections.sort(childTaskDatas, (TaskListLoader.ChildTaskData lhs, TaskListLoader.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
+        if (taskId == null)
+            Collections.reverse(childTaskDatas);
 
         return new TaskListLoader.Data(childTaskDatas, note);
     }
@@ -1296,10 +1298,18 @@ public class DomainFactory {
         save(context, dataIds);
     }
 
-    public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<Integer> taskIds) {
+    public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps");
 
-        Assert.assertTrue(!taskIds.isEmpty());
+        Assert.assertTrue(!taskKeys.isEmpty());
+
+        //todo firebase
+
+        ArrayList<Integer> taskIds = Stream.of(taskKeys).map(taskKey -> {
+            Assert.assertTrue(taskKey.mLocalTaskId != null);
+
+            return taskKey.mLocalTaskId;
+        }).collect(Collectors.toCollection(ArrayList::new));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -2013,7 +2023,7 @@ public class DomainFactory {
     private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
         return Stream.of(parentTask.getChildTasks(now))
                 .sortBy(Task::getId)
-                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp()))
+                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
                 .collect(Collectors.toList());
     }
 

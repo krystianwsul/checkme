@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
@@ -131,7 +132,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                startActivity(ShowTaskActivity.getIntent(mInstanceData.InstanceKey.TaskId, this));
+                startActivity(ShowTaskActivity.getIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
                 break;
             case R.id.instance_menu_edit_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -139,9 +140,9 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
                 if (mInstanceData.IsRootTask)
-                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
                 else
-                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
                 break;
             case R.id.instance_menu_delete_task:
                 Assert.assertTrue(mInstanceData != null);

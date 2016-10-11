@@ -10,6 +10,7 @@ import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMilli;
@@ -265,5 +266,10 @@ public class Task {
     @Nullable
     String getNote() {
         return mTaskRecord.getNote();
+    }
+
+    @NonNull
+    TaskKey getTaskKey() {
+        return new TaskKey(mTaskRecord.getId());
     }
 }

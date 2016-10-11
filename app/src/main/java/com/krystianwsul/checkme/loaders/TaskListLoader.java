@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -71,8 +72,6 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     }
 
     public static class ChildTaskData {
-        public final int TaskId;
-
         @NonNull
         public final String Name;
 
@@ -88,21 +87,23 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
         @NonNull
         public final ExactTimeStamp mStartExactTimeStamp;
 
-        public ChildTaskData(int taskId, @NonNull String name, @Nullable String scheduleText, @NonNull List<ChildTaskData> children, @Nullable String note, @NonNull ExactTimeStamp startExactTimeStamp) {
+        @NonNull
+        public final TaskKey mTaskKey;
+
+        public ChildTaskData(@NonNull String name, @Nullable String scheduleText, @NonNull List<ChildTaskData> children, @Nullable String note, @NonNull ExactTimeStamp startExactTimeStamp, @NonNull TaskKey taskKey) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
-            TaskId = taskId;
             Name = name;
             ScheduleText = scheduleText;
             Children = children;
             mNote = note;
             mStartExactTimeStamp = startExactTimeStamp;
+            mTaskKey = taskKey;
         }
 
         @Override
         public int hashCode() {
             int hashCode = 0;
-            hashCode += TaskId;
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
@@ -110,6 +111,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             if (!TextUtils.isEmpty(mNote))
                 hashCode += mNote.hashCode();
             hashCode += mStartExactTimeStamp.hashCode();
+            hashCode += mTaskKey.hashCode();
             return hashCode;
         }
 
@@ -126,9 +128,6 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
                 return false;
 
             ChildTaskData childTaskData = (ChildTaskData) object;
-
-            if (TaskId != childTaskData.TaskId)
-                return false;
 
             if (!Name.equals(childTaskData.Name))
                 return false;
@@ -149,6 +148,9 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
                 return false;
 
             if (!mStartExactTimeStamp.equals(childTaskData.mStartExactTimeStamp))
+                return false;
+
+            if (!mTaskKey.equals(childTaskData.mTaskKey))
                 return false;
 
             return true;

@@ -37,6 +37,7 @@ import com.krystianwsul.checkme.gui.tree.TreeNode;
 import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
 import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
@@ -47,8 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
-    private static final String SELECTED_TASKS_KEY = "selectedTasks";
-    private static final String EXPANDED_TASKS_KEY = "expandedTasks";
+    private static final String SELECTED_TASK_KEYS_KEY = "selectedTaskKeys";
+    private static final String EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys";
 
     private static final String ALL_TASKS_KEY = "allTasks";
     private static final String TASK_ID_KEY = "taskId";
@@ -83,8 +84,8 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                     .map(taskWrapper -> taskWrapper.mChildTaskData)
                     .collect(Collectors.toList());
 
-            ArrayList<Integer> taskIds = Stream.of(childTaskDatas)
-                    .map(childTaskData -> childTaskData.TaskId)
+            ArrayList<TaskKey> taskKeys = Stream.of(childTaskDatas)
+                    .map(childTaskData -> childTaskData.mTaskKey)
                     .collect(Collectors.toCollection(ArrayList::new));
 
             switch (menuItem.getItemId()) {
@@ -97,13 +98,13 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
                     TaskListLoader.ChildTaskData childTaskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
 
-                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), childTaskData.TaskId));
+                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), childTaskData.mTaskKey));
                     break;
                 case R.id.action_task_join:
                     if (mTaskId == null)
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys));
                     else
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, mTaskId));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mTaskId));
                     break;
                 case R.id.action_task_delete:
                     do {
@@ -117,7 +118,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                         decrementSelected();
                     } while (!(selected = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mData.DataId, taskIds);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mData.DataId, taskKeys);
 
                     updateSelectAll();
 
@@ -128,7 +129,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                     TaskListLoader.ChildTaskData childTaskData1 = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
                     Assert.assertTrue(childTaskData1 != null);
 
-                    startActivity(CreateTaskActivity.getCreateIntent(getActivity(), childTaskData1.TaskId));
+                    startActivity(CreateTaskActivity.getCreateIntent(getActivity(), childTaskData1.mTaskKey));
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -286,8 +287,8 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 .forEach(child -> printTree(lines, indentation + 1, child));
     }
 
-    private List<Integer> mSelectedTaskIds;
-    private List<Integer> mExpandedTaskIds;
+    private List<TaskKey> mSelectedTaskKeys;
+    private List<TaskKey> mExpandedTaskIds;
 
     public static TaskListFragment getInstance() {
         TaskListFragment taskListFragment = new TaskListFragment();
@@ -339,14 +340,14 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         }
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(SELECTED_TASKS_KEY)) {
-                mSelectedTaskIds = savedInstanceState.getIntegerArrayList(SELECTED_TASKS_KEY);
-                Assert.assertTrue(mSelectedTaskIds != null);
-                Assert.assertTrue(!mSelectedTaskIds.isEmpty());
+            if (savedInstanceState.containsKey(SELECTED_TASK_KEYS_KEY)) {
+                mSelectedTaskKeys = savedInstanceState.getParcelableArrayList(SELECTED_TASK_KEYS_KEY);
+                Assert.assertTrue(mSelectedTaskKeys != null);
+                Assert.assertTrue(!mSelectedTaskKeys.isEmpty());
             }
 
-            if (savedInstanceState.containsKey(EXPANDED_TASKS_KEY)) {
-                mExpandedTaskIds = savedInstanceState.getIntegerArrayList(EXPANDED_TASKS_KEY);
+            if (savedInstanceState.containsKey(EXPANDED_TASK_KEYS_KEY)) {
+                mExpandedTaskIds = savedInstanceState.getParcelableArrayList(EXPANDED_TASK_KEYS_KEY);
                 Assert.assertTrue(mExpandedTaskIds != null);
                 Assert.assertTrue(!mExpandedTaskIds.isEmpty());
             }
@@ -381,15 +382,15 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
             if (selected.isEmpty()) {
                 Assert.assertTrue(!mSelectionCallback.hasActionMode());
-                mSelectedTaskIds = null;
+                mSelectedTaskKeys = null;
             } else {
                 Assert.assertTrue(mSelectionCallback.hasActionMode());
-                mSelectedTaskIds = Stream.of(selected)
-                        .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mChildTaskData.TaskId)
+                mSelectedTaskKeys = Stream.of(selected)
+                        .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mChildTaskData.mTaskKey)
                         .collect(Collectors.toList());
             }
 
-            List<Integer> expanded = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskIds();
+            List<TaskKey> expanded = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskKeys();
 
             if (expanded.isEmpty()) {
                 mExpandedTaskIds = null;
@@ -402,10 +403,10 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             if (mTaskId == null)
                 startActivity(CreateTaskActivity.getCreateIntent(getContext()));
             else
-                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mTaskId));
+                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new TaskKey(mTaskId)));
         });
 
-        mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskIds, mExpandedTaskIds);
+        mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskKeys, mExpandedTaskIds);
 
         mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
@@ -451,19 +452,19 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             if (!selected.isEmpty()) {
                 Assert.assertTrue(mSelectionCallback.hasActionMode());
 
-                ArrayList<Integer> taskIds = Stream.of(selected)
-                        .map(taskWrapper -> ((TaskAdapter.TaskWrapper) taskWrapper.getModelNode()).mChildTaskData.TaskId)
+                ArrayList<TaskKey> taskKeys = Stream.of(selected)
+                        .map(taskWrapper -> ((TaskAdapter.TaskWrapper) taskWrapper.getModelNode()).mChildTaskData.mTaskKey)
                         .collect(Collectors.toCollection(ArrayList::new));
-                Assert.assertTrue(taskIds != null);
-                Assert.assertTrue(!taskIds.isEmpty());
+                Assert.assertTrue(taskKeys != null);
+                Assert.assertTrue(!taskKeys.isEmpty());
 
-                outState.putIntegerArrayList(SELECTED_TASKS_KEY, taskIds);
+                outState.putParcelableArrayList(SELECTED_TASK_KEYS_KEY, taskKeys);
             }
 
-            ArrayList<Integer> expandedTaskIds = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskIds();
+            ArrayList<TaskKey> expandedTaskKeys = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskKeys();
 
-            if (!expandedTaskIds.isEmpty())
-                outState.putIntegerArrayList(EXPANDED_TASKS_KEY, expandedTaskIds);
+            if (!expandedTaskKeys.isEmpty())
+                outState.putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, expandedTaskKeys);
         }
     }
 
@@ -500,7 +501,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         private TreeNodeCollection mTreeNodeCollection;
 
         @NonNull
-        static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<Integer> selectedTasks, List<Integer> expandedTasks) {
+        static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<TaskKey> selectedTaskKeys, List<TaskKey> expandedTaskKeys) {
             Assert.assertTrue(taskListFragment != null);
             Assert.assertTrue(data != null);
 
@@ -508,7 +509,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
             float density = taskListFragment.getActivity().getResources().getDisplayMetrics().density;
 
-            return taskAdapter.initialize(density, data, selectedTasks, expandedTasks);
+            return taskAdapter.initialize(density, data, selectedTaskKeys, expandedTaskKeys);
         }
 
         private TaskAdapter(@NonNull TaskListFragment taskListFragment) {
@@ -516,7 +517,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         }
 
         @NonNull
-        private TreeViewAdapter initialize(float density, @NonNull TaskListLoader.Data data, List<Integer> selectedTasks, List<Integer> expandedTasks) {
+        private TreeViewAdapter initialize(float density, @NonNull TaskListLoader.Data data, List<TaskKey> selectedTaskKeys, List<TaskKey> expandedTaskKeys) {
             mTreeViewAdapter = new TreeViewAdapter(false, this);
 
             mTreeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
@@ -538,7 +539,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
                 TaskWrapper taskWrapper = new TaskWrapper(density, 0, this, childTaskData);
 
-                treeNodes.add(taskWrapper.initialize(selectedTasks, mTreeNodeCollection, expandedTasks));
+                treeNodes.add(taskWrapper.initialize(selectedTaskKeys, mTreeNodeCollection, expandedTaskKeys));
 
                 mTaskWrappers.add(taskWrapper);
             }
@@ -632,9 +633,9 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         }
 
         @NonNull
-        ArrayList<Integer> getExpandedTaskIds() {
+        ArrayList<TaskKey> getExpandedTaskKeys() {
             return Stream.of(mTaskWrappers)
-                    .flatMap(TaskWrapper::getExpandedTaskIds)
+                    .flatMap(TaskWrapper::getExpandedTaskKeys)
                     .collect(Collectors.toCollection(ArrayList::new));
         }
 
@@ -659,17 +660,17 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             }
 
             @NonNull
-            TreeNode initialize(@Nullable List<Integer> selectedTasks, @NonNull NodeContainer nodeContainer, @Nullable List<Integer> expandedTasks) {
+            TreeNode initialize(@Nullable List<TaskKey> selectedTaskKeys, @NonNull NodeContainer nodeContainer, @Nullable List<TaskKey> expandedTaskKeys) {
                 boolean selected = false;
-                if (selectedTasks != null) {
-                    Assert.assertTrue(!selectedTasks.isEmpty());
-                    selected = selectedTasks.contains(mChildTaskData.TaskId);
+                if (selectedTaskKeys != null) {
+                    Assert.assertTrue(!selectedTaskKeys.isEmpty());
+                    selected = selectedTaskKeys.contains(mChildTaskData.mTaskKey);
                 }
 
                 boolean expanded = false;
-                if (expandedTasks != null) {
-                    Assert.assertTrue(!expandedTasks.isEmpty());
-                    expanded = expandedTasks.contains(mChildTaskData.TaskId);
+                if (expandedTaskKeys != null) {
+                    Assert.assertTrue(!expandedTaskKeys.isEmpty());
+                    expanded = expandedTaskKeys.contains(mChildTaskData.mTaskKey);
                 }
 
                 mTreeNode = new TreeNode(this, nodeContainer, expanded, selected);
@@ -683,7 +684,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
                     TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, this, childTaskData);
 
-                    treeNodes.add(taskWrapper.initialize(selectedTasks, mTreeNode, expandedTasks));
+                    treeNodes.add(taskWrapper.initialize(selectedTaskKeys, mTreeNode, expandedTaskKeys));
 
                     mTaskWrappers.add(taskWrapper);
                 }
@@ -798,7 +799,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 Activity activity = getTaskListFragment().getActivity();
                 Assert.assertTrue(activity != null);
 
-                activity.startActivity(ShowTaskActivity.getIntent(mChildTaskData.TaskId, activity));
+                activity.startActivity(ShowTaskActivity.getIntent(activity, mChildTaskData.mTaskKey));
             }
 
             @Override
@@ -850,20 +851,20 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             }
 
             @NonNull
-            Stream<Integer> getExpandedTaskIds() {
-                List<Integer> expandedTaskIds = new ArrayList<>();
+            Stream<TaskKey> getExpandedTaskKeys() {
+                List<TaskKey> expandedTaskKeys = new ArrayList<>();
 
                 TreeNode treeNode = getTreeNode();
 
                 if (treeNode.expanded()) {
-                    expandedTaskIds.add(mChildTaskData.TaskId);
+                    expandedTaskKeys.add(mChildTaskData.mTaskKey);
 
-                    expandedTaskIds.addAll(Stream.of(mTaskWrappers)
-                            .flatMap(TaskWrapper::getExpandedTaskIds)
+                    expandedTaskKeys.addAll(Stream.of(mTaskWrappers)
+                            .flatMap(TaskWrapper::getExpandedTaskKeys)
                             .collect(Collectors.toList()));
                 }
 
-                return Stream.of(expandedTaskIds);
+                return Stream.of(expandedTaskKeys);
             }
         }
 

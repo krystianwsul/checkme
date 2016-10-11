@@ -6,15 +6,17 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.List;
 
 public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
+    @Nullable
     private final Integer mTaskId;
 
-    public TaskListLoader(Context context, Integer taskId) {
+    public TaskListLoader(@NonNull Context context, @Nullable Integer taskId) {
         super(context);
         mTaskId = taskId;
     }
@@ -70,12 +72,23 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
     public static class ChildTaskData {
         public final int TaskId;
+
+        @NonNull
         public final String Name;
+
+        @Nullable
         public final String ScheduleText;
+
+        @NonNull
         public final List<ChildTaskData> Children;
+
+        @Nullable
         public final String mNote;
 
-        public ChildTaskData(int taskId, @NonNull String name, @Nullable String scheduleText, @NonNull List<ChildTaskData> children, @Nullable String note) {
+        @NonNull
+        public final ExactTimeStamp mStartExactTimeStamp;
+
+        public ChildTaskData(int taskId, @NonNull String name, @Nullable String scheduleText, @NonNull List<ChildTaskData> children, @Nullable String note, @NonNull ExactTimeStamp startExactTimeStamp) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             TaskId = taskId;
@@ -83,6 +96,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             ScheduleText = scheduleText;
             Children = children;
             mNote = note;
+            mStartExactTimeStamp = startExactTimeStamp;
         }
 
         @Override
@@ -95,6 +109,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
             hashCode += Children.hashCode();
             if (!TextUtils.isEmpty(mNote))
                 hashCode += mNote.hashCode();
+            hashCode += mStartExactTimeStamp.hashCode();
             return hashCode;
         }
 
@@ -131,6 +146,9 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
                 return false;
 
             if (!TextUtils.isEmpty(mNote) && !mNote.equals(childTaskData.mNote))
+                return false;
+
+            if (!mStartExactTimeStamp.equals(childTaskData.mStartExactTimeStamp))
                 return false;
 
             return true;

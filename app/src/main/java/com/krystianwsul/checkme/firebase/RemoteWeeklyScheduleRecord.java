@@ -7,16 +7,17 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 import junit.framework.Assert;
 
 public class RemoteWeeklyScheduleRecord extends RemoteScheduleRecord {
-    private final int dayOfWeek;
+    private int dayOfWeek;
 
-    @Nullable
-    private final Integer customTimeId;
+    private Integer customTimeId;
 
-    @Nullable
-    private final Integer hour;
+    private Integer hour;
 
-    @Nullable
-    private final Integer minute;
+    private Integer minute;
+
+    public RemoteWeeklyScheduleRecord() {
+
+    }
 
     public RemoteWeeklyScheduleRecord(long startTime, @Nullable Long endTime, int dayOfWeek, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         super(startTime, endTime, ScheduleType.WEEKLY.ordinal());

@@ -8,36 +8,38 @@ import junit.framework.Assert;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class RemoteTaskRecord {
-    @NonNull
     private String name;
 
-    private final long startTime;
+    private long startTime;
 
-    @Nullable
     private Long endTime;
 
-    @Nullable
     private Integer oldestVisibleYear;
 
-    @Nullable
     private Integer oldestVisibleMonth;
 
-    @Nullable
     private Integer oldestVisibleDay;
 
-    @Nullable
     private String note;
 
-    @NonNull
-    private final List<RemoteScheduleRecord> scheduleRecords;
+    private List<RemoteSingleScheduleRecord> singleScheduleRecords;
+    private List<RemoteDailyScheduleRecord> dailyScheduleRecords;
+    private List<RemoteWeeklyScheduleRecord> weeklyScheduleRecords;
+    private List<RemoteMonthlyDayScheduleRecord> monthlyDayScheduleRecords;
+    private List<RemoteMonthlyWeekScheduleRecord> monthlyWeekScheduleRecords;
 
-    public RemoteTaskRecord(@NonNull String name, long startTime, @Nullable Long endTime, boolean relevant, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note, @NonNull List<RemoteScheduleRecord> scheduleRecords) {
+    public RemoteTaskRecord() {
+
+    }
+
+    public RemoteTaskRecord(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note, @NonNull List<RemoteSingleScheduleRecord> remoteSingleScheduleRecords, @NonNull List<RemoteDailyScheduleRecord> remoteDailyScheduleRecords, @NonNull List<RemoteWeeklyScheduleRecord> remoteWeeklyScheduleRecords, @NonNull List<RemoteMonthlyDayScheduleRecord> remoteMonthlyDayScheduleRecords, @NonNull List<RemoteMonthlyWeekScheduleRecord> remoteMonthlyWeekScheduleRecords) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));
-        Assert.assertTrue(!scheduleRecords.isEmpty());
+        Assert.assertTrue(!remoteSingleScheduleRecords.isEmpty() || !remoteDailyScheduleRecords.isEmpty() || !remoteWeeklyScheduleRecords.isEmpty() || !remoteMonthlyDayScheduleRecords.isEmpty() || !remoteMonthlyWeekScheduleRecords.isEmpty());
 
         this.name = name;
         this.startTime = startTime;
@@ -49,7 +51,11 @@ public class RemoteTaskRecord {
 
         this.note = note;
 
-        this.scheduleRecords = scheduleRecords;
+        singleScheduleRecords = remoteSingleScheduleRecords;
+        dailyScheduleRecords = remoteDailyScheduleRecords;
+        weeklyScheduleRecords = remoteWeeklyScheduleRecords;
+        monthlyDayScheduleRecords = remoteMonthlyDayScheduleRecords;
+        monthlyWeekScheduleRecords = remoteMonthlyWeekScheduleRecords;
     }
 
     @NonNull
@@ -87,7 +93,27 @@ public class RemoteTaskRecord {
     }
 
     @NonNull
-    public List<RemoteScheduleRecord> getScheduleRecords() {
-        return scheduleRecords;
+    public List<RemoteSingleScheduleRecord> getSingleScheduleRecords() {
+        return singleScheduleRecords;
+    }
+
+    @NonNull
+    public List<RemoteDailyScheduleRecord> getDailyScheduleRecords() {
+        return dailyScheduleRecords;
+    }
+
+    @NonNull
+    public List<RemoteWeeklyScheduleRecord> getWeeklyScheduleRecords() {
+        return weeklyScheduleRecords;
+    }
+
+    @NonNull
+    public List<RemoteMonthlyDayScheduleRecord> getMonthlyDayScheduleRecords() {
+        return monthlyDayScheduleRecords;
+    }
+
+    @NonNull
+    public List<RemoteMonthlyWeekScheduleRecord> getMonthlyWeekScheduleRecords() {
+        return monthlyWeekScheduleRecords;
     }
 }

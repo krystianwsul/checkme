@@ -4,13 +4,18 @@ import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class RemoteScheduleRecord {
-    private final long startTime;
+    private long startTime;
 
-    @Nullable
     private Long endTime;
 
-    private final int type;
+    private int type;
+
+    @SuppressWarnings("WeakerAccess")
+    public RemoteScheduleRecord() {
+
+    }
 
     RemoteScheduleRecord(long startTime, @Nullable Long endTime, int type) {
         Assert.assertTrue((endTime == null) || startTime <= endTime);

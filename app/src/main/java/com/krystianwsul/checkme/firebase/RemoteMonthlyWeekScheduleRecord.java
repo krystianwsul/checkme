@@ -7,18 +7,19 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 import junit.framework.Assert;
 
 public class RemoteMonthlyWeekScheduleRecord extends RemoteScheduleRecord {
-    private final int dayOfMonth;
-    private final int dayOfWeek;
-    private final boolean beginningOfMonth;
+    private int dayOfMonth;
+    private int dayOfWeek;
+    private boolean beginningOfMonth;
 
-    @Nullable
-    private final Integer customTimeId;
+    private Integer customTimeId;
 
-    @Nullable
-    private final Integer hour;
+    private Integer hour;
 
-    @Nullable
-    private final Integer minute;
+    private Integer minute;
+
+    public RemoteMonthlyWeekScheduleRecord() {
+
+    }
 
     public RemoteMonthlyWeekScheduleRecord(long startTime, @Nullable Long endTime, int dayOfMonth, int dayOfWeek, boolean beginningOfMonth, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         super(startTime, endTime, ScheduleType.MONTHLY_WEEK.ordinal());

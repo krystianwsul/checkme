@@ -34,7 +34,6 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteDailyScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteMonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteMonthlyWeekScheduleRecord;
-import com.krystianwsul.checkme.firebase.RemoteScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.RemoteWeeklyScheduleRecord;
@@ -324,10 +323,77 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         if (hasValueFriends()) {
                             ExactTimeStamp now = ExactTimeStamp.getNow();
 
-                            List<RemoteScheduleRecord> remoteScheduleRecords = createRemoteScheduleRecords(getScheduleDatas(), now);
-                            Assert.assertTrue(!remoteScheduleRecords.isEmpty());
+                            List<RemoteSingleScheduleRecord> remoteSingleScheduleRecords = new ArrayList<>();
+                            List<RemoteDailyScheduleRecord> remoteDailyScheduleRecords = new ArrayList<>();
+                            List<RemoteWeeklyScheduleRecord> remoteWeeklyScheduleRecords = new ArrayList<>();
+                            List<RemoteMonthlyDayScheduleRecord> remoteMonthlyDayScheduleRecords = new ArrayList<>();
+                            List<RemoteMonthlyWeekScheduleRecord> remoteMonthlyWeekScheduleRecords = new ArrayList<>();
 
-                            RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(name, now.getLong(), null, true, null, null, null, mNote, remoteScheduleRecords);
+                            for (CreateTaskLoader.ScheduleData scheduleData : getScheduleDatas()) {
+                                Assert.assertTrue(scheduleData != null);
+
+                                switch (scheduleData.getScheduleType()) {
+                                    case SINGLE: {
+                                        CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
+
+                                        Date date = singleScheduleData.Date;
+
+                                        Assert.assertTrue(singleScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                                        HourMinute hourMinute = singleScheduleData.TimePair.mHourMinute;
+                                        Assert.assertTrue(hourMinute != null);
+
+                                        remoteSingleScheduleRecords.add(new RemoteSingleScheduleRecord(now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                                        break;
+                                    }
+                                    case DAILY: {
+                                        CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
+
+                                        Assert.assertTrue(dailyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+
+                                        HourMinute hourMinute = dailyScheduleData.TimePair.mHourMinute;
+                                        Assert.assertTrue(hourMinute != null);
+
+                                        remoteDailyScheduleRecords.add(new RemoteDailyScheduleRecord(now.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute()));
+                                        break;
+                                    }
+                                    case WEEKLY: {
+                                        CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
+
+                                        DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
+
+                                        Assert.assertTrue(weeklyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                                        HourMinute hourMinute = weeklyScheduleData.TimePair.mHourMinute;
+                                        Assert.assertTrue(hourMinute != null);
+
+                                        remoteWeeklyScheduleRecords.add(new RemoteWeeklyScheduleRecord(now.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                                        break;
+                                    }
+                                    case MONTHLY_DAY: {
+                                        CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
+
+                                        Assert.assertTrue(monthlyDayScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                                        HourMinute hourMinute = monthlyDayScheduleData.TimePair.mHourMinute;
+                                        Assert.assertTrue(hourMinute != null);
+
+                                        remoteMonthlyDayScheduleRecords.add(new RemoteMonthlyDayScheduleRecord(now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                                        break;
+                                    }
+                                    case MONTHLY_WEEK: {
+                                        CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
+
+                                        Assert.assertTrue(monthlyWeekScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                                        HourMinute hourMinute = monthlyWeekScheduleData.TimePair.mHourMinute;
+                                        Assert.assertTrue(hourMinute != null);
+
+                                        remoteMonthlyWeekScheduleRecords.add(new RemoteMonthlyWeekScheduleRecord(now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                                        break;
+                                    }
+                                    default:
+                                        throw new UnsupportedOperationException();
+                                }
+                            }
+
+                            RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(name, now.getLong(), null, null, null, null, mNote, remoteSingleScheduleRecords, remoteDailyScheduleRecords, remoteWeeklyScheduleRecords, remoteMonthlyDayScheduleRecords, remoteMonthlyWeekScheduleRecords);
 
                             UserData userData = MainActivity.getUserData();
                             Assert.assertTrue(userData != null);
@@ -1024,79 +1090,6 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
             mFriendPosition = null;
         }
-    }
-
-    @NonNull
-    private List<RemoteScheduleRecord> createRemoteScheduleRecords(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-
-        List<RemoteScheduleRecord> remoteScheduleRecords = new ArrayList<>();
-
-        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
-            Assert.assertTrue(scheduleData != null);
-
-            switch (scheduleData.getScheduleType()) {
-                case SINGLE: {
-                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
-
-                    Date date = singleScheduleData.Date;
-
-                    Assert.assertTrue(singleScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = singleScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteScheduleRecords.add(new RemoteSingleScheduleRecord(startExactTimeStamp.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case DAILY: {
-                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
-
-                    Assert.assertTrue(dailyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-
-                    HourMinute hourMinute = dailyScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteScheduleRecords.add(new RemoteDailyScheduleRecord(startExactTimeStamp.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case WEEKLY: {
-                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
-
-                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
-
-                    Assert.assertTrue(weeklyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = weeklyScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteScheduleRecords.add(new RemoteWeeklyScheduleRecord(startExactTimeStamp.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case MONTHLY_DAY: {
-                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
-
-                    Assert.assertTrue(monthlyDayScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = monthlyDayScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteScheduleRecords.add(new RemoteMonthlyDayScheduleRecord(startExactTimeStamp.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case MONTHLY_WEEK: {
-                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
-
-                    Assert.assertTrue(monthlyWeekScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = monthlyWeekScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteScheduleRecords.add(new RemoteMonthlyWeekScheduleRecord(startExactTimeStamp.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                default:
-                    throw new UnsupportedOperationException();
-            }
-        }
-
-        return remoteScheduleRecords;
     }
 
     public static class ScheduleHint implements Parcelable {

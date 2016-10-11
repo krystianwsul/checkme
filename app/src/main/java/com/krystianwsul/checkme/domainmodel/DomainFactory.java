@@ -17,6 +17,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
+import com.krystianwsul.checkme.firebase.TaskWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -78,6 +80,8 @@ public class DomainFactory {
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
+    private final Map<String, RemoteTaskRecord> mRemoteTaskRecords = new HashMap<>();
+
     private static ExactTimeStamp sStart;
     private static ExactTimeStamp sRead;
     private static ExactTimeStamp sStop;
@@ -93,6 +97,10 @@ public class DomainFactory {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
             Log.e("asdf", "onChildAdded, dataSnapshot: " + dataSnapshot + ", previousChildName: " + previousChildName);
+
+            Assert.assertTrue(dataSnapshot != null);
+
+            addRemoteTaskRecod(dataSnapshot);
         }
 
         @Override
@@ -274,6 +282,15 @@ public class DomainFactory {
             mUserData = null;
             mQuery = null;
         }
+    }
+
+    private synchronized void addRemoteTaskRecod(@NonNull DataSnapshot dataSnapshot) {
+        TaskWrapper taskWrapper = dataSnapshot.getValue(TaskWrapper.class);
+        Assert.assertTrue(taskWrapper != null);
+
+        mRemoteTaskRecords.put(dataSnapshot.getKey(), taskWrapper.taskRecord);
+
+        ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
 
     // gets
@@ -797,12 +814,10 @@ public class DomainFactory {
         return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId());
     }
 
-    public synchronized TaskListLoader.Data getTaskListData(Context context, Integer taskId) {
+    public synchronized TaskListLoader.Data getTaskListData(@NonNull Context context, @Nullable Integer taskId) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getTaskListData");
-
-        Assert.assertTrue(context != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -815,6 +830,8 @@ public class DomainFactory {
         String note;
 
         if (taskId != null) {
+            // todo firebase
+
             Task parentTask = mTasks.get(taskId);
             Assert.assertTrue(parentTask != null);
 
@@ -839,12 +856,12 @@ public class DomainFactory {
             note = null;
         }
 
-        Collections.sort(tasks, (Task lhs, Task rhs) -> Integer.valueOf(lhs.getId()).compareTo(rhs.getId()));
+        Collections.sort(tasks, (Task lhs, Task rhs) -> lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));
         if (taskId == null)
             Collections.reverse(tasks);
 
         List<TaskListLoader.ChildTaskData> childTaskDatas = Stream.of(tasks)
-                .map(task -> new TaskListLoader.ChildTaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote()))
+                .map(task -> new TaskListLoader.ChildTaskData(task.getId(), task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp()))
                 .collect(Collectors.toList());
 
         return new TaskListLoader.Data(childTaskDatas, note);
@@ -1996,7 +2013,7 @@ public class DomainFactory {
     private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
         return Stream.of(parentTask.getChildTasks(now))
                 .sortBy(Task::getId)
-                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote()))
+                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getId(), childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp()))
                 .collect(Collectors.toList());
     }
 

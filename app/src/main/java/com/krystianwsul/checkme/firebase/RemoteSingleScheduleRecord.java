@@ -7,18 +7,19 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 import junit.framework.Assert;
 
 public class RemoteSingleScheduleRecord extends RemoteScheduleRecord {
-    private final int year;
-    private final int month;
-    private final int day;
+    private int year;
+    private int month;
+    private int day;
 
-    @Nullable
-    private final Integer customTimeId;
+    private Integer customTimeId;
 
-    @Nullable
-    private final Integer hour;
+    private Integer hour;
 
-    @Nullable
-    private final Integer minute;
+    private Integer minute;
+
+    public RemoteSingleScheduleRecord() {
+
+    }
 
     public RemoteSingleScheduleRecord(long startTime, @Nullable Long endTime, int year, int month, int day, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         super(startTime, endTime, ScheduleType.SINGLE.ordinal());

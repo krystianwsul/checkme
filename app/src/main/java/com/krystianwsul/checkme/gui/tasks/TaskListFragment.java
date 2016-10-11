@@ -57,6 +57,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     private FloatingActionButton mTaskListFragmentFab;
     private TextView mEmptyText;
 
+    @Nullable
     private Integer mTaskId;
 
     private TaskListLoader.Data mData;
@@ -820,7 +821,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 if (another instanceof TaskWrapper) {
                     TaskListFragment taskListFragment = getTaskListFragment();
 
-                    int comparison = Integer.valueOf(mChildTaskData.TaskId).compareTo(((TaskWrapper) another).mChildTaskData.TaskId);
+                    int comparison = mChildTaskData.mStartExactTimeStamp.compareTo(((TaskWrapper) another).mChildTaskData.mStartExactTimeStamp);
                     if (taskListFragment.mTaskId == null && mIndentation == 0)
                         comparison = -comparison;
 

@@ -106,7 +106,7 @@ public class Task {
     }
 
     @NonNull
-    private ExactTimeStamp getStartExactTimeStamp() {
+    ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mTaskRecord.getStartTime());
     }
 

@@ -23,7 +23,6 @@ public class FriendListLoader extends Loader<List<UserData>> {
     private ValueEventListener mValueEventListener;
 
     private List<UserData> mUserDatas;
-    private boolean mFirst = true;
 
     public FriendListLoader(@NonNull Context context, @NonNull UserData userData) {
         super(context);

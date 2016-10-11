@@ -6,11 +6,18 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
 import com.krystianwsul.checkme.MyCrashlytics;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
@@ -60,22 +67,54 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+@SuppressLint("UseSparseArrays")
 public class DomainFactory {
     private static DomainFactory sDomainFactory;
 
     private final PersistenceManger mPersistenceManager;
 
-    @SuppressLint("UseSparseArrays")
     private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
-    @SuppressLint("UseSparseArrays")
     private final HashMap<Integer, Task> mTasks = new HashMap<>();
-    @SuppressLint("UseSparseArrays")
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
     private static ExactTimeStamp sStart;
     private static ExactTimeStamp sRead;
     private static ExactTimeStamp sStop;
+
+    @Nullable
+    private UserData mUserData;
+
+    @Nullable
+    private Query mQuery;
+
+    @NonNull
+    private final ChildEventListener mChildEventListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
+            Log.e("asdf", "onChildAdded, dataSnapshot: " + dataSnapshot + ", previousChildName: " + previousChildName);
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+            Log.e("asdf", "onChildChanged, dataSnapshot: " + dataSnapshot + ", previousChildName: " + previousChildName);
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            Log.e("asdf", "onChildRemoved, dataSnapshot: " + dataSnapshot);
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+            Log.e("asdf", "onChildMoved, dataSnapshot: " + dataSnapshot + ", previousChildName: " + previousChildName);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.e("asdf", "onCancelled, databaseError: " + databaseError);
+        }
+    };
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -201,6 +240,38 @@ public class DomainFactory {
     private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds) {
         mPersistenceManager.save(context);
         ObserverHolder.getObserverHolder().notifyDomainObservers(dataIds);
+    }
+
+    // firebase
+
+    public synchronized void setUserData(@NonNull UserData userData) {
+        if (mUserData != null) {
+            Assert.assertTrue(mQuery != null);
+
+            if (mUserData.equals(userData))
+                return;
+
+            clearUserData();
+        }
+
+        Assert.assertTrue(mUserData == null);
+        Assert.assertTrue(mQuery == null);
+
+        mQuery = DatabaseWrapper.getTaskRecordsQuery(userData);
+        mQuery.addChildEventListener(mChildEventListener);
+    }
+
+    public synchronized void clearUserData() {
+        if (mUserData == null) {
+            Assert.assertTrue(mQuery == null);
+        } else {
+            Assert.assertTrue(mQuery != null);
+
+            mQuery.removeEventListener(mChildEventListener);
+
+            mUserData = null;
+            mQuery = null;
+        }
     }
 
     // gets

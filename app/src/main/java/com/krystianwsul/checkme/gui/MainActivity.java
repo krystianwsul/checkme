@@ -43,6 +43,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
@@ -125,9 +126,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
             DatabaseWrapper.setUserData(sUserData);
 
+            DomainFactory.getDomainFactory(this).setUserData(sUserData);
+
             Log.e("asdf", "firebase logged in");
         } else {
             sUserData = null;
+
+            DomainFactory.getDomainFactory(this).clearUserData();
 
             Log.e("asdf", "firebase logged out");
         }

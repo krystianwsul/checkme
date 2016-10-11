@@ -66,4 +66,14 @@ public class DatabaseWrapper {
 
         taskReference.child("taskRecord").setValue(remoteTaskRecord);
     }
+
+    @NonNull
+    public static Query getTaskRecordsQuery(@NonNull UserData userData) {
+        String key = UserData.getKey(userData.email);
+
+        Query query = sDatabaseReference.child("tasks").orderByChild("taskOf/" + key).equalTo(true);
+        Assert.assertTrue(query != null);
+
+        return query;
+    }
 }

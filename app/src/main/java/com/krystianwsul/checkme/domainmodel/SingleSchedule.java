@@ -30,9 +30,7 @@ class SingleSchedule extends Schedule {
     @NonNull
     @Override
     String getScheduleText(@NonNull Context context) {
-        Instance instance = mDomainFactory.getInstance(getRootTask(), getDateTime());
-
-        return instance.getInstanceDateTime().getDisplayText(context);
+        return getDateTime().getDisplayText(context);
     }
 
     @NonNull

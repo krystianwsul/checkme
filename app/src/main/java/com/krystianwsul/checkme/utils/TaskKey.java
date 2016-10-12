@@ -24,7 +24,7 @@ public class TaskKey implements Parcelable {
         Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
 
         mLocalTaskId = null;
-        mRemoteTaskId = null;
+        mRemoteTaskId = remoteTaskId;
     }
 
     @Override

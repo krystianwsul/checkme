@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -24,10 +25,19 @@ public class RemoteTaskRecord {
 
     private String note;
 
+    @Nullable
     private List<RemoteSingleScheduleRecord> singleScheduleRecords;
+
+    @Nullable
     private List<RemoteDailyScheduleRecord> dailyScheduleRecords;
+
+    @Nullable
     private List<RemoteWeeklyScheduleRecord> weeklyScheduleRecords;
+
+    @Nullable
     private List<RemoteMonthlyDayScheduleRecord> monthlyDayScheduleRecords;
+
+    @Nullable
     private List<RemoteMonthlyWeekScheduleRecord> monthlyWeekScheduleRecords;
 
     public RemoteTaskRecord() {
@@ -94,26 +104,41 @@ public class RemoteTaskRecord {
 
     @NonNull
     public List<RemoteSingleScheduleRecord> getSingleScheduleRecords() {
-        return singleScheduleRecords;
+        if (singleScheduleRecords == null)
+            return new ArrayList<>();
+        else
+            return singleScheduleRecords;
     }
 
     @NonNull
     public List<RemoteDailyScheduleRecord> getDailyScheduleRecords() {
-        return dailyScheduleRecords;
+        if (dailyScheduleRecords == null)
+            return new ArrayList<>();
+        else
+            return dailyScheduleRecords;
     }
 
     @NonNull
     public List<RemoteWeeklyScheduleRecord> getWeeklyScheduleRecords() {
-        return weeklyScheduleRecords;
+        if (weeklyScheduleRecords == null)
+            return new ArrayList<>();
+        else
+            return weeklyScheduleRecords;
     }
 
     @NonNull
     public List<RemoteMonthlyDayScheduleRecord> getMonthlyDayScheduleRecords() {
-        return monthlyDayScheduleRecords;
+        if (monthlyDayScheduleRecords == null)
+            return new ArrayList<>();
+        else
+            return monthlyDayScheduleRecords;
     }
 
     @NonNull
     public List<RemoteMonthlyWeekScheduleRecord> getMonthlyWeekScheduleRecords() {
-        return monthlyWeekScheduleRecords;
+        if (monthlyWeekScheduleRecords == null)
+            return new ArrayList<>();
+        else
+            return monthlyWeekScheduleRecords;
     }
 }

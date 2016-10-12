@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.TaskWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
@@ -861,6 +862,16 @@ public class DomainFactory {
                 .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
                 .collect(Collectors.toList());
 
+        childTaskDatas.addAll(Stream.of(mRemoteTaskRecords)
+                .map(entry -> {
+                    String key = entry.getKey();
+                    RemoteTask task = new RemoteTask(entry.getValue());
+
+                    List<TaskListLoader.ChildTaskData> childTaskDatas1 = new ArrayList<>();  // todo firebase
+
+                    return new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), new ArrayList<>(), task.getNote(), task.getStartExactTimeStamp(), new TaskKey(key));
+                })
+                .collect(Collectors.toList()));
 
         Collections.sort(childTaskDatas, (TaskListLoader.ChildTaskData lhs, TaskListLoader.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
         if (taskId == null)

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -16,14 +17,18 @@ import java.util.List;
 
 public class RemoteTask {
     @NonNull
+    private final DomainFactory mDomainFactory;
+
+    @NonNull
     private final String mKey;
 
     @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
-    public RemoteTask(@NonNull String key, @NonNull RemoteTaskRecord remoteTaskRecord) {
+    public RemoteTask(@NonNull DomainFactory domainFactory, @NonNull String key, @NonNull RemoteTaskRecord remoteTaskRecord) {
         Assert.assertTrue(!TextUtils.isEmpty(key));
 
+        mDomainFactory = domainFactory;
         mKey = key;
         mRemoteTaskRecord = remoteTaskRecord;
     }
@@ -109,10 +114,10 @@ public class RemoteTask {
         }
     }
 
-    boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    public boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
-        return true; // todo firebase
+        return (getParentTask(exactTimeStamp) == null);
     }
 
     @Nullable
@@ -123,5 +128,19 @@ public class RemoteTask {
     @NonNull
     public TaskKey getTaskKey() {
         return new TaskKey(mKey);
+    }
+
+    @Nullable
+    RemoteTask getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(current(exactTimeStamp));
+
+        return mDomainFactory.getParentTask(this, exactTimeStamp);
+    }
+
+    @NonNull
+    public List<RemoteTask> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(current(exactTimeStamp));
+
+        return mDomainFactory.getChildTasks(this, exactTimeStamp);
     }
 }

@@ -52,14 +52,14 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     private static final String EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys";
 
     private static final String ALL_TASKS_KEY = "allTasks";
-    private static final String TASK_ID_KEY = "taskId";
+    private static final String TASK_KEY_KEY = "taskKey";
 
     private RecyclerView mTaskListFragmentRecycler;
     private FloatingActionButton mTaskListFragmentFab;
     private TextView mEmptyText;
 
     @Nullable
-    private Integer mTaskId;
+    private TaskKey mTaskKey;
 
     private TaskListLoader.Data mData;
 
@@ -101,10 +101,10 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                     startActivity(CreateTaskActivity.getEditIntent(getActivity(), childTaskData.mTaskKey));
                     break;
                 case R.id.action_task_join:
-                    if (mTaskId == null)
+                    if (mTaskKey == null)
                         startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys));
                     else
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mTaskId));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mTaskKey.mLocalTaskId)); // todo firebase
                     break;
                 case R.id.action_task_delete:
                     do {
@@ -301,11 +301,11 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     }
 
     @NonNull
-    public static TaskListFragment getInstance(int taskId) {
+    public static TaskListFragment getInstance(@NonNull TaskKey taskKey) {
         TaskListFragment taskListFragment = new TaskListFragment();
 
         Bundle args = new Bundle();
-        args.putInt(TASK_ID_KEY, taskId);
+        args.putParcelable(TASK_KEY_KEY, taskKey);
         taskListFragment.setArguments(args);
 
         return taskListFragment;
@@ -330,13 +330,16 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         Assert.assertTrue(args != null);
 
         boolean allTasks = args.getBoolean(ALL_TASKS_KEY, false);
-        int taskId = args.getInt(TASK_ID_KEY, -1);
-        if (taskId != -1) {
+
+        if (args.containsKey(TASK_KEY_KEY)) {
             Assert.assertTrue(!allTasks);
-            mTaskId = taskId;
+
+            mTaskKey = args.getParcelable(TASK_KEY_KEY);
+            Assert.assertTrue(mTaskKey != null);
         } else {
             Assert.assertTrue(allTasks);
-            mTaskId = null;
+
+            mTaskKey = null;
         }
 
         if (savedInstanceState != null) {
@@ -370,7 +373,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
     @Override
     public Loader<TaskListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new TaskListLoader(getActivity(), mTaskId);
+        return new TaskListLoader(getActivity(), mTaskKey);
     }
 
     @Override
@@ -400,10 +403,10 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         }
 
         mTaskListFragmentFab.setOnClickListener(v -> {
-            if (mTaskId == null)
+            if (mTaskKey == null)
                 startActivity(CreateTaskActivity.getCreateIntent(getContext()));
             else
-                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new TaskKey(mTaskId)));
+                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mTaskKey));
         });
 
         mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskKeys, mExpandedTaskIds);
@@ -418,7 +421,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             mTaskListFragmentRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
 
-            if (mTaskId != null) {
+            if (mTaskKey != null) {
                 mEmptyText.setText(R.string.empty_child);
             } else {
                 mEmptyText.setText(R.string.tasks_empty_root);
@@ -799,7 +802,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 Activity activity = getTaskListFragment().getActivity();
                 Assert.assertTrue(activity != null);
 
-                activity.startActivity(ShowTaskActivity.getIntent(activity, mChildTaskData.mTaskKey));
+                activity.startActivity(ShowTaskActivity.newIntent(activity, mChildTaskData.mTaskKey));
             }
 
             @Override
@@ -823,7 +826,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                     TaskListFragment taskListFragment = getTaskListFragment();
 
                     int comparison = mChildTaskData.mStartExactTimeStamp.compareTo(((TaskWrapper) another).mChildTaskData.mStartExactTimeStamp);
-                    if (taskListFragment.mTaskId == null && mIndentation == 0)
+                    if (taskListFragment.mTaskKey == null && mIndentation == 0)
                         comparison = -comparison;
 
                     return comparison;

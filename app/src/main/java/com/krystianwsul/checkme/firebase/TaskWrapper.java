@@ -16,6 +16,7 @@ import java.util.Map;
 public class TaskWrapper {
     public Map<String, Boolean> taskOf;
     public RemoteTaskRecord taskRecord;
+    public RemoteTaskHierarchyRecord taskHierarchyRecord;
 
     public TaskWrapper() {
 
@@ -30,5 +31,18 @@ public class TaskWrapper {
         taskOf.put(UserData.getKey(userData.email), true);
 
         taskRecord = remoteTaskRecord;
+        taskHierarchyRecord = null;
+    }
+
+    TaskWrapper(@NonNull UserData userData, @NonNull List<UserData> friends, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
+        Assert.assertTrue(!friends.isEmpty());
+        Assert.assertTrue(!friends.contains(userData));
+
+        taskOf = Stream.of(friends)
+                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+        taskOf.put(UserData.getKey(userData.email), true);
+
+        taskRecord = null;
+        taskHierarchyRecord = remoteTaskHierarchyRecord;
     }
 }

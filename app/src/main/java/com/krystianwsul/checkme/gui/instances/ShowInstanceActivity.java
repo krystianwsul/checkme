@@ -132,7 +132,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                startActivity(ShowTaskActivity.getIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
+                startActivity(ShowTaskActivity.newIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
                 break;
             case R.id.instance_menu_edit_task:
                 Assert.assertTrue(mInstanceData != null);

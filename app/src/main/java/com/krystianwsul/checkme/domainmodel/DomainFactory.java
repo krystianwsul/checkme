@@ -18,6 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteTask;
+import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.TaskWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
@@ -108,6 +109,9 @@ public class DomainFactory {
 
     @NonNull
     private Map<String, RemoteTask> mRemoteTasks = new HashMap<>();
+
+    @NonNull
+    private Map<String, RemoteTaskHierarchy> mRemoteTaskHierarchies = new HashMap<>();
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -270,10 +274,98 @@ public class DomainFactory {
     }
 
     private synchronized void setRemoteTaskRecords(@NonNull DataSnapshot dataSnapshot) {
-        mRemoteTasks = Stream.of(dataSnapshot.getChildren())
-                .collect(Collectors.toMap(DataSnapshot::getKey, child -> new RemoteTask(child.getKey(), child.getValue(TaskWrapper.class).taskRecord)));
+        mRemoteTasks = new HashMap<>();
+
+        for (DataSnapshot child : dataSnapshot.getChildren()) {
+            Assert.assertTrue(child != null);
+
+            String key = child.getKey();
+            Assert.assertTrue(!TextUtils.isEmpty(key));
+
+            TaskWrapper taskWrapper = child.getValue(TaskWrapper.class);
+            Assert.assertTrue(taskWrapper != null);
+
+            if (taskWrapper.taskRecord != null) {
+                Assert.assertTrue(taskWrapper.taskHierarchyRecord == null);
+
+                mRemoteTasks.put(key, new RemoteTask(this, key, taskWrapper.taskRecord));
+            } else {
+                Assert.assertTrue(taskWrapper.taskHierarchyRecord != null);
+
+                mRemoteTaskHierarchies.put(key, new RemoteTaskHierarchy(this, key, taskWrapper.taskHierarchyRecord));
+            }
+        }
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+    }
+
+    @Nullable
+    public RemoteTask getParentTask(@NonNull RemoteTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(childTask.current(exactTimeStamp));
+
+        RemoteTaskHierarchy remoteTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
+        if (remoteTaskHierarchy == null) {
+            return null;
+        } else {
+            Assert.assertTrue(remoteTaskHierarchy.current(exactTimeStamp));
+            RemoteTask parentRemoteTask = remoteTaskHierarchy.getParentTask();
+            Assert.assertTrue(parentRemoteTask.current(exactTimeStamp));
+            return parentRemoteTask;
+        }
+    }
+
+    @Nullable
+    private RemoteTaskHierarchy getParentTaskHierarchy(@NonNull RemoteTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(childTask.current(exactTimeStamp));
+
+        List<RemoteTaskHierarchy> remoteTaskHierarchies = Stream.of(mRemoteTaskHierarchies.values())
+                .filter(remoteTaskHierarchy -> remoteTaskHierarchy.current(exactTimeStamp))
+                .filter(remoteTaskHierarchy -> remoteTaskHierarchy.getChildTask() == childTask)
+                .collect(Collectors.toList());
+
+        if (remoteTaskHierarchies.isEmpty()) {
+            return null;
+        } else {
+            Assert.assertTrue(remoteTaskHierarchies.size() == 1);
+            return remoteTaskHierarchies.get(0);
+        }
+    }
+
+    @NonNull
+    public RemoteTask getTask(@NonNull String taskId) {
+        Assert.assertTrue(!TextUtils.isEmpty(taskId));
+
+        RemoteTask remoteTask = mRemoteTasks.get(taskId);
+        Assert.assertTrue(remoteTask != null);
+
+        return remoteTask;
+    }
+
+    @NonNull
+    public List<RemoteTask> getChildTasks(@NonNull RemoteTask parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(parentTask.current(exactTimeStamp));
+
+        return Stream.of(getChildTaskHierarchies(parentTask))
+                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
+                .map(RemoteTaskHierarchy::getChildTask)
+                .filter(childTask -> childTask.current(exactTimeStamp))
+                .sortBy(RemoteTask::getStartExactTimeStamp)
+                .collect(Collectors.toList());
+    }
+
+    @NonNull
+    List<RemoteTaskHierarchy> getChildTaskHierarchies(@NonNull RemoteTask parentTask) {
+        return Stream.of(mRemoteTaskHierarchies.values())
+                .filter(taskHierarchy -> taskHierarchy.getParentTask() == parentTask)
+                .collect(Collectors.toList());
+    }
+
+    @NonNull
+    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull RemoteTask parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
+        return Stream.of(parentTask.getChildTasks(now))
+                .sortBy(RemoteTask::getStartExactTimeStamp)
+                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
+                .collect(Collectors.toList());
     }
 
     // gets
@@ -783,75 +875,93 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowTaskLoader.Data getShowTaskData(int taskId, @NonNull Context context) {
+    public synchronized ShowTaskLoader.Data getShowTaskData(@NonNull TaskKey taskKey, @NonNull Context context) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getShowTaskData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task task = mTasks.get(taskId);
-        Assert.assertTrue(task != null);
-        Assert.assertTrue(task.current(now));
+        if (taskKey.mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
-        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getId());
+            Task task = mTasks.get(taskKey.mLocalTaskId);
+            Assert.assertTrue(task != null);
+            Assert.assertTrue(task.current(now));
+
+            return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getTaskKey());
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+
+            RemoteTask task = mRemoteTasks.get(taskKey.mRemoteTaskId);
+            Assert.assertTrue(task != null);
+            Assert.assertTrue(task.current(now));
+
+            return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getTaskKey());
+        }
     }
 
-    public synchronized TaskListLoader.Data getTaskListData(@NonNull Context context, @Nullable Integer taskId) {
+    public synchronized TaskListLoader.Data getTaskListData(@NonNull Context context, @Nullable TaskKey taskKey) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getTaskListData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return getTaskListData(now, context, taskId);
+        return getTaskListData(now, context, taskKey);
     }
 
     @NonNull
-    TaskListLoader.Data getTaskListData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable Integer taskId) {
-        List<Task> tasks;
+    TaskListLoader.Data getTaskListData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable TaskKey taskKey) {
+        List<TaskListLoader.ChildTaskData> childTaskDatas;
         String note;
 
-        if (taskId != null) {
-            // todo firebase
+        if (taskKey != null) {
+            if (taskKey.mLocalTaskId != null) {
+                Assert.assertTrue(taskKey.mRemoteTaskId == null);
 
-            Task parentTask = mTasks.get(taskId);
-            Assert.assertTrue(parentTask != null);
+                Task parentTask = mTasks.get(taskKey.mLocalTaskId);
+                Assert.assertTrue(parentTask != null);
 
-            tasks = parentTask.getChildTasks(now);
+                List<Task> tasks = parentTask.getChildTasks(now);
+                childTaskDatas = Stream.of(tasks)
+                        .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                        .collect(Collectors.toList());
 
-            note = parentTask.getNote();
-        } else {
-            tasks = new ArrayList<>();
-            for (Task rootTask : mTasks.values()) {
-                if (!rootTask.current(now))
-                    continue;
+                note = parentTask.getNote();
+            } else {
+                Assert.assertTrue(taskKey.mRemoteTaskId != null);
 
-                if (!rootTask.isVisible(now))
-                    continue;
+                RemoteTask parentTask = mRemoteTasks.get(taskKey.mRemoteTaskId);
+                Assert.assertTrue(parentTask != null);
 
-                if (!rootTask.isRootTask(now))
-                    continue;
+                List<RemoteTask> tasks = parentTask.getChildTasks(now);
+                childTaskDatas = Stream.of(tasks)
+                        .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                        .collect(Collectors.toList());
 
-                tasks.add(rootTask);
+                note = parentTask.getNote();
             }
+        } else {
+            List<Task> tasks = Stream.of(mTasks.values())
+                    .filter(task -> task.current(now))
+                    .filter(task -> task.isVisible(now))
+                    .filter(task -> task.isRootTask(now))
+                    .collect(Collectors.toList());
+
+            childTaskDatas = Stream.of(tasks)
+                    .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                    .collect(Collectors.toList());
+
+            childTaskDatas.addAll(Stream.of(mRemoteTasks.values())
+                    .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                    .collect(Collectors.toList()));
 
             note = null;
         }
 
-        List<TaskListLoader.ChildTaskData> childTaskDatas = Stream.of(tasks)
-                .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
-                .collect(Collectors.toList());
-
-        childTaskDatas.addAll(Stream.of(mRemoteTasks.values())
-                .map(task -> {
-                    List<TaskListLoader.ChildTaskData> childTaskDatas1 = new ArrayList<>();  // todo firebase
-                    return new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), childTaskDatas1, task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey());
-                })
-                .collect(Collectors.toList()));
-
         Collections.sort(childTaskDatas, (TaskListLoader.ChildTaskData lhs, TaskListLoader.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
-        if (taskId == null)
+        if (taskKey == null)
             Collections.reverse(childTaskDatas);
 
         return new TaskListLoader.Data(childTaskDatas, note);
@@ -1906,9 +2016,8 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    List<TaskHierarchy> getChildTaskHierarchies(Task parentTask) {
-        Assert.assertTrue(parentTask != null);
-
+    @NonNull
+    List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
         return Stream.of(mTaskHierarchies.values())
                 .filter(taskHierarchy -> taskHierarchy.getParentTask() == parentTask)
                 .collect(Collectors.toList());

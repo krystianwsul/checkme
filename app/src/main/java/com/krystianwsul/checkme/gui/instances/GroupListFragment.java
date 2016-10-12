@@ -147,7 +147,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
                     Assert.assertTrue(instanceData.TaskCurrent);
 
-                    startActivity(ShowTaskActivity.getIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
+                    startActivity(ShowTaskActivity.newIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
                     break;
                 }
                 case R.id.action_group_edit_task: {
@@ -3410,7 +3410,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 public void onClick() {
                     GroupListFragment groupListFragment = getGroupListFragment();
 
-                    groupListFragment.getActivity().startActivity(ShowTaskActivity.getIntent(groupListFragment.getActivity(), new TaskKey(mTaskData.TaskId)));
+                    groupListFragment.getActivity().startActivity(ShowTaskActivity.newIntent(groupListFragment.getActivity(), new TaskKey(mTaskData.TaskId)));
                 }
 
                 @Override

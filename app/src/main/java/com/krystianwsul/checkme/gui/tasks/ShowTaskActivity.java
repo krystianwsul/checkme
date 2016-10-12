@@ -26,9 +26,9 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
-    private static final String INTENT_KEY = "taskId";
+    private static final String TASK_KEY_KEY = "taskKey";
 
-    private int mTaskId;
+    private TaskKey mTaskKey;
 
     private ActionBar mActionBar;
 
@@ -38,14 +38,9 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
     private TaskListFragment mTaskListFragment;
 
-    public static Intent getIntent(@NonNull Context context, @NonNull TaskKey taskKey) {
-        // todo firebase
-
-        Integer taskId = taskKey.mLocalTaskId;
-        Assert.assertTrue(taskId != null);
-
+    public static Intent newIntent(@NonNull Context context, @NonNull TaskKey taskKey) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
-        intent.putExtra(INTENT_KEY, taskId);
+        intent.putExtra(TASK_KEY_KEY, taskKey);
         return intent;
     }
 
@@ -65,13 +60,14 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         mActionBar.setTitle(null);
 
         Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(INTENT_KEY));
-        mTaskId = intent.getIntExtra(INTENT_KEY, -1);
-        Assert.assertTrue(mTaskId != -1);
+        Assert.assertTrue(intent.hasExtra(TASK_KEY_KEY));
+
+        mTaskKey = intent.getParcelableExtra(TASK_KEY_KEY);
+        Assert.assertTrue(mTaskKey != null);
 
         mTaskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
         if (mTaskListFragment == null) {
-            mTaskListFragment = TaskListFragment.getInstance(mTaskId);
+            mTaskListFragment = TaskListFragment.getInstance(mTaskKey);
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.show_task_fragment, mTaskListFragment)
@@ -105,9 +101,9 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         switch (item.getItemId()) {
             case R.id.task_menu_edit:
                 if (mData.IsRootTask)
-                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, new TaskKey(mData.TaskId)));
+                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.mTaskKey));
                 else
-                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, new TaskKey(mData.TaskId)));
+                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.mTaskKey));
                 break;
             case R.id.task_menu_share:
                 Assert.assertTrue(mData != null);
@@ -131,7 +127,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mData.DataId);
                 dataIds.add(taskListFragment.getDataId());
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.TaskId);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.mTaskKey.mLocalTaskId); // todo firebase
                 TickService.startService(this);
 
                 finish();
@@ -153,7 +149,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
     @Override
     public Loader<ShowTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new ShowTaskLoader(this, mTaskId);
+        return new ShowTaskLoader(this, mTaskKey);
     }
 
     @Override

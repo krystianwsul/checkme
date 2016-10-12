@@ -15,16 +15,16 @@ import java.util.List;
 
 public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     @Nullable
-    private final Integer mTaskId;
+    private final TaskKey mTaskKey;
 
-    public TaskListLoader(@NonNull Context context, @Nullable Integer taskId) {
+    public TaskListLoader(@NonNull Context context, @Nullable TaskKey taskKey) {
         super(context);
-        mTaskId = taskId;
+        mTaskKey = taskKey;
     }
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext(), mTaskId);
+        return DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext(), mTaskKey);
     }
 
     public static class Data extends DomainLoader.Data {

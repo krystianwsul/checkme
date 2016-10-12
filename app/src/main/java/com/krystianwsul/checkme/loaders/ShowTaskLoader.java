@@ -1,39 +1,48 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
 public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
-    private final int mTaskId;
+    private final TaskKey mTaskKey;
 
-    public ShowTaskLoader(Context context, int taskId) {
+    public ShowTaskLoader(@NonNull Context context, @NonNull TaskKey taskKey) {
         super(context);
 
-        mTaskId = taskId;
+        mTaskKey = taskKey;
     }
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getShowTaskData(mTaskId, getContext());
+        return DomainFactory.getDomainFactory(getContext()).getShowTaskData(mTaskKey, getContext());
     }
 
     public static class Data extends DomainLoader.Data {
         public final boolean IsRootTask;
-        public final String Name;
-        public final String ScheduleText;
-        public final int TaskId;
 
-        public Data(boolean isRootTask, String name, String scheduleText, int taskId) {
+        @NonNull
+        public final String Name;
+
+        @Nullable
+        public final String ScheduleText;
+
+        @NonNull
+        public final TaskKey mTaskKey;
+
+        public Data(boolean isRootTask, @NonNull String name, @Nullable String scheduleText, @NonNull TaskKey taskKey) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             IsRootTask = isRootTask;
             Name = name;
             ScheduleText = scheduleText;
-            TaskId = taskId;
+            mTaskKey = taskKey;
         }
 
         @Override
@@ -43,10 +52,11 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
-            hashCode += TaskId;
+            hashCode += mTaskKey.hashCode();
             return hashCode;
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -60,7 +70,22 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
 
             Data data = (Data) object;
 
-            return ((IsRootTask == data.IsRootTask) && Name.equals(data.Name) && ((TextUtils.isEmpty(ScheduleText) && TextUtils.isEmpty(data.ScheduleText)) || ((!TextUtils.isEmpty(ScheduleText) && !TextUtils.isEmpty(data.ScheduleText)) && ScheduleText.equals(data.ScheduleText))) && (TaskId == data.TaskId));
+            if (IsRootTask != data.IsRootTask)
+                return false;
+
+            if (!Name.equals(data.Name))
+                return false;
+
+            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(data.ScheduleText))
+                return false;
+
+            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(data.ScheduleText))
+                return false;
+
+            if (!mTaskKey.equals(data.mTaskKey))
+                return false;
+
+            return true;
         }
     }
 }

@@ -3,9 +3,11 @@ package com.krystianwsul.checkme.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -14,9 +16,15 @@ import java.util.List;
 
 public class RemoteTask {
     @NonNull
+    private final String mKey;
+
+    @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
-    public RemoteTask(@NonNull RemoteTaskRecord remoteTaskRecord) {
+    public RemoteTask(@NonNull String key, @NonNull RemoteTaskRecord remoteTaskRecord) {
+        Assert.assertTrue(!TextUtils.isEmpty(key));
+
+        mKey = key;
         mRemoteTaskRecord = remoteTaskRecord;
     }
 
@@ -110,5 +118,10 @@ public class RemoteTask {
     @Nullable
     public String getNote() {
         return mRemoteTaskRecord.getNote();
+    }
+
+    @NonNull
+    public TaskKey getTaskKey() {
+        return new TaskKey(mKey);
     }
 }

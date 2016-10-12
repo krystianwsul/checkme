@@ -11,14 +11,13 @@ import android.util.Log;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteTask;
-import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.TaskWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
@@ -82,8 +81,6 @@ public class DomainFactory {
     private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
-    private final Map<String, RemoteTaskRecord> mRemoteTaskRecords = new HashMap<>();
-
     private static ExactTimeStamp sStart;
     private static ExactTimeStamp sRead;
     private static ExactTimeStamp sStop;
@@ -95,36 +92,22 @@ public class DomainFactory {
     private Query mQuery;
 
     @NonNull
-    private final ChildEventListener mChildEventListener = new ChildEventListener() {
+    private final ValueEventListener mValueEventListener = new ValueEventListener() {
         @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-            Log.e("asdf", "onChildAdded, dataSnapshot: " + dataSnapshot + ", previousChildName: " + previousChildName);
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.e("asdf", "onDataChange, dataSnapshot: " + dataSnapshot);
 
-            Assert.assertTrue(dataSnapshot != null);
-
-            addRemoteTaskRecod(dataSnapshot);
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-            Log.e("asdf", "onChildChanged, dataSnapshot: " + dataSnapshot + ", previousChildName: " + previousChildName);
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-            Log.e("asdf", "onChildRemoved, dataSnapshot: " + dataSnapshot);
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-            Log.e("asdf", "onChildMoved, dataSnapshot: " + dataSnapshot + ", previousChildName: " + previousChildName);
+            setRemoteTaskRecords(dataSnapshot);
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-            Log.e("asdf", "onCancelled, databaseError: " + databaseError);
+
         }
     };
+
+    @NonNull
+    private Map<String, RemoteTask> mRemoteTasks = new HashMap<>();
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -270,7 +253,7 @@ public class DomainFactory {
         mUserData = userData;
 
         mQuery = DatabaseWrapper.getTaskRecordsQuery(userData);
-        mQuery.addChildEventListener(mChildEventListener);
+        mQuery.addValueEventListener(mValueEventListener);
     }
 
     public synchronized void clearUserData() {
@@ -279,18 +262,16 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(mQuery != null);
 
-            mQuery.removeEventListener(mChildEventListener);
+            mQuery.removeEventListener(mValueEventListener);
 
             mUserData = null;
             mQuery = null;
         }
     }
 
-    private synchronized void addRemoteTaskRecod(@NonNull DataSnapshot dataSnapshot) {
-        TaskWrapper taskWrapper = dataSnapshot.getValue(TaskWrapper.class);
-        Assert.assertTrue(taskWrapper != null);
-
-        mRemoteTaskRecords.put(dataSnapshot.getKey(), taskWrapper.taskRecord);
+    private synchronized void setRemoteTaskRecords(@NonNull DataSnapshot dataSnapshot) {
+        mRemoteTasks = Stream.of(dataSnapshot.getChildren())
+                .collect(Collectors.toMap(DataSnapshot::getKey, child -> new RemoteTask(child.getKey(), child.getValue(TaskWrapper.class).taskRecord)));
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
@@ -862,14 +843,10 @@ public class DomainFactory {
                 .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
                 .collect(Collectors.toList());
 
-        childTaskDatas.addAll(Stream.of(mRemoteTaskRecords)
-                .map(entry -> {
-                    String key = entry.getKey();
-                    RemoteTask task = new RemoteTask(entry.getValue());
-
+        childTaskDatas.addAll(Stream.of(mRemoteTasks.values())
+                .map(task -> {
                     List<TaskListLoader.ChildTaskData> childTaskDatas1 = new ArrayList<>();  // todo firebase
-
-                    return new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), new ArrayList<>(), task.getNote(), task.getStartExactTimeStamp(), new TaskKey(key));
+                    return new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), childTaskDatas1, task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey());
                 })
                 .collect(Collectors.toList()));
 

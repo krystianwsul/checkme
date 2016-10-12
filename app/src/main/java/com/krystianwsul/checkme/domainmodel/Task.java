@@ -20,7 +20,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Task {
+public class Task implements MergedTask {
     @NonNull
     private final DomainFactory mDomainFactory;
 
@@ -40,7 +40,8 @@ public class Task {
     }
 
     @Nullable
-    String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
+    @Override
+    public String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         List<Schedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
@@ -71,6 +72,7 @@ public class Task {
     }
 
     @NonNull
+    @Override
     public String getName() {
         return mTaskRecord.getName();
     }
@@ -83,7 +85,8 @@ public class Task {
     }
 
     @NonNull
-    List<Task> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
+    @Override
+    public List<MergedTask> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getChildTasks(this, exactTimeStamp);
@@ -107,7 +110,8 @@ public class Task {
     }
 
     @NonNull
-    ExactTimeStamp getStartExactTimeStamp() {
+    @Override
+    public ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mTaskRecord.getStartTime());
     }
 
@@ -119,7 +123,8 @@ public class Task {
             return null;
     }
 
-    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
+    @Override
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         if (isRootTask(endExactTimeStamp)) {
@@ -134,7 +139,7 @@ public class Task {
             Assert.assertTrue(getCurrentSchedules(endExactTimeStamp).isEmpty());
         }
 
-        for (Task childTask : getChildTasks(endExactTimeStamp)) {
+        for (MergedTask childTask : getChildTasks(endExactTimeStamp)) {
             Assert.assertTrue(childTask != null);
             childTask.setEndExactTimeStamp(endExactTimeStamp);
         }
@@ -144,6 +149,7 @@ public class Task {
         mTaskRecord.setEndTime(endExactTimeStamp.getLong());
     }
 
+    @Override
     public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
@@ -264,12 +270,14 @@ public class Task {
     }
 
     @Nullable
-    String getNote() {
+    @Override
+    public String getNote() {
         return mTaskRecord.getNote();
     }
 
     @NonNull
-    TaskKey getTaskKey() {
+    @Override
+    public TaskKey getTaskKey() {
         return new TaskKey(mTaskRecord.getId());
     }
 }

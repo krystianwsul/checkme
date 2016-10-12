@@ -19,7 +19,7 @@ public abstract class RemoteSchedule {
     }
 
     @NonNull
-    protected abstract RemoteScheduleRecord getRemoteScheduleRecord();
+    abstract String getScheduleText(@NonNull Context context);
 
     @NonNull
     ExactTimeStamp getStartExactTimeStamp() {
@@ -35,5 +35,5 @@ public abstract class RemoteSchedule {
     }
 
     @NonNull
-    abstract String getScheduleText(@NonNull Context context);
+    protected abstract RemoteScheduleRecord getRemoteScheduleRecord();
 }

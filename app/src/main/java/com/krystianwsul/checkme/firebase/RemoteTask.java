@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -15,7 +16,7 @@ import junit.framework.Assert;
 
 import java.util.List;
 
-public class RemoteTask {
+public class RemoteTask implements MergedTask {
     @NonNull
     private final DomainFactory mDomainFactory;
 
@@ -34,6 +35,7 @@ public class RemoteTask {
     }
 
     @NonNull
+    @Override
     public String getName() {
         return mRemoteTaskRecord.getName();
     }
@@ -72,6 +74,7 @@ public class RemoteTask {
         return remoteSchedules;
     }
 
+    @Override
     public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
@@ -80,6 +83,7 @@ public class RemoteTask {
     }
 
     @NonNull
+    @Override
     public ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mRemoteTaskRecord.getStartTime());
     }
@@ -93,6 +97,7 @@ public class RemoteTask {
     }
 
     @Nullable
+    @Override
     public String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
@@ -121,26 +126,34 @@ public class RemoteTask {
     }
 
     @Nullable
+    @Override
     public String getNote() {
         return mRemoteTaskRecord.getNote();
     }
 
     @NonNull
+    @Override
     public TaskKey getTaskKey() {
         return new TaskKey(mKey);
     }
 
     @Nullable
-    RemoteTask getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    MergedTask getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getParentTask(this, exactTimeStamp);
     }
 
     @NonNull
-    public List<RemoteTask> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
+    @Override
+    public List<MergedTask> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getChildTasks(this, exactTimeStamp);
+    }
+
+    @Override
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
+        throw new UnsupportedOperationException(); // todo firebase
     }
 }

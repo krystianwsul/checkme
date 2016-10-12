@@ -854,25 +854,23 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             HashMap<InstanceKey, Boolean> expandedInstances = null;
             boolean doneExpanded = false;
             boolean unscheduledExpanded = false;
-            List<Integer> expandedTasks = null;
+            List<TaskKey> expandedTaskKeys = null;
 
             if (expansionState != null) {
                 expandedGroups = expansionState.ExpandedGroups;
-                Assert.assertTrue(expandedGroups != null);
 
                 expandedInstances = expansionState.ExpandedInstances;
-                Assert.assertTrue(expandedInstances != null);
 
                 doneExpanded = expansionState.DoneExpanded;
 
                 unscheduledExpanded = expansionState.UnscheduledExpanded;
 
-                expandedTasks = expansionState.ExpandedTasks;
+                expandedTaskKeys = expansionState.ExpandedTaskKeys;
             } else if (taskDatas != null) {
                 unscheduledExpanded = false;
             }
 
-            treeNodeCollection.setNodes(mNodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTasks));
+            treeNodeCollection.setNodes(mNodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys));
 
             mTreeViewAdapter.setTreeNodeCollection(treeNodeCollection);
 
@@ -943,9 +941,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
             boolean unscheduledExpanded = mNodeCollection.getUnscheduledExpanded();
 
-            List<Integer> expandedTasks = mNodeCollection.getExpandedTasks();
+            List<TaskKey> expandedTaskKeys = mNodeCollection.getExpandedTaskKeys();
 
-            return new ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTasks);
+            return new ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys);
         }
 
         @NonNull
@@ -1020,7 +1018,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             }
 
             @NonNull
-            private List<TreeNode> initialize(@NonNull Collection<GroupListLoader.InstanceData> instanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, boolean doneExpanded, @Nullable ArrayList<InstanceKey> selectedNodes, boolean selectable, @Nullable List<GroupListLoader.TaskData> taskDatas, boolean unscheduledExpanded, @Nullable List<Integer> expandedTasks) {
+            private List<TreeNode> initialize(@NonNull Collection<GroupListLoader.InstanceData> instanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, boolean doneExpanded, @Nullable ArrayList<InstanceKey> selectedNodes, boolean selectable, @Nullable List<GroupListLoader.TaskData> taskDatas, boolean unscheduledExpanded, @Nullable List<TaskKey> expandedTaskKeys) {
                 ArrayList<GroupListLoader.InstanceData> notDoneInstanceDatas = new ArrayList<>();
                 ArrayList<GroupListLoader.InstanceData> doneInstanceDatas = new ArrayList<>();
                 for (GroupListLoader.InstanceData instanceData : instanceDatas) {
@@ -1046,7 +1044,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 if (taskDatas != null && !taskDatas.isEmpty()) {
                     mUnscheduledNode = new UnscheduledNode(mDensity, this);
 
-                    TreeNode unscheduledTreeNode = mUnscheduledNode.initialize(unscheduledExpanded, mNodeContainer, taskDatas, expandedTasks);
+                    TreeNode unscheduledTreeNode = mUnscheduledNode.initialize(unscheduledExpanded, mNodeContainer, taskDatas, expandedTaskKeys);
 
                     rootTreeNodes.add(unscheduledTreeNode);
                 }
@@ -1091,11 +1089,11 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 return (mUnscheduledNode != null && mUnscheduledNode.expanded());
             }
 
-            List<Integer> getExpandedTasks() {
+            List<TaskKey> getExpandedTaskKeys() {
                 if (mUnscheduledNode == null)
                     return null;
                 else
-                    return mUnscheduledNode.getExpandedTasks();
+                    return mUnscheduledNode.getExpandedTaskKeys();
             }
 
             boolean getDoneExpanded() {
@@ -2980,7 +2978,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 }
 
                 @NonNull
-                private TreeNode initialize(boolean expanded, @NonNull NodeContainer nodeContainer, @NonNull List<GroupListLoader.TaskData> taskDatas, @Nullable List<Integer> expandedTasks) {
+                private TreeNode initialize(boolean expanded, @NonNull NodeContainer nodeContainer, @NonNull List<GroupListLoader.TaskData> taskDatas, @Nullable List<TaskKey> expandedTaskKeys) {
                     Assert.assertTrue(!expanded || !taskDatas.isEmpty());
 
                     mTreeNode = new TreeNode(this, nodeContainer, expanded, false);
@@ -2988,7 +2986,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     mTaskNodes = new ArrayList<>();
 
                     List<TreeNode> childTreeNodes = Stream.of(taskDatas)
-                            .map(taskData -> newChildTreeNode(taskData, expandedTasks))
+                            .map(taskData -> newChildTreeNode(taskData, expandedTaskKeys))
                             .collect(Collectors.toList());
 
                     mTreeNode.setChildTreeNodes(childTreeNodes);
@@ -2997,12 +2995,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 }
 
                 @NonNull
-                private TreeNode newChildTreeNode(@NonNull GroupListLoader.TaskData taskData, @Nullable List<Integer> expandedTasks) {
+                private TreeNode newChildTreeNode(@NonNull GroupListLoader.TaskData taskData, @Nullable List<TaskKey> expandedTaskKeys) {
                     TaskNode taskNode = new TaskNode(mDensity, 0, taskData, this);
 
                     mTaskNodes.add(taskNode);
 
-                    return taskNode.initialize(getTreeNode(), expandedTasks);
+                    return taskNode.initialize(getTreeNode(), expandedTaskKeys);
                 }
 
                 @NonNull
@@ -3014,9 +3012,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     return getTreeNode().expanded();
                 }
 
-                List<Integer> getExpandedTasks() {
+                List<TaskKey> getExpandedTaskKeys() {
                     return Stream.of(mTaskNodes)
-                            .flatMap(TaskNode::getExpandedTasks)
+                            .flatMap(TaskNode::getExpandedTaskKeys)
                             .collect(Collectors.toList());
                 }
 
@@ -3195,17 +3193,17 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 }
 
                 @NonNull
-                TreeNode initialize(TreeNode parentTreeNode, List<Integer> expandedTasks) {
+                TreeNode initialize(TreeNode parentTreeNode, List<TaskKey> expandedTaskKeys) {
                     Assert.assertTrue(parentTreeNode != null);
 
-                    boolean expanded = (expandedTasks != null && expandedTasks.contains(mTaskData.TaskId) && !mTaskData.Children.isEmpty());
+                    boolean expanded = (expandedTaskKeys != null && expandedTaskKeys.contains(mTaskData.mTaskKey) && !mTaskData.Children.isEmpty());
 
                     mTreeNode = new TreeNode(this, parentTreeNode, expanded, false);
 
                     mTaskNodes = new ArrayList<>();
 
                     List<TreeNode> childTreeNodes = Stream.of(mTaskData.Children)
-                            .map(taskData -> newChildTreeNode(taskData, expandedTasks))
+                            .map(taskData -> newChildTreeNode(taskData, expandedTaskKeys))
                             .collect(Collectors.toList());
 
                     mTreeNode.setChildTreeNodes(childTreeNodes);
@@ -3214,12 +3212,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 }
 
                 @NonNull
-                private TreeNode newChildTreeNode(@NonNull GroupListLoader.TaskData taskData, @Nullable List<Integer> expandedTasks) {
+                private TreeNode newChildTreeNode(@NonNull GroupListLoader.TaskData taskData, @Nullable List<TaskKey> expandedTaskKeys) {
                     TaskNode taskNode = new TaskNode(mDensity, mIndentation + 1, taskData, this);
 
                     mTaskNodes.add(taskNode);
 
-                    return taskNode.initialize(getTreeNode(), expandedTasks);
+                    return taskNode.initialize(getTreeNode(), expandedTaskKeys);
                 }
 
                 @NonNull
@@ -3249,18 +3247,18 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     return getTreeNode().expanded();
                 }
 
-                Stream<Integer> getExpandedTasks() {
+                Stream<TaskKey> getExpandedTaskKeys() {
                     if (mTaskNodes.isEmpty()) {
                         Assert.assertTrue(!expanded());
 
                         return Stream.of(new ArrayList<>());
                     } else {
-                        List<Integer> expandedTasks = new ArrayList<>();
+                        List<TaskKey> expandedTaskKeys = new ArrayList<>();
 
                         if (expanded())
-                            expandedTasks.add(mTaskData.TaskId);
+                            expandedTaskKeys.add(mTaskData.mTaskKey);
 
-                        return Stream.concat(Stream.of(expandedTasks), Stream.of(mTaskNodes).flatMap(TaskNode::getExpandedTasks));
+                        return Stream.concat(Stream.of(expandedTaskKeys), Stream.of(mTaskNodes).flatMap(TaskNode::getExpandedTaskKeys));
                     }
                 }
 
@@ -3269,9 +3267,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     TaskNode other = (TaskNode) modelNode;
 
                     if (mIndentation == 0) {
-                        return -Integer.valueOf(mTaskData.TaskId).compareTo(other.mTaskData.TaskId);
+                        return -mTaskData.mStartExactTimeStamp.compareTo(other.mTaskData.mStartExactTimeStamp);
                     } else {
-                        return Integer.valueOf(mTaskData.TaskId).compareTo(other.mTaskData.TaskId);
+                        return mTaskData.mStartExactTimeStamp.compareTo(other.mTaskData.mStartExactTimeStamp);
                     }
                 }
 
@@ -3325,7 +3323,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     Assert.assertTrue(!mTaskData.Children.isEmpty());
 
                     return Stream.of(mTaskData.Children)
-                            .sortBy(task -> task.TaskId)
+                            .sortBy(task -> task.mStartExactTimeStamp)
                             .map(task -> task.Name)
                             .collect(Collectors.joining(", "));
                 }
@@ -3410,7 +3408,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 public void onClick() {
                     GroupListFragment groupListFragment = getGroupListFragment();
 
-                    groupListFragment.getActivity().startActivity(ShowTaskActivity.newIntent(groupListFragment.getActivity(), new TaskKey(mTaskData.TaskId)));
+                    groupListFragment.getActivity().startActivity(ShowTaskActivity.newIntent(groupListFragment.getActivity(), mTaskData.mTaskKey));
                 }
 
                 @Override
@@ -3433,20 +3431,24 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
     public static class ExpansionState implements Parcelable {
         final boolean DoneExpanded;
+
+        @NonNull
         final List<TimeStamp> ExpandedGroups;
+
+        @NonNull
         final HashMap<InstanceKey, Boolean> ExpandedInstances;
+
         final boolean UnscheduledExpanded;
-        final List<Integer> ExpandedTasks;
 
-        ExpansionState(boolean doneExpanded, List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, boolean unscheduledExpanded, List<Integer> expandedTasks) {
-            Assert.assertTrue(expandedGroups != null);
-            Assert.assertTrue(expandedInstances != null);
+        @Nullable
+        final List<TaskKey> ExpandedTaskKeys;
 
+        ExpansionState(boolean doneExpanded, @NonNull List<TimeStamp> expandedGroups, @NonNull HashMap<InstanceKey, Boolean> expandedInstances, boolean unscheduledExpanded, @Nullable List<TaskKey> expandedTaskKeys) {
             DoneExpanded = doneExpanded;
             ExpandedGroups = expandedGroups;
             ExpandedInstances = expandedInstances;
             UnscheduledExpanded = unscheduledExpanded;
-            ExpandedTasks = expandedTasks;
+            ExpandedTaskKeys = expandedTaskKeys;
         }
 
         @Override
@@ -3462,11 +3464,11 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
             dest.writeInt(UnscheduledExpanded ? 1 : 0);
 
-            if (ExpandedTasks == null) {
+            if (ExpandedTaskKeys == null) {
                 dest.writeInt(0);
             } else {
                 dest.writeInt(1);
-                dest.writeList(ExpandedTasks);
+                dest.writeList(ExpandedTaskKeys);
             }
         }
 
@@ -3483,15 +3485,15 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 boolean unscheduledExpanded = (source.readInt() == 1);
 
                 boolean hasTasks = (source.readInt() == 1);
-                List<Integer> expandedTasks;
+                List<TaskKey> expandedTaskKeys;
                 if (hasTasks) {
-                    expandedTasks = new ArrayList<>();
-                    source.readList(expandedTasks, Integer.class.getClassLoader());
+                    expandedTaskKeys = new ArrayList<>();
+                    source.readList(expandedTaskKeys, TaskKey.class.getClassLoader());
                 } else {
-                    expandedTasks = null;
+                    expandedTaskKeys = null;
                 }
 
-                return new ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTasks);
+                return new ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys);
             }
 
             @Override

@@ -20,18 +20,13 @@ abstract class Schedule {
     @NonNull
     private final ScheduleRecord mScheduleRecord;
 
-    @NonNull
-    abstract String getScheduleText(@NonNull Context context);
-
     Schedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
         mDomainFactory = domainFactory;
         mScheduleRecord = scheduleRecord;
     }
 
     @NonNull
-    Task getRootTask() {
-        return mDomainFactory.getTask(mScheduleRecord.getRootTaskId());
-    }
+    abstract String getScheduleText(@NonNull Context context);
 
     @NonNull
     ExactTimeStamp getStartExactTimeStamp() {

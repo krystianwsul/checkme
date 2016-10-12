@@ -435,16 +435,16 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskId, name, mParent.TaskId, mNote);
+                        DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskId, name, mParent.mTaskKey.mLocalTaskId, mNote); // todo firebase
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskIds.size() > 1);
 
-                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, mParent.TaskId, name, mTaskIds, mNote);
+                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, mParent.mTaskKey.mLocalTaskId, name, mTaskIds, mNote); // todo firebase
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.TaskId, name, mNote);
+                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.mTaskKey.mLocalTaskId, name, mNote); // todo firebase
                     }
                 } else {  // no reminder
                     Assert.assertTrue(!hasValueFriends()); // todo friends
@@ -473,7 +473,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                 // new parent
                 if (mParent != null)
-                    taskIds.add(mParent.TaskId);
+                    taskIds.add(mParent.mTaskKey.mLocalTaskId); // todo firebase
 
                 // old parent of single task
                 if (mData.TaskData != null && mData.TaskData.ParentTaskId != null)
@@ -616,7 +616,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             }
 
             if (mParent != null) {
-                outState.putInt(PARENT_ID, mParent.TaskId);
+                outState.putInt(PARENT_ID, mParent.mTaskKey.mLocalTaskId); // todo firebase
             }
 
             if (!TextUtils.isEmpty(mNote))
@@ -628,18 +628,20 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     @Override
     public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        List<Integer> excludedTaskIds = new ArrayList<>();
+        List<TaskKey> excludedTaskKeys = new ArrayList<>();
 
         if (mTaskId != null) {
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mParentTaskIdHint == null);
 
-            excludedTaskIds.add(mTaskId);
+            excludedTaskKeys.add(new TaskKey(mTaskId));
         } else if (mTaskIds != null) {
-            excludedTaskIds.addAll(mTaskIds);
+            excludedTaskKeys.addAll(Stream.of(mTaskIds)
+                    .map(TaskKey::new)
+                    .collect(Collectors.toList()));
         }
 
-        return new CreateTaskLoader(this, mTaskId, excludedTaskIds);
+        return new CreateTaskLoader(this, mTaskId, excludedTaskKeys);
     }
 
     @Override
@@ -692,8 +694,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(SCHEDULE_ENTRIES_KEY)) {
             if (mSavedInstanceState.containsKey(PARENT_ID)) {
                 int parentId = mSavedInstanceState.getInt(PARENT_ID);
-                mParent = findTaskData(parentId);
-                Assert.assertTrue(mParent != null);
+                mParent = findTaskData(new TaskKey(parentId)); // todo firebase
             }
 
             if (mSavedInstanceState.containsKey(NOTE_KEY)) {
@@ -710,11 +711,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 Assert.assertTrue(mTaskIds == null);
                 Assert.assertTrue(mTaskId != null);
 
-                mParent = findTaskData(mData.TaskData.ParentTaskId);
+                mParent = findTaskData(new TaskKey(mData.TaskData.ParentTaskId));  // todo firebase
             } else if (mParentTaskIdHint != null) {
                 Assert.assertTrue(mTaskId == null);
 
-                mParent = findTaskData(mParentTaskIdHint);
+                mParent = findTaskData(new TaskKey(mParentTaskIdHint));  // todo firebase
             }
 
             if (mData.TaskData != null)
@@ -915,7 +916,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 if (!hasValueParent())
                     return true;
 
-                if (mParent.TaskId != mData.TaskData.ParentTaskId)
+                Assert.assertTrue(mParent.mTaskKey.mLocalTaskId != null); // todo firebase
+                if (!mParent.mTaskKey.mLocalTaskId.equals(mData.TaskData.ParentTaskId))
                     return true;
 
                 return false;
@@ -943,7 +945,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 if (!hasValueParent())
                     return true;
 
-                if (mParent == null || mParent.TaskId != mParentTaskIdHint)
+                Assert.assertTrue(mParent == null || mParent.mTaskKey.mLocalTaskId != null); // todo firebase
+                if (mParent == null || !mParent.mTaskKey.mLocalTaskId.equals(mParentTaskIdHint))
                     return true;
 
                 return false;
@@ -959,27 +962,27 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         }
     }
 
-    private CreateTaskLoader.TaskTreeData findTaskData(int taskId) {
+    @NonNull
+    private CreateTaskLoader.TaskTreeData findTaskData(@NonNull TaskKey taskKey) {
         Assert.assertTrue(mData != null);
 
-        List<CreateTaskLoader.TaskTreeData> taskTreeDatas = findTaskDataHelper(mData.TaskTreeDatas, taskId)
+        List<CreateTaskLoader.TaskTreeData> taskTreeDatas = findTaskDataHelper(mData.TaskTreeDatas, taskKey)
                 .collect(Collectors.toList());
 
         Assert.assertTrue(taskTreeDatas.size() == 1);
         return taskTreeDatas.get(0);
     }
 
-    private Stream<CreateTaskLoader.TaskTreeData> findTaskDataHelper(Map<Integer, CreateTaskLoader.TaskTreeData> taskDatas, int taskId) {
-        Assert.assertTrue(taskDatas != null);
-
-        if (taskDatas.containsKey(taskId)) {
+    @NonNull
+    private Stream<CreateTaskLoader.TaskTreeData> findTaskDataHelper(@NonNull Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas, @NonNull TaskKey taskKey) {
+        if (taskDatas.containsKey(taskKey)) {
             List<CreateTaskLoader.TaskTreeData> ret = new ArrayList<>();
-            ret.add(taskDatas.get(taskId));
+            ret.add(taskDatas.get(taskKey));
             return Stream.of(ret);
         }
 
         return Stream.of(taskDatas.values())
-                .map(taskData -> findTaskDataHelper(taskData.TaskDatas, taskId))
+                .map(taskData -> findTaskDataHelper(taskData.TaskDatas, taskKey))
                 .flatMap(stream -> stream);
     }
 

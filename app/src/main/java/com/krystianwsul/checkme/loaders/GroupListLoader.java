@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -358,25 +359,34 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     }
 
     public static class TaskData {
-        public final int TaskId;
+        @NonNull
+        public final TaskKey mTaskKey;
+
+        @NonNull
         public final String Name;
+
+        @NonNull
         public final List<TaskData> Children;
 
-        public TaskData(int taskId, String name, List<TaskData> children) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(children != null);
+        @NonNull
+        public final ExactTimeStamp mStartExactTimeStamp;
 
-            TaskId = taskId;
+        public TaskData(@NonNull TaskKey taskKey, @NonNull String name, @NonNull List<TaskData> children, @NonNull ExactTimeStamp startExactTimeStamp) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+
+            mTaskKey = taskKey;
             Name = name;
             Children = children;
+            mStartExactTimeStamp = startExactTimeStamp;
         }
 
         @Override
         public int hashCode() {
             int hashCode = 0;
-            hashCode += TaskId;
+            hashCode += mTaskKey.hashCode();
             hashCode += Name.hashCode();
             hashCode += Children.hashCode();
+            hashCode += mStartExactTimeStamp.hashCode();
             return hashCode;
         }
 
@@ -394,13 +404,16 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
             TaskData taskData = (TaskData) object;
 
-            if (TaskId != taskData.TaskId)
+            if (!mTaskKey.equals(taskData.mTaskKey))
                 return false;
 
             if (!Name.equals(taskData.Name))
                 return false;
 
             if (!Children.equals(taskData.Children))
+                return false;
+
+            if (!mStartExactTimeStamp.equals(taskData.mStartExactTimeStamp))
                 return false;
 
             return true;

@@ -7,8 +7,10 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
@@ -23,18 +25,18 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     private final Integer mTaskId;
 
     @NonNull
-    private final List<Integer> mExcludedTaskIds;
+    private final List<TaskKey> mExcludedTaskKeys;
 
-    public CreateTaskLoader(@NonNull Context context, @Nullable Integer taskId, @NonNull List<Integer> excludedTaskIds) {
+    public CreateTaskLoader(@NonNull Context context, @Nullable Integer taskId, @NonNull List<TaskKey> excludedTaskKeys) {
         super(context);
 
         mTaskId = taskId;
-        mExcludedTaskIds = excludedTaskIds;
+        mExcludedTaskKeys = excludedTaskKeys;
     }
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mTaskId, getContext(), mExcludedTaskIds);
+        return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mTaskId, getContext(), mExcludedTaskKeys);
     }
 
     public interface ScheduleData {
@@ -42,11 +44,16 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
+        @Nullable
         public final TaskData TaskData;
-        public final TreeMap<Integer, TaskTreeData> TaskTreeDatas;
+
+        @NonNull
+        public final Map<TaskKey, TaskTreeData> TaskTreeDatas;
+
+        @NonNull
         public final Map<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(TaskData taskData, @NonNull TreeMap<Integer, TaskTreeData> taskTreeDatas, @NonNull Map<Integer, CustomTimeData> customTimeDatas) {
+        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<Integer, CustomTimeData> customTimeDatas) {
             TaskData = taskData;
             TaskTreeDatas = taskTreeDatas;
             CustomTimeDatas = customTimeDatas;
@@ -166,20 +173,32 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     public static class TaskTreeData {
+        @NonNull
         public final String Name;
-        public final TreeMap<Integer, TaskTreeData> TaskDatas;
-        public final int TaskId;
+
+        @NonNull
+        public final Map<TaskKey, TaskTreeData> TaskDatas;
+
+        @NonNull
+        public final TaskKey mTaskKey;
+
         public final String ScheduleText;
+
+        @Nullable
         public final String mNote;
 
-        public TaskTreeData(@NonNull String name, @NonNull TreeMap<Integer, TaskTreeData> taskDatas, int taskId, @Nullable String scheduleText, @Nullable String note) {
+        @NonNull
+        public final ExactTimeStamp mStartExactTimeStamp;
+
+        public TaskTreeData(@NonNull String name, @NonNull Map<TaskKey, TaskTreeData> taskDatas, @NonNull TaskKey taskKey, @Nullable String scheduleText, @Nullable String note, @NonNull ExactTimeStamp startExactTimeStamp) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;
             TaskDatas = taskDatas;
-            TaskId = taskId;
+            mTaskKey = taskKey;
             ScheduleText = scheduleText;
             mNote = note;
+            mStartExactTimeStamp = startExactTimeStamp;
         }
 
         @Override
@@ -187,7 +206,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             int hash = 0;
             hash += Name.hashCode();
             hash += TaskDatas.hashCode();
-            hash += TaskId;
+            hash += mTaskKey.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hash += ScheduleText.hashCode();
             if (!TextUtils.isEmpty(mNote))
@@ -215,7 +234,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if (!TaskDatas.equals(taskTreeData.TaskDatas))
                 return false;
 
-            if (TaskId != taskTreeData.TaskId)
+            if (!mTaskKey.equals(taskTreeData.mTaskKey))
                 return false;
 
             if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskTreeData.ScheduleText))

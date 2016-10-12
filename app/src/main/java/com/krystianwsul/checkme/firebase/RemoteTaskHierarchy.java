@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.MergedTask;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -44,12 +46,12 @@ public class RemoteTaskHierarchy {
     }
 
     @NonNull
-    public RemoteTask getParentTask() {
-        return mDomainFactory.getTask(mRemoteTaskHierarchyRecord.getParentTaskId());
+    public MergedTask getParentTask() {
+        return mDomainFactory.getTask(new TaskKey(mRemoteTaskHierarchyRecord.getParentTaskId()));
     }
 
     @NonNull
-    public RemoteTask getChildTask() {
-        return mDomainFactory.getTask(mRemoteTaskHierarchyRecord.getChildTaskId());
+    public MergedTask getChildTask() {
+        return mDomainFactory.getTask(new TaskKey(mRemoteTaskHierarchyRecord.getChildTaskId()));
     }
 }

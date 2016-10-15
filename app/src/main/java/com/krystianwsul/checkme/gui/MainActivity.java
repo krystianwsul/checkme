@@ -31,7 +31,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -685,14 +684,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                             Log.e("asdf", "signInWithCredential:onComplete:" + task.isSuccessful());
 
                             if (!task.isSuccessful()) {
-                                Assert.assertTrue(task.getException() != null);
-                                //noinspection ThrowableResultOfMethodCallIgnored
-                                Log.e("asdf", "firebase signin error: " + task.getException());
-
-                                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
-
                                 Exception exception = task.getException();
                                 Assert.assertTrue(exception != null);
+
+                                Log.e("asdf", "firebase signin error: " + exception);
+
+                                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
 
                                 MyCrashlytics.logException(exception);
 

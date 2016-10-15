@@ -31,6 +31,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -684,6 +685,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                             Log.e("asdf", "signInWithCredential:onComplete:" + task.isSuccessful());
 
                             if (!task.isSuccessful()) {
+                                Assert.assertTrue(task.getException() != null);
                                 //noinspection ThrowableResultOfMethodCallIgnored
                                 Log.e("asdf", "firebase signin error: " + task.getException());
 
@@ -706,7 +708,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
 
-                MyCrashlytics.logException(new Exception(message));
+                MyCrashlytics.logException(new GoogleSignInException("isSuccess: " + googleSignInResult.isSuccess() + ", status: " + googleSignInResult.getStatus()));
             }
         }
     }
@@ -769,6 +771,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(dayFragment != null);
 
             return dayFragment;
+        }
+    }
+
+    private static class GoogleSignInException extends Exception {
+        GoogleSignInException(@NonNull String message) {
+            super(message);
         }
     }
 }

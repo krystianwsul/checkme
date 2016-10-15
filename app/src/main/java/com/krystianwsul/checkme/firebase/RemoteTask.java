@@ -156,4 +156,11 @@ public class RemoteTask implements MergedTask {
     public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         throw new UnsupportedOperationException(); // todo firebase
     }
+
+    @Override
+    public boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
+
+        return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
+    }
 }

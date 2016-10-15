@@ -6,12 +6,13 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
+import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-public class RemoteTaskHierarchy {
+public class RemoteTaskHierarchy implements MergedTaskHierarchy {
     @NonNull
     private final DomainFactory mDomainFactory;
 
@@ -25,6 +26,7 @@ public class RemoteTaskHierarchy {
         mRemoteTaskHierarchyRecord = remoteTaskHierarchyRecord;
     }
 
+    @Override
     public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
@@ -46,12 +48,33 @@ public class RemoteTaskHierarchy {
     }
 
     @NonNull
+    @Override
     public MergedTask getParentTask() {
-        return mDomainFactory.getTask(new TaskKey(mRemoteTaskHierarchyRecord.getParentTaskId()));
+        return mDomainFactory.getTask(getParentTaskKey());
     }
 
     @NonNull
+    @Override
     public MergedTask getChildTask() {
-        return mDomainFactory.getTask(new TaskKey(mRemoteTaskHierarchyRecord.getChildTaskId()));
+        return mDomainFactory.getTask(getChildTaskKey());
+    }
+
+    @NonNull
+    @Override
+    public TaskKey getParentTaskKey() {
+        return new TaskKey(mRemoteTaskHierarchyRecord.getParentTaskId());
+    }
+
+    @NonNull
+    @Override
+    public TaskKey getChildTaskKey() {
+        return new TaskKey(mRemoteTaskHierarchyRecord.getChildTaskId());
+    }
+
+    @Override
+    public boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
+
+        return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 }

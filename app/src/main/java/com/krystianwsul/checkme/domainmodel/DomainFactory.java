@@ -301,10 +301,10 @@ public class DomainFactory {
     }
 
     @Nullable
-    public MergedTask getParentTask(@NonNull RemoteTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public MergedTask getParentTask(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
-        RemoteTaskHierarchy taskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
+        MergedTaskHierarchy taskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
         if (taskHierarchy == null) {
             return null;
         } else {
@@ -315,58 +315,67 @@ public class DomainFactory {
         }
     }
 
+    @NonNull
+    private List<MergedTaskHierarchy> getTaskHierarchies() {
+        List<MergedTaskHierarchy> taskHierarchies = new ArrayList<>(mTaskHierarchies.values());
+        taskHierarchies.addAll(mRemoteTaskHierarchies.values());
+        return taskHierarchies;
+    }
+
     @Nullable
-    private RemoteTaskHierarchy getParentTaskHierarchy(@NonNull RemoteTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    private MergedTaskHierarchy getParentTaskHierarchy(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
-        List<RemoteTaskHierarchy> remoteTaskHierarchies = Stream.of(mRemoteTaskHierarchies.values())
-                .filter(remoteTaskHierarchy -> remoteTaskHierarchy.current(exactTimeStamp))
-                .filter(remoteTaskHierarchy -> remoteTaskHierarchy.getChildTask() == childTask)
+        TaskKey childTaskKey = childTask.getTaskKey();
+
+        List<MergedTaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchies())
+                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
+                .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(childTaskKey))
                 .collect(Collectors.toList());
 
-        if (remoteTaskHierarchies.isEmpty()) {
+        if (taskHierarchies.isEmpty()) {
             return null;
         } else {
-            Assert.assertTrue(remoteTaskHierarchies.size() == 1);
-            return remoteTaskHierarchies.get(0);
+            Assert.assertTrue(taskHierarchies.size() == 1);
+            return taskHierarchies.get(0);
         }
+    }
+
+    @NonNull
+    private Map<TaskKey, MergedTask> getTasks() {
+        return Stream.concat(Stream.of(mTasks.values()), Stream.of(mRemoteTasks.values()))
+                .collect(Collectors.toMap(MergedTask::getTaskKey, task -> task));
     }
 
     @NonNull
     public MergedTask getTask(@NonNull TaskKey taskKey) {
-        if (taskKey.mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
+        Map<TaskKey, MergedTask> tasks = getTasks();
+        Assert.assertTrue(tasks.containsKey(taskKey));
 
-            Task task = mTasks.get(taskKey.mLocalTaskId);
-            Assert.assertTrue(task != null);
+        MergedTask task = tasks.get(taskKey);
+        Assert.assertTrue(task != null);
 
-            return task;
-        } else {
-            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
-
-            RemoteTask remoteTask = mRemoteTasks.get(taskKey.mRemoteTaskId);
-            Assert.assertTrue(remoteTask != null);
-
-            return remoteTask;
-        }
+        return task;
     }
 
     @NonNull
-    public List<MergedTask> getChildTasks(@NonNull RemoteTask parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public List<MergedTask> getChildTasks(@NonNull MergedTask parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
         return Stream.of(getChildTaskHierarchies(parentTask))
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .map(RemoteTaskHierarchy::getChildTask)
+                .map(MergedTaskHierarchy::getChildTask)
                 .filter(childTask -> childTask.current(exactTimeStamp))
                 .sortBy(MergedTask::getStartExactTimeStamp)
                 .collect(Collectors.toList());
     }
 
     @NonNull
-    List<RemoteTaskHierarchy> getChildTaskHierarchies(@NonNull RemoteTask parentTask) {
-        return Stream.of(mRemoteTaskHierarchies.values())
-                .filter(taskHierarchy -> taskHierarchy.getParentTask() == parentTask)
+    List<MergedTaskHierarchy> getChildTaskHierarchies(@NonNull MergedTask parentTask) {
+        TaskKey parentTaskKey = parentTask.getTaskKey();
+
+        return Stream.of(getTaskHierarchies())
+                .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(parentTaskKey))
                 .collect(Collectors.toList());
     }
 
@@ -2000,25 +2009,6 @@ public class DomainFactory {
     }
 
     @NonNull
-    List<MergedTask> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(parentTask.current(exactTimeStamp));
-
-        return Stream.of(getChildTaskHierarchies(parentTask))
-                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .map(TaskHierarchy::getChildTask)
-                .filter(childTask -> childTask.current(exactTimeStamp))
-                .sortBy(Task::getId)
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
-        return Stream.of(mTaskHierarchies.values())
-                .filter(taskHierarchy -> taskHierarchy.getParentTask() == parentTask)
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
     List<TaskHierarchy> getParentTaskHierarchies(Task childTask) {
         Assert.assertTrue(childTask != null);
 
@@ -2112,14 +2102,6 @@ public class DomainFactory {
     }
 
     @NonNull
-    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
-        return Stream.of(parentTask.getChildTasks(now))
-                .sortBy(MergedTask::getStartExactTimeStamp)
-                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
     private Map<TaskKey, CreateTaskLoader.TaskTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull MergedTask parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
         return Stream.of(parentTask.getChildTasks(now))
                 .filterNot(childTask -> excludedTaskKeys.contains(childTask.getTaskKey()))
@@ -2134,14 +2116,6 @@ public class DomainFactory {
                 .filter(task -> task.isRootTask(now))
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .collect(Collectors.toMap(Task::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
-    }
-
-    @NonNull
-    Task getTask(int taskId) {
-        Task task = mTasks.get(taskId);
-        Assert.assertTrue(task != null);
-
-        return task;
     }
 
     static class Irrelevant {

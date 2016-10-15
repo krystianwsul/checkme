@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -70,7 +71,10 @@ class Instance {
 
     @NonNull
     private Task getTask() {
-        return mDomainFactory.getTask(getTaskId());
+        MergedTask task = mDomainFactory.getTask(new TaskKey(getTaskId()));
+        Assert.assertTrue(task instanceof Task); // todo firebase;
+
+        return (Task) task;
     }
 
     public String getName() {
@@ -215,12 +219,13 @@ class Instance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        List<TaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
+        List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
         HashSet<Instance> childInstances = new HashSet<>();
-        for (TaskHierarchy taskHierarchy : taskHierarchies) {
+        for (MergedTaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
-            Task childTask = taskHierarchy.getChildTask();
+            Assert.assertTrue(taskHierarchy.getChildTask() instanceof Task); // todo firebase
+            Task childTask = (Task) taskHierarchy.getChildTask();
 
             Instance existingChildInstance = mDomainFactory.getExistingInstance(childTask, scheduleDateTime);
             if (existingChildInstance != null) {

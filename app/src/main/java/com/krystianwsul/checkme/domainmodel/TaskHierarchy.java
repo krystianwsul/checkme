@@ -4,11 +4,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-class TaskHierarchy {
+class TaskHierarchy implements MergedTaskHierarchy {
     @NonNull
     private final DomainFactory mDomainFactory;
 
@@ -25,13 +26,21 @@ class TaskHierarchy {
     }
 
     @NonNull
-    Task getParentTask() {
-        return mDomainFactory.getTask(mTaskHierarchyRecord.getParentTaskId());
+    @Override
+    public Task getParentTask() {
+        MergedTask parentTask = mDomainFactory.getTask(getParentTaskKey());
+        Assert.assertTrue(parentTask instanceof Task); // todo firebase
+
+        return (Task) parentTask;
     }
 
     @NonNull
-    Task getChildTask() {
-        return mDomainFactory.getTask(mTaskHierarchyRecord.getChildTaskId());
+    @Override
+    public Task getChildTask() {
+        MergedTask childTask = mDomainFactory.getTask(getChildTaskKey());
+        Assert.assertTrue(childTask instanceof Task); // todo firebase
+
+        return (Task) childTask;
     }
 
     @NonNull
@@ -47,14 +56,16 @@ class TaskHierarchy {
             return null;
     }
 
-    boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
+    @Override
+    public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
+    @Override
+    public boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
@@ -72,5 +83,17 @@ class TaskHierarchy {
 
     int getChildTaskId() {
         return mTaskHierarchyRecord.getChildTaskId();
+    }
+
+    @NonNull
+    @Override
+    public TaskKey getParentTaskKey() {
+        return new TaskKey(getParentTaskId());
+    }
+
+    @NonNull
+    @Override
+    public TaskKey getChildTaskKey() {
+        return new TaskKey(getChildTaskId());
     }
 }

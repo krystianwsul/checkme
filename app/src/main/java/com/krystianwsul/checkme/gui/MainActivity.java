@@ -61,9 +61,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private static final String TIME_RANGE_KEY = "timeRange";
 
     private static final int RC_SIGN_IN = 1000;
-    private static final String SIGNED_IN_KEY = "signedIn";
-    private static final String DISPLAY_NAME_KEY = "displayName";
-    private static final String EMAIL_KEY = "email";
 
     private static final int INSTANCES_VISIBLE = 0;
     private static final int TASKS_VISIBLE = 1;
@@ -114,7 +111,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private FirebaseAuth mFirebaseAuth;
     private boolean mSignedIn = false;
 
-    private FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
+    private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
             mSignedIn = true;
@@ -618,6 +615,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mDrawerCustomTimesListener = null;
     }
 
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -637,6 +635,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                             Log.e("asdf", "signInWithCredential:onComplete:" + task.isSuccessful());
 
                             if (!task.isSuccessful()) {
+                                Assert.assertTrue(task.getException() != null);
                                 Log.e("asdf", "firebase signin error: " + task.getException());
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();

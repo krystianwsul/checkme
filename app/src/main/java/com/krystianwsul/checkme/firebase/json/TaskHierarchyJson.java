@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase;
+package com.krystianwsul.checkme.firebase.json;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -6,18 +6,18 @@ import android.text.TextUtils;
 
 import junit.framework.Assert;
 
-public class RemoteTaskHierarchyRecord {
+public class TaskHierarchyJson {
     private String parentTaskId;
     private String childTaskId;
 
     private long startTime;
     private Long endTime;
 
-    public RemoteTaskHierarchyRecord() {
+    public TaskHierarchyJson() {
 
     }
 
-    RemoteTaskHierarchyRecord(@NonNull String parentTaskId, @NonNull String childTaskId, long startTime, Long endTime) {
+    public TaskHierarchyJson(@NonNull String parentTaskId, @NonNull String childTaskId, long startTime, Long endTime) {
         Assert.assertTrue(!TextUtils.isEmpty(parentTaskId));
         Assert.assertTrue(!TextUtils.isEmpty(childTaskId));
         Assert.assertTrue(!parentTaskId.equals(childTaskId));

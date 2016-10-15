@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase;
+package com.krystianwsul.checkme.firebase.json;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
-public class RemoteTaskRecord {
+public class TaskJson {
     private String name;
 
     private long startTime;
@@ -26,30 +26,30 @@ public class RemoteTaskRecord {
     private String note;
 
     @Nullable
-    private List<RemoteSingleScheduleRecord> singleScheduleRecords;
+    private List<SingleScheduleJson> singleScheduleRecords;
 
     @Nullable
-    private List<RemoteDailyScheduleRecord> dailyScheduleRecords;
+    private List<DailyScheduleJson> dailyScheduleRecords;
 
     @Nullable
-    private List<RemoteWeeklyScheduleRecord> weeklyScheduleRecords;
+    private List<WeeklyScheduleJson> weeklyScheduleRecords;
 
     @Nullable
-    private List<RemoteMonthlyDayScheduleRecord> monthlyDayScheduleRecords;
+    private List<MonthlyDayScheduleJson> monthlyDayScheduleRecords;
 
     @Nullable
-    private List<RemoteMonthlyWeekScheduleRecord> monthlyWeekScheduleRecords;
+    private List<MonthlyWeekScheduleJson> monthlyWeekScheduleRecords;
 
-    public RemoteTaskRecord() {
+    public TaskJson() {
 
     }
 
-    public RemoteTaskRecord(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note, @NonNull List<RemoteSingleScheduleRecord> remoteSingleScheduleRecords, @NonNull List<RemoteDailyScheduleRecord> remoteDailyScheduleRecords, @NonNull List<RemoteWeeklyScheduleRecord> remoteWeeklyScheduleRecords, @NonNull List<RemoteMonthlyDayScheduleRecord> remoteMonthlyDayScheduleRecords, @NonNull List<RemoteMonthlyWeekScheduleRecord> remoteMonthlyWeekScheduleRecords) {
+    public TaskJson(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note, @NonNull List<SingleScheduleJson> remoteSingleScheduleRecords, @NonNull List<DailyScheduleJson> dailyScheduleJsons, @NonNull List<WeeklyScheduleJson> remoteWeeklyScheduleRecords, @NonNull List<MonthlyDayScheduleJson> monthlyDayScheduleJsons, @NonNull List<MonthlyWeekScheduleJson> monthlyWeekScheduleJsons) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));
-        Assert.assertTrue(!remoteSingleScheduleRecords.isEmpty() || !remoteDailyScheduleRecords.isEmpty() || !remoteWeeklyScheduleRecords.isEmpty() || !remoteMonthlyDayScheduleRecords.isEmpty() || !remoteMonthlyWeekScheduleRecords.isEmpty());
+        Assert.assertTrue(!remoteSingleScheduleRecords.isEmpty() || !dailyScheduleJsons.isEmpty() || !remoteWeeklyScheduleRecords.isEmpty() || !monthlyDayScheduleJsons.isEmpty() || !monthlyWeekScheduleJsons.isEmpty());
 
         this.name = name;
         this.startTime = startTime;
@@ -62,13 +62,13 @@ public class RemoteTaskRecord {
         this.note = note;
 
         singleScheduleRecords = remoteSingleScheduleRecords;
-        dailyScheduleRecords = remoteDailyScheduleRecords;
+        dailyScheduleRecords = dailyScheduleJsons;
         weeklyScheduleRecords = remoteWeeklyScheduleRecords;
-        monthlyDayScheduleRecords = remoteMonthlyDayScheduleRecords;
-        monthlyWeekScheduleRecords = remoteMonthlyWeekScheduleRecords;
+        monthlyDayScheduleRecords = monthlyDayScheduleJsons;
+        monthlyWeekScheduleRecords = monthlyWeekScheduleJsons;
     }
 
-    public RemoteTaskRecord(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note) {
+    public TaskJson(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
@@ -127,7 +127,7 @@ public class RemoteTaskRecord {
     }
 
     @NonNull
-    public List<RemoteSingleScheduleRecord> getSingleScheduleRecords() {
+    public List<SingleScheduleJson> getSingleScheduleRecords() {
         if (singleScheduleRecords == null)
             return new ArrayList<>();
         else
@@ -135,7 +135,7 @@ public class RemoteTaskRecord {
     }
 
     @NonNull
-    public List<RemoteDailyScheduleRecord> getDailyScheduleRecords() {
+    public List<DailyScheduleJson> getDailyScheduleRecords() {
         if (dailyScheduleRecords == null)
             return new ArrayList<>();
         else
@@ -143,7 +143,7 @@ public class RemoteTaskRecord {
     }
 
     @NonNull
-    public List<RemoteWeeklyScheduleRecord> getWeeklyScheduleRecords() {
+    public List<WeeklyScheduleJson> getWeeklyScheduleRecords() {
         if (weeklyScheduleRecords == null)
             return new ArrayList<>();
         else
@@ -151,7 +151,7 @@ public class RemoteTaskRecord {
     }
 
     @NonNull
-    public List<RemoteMonthlyDayScheduleRecord> getMonthlyDayScheduleRecords() {
+    public List<MonthlyDayScheduleJson> getMonthlyDayScheduleRecords() {
         if (monthlyDayScheduleRecords == null)
             return new ArrayList<>();
         else
@@ -159,7 +159,7 @@ public class RemoteTaskRecord {
     }
 
     @NonNull
-    public List<RemoteMonthlyWeekScheduleRecord> getMonthlyWeekScheduleRecords() {
+    public List<MonthlyWeekScheduleJson> getMonthlyWeekScheduleRecords() {
         if (monthlyWeekScheduleRecords == null)
             return new ArrayList<>();
         else

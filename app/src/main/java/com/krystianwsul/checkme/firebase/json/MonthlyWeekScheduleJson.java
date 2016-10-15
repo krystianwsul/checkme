@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase;
+package com.krystianwsul.checkme.firebase.json;
 
 import android.support.annotation.Nullable;
 
@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 
 import junit.framework.Assert;
 
-public class RemoteMonthlyWeekScheduleRecord extends RemoteScheduleRecord {
+public class MonthlyWeekScheduleJson extends ScheduleJson {
     private int dayOfMonth;
     private int dayOfWeek;
     private boolean beginningOfMonth;
@@ -17,11 +17,11 @@ public class RemoteMonthlyWeekScheduleRecord extends RemoteScheduleRecord {
 
     private Integer minute;
 
-    public RemoteMonthlyWeekScheduleRecord() {
+    public MonthlyWeekScheduleJson() {
 
     }
 
-    public RemoteMonthlyWeekScheduleRecord(long startTime, @Nullable Long endTime, int dayOfMonth, int dayOfWeek, boolean beginningOfMonth, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
+    public MonthlyWeekScheduleJson(long startTime, @Nullable Long endTime, int dayOfMonth, int dayOfWeek, boolean beginningOfMonth, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         super(startTime, endTime, ScheduleType.MONTHLY_WEEK.ordinal());
 
         Assert.assertTrue((hour == null) == (minute == null));

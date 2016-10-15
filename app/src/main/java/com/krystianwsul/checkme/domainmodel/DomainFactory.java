@@ -17,15 +17,15 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
-import com.krystianwsul.checkme.firebase.RemoteDailyScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
-import com.krystianwsul.checkme.firebase.RemoteMonthlyDayScheduleRecord;
-import com.krystianwsul.checkme.firebase.RemoteMonthlyWeekScheduleRecord;
-import com.krystianwsul.checkme.firebase.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteTask;
-import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
-import com.krystianwsul.checkme.firebase.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
+import com.krystianwsul.checkme.firebase.json.MonthlyDayScheduleJson;
+import com.krystianwsul.checkme.firebase.json.MonthlyWeekScheduleJson;
+import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
+import com.krystianwsul.checkme.firebase.json.TaskJson;
+import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
@@ -376,11 +376,11 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<RemoteSingleScheduleRecord> remoteSingleScheduleRecords = new ArrayList<>();
-        List<RemoteDailyScheduleRecord> remoteDailyScheduleRecords = new ArrayList<>();
-        List<RemoteWeeklyScheduleRecord> remoteWeeklyScheduleRecords = new ArrayList<>();
-        List<RemoteMonthlyDayScheduleRecord> remoteMonthlyDayScheduleRecords = new ArrayList<>();
-        List<RemoteMonthlyWeekScheduleRecord> remoteMonthlyWeekScheduleRecords = new ArrayList<>();
+        List<SingleScheduleJson> remoteSingleScheduleRecords = new ArrayList<>();
+        List<DailyScheduleJson> dailyScheduleJsons = new ArrayList<>();
+        List<WeeklyScheduleJson> remoteWeeklyScheduleRecords = new ArrayList<>();
+        List<MonthlyDayScheduleJson> monthlyDayScheduleJsons = new ArrayList<>();
+        List<MonthlyWeekScheduleJson> monthlyWeekScheduleJsons = new ArrayList<>();
 
         for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
             Assert.assertTrue(scheduleData != null);
@@ -395,7 +395,7 @@ public class DomainFactory {
                     HourMinute hourMinute = singleScheduleData.TimePair.mHourMinute;
                     Assert.assertTrue(hourMinute != null);
 
-                    remoteSingleScheduleRecords.add(new RemoteSingleScheduleRecord(now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                    remoteSingleScheduleRecords.add(new SingleScheduleJson(now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute()));
                     break;
                 }
                 case DAILY: {
@@ -406,7 +406,7 @@ public class DomainFactory {
                     HourMinute hourMinute = dailyScheduleData.TimePair.mHourMinute;
                     Assert.assertTrue(hourMinute != null);
 
-                    remoteDailyScheduleRecords.add(new RemoteDailyScheduleRecord(now.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    dailyScheduleJsons.add(new DailyScheduleJson(now.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute()));
                     break;
                 }
                 case WEEKLY: {
@@ -418,7 +418,7 @@ public class DomainFactory {
                     HourMinute hourMinute = weeklyScheduleData.TimePair.mHourMinute;
                     Assert.assertTrue(hourMinute != null);
 
-                    remoteWeeklyScheduleRecords.add(new RemoteWeeklyScheduleRecord(now.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                    remoteWeeklyScheduleRecords.add(new WeeklyScheduleJson(now.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute()));
                     break;
                 }
                 case MONTHLY_DAY: {
@@ -428,7 +428,7 @@ public class DomainFactory {
                     HourMinute hourMinute = monthlyDayScheduleData.TimePair.mHourMinute;
                     Assert.assertTrue(hourMinute != null);
 
-                    remoteMonthlyDayScheduleRecords.add(new RemoteMonthlyDayScheduleRecord(now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    monthlyDayScheduleJsons.add(new MonthlyDayScheduleJson(now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
                     break;
                 }
                 case MONTHLY_WEEK: {
@@ -438,7 +438,7 @@ public class DomainFactory {
                     HourMinute hourMinute = monthlyWeekScheduleData.TimePair.mHourMinute;
                     Assert.assertTrue(hourMinute != null);
 
-                    remoteMonthlyWeekScheduleRecords.add(new RemoteMonthlyWeekScheduleRecord(now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    monthlyWeekScheduleJsons.add(new MonthlyWeekScheduleJson(now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
                     break;
                 }
                 default:
@@ -446,12 +446,12 @@ public class DomainFactory {
             }
         }
 
-        RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(name, now.getLong(), null, null, null, null, note, remoteSingleScheduleRecords, remoteDailyScheduleRecords, remoteWeeklyScheduleRecords, remoteMonthlyDayScheduleRecords, remoteMonthlyWeekScheduleRecords);
+        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, remoteSingleScheduleRecords, dailyScheduleJsons, remoteWeeklyScheduleRecords, monthlyDayScheduleJsons, monthlyWeekScheduleJsons);
 
         UserData userData = MainActivity.getUserData();
         Assert.assertTrue(userData != null);
 
-        DatabaseWrapper.addRootTask(userData, remoteTaskRecord, friendEntries);
+        DatabaseWrapper.addRootTask(userData, taskJson, friendEntries);
     }
 
     // gets
@@ -1377,9 +1377,9 @@ public class DomainFactory {
             Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
             Assert.assertTrue(parentTask instanceof RemoteTask);
 
-            RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(name, now.getLong(), null, null, null, null, note);
+            TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note);
 
-            DatabaseWrapper.addChildTask((RemoteTask) parentTask, remoteTaskRecord);
+            DatabaseWrapper.addChildTask((RemoteTask) parentTask, taskJson);
         }
     }
 

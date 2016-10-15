@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
+import com.krystianwsul.checkme.firebase.json.ScheduleJson;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 
@@ -13,17 +15,17 @@ public class RemoteDailySchedule extends RemoteSchedule {
     private final int mPosition;
 
     @NonNull
-    private RemoteDailyScheduleRecord mRemoteDailyScheduleRecord;
+    private DailyScheduleJson mDailyScheduleJson;
 
-    public RemoteDailySchedule(int position, @NonNull RemoteDailyScheduleRecord remoteDailyScheduleRecord) {
+    public RemoteDailySchedule(int position, @NonNull DailyScheduleJson dailyScheduleJson) {
         mPosition = position;
-        mRemoteDailyScheduleRecord = remoteDailyScheduleRecord;
+        mDailyScheduleJson = dailyScheduleJson;
     }
 
     @NonNull
     @Override
-    protected RemoteScheduleRecord getRemoteScheduleRecord() {
-        return mRemoteDailyScheduleRecord;
+    protected ScheduleJson getRemoteScheduleRecord() {
+        return mDailyScheduleJson;
     }
 
     @NonNull
@@ -34,16 +36,16 @@ public class RemoteDailySchedule extends RemoteSchedule {
 
     @NonNull
     public Time getTime() {
-        Assert.assertTrue(mRemoteDailyScheduleRecord.getCustomTimeId() == null); // todo customtime
-        Assert.assertTrue(mRemoteDailyScheduleRecord.getHour() != null);
-        Assert.assertTrue(mRemoteDailyScheduleRecord.getMinute() != null);
+        Assert.assertTrue(mDailyScheduleJson.getCustomTimeId() == null); // todo customtime
+        Assert.assertTrue(mDailyScheduleJson.getHour() != null);
+        Assert.assertTrue(mDailyScheduleJson.getMinute() != null);
 
         //Integer customTimeId = mDailyScheduleRecord.getCustomTimeId();
         //if (customTimeId != null) {
         //    return mDomainFactory.getCustomTime(mDailyScheduleRecord.getCustomTimeId());
         //} else {
-        Integer hour = mRemoteDailyScheduleRecord.getHour();
-        Integer minute = mRemoteDailyScheduleRecord.getMinute();
+        Integer hour = mDailyScheduleJson.getHour();
+        Integer minute = mDailyScheduleJson.getMinute();
         Assert.assertTrue(hour != null);
         Assert.assertTrue(minute != null);
         return new NormalTime(hour, minute);

@@ -3,6 +3,8 @@ package com.krystianwsul.checkme.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.krystianwsul.checkme.firebase.json.ScheduleJson;
+import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
@@ -13,16 +15,16 @@ public class RemoteWeeklySchedule extends RemoteSchedule {
     private final int mPosition;
 
     @NonNull
-    private RemoteWeeklyScheduleRecord mRemoteWeeklyScheduleRecord;
+    private WeeklyScheduleJson mRemoteWeeklyScheduleRecord;
 
-    public RemoteWeeklySchedule(int position, @NonNull RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord) {
+    public RemoteWeeklySchedule(int position, @NonNull WeeklyScheduleJson remoteWeeklyScheduleRecord) {
         mPosition = position;
         mRemoteWeeklyScheduleRecord = remoteWeeklyScheduleRecord;
     }
 
     @NonNull
     @Override
-    protected RemoteScheduleRecord getRemoteScheduleRecord() {
+    protected ScheduleJson getRemoteScheduleRecord() {
         return mRemoteWeeklyScheduleRecord;
     }
 

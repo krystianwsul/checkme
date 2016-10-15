@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -11,6 +10,12 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
+import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
+import com.krystianwsul.checkme.firebase.json.MonthlyDayScheduleJson;
+import com.krystianwsul.checkme.firebase.json.MonthlyWeekScheduleJson;
+import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
+import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
+import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -26,25 +31,11 @@ public class RemoteTask implements MergedTask {
     private final DomainFactory mDomainFactory;
 
     @NonNull
-    private final String mId;
-
-    @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
-    @NonNull
-    private final Set<String> mTaskOf;
-
-    public RemoteTask(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull TaskWrapper taskWrapper) {
-        Assert.assertTrue(!TextUtils.isEmpty(id));
-        Assert.assertTrue(taskWrapper.taskRecord != null);
-        Assert.assertTrue(taskWrapper.taskHierarchyRecord == null);
-
+    public RemoteTask(@NonNull DomainFactory domainFactory, @NonNull RemoteTaskRecord remoteTaskRecord) {
         mDomainFactory = domainFactory;
-        mId = id;
-        mRemoteTaskRecord = taskWrapper.taskRecord;
-
-        mTaskOf = taskWrapper.taskOf.keySet();
-        Assert.assertTrue(!mTaskOf.isEmpty());
+        mRemoteTaskRecord = remoteTaskRecord;
     }
 
     @NonNull
@@ -66,27 +57,27 @@ public class RemoteTask implements MergedTask {
     private List<RemoteSchedule> getRemoteSchedules() {
         List<RemoteSchedule> remoteSchedules = new ArrayList<>();
 
-        List<RemoteSingleScheduleRecord> singleScheduleRecords = mRemoteTaskRecord.getSingleScheduleRecords();
+        List<SingleScheduleJson> singleScheduleRecords = mRemoteTaskRecord.getSingleScheduleRecords();
         for (int i = 0; i < singleScheduleRecords.size(); i++) {
             remoteSchedules.add(new RemoteSingleSchedule(i, singleScheduleRecords.get(i)));
         }
 
-        List<RemoteDailyScheduleRecord> dailyScheduleRecords = mRemoteTaskRecord.getDailyScheduleRecords();
+        List<DailyScheduleJson> dailyScheduleRecords = mRemoteTaskRecord.getDailyScheduleRecords();
         for (int i = 0; i < dailyScheduleRecords.size(); i++) {
             remoteSchedules.add(new RemoteDailySchedule(i, dailyScheduleRecords.get(i)));
         }
 
-        List<RemoteWeeklyScheduleRecord> weeklyScheduleRecords = mRemoteTaskRecord.getWeeklyScheduleRecords();
+        List<WeeklyScheduleJson> weeklyScheduleRecords = mRemoteTaskRecord.getWeeklyScheduleRecords();
         for (int i = 0; i < weeklyScheduleRecords.size(); i++) {
             remoteSchedules.add(new RemoteWeeklySchedule(i, weeklyScheduleRecords.get(i)));
         }
 
-        List<RemoteMonthlyDayScheduleRecord> monthlyDayScheduleRecords = mRemoteTaskRecord.getMonthlyDayScheduleRecords();
+        List<MonthlyDayScheduleJson> monthlyDayScheduleRecords = mRemoteTaskRecord.getMonthlyDayScheduleRecords();
         for (int i = 0; i < monthlyDayScheduleRecords.size(); i++) {
             remoteSchedules.add(new RemoteMonthlyDaySchedule(i, monthlyDayScheduleRecords.get(i)));
         }
 
-        List<RemoteMonthlyWeekScheduleRecord> monthlyWeekScheduleRecords = mRemoteTaskRecord.getMonthlyWeekScheduleRecords();
+        List<MonthlyWeekScheduleJson> monthlyWeekScheduleRecords = mRemoteTaskRecord.getMonthlyWeekScheduleRecords();
         for (int i = 0; i < monthlyWeekScheduleRecords.size(); i++) {
             remoteSchedules.add(new RemoteMonthlyWeekSchedule(i, monthlyWeekScheduleRecords.get(i)));
         }
@@ -154,7 +145,7 @@ public class RemoteTask implements MergedTask {
     @NonNull
     @Override
     public TaskKey getTaskKey() {
-        return new TaskKey(mId);
+        return new TaskKey(mRemoteTaskRecord.getId());
     }
 
     @Nullable
@@ -208,8 +199,8 @@ public class RemoteTask implements MergedTask {
     }
 
     @NonNull
-    public Set<String> getTaskOf() {
-        return mTaskOf;
+    public Set<String> getRecordOf() {
+        return mRemoteTaskRecord.getRecordOf();
     }
 
     public void setEndExactTimeStamp(@NonNull Map<String, Object> values, @NonNull ExactTimeStamp now) {
@@ -219,7 +210,7 @@ public class RemoteTask implements MergedTask {
                     .allMatch(schedule -> schedule.current(now)));
 
             for (RemoteSchedule schedule : schedules)
-                values.put("tasks/" + mId + "/taskRecord/" + schedule.getPath() + "/endTime", now.getLong());
+                values.put("tasks/" + mRemoteTaskRecord.getId() + "/taskJson/" + schedule.getPath() + "/endTime", now.getLong());
         } else {
             Assert.assertTrue(schedules.isEmpty());
         }
@@ -237,6 +228,6 @@ public class RemoteTask implements MergedTask {
             ((RemoteTaskHierarchy) parentTaskHierarchy).setEndExactTimeStamp(values, now);
         }
 
-        values.put("tasks/" + mId + "/taskRecord/endTime", now.getLong());
+        values.put("tasks/" + mRemoteTaskRecord.getId() + "/taskJson/endTime", now.getLong());
     }
 }

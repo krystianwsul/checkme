@@ -5,6 +5,9 @@ import android.text.TextUtils;
 
 import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.json.JsonWrapper;
+import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 
 import junit.framework.Assert;
 
@@ -25,17 +28,17 @@ public class RemoteFactory {
             String key = child.getKey();
             Assert.assertTrue(!TextUtils.isEmpty(key));
 
-            TaskWrapper taskWrapper = child.getValue(TaskWrapper.class);
-            Assert.assertTrue(taskWrapper != null);
+            JsonWrapper jsonWrapper = child.getValue(JsonWrapper.class);
+            Assert.assertTrue(jsonWrapper != null);
 
-            if (taskWrapper.taskRecord != null) {
-                Assert.assertTrue(taskWrapper.taskHierarchyRecord == null);
+            if (jsonWrapper.taskJson != null) {
+                Assert.assertTrue(jsonWrapper.taskHierarchyJson == null);
 
-                mRemoteTasks.put(key, new RemoteTask(domainFactory, key, taskWrapper));
+                mRemoteTasks.put(key, new RemoteTask(domainFactory, new RemoteTaskRecord(key, jsonWrapper)));
             } else {
-                Assert.assertTrue(taskWrapper.taskHierarchyRecord != null);
+                Assert.assertTrue(jsonWrapper.taskHierarchyJson != null);
 
-                mRemoteTaskHierarchies.put(key, new RemoteTaskHierarchy(domainFactory, key, taskWrapper.taskHierarchyRecord));
+                mRemoteTaskHierarchies.put(key, new RemoteTaskHierarchy(domainFactory, new RemoteTaskHierarchyRecord(key, jsonWrapper)));
             }
         }
     }

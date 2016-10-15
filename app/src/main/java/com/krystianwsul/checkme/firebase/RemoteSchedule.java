@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
+import com.krystianwsul.checkme.firebase.json.ScheduleJson;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -39,7 +40,7 @@ public abstract class RemoteSchedule implements MergedSchedule {
     }
 
     @NonNull
-    protected abstract RemoteScheduleRecord getRemoteScheduleRecord();
+    protected abstract ScheduleJson getRemoteScheduleRecord();
 
     @Override
     public boolean isVisible(@NonNull MergedTask task, @NonNull ExactTimeStamp now) {

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase;
+package com.krystianwsul.checkme.firebase.json;
 
 import android.support.annotation.Nullable;
 
@@ -6,28 +6,36 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 
 import junit.framework.Assert;
 
-public class RemoteDailyScheduleRecord extends RemoteScheduleRecord {
+public class WeeklyScheduleJson extends ScheduleJson {
+    private int dayOfWeek;
+
     private Integer customTimeId;
 
     private Integer hour;
 
     private Integer minute;
 
-    public RemoteDailyScheduleRecord() {
+    public WeeklyScheduleJson() {
 
     }
 
-    public RemoteDailyScheduleRecord(long startTime, @Nullable Long endTime, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
-        super(startTime, endTime, ScheduleType.DAILY.ordinal());
+    public WeeklyScheduleJson(long startTime, @Nullable Long endTime, int dayOfWeek, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
+        super(startTime, endTime, ScheduleType.WEEKLY.ordinal());
 
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));
         Assert.assertTrue((hour != null) || (customTimeId != null));
 
+        this.dayOfWeek = dayOfWeek;
+
         this.customTimeId = customTimeId;
 
         this.hour = hour;
         this.minute = minute;
+    }
+
+    public int getDayOfWeek() {
+        return dayOfWeek;
     }
 
     @Nullable

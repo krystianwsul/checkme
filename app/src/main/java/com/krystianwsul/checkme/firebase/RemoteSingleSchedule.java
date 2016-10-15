@@ -3,6 +3,8 @@ package com.krystianwsul.checkme.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.krystianwsul.checkme.firebase.json.ScheduleJson;
+import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.NormalTime;
@@ -14,16 +16,16 @@ public class RemoteSingleSchedule extends RemoteSchedule {
     private final int mPosition;
 
     @NonNull
-    private RemoteSingleScheduleRecord mRemoteSingleScheduleRecord;
+    private SingleScheduleJson mRemoteSingleScheduleRecord;
 
-    public RemoteSingleSchedule(int position, @NonNull RemoteSingleScheduleRecord remoteSingleScheduleRecord) {
+    public RemoteSingleSchedule(int position, @NonNull SingleScheduleJson remoteSingleScheduleRecord) {
         mPosition = position;
         mRemoteSingleScheduleRecord = remoteSingleScheduleRecord;
     }
 
     @NonNull
     @Override
-    protected RemoteScheduleRecord getRemoteScheduleRecord() {
+    protected ScheduleJson getRemoteScheduleRecord() {
         return mRemoteSingleScheduleRecord;
     }
 

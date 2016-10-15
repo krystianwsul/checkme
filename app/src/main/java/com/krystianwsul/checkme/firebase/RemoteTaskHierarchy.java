@@ -2,15 +2,13 @@ package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
+import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-
-import junit.framework.Assert;
 
 import java.util.Map;
 
@@ -19,15 +17,9 @@ public class RemoteTaskHierarchy implements MergedTaskHierarchy {
     private final DomainFactory mDomainFactory;
 
     @NonNull
-    private final String mId;
-
-    @NonNull
     private final RemoteTaskHierarchyRecord mRemoteTaskHierarchyRecord;
 
-    public RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
-        Assert.assertTrue(!TextUtils.isEmpty(id));
-
-        mId = id;
+    public RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
         mDomainFactory = domainFactory;
         mRemoteTaskHierarchyRecord = remoteTaskHierarchyRecord;
     }
@@ -85,6 +77,6 @@ public class RemoteTaskHierarchy implements MergedTaskHierarchy {
     }
 
     void setEndExactTimeStamp(@NonNull Map<String, Object> values, @NonNull ExactTimeStamp now) {
-        values.put("tasks/" + mId + "/taskHierarchyRecord/endTime", now.getLong());
+        values.put("tasks/" + mRemoteTaskHierarchyRecord.getId() + "/taskHierarchyJson/endTime", now.getLong());
     }
 }

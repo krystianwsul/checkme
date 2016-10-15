@@ -1,11 +1,11 @@
-package com.krystianwsul.checkme.firebase;
+package com.krystianwsul.checkme.firebase.json;
 
 import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
 @SuppressWarnings("WeakerAccess")
-public abstract class RemoteScheduleRecord {
+public abstract class ScheduleJson {
     private long startTime;
 
     private Long endTime;
@@ -13,11 +13,11 @@ public abstract class RemoteScheduleRecord {
     private int type;
 
     @SuppressWarnings("WeakerAccess")
-    public RemoteScheduleRecord() {
+    public ScheduleJson() {
 
     }
 
-    RemoteScheduleRecord(long startTime, @Nullable Long endTime, int type) {
+    ScheduleJson(long startTime, @Nullable Long endTime, int type) {
         Assert.assertTrue((endTime == null) || startTime <= endTime);
 
         this.startTime = startTime;

@@ -2110,12 +2110,12 @@ public class DomainFactory {
 
     @NonNull
     private Map<TaskKey, CreateTaskLoader.TaskTreeData> getTaskDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
-        return Stream.of(mTasks.values())
+        return Stream.of(getTasks().values())
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
-                .collect(Collectors.toMap(Task::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
+                .collect(Collectors.toMap(MergedTask::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
     }
 
     static class Irrelevant {

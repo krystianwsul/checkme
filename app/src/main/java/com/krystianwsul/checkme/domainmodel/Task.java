@@ -63,7 +63,7 @@ public class Task implements MergedTask {
     }
 
     @NonNull
-    List<Schedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
+    public List<Schedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return Stream.of(mSchedules)
@@ -103,7 +103,8 @@ public class Task implements MergedTask {
         return mTaskRecord.getId();
     }
 
-    boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    @Override
+    public boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return (getParentTask(exactTimeStamp) == null);
@@ -234,7 +235,7 @@ public class Task implements MergedTask {
     }
 
     @NonNull
-    private Task getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    public Task getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Task parentTask = getParentTask(exactTimeStamp);
         if (parentTask == null)
             return this;
@@ -242,7 +243,8 @@ public class Task implements MergedTask {
             return parentTask.getRootTask(exactTimeStamp);
     }
 
-    boolean isVisible(@NonNull ExactTimeStamp now) {
+    @Override
+    public boolean isVisible(@NonNull ExactTimeStamp now) {
         if (current(now)) {
             Task rootTask = getRootTask(now);
 

@@ -13,7 +13,7 @@ import junit.framework.Assert;
 
 import java.util.List;
 
-abstract class Schedule {
+abstract class Schedule implements MergedSchedule {
     @NonNull
     final DomainFactory mDomainFactory;
 
@@ -53,7 +53,7 @@ abstract class Schedule {
     }
 
     @NonNull
-    ScheduleType getType() {
+    public ScheduleType getType() {
         ScheduleType scheduleType = ScheduleType.values()[mScheduleRecord.getType()];
         Assert.assertTrue(scheduleType != null);
 

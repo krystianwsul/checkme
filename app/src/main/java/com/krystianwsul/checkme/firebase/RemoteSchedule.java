@@ -4,9 +4,13 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.domainmodel.MergedSchedule;
+import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
-public abstract class RemoteSchedule {
+import junit.framework.Assert;
+
+public abstract class RemoteSchedule implements MergedSchedule {
     public RemoteSchedule() {
 
     }
@@ -36,4 +40,11 @@ public abstract class RemoteSchedule {
 
     @NonNull
     protected abstract RemoteScheduleRecord getRemoteScheduleRecord();
+
+    @Override
+    public boolean isVisible(@NonNull MergedTask task, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(current(now));
+
+        return true; // todo firebase
+    }
 }

@@ -33,4 +33,14 @@ public interface MergedTask {
     void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp);
 
     boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp);
+
+    boolean isVisible(@NonNull ExactTimeStamp now);
+
+    @NonNull
+    MergedTask getRootTask(@NonNull ExactTimeStamp exactTimeStamp);
+
+    @NonNull
+    List<? extends MergedSchedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp);
+
+    boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp);
 }

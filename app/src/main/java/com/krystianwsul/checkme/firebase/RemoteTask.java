@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -41,7 +42,7 @@ public class RemoteTask implements MergedTask {
     }
 
     @NonNull
-    List<RemoteSchedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
+    public List<RemoteSchedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return Stream.of(getRemoteSchedules())
@@ -162,5 +163,33 @@ public class RemoteTask implements MergedTask {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
+    }
+
+    @NonNull
+    public MergedTask getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+        MergedTask parentTask = getParentTask(exactTimeStamp);
+        if (parentTask == null)
+            return this;
+        else
+            return parentTask.getRootTask(exactTimeStamp);
+    }
+
+    @Override
+    public boolean isVisible(@NonNull ExactTimeStamp now) {
+        if (current(now)) {
+            MergedTask rootTask = getRootTask(now);
+
+            List<? extends MergedSchedule> schedules = rootTask.getCurrentSchedules(now);
+
+            if (schedules.isEmpty()) {
+                return true;
+            }
+
+            if (Stream.of(schedules).anyMatch(schedule -> schedule.isVisible(this, now))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

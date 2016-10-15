@@ -97,4 +97,12 @@ class SingleSchedule extends Schedule {
     public Integer getCustomTimeId() {
         return mSingleScheduleRecord.getCustomTimeId();
     }
+
+    @Override
+    public boolean isVisible(@NonNull MergedTask task, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(current(now));
+        Assert.assertTrue(task instanceof Task); // todo firebase
+
+        return getInstance((Task) task).isVisible(now);
+    }
 }

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -8,7 +9,11 @@ import com.google.firebase.database.Query;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class DatabaseWrapper {
     private static final DatabaseReference sDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -46,10 +51,13 @@ public class DatabaseWrapper {
         return query;
     }
 
-    public static void addTask(@NonNull UserData userData, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull List<UserData> friends) {
+    public static void addRootTask(@NonNull UserData userData, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull List<UserData> friends) {
         Assert.assertTrue(!friends.isEmpty());
 
-        sDatabaseReference.child("tasks").push().setValue(new TaskWrapper(userData, friends, remoteTaskRecord));
+        List<UserData> userDatas = new ArrayList<>(friends);
+        userDatas.add(userData);
+
+        sDatabaseReference.child("tasks").push().setValue(new TaskWrapper(userDatas, remoteTaskRecord));
     }
 
     @NonNull
@@ -62,4 +70,22 @@ public class DatabaseWrapper {
         return query;
     }
 
+    public static void addChildTask(@NonNull RemoteTask parentTask, @NonNull RemoteTaskRecord remoteTaskRecord) {
+        String parentTaskId = parentTask.getTaskKey().mRemoteTaskId;
+        Assert.assertTrue(!TextUtils.isEmpty(parentTaskId));
+
+        Set<String> taskOf = parentTask.getTaskOf();
+
+        String childTaskId = sDatabaseReference.child("tasks").push().getKey();
+        Assert.assertTrue(!TextUtils.isEmpty(childTaskId));
+
+        String taskHierarchyId = sDatabaseReference.child("tasks").push().getKey();
+        Assert.assertTrue(!TextUtils.isEmpty(taskHierarchyId));
+
+        Map<String, Object> updateData = new HashMap<>();
+        updateData.put(childTaskId, new TaskWrapper(taskOf, remoteTaskRecord));
+        updateData.put(taskHierarchyId, new TaskWrapper(taskOf, new RemoteTaskHierarchyRecord(parentTaskId, childTaskId, remoteTaskRecord.getStartTime(), null)));
+
+        sDatabaseReference.child("tasks").updateChildren(updateData);
+    }
 }

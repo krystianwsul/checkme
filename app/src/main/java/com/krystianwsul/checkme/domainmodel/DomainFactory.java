@@ -17,8 +17,14 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.RemoteDailyScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteMonthlyDayScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteMonthlyWeekScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
+import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
+import com.krystianwsul.checkme.firebase.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.firebase.TaskWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
@@ -96,14 +102,16 @@ public class DomainFactory {
     private final ValueEventListener mValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Log.e("asdf", "onDataChange, dataSnapshot: " + dataSnapshot);
+            Log.e("asdf", "DomainFactory.mValueEventListeneronDataChange, dataSnapshot: " + dataSnapshot);
 
             setRemoteTaskRecords(dataSnapshot);
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
+            Log.e("asdf", "DomainFactory.mValueEventListener.onCancelled", databaseError.toException());
 
+            MyCrashlytics.logException(databaseError.toException());
         }
     };
 
@@ -289,7 +297,7 @@ public class DomainFactory {
             if (taskWrapper.taskRecord != null) {
                 Assert.assertTrue(taskWrapper.taskHierarchyRecord == null);
 
-                mRemoteTasks.put(key, new RemoteTask(this, key, taskWrapper.taskRecord));
+                mRemoteTasks.put(key, new RemoteTask(this, key, taskWrapper));
             } else {
                 Assert.assertTrue(taskWrapper.taskHierarchyRecord != null);
 
@@ -385,6 +393,89 @@ public class DomainFactory {
                 .sortBy(MergedTask::getStartExactTimeStamp)
                 .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
                 .collect(Collectors.toList());
+    }
+
+    public synchronized void createScheduleRootTask(@NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        Assert.assertTrue(!friendEntries.isEmpty());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        List<RemoteSingleScheduleRecord> remoteSingleScheduleRecords = new ArrayList<>();
+        List<RemoteDailyScheduleRecord> remoteDailyScheduleRecords = new ArrayList<>();
+        List<RemoteWeeklyScheduleRecord> remoteWeeklyScheduleRecords = new ArrayList<>();
+        List<RemoteMonthlyDayScheduleRecord> remoteMonthlyDayScheduleRecords = new ArrayList<>();
+        List<RemoteMonthlyWeekScheduleRecord> remoteMonthlyWeekScheduleRecords = new ArrayList<>();
+
+        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
+            Assert.assertTrue(scheduleData != null);
+
+            switch (scheduleData.getScheduleType()) {
+                case SINGLE: {
+                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
+
+                    Date date = singleScheduleData.Date;
+
+                    Assert.assertTrue(singleScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = singleScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteSingleScheduleRecords.add(new RemoteSingleScheduleRecord(now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case DAILY: {
+                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
+
+                    Assert.assertTrue(dailyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+
+                    HourMinute hourMinute = dailyScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteDailyScheduleRecords.add(new RemoteDailyScheduleRecord(now.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case WEEKLY: {
+                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
+
+                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
+
+                    Assert.assertTrue(weeklyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = weeklyScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteWeeklyScheduleRecords.add(new RemoteWeeklyScheduleRecord(now.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case MONTHLY_DAY: {
+                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
+
+                    Assert.assertTrue(monthlyDayScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = monthlyDayScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteMonthlyDayScheduleRecords.add(new RemoteMonthlyDayScheduleRecord(now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                case MONTHLY_WEEK: {
+                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
+
+                    Assert.assertTrue(monthlyWeekScheduleData.TimePair.mCustomTimeId == null); // todo custom time
+                    HourMinute hourMinute = monthlyWeekScheduleData.TimePair.mHourMinute;
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteMonthlyWeekScheduleRecords.add(new RemoteMonthlyWeekScheduleRecord(now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
+                    break;
+                }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(name, now.getLong(), null, null, null, null, note, remoteSingleScheduleRecords, remoteDailyScheduleRecords, remoteWeeklyScheduleRecords, remoteMonthlyDayScheduleRecords, remoteMonthlyWeekScheduleRecords);
+
+        UserData userData = MainActivity.getUserData();
+        Assert.assertTrue(userData != null);
+
+        DatabaseWrapper.addRootTask(userData, remoteTaskRecord, friendEntries);
     }
 
     // gets
@@ -947,19 +1038,12 @@ public class DomainFactory {
 
             note = parentTask.getNote();
         } else {
-            childTaskDatas = Stream.of(mTasks.values())
+            childTaskDatas = Stream.of(getTasks().values())
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
                     .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
                     .collect(Collectors.toList());
-
-            childTaskDatas.addAll(Stream.of(mRemoteTasks.values())
-                    .filter(task -> task.current(now))
-                    //.filter(task -> task.isVisible(now)) // todo firebase
-                    .filter(task -> task.isRootTask(now))
-                    .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
-                    .collect(Collectors.toList()));
 
             note = null;
         }
@@ -1207,7 +1291,7 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        Task rootTask = createRootTaskHelper(name, now, note);
+        Task rootTask = createLocalTaskHelper(name, now, note);
 
         List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
@@ -1269,7 +1353,7 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskIds.size() > 1);
 
-        Task rootTask = createRootTaskHelper(name, now, note);
+        Task rootTask = createLocalTaskHelper(name, now, note);
 
         List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
@@ -1293,34 +1377,50 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void createChildTask(@NonNull Context context, int dataId, int parentTaskId, @NonNull String name, @Nullable String note) {
+    public synchronized void createChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createChildTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createChildTask(now, parentTaskId, name, note);
+        if (parentTaskKey.mLocalTaskId != null) { // todo firebase?
+            Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
 
-        save(context, dataId);
+            createLocalChildTask(now, parentTaskKey, name, note);
+
+            save(context, dataId);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
+
+            MergedTask parentTask = getTasks().get(parentTaskKey);
+            Assert.assertTrue(parentTask != null);
+
+            Assert.assertTrue(parentTask.current(now));
+
+            Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
+            Assert.assertTrue(parentTask instanceof RemoteTask);
+
+            RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(name, now.getLong(), null, null, null, null, note);
+
+            DatabaseWrapper.addChildTask((RemoteTask) parentTask, remoteTaskRecord);
+        }
     }
 
     @NonNull
-    Task createChildTask(@NonNull ExactTimeStamp now, int parentTaskId, @NonNull String name, @Nullable String note) {
+    Task createLocalChildTask(@NonNull ExactTimeStamp now, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
+        Assert.assertTrue(parentTaskKey.mLocalTaskId != null);
+        Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Task parentTask = mTasks.get(parentTaskId);
+        MergedTask parentTask = getTasks().get(parentTaskKey);
         Assert.assertTrue(parentTask != null);
-
         Assert.assertTrue(parentTask.current(now));
+        Assert.assertTrue(parentTask instanceof Task);
 
-        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now, note);
+        Task childTask = createLocalTaskHelper(name, now, note);
 
-        Task childTask = new Task(this, childTaskRecord);
-        Assert.assertTrue(!mTasks.containsKey(childTask.getId()));
-        mTasks.put(childTask.getId(), childTask);
-
-        createTaskHierarchy(parentTask, childTask, now);
+        createTaskHierarchy((Task) parentTask, childTask, now);
 
         return childTask;
     }
@@ -1868,7 +1968,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Task createRootTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
+    private Task createLocalTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, startExactTimeStamp, note);

@@ -68,8 +68,32 @@ public class RemoteTaskRecord {
         monthlyWeekScheduleRecords = remoteMonthlyWeekScheduleRecords;
     }
 
+    public RemoteTaskRecord(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(endTime == null || startTime <= endTime);
+        Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
+        Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));
+
+        this.name = name;
+        this.startTime = startTime;
+        this.endTime = endTime;
+
+        this.oldestVisibleDay = oldestVisibleDay;
+        this.oldestVisibleMonth = oldestVisibleMonth;
+        this.oldestVisibleYear = oldestVisibleYear;
+
+        this.note = note;
+
+        singleScheduleRecords = null;
+        dailyScheduleRecords = null;
+        weeklyScheduleRecords = null;
+        monthlyDayScheduleRecords = null;
+        monthlyWeekScheduleRecords = null;
+    }
+
     @NonNull
     public String getName() {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
         return name;
     }
 

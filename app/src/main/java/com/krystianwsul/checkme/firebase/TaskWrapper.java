@@ -10,6 +10,7 @@ import junit.framework.Assert;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 @IgnoreExtraProperties
@@ -22,25 +23,41 @@ public class TaskWrapper {
 
     }
 
-    TaskWrapper(@NonNull UserData userData, @NonNull List<UserData> friends, @NonNull RemoteTaskRecord remoteTaskRecord) {
-        Assert.assertTrue(!friends.isEmpty());
-        Assert.assertTrue(!friends.contains(userData));
+    TaskWrapper(@NonNull List<UserData> userDatas, @NonNull RemoteTaskRecord remoteTaskRecord) {
+        Assert.assertTrue(!userDatas.isEmpty());
 
-        taskOf = Stream.of(friends)
+        taskOf = Stream.of(userDatas)
                 .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
-        taskOf.put(UserData.getKey(userData.email), true);
 
         taskRecord = remoteTaskRecord;
         taskHierarchyRecord = null;
     }
 
-    TaskWrapper(@NonNull UserData userData, @NonNull List<UserData> friends, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
-        Assert.assertTrue(!friends.isEmpty());
-        Assert.assertTrue(!friends.contains(userData));
+    TaskWrapper(@NonNull List<UserData> userDatas, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
+        Assert.assertTrue(!userDatas.isEmpty());
 
-        taskOf = Stream.of(friends)
+        taskOf = Stream.of(userDatas)
                 .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
-        taskOf.put(UserData.getKey(userData.email), true);
+
+        taskRecord = null;
+        taskHierarchyRecord = remoteTaskHierarchyRecord;
+    }
+
+    TaskWrapper(@NonNull Set<String> taskOf, @NonNull RemoteTaskRecord remoteTaskRecord) {
+        Assert.assertTrue(!taskOf.isEmpty());
+
+        this.taskOf = Stream.of(taskOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
+
+        taskRecord = remoteTaskRecord;
+        taskHierarchyRecord = null;
+    }
+
+    TaskWrapper(@NonNull Set<String> taskOf, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
+        Assert.assertTrue(!taskOf.isEmpty());
+
+        this.taskOf = Stream.of(taskOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         taskRecord = null;
         taskHierarchyRecord = remoteTaskHierarchyRecord;

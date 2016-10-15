@@ -7,11 +7,11 @@ import android.text.TextUtils;
 import junit.framework.Assert;
 
 public class RemoteTaskHierarchyRecord {
-    private String mParentTaskId;
-    private String mChildTaskId;
+    private String parentTaskId;
+    private String childTaskId;
 
-    private long mStartTime;
-    private Long mEndTime;
+    private long startTime;
+    private Long endTime;
 
     public RemoteTaskHierarchyRecord() {
 
@@ -23,28 +23,30 @@ public class RemoteTaskHierarchyRecord {
         Assert.assertTrue(!parentTaskId.equals(childTaskId));
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
-        mParentTaskId = parentTaskId;
-        mChildTaskId = childTaskId;
-        mStartTime = startTime;
-        mEndTime = endTime;
+        this.parentTaskId = parentTaskId;
+        this.childTaskId = childTaskId;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     @NonNull
     public String getParentTaskId() {
-        return mParentTaskId;
+        Assert.assertTrue(!TextUtils.isEmpty(parentTaskId));
+        return parentTaskId;
     }
 
     @NonNull
     public String getChildTaskId() {
-        return mChildTaskId;
+        Assert.assertTrue(!TextUtils.isEmpty(parentTaskId));
+        return childTaskId;
     }
 
     public long getStartTime() {
-        return mStartTime;
+        return startTime;
     }
 
     @Nullable
     public Long getEndTime() {
-        return mEndTime;
+        return endTime;
     }
 }

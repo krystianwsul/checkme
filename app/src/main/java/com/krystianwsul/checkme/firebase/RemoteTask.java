@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import junit.framework.Assert;
 
 import java.util.List;
+import java.util.Set;
 
 public class RemoteTask implements MergedTask {
     @NonNull
@@ -27,12 +28,20 @@ public class RemoteTask implements MergedTask {
     @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
-    public RemoteTask(@NonNull DomainFactory domainFactory, @NonNull String key, @NonNull RemoteTaskRecord remoteTaskRecord) {
+    @NonNull
+    private final Set<String> mTaskOf;
+
+    public RemoteTask(@NonNull DomainFactory domainFactory, @NonNull String key, @NonNull TaskWrapper taskWrapper) {
         Assert.assertTrue(!TextUtils.isEmpty(key));
+        Assert.assertTrue(taskWrapper.taskRecord != null);
+        Assert.assertTrue(taskWrapper.taskHierarchyRecord == null);
 
         mDomainFactory = domainFactory;
         mKey = key;
-        mRemoteTaskRecord = remoteTaskRecord;
+        mRemoteTaskRecord = taskWrapper.taskRecord;
+
+        mTaskOf = taskWrapper.taskOf.keySet();
+        Assert.assertTrue(!mTaskOf.isEmpty());
     }
 
     @NonNull
@@ -191,5 +200,10 @@ public class RemoteTask implements MergedTask {
         }
 
         return false;
+    }
+
+    @NonNull
+    public Set<String> getTaskOf() {
+        return mTaskOf;
     }
 }

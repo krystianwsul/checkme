@@ -18,14 +18,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteDailyScheduleRecord;
+import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteMonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteMonthlyWeekScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.firebase.RemoteTask;
-import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.RemoteWeeklyScheduleRecord;
-import com.krystianwsul.checkme.firebase.TaskWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -115,11 +114,7 @@ public class DomainFactory {
         }
     };
 
-    @NonNull
-    private Map<String, RemoteTask> mRemoteTasks = new HashMap<>();
-
-    @NonNull
-    private Map<String, RemoteTaskHierarchy> mRemoteTaskHierarchies = new HashMap<>();
+    private RemoteFactory mRemoteFactory;
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -142,6 +137,8 @@ public class DomainFactory {
     private DomainFactory(Context context) {
         mPersistenceManager = PersistenceManger.getInstance(context);
         Assert.assertTrue(mPersistenceManager != null);
+
+        mRemoteFactory = new RemoteFactory(this, new ArrayList<>());
     }
 
     DomainFactory(PersistenceManger persistenceManger) {
@@ -282,28 +279,7 @@ public class DomainFactory {
     }
 
     private synchronized void setRemoteTaskRecords(@NonNull DataSnapshot dataSnapshot) {
-        mRemoteTasks = new HashMap<>();
-        mRemoteTaskHierarchies = new HashMap<>();
-
-        for (DataSnapshot child : dataSnapshot.getChildren()) {
-            Assert.assertTrue(child != null);
-
-            String key = child.getKey();
-            Assert.assertTrue(!TextUtils.isEmpty(key));
-
-            TaskWrapper taskWrapper = child.getValue(TaskWrapper.class);
-            Assert.assertTrue(taskWrapper != null);
-
-            if (taskWrapper.taskRecord != null) {
-                Assert.assertTrue(taskWrapper.taskHierarchyRecord == null);
-
-                mRemoteTasks.put(key, new RemoteTask(this, key, taskWrapper));
-            } else {
-                Assert.assertTrue(taskWrapper.taskHierarchyRecord != null);
-
-                mRemoteTaskHierarchies.put(key, new RemoteTaskHierarchy(this, key, taskWrapper.taskHierarchyRecord));
-            }
-        }
+        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren());
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
@@ -326,7 +302,7 @@ public class DomainFactory {
     @NonNull
     private List<MergedTaskHierarchy> getTaskHierarchies() {
         List<MergedTaskHierarchy> taskHierarchies = new ArrayList<>(mTaskHierarchies.values());
-        taskHierarchies.addAll(mRemoteTaskHierarchies.values());
+        taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
         return taskHierarchies;
     }
 
@@ -351,7 +327,7 @@ public class DomainFactory {
 
     @NonNull
     private Map<TaskKey, MergedTask> getTasks() {
-        return Stream.concat(Stream.of(mTasks.values()), Stream.of(mRemoteTasks.values()))
+        return Stream.concat(Stream.of(mTasks.values()), Stream.of(mRemoteFactory.mRemoteTasks.values()))
                 .collect(Collectors.toMap(MergedTask::getTaskKey, task -> task));
     }
 
@@ -1004,7 +980,7 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
-            RemoteTask task = mRemoteTasks.get(taskKey.mRemoteTaskId);
+            RemoteTask task = mRemoteFactory.mRemoteTasks.get(taskKey.mRemoteTaskId);
             Assert.assertTrue(task != null);
             Assert.assertTrue(task.current(now));
 

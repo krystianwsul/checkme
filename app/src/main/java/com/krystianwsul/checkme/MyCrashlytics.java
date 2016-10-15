@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
@@ -11,7 +12,7 @@ import io.fabric.sdk.android.Fabric;
 public class MyCrashlytics {
     private static Boolean sEnabled = null;
 
-    public static void initialize(OrganizatorApplication organizatorApplication) {
+    static void initialize(OrganizatorApplication organizatorApplication) {
         Assert.assertTrue(organizatorApplication != null);
         Assert.assertTrue(sEnabled == null);
 
@@ -33,5 +34,12 @@ public class MyCrashlytics {
         Assert.assertTrue(sEnabled != null);
 
         return sEnabled;
+    }
+
+    public static void logException(@NonNull Throwable throwable) {
+        Assert.assertTrue(sEnabled != null);
+
+        if (sEnabled)
+            Crashlytics.logException(throwable);
     }
 }

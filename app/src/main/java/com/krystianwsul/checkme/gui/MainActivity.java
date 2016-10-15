@@ -31,7 +31,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -42,6 +41,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -641,7 +641,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
 
-                                Crashlytics.logException(task.getException());
+                                MyCrashlytics.logException(task.getException());
 
                                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                             } else {
@@ -655,7 +655,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show();
 
-                Crashlytics.logException(new Exception(message));
+                MyCrashlytics.logException(new GoogleSignInException("isSuccess: " + googleSignInResult.isSuccess() + ", status: " + googleSignInResult.getStatus()));
             }
         }
     }
@@ -711,6 +711,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(dayFragment != null);
 
             return dayFragment;
+        }
+    }
+
+    private static class GoogleSignInException extends Exception {
+        GoogleSignInException(@NonNull String message) {
+            super(message);
         }
     }
 }

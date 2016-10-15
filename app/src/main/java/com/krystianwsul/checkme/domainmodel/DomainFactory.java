@@ -769,6 +769,7 @@ public class DomainFactory {
         return new ShowInstanceLoader.Data(new ShowInstanceLoader.InstanceData(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), isRootTask));
     }
 
+    @NonNull
     public synchronized CreateTaskLoader.Data getCreateChildTaskData(@Nullable Integer taskId, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
         fakeDelay();
 
@@ -911,6 +912,7 @@ public class DomainFactory {
         }
     }
 
+    @NonNull
     public synchronized TaskListLoader.Data getTaskListData(@NonNull Context context, @Nullable TaskKey taskKey) {
         fakeDelay();
 

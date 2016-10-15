@@ -55,7 +55,7 @@ class Instance {
         mScheduleDateTime = scheduleDateTime;
     }
 
-    public int getTaskId() {
+    int getTaskId() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);
@@ -67,6 +67,11 @@ class Instance {
 
             return mTaskId;
         }
+    }
+
+    @NonNull
+    TaskKey getTaskKey() {
+        return new TaskKey(getTaskId()); // todo firebase
     }
 
     @NonNull

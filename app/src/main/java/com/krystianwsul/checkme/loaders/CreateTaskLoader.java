@@ -100,17 +100,24 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     public static class TaskData {
+        @NonNull
         public final String Name;
-        public final Integer ParentTaskId;
+
+        @Nullable
+        public final TaskKey mParentTaskKey;
+
+        @Nullable
         public final List<ScheduleData> ScheduleDatas;
+
+        @Nullable
         public final String mNote;
 
-        public TaskData(@NonNull String name, @Nullable Integer parentTaskId, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note) {
+        public TaskData(@NonNull String name, @Nullable TaskKey parentTaskKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue((parentTaskId == null) || (scheduleDatas == null));
+            Assert.assertTrue((parentTaskKey == null) || (scheduleDatas == null));
 
             Name = name;
-            ParentTaskId = parentTaskId;
+            mParentTaskKey = parentTaskKey;
             ScheduleDatas = scheduleDatas;
             mNote = note;
         }
@@ -119,10 +126,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public int hashCode() {
             int hash = 0;
             hash += Name.hashCode();
-            if (ParentTaskId != null) {
+            if (mParentTaskKey != null) {
                 Assert.assertTrue(ScheduleDatas == null);
 
-                hash += ParentTaskId;
+                hash += mParentTaskKey.hashCode();
             } else {
                 Assert.assertTrue(ScheduleDatas != null);
 
@@ -150,10 +157,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if (!Name.equals(taskData.Name))
                 return false;
 
-            if ((ParentTaskId == null) != (taskData.ParentTaskId == null))
+            if ((mParentTaskKey == null) != (taskData.mParentTaskKey == null))
                 return false;
 
-            if ((ParentTaskId != null) && !ParentTaskId.equals(taskData.ParentTaskId))
+            if ((mParentTaskKey != null) && !mParentTaskKey.equals(taskData.mParentTaskKey))
                 return false;
 
             if ((ScheduleDatas == null) != (taskData.ScheduleDatas == null))

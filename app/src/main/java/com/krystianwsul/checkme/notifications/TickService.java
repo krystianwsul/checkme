@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity;
 import com.krystianwsul.checkme.loaders.DomainLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -40,8 +41,7 @@ public class TickService extends IntentService {
 
     private static final String SILENT_KEY = "silent";
     private static final String REGISTERING_KEY = "registering";
-    private static final String TASK_IDS_KEY = "taskIds";
-    private static final String TASK_UPDATED_KEY = "taskUpdated";
+    private static final String TASK_KEYS_KEY = "taskKeys";
 
     public static final String TICK_PREFERENCES = "tickPreferences";
     public static final String LAST_TICK_KEY = "lastTick";
@@ -56,21 +56,21 @@ public class TickService extends IntentService {
         context.startService(getIntent(context, true, false, new ArrayList<>()));
     }
 
-    public static void startService(@NonNull Context context, @NonNull ArrayList<Integer> taskIds) {
-        context.startService(getIntent(context, true, false, taskIds));
+    public static void startService(@NonNull Context context, @NonNull ArrayList<TaskKey> taskKeys) {
+        context.startService(getIntent(context, true, false, taskKeys));
     }
 
     public static void startServiceDebug(@NonNull Context context) {
         context.startService(getIntent(context, false, false, new ArrayList<>()));
     }
 
-    private static Intent getIntent(@NonNull Context context, boolean silent, boolean registering, @NonNull ArrayList<Integer> taskIds) {
+    private static Intent getIntent(@NonNull Context context, boolean silent, boolean registering, @NonNull ArrayList<TaskKey> taskKeys) {
         Assert.assertTrue(!registering || silent);
 
         Intent intent = new Intent(context, TickService.class);
         intent.putExtra(SILENT_KEY, silent);
         intent.putExtra(REGISTERING_KEY, registering);
-        intent.putExtra(TASK_IDS_KEY, taskIds);
+        intent.putExtra(TASK_KEYS_KEY, taskKeys);
         return intent;
     }
 
@@ -82,20 +82,20 @@ public class TickService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
         Assert.assertTrue(intent.hasExtra(REGISTERING_KEY));
-        Assert.assertTrue(intent.hasExtra(TASK_IDS_KEY));
+        Assert.assertTrue(intent.hasExtra(TASK_KEYS_KEY));
 
         boolean silent = intent.getBooleanExtra(SILENT_KEY, false);
         boolean registering = intent.getBooleanExtra(REGISTERING_KEY, false);
 
-        List<Integer> taskIds = intent.getIntegerArrayListExtra(TASK_IDS_KEY);
-        Assert.assertTrue(taskIds != null);
+        List<TaskKey> taskKeys = intent.getParcelableArrayListExtra(TASK_KEYS_KEY);
+        Assert.assertTrue(taskKeys != null);
 
         if (!silent) {
             SharedPreferences sharedPreferences = getSharedPreferences(TICK_PREFERENCES, MODE_PRIVATE);
             sharedPreferences.edit().putLong(LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
         }
 
-        Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this, taskIds);
+        Data data = DomainFactory.getDomainFactory(this).getTickServiceData(this, taskKeys);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Assert.assertTrue(notificationManager != null);

@@ -794,13 +794,13 @@ public class DomainFactory {
             Task task = mTasks.get(taskId);
             Assert.assertTrue(task != null);
 
-            Integer parentTaskId;
+            TaskKey parentTaskKey;
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
 
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
 
-                parentTaskId = null;
+                parentTaskKey = null;
 
                 if (!schedules.isEmpty()) {
                     scheduleDatas = new ArrayList<>();
@@ -879,10 +879,10 @@ public class DomainFactory {
                 Task parentTask = task.getParentTask(now);
                 Assert.assertTrue(parentTask != null);
 
-                parentTaskId = parentTask.getId();
+                parentTaskKey = parentTask.getTaskKey();
             }
 
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskId, scheduleDatas, task.getNote());
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskKey, scheduleDatas, task.getNote());
         }
 
         Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskKeys);
@@ -972,7 +972,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TickService.Data getTickServiceData(@NonNull Context context, @NonNull List<Integer> taskIds) {
+    public synchronized TickService.Data getTickServiceData(@NonNull Context context, @NonNull List<TaskKey> taskKeys) {
         MyCrashlytics.log("DomainFactory.getTickServiceData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1002,7 +1002,7 @@ public class DomainFactory {
                             .map(Instance::getName)
                             .collect(Collectors.toList());
 
-                    boolean update = (taskIds.contains(task.getId()) || Stream.of(childInstances).anyMatch(childInstance -> taskIds.contains(childInstance.getTaskId())));
+                    boolean update = (taskKeys.contains(task.getTaskKey()) || Stream.of(childInstances).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
 
                     String displayText = instance.getDisplayText(context, now);
                     Assert.assertTrue(!TextUtils.isEmpty(displayText));

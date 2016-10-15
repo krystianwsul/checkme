@@ -10,10 +10,13 @@ import com.krystianwsul.checkme.utils.time.Time;
 import junit.framework.Assert;
 
 public class RemoteMonthlyDaySchedule extends RemoteSchedule {
+    private final int mPosition;
+
     @NonNull
     private RemoteMonthlyDayScheduleRecord mRemoteMonthlyDayScheduleRecord;
 
-    public RemoteMonthlyDaySchedule(@NonNull RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord) {
+    public RemoteMonthlyDaySchedule(int position, @NonNull RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord) {
+        mPosition = position;
         mRemoteMonthlyDayScheduleRecord = remoteMonthlyDayScheduleRecord;
     }
 
@@ -47,5 +50,11 @@ public class RemoteMonthlyDaySchedule extends RemoteSchedule {
         Assert.assertTrue(minute != null);
         return new NormalTime(hour, minute);
         //}
+    }
+
+    @NonNull
+    @Override
+    public String getPath() {
+        return "monthlyDayScheduleRecords/" + mPosition;
     }
 }

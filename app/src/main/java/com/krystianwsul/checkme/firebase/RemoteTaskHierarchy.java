@@ -12,16 +12,22 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
+import java.util.Map;
+
 public class RemoteTaskHierarchy implements MergedTaskHierarchy {
     @NonNull
     private final DomainFactory mDomainFactory;
 
     @NonNull
+    private final String mId;
+
+    @NonNull
     private final RemoteTaskHierarchyRecord mRemoteTaskHierarchyRecord;
 
-    public RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull String key, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
-        Assert.assertTrue(!TextUtils.isEmpty(key));
+    public RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
+        Assert.assertTrue(!TextUtils.isEmpty(id));
 
+        mId = id;
         mDomainFactory = domainFactory;
         mRemoteTaskHierarchyRecord = remoteTaskHierarchyRecord;
     }
@@ -76,5 +82,9 @@ public class RemoteTaskHierarchy implements MergedTaskHierarchy {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
+    }
+
+    void setEndExactTimeStamp(@NonNull Map<String, Object> values, @NonNull ExactTimeStamp now) {
+        values.put("tasks/" + mId + "/taskHierarchyRecord/endTime", now.getLong());
     }
 }

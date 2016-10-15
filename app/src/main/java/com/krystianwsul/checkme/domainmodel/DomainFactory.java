@@ -331,7 +331,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    private MergedTaskHierarchy getParentTaskHierarchy(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public MergedTaskHierarchy getParentTaskHierarchy(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskKey childTaskKey = childTask.getTaskKey();
@@ -1483,21 +1483,29 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void setTaskEndTimeStamp(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, int taskId) {
+    public synchronized void setTaskEndTimeStamp(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, @NonNull TaskKey taskKey) {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp");
 
         Assert.assertTrue(!dataIds.isEmpty());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task task = mTasks.get(taskId);
-        Assert.assertTrue(task != null);
-
+        MergedTask task = getTask(taskKey);
         Assert.assertTrue(task.current(now));
 
-        task.setEndExactTimeStamp(now);
+        if (taskKey.mLocalTaskId != null) { // todo firebase
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
+            Assert.assertTrue(task instanceof Task);
 
-        save(context, dataIds);
+            ((Task) task).setEndExactTimeStamp(now);
+
+            save(context, dataIds);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+            Assert.assertTrue(task instanceof RemoteTask);
+
+            DatabaseWrapper.setTaskEndTimeStamp((RemoteTask) task, now);
+        }
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {

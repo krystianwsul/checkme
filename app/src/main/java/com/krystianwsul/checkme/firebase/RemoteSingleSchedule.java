@@ -11,10 +11,13 @@ import com.krystianwsul.checkme.utils.time.Time;
 import junit.framework.Assert;
 
 public class RemoteSingleSchedule extends RemoteSchedule {
+    private final int mPosition;
+
     @NonNull
     private RemoteSingleScheduleRecord mRemoteSingleScheduleRecord;
 
-    public RemoteSingleSchedule(@NonNull RemoteSingleScheduleRecord remoteSingleScheduleRecord) {
+    public RemoteSingleSchedule(int position, @NonNull RemoteSingleScheduleRecord remoteSingleScheduleRecord) {
+        mPosition = position;
         mRemoteSingleScheduleRecord = remoteSingleScheduleRecord;
     }
 
@@ -56,5 +59,11 @@ public class RemoteSingleSchedule extends RemoteSchedule {
     @NonNull
     Date getDate() {
         return new Date(mRemoteSingleScheduleRecord.getYear(), mRemoteSingleScheduleRecord.getMonth(), mRemoteSingleScheduleRecord.getDay());
+    }
+
+    @NonNull
+    @Override
+    public String getPath() {
+        return "singleScheduleRecords/" + mPosition;
     }
 }

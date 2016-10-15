@@ -47,4 +47,7 @@ public abstract class RemoteSchedule implements MergedSchedule {
 
         return true; // todo firebase
     }
+
+    @NonNull
+    public abstract String getPath();
 }

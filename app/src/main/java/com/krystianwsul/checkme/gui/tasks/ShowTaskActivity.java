@@ -127,7 +127,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mData.DataId);
                 dataIds.add(taskListFragment.getDataId());
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.mTaskKey.mLocalTaskId); // todo firebase
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.mTaskKey);
                 TickService.startService(this);
 
                 finish();

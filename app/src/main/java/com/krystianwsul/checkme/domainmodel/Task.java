@@ -124,8 +124,7 @@ public class Task implements MergedTask {
             return null;
     }
 
-    @Override
-    public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         if (isRootTask(endExactTimeStamp)) {
@@ -142,7 +141,8 @@ public class Task implements MergedTask {
 
         for (MergedTask childTask : getChildTasks(endExactTimeStamp)) {
             Assert.assertTrue(childTask != null);
-            childTask.setEndExactTimeStamp(endExactTimeStamp);
+            Assert.assertTrue(childTask instanceof Task);
+            ((Task) childTask).setEndExactTimeStamp(endExactTimeStamp);
         }
 
         mDomainFactory.setParentHierarchyEndTimeStamp(this, endExactTimeStamp);

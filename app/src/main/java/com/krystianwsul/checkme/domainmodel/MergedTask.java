@@ -30,8 +30,6 @@ public interface MergedTask {
     @NonNull
     List<MergedTask> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp);
 
-    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp);
-
     boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp);
 
     boolean isVisible(@NonNull ExactTimeStamp now);

@@ -155,7 +155,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 getSupportLoaderManager().destroyLoader(0);
                 mGroupListFragment.destroyLoader();
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceData.InstanceKey.TaskId);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, new TaskKey(mInstanceData.InstanceKey.TaskId));
 
                 TickService.startService(this);
 

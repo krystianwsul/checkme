@@ -10,12 +10,15 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
+import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class RemoteTask implements MergedTask {
@@ -23,7 +26,7 @@ public class RemoteTask implements MergedTask {
     private final DomainFactory mDomainFactory;
 
     @NonNull
-    private final String mKey;
+    private final String mId;
 
     @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
@@ -31,13 +34,13 @@ public class RemoteTask implements MergedTask {
     @NonNull
     private final Set<String> mTaskOf;
 
-    public RemoteTask(@NonNull DomainFactory domainFactory, @NonNull String key, @NonNull TaskWrapper taskWrapper) {
-        Assert.assertTrue(!TextUtils.isEmpty(key));
+    public RemoteTask(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull TaskWrapper taskWrapper) {
+        Assert.assertTrue(!TextUtils.isEmpty(id));
         Assert.assertTrue(taskWrapper.taskRecord != null);
         Assert.assertTrue(taskWrapper.taskHierarchyRecord == null);
 
         mDomainFactory = domainFactory;
-        mKey = key;
+        mId = id;
         mRemoteTaskRecord = taskWrapper.taskRecord;
 
         mTaskOf = taskWrapper.taskOf.keySet();
@@ -61,25 +64,32 @@ public class RemoteTask implements MergedTask {
 
     @NonNull
     private List<RemoteSchedule> getRemoteSchedules() {
-        List<RemoteSchedule> remoteSchedules = Stream.of(mRemoteTaskRecord.getSingleScheduleRecords())
-                .map(RemoteSingleSchedule::new)
-                .collect(Collectors.toList());
+        List<RemoteSchedule> remoteSchedules = new ArrayList<>();
 
-        remoteSchedules.addAll(Stream.of(mRemoteTaskRecord.getDailyScheduleRecords())
-                .map(RemoteDailySchedule::new)
-                .collect(Collectors.toList()));
+        List<RemoteSingleScheduleRecord> singleScheduleRecords = mRemoteTaskRecord.getSingleScheduleRecords();
+        for (int i = 0; i < singleScheduleRecords.size(); i++) {
+            remoteSchedules.add(new RemoteSingleSchedule(i, singleScheduleRecords.get(i)));
+        }
 
-        remoteSchedules.addAll(Stream.of(mRemoteTaskRecord.getWeeklyScheduleRecords())
-                .map(RemoteWeeklySchedule::new)
-                .collect(Collectors.toList()));
+        List<RemoteDailyScheduleRecord> dailyScheduleRecords = mRemoteTaskRecord.getDailyScheduleRecords();
+        for (int i = 0; i < dailyScheduleRecords.size(); i++) {
+            remoteSchedules.add(new RemoteDailySchedule(i, dailyScheduleRecords.get(i)));
+        }
 
-        remoteSchedules.addAll(Stream.of(mRemoteTaskRecord.getMonthlyDayScheduleRecords())
-                .map(RemoteMonthlyDaySchedule::new)
-                .collect(Collectors.toList()));
+        List<RemoteWeeklyScheduleRecord> weeklyScheduleRecords = mRemoteTaskRecord.getWeeklyScheduleRecords();
+        for (int i = 0; i < weeklyScheduleRecords.size(); i++) {
+            remoteSchedules.add(new RemoteWeeklySchedule(i, weeklyScheduleRecords.get(i)));
+        }
 
-        remoteSchedules.addAll(Stream.of(mRemoteTaskRecord.getMonthlyWeekScheduleRecords())
-                .map(RemoteMonthlyWeekSchedule::new)
-                .collect(Collectors.toList()));
+        List<RemoteMonthlyDayScheduleRecord> monthlyDayScheduleRecords = mRemoteTaskRecord.getMonthlyDayScheduleRecords();
+        for (int i = 0; i < monthlyDayScheduleRecords.size(); i++) {
+            remoteSchedules.add(new RemoteMonthlyDaySchedule(i, monthlyDayScheduleRecords.get(i)));
+        }
+
+        List<RemoteMonthlyWeekScheduleRecord> monthlyWeekScheduleRecords = mRemoteTaskRecord.getMonthlyWeekScheduleRecords();
+        for (int i = 0; i < monthlyWeekScheduleRecords.size(); i++) {
+            remoteSchedules.add(new RemoteMonthlyWeekSchedule(i, monthlyWeekScheduleRecords.get(i)));
+        }
 
         return remoteSchedules;
     }
@@ -144,7 +154,7 @@ public class RemoteTask implements MergedTask {
     @NonNull
     @Override
     public TaskKey getTaskKey() {
-        return new TaskKey(mKey);
+        return new TaskKey(mId);
     }
 
     @Nullable
@@ -160,11 +170,6 @@ public class RemoteTask implements MergedTask {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getChildTasks(this, exactTimeStamp);
-    }
-
-    @Override
-    public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
-        throw new UnsupportedOperationException(); // todo firebase
     }
 
     @Override
@@ -205,5 +210,33 @@ public class RemoteTask implements MergedTask {
     @NonNull
     public Set<String> getTaskOf() {
         return mTaskOf;
+    }
+
+    public void setEndExactTimeStamp(@NonNull Map<String, Object> values, @NonNull ExactTimeStamp now) {
+        List<RemoteSchedule> schedules = getCurrentSchedules(now);
+        if (isRootTask(now)) {
+            Assert.assertTrue(Stream.of(schedules)
+                    .allMatch(schedule -> schedule.current(now)));
+
+            for (RemoteSchedule schedule : schedules)
+                values.put("tasks/" + mId + "/taskRecord/" + schedule.getPath() + "/endTime", now.getLong());
+        } else {
+            Assert.assertTrue(schedules.isEmpty());
+        }
+
+        for (MergedTask childTask : getChildTasks(now)) {
+            Assert.assertTrue(childTask != null);
+            Assert.assertTrue(childTask instanceof RemoteTask);
+            ((RemoteTask) childTask).setEndExactTimeStamp(values, now);
+        }
+
+        MergedTaskHierarchy parentTaskHierarchy = mDomainFactory.getParentTaskHierarchy(this, now);
+        if (parentTaskHierarchy != null) {
+            Assert.assertTrue(parentTaskHierarchy.current(now));
+            Assert.assertTrue(parentTaskHierarchy instanceof RemoteTaskHierarchy);
+            ((RemoteTaskHierarchy) parentTaskHierarchy).setEndExactTimeStamp(values, now);
+        }
+
+        values.put("tasks/" + mId + "/taskRecord/endTime", now.getLong());
     }
 }

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
@@ -87,5 +88,13 @@ public class DatabaseWrapper {
         updateData.put(taskHierarchyId, new TaskWrapper(taskOf, new RemoteTaskHierarchyRecord(parentTaskId, childTaskId, remoteTaskRecord.getStartTime(), null)));
 
         sDatabaseReference.child("tasks").updateChildren(updateData);
+    }
+
+    public static void setTaskEndTimeStamp(@NonNull RemoteTask task, @NonNull ExactTimeStamp now) {
+        Map<String, Object> values = new HashMap<>();
+
+        task.setEndExactTimeStamp(values, now);
+
+        sDatabaseReference.updateChildren(values);
     }
 }

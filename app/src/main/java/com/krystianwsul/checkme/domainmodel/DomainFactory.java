@@ -365,18 +365,6 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    public synchronized void createScheduleRootTask(@NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
-        MyCrashlytics.log("DomainFactory.createScheduleRootTask");
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(!friendEntries.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, friendEntries);
-    }
-
     @NonNull
     public RemoteFactory getRemoteFactory() {
         return mRemoteFactory;
@@ -1218,6 +1206,18 @@ public class DomainFactory {
         save(context, dataId);
     }
 
+    public synchronized void createScheduleRootTask(@NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        MyCrashlytics.log("DomainFactory.createScheduleRootTask");
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+        Assert.assertTrue(!friendEntries.isEmpty());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, friendEntries);
+    }
+
     public synchronized void updateScheduleTask(@NonNull Context context, int dataId, int taskId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
 
@@ -1315,8 +1315,7 @@ public class DomainFactory {
         Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        MergedTask parentTask = getTasks().get(parentTaskKey);
-        Assert.assertTrue(parentTask != null);
+        MergedTask parentTask = getTask(parentTaskKey);
         Assert.assertTrue(parentTask.current(now));
         Assert.assertTrue(parentTask instanceof Task);
 

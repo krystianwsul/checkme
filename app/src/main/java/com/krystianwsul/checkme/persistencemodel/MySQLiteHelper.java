@@ -15,7 +15,7 @@ import java.util.List;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
@@ -45,6 +45,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         MonthlyWeekScheduleRecord.onCreate(sqLiteDatabase);
 
         InstanceRecord.onCreate(sqLiteDatabase);
+
+        InstanceShownRecord.onCreate(sqLiteDatabase);
     }
 
     @Override
@@ -206,6 +208,11 @@ class MySQLiteHelper extends SQLiteOpenHelper {
             MonthlyWeekScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
             InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+
+            if (oldVersion <= 14)
+                InstanceShownRecord.onCreate(sqLiteDatabase);
+            else
+                InstanceShownRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
             sqLiteDatabase.setTransactionSuccessful();
         } finally {

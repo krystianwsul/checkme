@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-class Instance {
+class Instance implements MergedInstance {
     @NonNull
     private final DomainFactory mDomainFactory;
 

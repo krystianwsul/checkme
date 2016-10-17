@@ -24,6 +24,7 @@ public class JsonWrapper {
     public WeeklyScheduleJson weeklyScheduleJson;
     public MonthlyDayScheduleJson monthlyDayScheduleJson;
     public MonthlyWeekScheduleJson monthlyWeekScheduleJson;
+    public InstanceJson instanceJson;
 
     public JsonWrapper() {
 
@@ -42,6 +43,7 @@ public class JsonWrapper {
         weeklyScheduleJson = null;
         monthlyDayScheduleJson = null;
         monthlyWeekScheduleJson = null;
+        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull TaskHierarchyJson taskHierarchyJson) {
@@ -72,6 +74,7 @@ public class JsonWrapper {
         weeklyScheduleJson = null;
         monthlyDayScheduleJson = null;
         monthlyWeekScheduleJson = null;
+        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull TaskHierarchyJson taskHierarchyJson) {
@@ -87,6 +90,7 @@ public class JsonWrapper {
         weeklyScheduleJson = null;
         monthlyDayScheduleJson = null;
         monthlyWeekScheduleJson = null;
+        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull SingleScheduleJson singleScheduleJson) {
@@ -102,6 +106,7 @@ public class JsonWrapper {
         weeklyScheduleJson = null;
         monthlyDayScheduleJson = null;
         monthlyWeekScheduleJson = null;
+        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull DailyScheduleJson dailyScheduleJson) {
@@ -117,6 +122,7 @@ public class JsonWrapper {
         weeklyScheduleJson = null;
         monthlyDayScheduleJson = null;
         monthlyWeekScheduleJson = null;
+        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull WeeklyScheduleJson weeklyScheduleJson) {
@@ -132,6 +138,7 @@ public class JsonWrapper {
         this.weeklyScheduleJson = weeklyScheduleJson;
         monthlyDayScheduleJson = null;
         monthlyWeekScheduleJson = null;
+        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull MonthlyDayScheduleJson monthlyDayScheduleJson) {
@@ -147,6 +154,7 @@ public class JsonWrapper {
         weeklyScheduleJson = null;
         this.monthlyDayScheduleJson = monthlyDayScheduleJson;
         monthlyWeekScheduleJson = null;
+        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull MonthlyWeekScheduleJson monthlyWeekScheduleJson) {
@@ -162,5 +170,22 @@ public class JsonWrapper {
         weeklyScheduleJson = null;
         monthlyDayScheduleJson = null;
         this.monthlyWeekScheduleJson = monthlyWeekScheduleJson;
+        instanceJson = null;
+    }
+
+    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull InstanceJson instanceJson) {
+        Assert.assertTrue(!userDatas.isEmpty());
+
+        recordOf = Stream.of(userDatas)
+                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+
+        taskJson = null;
+        taskHierarchyJson = null;
+        singleScheduleJson = null;
+        dailyScheduleJson = null;
+        weeklyScheduleJson = null;
+        monthlyDayScheduleJson = null;
+        monthlyWeekScheduleJson = null;
+        this.instanceJson = instanceJson;
     }
 }

@@ -6,13 +6,13 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
-import com.krystianwsul.checkme.firebase.json.ScheduleJson;
+import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-public abstract class RemoteSchedule implements MergedSchedule {
-    public RemoteSchedule() {
+abstract class RemoteSchedule implements MergedSchedule {
+    RemoteSchedule() {
 
     }
 
@@ -27,12 +27,12 @@ public abstract class RemoteSchedule implements MergedSchedule {
     abstract String getScheduleText(@NonNull Context context);
 
     @NonNull
-    ExactTimeStamp getStartExactTimeStamp() {
+    private ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(getRemoteScheduleRecord().getStartTime());
     }
 
     @Nullable
-    ExactTimeStamp getEndExactTimeStamp() {
+    private ExactTimeStamp getEndExactTimeStamp() {
         if (getRemoteScheduleRecord().getEndTime() == null)
             return null;
         else
@@ -40,7 +40,7 @@ public abstract class RemoteSchedule implements MergedSchedule {
     }
 
     @NonNull
-    protected abstract ScheduleJson getRemoteScheduleRecord();
+    protected abstract RemoteScheduleRecord getRemoteScheduleRecord();
 
     @Override
     public boolean isVisible(@NonNull MergedTask task, @NonNull ExactTimeStamp now) {
@@ -50,5 +50,9 @@ public abstract class RemoteSchedule implements MergedSchedule {
     }
 
     @NonNull
-    public abstract String getPath();
+    public String getTaskId() {
+        return getRemoteScheduleRecord().getTaskId();
+    }
+
+    public abstract void setEndExactTimeStamp(@NonNull ExactTimeStamp now);
 }

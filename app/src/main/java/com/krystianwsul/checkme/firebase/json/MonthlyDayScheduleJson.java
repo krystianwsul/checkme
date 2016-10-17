@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.json;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -20,8 +21,8 @@ public class MonthlyDayScheduleJson extends ScheduleJson {
 
     }
 
-    public MonthlyDayScheduleJson(long startTime, @Nullable Long endTime, int dayOfMonth, boolean beginningOfMonth, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
-        super(startTime, endTime, ScheduleType.MONTHLY_DAY.ordinal());
+    public MonthlyDayScheduleJson(@NonNull String taskId, long startTime, @Nullable Long endTime, int dayOfMonth, boolean beginningOfMonth, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
+        super(taskId, startTime, endTime, ScheduleType.MONTHLY_DAY.ordinal());
 
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || (customTimeId == null));

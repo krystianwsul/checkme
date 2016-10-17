@@ -3,29 +3,27 @@ package com.krystianwsul.checkme.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.krystianwsul.checkme.firebase.json.ScheduleJson;
-import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
+import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 
 import junit.framework.Assert;
 
-public class RemoteSingleSchedule extends RemoteSchedule {
-    private final int mPosition;
-
+class RemoteSingleSchedule extends RemoteSchedule {
     @NonNull
-    private SingleScheduleJson mRemoteSingleScheduleRecord;
+    private final RemoteSingleScheduleRecord mRemoteSingleScheduleRecord;
 
-    public RemoteSingleSchedule(int position, @NonNull SingleScheduleJson remoteSingleScheduleRecord) {
-        mPosition = position;
+    RemoteSingleSchedule(@NonNull RemoteSingleScheduleRecord remoteSingleScheduleRecord) {
         mRemoteSingleScheduleRecord = remoteSingleScheduleRecord;
     }
 
     @NonNull
     @Override
-    protected ScheduleJson getRemoteScheduleRecord() {
+    protected RemoteScheduleRecord getRemoteScheduleRecord() {
         return mRemoteSingleScheduleRecord;
     }
 
@@ -41,7 +39,7 @@ public class RemoteSingleSchedule extends RemoteSchedule {
     }
 
     @NonNull
-    public Time getTime() {
+    private Time getTime() {
         Assert.assertTrue(mRemoteSingleScheduleRecord.getCustomTimeId() == null); // todo customtime
         Assert.assertTrue(mRemoteSingleScheduleRecord.getHour() != null);
         Assert.assertTrue(mRemoteSingleScheduleRecord.getMinute() != null);
@@ -59,13 +57,14 @@ public class RemoteSingleSchedule extends RemoteSchedule {
     }
 
     @NonNull
-    Date getDate() {
+    private Date getDate() {
         return new Date(mRemoteSingleScheduleRecord.getYear(), mRemoteSingleScheduleRecord.getMonth(), mRemoteSingleScheduleRecord.getDay());
     }
 
-    @NonNull
     @Override
-    public String getPath() {
-        return "singleScheduleRecords/" + mPosition;
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
+        Assert.assertTrue(current(now));
+
+        mRemoteSingleScheduleRecord.setEndTime(now.getLong());
     }
 }

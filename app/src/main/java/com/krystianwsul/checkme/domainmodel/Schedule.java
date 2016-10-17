@@ -42,6 +42,8 @@ abstract class Schedule implements MergedSchedule {
     }
 
     void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
+        Assert.assertTrue(current(endExactTimeStamp));
+
         mScheduleRecord.setEndTime(endExactTimeStamp.getLong());
     }
 
@@ -53,7 +55,7 @@ abstract class Schedule implements MergedSchedule {
     }
 
     @NonNull
-    public ScheduleType getType() {
+    ScheduleType getType() {
         ScheduleType scheduleType = ScheduleType.values()[mScheduleRecord.getType()];
         Assert.assertTrue(scheduleType != null);
 

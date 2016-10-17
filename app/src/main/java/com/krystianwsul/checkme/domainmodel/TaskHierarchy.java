@@ -71,7 +71,8 @@ class TaskHierarchy implements MergedTaskHierarchy {
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
-    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
+    @Override
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         mTaskHierarchyRecord.setEndTime(endExactTimeStamp.getLong());

@@ -9,11 +9,11 @@ import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
 import junit.framework.Assert;
 
 public class RemoteTaskHierarchyRecord extends RemoteRecord {
-    public RemoteTaskHierarchyRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
+    RemoteTaskHierarchyRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(id, jsonWrapper);
     }
 
-    public RemoteTaskHierarchyRecord(@NonNull JsonWrapper jsonWrapper) {
+    RemoteTaskHierarchyRecord(@NonNull JsonWrapper jsonWrapper) {
         super(jsonWrapper);
     }
 
@@ -42,5 +42,11 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
     @NonNull
     public String getChildTaskId() {
         return getTaskHierarchyJson().getChildTaskId();
+    }
+
+    public void setEndTime(long endTime) {
+        Assert.assertTrue(getEndTime() == null);
+
+        addValue(getId() + "/taskHierarchyJson/endTime", endTime);
     }
 }

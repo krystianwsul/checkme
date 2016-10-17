@@ -20,12 +20,6 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.UserData;
-import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
-import com.krystianwsul.checkme.firebase.json.MonthlyDayScheduleJson;
-import com.krystianwsul.checkme.firebase.json.MonthlyWeekScheduleJson;
-import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
-import com.krystianwsul.checkme.firebase.json.TaskJson;
-import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
@@ -372,86 +366,20 @@ public class DomainFactory {
     }
 
     public synchronized void createScheduleRootTask(@NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        MyCrashlytics.log("DomainFactory.createScheduleRootTask");
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(!friendEntries.isEmpty());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<SingleScheduleJson> remoteSingleScheduleRecords = new ArrayList<>();
-        List<DailyScheduleJson> dailyScheduleJsons = new ArrayList<>();
-        List<WeeklyScheduleJson> remoteWeeklyScheduleRecords = new ArrayList<>();
-        List<MonthlyDayScheduleJson> monthlyDayScheduleJsons = new ArrayList<>();
-        List<MonthlyWeekScheduleJson> monthlyWeekScheduleJsons = new ArrayList<>();
+        mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, friendEntries);
+    }
 
-        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
-            Assert.assertTrue(scheduleData != null);
-
-            switch (scheduleData.getScheduleType()) {
-                case SINGLE: {
-                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
-
-                    Date date = singleScheduleData.Date;
-
-                    Assert.assertTrue(singleScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = singleScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteSingleScheduleRecords.add(new SingleScheduleJson(now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case DAILY: {
-                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
-
-                    Assert.assertTrue(dailyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-
-                    HourMinute hourMinute = dailyScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    dailyScheduleJsons.add(new DailyScheduleJson(now.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case WEEKLY: {
-                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
-
-                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
-
-                    Assert.assertTrue(weeklyScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = weeklyScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteWeeklyScheduleRecords.add(new WeeklyScheduleJson(now.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case MONTHLY_DAY: {
-                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
-
-                    Assert.assertTrue(monthlyDayScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = monthlyDayScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    monthlyDayScheduleJsons.add(new MonthlyDayScheduleJson(now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                case MONTHLY_WEEK: {
-                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
-
-                    Assert.assertTrue(monthlyWeekScheduleData.TimePair.mCustomTimeId == null); // todo custom time
-                    HourMinute hourMinute = monthlyWeekScheduleData.TimePair.mHourMinute;
-                    Assert.assertTrue(hourMinute != null);
-
-                    monthlyWeekScheduleJsons.add(new MonthlyWeekScheduleJson(now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute()));
-                    break;
-                }
-                default:
-                    throw new UnsupportedOperationException();
-            }
-        }
-
-        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, remoteSingleScheduleRecords, dailyScheduleJsons, remoteWeeklyScheduleRecords, monthlyDayScheduleJsons, monthlyWeekScheduleJsons);
-
-        UserData userData = MainActivity.getUserData();
-        Assert.assertTrue(userData != null);
-
-        DatabaseWrapper.addRootTask(userData, taskJson, friendEntries);
+    @NonNull
+    public RemoteFactory getRemoteFactory() {
+        return mRemoteFactory;
     }
 
     // gets
@@ -1363,23 +1291,21 @@ public class DomainFactory {
         if (parentTaskKey.mLocalTaskId != null) { // todo firebase?
             Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
 
-            createLocalChildTask(now, parentTaskKey, name, note);
+            MergedTask parentTask = getTask(parentTaskKey);
+            Assert.assertTrue(parentTask.current(now));
+
+            parentTask.createChildTask(now, name, note);
 
             save(context, dataId);
         } else {
             Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
 
-            MergedTask parentTask = getTasks().get(parentTaskKey);
-            Assert.assertTrue(parentTask != null);
-
+            MergedTask parentTask = getTask(parentTaskKey);
             Assert.assertTrue(parentTask.current(now));
 
-            Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
-            Assert.assertTrue(parentTask instanceof RemoteTask);
+            parentTask.createChildTask(now, name, note);
 
-            TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note);
-
-            DatabaseWrapper.addChildTask((RemoteTask) parentTask, taskJson);
+            mRemoteFactory.save();
         }
     }
 
@@ -1469,19 +1395,10 @@ public class DomainFactory {
         MergedTask task = getTask(taskKey);
         Assert.assertTrue(task.current(now));
 
-        if (taskKey.mLocalTaskId != null) { // todo firebase
-            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
-            Assert.assertTrue(task instanceof Task);
+        task.setEndExactTimeStamp(now);
 
-            ((Task) task).setEndExactTimeStamp(now);
-
-            save(context, dataIds);
-        } else {
-            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
-            Assert.assertTrue(task instanceof RemoteTask);
-
-            DatabaseWrapper.setTaskEndTimeStamp((RemoteTask) task, now);
-        }
+        save(context, dataIds);
+        mRemoteFactory.save();
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {

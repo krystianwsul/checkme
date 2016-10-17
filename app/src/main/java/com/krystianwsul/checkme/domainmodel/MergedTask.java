@@ -41,4 +41,8 @@ public interface MergedTask {
     List<? extends MergedSchedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp);
 
     boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp);
+
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp now);
+
+    void createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note);
 }

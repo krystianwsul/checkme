@@ -21,4 +21,6 @@ public interface MergedTaskHierarchy {
     MergedTask getChildTask();
 
     boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp);
+
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp now);
 }

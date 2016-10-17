@@ -10,16 +10,16 @@ import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
-import java.util.Map;
+import junit.framework.Assert;
 
-public class RemoteTaskHierarchy implements MergedTaskHierarchy {
+class RemoteTaskHierarchy implements MergedTaskHierarchy {
     @NonNull
     private final DomainFactory mDomainFactory;
 
     @NonNull
     private final RemoteTaskHierarchyRecord mRemoteTaskHierarchyRecord;
 
-    public RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
+    RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
         mDomainFactory = domainFactory;
         mRemoteTaskHierarchyRecord = remoteTaskHierarchyRecord;
     }
@@ -76,7 +76,15 @@ public class RemoteTaskHierarchy implements MergedTaskHierarchy {
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
-    void setEndExactTimeStamp(@NonNull Map<String, Object> values, @NonNull ExactTimeStamp now) {
-        values.put("tasks/" + mRemoteTaskHierarchyRecord.getId() + "/taskHierarchyJson/endTime", now.getLong());
+    @Override
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
+        Assert.assertTrue(current(now));
+
+        mRemoteTaskHierarchyRecord.setEndTime(now.getLong());
+    }
+
+    @NonNull
+    public String getId() {
+        return mRemoteTaskHierarchyRecord.getId();
     }
 }

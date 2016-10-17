@@ -3,28 +3,26 @@ package com.krystianwsul.checkme.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.krystianwsul.checkme.firebase.json.ScheduleJson;
-import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
+import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 
 import junit.framework.Assert;
 
-public class RemoteWeeklySchedule extends RemoteSchedule {
-    private final int mPosition;
-
+class RemoteWeeklySchedule extends RemoteSchedule {
     @NonNull
-    private WeeklyScheduleJson mRemoteWeeklyScheduleRecord;
+    private final RemoteWeeklyScheduleRecord mRemoteWeeklyScheduleRecord;
 
-    public RemoteWeeklySchedule(int position, @NonNull WeeklyScheduleJson remoteWeeklyScheduleRecord) {
-        mPosition = position;
+    RemoteWeeklySchedule(@NonNull RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord) {
         mRemoteWeeklyScheduleRecord = remoteWeeklyScheduleRecord;
     }
 
     @NonNull
     @Override
-    protected ScheduleJson getRemoteScheduleRecord() {
+    protected RemoteScheduleRecord getRemoteScheduleRecord() {
         return mRemoteWeeklyScheduleRecord;
     }
 
@@ -60,9 +58,10 @@ public class RemoteWeeklySchedule extends RemoteSchedule {
         //}
     }
 
-    @NonNull
     @Override
-    public String getPath() {
-        return "weeklyScheduleRecords/" + mPosition;
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
+        Assert.assertTrue(current(now));
+
+        mRemoteWeeklyScheduleRecord.setEndTime(now.getLong());
     }
 }

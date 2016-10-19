@@ -77,7 +77,8 @@ public class Task implements MergedTask {
         return mTaskRecord.getName();
     }
 
-    void setName(@NonNull String name, @Nullable String note) {
+    @Override
+    public void setName(@NonNull String name, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mTaskRecord.setName(name);
@@ -93,7 +94,8 @@ public class Task implements MergedTask {
     }
 
     @Nullable
-    Task getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    @Override
+    public Task getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getParentTask(this, exactTimeStamp);
@@ -117,7 +119,8 @@ public class Task implements MergedTask {
     }
 
     @Nullable
-    ExactTimeStamp getEndExactTimeStamp() {
+    @Override
+    public ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskRecord.getEndTime() != null)
             return new ExactTimeStamp(mTaskRecord.getEndTime());
         else
@@ -167,7 +170,8 @@ public class Task implements MergedTask {
     }
 
     @Nullable
-    Date getOldestVisible() {
+    @Override
+    public Date getOldestVisible() {
         if (mTaskRecord.getOldestVisibleYear() != null) {
             Assert.assertTrue(mTaskRecord.getOldestVisibleMonth() != null);
             Assert.assertTrue(mTaskRecord.getOldestVisibleDay() != null);
@@ -182,7 +186,8 @@ public class Task implements MergedTask {
     }
 
     @NonNull
-    List<Instance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
+    @Override
+    public List<MergedInstance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
         if (startExactTimeStamp == null) { // 24 hack
             Date oldestVisible = getOldestVisible();
             if (oldestVisible != null) {
@@ -191,31 +196,31 @@ public class Task implements MergedTask {
             }
         }
 
-        List<Instance> instances = new ArrayList<>();
+        List<MergedInstance> instances = new ArrayList<>();
         for (Schedule schedule : mSchedules)
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
-        List<TaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
+        List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
 
         ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
 
         instances.addAll(Stream.of(taskHierarchies)
-                .map(TaskHierarchy::getParentTask)
+                .map(MergedTaskHierarchy::getParentTask)
                 .map(task -> task.getInstances(finalStartExactTimeStamp, endExactTimeStamp, now))
                 .flatMap(Stream::of)
                 .map(instance -> instance.getChildInstances(now))
                 .flatMap(Stream::of)
-                .filter(instance -> instance.getTaskId() == getId())
+                .filter(instance -> instance.getTaskKey().equals(getTaskKey()))
                 .collect(Collectors.toList()));
 
         return instances;
     }
 
-    void updateOldestVisible(@NonNull ExactTimeStamp now) {
+    public void updateOldestVisible(@NonNull ExactTimeStamp now) {
         // 24 hack
-        List<Instance> instances = mDomainFactory.getPastInstances(this, now);
+        List<MergedInstance> instances = mDomainFactory.getPastInstances(this, now);
 
-        Optional<Instance> optional = Stream.of(instances)
+        Optional<MergedInstance> optional = Stream.of(instances)
                 .filter(instance -> instance.isVisible(now))
                 .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
 
@@ -269,7 +274,8 @@ public class Task implements MergedTask {
         return false;
     }
 
-    void setRelevant() {
+    @Override
+    public void setRelevant() {
         mTaskRecord.setRelevant(false);
     }
 

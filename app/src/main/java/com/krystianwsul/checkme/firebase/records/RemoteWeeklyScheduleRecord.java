@@ -64,6 +64,7 @@ public class RemoteWeeklyScheduleRecord extends RemoteScheduleRecord {
     public void setEndTime(long endTime) {
         Assert.assertTrue(getEndTime() == null);
 
+        getWeeklyScheduleJson().setEndTime(endTime);
         addValue(getId() + "/weeklyScheduleJson/endTime", endTime);
     }
 }

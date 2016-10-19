@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
@@ -47,6 +46,7 @@ abstract class Schedule implements MergedSchedule {
         mScheduleRecord.setEndTime(endExactTimeStamp.getLong());
     }
 
+    @Override
     public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
@@ -55,7 +55,8 @@ abstract class Schedule implements MergedSchedule {
     }
 
     @NonNull
-    ScheduleType getType() {
+    @Override
+    public ScheduleType getType() {
         ScheduleType scheduleType = ScheduleType.values()[mScheduleRecord.getType()];
         Assert.assertTrue(scheduleType != null);
 
@@ -63,10 +64,7 @@ abstract class Schedule implements MergedSchedule {
     }
 
     @NonNull
-    abstract List<Instance> getInstances(@NonNull Task task, @Nullable ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
-
-    @Nullable
-    protected abstract TimeStamp getNextAlarm(@NonNull ExactTimeStamp now);
+    abstract List<MergedInstance> getInstances(@NonNull Task task, @Nullable ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
 
     @Nullable
     public abstract Integer getCustomTimeId();

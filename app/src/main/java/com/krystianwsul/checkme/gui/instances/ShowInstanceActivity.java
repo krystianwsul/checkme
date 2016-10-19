@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
@@ -132,7 +131,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                startActivity(ShowTaskActivity.newIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
+                startActivity(ShowTaskActivity.newIntent(this, mInstanceData.InstanceKey.mTaskKey));
                 break;
             case R.id.instance_menu_edit_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -140,9 +139,9 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
                 if (mInstanceData.IsRootTask)
-                    startActivity(CreateTaskActivity.getEditIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
+                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.mTaskKey));
                 else
-                    startActivity(CreateTaskActivity.getEditIntent(this, new TaskKey(mInstanceData.InstanceKey.TaskId)));
+                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.mTaskKey));
                 break;
             case R.id.instance_menu_delete_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -155,7 +154,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 getSupportLoaderManager().destroyLoader(0);
                 mGroupListFragment.destroyLoader();
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, new TaskKey(mInstanceData.InstanceKey.TaskId));
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceData.InstanceKey.mTaskKey);
 
                 TickService.startService(this);
 

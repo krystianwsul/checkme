@@ -260,7 +260,7 @@ public class TickService extends IntentService {
                     if (timeStampComparison != 0)
                         return timeStampComparison;
 
-                    return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
+                    return lhs.mTaskStartExactTimeStamp.compareTo(rhs.mTaskStartExactTimeStamp);
                 })
                 .map(notificationInstanceData -> notificationInstanceData.Name + " (" + notificationInstanceData.DisplayText + ")")
                 .collect(Collectors.toList()));
@@ -354,7 +354,10 @@ public class TickService extends IntentService {
         final String mNote;
         final boolean mUpdate;
 
-        public NotificationInstanceData(@NonNull InstanceKey instanceKey, @NonNull String name, int notificationId, @NonNull String displayText, @NonNull TimeStamp instanceTimeStamp, @NonNull List<String> children, @Nullable String note, boolean update) {
+        @NonNull
+        final ExactTimeStamp mTaskStartExactTimeStamp;
+
+        public NotificationInstanceData(@NonNull InstanceKey instanceKey, @NonNull String name, int notificationId, @NonNull String displayText, @NonNull TimeStamp instanceTimeStamp, @NonNull List<String> children, @Nullable String note, boolean update, @NonNull ExactTimeStamp taskStartExactTimeStamp) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
 
@@ -366,6 +369,7 @@ public class TickService extends IntentService {
             Children = children;
             mNote = note;
             mUpdate = update;
+            mTaskStartExactTimeStamp = taskStartExactTimeStamp;
         }
     }
 

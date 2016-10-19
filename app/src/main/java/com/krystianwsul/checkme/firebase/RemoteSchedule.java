@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.domainmodel.MergedInstance;
 import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
@@ -11,11 +12,14 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
+import java.util.List;
+
 abstract class RemoteSchedule implements MergedSchedule {
     RemoteSchedule() {
 
     }
 
+    @Override
     public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
@@ -27,12 +31,12 @@ abstract class RemoteSchedule implements MergedSchedule {
     abstract String getScheduleText(@NonNull Context context);
 
     @NonNull
-    private ExactTimeStamp getStartExactTimeStamp() {
+    ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(getRemoteScheduleRecord().getStartTime());
     }
 
     @Nullable
-    private ExactTimeStamp getEndExactTimeStamp() {
+    ExactTimeStamp getEndExactTimeStamp() {
         if (getRemoteScheduleRecord().getEndTime() == null)
             return null;
         else
@@ -55,4 +59,7 @@ abstract class RemoteSchedule implements MergedSchedule {
     }
 
     public abstract void setEndExactTimeStamp(@NonNull ExactTimeStamp now);
+
+    @NonNull
+    abstract List<MergedInstance> getInstances(@NonNull RemoteTask task, @Nullable ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
 }

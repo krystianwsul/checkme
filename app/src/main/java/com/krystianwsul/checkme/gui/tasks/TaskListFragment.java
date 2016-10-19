@@ -104,7 +104,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                     if (mTaskKey == null)
                         startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys));
                     else
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mTaskKey.mLocalTaskId)); // todo firebase
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mTaskKey));
                     break;
                 case R.id.action_task_delete:
                     do {

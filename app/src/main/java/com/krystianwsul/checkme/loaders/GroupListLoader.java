@@ -202,7 +202,10 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         @NonNull
         public final InstanceDataParent mInstanceDataParent;
 
-        public InstanceData(@Nullable ExactTimeStamp done, @NonNull InstanceKey instanceKey, @Nullable String displayText, @NonNull String name, @NonNull TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, @Nullable Boolean isRootTask, boolean exists, @NonNull InstanceDataParent instanceDataParent, @NonNull TimePair instanceTimePair, @Nullable String note) {
+        @NonNull
+        public final ExactTimeStamp mTaskStartExactTimeStamp;
+
+        public InstanceData(@Nullable ExactTimeStamp done, @NonNull InstanceKey instanceKey, @Nullable String displayText, @NonNull String name, @NonNull TimeStamp instanceTimeStamp, boolean taskCurrent, boolean isRootInstance, @Nullable Boolean isRootTask, boolean exists, @NonNull InstanceDataParent instanceDataParent, @NonNull TimePair instanceTimePair, @Nullable String note, @NonNull ExactTimeStamp taskStartExactTimeStamp) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Done = done;
@@ -217,6 +220,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             InstanceTimePair = instanceTimePair;
             mInstanceDataParent = instanceDataParent;
             mNote = note;
+            mTaskStartExactTimeStamp = taskStartExactTimeStamp;
         }
 
         @Override
@@ -238,6 +242,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             hashCode += InstanceTimePair.hashCode();
             if (!TextUtils.isEmpty(mNote))
                 hashCode += mNote.hashCode();
+            hashCode += mTaskStartExactTimeStamp.hashCode();
             return hashCode;
         }
 
@@ -305,6 +310,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
                 return false;
 
             if (!TextUtils.isEmpty(mNote) && !mNote.equals(instanceData.mNote))
+                return false;
+
+            if (!mTaskStartExactTimeStamp.equals(instanceData.mTaskStartExactTimeStamp))
                 return false;
 
             return true;

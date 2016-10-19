@@ -60,6 +60,7 @@ public class RemoteDailyScheduleRecord extends RemoteScheduleRecord {
     public void setEndTime(long endTime) {
         Assert.assertTrue(getEndTime() == null);
 
+        getDailyScheduleJson().setEndTime(endTime);
         addValue(getId() + "/dailyScheduleJson/endTime", endTime);
     }
 }

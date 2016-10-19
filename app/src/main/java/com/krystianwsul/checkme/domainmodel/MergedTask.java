@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.utils.TaskKey;
+import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import java.util.List;
@@ -45,4 +46,22 @@ public interface MergedTask {
     void setEndExactTimeStamp(@NonNull ExactTimeStamp now);
 
     void createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note);
+
+    @Nullable
+    ExactTimeStamp getEndExactTimeStamp();
+
+    @Nullable
+    MergedTask getParentTask(@NonNull ExactTimeStamp exactTimeStamp);
+
+    @Nullable
+    Date getOldestVisible();
+
+    void updateOldestVisible(@NonNull ExactTimeStamp now);
+
+    @NonNull
+    List<MergedInstance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now);
+
+    void setRelevant();
+
+    void setName(@NonNull String name, @Nullable String note);
 }

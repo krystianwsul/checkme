@@ -47,6 +47,7 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
     public void setEndTime(long endTime) {
         Assert.assertTrue(getEndTime() == null);
 
+        getTaskHierarchyJson().setEndTime(endTime);
         addValue(getId() + "/taskHierarchyJson/endTime", endTime);
     }
 }

@@ -72,7 +72,7 @@ public class DomainFactoryTest {
 
         DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
 
-        Instance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
+        MergedInstance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
@@ -167,7 +167,7 @@ public class DomainFactoryTest {
 
         DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
 
-        Instance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
+        MergedInstance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
@@ -180,14 +180,14 @@ public class DomainFactoryTest {
         rootInstance = domainFactory.setInstanceDone(doneExactTimeStamp, rootInstance.getInstanceKey(), true);
         Assert.assertTrue(rootInstance.exists());
 
-        Instance childInstanceDone = domainFactory.getInstance(childTaskDone, scheduleDateTime);
+        MergedInstance childInstanceDone = domainFactory.getInstance(childTaskDone, scheduleDateTime);
         Assert.assertTrue(!childInstanceDone.exists());
         Assert.assertTrue(childInstanceDone.isVisible(doneExactTimeStamp));
 
         childInstanceDone = domainFactory.setInstanceDone(doneExactTimeStamp, childInstanceDone.getInstanceKey(), true);
         Assert.assertTrue(childInstanceDone.exists());
 
-        Instance childInstanceExists = domainFactory.getInstance(childTaskExists, scheduleDateTime);
+        MergedInstance childInstanceExists = domainFactory.getInstance(childTaskExists, scheduleDateTime);
         Assert.assertTrue(!childInstanceExists.exists());
         Assert.assertTrue(childInstanceExists.isVisible(doneExactTimeStamp));
 
@@ -197,7 +197,7 @@ public class DomainFactoryTest {
         childInstanceExists = domainFactory.setInstanceDone(doneExactTimeStamp, childInstanceExists.getInstanceKey(), false);
         Assert.assertTrue(childInstanceExists.exists());
 
-        Instance childInstanceDoesntExist = domainFactory.getInstance(childTaskDoesntExist, scheduleDateTime);
+        MergedInstance childInstanceDoesntExist = domainFactory.getInstance(childTaskDoesntExist, scheduleDateTime);
         Assert.assertTrue(!childInstanceDoesntExist.exists());
         Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp));
 

@@ -72,6 +72,7 @@ public class RemoteSingleScheduleRecord extends RemoteScheduleRecord {
     public void setEndTime(long endTime) {
         Assert.assertTrue(getEndTime() == null);
 
+        getSingleScheduleJson().setEndTime(endTime);
         addValue(getId() + "/singleScheduleJson/endTime", endTime);
     }
 }

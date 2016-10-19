@@ -49,4 +49,8 @@ public class TaskHierarchyJson {
     public Long getEndTime() {
         return endTime;
     }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
 }

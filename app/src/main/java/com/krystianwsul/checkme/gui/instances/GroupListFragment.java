@@ -147,7 +147,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
                     Assert.assertTrue(instanceData.TaskCurrent);
 
-                    startActivity(ShowTaskActivity.newIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
+                    startActivity(ShowTaskActivity.newIntent(getActivity(), instanceData.InstanceKey.mTaskKey));
                     break;
                 }
                 case R.id.action_group_edit_task: {
@@ -156,12 +156,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
                     Assert.assertTrue(instanceData.TaskCurrent);
 
-                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
+                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), instanceData.InstanceKey.mTaskKey));
                     break;
                 }
                 case R.id.action_group_delete_task: {
                     ArrayList<TaskKey> taskKeys = new ArrayList<>(Stream.of(instanceDatas)
-                            .map(instanceData -> new TaskKey(instanceData.InstanceKey.TaskId))
+                            .map(instanceData -> instanceData.InstanceKey.mTaskKey)
                             .collect(Collectors.toList()));
                     Assert.assertTrue(!taskKeys.isEmpty());
                     Assert.assertTrue(Stream.of(instanceDatas)
@@ -193,17 +193,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     GroupListLoader.InstanceData instanceData = instanceDatas.get(0);
                     Assert.assertTrue(instanceData.TaskCurrent);
 
-                    getActivity().startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new TaskKey(instanceData.InstanceKey.TaskId)));
+                    getActivity().startActivity(CreateTaskActivity.getCreateIntent(getActivity(), instanceData.InstanceKey.mTaskKey));
                     break;
                 }
                 case R.id.action_group_join: {
-                    ArrayList<Integer> taskIds = new ArrayList<>(Stream.of(instanceDatas)
-                            .map(instanceData -> instanceData.InstanceKey.TaskId)
-                            .collect(Collectors.toList()));
-                    Assert.assertTrue(taskIds.size() > 1);
-
                     ArrayList<TaskKey> taskKeys = new ArrayList<>(Stream.of(instanceDatas)
-                            .map(instanceData -> new TaskKey(instanceData.InstanceKey.TaskId))
+                            .map(instanceData -> instanceData.InstanceKey.mTaskKey)
                             .collect(Collectors.toList()));
                     Assert.assertTrue(taskKeys.size() > 1);
 
@@ -216,9 +211,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                         TimePair timePair = firstInstanceData.InstanceTimePair;
 
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskIds, new CreateTaskActivity.ScheduleHint(date, timePair)));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, new CreateTaskActivity.ScheduleHint(date, timePair)));
                     } else {
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mInstanceKey.TaskId));
+                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mInstanceKey.mTaskKey));
                     }
                     break;
                 }
@@ -487,7 +482,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             if (timeStampComparison != 0) {
                 return timeStampComparison;
             } else {
-                return Integer.valueOf(lhs.InstanceKey.TaskId).compareTo(rhs.InstanceKey.TaskId);
+                return lhs.mTaskStartExactTimeStamp.compareTo(rhs.mTaskStartExactTimeStamp);
             }
         });
 
@@ -515,7 +510,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         lines.add(StringUtils.repeat("-", indentation) + instanceData.Name);
 
         Stream.of(instanceData.Children.values())
-                .sortBy(child -> child.InstanceKey.TaskId)
+                .sortBy(child -> child.mTaskStartExactTimeStamp)
                 .forEach(child -> printTree(lines, indentation + 1, child));
     }
 
@@ -747,7 +742,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
             if (data.TaskEditable) {
                 showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new TaskKey(mInstanceKey.TaskId))));
+                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, mInstanceKey.mTaskKey)));
 
                 emptyTextId = R.string.empty_child;
             } else {
@@ -2038,7 +2033,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                             Assert.assertTrue(singleInstance());
                             Assert.assertTrue(notDoneGroupNode.singleInstance());
 
-                            return Integer.valueOf(getSingleInstanceData().InstanceKey.TaskId).compareTo(notDoneGroupNode.getSingleInstanceData().InstanceKey.TaskId);
+                            return getSingleInstanceData().mTaskStartExactTimeStamp.compareTo(notDoneGroupNode.getSingleInstanceData().mTaskStartExactTimeStamp);
                         }
                     } else if (another instanceof UnscheduledNode) {
                         return -1;
@@ -2419,7 +2414,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                     @Override
                     public int compareTo(@NonNull ModelNode another) {
-                        return Integer.valueOf(mInstanceData.InstanceKey.TaskId).compareTo(((NotDoneInstanceNode) another).mInstanceData.InstanceKey.TaskId);
+                        return mInstanceData.mTaskStartExactTimeStamp.compareTo(((NotDoneInstanceNode) another).mInstanceData.mTaskStartExactTimeStamp);
                     }
 
                     @Override
@@ -3582,7 +3577,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         if (!instanceDatas.isEmpty() && !expanded) {
             Stream<GroupListLoader.InstanceData> notDone = Stream.of(instanceDatas)
                     .filter(instanceData -> instanceData.Done == null)
-                    .sortBy(instanceData -> instanceData.InstanceKey.TaskId);
+                    .sortBy(instanceData -> instanceData.mTaskStartExactTimeStamp);
 
             //noinspection ConstantConditions
             Stream<GroupListLoader.InstanceData> done = Stream.of(instanceDatas)

@@ -12,6 +12,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.Task;
+import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -48,11 +49,14 @@ public class PersistenceManger {
 
     private final List<InstanceRecord> mInstanceRecords;
 
+    private final List<InstanceShownRecord> mInstancesShownRecords;
+
     private int mCustomTimeMaxId;
     private int mTaskMaxId;
     private int mTaskHierarchyMaxId;
     private int mScheduleMaxId;
     private int mInstanceMaxId;
+    private int mInstanceShownMaxId;
 
     public static synchronized PersistenceManger getInstance(Context context) {
         Assert.assertTrue(context != null);
@@ -133,6 +137,10 @@ public class PersistenceManger {
         Assert.assertTrue(mInstanceRecords != null);
 
         mInstanceMaxId = InstanceRecord.getMaxId(mSQLiteDatabase);
+
+        mInstancesShownRecords = InstanceShownRecord.getInstancesShownRecords(mSQLiteDatabase);
+
+        mInstanceShownMaxId = InstanceShownRecord.getMaxId(mSQLiteDatabase);
     }
 
     @SuppressLint("UseSparseArrays")
@@ -148,12 +156,14 @@ public class PersistenceManger {
         mMonthlyDayScheduleRecords = new HashMap<>();
         mMonthlyWeekScheduleRecords = new HashMap<>();
         mInstanceRecords = new ArrayList<>();
+        mInstancesShownRecords = new ArrayList<>();
 
         mCustomTimeMaxId = 0;
         mTaskMaxId = 0;
         mTaskHierarchyMaxId = 0;
         mScheduleMaxId = 0;
         mInstanceMaxId = 0;
+        mInstanceShownMaxId = 0;
     }
 
     public synchronized void reset() {
@@ -207,6 +217,10 @@ public class PersistenceManger {
 
     public Collection<InstanceRecord> getInstanceRecords() {
         return mInstanceRecords;
+    }
+
+    public List<InstanceShownRecord> getInstancesShownRecords() {
+        return mInstancesShownRecords;
     }
 
     public CustomTimeRecord createCustomTimeRecord(String name, Map<DayOfWeek, HourMinute> hourMinutes) {
@@ -520,5 +534,17 @@ public class PersistenceManger {
 
     SQLiteDatabase getSQLiteDatabase() {
         return mSQLiteDatabase;
+    }
+
+    @NonNull
+    public InstanceShownRecord createInstanceShownRecord(@NonNull RemoteTask remoteTask, @NonNull DateTime scheduleDateTime) {
+        int id = ++mInstanceShownMaxId;
+
+        HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
+        Integer hour = (hourMinute == null ? null : hourMinute.getHour());
+        Integer minute = (hourMinute == null ? null : hourMinute.getMinute());
+        InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTask.getId(), scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute, false, false);
+        mInstancesShownRecords.add(instanceShownRecord);
+        return instanceShownRecord;
     }
 }

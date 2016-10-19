@@ -50,4 +50,8 @@ public abstract class ScheduleJson {
     public int getType() {
         return type;
     }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
 }

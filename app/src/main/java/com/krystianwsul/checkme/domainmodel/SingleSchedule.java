@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 class SingleSchedule extends Schedule {
     @NonNull
@@ -34,13 +35,13 @@ class SingleSchedule extends Schedule {
     }
 
     @NonNull
-    Instance getInstance(@NonNull Task task) {
+    MergedInstance getInstance(@NonNull Task task) {
         return mDomainFactory.getInstance(task, getDateTime());
     }
 
     @Nullable
     @Override
-    protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
+    public TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         TimeStamp timeStamp = getDateTime().getTimeStamp();
         if (timeStamp.toExactTimeStamp().compareTo(now) > 0)
             return timeStamp;
@@ -50,8 +51,8 @@ class SingleSchedule extends Schedule {
 
     @NonNull
     @Override
-    ArrayList<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
-        ArrayList<Instance> instances = new ArrayList<>();
+    List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
+        List<MergedInstance> instances = new ArrayList<>();
 
         ExactTimeStamp singleScheduleExactTimeStamp = getDateTime().getTimeStamp().toExactTimeStamp();
 

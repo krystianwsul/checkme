@@ -3,16 +3,21 @@ package com.krystianwsul.checkme.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
+import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.MergedInstance;
 import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
+import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.HourMilli;
 
 import junit.framework.Assert;
 
@@ -71,7 +76,8 @@ public class RemoteTask implements MergedTask {
     }
 
     @Nullable
-    private ExactTimeStamp getEndExactTimeStamp() {
+    @Override
+    public ExactTimeStamp getEndExactTimeStamp() {
         if (mRemoteTaskRecord.getEndTime() != null)
             return new ExactTimeStamp(mRemoteTaskRecord.getEndTime());
         else
@@ -120,7 +126,7 @@ public class RemoteTask implements MergedTask {
     }
 
     @Nullable
-    private MergedTask getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    public MergedTask getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getParentTask(this, exactTimeStamp);
@@ -211,6 +217,90 @@ public class RemoteTask implements MergedTask {
 
     @Override
     public void createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
-        mDomainFactory.getRemoteFactory().createChildTask(this, now, name, note);
+        mDomainFactory.getRemoteFactory().createChildTask(mDomainFactory, this, now, name, note);
+    }
+
+    @Nullable
+    @Override
+    public Date getOldestVisible() {
+        if (mRemoteTaskRecord.getOldestVisibleYear() != null) {
+            Assert.assertTrue(mRemoteTaskRecord.getOldestVisibleMonth() != null);
+            Assert.assertTrue(mRemoteTaskRecord.getOldestVisibleDay() != null);
+
+            return new Date(mRemoteTaskRecord.getOldestVisibleYear(), mRemoteTaskRecord.getOldestVisibleMonth(), mRemoteTaskRecord.getOldestVisibleDay());
+        } else {
+            Assert.assertTrue(mRemoteTaskRecord.getOldestVisibleMonth() == null);
+            Assert.assertTrue(mRemoteTaskRecord.getOldestVisibleDay() == null);
+
+            return null;
+        }
+    }
+
+    public void updateOldestVisible(@NonNull ExactTimeStamp now) {
+        // 24 hack
+        List<MergedInstance> instances = mDomainFactory.getPastInstances(this, now);
+
+        Optional<MergedInstance> optional = Stream.of(instances)
+                .filter(instance -> instance.isVisible(now))
+                .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
+
+        Date oldestVisible;
+
+        if (optional.isPresent()) {
+            oldestVisible = optional.get().getScheduleDateTime().getDate();
+
+            if (oldestVisible.compareTo(now.getDate()) > 0)
+                oldestVisible = now.getDate();
+        } else {
+            oldestVisible = now.getDate();
+        }
+
+        mRemoteTaskRecord.setOldestVisibleYear(oldestVisible.getYear());
+        mRemoteTaskRecord.setOldestVisibleMonth(oldestVisible.getMonth());
+        mRemoteTaskRecord.setOldestVisibleDay(oldestVisible.getDay());
+    }
+
+    @NonNull
+    @Override
+    public List<MergedInstance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
+        if (startExactTimeStamp == null) { // 24 hack
+            Date oldestVisible = getOldestVisible();
+            if (oldestVisible != null) {
+                HourMilli zero = new HourMilli(0, 0, 0, 0);
+                startExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
+            }
+        }
+
+        List<MergedInstance> instances = new ArrayList<>();
+        for (RemoteSchedule schedule : getRemoteSchedules())
+            instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
+
+        List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
+
+        ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
+
+        instances.addAll(Stream.of(taskHierarchies)
+                .map(MergedTaskHierarchy::getParentTask)
+                .map(task -> task.getInstances(finalStartExactTimeStamp, endExactTimeStamp, now))
+                .flatMap(Stream::of)
+                .map(instance -> instance.getChildInstances(now))
+                .flatMap(Stream::of)
+                .filter(instance -> instance.getTaskKey().equals(getTaskKey()))
+                .collect(Collectors.toList()));
+
+        return instances;
+    }
+
+    @Override
+    public void setRelevant() {
+        mRemoteTaskRecord.delete();
+    }
+
+    @Override
+    public void setName(@NonNull String name, @Nullable String note) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        mRemoteTaskRecord.setName(name);
+        mRemoteTaskRecord.setNote(note);
     }
 }

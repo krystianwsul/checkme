@@ -241,7 +241,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     @NonNull
-    public static Intent getJoinIntent(@NonNull Context context, @NonNull ArrayList<TaskKey> joinTaskKeys, int parentTaskIdHint) {
+    public static Intent getJoinIntent(@NonNull Context context, @NonNull ArrayList<TaskKey> joinTaskKeys, @NonNull TaskKey parentTaskKeyHint) {
         Assert.assertTrue(joinTaskKeys.size() > 1);
 
         //todo firebase
@@ -254,13 +254,21 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         Intent intent = new Intent(context, CreateTaskActivity.class);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
-        intent.putExtra(PARENT_TASK_KEY_HINT_KEY, new TaskKey(parentTaskIdHint)); // todo firebase
+        intent.putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint);
         return intent;
     }
 
     @NonNull
-    public static Intent getJoinIntent(@NonNull Context context, @NonNull ArrayList<Integer> joinTaskIds, @NonNull ScheduleHint scheduleHint) {
-        Assert.assertTrue(joinTaskIds.size() > 1);
+    public static Intent getJoinIntent(@NonNull Context context, @NonNull ArrayList<TaskKey> joinTaskKeys, @NonNull ScheduleHint scheduleHint) {
+        Assert.assertTrue(joinTaskKeys.size() > 1);
+
+        //todo firebase
+
+        ArrayList<Integer> joinTaskIds = Stream.of(joinTaskKeys).map(joinTaskKey -> {
+            Assert.assertTrue(joinTaskKey.mLocalTaskId != null);
+
+            return joinTaskKey.mLocalTaskId;
+        }).collect(Collectors.toCollection(ArrayList::new));
 
         Intent intent = new Intent(context, CreateTaskActivity.class);
         intent.putIntegerArrayListExtra(TASK_IDS_KEY, joinTaskIds);
@@ -548,7 +556,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     .collect(Collectors.toList()));
         }
 
-        return new CreateTaskLoader(this, mTaskId, excludedTaskKeys);
+        TaskKey taskKey = (mTaskId == null ? null : new TaskKey(mTaskId)); // todo firebase
+        return new CreateTaskLoader(this, taskKey, excludedTaskKeys);
     }
 
     @Override

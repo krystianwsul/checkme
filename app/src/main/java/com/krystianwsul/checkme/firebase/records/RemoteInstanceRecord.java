@@ -94,4 +94,39 @@ public class RemoteInstanceRecord extends RemoteRecord {
     public long getHierarchyTime() {
         return getInstanceJson().getHierarchyTime();
     }
+
+    public void setInstanceYear(int instanceYear) {
+        getInstanceJson().setInstanceYear(instanceYear);
+        addValue(getId() + "/instanceJson/instanceYear", instanceYear);
+    }
+
+    public void setInstanceMonth(int instanceMonth) {
+        getInstanceJson().setInstanceMonth(instanceMonth);
+        addValue(getId() + "/instanceJson/instanceMonth", instanceMonth);
+    }
+
+    public void setInstanceDay(int instanceDay) {
+        getInstanceJson().setInstanceDay(instanceDay);
+        addValue(getId() + "/instanceJson/instanceDay", instanceDay);
+    }
+
+    public void setInstanceCustomTimeId(@Nullable Integer instanceCustomTimeId) {
+        getInstanceJson().setInstanceCustomTimeId(instanceCustomTimeId);
+        addValue(getId() + "/instanceJson/instanceCustomTimeId", instanceCustomTimeId);
+    }
+
+    public void setInstanceHour(@Nullable Integer instanceHour) {
+        getInstanceJson().setInstanceHour(instanceHour);
+        addValue(getId() + "/instanceJson/instanceHour", instanceHour);
+    }
+
+    public void setInstanceMinute(@Nullable Integer instanceMinute) {
+        getInstanceJson().setInstanceMinute(instanceMinute);
+        addValue(getId() + "/instanceJson/instanceMinute", instanceMinute);
+    }
+
+    public void setDone(@Nullable Long done) {
+        getInstanceJson().setDone(done);
+        addValue(getId() + "/instanceJson/done", done);
+    }
 }

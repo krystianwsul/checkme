@@ -77,4 +77,30 @@ public class TaskJson {
     public String getNote() {
         return note;
     }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setOldestVisibleYear(int oldestVisibleYear) {
+        this.oldestVisibleYear = oldestVisibleYear;
+    }
+
+    public void setOldestVisibleMonth(int oldestVisibleMonth) {
+        this.oldestVisibleMonth = oldestVisibleMonth;
+    }
+
+    public void setOldestVisibleDay(int oldestVisibleDay) {
+        this.oldestVisibleDay = oldestVisibleDay;
+    }
+
+    public void setName(@NonNull String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        this.name = name;
+    }
+
+    public void setNote(@Nullable String note) {
+        this.note = note;
+    }
 }

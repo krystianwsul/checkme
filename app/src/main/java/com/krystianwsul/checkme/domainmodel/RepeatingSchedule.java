@@ -23,11 +23,11 @@ abstract class RepeatingSchedule extends Schedule {
 
     @NonNull
     @Override
-    List<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
+    List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
         ExactTimeStamp myStartTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp myEndTimeStamp = getEndExactTimeStamp();
 
-        ArrayList<Instance> instances = new ArrayList<>();
+        List<MergedInstance> instances = new ArrayList<>();
 
         ExactTimeStamp startExactTimeStamp;
         ExactTimeStamp endExactTimeStamp;
@@ -68,7 +68,7 @@ abstract class RepeatingSchedule extends Schedule {
     }
 
     @Nullable
-    protected abstract Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli);
+    protected abstract MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli);
 
     @Override
     public boolean isVisible(@NonNull MergedTask task, @NonNull ExactTimeStamp now) {

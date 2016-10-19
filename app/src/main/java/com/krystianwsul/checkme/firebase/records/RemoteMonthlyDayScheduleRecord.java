@@ -68,6 +68,7 @@ public class RemoteMonthlyDayScheduleRecord extends RemoteScheduleRecord {
     public void setEndTime(long endTime) {
         Assert.assertTrue(getEndTime() == null);
 
+        getMonthlyDayScheduleJson().setEndTime(endTime);
         addValue(getId() + "/monthlyDayScheduleJson/endTime", endTime);
     }
 }

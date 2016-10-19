@@ -173,11 +173,11 @@ public class JsonWrapper {
         instanceJson = null;
     }
 
-    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull InstanceJson instanceJson) {
-        Assert.assertTrue(!userDatas.isEmpty());
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull InstanceJson instanceJson) {
+        Assert.assertTrue(!recordOf.isEmpty());
 
-        recordOf = Stream.of(userDatas)
-                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+        this.recordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         taskJson = null;
         taskHierarchyJson = null;

@@ -16,10 +16,7 @@ public class ShowCustomTimesLoader extends DomainLoader<ShowCustomTimesLoader.Da
 
     @Override
     public Data loadInBackground() {
-        Data data = DomainFactory.getDomainFactory(getContext()).getShowCustomTimesData();
-        Assert.assertTrue(data != null);
-
-        return data;
+        return DomainFactory.getDomainFactory(getContext()).getShowCustomTimesData();
     }
 
     public static class Data extends DomainLoader.Data {

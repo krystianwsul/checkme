@@ -22,21 +22,21 @@ import java.util.TreeMap;
 
 public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     @Nullable
-    private final Integer mTaskId;
+    private final TaskKey mTaskKey;
 
     @NonNull
     private final List<TaskKey> mExcludedTaskKeys;
 
-    public CreateTaskLoader(@NonNull Context context, @Nullable Integer taskId, @NonNull List<TaskKey> excludedTaskKeys) {
+    public CreateTaskLoader(@NonNull Context context, @Nullable TaskKey taskKey, @NonNull List<TaskKey> excludedTaskKeys) {
         super(context);
 
-        mTaskId = taskId;
+        mTaskKey = taskKey;
         mExcludedTaskKeys = excludedTaskKeys;
     }
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mTaskId, getContext(), mExcludedTaskKeys);
+        return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mTaskKey, getContext(), mExcludedTaskKeys);
     }
 
     public interface ScheduleData {

@@ -39,7 +39,7 @@ class DailySchedule extends RepeatingSchedule {
 
     @Nullable
     @Override
-    protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
+    protected MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         DayOfWeek day = date.getDayOfWeek();
 
         HourMinute hourMinute = getTime().getHourMinute(day);
@@ -57,8 +57,9 @@ class DailySchedule extends RepeatingSchedule {
         return mDomainFactory.getInstance(task, scheduleDateTime);
     }
 
+    @Nullable
     @Override
-    protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
+    public TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         Date today = Date.today();
 
         Calendar calendar = Calendar.getInstance();

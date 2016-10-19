@@ -39,7 +39,7 @@ class WeeklySchedule extends RepeatingSchedule {
 
     @Nullable
     @Override
-    protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
+    protected MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         DayOfWeek day = date.getDayOfWeek();
 
         if (getDayOfWeek() != day)
@@ -67,7 +67,7 @@ class WeeklySchedule extends RepeatingSchedule {
 
     @NonNull
     @Override
-    protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
+    public TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         Date today = Date.today();
 
         DayOfWeek dayOfWeek = today.getDayOfWeek();

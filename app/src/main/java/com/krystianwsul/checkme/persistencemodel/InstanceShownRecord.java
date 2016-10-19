@@ -57,6 +57,7 @@ public class InstanceShownRecord extends Record {
 
     }
 
+    @NonNull
     public static ArrayList<InstanceShownRecord> getInstancesShownRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 

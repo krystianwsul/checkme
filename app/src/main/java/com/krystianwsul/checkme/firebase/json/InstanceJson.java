@@ -34,7 +34,7 @@ public class InstanceJson {
 
     }
 
-    InstanceJson(@NonNull String taskId, @Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable Integer scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable Integer instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
+    public InstanceJson(@NonNull String taskId, @Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable Integer scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable Integer instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
@@ -140,5 +140,33 @@ public class InstanceJson {
 
     public long getHierarchyTime() {
         return hierarchyTime;
+    }
+
+    public void setInstanceYear(int instanceYear) {
+        this.instanceYear = instanceYear;
+    }
+
+    public void setInstanceMonth(int instanceMonth) {
+        this.instanceMonth = instanceMonth;
+    }
+
+    public void setInstanceDay(int instanceDay) {
+        this.instanceDay = instanceDay;
+    }
+
+    public void setInstanceCustomTimeId(@Nullable Integer instanceCustomTimeId) {
+        this.instanceCustomTimeId = instanceCustomTimeId;
+    }
+
+    public void setInstanceHour(@Nullable Integer instanceHour) {
+        this.instanceHour = instanceHour;
+    }
+
+    public void setInstanceMinute(@Nullable Integer instanceMinute) {
+        this.instanceMinute = instanceMinute;
+    }
+
+    public void setDone(@Nullable Long done) {
+        this.done = done;
     }
 }

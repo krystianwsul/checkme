@@ -41,7 +41,7 @@ class MonthlyDaySchedule extends RepeatingSchedule {
 
     @Nullable
     @Override
-    protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
+    protected MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         Date dateThisMonth = getDate(date.getYear(), date.getMonth());
 
         if (!dateThisMonth.equals(date))
@@ -64,7 +64,7 @@ class MonthlyDaySchedule extends RepeatingSchedule {
 
     @Nullable
     @Override
-    protected TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
+    public TimeStamp getNextAlarm(@NonNull ExactTimeStamp now) {
         Date today = now.getDate();
 
         Date dateThisMonth = getDate(today.getYear(), today.getMonth());

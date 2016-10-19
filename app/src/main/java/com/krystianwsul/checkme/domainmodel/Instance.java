@@ -70,18 +70,22 @@ class Instance implements MergedInstance {
     }
 
     @NonNull
-    TaskKey getTaskKey() {
+    @Override
+    public TaskKey getTaskKey() {
         return new TaskKey(getTaskId()); // todo firebase
     }
 
     @NonNull
-    private Task getTask() {
+    @Override
+    public Task getTask() {
         MergedTask task = mDomainFactory.getTask(new TaskKey(getTaskId()));
         Assert.assertTrue(task instanceof Task); // todo firebase;
 
         return (Task) task;
     }
 
+    @NonNull
+    @Override
     public String getName() {
         return getTask().getName();
     }
@@ -115,7 +119,7 @@ class Instance implements MergedInstance {
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTime(mInstanceRecord.getScheduleCustomTimeId());
+                return mDomainFactory.getCustomTime(customTimeId);
             } else {
                 return new NormalTime(hour, minute);
             }
@@ -128,12 +132,14 @@ class Instance implements MergedInstance {
     }
 
     @NonNull
-    DateTime getScheduleDateTime() {
+    @Override
+    public DateTime getScheduleDateTime() {
         return new DateTime(getScheduleDate(), getScheduleTime());
     }
 
     @NonNull
-    Date getInstanceDate() {
+    @Override
+    public Date getInstanceDate() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);
@@ -177,11 +183,13 @@ class Instance implements MergedInstance {
     }
 
     @NonNull
-    DateTime getInstanceDateTime() {
+    @Override
+    public DateTime getInstanceDateTime() {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
-    void setInstanceDateTime(@NonNull Date date, @NonNull TimePair timePair, @NonNull ExactTimeStamp now) {
+    @Override
+    public void setInstanceDateTime(@NonNull Date date, @NonNull TimePair timePair, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(isRootInstance(now));
 
         if (mInstanceRecord == null)
@@ -208,6 +216,7 @@ class Instance implements MergedInstance {
     }
 
     @Nullable
+    @Override
     public String getDisplayText(@NonNull Context context, @NonNull ExactTimeStamp now) {
         if (isRootInstance(now)) {
             return getInstanceDateTime().getDisplayText(context);
@@ -217,7 +226,8 @@ class Instance implements MergedInstance {
     }
 
     @NonNull
-    List<Instance> getChildInstances(@NonNull ExactTimeStamp now) {
+    @Override
+    public List<MergedInstance> getChildInstances(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
         Task task = getTask();
@@ -225,14 +235,14 @@ class Instance implements MergedInstance {
         DateTime scheduleDateTime = getScheduleDateTime();
 
         List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
-        HashSet<Instance> childInstances = new HashSet<>();
+        HashSet<MergedInstance> childInstances = new HashSet<>();
         for (MergedTaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
             Assert.assertTrue(taskHierarchy.getChildTask() instanceof Task); // todo firebase
             Task childTask = (Task) taskHierarchy.getChildTask();
 
-            Instance existingChildInstance = mDomainFactory.getExistingInstance(childTask, scheduleDateTime);
+            MergedInstance existingChildInstance = mDomainFactory.getExistingInstance(childTask, scheduleDateTime);
             if (existingChildInstance != null) {
                 childInstances.add(existingChildInstance);
             } else if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.getChildTask().notDeleted(hierarchyExactTimeStamp)) {
@@ -244,7 +254,8 @@ class Instance implements MergedInstance {
     }
 
     @Nullable
-    Instance getParentInstance(@NonNull ExactTimeStamp now) {
+    @Override
+    public MergedInstance getParentInstance(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
         Task task = getTask();
@@ -259,11 +270,13 @@ class Instance implements MergedInstance {
         return mDomainFactory.getInstance(parentTask, getScheduleDateTime());
     }
 
-    boolean isRootInstance(@NonNull ExactTimeStamp now) {
+    @Override
+    public boolean isRootInstance(@NonNull ExactTimeStamp now) {
         return getTask().isRootTask(getHierarchyExactTimeStamp(now));
     }
 
     @Nullable
+    @Override
     public ExactTimeStamp getDone() {
         if (mInstanceRecord == null)
             return null;
@@ -275,7 +288,8 @@ class Instance implements MergedInstance {
             return null;
     }
 
-    void setDone(boolean done, @NonNull ExactTimeStamp now) {
+    @Override
+    public void setDone(boolean done, @NonNull ExactTimeStamp now) {
         if (done) {
             if (mInstanceRecord == null) {
                 createInstanceHierarchy(now);
@@ -290,11 +304,12 @@ class Instance implements MergedInstance {
         }
     }
 
-    private void createInstanceHierarchy(@NonNull ExactTimeStamp now) {
+    @Override
+    public void createInstanceHierarchy(@NonNull ExactTimeStamp now) {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
         Assert.assertTrue((mTaskId == null) == (mScheduleDateTime == null));
 
-        Instance parentInstance = getParentInstance(now);
+        MergedInstance parentInstance = getParentInstance(now);
         if (parentInstance != null)
             parentInstance.createInstanceHierarchy(now);
 
@@ -340,11 +355,13 @@ class Instance implements MergedInstance {
         return getName() + " " + getInstanceDateTime();
     }
 
-    boolean getNotified() {
+    @Override
+    public boolean getNotified() {
         return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }
 
-    void setNotified(@NonNull ExactTimeStamp now) {
+    @Override
+    public void setNotified(@NonNull ExactTimeStamp now) {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now);
 
@@ -360,7 +377,8 @@ class Instance implements MergedInstance {
         4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
      */
 
-    int getNotificationId() {
+    @Override
+    public int getNotificationId() {
         Date scheduleDate = getScheduleDate();
 
         Integer scheduleCustomTimeId = getScheduleCustomTimeId();
@@ -388,7 +406,8 @@ class Instance implements MergedInstance {
         return (mInstanceRecord != null && mInstanceRecord.getNotificationShown());
     }
 
-    void setNotificationShown(boolean notificationShown, @NonNull ExactTimeStamp now) {
+    @Override
+    public void setNotificationShown(boolean notificationShown, @NonNull ExactTimeStamp now) {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now);
 
@@ -435,20 +454,23 @@ class Instance implements MergedInstance {
 
     @NonNull
     public InstanceKey getInstanceKey() {
-        return new InstanceKey(getTaskId(), getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute());
+        return new InstanceKey(new TaskKey(getTaskId()), getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute());
     }
 
     @NonNull
-    TimePair getInstanceTimePair() {
+    @Override
+    public TimePair getInstanceTimePair() {
         return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
     }
 
     @NonNull
-    TimePair getScheduleTimePair() {
+    @Override
+    public TimePair getScheduleTimePair() {
         return new TimePair(getScheduleCustomTimeId(), getScheduleHourMinute());
     }
 
-    boolean isVisible(@NonNull ExactTimeStamp now) {
+    @Override
+    public boolean isVisible(@NonNull ExactTimeStamp now) {
         boolean isVisible = isVisibleHelper(now);
 
         if (isVisible) {
@@ -472,7 +494,7 @@ class Instance implements MergedInstance {
         calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
         ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
 
-        Instance parentInstance = getParentInstance(now);
+        MergedInstance parentInstance = getParentInstance(now);
         if (parentInstance == null) {
             ExactTimeStamp done = getDone();
             return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
@@ -481,14 +503,15 @@ class Instance implements MergedInstance {
         }
     }
 
-    boolean exists() {
+    @Override
+    public boolean exists() {
         Assert.assertTrue((mInstanceRecord == null) != (mScheduleDateTime == null));
         Assert.assertTrue((mTaskId == null) == (mScheduleDateTime == null));
 
         return (mInstanceRecord != null);
     }
 
-    void setRelevant() {
+    public void setRelevant() {
         Assert.assertTrue(mInstanceRecord != null);
 
         mInstanceRecord.setRelevant(false);

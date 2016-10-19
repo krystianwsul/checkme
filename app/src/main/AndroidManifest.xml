@@ -86,9 +86,6 @@
         <service
             android:name=".notifications.InstanceNotificationDeleteService"
             android:exported="false"/>
-        <service
-            android:name=".PruneService"
-            android:exported="false"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"

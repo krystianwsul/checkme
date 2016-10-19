@@ -1050,6 +1050,44 @@ public class DomainFactory {
             }
         }
 
+        List<InstanceKey> shownInstanceKeys = Stream.of(shownInstanceDatas.values())
+                .map(shownInstanceData -> shownInstanceData.InstanceKey)
+                .collect(Collectors.toList());
+
+        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstanceDatas.values())
+                .map(notificationInstanceData -> notificationInstanceData.InstanceKey)
+                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
+                .collect(Collectors.toList());
+
+        List<InstanceKey> hideInstanceKeys = Stream.of(shownInstanceDatas.values())
+                .map(shownInstanceData -> shownInstanceData.InstanceKey)
+                .filter(instanceKey -> !notificationInstanceDatas.containsKey(instanceKey))
+                .collect(Collectors.toList());
+
+        if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
+            for (InstanceKey showInstanceKey : showInstanceKeys) {
+                Assert.assertTrue(showInstanceKey != null);
+
+                MergedInstance showInstance = getInstance(showInstanceKey);
+
+                showInstance.setNotificationShown(true, now);
+            }
+
+            for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                Assert.assertTrue(hideInstanceKey != null);
+
+                MergedInstance hideInstance = getInstance(hideInstanceKey);
+
+                hideInstance.setNotificationShown(false, now);
+            }
+        }
+
+        Irrelevant irrelevant = setIrrelevant(now);
+
+        save(context, 0);
+
+        removeIrrelevant(irrelevant);
+
         return new TickService.Data(notificationInstanceDatas, shownInstanceDatas, nextAlarm);
     }
 
@@ -1180,32 +1218,6 @@ public class DomainFactory {
 
         instance.setNotified(now);
         instance.setNotificationShown(false, now);
-
-        save(context, dataId);
-    }
-
-    public synchronized void updateInstancesShown(@NonNull Context context, int dataId, @Nullable List<InstanceKey> showInstanceKeys, @NonNull List<InstanceKey> hideInstanceKeys) {
-        MyCrashlytics.log("DomainFactory.updateInstancesShown");
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        if (showInstanceKeys != null) {
-            for (InstanceKey showInstanceKey : showInstanceKeys) {
-                Assert.assertTrue(showInstanceKey != null);
-
-                MergedInstance showInstance = getInstance(showInstanceKey);
-
-                showInstance.setNotificationShown(true, now);
-            }
-        }
-
-        for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-            Assert.assertTrue(hideInstanceKey != null);
-
-            MergedInstance hideInstance = getInstance(hideInstanceKey);
-
-            hideInstance.setNotificationShown(false, now);
-        }
 
         save(context, dataId);
     }

@@ -18,7 +18,6 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
@@ -118,9 +117,6 @@ public class TickService extends IntentService {
                 .filter(instanceKey -> !notificationInstanceKeys.contains(instanceKey))
                 .collect(Collectors.toList());
 
-        if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty())
-            DomainFactory.getDomainFactory(this).updateInstancesShown(this, data.DataId, showInstanceKeys, hideInstanceKeys);
-
         if (registering) {
             Assert.assertTrue(silent);
 
@@ -182,8 +178,6 @@ public class TickService extends IntentService {
 
             setExact(data.NextAlarm.getLong(), pendingIntent);
         }
-
-        PruneService.startService(this);
     }
 
     @SuppressLint("NewApi")

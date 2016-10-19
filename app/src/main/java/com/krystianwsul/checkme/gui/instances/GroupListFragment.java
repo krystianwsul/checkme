@@ -32,7 +32,6 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.DataDiff;
-import com.krystianwsul.checkme.PruneService;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
@@ -784,12 +783,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         }
 
         updateSelectAll();
-
-        if (mPosition != null && mPosition.equals(0)) { // 24 hack
-            Assert.assertTrue(mTimeRange != null);
-            // relevant hack
-            PruneService.startService(getActivity());
-        }
     }
 
     private void updateSelectAll() {

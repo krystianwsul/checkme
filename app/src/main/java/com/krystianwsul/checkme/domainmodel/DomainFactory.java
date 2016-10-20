@@ -1,9 +1,18 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,12 +25,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
+import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
+import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
+import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
@@ -32,6 +44,10 @@ import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
+import com.krystianwsul.checkme.notifications.GroupNotificationDeleteService;
+import com.krystianwsul.checkme.notifications.InstanceDoneService;
+import com.krystianwsul.checkme.notifications.InstanceHourService;
+import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
@@ -980,117 +996,6 @@ public class DomainFactory {
         return new TaskListLoader.Data(childTaskDatas, note);
     }
 
-    @NonNull
-    public synchronized TickService.Data getTickServiceData(@NonNull Context context, @NonNull List<TaskKey> taskKeys) {
-        MyCrashlytics.log("DomainFactory.getTickServiceData");
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        List<MergedInstance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
-
-        Map<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = Stream.of(rootInstances)
-                .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
-                .collect(Collectors.toMap(MergedInstance::getInstanceKey, instance -> {
-                    Assert.assertTrue(instance != null);
-
-                    MergedTask task = getTask(instance.getTaskKey());
-
-                    List<MergedInstance> childInstances = instance.getChildInstances(now);
-
-                    Stream<MergedInstance> notDone = Stream.of(childInstances)
-                            .filter(childInstance -> childInstance.getDone() == null)
-                            .sortBy(childInstance -> childInstance.getTask().getStartExactTimeStamp());
-
-                    //noinspection ConstantConditions
-                    Stream<MergedInstance> done = Stream.of(childInstances)
-                            .filter(childInstance -> childInstance.getDone() != null)
-                            .sortBy(childInstance -> -childInstance.getDone().getLong());
-
-                    List<String> children = Stream.concat(notDone, done)
-                            .map(MergedInstance::getName)
-                            .collect(Collectors.toList());
-
-                    boolean update = (taskKeys.contains(task.getTaskKey()) || Stream.of(childInstances).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
-
-                    String displayText = instance.getDisplayText(context, now);
-                    Assert.assertTrue(!TextUtils.isEmpty(displayText));
-
-                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), displayText, instance.getInstanceDateTime().getTimeStamp(), children, task.getNote(), update, task.getStartExactTimeStamp());
-                }));
-
-        Map<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = Stream.of(mExistingInstances)
-                .filter(Instance::getNotificationShown)
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey())));
-
-        TimeStamp nextAlarm = null;
-        for (Instance existingInstance : mExistingInstances) {
-            TimeStamp instanceTimeStamp = existingInstance.getInstanceDateTime().getTimeStamp();
-            if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
-                if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
-                    nextAlarm = instanceTimeStamp;
-        }
-
-        for (MergedTask task : getTasks().values()) {
-            if (task.current(now) && task.isRootTask(now)) {
-                List<? extends MergedSchedule> schedules = task.getCurrentSchedules(now);
-
-                Optional<TimeStamp> optional = Stream.of(schedules)
-                        .map(schedule -> schedule.getNextAlarm(now))
-                        .filter(timeStamp -> timeStamp != null)
-                        .min(TimeStamp::compareTo);
-
-                if (optional.isPresent()) {
-                    TimeStamp scheduleTimeStamp = optional.get();
-                    Assert.assertTrue(scheduleTimeStamp != null);
-                    Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
-
-                    if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
-                        nextAlarm = scheduleTimeStamp;
-                }
-            }
-        }
-
-        List<InstanceKey> shownInstanceKeys = Stream.of(shownInstanceDatas.values())
-                .map(shownInstanceData -> shownInstanceData.InstanceKey)
-                .collect(Collectors.toList());
-
-        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstanceDatas.values())
-                .map(notificationInstanceData -> notificationInstanceData.InstanceKey)
-                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
-                .collect(Collectors.toList());
-
-        List<InstanceKey> hideInstanceKeys = Stream.of(shownInstanceDatas.values())
-                .map(shownInstanceData -> shownInstanceData.InstanceKey)
-                .filter(instanceKey -> !notificationInstanceDatas.containsKey(instanceKey))
-                .collect(Collectors.toList());
-
-        if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-            for (InstanceKey showInstanceKey : showInstanceKeys) {
-                Assert.assertTrue(showInstanceKey != null);
-
-                MergedInstance showInstance = getInstance(showInstanceKey);
-
-                showInstance.setNotificationShown(true, now);
-            }
-
-            for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                Assert.assertTrue(hideInstanceKey != null);
-
-                MergedInstance hideInstance = getInstance(hideInstanceKey);
-
-                hideInstance.setNotificationShown(false, now);
-            }
-        }
-
-        Irrelevant irrelevant = setIrrelevant(now);
-
-        save(context, 0);
-
-        removeIrrelevant(irrelevant);
-
-        return new TickService.Data(notificationInstanceDatas, shownInstanceDatas, nextAlarm);
-    }
-
     // sets
 
     public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
@@ -1520,18 +1425,6 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void updateTaskOldestVisible(@NonNull Context context) {
-        MyCrashlytics.log("DomainFactory.updateTaskOldestVisible");
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        Irrelevant irrelevant = setIrrelevant(now);
-
-        save(context, 0);
-
-        removeIrrelevant(irrelevant);
-    }
-
     @NonNull
     Irrelevant setIrrelevant(@NonNull ExactTimeStamp now) {
         for (MergedTask task : getTasks().values())
@@ -1701,6 +1594,188 @@ public class DomainFactory {
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
         save(context, dataId);
+    }
+
+    public synchronized void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
+        if (!silent) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+            sharedPreferences.edit().putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
+        }
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        List<MergedInstance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
+
+        Map<InstanceKey, TickService.NotificationInstanceData> notificationInstanceDatas = Stream.of(rootInstances)
+                .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
+                .collect(Collectors.toMap(MergedInstance::getInstanceKey, instance -> {
+                    Assert.assertTrue(instance != null);
+
+                    MergedTask task = getTask(instance.getTaskKey());
+
+                    List<MergedInstance> childInstances = instance.getChildInstances(now);
+
+                    Stream<MergedInstance> notDone = Stream.of(childInstances)
+                            .filter(childInstance -> childInstance.getDone() == null)
+                            .sortBy(childInstance -> childInstance.getTask().getStartExactTimeStamp());
+
+                    //noinspection ConstantConditions
+                    Stream<MergedInstance> done = Stream.of(childInstances)
+                            .filter(childInstance -> childInstance.getDone() != null)
+                            .sortBy(childInstance -> -childInstance.getDone().getLong());
+
+                    List<String> children = Stream.concat(notDone, done)
+                            .map(MergedInstance::getName)
+                            .collect(Collectors.toList());
+
+                    boolean update = (taskKeys.contains(task.getTaskKey()) || Stream.of(childInstances).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
+
+                    String displayText = instance.getDisplayText(context, now);
+                    Assert.assertTrue(!TextUtils.isEmpty(displayText));
+
+                    return new TickService.NotificationInstanceData(instance.getInstanceKey(), instance.getName(), instance.getNotificationId(), displayText, instance.getInstanceDateTime().getTimeStamp(), children, task.getNote(), update, task.getStartExactTimeStamp());
+                }));
+
+        Map<InstanceKey, TickService.ShownInstanceData> shownInstanceDatas = Stream.of(mExistingInstances)
+                .filter(Instance::getNotificationShown)
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> new TickService.ShownInstanceData(instance.getNotificationId(), instance.getInstanceKey())));
+
+        List<InstanceKey> shownInstanceKeys = Stream.of(shownInstanceDatas.values())
+                .map(shownInstanceData -> shownInstanceData.InstanceKey)
+                .collect(Collectors.toList());
+
+        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstanceDatas.values())
+                .map(notificationInstanceData -> notificationInstanceData.InstanceKey)
+                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
+                .collect(Collectors.toList());
+
+        List<InstanceKey> hideInstanceKeys = Stream.of(shownInstanceDatas.values())
+                .map(shownInstanceData -> shownInstanceData.InstanceKey)
+                .filter(instanceKey -> !notificationInstanceDatas.containsKey(instanceKey))
+                .collect(Collectors.toList());
+
+        if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
+            for (InstanceKey showInstanceKey : showInstanceKeys) {
+                Assert.assertTrue(showInstanceKey != null);
+
+                MergedInstance showInstance = getInstance(showInstanceKey);
+
+                showInstance.setNotificationShown(true, now);
+            }
+
+            for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                Assert.assertTrue(hideInstanceKey != null);
+
+                MergedInstance hideInstance = getInstance(hideInstanceKey);
+
+                hideInstance.setNotificationShown(false, now);
+            }
+        }
+
+        Irrelevant irrelevant = setIrrelevant(now);
+
+        save(context, 0);
+
+        removeIrrelevant(irrelevant);
+
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Assert.assertTrue(notificationManager != null);
+
+        if (registering) {
+            Assert.assertTrue(silent);
+
+            if (notificationInstanceDatas.size() > TickService.MAX_NOTIFICATIONS) { // show group
+                notifyGroup(context, notificationInstanceDatas.values(), true);
+            } else { // show instances
+                for (TickService.NotificationInstanceData notificationInstanceData : notificationInstanceDatas.values()) {
+                    Assert.assertTrue(notificationInstanceData != null);
+
+                    notifyInstance(context, notificationInstanceData, true);
+                }
+            }
+        } else {
+            if (notificationInstanceDatas.size() > TickService.MAX_NOTIFICATIONS) { // show group
+                if (shownInstanceDatas.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
+                        notifyGroup(context, notificationInstanceDatas.values(), silent);
+                    } else if (Stream.of(notificationInstanceDatas.values()).anyMatch(notificationInstanceData -> notificationInstanceData.mUpdate)) {
+                        notifyGroup(context, notificationInstanceDatas.values(), true);
+                    }
+                } else { // instances shown
+                    for (TickService.ShownInstanceData shownInstanceData : shownInstanceDatas.values())
+                        notificationManager.cancel(shownInstanceData.NotificationId);
+
+                    notifyGroup(context, notificationInstanceDatas.values(), silent);
+                }
+            } else { // show instances
+                if (shownInstanceDatas.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                    notificationManager.cancel(0);
+
+                    for (TickService.NotificationInstanceData notificationInstanceData : notificationInstanceDatas.values()) {
+                        Assert.assertTrue(notificationInstanceData != null);
+
+                        notifyInstance(context, notificationInstanceData, silent);
+                    }
+                } else { // instances shown
+                    for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                        TickService.ShownInstanceData shownInstanceData = shownInstanceDatas.get(hideInstanceKey);
+                        Assert.assertTrue(shownInstanceData != null);
+
+                        notificationManager.cancel(shownInstanceData.NotificationId);
+                    }
+
+                    for (InstanceKey showInstanceKey : showInstanceKeys) {
+                        TickService.NotificationInstanceData notificationInstanceData = notificationInstanceDatas.get(showInstanceKey);
+                        Assert.assertTrue(notificationInstanceData != null);
+
+                        notifyInstance(context, notificationInstanceData, silent);
+                    }
+
+                    Stream.of(notificationInstanceDatas.values())
+                            .filter(notificationInstanceData -> notificationInstanceData.mUpdate)
+                            .filter(notificationInstanceData -> !showInstanceKeys.contains(notificationInstanceData.InstanceKey))
+                            .forEach(notificationInstanceData -> notifyInstance(context, notificationInstanceData, true));
+                }
+            }
+        }
+
+        TimeStamp nextAlarm = null;
+        for (Instance existingInstance : mExistingInstances) {
+            TimeStamp instanceTimeStamp = existingInstance.getInstanceDateTime().getTimeStamp();
+            if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
+                if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
+                    nextAlarm = instanceTimeStamp;
+        }
+
+        for (MergedTask task : getTasks().values()) {
+            if (task.current(now) && task.isRootTask(now)) {
+                List<? extends MergedSchedule> schedules = task.getCurrentSchedules(now);
+
+                Optional<TimeStamp> optional = Stream.of(schedules)
+                        .map(schedule -> schedule.getNextAlarm(now))
+                        .filter(timeStamp -> timeStamp != null)
+                        .min(TimeStamp::compareTo);
+
+                if (optional.isPresent()) {
+                    TimeStamp scheduleTimeStamp = optional.get();
+                    Assert.assertTrue(scheduleTimeStamp != null);
+                    Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
+
+                    if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
+                        nextAlarm = scheduleTimeStamp;
+                }
+            }
+        }
+
+        if (nextAlarm != null) {
+            Intent nextIntent = TickService.getIntent(context, false, false, new ArrayList<>());
+
+            PendingIntent pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Assert.assertTrue(pendingIntent != null);
+
+            setExact(context, nextAlarm.getLong(), pendingIntent);
+        }
     }
 
     // internal
@@ -2171,6 +2246,146 @@ public class DomainFactory {
                 .filter(task -> task.isRootTask(now))
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .collect(Collectors.toMap(MergedTask::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
+    }
+
+    // notifications
+
+    @SuppressLint("NewApi")
+    private void setExact(@NonNull Context context, long time, @NonNull PendingIntent pendingIntent) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+        }
+    }
+
+    private void notifyInstance(@NonNull Context context, @NonNull TickService.NotificationInstanceData notificationInstanceData, boolean silent) {
+        Intent deleteIntent = InstanceNotificationDeleteService.getIntent(context, notificationInstanceData.InstanceKey);
+        PendingIntent pendingDeleteIntent = PendingIntent.getService(context, notificationInstanceData.NotificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Intent contentIntent = ShowInstanceActivity.getNotificationIntent(context, notificationInstanceData.InstanceKey);
+        PendingIntent pendingContentIntent = PendingIntent.getActivity(context, notificationInstanceData.NotificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
+
+        Intent doneIntent = InstanceDoneService.getIntent(context, notificationInstanceData.InstanceKey, notificationInstanceData.NotificationId);
+        PendingIntent pendingDoneIntent = PendingIntent.getService(context, notificationInstanceData.NotificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, context.getString(R.string.done), pendingDoneIntent).build());
+
+        Intent hourIntent = InstanceHourService.getIntent(context, notificationInstanceData.InstanceKey, notificationInstanceData.NotificationId);
+        PendingIntent pendingHourIntent = PendingIntent.getService(context, notificationInstanceData.NotificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, context.getString(R.string.hour), pendingHourIntent).build());
+
+        String text;
+        NotificationCompat.Style style;
+        if (!notificationInstanceData.Children.isEmpty()) {
+            text = TextUtils.join(", ", notificationInstanceData.Children);
+            style = getInboxStyle(context, notificationInstanceData.Children);
+        } else if (!TextUtils.isEmpty(notificationInstanceData.mNote)) {
+            text = notificationInstanceData.mNote;
+
+            NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+            bigTextStyle.bigText(notificationInstanceData.mNote);
+
+            style = bigTextStyle;
+        } else {
+            text = null;
+            style = null;
+        }
+
+        notify(context, notificationInstanceData.Name, text, notificationInstanceData.NotificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, notificationInstanceData.InstanceTimeStamp.getLong(), style, true);
+    }
+
+    private void notifyGroup(@NonNull Context context, @NonNull Collection<TickService.NotificationInstanceData> notificationInstanceDatas, boolean silent) {
+        Assert.assertTrue(notificationInstanceDatas.size() > TickService.MAX_NOTIFICATIONS);
+
+        ArrayList<String> names = new ArrayList<>();
+        ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
+        for (TickService.NotificationInstanceData notificationInstanceData : notificationInstanceDatas) {
+            names.add(notificationInstanceData.Name);
+            instanceKeys.add(notificationInstanceData.InstanceKey);
+        }
+
+        Intent deleteIntent = GroupNotificationDeleteService.getIntent(context, instanceKeys);
+        PendingIntent pendingDeleteIntent = PendingIntent.getService(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Intent contentIntent = ShowNotificationGroupActivity.getIntent(context, instanceKeys);
+        PendingIntent pendingContentIntent = PendingIntent.getActivity(context, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        NotificationCompat.InboxStyle inboxStyle = getInboxStyle(context, Stream.of(notificationInstanceDatas)
+                .sorted((lhs, rhs) -> {
+                    int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
+                    if (timeStampComparison != 0)
+                        return timeStampComparison;
+
+                    return lhs.mTaskStartExactTimeStamp.compareTo(rhs.mTaskStartExactTimeStamp);
+                })
+                .map(notificationInstanceData -> notificationInstanceData.Name + " (" + notificationInstanceData.DisplayText + ")")
+                .collect(Collectors.toList()));
+
+        notify(context, notificationInstanceDatas.size() + " " + context.getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, new ArrayList<>(), null, inboxStyle, false);
+    }
+
+    @NonNull
+    private NotificationCompat.InboxStyle getInboxStyle(@NonNull Context context, @NonNull List<String> lines) {
+        Assert.assertTrue(!lines.isEmpty());
+
+        int max = 5;
+
+        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+
+        Stream.of(lines)
+                .limit(max)
+                .forEach(inboxStyle::addLine);
+
+        int extraCount = lines.size() - max;
+
+        if (extraCount > 0)
+            inboxStyle.setSummaryText("+" + extraCount + " " + context.getString(R.string.more));
+
+        return inboxStyle;
+    }
+
+    private void notify(@NonNull Context context, @NonNull String title, @Nullable String text, int notificationId, @NonNull PendingIntent deleteIntent, @NonNull PendingIntent contentIntent, boolean silent, @NonNull List<NotificationCompat.Action> actions, @Nullable Long when, @Nullable NotificationCompat.Style style, boolean autoCancel) {
+        Assert.assertTrue(!TextUtils.isEmpty(title));
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        NotificationCompat.Builder builder = (new NotificationCompat.Builder(context))
+                .setContentTitle(title)
+                .setSmallIcon(R.drawable.ikona_bez)
+                .setDeleteIntent(deleteIntent)
+                .setContentIntent(contentIntent)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        if (!TextUtils.isEmpty(text))
+            builder.setContentText(text);
+
+        if (!silent)
+            builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+
+        Assert.assertTrue(actions.size() <= 3);
+
+        Stream.of(actions)
+                .forEach(builder::addAction);
+
+        if (when != null)
+            builder.setWhen(when);
+
+        if (style != null)
+            builder.setStyle(style);
+
+        if (autoCancel)
+            builder.setAutoCancel(true);
+
+        Notification notification = builder.build();
+
+        if (!silent)
+            notification.defaults |= Notification.DEFAULT_VIBRATE;
+
+        notificationManager.notify(notificationId, notification);
     }
 
     public static class Irrelevant {

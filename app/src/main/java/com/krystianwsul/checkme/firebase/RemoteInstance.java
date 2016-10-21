@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
-import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -250,9 +250,9 @@ public class RemoteInstance implements MergedInstance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
+        List<TaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
         HashSet<MergedInstance> childInstances = new HashSet<>();
-        for (MergedTaskHierarchy taskHierarchy : taskHierarchies) {
+        for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
             MergedTask childTask = taskHierarchy.getChildTask();

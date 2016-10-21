@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
 import com.krystianwsul.checkme.domainmodel.MergedSchedule;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
-import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -200,7 +200,7 @@ public class RemoteTask implements MergedTask {
             childTask.setEndExactTimeStamp(now);
         }
 
-        MergedTaskHierarchy parentTaskHierarchy = mDomainFactory.getParentTaskHierarchy(this, now);
+        TaskHierarchy parentTaskHierarchy = mDomainFactory.getParentTaskHierarchy(this, now);
         if (parentTaskHierarchy != null) {
             Assert.assertTrue(parentTaskHierarchy.current(now));
 
@@ -275,12 +275,12 @@ public class RemoteTask implements MergedTask {
         for (RemoteSchedule schedule : getRemoteSchedules())
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
-        List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
+        List<TaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
 
         ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
 
         instances.addAll(Stream.of(taskHierarchies)
-                .map(MergedTaskHierarchy::getParentTask)
+                .map(TaskHierarchy::getParentTask)
                 .map(task -> task.getInstances(finalStartExactTimeStamp, endExactTimeStamp, now))
                 .flatMap(Stream::of)
                 .map(instance -> instance.getChildInstances(now))

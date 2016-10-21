@@ -95,7 +95,7 @@ public class DomainFactory {
 
     private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
     private final HashMap<Integer, Task> mTasks = new HashMap<>();
-    private final HashMap<Integer, TaskHierarchy> mTaskHierarchies = new HashMap<>();
+    private final HashMap<Integer, LocalTaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
     private static ExactTimeStamp sStart;
@@ -197,10 +197,10 @@ public class DomainFactory {
             Task childTask = mTasks.get(taskHierarchyRecord.getChildTaskId());
             Assert.assertTrue(childTask != null);
 
-            TaskHierarchy taskHierarchy = new TaskHierarchy(this, taskHierarchyRecord);
+            LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
 
-            Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId()));
-            mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy);
+            Assert.assertTrue(!mTaskHierarchies.containsKey(localTaskHierarchy.getId()));
+            mTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy);
         }
 
         Collection<InstanceRecord> instanceRecords = mPersistenceManager.getInstanceRecords();
@@ -296,35 +296,20 @@ public class DomainFactory {
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
 
-    @Nullable
-    public MergedTask getParentTask(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(childTask.current(exactTimeStamp));
-
-        MergedTaskHierarchy taskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
-        if (taskHierarchy == null) {
-            return null;
-        } else {
-            Assert.assertTrue(taskHierarchy.current(exactTimeStamp));
-            MergedTask parentTask = taskHierarchy.getParentTask();
-            Assert.assertTrue(parentTask.current(exactTimeStamp));
-            return parentTask;
-        }
-    }
-
     @NonNull
-    private List<MergedTaskHierarchy> getTaskHierarchies() {
-        List<MergedTaskHierarchy> taskHierarchies = new ArrayList<>(mTaskHierarchies.values());
+    private List<TaskHierarchy> getTaskHierarchies() {
+        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mTaskHierarchies.values());
         taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
         return taskHierarchies;
     }
 
     @Nullable
-    public MergedTaskHierarchy getParentTaskHierarchy(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public TaskHierarchy getParentTaskHierarchy(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskKey childTaskKey = childTask.getTaskKey();
 
-        List<MergedTaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchies())
+        List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchies())
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
                 .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(childTaskKey))
                 .collect(Collectors.toList());
@@ -360,14 +345,14 @@ public class DomainFactory {
 
         return Stream.of(getChildTaskHierarchies(parentTask))
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .map(MergedTaskHierarchy::getChildTask)
+                .map(TaskHierarchy::getChildTask)
                 .filter(childTask -> childTask.current(exactTimeStamp))
                 .sortBy(MergedTask::getStartExactTimeStamp)
                 .collect(Collectors.toList());
     }
 
     @NonNull
-    public List<MergedTaskHierarchy> getChildTaskHierarchies(@NonNull MergedTask parentTask) {
+    public List<TaskHierarchy> getChildTaskHierarchies(@NonNull MergedTask parentTask) {
         TaskKey parentTaskKey = parentTask.getTaskKey();
 
         return Stream.of(getTaskHierarchies())
@@ -1204,12 +1189,12 @@ public class DomainFactory {
             Stream.of(schedules)
                     .forEach(schedule -> schedule.setEndExactTimeStamp(now));
         } else {
-            TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
-            Assert.assertTrue(taskHierarchy != null);
+            LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(task, now);
+            Assert.assertTrue(localTaskHierarchy != null);
 
-            taskHierarchy.setEndExactTimeStamp(now);
+            localTaskHierarchy.setEndExactTimeStamp(now);
 
-            taskKeys.add(taskHierarchy.getParentTaskKey());
+            taskKeys.add(localTaskHierarchy.getParentTaskKey());
         }
 
         List<Schedule> schedules = createSchedules(task, scheduleDatas, now);
@@ -1364,19 +1349,19 @@ public class DomainFactory {
 
         taskKeys.add(newParentTask.getTaskKey());
 
-        Task oldParentTask = task.getParentTask(now);
+        MergedTask oldParentTask = task.getParentTask(now);
         if (oldParentTask == null) {
             Stream.of(task.getCurrentSchedules(now))
                     .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
             createTaskHierarchy(newParentTask, task, now);
         } else if (oldParentTask != newParentTask) {
-            TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(task, now);
-            Assert.assertTrue(oldTaskHierarchy != null);
+            LocalTaskHierarchy oldLocalTaskHierarchy = getParentTaskHierarchy(task, now);
+            Assert.assertTrue(oldLocalTaskHierarchy != null);
 
-            oldTaskHierarchy.setEndExactTimeStamp(now);
+            oldLocalTaskHierarchy.setEndExactTimeStamp(now);
 
-            taskKeys.add(oldTaskHierarchy.getParentTaskKey());
+            taskKeys.add(oldLocalTaskHierarchy.getParentTaskKey());
 
             createTaskHierarchy(newParentTask, task, now);
         }
@@ -1566,15 +1551,15 @@ public class DomainFactory {
     }
 
     void removeIrrelevant(@NonNull Irrelevant irrelevant) {
-        List<TaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values()) // todo removal
+        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values()) // todo removal
                 .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
                 .collect(Collectors.toList());
 
         Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
                 .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
 
-        for (TaskHierarchy irrelevantTaskHierarchy : irrelevantTaskHierarchies)
-            mTaskHierarchies.remove(irrelevantTaskHierarchy.getId()); // todo removal
+        for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
+            mTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId()); // todo removal
 
         for (MergedTask task : irrelevant.mTasks) {
             if (task instanceof Task) {
@@ -1659,10 +1644,10 @@ public class DomainFactory {
 
         List<TaskKey> taskKeys = new ArrayList<>();
 
-        TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
-        if (taskHierarchy != null) {
-            taskHierarchy.setEndExactTimeStamp(now);
-            taskKeys.add(taskHierarchy.getParentTaskKey());
+        LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(task, now);
+        if (localTaskHierarchy != null) {
+            localTaskHierarchy.setEndExactTimeStamp(now);
+            taskKeys.add(localTaskHierarchy.getParentTaskKey());
         }
 
         Stream.of(task.getCurrentSchedules(now))
@@ -2098,10 +2083,10 @@ public class DomainFactory {
                 Stream.of(joinTask.getCurrentSchedules(now))
                         .forEach(schedule -> schedule.setEndExactTimeStamp(now));
             } else {
-                TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, now);
-                Assert.assertTrue(taskHierarchy != null);
+                LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(joinTask, now);
+                Assert.assertTrue(localTaskHierarchy != null);
 
-                taskHierarchy.setEndExactTimeStamp(now);
+                localTaskHierarchy.setEndExactTimeStamp(now);
             }
 
             createTaskHierarchy(newParentTask, joinTask, now);
@@ -2115,9 +2100,9 @@ public class DomainFactory {
         TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentTask, childTask, startExactTimeStamp);
         Assert.assertTrue(taskHierarchyRecord != null);
 
-        TaskHierarchy taskHierarchy = new TaskHierarchy(this, taskHierarchyRecord);
-        Assert.assertTrue(!mTaskHierarchies.containsKey(taskHierarchy.getId())); // todo firebase
-        mTaskHierarchies.put(taskHierarchy.getId(), taskHierarchy); // todo firebase
+        LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
+        Assert.assertTrue(!mTaskHierarchies.containsKey(localTaskHierarchy.getId())); // todo firebase
+        mTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy); // todo firebase
     }
 
     @NonNull
@@ -2198,7 +2183,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<MergedTaskHierarchy> getParentTaskHierarchies(MergedTask childTask) {
+    public List<TaskHierarchy> getParentTaskHierarchies(MergedTask childTask) {
         Assert.assertTrue(childTask != null);
 
         return Stream.of(getTaskHierarchies())
@@ -2207,7 +2192,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public MergedTask getParentTask(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
@@ -2215,27 +2200,27 @@ public class DomainFactory {
             return null;
         } else {
             Assert.assertTrue(parentTaskHierarchy.current(exactTimeStamp));
-            Task parentTask = parentTaskHierarchy.getParentTask();
+            MergedTask parentTask = parentTaskHierarchy.getParentTask();
             Assert.assertTrue(parentTask.current(exactTimeStamp));
             return parentTask;
         }
     }
 
     @Nullable
-    private TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    private LocalTaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
-        ArrayList<TaskHierarchy> taskHierarchies = new ArrayList<>();
-        for (TaskHierarchy taskHierarchy : mTaskHierarchies.values()) {
-            Assert.assertTrue(taskHierarchy != null);
+        ArrayList<LocalTaskHierarchy> taskHierarchies = new ArrayList<>();
+        for (LocalTaskHierarchy localTaskHierarchy : mTaskHierarchies.values()) {
+            Assert.assertTrue(localTaskHierarchy != null);
 
-            if (!taskHierarchy.current(exactTimeStamp))
+            if (!localTaskHierarchy.current(exactTimeStamp))
                 continue;
 
-            if (taskHierarchy.getChildTask() != childTask)
+            if (localTaskHierarchy.getChildTask() != childTask)
                 continue;
 
-            taskHierarchies.add(taskHierarchy);
+            taskHierarchies.add(localTaskHierarchy);
         }
 
         if (taskHierarchies.isEmpty()) {
@@ -2249,10 +2234,10 @@ public class DomainFactory {
     void setParentHierarchyEndTimeStamp(@NonNull Task childTask, @NonNull ExactTimeStamp exactEndTimeStamp) {
         Assert.assertTrue(childTask.current(exactEndTimeStamp));
 
-        TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactEndTimeStamp);
-        if (parentTaskHierarchy != null) {
-            Assert.assertTrue(parentTaskHierarchy.current(exactEndTimeStamp));
-            parentTaskHierarchy.setEndExactTimeStamp(exactEndTimeStamp);
+        LocalTaskHierarchy parentLocalTaskHierarchy = getParentTaskHierarchy(childTask, exactEndTimeStamp);
+        if (parentLocalTaskHierarchy != null) {
+            Assert.assertTrue(parentLocalTaskHierarchy.current(exactEndTimeStamp));
+            parentLocalTaskHierarchy.setEndExactTimeStamp(exactEndTimeStamp);
         }
     }
 
@@ -2502,14 +2487,14 @@ public class DomainFactory {
             // mark parents relevant
             Stream.of(mTaskHierarchies.values())
                     .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
-                    .map(MergedTaskHierarchy::getParentTaskKey)
+                    .map(TaskHierarchy::getParentTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark children relevant
             Stream.of(mTaskHierarchies.values())
                     .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(taskKey))
-                    .map(MergedTaskHierarchy::getChildTaskKey)
+                    .map(TaskHierarchy::getChildTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 

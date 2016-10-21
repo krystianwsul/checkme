@@ -234,9 +234,9 @@ class Instance implements MergedInstance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
+        List<TaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
         HashSet<MergedInstance> childInstances = new HashSet<>();
-        for (MergedTaskHierarchy taskHierarchy : taskHierarchies) {
+        for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
             Assert.assertTrue(taskHierarchy.getChildTask() instanceof Task); // todo firebase
@@ -260,7 +260,7 @@ class Instance implements MergedInstance {
 
         Task task = getTask();
 
-        Task parentTask = task.getParentTask(hierarchyExactTimeStamp);
+        MergedTask parentTask = task.getParentTask(hierarchyExactTimeStamp);
 
         if (parentTask == null)
             return null;

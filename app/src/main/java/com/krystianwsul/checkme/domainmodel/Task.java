@@ -95,7 +95,7 @@ public class Task implements MergedTask {
 
     @Nullable
     @Override
-    public Task getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    public MergedTask getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getParentTask(this, exactTimeStamp);
@@ -200,12 +200,12 @@ public class Task implements MergedTask {
         for (Schedule schedule : mSchedules)
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
-        List<MergedTaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
+        List<TaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
 
         ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
 
         instances.addAll(Stream.of(taskHierarchies)
-                .map(MergedTaskHierarchy::getParentTask)
+                .map(TaskHierarchy::getParentTask)
                 .map(task -> task.getInstances(finalStartExactTimeStamp, endExactTimeStamp, now))
                 .flatMap(Stream::of)
                 .map(instance -> instance.getChildInstances(now))
@@ -241,8 +241,8 @@ public class Task implements MergedTask {
     }
 
     @NonNull
-    public Task getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
-        Task parentTask = getParentTask(exactTimeStamp);
+    public MergedTask getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+        MergedTask parentTask = getParentTask(exactTimeStamp);
         if (parentTask == null)
             return this;
         else
@@ -252,9 +252,9 @@ public class Task implements MergedTask {
     @Override
     public boolean isVisible(@NonNull ExactTimeStamp now) {
         if (current(now)) {
-            Task rootTask = getRootTask(now);
+            MergedTask rootTask = getRootTask(now);
 
-            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
+            List<? extends MergedSchedule> schedules = rootTask.getCurrentSchedules(now);
 
             if (schedules.isEmpty()) {
                 return true;

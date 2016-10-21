@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
-import com.krystianwsul.checkme.domainmodel.Task;
+import com.krystianwsul.checkme.domainmodel.LocalTask;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -182,11 +182,9 @@ public class PersistenceManger {
         return mTaskHierarchyRecords;
     }
 
-    public List<ScheduleRecord> getScheduleRecords(Task task) {
-        Assert.assertTrue(task != null);
-
+    public List<ScheduleRecord> getScheduleRecords(int localTaskId) {
         return Stream.of(mScheduleRecords)
-                .filter(scheduleRecord -> scheduleRecord.getRootTaskId() == task.getId())
+                .filter(scheduleRecord -> scheduleRecord.getRootTaskId() == localTaskId)
                 .collect(Collectors.toList());
     }
 
@@ -262,24 +260,24 @@ public class PersistenceManger {
         return taskRecord;
     }
 
-    public TaskHierarchyRecord createTaskHierarchyRecord(@NonNull Task parentTask, @NonNull Task childTask, @NonNull ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(parentTask.current(startExactTimeStamp));
-        Assert.assertTrue(childTask.current(startExactTimeStamp));
+    public TaskHierarchyRecord createTaskHierarchyRecord(@NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
+        Assert.assertTrue(parentLocalTask.current(startExactTimeStamp));
+        Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
 
         int id = ++mTaskHierarchyMaxId;
 
-        TaskHierarchyRecord taskHierarchyRecord = new TaskHierarchyRecord(false, id, parentTask.getId(), childTask.getId(), startExactTimeStamp.getLong(), null);
+        TaskHierarchyRecord taskHierarchyRecord = new TaskHierarchyRecord(false, id, parentLocalTask.getId(), childLocalTask.getId(), startExactTimeStamp.getLong(), null);
         mTaskHierarchyRecords.add(taskHierarchyRecord);
         return taskHierarchyRecord;
     }
 
     @NonNull
-    public ScheduleRecord createScheduleRecord(@NonNull Task rootTask, @NonNull ScheduleType scheduleType, @NonNull ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(rootTask.current(startExactTimeStamp));
+    public ScheduleRecord createScheduleRecord(@NonNull LocalTask rootLocalTask, @NonNull ScheduleType scheduleType, @NonNull ExactTimeStamp startExactTimeStamp) {
+        Assert.assertTrue(rootLocalTask.current(startExactTimeStamp));
 
         int id = ++mScheduleMaxId;
 
-        ScheduleRecord scheduleRecord = new ScheduleRecord(false, id, rootTask.getId(), startExactTimeStamp.getLong(), null, scheduleType.ordinal());
+        ScheduleRecord scheduleRecord = new ScheduleRecord(false, id, rootLocalTask.getId(), startExactTimeStamp.getLong(), null, scheduleType.ordinal());
         mScheduleRecords.add(scheduleRecord);
 
         return scheduleRecord;
@@ -416,7 +414,7 @@ public class PersistenceManger {
     }
 
     @NonNull
-    public InstanceRecord createInstanceRecord(@NonNull Task task, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+    public InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
         Date scheduleDate = scheduleDateTime.getDate();
         Time scheduleTime = scheduleDateTime.getTime();
 
@@ -435,7 +433,7 @@ public class PersistenceManger {
 
         int id = ++mInstanceMaxId;
 
-        InstanceRecord instanceRecord = new InstanceRecord(false, id, task.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false, true);
+        InstanceRecord instanceRecord = new InstanceRecord(false, id, localTask.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false, true);
         mInstanceRecords.add(instanceRecord);
         return instanceRecord;
     }

@@ -30,7 +30,7 @@ class SingleSchedule extends Schedule {
 
     @NonNull
     @Override
-    String getScheduleText(@NonNull Context context) {
+    public String getScheduleText(@NonNull Context context) {
         return getDateTime().getDisplayText(context);
     }
 
@@ -51,7 +51,7 @@ class SingleSchedule extends Schedule {
 
     @NonNull
     @Override
-    List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
+    public List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
         List<MergedInstance> instances = new ArrayList<>();
 
         ExactTimeStamp singleScheduleExactTimeStamp = getDateTime().getTimeStamp().toExactTimeStamp();
@@ -100,10 +100,9 @@ class SingleSchedule extends Schedule {
     }
 
     @Override
-    public boolean isVisible(@NonNull MergedTask task, @NonNull ExactTimeStamp now) {
+    public boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(current(now));
-        Assert.assertTrue(task instanceof Task); // todo firebase
 
-        return getInstance((Task) task).isVisible(now);
+        return getInstance(task).isVisible(now);
     }
 }

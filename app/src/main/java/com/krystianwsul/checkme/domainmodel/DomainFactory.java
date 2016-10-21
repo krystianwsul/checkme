@@ -94,7 +94,7 @@ public class DomainFactory {
     private final PersistenceManger mPersistenceManager;
 
     private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
-    private final HashMap<Integer, Task> mTasks = new HashMap<>();
+    private final HashMap<Integer, LocalTask> mTasks = new HashMap<>();
     private final HashMap<Integer, LocalTaskHierarchy> mTaskHierarchies = new HashMap<>();
     private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
 
@@ -175,14 +175,14 @@ public class DomainFactory {
         for (TaskRecord taskRecord : taskRecords) {
             Assert.assertTrue(taskRecord != null);
 
-            Task task = new Task(this, taskRecord);
+            LocalTask localTask = new LocalTask(this, taskRecord);
 
-            ArrayList<Schedule> schedules = loadSchedules(task);
+            ArrayList<Schedule> schedules = loadSchedules(taskRecord.getId());
 
-            task.addSchedules(schedules);
+            localTask.addSchedules(schedules);
 
-            Assert.assertTrue(!mTasks.containsKey(task.getId()));
-            mTasks.put(task.getId(), task);
+            Assert.assertTrue(!mTasks.containsKey(localTask.getId()));
+            mTasks.put(localTask.getId(), localTask);
         }
 
         Collection<TaskHierarchyRecord> taskHierarchyRecords = mPersistenceManager.getTaskHierarchyRecords();
@@ -191,11 +191,11 @@ public class DomainFactory {
         for (TaskHierarchyRecord taskHierarchyRecord : taskHierarchyRecords) {
             Assert.assertTrue(taskHierarchyRecord != null);
 
-            Task parentTask = mTasks.get(taskHierarchyRecord.getParentTaskId());
-            Assert.assertTrue(parentTask != null);
+            LocalTask parentLocalTask = mTasks.get(taskHierarchyRecord.getParentTaskId());
+            Assert.assertTrue(parentLocalTask != null);
 
-            Task childTask = mTasks.get(taskHierarchyRecord.getChildTaskId());
-            Assert.assertTrue(childTask != null);
+            LocalTask childLocalTask = mTasks.get(taskHierarchyRecord.getChildTaskId());
+            Assert.assertTrue(childLocalTask != null);
 
             LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
 
@@ -207,8 +207,8 @@ public class DomainFactory {
         Assert.assertTrue(instanceRecords != null);
 
         for (InstanceRecord instanceRecord : instanceRecords) {
-            Task task = mTasks.get(instanceRecord.getTaskId());
-            Assert.assertTrue(task != null);
+            LocalTask localTask = mTasks.get(instanceRecord.getTaskId());
+            Assert.assertTrue(localTask != null);
 
             Instance instance = new Instance(this, instanceRecord);
             mExistingInstances.add(instance);
@@ -304,7 +304,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    public TaskHierarchy getParentTaskHierarchy(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskKey childTaskKey = childTask.getTaskKey();
@@ -323,36 +323,36 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Map<TaskKey, MergedTask> getTasks() {
+    private Map<TaskKey, Task> getTasks() {
         return Stream.concat(Stream.of(mTasks.values()), Stream.of(mRemoteFactory.mRemoteTasks.values()))
-                .collect(Collectors.toMap(MergedTask::getTaskKey, task -> task));
+                .collect(Collectors.toMap(Task::getTaskKey, task -> task));
     }
 
     @NonNull
-    public MergedTask getTask(@NonNull TaskKey taskKey) {
-        Map<TaskKey, MergedTask> tasks = getTasks();
+    public Task getTask(@NonNull TaskKey taskKey) {
+        Map<TaskKey, Task> tasks = getTasks();
         Assert.assertTrue(tasks.containsKey(taskKey));
 
-        MergedTask task = tasks.get(taskKey);
+        Task task = tasks.get(taskKey);
         Assert.assertTrue(task != null);
 
         return task;
     }
 
     @NonNull
-    public List<MergedTask> getChildTasks(@NonNull MergedTask parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
         return Stream.of(getChildTaskHierarchies(parentTask))
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
                 .map(TaskHierarchy::getChildTask)
                 .filter(childTask -> childTask.current(exactTimeStamp))
-                .sortBy(MergedTask::getStartExactTimeStamp)
+                .sortBy(Task::getStartExactTimeStamp)
                 .collect(Collectors.toList());
     }
 
     @NonNull
-    public List<TaskHierarchy> getChildTaskHierarchies(@NonNull MergedTask parentTask) {
+    public List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
         TaskKey parentTaskKey = parentTask.getTaskKey();
 
         return Stream.of(getTaskHierarchies())
@@ -361,9 +361,9 @@ public class DomainFactory {
     }
 
     @NonNull
-    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull MergedTask parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
+    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
         return Stream.of(parentTask.getChildTasks(now))
-                .sortBy(MergedTask::getStartExactTimeStamp)
+                .sortBy(Task::getStartExactTimeStamp)
                 .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
                 .collect(Collectors.toList());
     }
@@ -612,7 +612,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (MergedInstance instance : currentInstances) {
-            MergedTask task = getTask(instance.getTaskKey());
+            Task task = getTask(instance.getTaskKey());
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
@@ -627,7 +627,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private List<GroupListLoader.TaskData> getChildTaskDatas(@NonNull MergedTask parentTask, @NonNull ExactTimeStamp now) {
+    private List<GroupListLoader.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
         return Stream.of(parentTask.getChildTasks(now))
                 .map(childTask -> new GroupListLoader.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp()))
                 .collect(Collectors.toList());
@@ -692,7 +692,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (MergedInstance instance : currentInstances) {
-            MergedTask task = getTask(instance.getTaskKey());
+            Task task = getTask(instance.getTaskKey());
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
@@ -721,13 +721,13 @@ public class DomainFactory {
                 .collect(Collectors.toList());
 
         if (getTasks().containsKey(instanceKey.mTaskKey)) {
-            MergedTask task = getTask(instanceKey.mTaskKey);
+            Task task = getTask(instanceKey.mTaskKey);
             MergedInstance instance = getInstance(instanceKey);
 
             GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
 
             for (MergedInstance childInstance : instance.getChildInstances(now)) {
-                MergedTask childTask = getTask(childInstance.getTaskKey());
+                Task childTask = getTask(childInstance.getTaskKey());
 
                 Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
@@ -776,7 +776,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (MergedInstance instance : instances) {
-            MergedTask task = instance.getTask();
+            Task task = instance.getTask();
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
@@ -799,7 +799,7 @@ public class DomainFactory {
         if (!getTasks().containsKey(instanceKey.mTaskKey))
             return new ShowInstanceLoader.Data(null);
 
-        MergedTask task = getTask(instanceKey.mTaskKey);
+        Task task = getTask(instanceKey.mTaskKey);
         MergedInstance instance = getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -821,7 +821,7 @@ public class DomainFactory {
 
         CreateTaskLoader.TaskData taskData = null;
         if (taskKey != null) {
-            MergedTask task = getTasks().get(taskKey);
+            Task task = getTasks().get(taskKey);
             Assert.assertTrue(task != null);
 
             TaskKey parentTaskKey;
@@ -906,7 +906,7 @@ public class DomainFactory {
                     }
                 }
             } else {
-                MergedTask parentTask = task.getParentTask(now);
+                Task parentTask = task.getParentTask(now);
                 Assert.assertTrue(parentTask != null);
 
                 parentTaskKey = parentTask.getTaskKey();
@@ -932,7 +932,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        MergedTask task = getTask(taskKey);
+        Task task = getTask(taskKey);
         Assert.assertTrue(task.current(now));
 
         return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getTaskKey());
@@ -955,9 +955,9 @@ public class DomainFactory {
         String note;
 
         if (taskKey != null) {
-            MergedTask parentTask = getTask(taskKey);
+            Task parentTask = getTask(taskKey);
 
-            List<MergedTask> tasks = parentTask.getChildTasks(now);
+            List<Task> tasks = parentTask.getChildTasks(now);
             childTaskDatas = Stream.of(tasks)
                     .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
                     .collect(Collectors.toList());
@@ -1123,18 +1123,18 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
+    LocalTask createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        Task rootTask = createLocalTaskHelper(name, now, note);
+        LocalTask rootLocalTask = createLocalTaskHelper(name, now, note);
 
-        List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
+        List<Schedule> schedules = createSchedules(rootLocalTask, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
 
-        rootTask.addSchedules(schedules);
+        rootLocalTask.addSchedules(schedules);
 
-        return rootTask;
+        return rootLocalTask;
     }
 
     public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
@@ -1172,24 +1172,24 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        Task task = mTasks.get(taskId); // todo firebase
-        Assert.assertTrue(task != null);
+        LocalTask localTask = mTasks.get(taskId); // todo firebase
+        Assert.assertTrue(localTask != null);
 
         List<TaskKey> taskKeys = new ArrayList<>();
-        taskKeys.add(task.getTaskKey());
+        taskKeys.add(localTask.getTaskKey());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
-        Assert.assertTrue(task.current(now));
+        Assert.assertTrue(localTask.current(now));
 
-        task.setName(name, note);
+        localTask.setName(name, note);
 
-        if (task.isRootTask(now)) {
-            List<Schedule> schedules = task.getCurrentSchedules(now);
+        if (localTask.isRootTask(now)) {
+            List<MergedSchedule> schedules = localTask.getCurrentSchedules(now);
 
             Stream.of(schedules)
                     .forEach(schedule -> schedule.setEndExactTimeStamp(now));
         } else {
-            LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(task, now);
+            LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(localTask, now);
             Assert.assertTrue(localTaskHierarchy != null);
 
             localTaskHierarchy.setEndExactTimeStamp(now);
@@ -1197,10 +1197,10 @@ public class DomainFactory {
             taskKeys.add(localTaskHierarchy.getParentTaskKey());
         }
 
-        List<Schedule> schedules = createSchedules(task, scheduleDatas, now);
+        List<Schedule> schedules = createSchedules(localTask, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
 
-        task.addSchedules(schedules);
+        localTask.addSchedules(schedules);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1212,14 +1212,14 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskIds.size() > 1);
 
-        Task rootTask = createLocalTaskHelper(name, now, note);
+        LocalTask rootLocalTask = createLocalTaskHelper(name, now, note);
 
-        List<Schedule> schedules = createSchedules(rootTask, scheduleDatas, now);
+        List<Schedule> schedules = createSchedules(rootLocalTask, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
 
-        rootTask.addSchedules(schedules);
+        rootLocalTask.addSchedules(schedules);
 
-        joinTasks(rootTask, joinTaskIds, now);
+        joinTasks(rootLocalTask, joinTaskIds, now);
     }
 
     public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
@@ -1236,7 +1236,7 @@ public class DomainFactory {
                 .map(this::getTask)
                 .map(task -> task.getParentTask(now))
                 .filter(parentTask -> parentTask != null)
-                .map(MergedTask::getTaskKey)
+                .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
         createScheduleJoinRootTask(now, name, scheduleDatas, joinTaskIds, note);
@@ -1256,14 +1256,14 @@ public class DomainFactory {
         if (parentTaskKey.mLocalTaskId != null) { // todo firebase?
             Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
 
-            MergedTask parentTask = getTask(parentTaskKey);
+            Task parentTask = getTask(parentTaskKey);
             Assert.assertTrue(parentTask.current(now));
 
             parentTask.createChildTask(now, name, note);
         } else {
             Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
 
-            MergedTask parentTask = getTask(parentTaskKey);
+            Task parentTask = getTask(parentTaskKey);
             Assert.assertTrue(parentTask.current(now));
 
             parentTask.createChildTask(now, name, note);
@@ -1275,20 +1275,20 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task createLocalChildTask(@NonNull ExactTimeStamp now, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
+    LocalTask createLocalChildTask(@NonNull ExactTimeStamp now, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         Assert.assertTrue(parentTaskKey.mLocalTaskId != null);
         Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        MergedTask parentTask = getTask(parentTaskKey);
+        Task parentTask = getTask(parentTaskKey);
         Assert.assertTrue(parentTask.current(now));
-        Assert.assertTrue(parentTask instanceof Task);
+        Assert.assertTrue(parentTask instanceof LocalTask);
 
-        Task childTask = createLocalTaskHelper(name, now, note);
+        LocalTask childLocalTask = createLocalTaskHelper(name, now, note);
 
-        createTaskHierarchy((Task) parentTask, childTask, now);
+        createTaskHierarchy((LocalTask) parentTask, childLocalTask, now);
 
-        return childTask;
+        return childLocalTask;
     }
 
     public synchronized void createJoinChildTask(@NonNull Context context, int dataId, int parentTaskId, @NonNull String name, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
@@ -1304,24 +1304,24 @@ public class DomainFactory {
                 .map(this::getTask)
                 .map(task -> task.getParentTask(now))
                 .filter(parentTask -> parentTask != null)
-                .map(MergedTask::getTaskKey)
+                .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
-        Task parentTask = mTasks.get(parentTaskId); // todo firebase
-        Assert.assertTrue(parentTask != null);
-        Assert.assertTrue(parentTask.current(now));
+        LocalTask parentLocalTask = mTasks.get(parentTaskId); // todo firebase
+        Assert.assertTrue(parentLocalTask != null);
+        Assert.assertTrue(parentLocalTask.current(now));
 
-        taskKeys.add(parentTask.getTaskKey());
+        taskKeys.add(parentLocalTask.getTaskKey());
 
         TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now, note);
 
-        Task childTask = new Task(this, childTaskRecord);
-        Assert.assertTrue(!mTasks.containsKey(childTask.getId())); // todo firebase
-        mTasks.put(childTask.getId(), childTask); // todo firebase
+        LocalTask childLocalTask = new LocalTask(this, childTaskRecord);
+        Assert.assertTrue(!mTasks.containsKey(childLocalTask.getId())); // todo firebase
+        mTasks.put(childLocalTask.getId(), childLocalTask); // todo firebase
 
-        createTaskHierarchy(parentTask, childTask, now);
+        createTaskHierarchy(parentLocalTask, childLocalTask, now);
 
-        joinTasks(childTask, joinTaskIds, now);
+        joinTasks(childLocalTask, joinTaskIds, now);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1337,33 +1337,33 @@ public class DomainFactory {
 
         List<TaskKey> taskKeys = new ArrayList<>();
 
-        Task task = mTasks.get(taskId); // todo firebase
-        Assert.assertTrue(task != null);
+        LocalTask localTask = mTasks.get(taskId); // todo firebase
+        Assert.assertTrue(localTask != null);
 
-        taskKeys.add(task.getTaskKey());
+        taskKeys.add(localTask.getTaskKey());
 
-        task.setName(name, note);
+        localTask.setName(name, note);
 
-        Task newParentTask = mTasks.get(parentTaskId); // todo firebase
-        Assert.assertTrue(newParentTask != null);
+        LocalTask newParentLocalTask = mTasks.get(parentTaskId); // todo firebase
+        Assert.assertTrue(newParentLocalTask != null);
 
-        taskKeys.add(newParentTask.getTaskKey());
+        taskKeys.add(newParentLocalTask.getTaskKey());
 
-        MergedTask oldParentTask = task.getParentTask(now);
+        Task oldParentTask = localTask.getParentTask(now);
         if (oldParentTask == null) {
-            Stream.of(task.getCurrentSchedules(now))
+            Stream.of(localTask.getCurrentSchedules(now))
                     .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
-            createTaskHierarchy(newParentTask, task, now);
-        } else if (oldParentTask != newParentTask) {
-            LocalTaskHierarchy oldLocalTaskHierarchy = getParentTaskHierarchy(task, now);
+            createTaskHierarchy(newParentLocalTask, localTask, now);
+        } else if (oldParentTask != newParentLocalTask) {
+            LocalTaskHierarchy oldLocalTaskHierarchy = getParentTaskHierarchy(localTask, now);
             Assert.assertTrue(oldLocalTaskHierarchy != null);
 
             oldLocalTaskHierarchy.setEndExactTimeStamp(now);
 
             taskKeys.add(oldLocalTaskHierarchy.getParentTaskKey());
 
-            createTaskHierarchy(newParentTask, task, now);
+            createTaskHierarchy(newParentLocalTask, localTask, now);
         }
 
         updateNotifications(context, taskKeys, now);
@@ -1378,7 +1378,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        MergedTask task = getTask(taskKey);
+        Task task = getTask(taskKey);
         Assert.assertTrue(task.current(now));
 
         task.setEndExactTimeStamp(now);
@@ -1398,7 +1398,7 @@ public class DomainFactory {
         for (TaskKey taskKey : taskKeys) {
             Assert.assertTrue(taskKey != null);
 
-            MergedTask task = getTask(taskKey);
+            Task task = getTask(taskKey);
             Assert.assertTrue(task.current(now));
 
             task.setEndExactTimeStamp(now);
@@ -1471,11 +1471,11 @@ public class DomainFactory {
 
     @NonNull
     Irrelevant setIrrelevant(@NonNull ExactTimeStamp now) {
-        for (MergedTask task : getTasks().values())
+        for (Task task : getTasks().values())
             task.updateOldestVisible(now);
 
         // relevant hack
-        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks().values()).collect(Collectors.toMap(MergedTask::getTaskKey, TaskRelevance::new));
+        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks().values()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances().values()).collect(Collectors.toMap(MergedInstance::getInstanceKey, InstanceRelevance::new));
         Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
 
@@ -1483,7 +1483,7 @@ public class DomainFactory {
                 .filter(task -> task.current(now))
                 .filter(task -> task.isRootTask(now))
                 .filter(task -> task.isVisible(now))
-                .map(MergedTask::getTaskKey)
+                .map(Task::getTaskKey)
                 .map(taskRelevances::get)
                 .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
@@ -1504,12 +1504,12 @@ public class DomainFactory {
                 .map(customTimeRelevances::get)
                 .forEach(CustomTimeRelevance::setRelevant);
 
-        List<MergedTask> relevantTasks = Stream.of(taskRelevances.values())
+        List<Task> relevantTasks = Stream.of(taskRelevances.values())
                 .filter(TaskRelevance::getRelevant)
                 .map(TaskRelevance::getTask)
                 .collect(Collectors.toList());
 
-        List<MergedTask> irrelevantTasks = new ArrayList<>(getTasks().values());
+        List<Task> irrelevantTasks = new ArrayList<>(getTasks().values());
         irrelevantTasks.removeAll(relevantTasks);
 
         Assert.assertTrue(Stream.of(irrelevantTasks)
@@ -1539,7 +1539,7 @@ public class DomainFactory {
                 .noneMatch(CustomTime::getCurrent));
 
         Stream.of(irrelevantTasks)
-                .forEach(MergedTask::setRelevant);
+                .forEach(Task::setRelevant);
 
         Stream.of(irrelevantExistingInstances)
                 .forEach(MergedInstance::setRelevant);
@@ -1561,11 +1561,11 @@ public class DomainFactory {
         for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
             mTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId()); // todo removal
 
-        for (MergedTask task : irrelevant.mTasks) {
-            if (task instanceof Task) {
-                Assert.assertTrue(mTasks.containsKey(((Task) task).getId())); // todo removal
+        for (Task task : irrelevant.mTasks) {
+            if (task instanceof LocalTask) {
+                Assert.assertTrue(mTasks.containsKey(((LocalTask) task).getId())); // todo removal
 
-                mTasks.remove(((Task) task).getId()); // todo removal
+                mTasks.remove(((LocalTask) task).getId()); // todo removal
             }
         }
 
@@ -1592,9 +1592,9 @@ public class DomainFactory {
 
         TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
 
-        Task childTask = new Task(this, taskRecord);
-        Assert.assertTrue(!mTasks.containsKey(childTask.getId())); // todo firebase
-        mTasks.put(childTask.getId(), childTask); // todo firbase
+        LocalTask childLocalTask = new LocalTask(this, taskRecord);
+        Assert.assertTrue(!mTasks.containsKey(childLocalTask.getId())); // todo firebase
+        mTasks.put(childLocalTask.getId(), childLocalTask); // todo firbase
 
         updateNotifications(context, new ArrayList<>(), now);
 
@@ -1614,16 +1614,16 @@ public class DomainFactory {
                 .map(this::getTask)
                 .map(task -> task.getParentTask(now))
                 .filter(parentTask -> parentTask != null)
-                .map(MergedTask::getTaskKey)
+                .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
         TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
 
-        Task task = new Task(this, taskRecord);
-        Assert.assertTrue(!mTasks.containsKey(task.getId())); // todo firebase
-        mTasks.put(task.getId(), task); // todo firebase
+        LocalTask localTask = new LocalTask(this, taskRecord);
+        Assert.assertTrue(!mTasks.containsKey(localTask.getId())); // todo firebase
+        mTasks.put(localTask.getId(), localTask); // todo firebase
 
-        joinTasks(task, joinTaskIds, now);
+        joinTasks(localTask, joinTaskIds, now);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1637,20 +1637,20 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task task = mTasks.get(taskId);  // todo firebase
-        Assert.assertTrue(task != null);
+        LocalTask localTask = mTasks.get(taskId);  // todo firebase
+        Assert.assertTrue(localTask != null);
 
-        task.setName(name, note);
+        localTask.setName(name, note);
 
         List<TaskKey> taskKeys = new ArrayList<>();
 
-        LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(task, now);
+        LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(localTask, now);
         if (localTaskHierarchy != null) {
             localTaskHierarchy.setEndExactTimeStamp(now);
             taskKeys.add(localTaskHierarchy.getParentTaskKey());
         }
 
-        Stream.of(task.getCurrentSchedules(now))
+        Stream.of(localTask.getCurrentSchedules(now))
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
         updateNotifications(context, taskKeys, now);
@@ -1787,7 +1787,7 @@ public class DomainFactory {
                     nextAlarm = instanceTimeStamp;
         }
 
-        for (MergedTask task : getTasks().values()) {
+        for (Task task : getTasks().values()) {
             if (task.current(now) && task.isRootTask(now)) {
                 List<? extends MergedSchedule> schedules = task.getCurrentSchedules(now);
 
@@ -1824,7 +1824,7 @@ public class DomainFactory {
     // internal
 
     @NonNull
-    private ArrayList<MergedInstance> getExistingInstances(@NonNull MergedTask task) {
+    private ArrayList<MergedInstance> getExistingInstances(@NonNull Task task) {
         ArrayList<MergedInstance> instances = new ArrayList<>();
         for (MergedInstance instance : getExistingInstances().values()) {
             Assert.assertTrue(instance != null);
@@ -1836,7 +1836,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    public MergedInstance getExistingInstance(@NonNull MergedTask task, @NonNull DateTime scheduleDateTime) {
+    public MergedInstance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
         ArrayList<MergedInstance> taskInstances = getExistingInstances(task);
 
         ArrayList<MergedInstance> instances = new ArrayList<>();
@@ -1855,7 +1855,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public MergedInstance getInstance(@NonNull MergedTask task, @NonNull DateTime scheduleDateTime) {
+    public MergedInstance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
         MergedInstance existingInstance = getExistingInstance(task, scheduleDateTime);
 
         if (existingInstance != null) {
@@ -1879,7 +1879,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<MergedInstance> getPastInstances(@NonNull MergedTask task, @NonNull ExactTimeStamp now) {
+    public List<MergedInstance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Map<InstanceKey, MergedInstance> allInstances = new HashMap<>();
 
         allInstances.putAll(Stream.of(getExistingInstances().values())
@@ -1911,7 +1911,7 @@ public class DomainFactory {
             allInstances.put(instance.getInstanceKey(), instance);
         }
 
-        for (MergedTask task : getTasks().values()) {
+        for (Task task : getTasks().values()) {
             for (MergedInstance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
                 ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
@@ -1932,10 +1932,10 @@ public class DomainFactory {
     }
 
     @NonNull
-    InstanceRecord createInstanceRecord(@NonNull Task task, @NonNull Instance instance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+    InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull Instance instance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
         mExistingInstances.add(instance);
 
-        return mPersistenceManager.createInstanceRecord(task, scheduleDateTime, now);
+        return mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
     }
 
     @NonNull
@@ -1947,7 +1947,7 @@ public class DomainFactory {
 
     @NonNull
     private MergedInstance getInstance(@NonNull InstanceKey instanceKey) {
-        MergedTask task = getTask(instanceKey.mTaskKey);
+        Task task = getTask(instanceKey.mTaskKey);
 
         DateTime scheduleDateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
 
@@ -1955,8 +1955,8 @@ public class DomainFactory {
     }
 
     @NonNull
-    private ArrayList<Schedule> loadSchedules(@NonNull Task task) {
-        List<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(task);
+    private ArrayList<Schedule> loadSchedules(int localTaskId) {
+        List<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(localTaskId);
         Assert.assertTrue(scheduleRecords != null);
 
         ArrayList<Schedule> schedules = new ArrayList<>();
@@ -1969,19 +1969,19 @@ public class DomainFactory {
 
             switch (scheduleType) {
                 case SINGLE:
-                    schedules.add(loadSingleSchedule(scheduleRecord, task));
+                    schedules.add(loadSingleSchedule(scheduleRecord));
                     break;
                 case DAILY:
-                    schedules.add(loadDailySchedule(scheduleRecord, task));
+                    schedules.add(loadDailySchedule(scheduleRecord));
                     break;
                 case WEEKLY:
-                    schedules.add(loadWeeklySchedule(scheduleRecord, task));
+                    schedules.add(loadWeeklySchedule(scheduleRecord));
                     break;
                 case MONTHLY_DAY:
-                    schedules.add(loadMonthlyDaySchedule(scheduleRecord, task));
+                    schedules.add(loadMonthlyDaySchedule(scheduleRecord));
                     break;
                 case MONTHLY_WEEK:
-                    schedules.add(loadMonthlyWeekSchedule(scheduleRecord, task));
+                    schedules.add(loadMonthlyWeekSchedule(scheduleRecord));
                     break;
                 default:
                     throw new IndexOutOfBoundsException("unknown schedule type");
@@ -1991,9 +1991,8 @@ public class DomainFactory {
         return schedules;
     }
 
-    private Schedule loadSingleSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private Schedule loadSingleSchedule(ScheduleRecord scheduleRecord) {
         Assert.assertTrue(scheduleRecord != null);
-        Assert.assertTrue(rootTask != null);
 
         SingleScheduleRecord singleScheduleRecord = mPersistenceManager.getSingleScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(singleScheduleRecord != null);
@@ -2001,9 +2000,8 @@ public class DomainFactory {
         return new SingleSchedule(this, scheduleRecord, singleScheduleRecord);
     }
 
-    private DailySchedule loadDailySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private DailySchedule loadDailySchedule(ScheduleRecord scheduleRecord) {
         Assert.assertTrue(scheduleRecord != null);
-        Assert.assertTrue(rootTask != null);
 
         DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.getDailyScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(dailyScheduleRecord != null);
@@ -2011,9 +2009,8 @@ public class DomainFactory {
         return new DailySchedule(this, scheduleRecord, dailyScheduleRecord);
     }
 
-    private WeeklySchedule loadWeeklySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private WeeklySchedule loadWeeklySchedule(ScheduleRecord scheduleRecord) {
         Assert.assertTrue(scheduleRecord != null);
-        Assert.assertTrue(rootTask != null);
 
         WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.getWeeklyScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(weeklyScheduleRecord != null);
@@ -2021,9 +2018,8 @@ public class DomainFactory {
         return new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord);
     }
 
-    private MonthlyDaySchedule loadMonthlyDaySchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private MonthlyDaySchedule loadMonthlyDaySchedule(ScheduleRecord scheduleRecord) {
         Assert.assertTrue(scheduleRecord != null);
-        Assert.assertTrue(rootTask != null);
 
         MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.getMonthlyDayScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(monthlyDayScheduleRecord != null);
@@ -2031,9 +2027,8 @@ public class DomainFactory {
         return new MonthlyDaySchedule(this, scheduleRecord, monthlyDayScheduleRecord);
     }
 
-    private MonthlyWeekSchedule loadMonthlyWeekSchedule(ScheduleRecord scheduleRecord, Task rootTask) {
+    private MonthlyWeekSchedule loadMonthlyWeekSchedule(ScheduleRecord scheduleRecord) {
         Assert.assertTrue(scheduleRecord != null);
-        Assert.assertTrue(rootTask != null);
 
         MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.getMonthlyWeekScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(monthlyWeekScheduleRecord != null);
@@ -2042,17 +2037,17 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Task createLocalTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
+    private LocalTask createLocalTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, startExactTimeStamp, note);
 
-        Task rootTask = new Task(this, taskRecord);
+        LocalTask rootLocalTask = new LocalTask(this, taskRecord);
 
-        Assert.assertTrue(!mTasks.containsKey(rootTask.getId()));
-        mTasks.put(rootTask.getId(), rootTask);
+        Assert.assertTrue(!mTasks.containsKey(rootLocalTask.getId()));
+        mTasks.put(rootLocalTask.getId(), rootLocalTask);
 
-        return rootTask;
+        return rootLocalTask;
     }
 
     @NonNull
@@ -2070,34 +2065,34 @@ public class DomainFactory {
         }
     }
 
-    private void joinTasks(@NonNull Task newParentTask, @NonNull List<Integer> joinTaskIds, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(newParentTask.current(now));
+    private void joinTasks(@NonNull LocalTask newParentLocalTask, @NonNull List<Integer> joinTaskIds, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(newParentLocalTask.current(now));
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         for (int joinTaskId : joinTaskIds) {
-            Task joinTask = mTasks.get(joinTaskId); // todo firebase
-            Assert.assertTrue(joinTask != null);
-            Assert.assertTrue(joinTask.current(now));
+            LocalTask joinLocalTask = mTasks.get(joinTaskId); // todo firebase
+            Assert.assertTrue(joinLocalTask != null);
+            Assert.assertTrue(joinLocalTask.current(now));
 
-            if (joinTask.isRootTask(now)) {
-                Stream.of(joinTask.getCurrentSchedules(now))
+            if (joinLocalTask.isRootTask(now)) {
+                Stream.of(joinLocalTask.getCurrentSchedules(now))
                         .forEach(schedule -> schedule.setEndExactTimeStamp(now));
             } else {
-                LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(joinTask, now);
+                LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(joinLocalTask, now);
                 Assert.assertTrue(localTaskHierarchy != null);
 
                 localTaskHierarchy.setEndExactTimeStamp(now);
             }
 
-            createTaskHierarchy(newParentTask, joinTask, now);
+            createTaskHierarchy(newParentLocalTask, joinLocalTask, now);
         }
     }
 
-    private void createTaskHierarchy(@NonNull Task parentTask, @NonNull Task childTask, @NonNull ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(parentTask.current(startExactTimeStamp));
-        Assert.assertTrue(childTask.current(startExactTimeStamp));
+    private void createTaskHierarchy(@NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
+        Assert.assertTrue(parentLocalTask.current(startExactTimeStamp));
+        Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
 
-        TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentTask, childTask, startExactTimeStamp);
+        TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp);
         Assert.assertTrue(taskHierarchyRecord != null);
 
         LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
@@ -2106,9 +2101,9 @@ public class DomainFactory {
     }
 
     @NonNull
-    private List<Schedule> createSchedules(@NonNull Task rootTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
+    private List<Schedule> createSchedules(@NonNull LocalTask rootLocalTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(rootTask.current(startExactTimeStamp));
+        Assert.assertTrue(rootLocalTask.current(startExactTimeStamp));
 
         List<Schedule> schedules = new ArrayList<>();
 
@@ -2122,7 +2117,7 @@ public class DomainFactory {
                     Date date = singleScheduleData.Date;
                     Time time = getTime(singleScheduleData.TimePair);
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.SINGLE, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp);
 
                     SingleScheduleRecord singleScheduleRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
 
@@ -2134,7 +2129,7 @@ public class DomainFactory {
 
                     Time time = getTime(dailyScheduleData.TimePair);
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.DAILY, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
 
                     DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
 
@@ -2147,7 +2142,7 @@ public class DomainFactory {
                     DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
                     Time time = getTime(weeklyScheduleData.TimePair);
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.WEEKLY, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
 
                     WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
 
@@ -2157,7 +2152,7 @@ public class DomainFactory {
                 case MONTHLY_DAY: {
                     CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
 
                     MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
 
@@ -2167,7 +2162,7 @@ public class DomainFactory {
                 case MONTHLY_WEEK: {
                     CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
 
                     MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
 
@@ -2183,7 +2178,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<TaskHierarchy> getParentTaskHierarchies(MergedTask childTask) {
+    public List<TaskHierarchy> getParentTaskHierarchies(Task childTask) {
         Assert.assertTrue(childTask != null);
 
         return Stream.of(getTaskHierarchies())
@@ -2192,7 +2187,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    public MergedTask getParentTask(@NonNull MergedTask childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    public Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
@@ -2200,15 +2195,15 @@ public class DomainFactory {
             return null;
         } else {
             Assert.assertTrue(parentTaskHierarchy.current(exactTimeStamp));
-            MergedTask parentTask = parentTaskHierarchy.getParentTask();
+            Task parentTask = parentTaskHierarchy.getParentTask();
             Assert.assertTrue(parentTask.current(exactTimeStamp));
             return parentTask;
         }
     }
 
     @Nullable
-    private LocalTaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(childTask.current(exactTimeStamp));
+    private LocalTaskHierarchy getParentTaskHierarchy(@NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(childLocalTask.current(exactTimeStamp));
 
         ArrayList<LocalTaskHierarchy> taskHierarchies = new ArrayList<>();
         for (LocalTaskHierarchy localTaskHierarchy : mTaskHierarchies.values()) {
@@ -2217,7 +2212,7 @@ public class DomainFactory {
             if (!localTaskHierarchy.current(exactTimeStamp))
                 continue;
 
-            if (localTaskHierarchy.getChildTask() != childTask)
+            if (localTaskHierarchy.getChildTask() != childLocalTask)
                 continue;
 
             taskHierarchies.add(localTaskHierarchy);
@@ -2231,10 +2226,10 @@ public class DomainFactory {
         }
     }
 
-    void setParentHierarchyEndTimeStamp(@NonNull Task childTask, @NonNull ExactTimeStamp exactEndTimeStamp) {
-        Assert.assertTrue(childTask.current(exactEndTimeStamp));
+    void setParentHierarchyEndTimeStamp(@NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp exactEndTimeStamp) {
+        Assert.assertTrue(childLocalTask.current(exactEndTimeStamp));
 
-        LocalTaskHierarchy parentLocalTaskHierarchy = getParentTaskHierarchy(childTask, exactEndTimeStamp);
+        LocalTaskHierarchy parentLocalTaskHierarchy = getParentTaskHierarchy(childLocalTask, exactEndTimeStamp);
         if (parentLocalTaskHierarchy != null) {
             Assert.assertTrue(parentLocalTaskHierarchy.current(exactEndTimeStamp));
             parentLocalTaskHierarchy.setEndExactTimeStamp(exactEndTimeStamp);
@@ -2262,7 +2257,7 @@ public class DomainFactory {
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
         for (MergedInstance childInstance : instance.getChildInstances(now)) {
-            MergedTask childTask = getTask(childInstance.getTaskKey());
+            Task childTask = getTask(childInstance.getTaskKey());
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
@@ -2275,10 +2270,10 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Map<TaskKey, CreateTaskLoader.TaskTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull MergedTask parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
+    private Map<TaskKey, CreateTaskLoader.TaskTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
         return Stream.of(parentTask.getChildTasks(now))
                 .filterNot(childTask -> excludedTaskKeys.contains(childTask.getTaskKey()))
-                .collect(Collectors.toMap(MergedTask::getTaskKey, childTask -> new CreateTaskLoader.TaskTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), childTask.getTaskKey(), childTask.getScheduleText(context, now), childTask.getNote(), childTask.getStartExactTimeStamp())));
+                .collect(Collectors.toMap(Task::getTaskKey, childTask -> new CreateTaskLoader.TaskTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), childTask.getTaskKey(), childTask.getScheduleText(context, now), childTask.getNote(), childTask.getStartExactTimeStamp())));
     }
 
     @NonNull
@@ -2288,7 +2283,7 @@ public class DomainFactory {
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
-                .collect(Collectors.toMap(MergedTask::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
+                .collect(Collectors.toMap(Task::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
     }
 
     // notifications
@@ -2304,7 +2299,7 @@ public class DomainFactory {
     }
 
     private void notifyInstance(@NonNull Context context, @NonNull MergedInstance instance, boolean silent, @NonNull ExactTimeStamp now) {
-        MergedTask task = instance.getTask();
+        Task task = instance.getTask();
         int notificationId = instance.getNotificationId();
         InstanceKey instanceKey = instance.getInstanceKey();
 
@@ -2455,12 +2450,12 @@ public class DomainFactory {
         public final List<CustomTime> mCustomTimes; // todo customTimes
 
         @NonNull
-        public final List<MergedTask> mTasks;
+        public final List<Task> mTasks;
 
         @NonNull
         public final List<MergedInstance> mInstances;
 
-        Irrelevant(@NonNull List<CustomTime> customTimes, @NonNull List<MergedTask> tasks, @NonNull List<MergedInstance> instances) {
+        Irrelevant(@NonNull List<CustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<MergedInstance> instances) {
             mCustomTimes = customTimes;
             mTasks = tasks;
             mInstances = instances;
@@ -2469,10 +2464,10 @@ public class DomainFactory {
 
     private class TaskRelevance {
         @NonNull
-        private final MergedTask mTask;
+        private final Task mTask;
         private boolean mRelevant = false;
 
-        TaskRelevance(@NonNull MergedTask task) {
+        TaskRelevance(@NonNull Task task) {
             mTask = task;
         }
 
@@ -2533,7 +2528,7 @@ public class DomainFactory {
             return mRelevant;
         }
 
-        public MergedTask getTask() {
+        public Task getTask() {
             return mTask;
         }
     }

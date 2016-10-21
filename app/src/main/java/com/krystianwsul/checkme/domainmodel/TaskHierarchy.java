@@ -34,12 +34,12 @@ public abstract class TaskHierarchy {
     public abstract TaskKey getChildTaskKey();
 
     @NonNull
-    public MergedTask getParentTask() {
+    public Task getParentTask() {
         return mDomainFactory.getTask(getParentTaskKey());
     }
 
     @NonNull
-    public MergedTask getChildTask() {
+    public Task getChildTask() {
         return mDomainFactory.getTask(getChildTaskKey());
     }
 

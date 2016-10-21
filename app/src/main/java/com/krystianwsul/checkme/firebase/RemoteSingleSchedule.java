@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -41,7 +42,7 @@ class RemoteSingleSchedule extends RemoteSchedule {
 
     @NonNull
     @Override
-    String getScheduleText(@NonNull Context context) {
+    public String getScheduleText(@NonNull Context context) {
         return getDateTime().getDisplayText(context);
     }
 
@@ -82,7 +83,7 @@ class RemoteSingleSchedule extends RemoteSchedule {
 
     @NonNull
     @Override
-    List<MergedInstance> getInstances(@NonNull RemoteTask task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
+    public List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
         List<MergedInstance> instances = new ArrayList<>();
 
         ExactTimeStamp singleScheduleExactTimeStamp = getDateTime().getTimeStamp().toExactTimeStamp();
@@ -101,7 +102,7 @@ class RemoteSingleSchedule extends RemoteSchedule {
     }
 
     @NonNull
-    MergedInstance getInstance(@NonNull RemoteTask task) {
+    MergedInstance getInstance(@NonNull Task task) {
         return mDomainFactory.getInstance(task, getDateTime());
     }
 

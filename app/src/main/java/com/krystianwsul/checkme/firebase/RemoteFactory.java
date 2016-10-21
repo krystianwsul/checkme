@@ -10,7 +10,7 @@ import com.google.common.collect.Multimap;
 import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
-import com.krystianwsul.checkme.domainmodel.MergedTask;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
@@ -247,7 +247,7 @@ public class RemoteFactory {
         for (RemoteTaskHierarchy irrelevantTaskHierarchy : irrelevantTaskHierarchies)
             mRemoteTaskHierarchies.remove(irrelevantTaskHierarchy.getId());
 
-        for (MergedTask task : irrelevant.mTasks) {
+        for (Task task : irrelevant.mTasks) {
             if (task instanceof RemoteTask) {
                 Assert.assertTrue(mRemoteTasks.containsKey(((RemoteTask) task).getId()));
 

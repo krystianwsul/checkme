@@ -33,7 +33,7 @@ class WeeklySchedule extends RepeatingSchedule {
 
     @NonNull
     @Override
-    String getScheduleText(@NonNull Context context) {
+    public String getScheduleText(@NonNull Context context) {
         return getDayOfWeek() + ": " + getTime();
     }
 

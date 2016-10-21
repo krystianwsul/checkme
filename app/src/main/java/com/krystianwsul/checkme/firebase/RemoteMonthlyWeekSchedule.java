@@ -9,7 +9,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
-import com.krystianwsul.checkme.domainmodel.MergedTask;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -50,7 +50,7 @@ class RemoteMonthlyWeekSchedule extends RemoteSchedule {
 
     @NonNull
     @Override
-    String getScheduleText(@NonNull Context context) {
+    public String getScheduleText(@NonNull Context context) {
         String day = mRemoteMonthlyWeekScheduleRecord.getDayOfMonth() + " " + getDayOfWeek() + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mRemoteMonthlyWeekScheduleRecord.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
         return day + ": " + getTime();
@@ -91,7 +91,7 @@ class RemoteMonthlyWeekSchedule extends RemoteSchedule {
 
     @NonNull
     @Override
-    List<MergedInstance> getInstances(@NonNull RemoteTask task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
+    public List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
         ExactTimeStamp myStartTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp myEndTimeStamp = getEndExactTimeStamp();
 
@@ -136,7 +136,7 @@ class RemoteMonthlyWeekSchedule extends RemoteSchedule {
     }
 
     @Nullable
-    protected MergedInstance getInstanceInDate(@NonNull MergedTask task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
+    protected MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         Date dateThisMonth = getDate(date.getYear(), date.getMonth());
 
         if (!dateThisMonth.equals(date))

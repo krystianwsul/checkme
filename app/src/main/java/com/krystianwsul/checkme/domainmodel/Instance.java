@@ -77,11 +77,11 @@ class Instance implements MergedInstance {
 
     @NonNull
     @Override
-    public Task getTask() {
-        MergedTask task = mDomainFactory.getTask(new TaskKey(getTaskId()));
-        Assert.assertTrue(task instanceof Task); // todo firebase;
+    public LocalTask getTask() {
+        Task task = mDomainFactory.getTask(new TaskKey(getTaskId()));
+        Assert.assertTrue(task instanceof LocalTask); // todo firebase;
 
-        return (Task) task;
+        return (LocalTask) task;
     }
 
     @NonNull
@@ -230,23 +230,23 @@ class Instance implements MergedInstance {
     public List<MergedInstance> getChildInstances(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
-        Task task = getTask();
+        LocalTask localTask = getTask();
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        List<TaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
+        List<TaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(localTask);
         HashSet<MergedInstance> childInstances = new HashSet<>();
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
-            Assert.assertTrue(taskHierarchy.getChildTask() instanceof Task); // todo firebase
-            Task childTask = (Task) taskHierarchy.getChildTask();
+            Assert.assertTrue(taskHierarchy.getChildTask() instanceof LocalTask); // todo firebase
+            LocalTask childLocalTask = (LocalTask) taskHierarchy.getChildTask();
 
-            MergedInstance existingChildInstance = mDomainFactory.getExistingInstance(childTask, scheduleDateTime);
+            MergedInstance existingChildInstance = mDomainFactory.getExistingInstance(childLocalTask, scheduleDateTime);
             if (existingChildInstance != null) {
                 childInstances.add(existingChildInstance);
             } else if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.getChildTask().notDeleted(hierarchyExactTimeStamp)) {
-                childInstances.add(mDomainFactory.getInstance(childTask, scheduleDateTime));
+                childInstances.add(mDomainFactory.getInstance(childLocalTask, scheduleDateTime));
             }
         }
 
@@ -258,9 +258,9 @@ class Instance implements MergedInstance {
     public MergedInstance getParentInstance(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
-        Task task = getTask();
+        LocalTask localTask = getTask();
 
-        MergedTask parentTask = task.getParentTask(hierarchyExactTimeStamp);
+        Task parentTask = localTask.getParentTask(hierarchyExactTimeStamp);
 
         if (parentTask == null)
             return null;
@@ -318,14 +318,14 @@ class Instance implements MergedInstance {
     }
 
     private void createInstanceRecord(@NonNull ExactTimeStamp now) {
-        Task task = getTask();
+        LocalTask localTask = getTask();
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
         mTaskId = null;
         mScheduleDateTime = null;
 
-        mInstanceRecord = mDomainFactory.createInstanceRecord(task, this, scheduleDateTime, now);
+        mInstanceRecord = mDomainFactory.createInstanceRecord(localTask, this, scheduleDateTime, now);
     }
 
     @NonNull
@@ -334,9 +334,9 @@ class Instance implements MergedInstance {
 
         exactTimeStamps.add(now);
 
-        Task task = getTask();
+        LocalTask localTask = getTask();
 
-        ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
+        ExactTimeStamp taskEndExactTimeStamp = localTask.getEndExactTimeStamp();
         if (taskEndExactTimeStamp != null)
             exactTimeStamps.add(taskEndExactTimeStamp.minusOne());
 
@@ -474,9 +474,9 @@ class Instance implements MergedInstance {
         boolean isVisible = isVisibleHelper(now);
 
         if (isVisible) {
-            Task task = getTask();
+            LocalTask localTask = getTask();
 
-            Date oldestVisible = task.getOldestVisible();
+            Date oldestVisible = localTask.getOldestVisible();
 
             // zone hack
             if (!(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getDate()) <= 0)) {

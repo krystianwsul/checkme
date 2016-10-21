@@ -34,7 +34,7 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
 
     @NonNull
     @Override
-    String getScheduleText(@NonNull Context context) {
+    public String getScheduleText(@NonNull Context context) {
         String day = mMonthlyWeekScheduleRecord.getDayOfMonth() + " " + getDayOfWeek() + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mMonthlyWeekScheduleRecord.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
         return day + ": " + getTime();

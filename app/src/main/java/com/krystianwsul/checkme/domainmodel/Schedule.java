@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -9,8 +8,6 @@ import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
-
-import java.util.List;
 
 abstract class Schedule implements MergedSchedule {
     @NonNull
@@ -25,9 +22,6 @@ abstract class Schedule implements MergedSchedule {
     }
 
     @NonNull
-    abstract String getScheduleText(@NonNull Context context);
-
-    @NonNull
     ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mScheduleRecord.getStartTime());
     }
@@ -40,7 +34,8 @@ abstract class Schedule implements MergedSchedule {
             return new ExactTimeStamp(mScheduleRecord.getEndTime());
     }
 
-    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
+    @Override
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         mScheduleRecord.setEndTime(endExactTimeStamp.getLong());
@@ -62,9 +57,6 @@ abstract class Schedule implements MergedSchedule {
 
         return scheduleType;
     }
-
-    @NonNull
-    abstract List<MergedInstance> getInstances(@NonNull Task task, @Nullable ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
 
     @Nullable
     public abstract Integer getCustomTimeId();

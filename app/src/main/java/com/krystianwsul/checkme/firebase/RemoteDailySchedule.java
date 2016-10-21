@@ -9,6 +9,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.records.RemoteDailyScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -48,7 +49,7 @@ class RemoteDailySchedule extends RemoteSchedule {
 
     @NonNull
     @Override
-    String getScheduleText(@NonNull Context context) {
+    public String getScheduleText(@NonNull Context context) {
         return context.getString(R.string.daily) + " " + getTime().toString();
     }
 
@@ -79,7 +80,7 @@ class RemoteDailySchedule extends RemoteSchedule {
 
     @NonNull
     @Override
-    List<MergedInstance> getInstances(@NonNull RemoteTask task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
+    public List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
         ExactTimeStamp myStartTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp myEndTimeStamp = getEndExactTimeStamp();
 
@@ -124,7 +125,7 @@ class RemoteDailySchedule extends RemoteSchedule {
     }
 
     @Nullable
-    protected MergedInstance getInstanceInDate(@NonNull RemoteTask task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
+    protected MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         DayOfWeek day = date.getDayOfWeek();
 
         HourMinute hourMinute = getTime().getHourMinute(day);

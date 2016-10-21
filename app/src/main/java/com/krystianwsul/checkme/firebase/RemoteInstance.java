@@ -9,7 +9,7 @@ import android.util.Log;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
-import com.krystianwsul.checkme.domainmodel.MergedTask;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
@@ -235,7 +235,7 @@ public class RemoteInstance implements MergedInstance {
     @NonNull
     @Override
     public RemoteTask getTask() {
-        MergedTask task = mDomainFactory.getTask(getTaskKey());
+        Task task = mDomainFactory.getTask(getTaskKey());
         Assert.assertTrue(task instanceof RemoteTask);
 
         return (RemoteTask) task;
@@ -246,7 +246,7 @@ public class RemoteInstance implements MergedInstance {
     public List<MergedInstance> getChildInstances(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
-        MergedTask task = getTask();
+        Task task = getTask();
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
@@ -255,7 +255,7 @@ public class RemoteInstance implements MergedInstance {
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
-            MergedTask childTask = taskHierarchy.getChildTask();
+            Task childTask = taskHierarchy.getChildTask();
 
             MergedInstance existingChildInstance = mDomainFactory.getExistingInstance(childTask, scheduleDateTime);
             if (existingChildInstance != null) {
@@ -274,7 +274,7 @@ public class RemoteInstance implements MergedInstance {
 
         exactTimeStamps.add(now);
 
-        MergedTask task = getTask();
+        Task task = getTask();
 
         ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
         if (taskEndExactTimeStamp != null)
@@ -390,9 +390,9 @@ public class RemoteInstance implements MergedInstance {
     public MergedInstance getParentInstance(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
-        MergedTask task = getTask();
+        Task task = getTask();
 
-        MergedTask parentTask = task.getParentTask(hierarchyExactTimeStamp);
+        Task parentTask = task.getParentTask(hierarchyExactTimeStamp);
 
         if (parentTask == null)
             return null;
@@ -457,7 +457,7 @@ public class RemoteInstance implements MergedInstance {
         boolean isVisible = isVisibleHelper(now);
 
         if (isVisible) {
-            MergedTask task = getTask();
+            Task task = getTask();
 
             Date oldestVisible = task.getOldestVisible();
 

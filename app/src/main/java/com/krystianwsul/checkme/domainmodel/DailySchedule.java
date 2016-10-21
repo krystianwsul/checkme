@@ -33,7 +33,7 @@ class DailySchedule extends RepeatingSchedule {
 
     @NonNull
     @Override
-    String getScheduleText(@NonNull Context context) {
+    public String getScheduleText(@NonNull Context context) {
         return context.getString(R.string.daily) + " " + getTime().toString();
     }
 

@@ -40,7 +40,7 @@ public interface MergedInstance {
     boolean isRootInstance(@NonNull ExactTimeStamp now);
 
     @NonNull
-    MergedTask getTask();
+    Task getTask();
 
     @NonNull
     TimePair getInstanceTimePair();

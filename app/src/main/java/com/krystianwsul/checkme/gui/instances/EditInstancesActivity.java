@@ -29,7 +29,6 @@ import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
-import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -143,8 +142,6 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
                     break;
 
                 DomainFactory.getDomainFactory(this).setInstancesDateTime(this, mData.DataId, mData.InstanceDatas.keySet(), mDate, mTimePairPersist.getTimePair());
-
-                TickService.startService(this);
 
                 finish();
                 break;

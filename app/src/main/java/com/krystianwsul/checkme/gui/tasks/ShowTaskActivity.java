@@ -17,7 +17,6 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
-import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 
@@ -128,7 +127,6 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
                 dataIds.add(mData.DataId);
                 dataIds.add(taskListFragment.getDataId());
                 DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.mTaskKey);
-                TickService.startService(this);
 
                 finish();
                 break;

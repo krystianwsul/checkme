@@ -19,7 +19,6 @@ import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
-import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.Utils;
 
@@ -156,8 +155,6 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
                 DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceData.InstanceKey.mTaskKey);
 
-                TickService.startService(this);
-
                 finish();
                 break;
             case R.id.instance_menu_select_all: {
@@ -239,8 +236,6 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
     private void setDone(boolean done) {
         DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mDataId, mInstanceData.InstanceKey, done);
         mInstanceData.Done = done;
-
-        TickService.startService(ShowInstanceActivity.this);
 
         invalidateOptionsMenu();
     }

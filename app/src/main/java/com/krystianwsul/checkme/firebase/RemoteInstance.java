@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
 import com.krystianwsul.checkme.domainmodel.MergedTask;
 import com.krystianwsul.checkme.domainmodel.MergedTaskHierarchy;
-import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -256,8 +255,7 @@ public class RemoteInstance implements MergedInstance {
         for (MergedTaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
-            Assert.assertTrue(taskHierarchy.getChildTask() instanceof Task); // todo firebase
-            Task childTask = (Task) taskHierarchy.getChildTask();
+            MergedTask childTask = taskHierarchy.getChildTask();
 
             MergedInstance existingChildInstance = mDomainFactory.getExistingInstance(childTask, scheduleDateTime);
             if (existingChildInstance != null) {

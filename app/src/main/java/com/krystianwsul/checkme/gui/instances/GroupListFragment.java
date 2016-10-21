@@ -46,7 +46,6 @@ import com.krystianwsul.checkme.gui.tree.TreeNode;
 import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
 import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
-import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -182,8 +181,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                     updateSelectAll();
 
-                    TickService.startService(getActivity());
-
                     break;
                 }
                 case R.id.action_group_add_task: {
@@ -264,8 +261,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     } while (!(selectedTreeNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
                     updateSelectAll();
-
-                    TickService.startService(getActivity());
 
                     break;
                 }
@@ -1900,8 +1895,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
                         recursiveExists(instanceData);
 
-                        TickService.startService(groupAdapter.mGroupListFragment.getActivity());
-
                         nodeCollection.mDividerNode.add(instanceData);
 
                         notDoneGroupCollection.remove(this);
@@ -2348,8 +2341,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                             Assert.assertTrue(mInstanceData.Done != null);
 
                             recursiveExists(mInstanceData);
-
-                            TickService.startService(groupAdapter.mGroupListFragment.getActivity());
 
                             notDoneGroupNode.remove(this);
 
@@ -2878,8 +2869,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                     return v -> {
                         mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, mInstanceData.InstanceKey, false);
                         Assert.assertTrue(mInstanceData.Done == null);
-
-                        TickService.startService(groupAdapter.mGroupListFragment.getActivity());
 
                         dividerNode.remove(this);
 

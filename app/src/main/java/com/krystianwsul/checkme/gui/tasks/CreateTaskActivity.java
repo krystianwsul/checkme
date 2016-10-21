@@ -35,7 +35,6 @@ import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -337,7 +336,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData == null);
 
                         if (hasValueFriends()) {
-                            DomainFactory.getDomainFactory(this).createScheduleRootTask(name, getScheduleDatas(), mNote, mFriendEntries);
+                            DomainFactory.getDomainFactory(this).createScheduleRootTask(this, name, getScheduleDatas(), mNote, mFriendEntries);
                         } else {
                             DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote);
                         }
@@ -379,26 +378,6 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote);
                     }
                 }
-
-                ArrayList<TaskKey> taskKeys = new ArrayList<>();
-
-                // this task
-                if (mTaskId != null)
-                    taskKeys.add(new TaskKey(mTaskId)); // todo firebase
-
-                // new parent
-                if (mParent != null)
-                    taskKeys.add(mParent.mTaskKey); // todo firebase
-
-                // old parent of single task
-                if (mData.TaskData != null && mData.TaskData.mParentTaskKey != null)
-                    taskKeys.add(mData.TaskData.mParentTaskKey);
-
-                // old parent of multiple tasks
-                if (mParentTaskKeyHint != null)
-                    taskKeys.add(mParentTaskKeyHint);
-
-                TickService.startService(this, taskKeys);
 
                 finish();
 

@@ -9,6 +9,6 @@ public class BootReceiver extends BroadcastReceiver {
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @Override
     public void onReceive(Context context, Intent intent) {
-        TickService.register(context);
+        TickService.startServiceRegister(context);
     }
 }

@@ -30,7 +30,6 @@ import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
-import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -140,8 +139,6 @@ public class EditInstanceActivity extends AbstractActivity implements LoaderMana
                 getSupportLoaderManager().destroyLoader(0);
 
                 DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(this, mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
-
-                TickService.startService(EditInstanceActivity.this);
 
                 finish();
                 break;

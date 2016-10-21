@@ -9,6 +9,6 @@ public class TimeChangeReceiver extends BroadcastReceiver {
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @Override
     public void onReceive(Context context, Intent intent) {
-        TickService.startService(context);
+        TickService.startServiceTimeChange(context);
     }
 }

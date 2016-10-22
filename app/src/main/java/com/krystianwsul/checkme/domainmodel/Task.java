@@ -17,6 +17,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Task {
     @NonNull
@@ -226,4 +227,7 @@ public abstract class Task {
     public abstract void setRelevant();
 
     public abstract void setName(@NonNull String name, @Nullable String note);
+
+    @NonNull
+    public abstract Set<String> getRecordOf();
 }

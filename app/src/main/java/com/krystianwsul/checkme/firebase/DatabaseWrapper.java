@@ -42,7 +42,7 @@ public class DatabaseWrapper {
     }
 
     @NonNull
-    static Query getFriendsQuery(@NonNull UserData userData) {
+    public static Query getFriendsQuery(@NonNull UserData userData) {
         String key = UserData.getKey(userData.email);
 
         Query query = sDatabaseReference.child(USERS_KEY).orderByChild("friendOf/" + key).equalTo(true);

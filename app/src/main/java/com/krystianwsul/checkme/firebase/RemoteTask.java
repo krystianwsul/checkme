@@ -71,7 +71,8 @@ public class RemoteTask extends Task {
     }
 
     @NonNull
-    Set<String> getRecordOf() {
+    @Override
+    public Set<String> getRecordOf() {
         return mRemoteTaskRecord.getRecordOf();
     }
 

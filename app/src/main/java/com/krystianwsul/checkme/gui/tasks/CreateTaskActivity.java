@@ -51,7 +51,7 @@ import java.util.Map;
 public class CreateTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data>, FriendPickerFragment.Listener {
     private static final String DISCARD_TAG = "discard";
 
-    private static final String TASK_ID_KEY = "taskId";
+    private static final String TASK_KEY_KEY = "taskKey";
     private static final String TASK_IDS_KEY = "taskIds";
 
     private static final String PARENT_TASK_KEY_HINT_KEY = "parentTaskKeyHint";
@@ -78,7 +78,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateTaskActivity.this::finish;
 
-    private Integer mTaskId;
+    private TaskKey mTaskKey;
     private ArrayList<Integer> mTaskIds;
 
     @Nullable
@@ -201,7 +201,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         }
     };
 
-    private List<UserData> mFriendEntries = new ArrayList<>(); // todo friend
+    private List<UserData> mFriendEntries;
 
     @NonNull
     public static Intent getCreateIntent(@NonNull Context context) {
@@ -278,12 +278,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     @NonNull
     public static Intent getEditIntent(@NonNull Context context, @NonNull TaskKey taskKey) {
         Intent intent = new Intent(context, CreateTaskActivity.class);
-        // todo firebase
-
-        Integer taskId = taskKey.mLocalTaskId;
-        Assert.assertTrue(taskId != null);
-
-        intent.putExtra(TASK_ID_KEY, taskId);
+        intent.putExtra(TASK_KEY_KEY, taskKey);
         return intent;
     }
 
@@ -320,12 +315,12 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 if (hasValueSchedule()) {
                     Assert.assertTrue(!hasValueParent());
 
-                    if (mTaskId != null) {
+                    if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
                         Assert.assertTrue(!hasValueFriends()); // todo friends
 
-                        DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskId, name, getScheduleDatas(), mNote);
+                        DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskKey.mLocalTaskId, name, getScheduleDatas(), mNote); // todo firebase
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskIds.size() > 1);
@@ -345,11 +340,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     Assert.assertTrue(mParent != null);
                     Assert.assertTrue(!hasValueFriends());
 
-                    if (mTaskId != null) {
+                    if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskId, name, mParent.mTaskKey.mLocalTaskId, mNote); // todo firebase
+                        DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskKey.mLocalTaskId, name, mParent.mTaskKey.mLocalTaskId, mNote); // todo firebase
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskIds.size() > 1);
@@ -363,11 +358,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 } else {  // no reminder
                     Assert.assertTrue(!hasValueFriends()); // todo friends
 
-                    if (mTaskId != null) {
+                    if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskId, name, mNote);
+                        DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskKey.mLocalTaskId, name, mNote); // todo firebase
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
@@ -422,13 +417,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         mScheduleTimes.setLayoutManager(new LinearLayoutManager(this));
 
         Intent intent = getIntent();
-        if (intent.hasExtra(TASK_ID_KEY)) {
+        if (intent.hasExtra(TASK_KEY_KEY)) {
             Assert.assertTrue(!intent.hasExtra(TASK_IDS_KEY));
             Assert.assertTrue(!intent.hasExtra(PARENT_TASK_KEY_HINT_KEY));
             Assert.assertTrue(!intent.hasExtra(SCHEDULE_HINT_KEY));
 
-            mTaskId = intent.getIntExtra(TASK_ID_KEY, -1);
-            Assert.assertTrue(mTaskId != -1);
+            mTaskKey = intent.getParcelableExtra(TASK_KEY_KEY);
+            Assert.assertTrue(mTaskKey != null);
         } else if ((intent.getAction() != null) && intent.getAction().equals(Intent.ACTION_SEND)) {
             Assert.assertTrue(intent.getType().equals("text/plain"));
 
@@ -524,19 +519,18 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
         List<TaskKey> excludedTaskKeys = new ArrayList<>();
 
-        if (mTaskId != null) {
+        if (mTaskKey != null) {
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mParentTaskKeyHint == null);
 
-            excludedTaskKeys.add(new TaskKey(mTaskId));
+            excludedTaskKeys.add(mTaskKey);
         } else if (mTaskIds != null) {
             excludedTaskKeys.addAll(Stream.of(mTaskIds)
                     .map(TaskKey::new)
                     .collect(Collectors.toList()));
         }
 
-        TaskKey taskKey = (mTaskId == null ? null : new TaskKey(mTaskId)); // todo firebase
-        return new CreateTaskLoader(this, taskKey, excludedTaskKeys);
+        return new CreateTaskLoader(this, mTaskKey, excludedTaskKeys);
     }
 
     @Override
@@ -547,11 +541,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         if (mSavedInstanceState == null) {
             if (mData.TaskData != null) {
-                Assert.assertTrue(mTaskId != null);
+                Assert.assertTrue(mTaskKey != null);
 
                 mToolbarEditText.setText(mData.TaskData.Name);
             } else if (!TextUtils.isEmpty(mNameHint)) {
-                Assert.assertTrue(mTaskId == null);
+                Assert.assertTrue(mTaskKey == null);
                 Assert.assertTrue(mTaskIds == null);
                 Assert.assertTrue(mParentTaskKeyHint == null);
                 Assert.assertTrue(mScheduleHint == null);
@@ -604,11 +598,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             if (mData.TaskData != null && mData.TaskData.mParentTaskKey != null) {
                 Assert.assertTrue(mParentTaskKeyHint == null);
                 Assert.assertTrue(mTaskIds == null);
-                Assert.assertTrue(mTaskId != null);
+                Assert.assertTrue(mTaskKey != null);
 
                 mParent = findTaskData(mData.TaskData.mParentTaskKey);
             } else if (mParentTaskKeyHint != null) {
-                Assert.assertTrue(mTaskId == null);
+                Assert.assertTrue(mTaskKey == null);
 
                 mParent = findTaskData(mParentTaskKeyHint);
             }
@@ -629,6 +623,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             mFirst = false;
 
             mScheduleEntries = new ArrayList<>();
+            mFriendEntries = new ArrayList<>();
 
             if (mData.TaskData != null) {
                 if (mData.TaskData.ScheduleDatas != null) {
@@ -657,6 +652,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                                 }
                             })
                             .collect(Collectors.toList());
+
+                    mFriendEntries = new ArrayList<>(mData.TaskData.mFriends);
                 }
             } else {
                 if (mParentTaskKeyHint == null)
@@ -798,7 +795,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         if (hasValueFriends()) // todo friend
             return true;
 
-        if (mTaskId != null) {
+        if (mTaskKey != null) {
             Assert.assertTrue(mData.TaskData != null);
             Assert.assertTrue(mTaskIds == null);
             Assert.assertTrue(mParentTaskKeyHint == null);
@@ -1191,11 +1188,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                     mFriendPosition = friendPosition;
 
-                    ArrayList<String> chosenEmails = Stream.of(mFriendEntries)
-                            .map(userData -> userData.email)
+                    ArrayList<UserData> userDatas = Stream.of(mData.mFriends)
+                            .filterNot(mFriendEntries::contains)
                             .collect(Collectors.toCollection(ArrayList::new));
 
-                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(true, chosenEmails);
+                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(true, userDatas);
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
             } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
@@ -1212,11 +1209,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     Assert.assertTrue(mCreateTaskAdapter != null);
                     Assert.assertTrue(mFriendPosition == null);
 
-                    ArrayList<String> chosenEmails = Stream.of(mFriendEntries)
-                            .map(friendEntry -> friendEntry.email)
+                    ArrayList<UserData> userDatas = Stream.of(mData.mFriends)
+                            .filterNot(mFriendEntries::contains)
                             .collect(Collectors.toCollection(ArrayList::new));
 
-                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false, chosenEmails);
+                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false, userDatas);
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
             } else {

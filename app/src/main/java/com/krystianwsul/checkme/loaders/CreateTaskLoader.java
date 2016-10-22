@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -18,6 +19,7 @@ import junit.framework.Assert;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
@@ -53,10 +55,14 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @NonNull
         public final Map<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<Integer, CustomTimeData> customTimeDatas) {
+        @NonNull
+        public final Set<UserData> mFriends;
+
+        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<Integer, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends) {
             TaskData = taskData;
             TaskTreeDatas = taskTreeDatas;
             CustomTimeDatas = customTimeDatas;
+            mFriends = friends;
         }
 
         @Override
@@ -66,6 +72,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 hash += TaskData.hashCode();
             hash += TaskTreeDatas.hashCode();
             hash += CustomTimeDatas.hashCode();
+            hash += mFriends.hashCode();
             return hash;
         }
 
@@ -95,6 +102,9 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if (!CustomTimeDatas.equals(data.CustomTimeDatas))
                 return false;
 
+            if (!mFriends.equals(data.mFriends))
+                return false;
+
             return true;
         }
     }
@@ -112,7 +122,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @Nullable
         public final String mNote;
 
-        public TaskData(@NonNull String name, @Nullable TaskKey parentTaskKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note) {
+        @NonNull
+        public final Set<UserData> mFriends;
+
+        public TaskData(@NonNull String name, @Nullable TaskKey parentTaskKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @NonNull Set<UserData> friends) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue((parentTaskKey == null) || (scheduleDatas == null));
 
@@ -120,6 +133,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             mParentTaskKey = parentTaskKey;
             ScheduleDatas = scheduleDatas;
             mNote = note;
+            mFriends = friends;
         }
 
         @Override
@@ -137,6 +151,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             }
             if (!TextUtils.isEmpty(mNote))
                 hash += mNote.hashCode();
+            hash += mFriends.hashCode();
             return hash;
         }
 
@@ -173,6 +188,9 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if (!TextUtils.isEmpty(mNote) && !mNote.equals(taskData.mNote))
+                return false;
+
+            if (!mFriends.equals(taskData.mFriends))
                 return false;
 
             return true;

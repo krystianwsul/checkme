@@ -82,6 +82,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,10 +100,19 @@ public class DomainFactory {
     private UserData mUserData;
 
     @Nullable
-    private Query mQuery;
+    private Map<String, UserData> mFriends;
 
     @Nullable
-    private ValueEventListener mValueEventListener;
+    private Query mRecordQuery;
+
+    @Nullable
+    private ValueEventListener mRecordListener;
+
+    @Nullable
+    private Query mFriendQuery;
+
+    @Nullable
+    private ValueEventListener mFriendListener;
 
     private LocalFactory mLocalFactory;
     private RemoteFactory mRemoteFactory;
@@ -188,7 +198,8 @@ public class DomainFactory {
 
     public synchronized void setUserData(@NonNull Context context, @NonNull UserData userData) {
         if (mUserData != null) {
-            Assert.assertTrue(mQuery != null);
+            Assert.assertTrue(mRecordQuery != null);
+            Assert.assertTrue(mFriendQuery != null);
 
             if (mUserData.equals(userData))
                 return;
@@ -197,43 +208,80 @@ public class DomainFactory {
         }
 
         Assert.assertTrue(mUserData == null);
-        Assert.assertTrue(mQuery == null);
+
+        Assert.assertTrue(mRecordQuery == null);
+        Assert.assertTrue(mRecordListener == null);
+
+        Assert.assertTrue(mFriendQuery == null);
+        Assert.assertTrue(mFriendListener == null);
 
         mUserData = userData;
 
-        mQuery = DatabaseWrapper.getTaskRecordsQuery(userData);
-
-        mValueEventListener = new ValueEventListener() {
+        mRecordQuery = DatabaseWrapper.getTaskRecordsQuery(userData);
+        mRecordListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.e("asdf", "DomainFactory.mValueEventListeneronDataChange, dataSnapshot: " + dataSnapshot);
+                Log.e("asdf", "DomainFactory.mRecordListener.onDataChange, dataSnapshot: " + dataSnapshot);
+                Assert.assertTrue(dataSnapshot != null);
 
                 setRemoteTaskRecords(context.getApplicationContext(), dataSnapshot);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("asdf", "DomainFactory.mValueEventListener.onCancelled", databaseError.toException());
+                Assert.assertTrue(databaseError != null);
+                Log.e("asdf", "DomainFactory.mRecordListener.onCancelled", databaseError.toException());
 
                 MyCrashlytics.logException(databaseError.toException());
             }
         };
+        mRecordQuery.addValueEventListener(mRecordListener);
 
-        mQuery.addValueEventListener(mValueEventListener);
+        mFriendQuery = DatabaseWrapper.getFriendsQuery(mUserData);
+        mFriendListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.e("asdf", "DomainFactory.mFriendListener.onDataChange, dataSnapshot: " + dataSnapshot);
+                Assert.assertTrue(dataSnapshot != null);
+
+                setFriendRecords(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Assert.assertTrue(databaseError != null);
+                Log.e("asdf", "DomainFactory.mFriendListener.onCancelled", databaseError.toException());
+
+                MyCrashlytics.logException(databaseError.toException());
+            }
+        };
+        mFriendQuery.addValueEventListener(mFriendListener);
     }
 
     public synchronized void clearUserData() {
         if (mUserData == null) {
-            Assert.assertTrue(mQuery == null);
-            Assert.assertTrue(mValueEventListener == null);
+            Assert.assertTrue(mRecordQuery == null);
+            Assert.assertTrue(mRecordListener == null);
+            Assert.assertTrue(mFriendQuery == null);
+            Assert.assertTrue(mFriendListener == null);
         } else {
-            Assert.assertTrue(mQuery != null);
-            Assert.assertTrue(mValueEventListener != null);
+            Assert.assertTrue(mRecordQuery != null);
+            Assert.assertTrue(mRecordListener != null);
+            Assert.assertTrue(mFriendQuery != null);
+            Assert.assertTrue(mFriendListener != null);
 
-            mQuery.removeEventListener(mValueEventListener);
+            mRemoteFactory = new RemoteFactory(this, new ArrayList<>());
+            mFriends = null;
 
             mUserData = null;
-            mQuery = null;
+
+            mRecordQuery.removeEventListener(mRecordListener);
+            mRecordQuery = null;
+            mRecordListener = null;
+
+            mFriendQuery.removeEventListener(mFriendListener);
+            mFriendQuery = null;
+            mFriendListener = null;
         }
     }
 
@@ -241,6 +289,15 @@ public class DomainFactory {
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren());
 
         updateNotifications(context, new ArrayList<>(), ExactTimeStamp.getNow());
+
+        ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+    }
+
+    private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
+        mFriends = Stream.of(dataSnapshot.getChildren())
+                .map(child -> child.child("userData"))
+                .map(userData -> userData.getValue(UserData.class))
+                .collect(Collectors.toMap(userData -> UserData.getKey(userData.email), userData -> userData));
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
@@ -829,7 +886,18 @@ public class DomainFactory {
                 parentTaskKey = parentTask.getTaskKey();
             }
 
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskKey, scheduleDatas, task.getNote());
+            Set<UserData> friends;
+            if (task.getRecordOf().isEmpty()) {
+                friends = new HashSet<>();
+            } else {
+                Assert.assertTrue(mFriends != null);
+
+                friends = Stream.of(mFriends.values())
+                        .filter(userData -> task.getRecordOf().contains(UserData.getKey(userData.email)))
+                        .collect(Collectors.toSet());
+            }
+
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskKey, scheduleDatas, task.getNote(), friends);
         }
 
         Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskKeys);
@@ -838,7 +906,9 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getId(), new CreateTaskLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas);
+        Set<UserData> friends = (mFriends != null ? new HashSet<>(mFriends.values()) : new HashSet<>());
+
+        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends);
     }
 
     @NonNull
@@ -897,6 +967,7 @@ public class DomainFactory {
 
         return new TaskListLoader.Data(childTaskDatas, note);
     }
+
 
     // sets
 

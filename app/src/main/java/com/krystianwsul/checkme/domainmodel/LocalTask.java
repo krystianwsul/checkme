@@ -13,7 +13,9 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LocalTask extends Task {
     @NonNull
@@ -119,5 +121,11 @@ public class LocalTask extends Task {
     @Override
     protected Collection<Schedule> getSchedules() {
         return mSchedules;
+    }
+
+    @NonNull
+    @Override
+    public Set<String> getRecordOf() {
+        return new HashSet<>();
     }
 }

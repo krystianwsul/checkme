@@ -20,11 +20,11 @@ import junit.framework.Assert;
 
 import java.util.Calendar;
 
-class MonthlyWeekSchedule extends RepeatingSchedule {
+public class MonthlyWeekSchedule extends RepeatingSchedule {
     @NonNull
     private final MonthlyWeekScheduleBridge mMonthlyWeekScheduleBridge;
 
-    MonthlyWeekSchedule(@NonNull DomainFactory domainFactory, @NonNull MonthlyWeekScheduleBridge monthlyWeekScheduleBridge) {
+    public MonthlyWeekSchedule(@NonNull DomainFactory domainFactory, @NonNull MonthlyWeekScheduleBridge monthlyWeekScheduleBridge) {
         super(domainFactory);
 
         mMonthlyWeekScheduleBridge = monthlyWeekScheduleBridge;

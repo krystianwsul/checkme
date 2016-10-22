@@ -8,9 +8,15 @@ import com.annimon.stream.Stream;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.firebase.database.DataSnapshot;
+import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MergedInstance;
+import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
+import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
+import com.krystianwsul.checkme.domainmodel.Schedule;
+import com.krystianwsul.checkme.domainmodel.SingleSchedule;
 import com.krystianwsul.checkme.domainmodel.Task;
+import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
@@ -56,7 +62,7 @@ public class RemoteFactory {
     public final Map<String, RemoteTaskHierarchy> mRemoteTaskHierarchies;
 
     @NonNull
-    final Multimap<String, RemoteSchedule> mRemoteSchedules;
+    final Multimap<String, Schedule> mRemoteSchedules;
 
     @NonNull
     public final Map<String, RemoteInstance> mExistingRemoteInstances;
@@ -74,19 +80,19 @@ public class RemoteFactory {
 
         mRemoteSchedules = ArrayListMultimap.create();
         for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteManager.mRemoteSingleScheduleRecords.values())
-            mRemoteSchedules.put(remoteSingleScheduleRecord.getTaskId(), new RemoteSingleSchedule(domainFactory, remoteSingleScheduleRecord));
+            mRemoteSchedules.put(remoteSingleScheduleRecord.getTaskId(), new SingleSchedule(domainFactory, new RemoteSingleScheduleBridge(remoteSingleScheduleRecord)));
 
         for (RemoteDailyScheduleRecord remoteDailyScheduleRecord : mRemoteManager.mRemoteDailyScheduleRecords.values())
-            mRemoteSchedules.put(remoteDailyScheduleRecord.getTaskId(), new RemoteDailySchedule(domainFactory, remoteDailyScheduleRecord));
+            mRemoteSchedules.put(remoteDailyScheduleRecord.getTaskId(), new DailySchedule(domainFactory, new RemoteDailyScheduleBridge(remoteDailyScheduleRecord)));
 
         for (RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord : mRemoteManager.mRemoteWeeklyScheduleRecords.values())
-            mRemoteSchedules.put(remoteWeeklyScheduleRecord.getTaskId(), new RemoteWeeklySchedule(domainFactory, remoteWeeklyScheduleRecord));
+            mRemoteSchedules.put(remoteWeeklyScheduleRecord.getTaskId(), new WeeklySchedule(domainFactory, new RemoteWeeklyScheduleBridge(remoteWeeklyScheduleRecord)));
 
         for (RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord : mRemoteManager.mRemoteMonthlyDayScheduleRecords.values())
-            mRemoteSchedules.put(remoteMonthlyDayScheduleRecord.getTaskId(), new RemoteMonthlyDaySchedule(domainFactory, remoteMonthlyDayScheduleRecord));
+            mRemoteSchedules.put(remoteMonthlyDayScheduleRecord.getTaskId(), new MonthlyDaySchedule(domainFactory, new RemoteMonthlyDayScheduleBridge(remoteMonthlyDayScheduleRecord)));
 
         for (RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord : mRemoteManager.mRemoteMonthlyWeekScheduleRecords.values())
-            mRemoteSchedules.put(remoteMonthlyWeekScheduleRecord.getTaskId(), new RemoteMonthlyWeekSchedule(domainFactory, remoteMonthlyWeekScheduleRecord));
+            mRemoteSchedules.put(remoteMonthlyWeekScheduleRecord.getTaskId(), new MonthlyWeekSchedule(domainFactory, new RemoteMonthlyWeekScheduleBridge(remoteMonthlyWeekScheduleRecord)));
 
         mExistingRemoteInstances = new HashMap<>();
         for (RemoteInstanceRecord remoteInstanceRecord : mRemoteManager.mRemoteInstanceRecords.values()) {
@@ -124,7 +130,7 @@ public class RemoteFactory {
                     RemoteSingleScheduleRecord remoteSingleScheduleRecord = mRemoteManager.newRemoteSingleScheduleRecord(new JsonWrapper(userDatas, new SingleScheduleJson(taskId, now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), null, hourMinute.getHour(), hourMinute.getMinute())));
                     Assert.assertTrue(!mRemoteSchedules.containsKey(remoteSingleScheduleRecord.getId()));
 
-                    mRemoteSchedules.put(remoteSingleScheduleRecord.getId(), new RemoteSingleSchedule(domainFactory, remoteSingleScheduleRecord));
+                    mRemoteSchedules.put(remoteSingleScheduleRecord.getId(), new SingleSchedule(domainFactory, new RemoteSingleScheduleBridge(remoteSingleScheduleRecord)));
                     break;
                 }
                 case DAILY: {
@@ -138,7 +144,7 @@ public class RemoteFactory {
                     RemoteDailyScheduleRecord remoteDailyScheduleRecord = mRemoteManager.newRemoteDailyScheduleRecord(new JsonWrapper(userDatas, new DailyScheduleJson(taskId, now.getLong(), null, null, hourMinute.getHour(), hourMinute.getMinute())));
                     Assert.assertTrue(!mRemoteSchedules.containsKey(remoteDailyScheduleRecord.getId()));
 
-                    mRemoteSchedules.put(remoteDailyScheduleRecord.getId(), new RemoteDailySchedule(domainFactory, remoteDailyScheduleRecord));
+                    mRemoteSchedules.put(remoteDailyScheduleRecord.getId(), new DailySchedule(domainFactory, new RemoteDailyScheduleBridge(remoteDailyScheduleRecord)));
                     break;
                 }
                 case WEEKLY: {
@@ -153,7 +159,7 @@ public class RemoteFactory {
                     RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteManager.newRemoteWeeklyScheduleRecord(new JsonWrapper(userDatas, new WeeklyScheduleJson(taskId, now.getLong(), null, dayOfWeek.ordinal(), null, hourMinute.getHour(), hourMinute.getMinute())));
                     Assert.assertTrue(!mRemoteSchedules.containsKey(remoteWeeklyScheduleRecord.getId()));
 
-                    mRemoteSchedules.put(remoteWeeklyScheduleRecord.getId(), new RemoteWeeklySchedule(domainFactory, remoteWeeklyScheduleRecord));
+                    mRemoteSchedules.put(remoteWeeklyScheduleRecord.getId(), new WeeklySchedule(domainFactory, new RemoteWeeklyScheduleBridge(remoteWeeklyScheduleRecord)));
                     break;
                 }
                 case MONTHLY_DAY: {
@@ -166,7 +172,7 @@ public class RemoteFactory {
                     RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = mRemoteManager.newRemoteMonthlyDayScheduleRecord(new JsonWrapper(userDatas, new MonthlyDayScheduleJson(taskId, now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute())));
                     Assert.assertTrue(!mRemoteSchedules.containsKey(remoteMonthlyDayScheduleRecord.getId()));
 
-                    mRemoteSchedules.put(remoteMonthlyDayScheduleRecord.getId(), new RemoteMonthlyDaySchedule(domainFactory, remoteMonthlyDayScheduleRecord));
+                    mRemoteSchedules.put(remoteMonthlyDayScheduleRecord.getId(), new MonthlyDaySchedule(domainFactory, new RemoteMonthlyDayScheduleBridge(remoteMonthlyDayScheduleRecord)));
                     break;
                 }
                 case MONTHLY_WEEK: {
@@ -179,7 +185,7 @@ public class RemoteFactory {
                     RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = mRemoteManager.newRemoteMonthlyWeekScheduleRecord(new JsonWrapper(userDatas, new MonthlyWeekScheduleJson(taskId, now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, null, hourMinute.getHour(), hourMinute.getMinute())));
                     Assert.assertTrue(!mRemoteSchedules.containsKey(remoteMonthlyWeekScheduleRecord.getId()));
 
-                    mRemoteSchedules.put(remoteMonthlyWeekScheduleRecord.getId(), new RemoteMonthlyWeekSchedule(domainFactory, remoteMonthlyWeekScheduleRecord));
+                    mRemoteSchedules.put(remoteMonthlyWeekScheduleRecord.getId(), new MonthlyWeekSchedule(domainFactory, new RemoteMonthlyWeekScheduleBridge(remoteMonthlyWeekScheduleRecord)));
                     break;
                 }
                 default:

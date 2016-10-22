@@ -16,11 +16,11 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-class SingleSchedule extends Schedule {
+public class SingleSchedule extends Schedule {
     @NonNull
     private final SingleScheduleBridge mSingleScheduleBridge;
 
-    SingleSchedule(@NonNull DomainFactory domainFactory, @NonNull SingleScheduleBridge singleScheduleBridge) {
+    public SingleSchedule(@NonNull DomainFactory domainFactory, @NonNull SingleScheduleBridge singleScheduleBridge) {
         super(domainFactory);
 
         mSingleScheduleBridge = singleScheduleBridge;

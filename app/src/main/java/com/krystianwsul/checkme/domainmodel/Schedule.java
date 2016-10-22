@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-abstract class Schedule implements MergedSchedule {
+public abstract class Schedule implements MergedSchedule {
     @NonNull
     final DomainFactory mDomainFactory;
 

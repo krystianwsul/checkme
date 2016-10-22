@@ -43,7 +43,7 @@ public class DailySchedule extends RepeatingSchedule {
 
     @Nullable
     @Override
-    protected MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
+    protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         DayOfWeek day = date.getDayOfWeek();
 
         HourMinute hourMinute = getTime().getHourMinute(day);

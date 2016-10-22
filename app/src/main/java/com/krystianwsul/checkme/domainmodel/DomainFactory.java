@@ -96,7 +96,7 @@ public class DomainFactory {
     private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
     private final HashMap<Integer, LocalTask> mTasks = new HashMap<>();
     private final HashMap<Integer, LocalTaskHierarchy> mTaskHierarchies = new HashMap<>();
-    private final ArrayList<Instance> mExistingInstances = new ArrayList<>();
+    private final ArrayList<LocalInstance> mExistingLocalInstances = new ArrayList<>();
 
     private static ExactTimeStamp sStart;
     private static ExactTimeStamp sRead;
@@ -210,8 +210,8 @@ public class DomainFactory {
             LocalTask localTask = mTasks.get(instanceRecord.getTaskId());
             Assert.assertTrue(localTask != null);
 
-            Instance instance = new Instance(this, instanceRecord);
-            mExistingInstances.add(instance);
+            LocalInstance localInstance = new LocalInstance(this, instanceRecord);
+            mExistingLocalInstances.add(localInstance);
         }
     }
 
@@ -237,7 +237,7 @@ public class DomainFactory {
     }
 
     public int getInstanceCount() {
-        return mExistingInstances.size();
+        return mExistingLocalInstances.size();
     }
 
     public int getCustomTimeCount() {
@@ -374,9 +374,9 @@ public class DomainFactory {
     }
 
     @NonNull
-    public Map<InstanceKey, MergedInstance> getExistingInstances() {
-        return Stream.concat(Stream.of(mExistingInstances), Stream.of(mRemoteFactory.mExistingRemoteInstances.values()))
-                .collect(Collectors.toMap(MergedInstance::getInstanceKey, instance -> instance));
+    public Map<InstanceKey, Instance> getExistingInstances() {
+        return Stream.concat(Stream.of(mExistingLocalInstances), Stream.of(mRemoteFactory.mExistingRemoteInstances.values()))
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
     }
 
     @Nullable
@@ -445,7 +445,7 @@ public class DomainFactory {
         Map<Integer, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
 
-        MergedInstance instance = getInstance(instanceKey);
+        Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance.isRootInstance(now));
         Assert.assertTrue(instance.getDone() == null);
 
@@ -479,7 +479,7 @@ public class DomainFactory {
         HashMap<InstanceKey, EditInstancesLoader.InstanceData> instanceDatas = new HashMap<>();
 
         for (InstanceKey instanceKey : instanceKeys) {
-            MergedInstance instance = getInstance(instanceKey);
+            Instance instance = getInstance(instanceKey);
             Assert.assertTrue(instance.isRootInstance(now));
             Assert.assertTrue(instance.getDone() == null);
 
@@ -591,7 +591,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<MergedInstance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
+        List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
         List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
@@ -611,7 +611,7 @@ public class DomainFactory {
         GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, taskDatas, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
-        for (MergedInstance instance : currentInstances) {
+        for (Instance instance : currentInstances) {
             Task task = getTask(instance.getTaskKey());
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
@@ -644,9 +644,9 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<MergedInstance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
+        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
 
-        List<MergedInstance> currentInstances = Stream.of(rootInstances)
+        List<Instance> currentInstances = Stream.of(rootInstances)
                 .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 .collect(Collectors.toList());
 
@@ -678,9 +678,9 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<MergedInstance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
+        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
 
-        List<MergedInstance> currentInstances = Stream.of(rootInstances)
+        List<Instance> currentInstances = Stream.of(rootInstances)
                 .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 .collect(Collectors.toList());
 
@@ -691,7 +691,7 @@ public class DomainFactory {
         GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
-        for (MergedInstance instance : currentInstances) {
+        for (Instance instance : currentInstances) {
             Task task = getTask(instance.getTaskKey());
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
@@ -722,11 +722,11 @@ public class DomainFactory {
 
         if (getTasks().containsKey(instanceKey.mTaskKey)) {
             Task task = getTask(instanceKey.mTaskKey);
-            MergedInstance instance = getInstance(instanceKey);
+            Instance instance = getInstance(instanceKey);
 
             GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
 
-            for (MergedInstance childInstance : instance.getChildInstances(now)) {
+            for (Instance childInstance : instance.getChildInstances(now)) {
                 Task childTask = getTask(childInstance.getTaskKey());
 
                 Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
@@ -758,9 +758,9 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        ArrayList<MergedInstance> instances = new ArrayList<>();
+        ArrayList<Instance> instances = new ArrayList<>();
         for (InstanceKey instanceKey : instanceKeys) {
-            MergedInstance instance = getInstance(instanceKey);
+            Instance instance = getInstance(instanceKey);
 
             if (instance.isRootInstance(now))
                 instances.add(instance);
@@ -775,7 +775,7 @@ public class DomainFactory {
         GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
-        for (MergedInstance instance : instances) {
+        for (Instance instance : instances) {
             Task task = instance.getTask();
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
@@ -800,7 +800,7 @@ public class DomainFactory {
             return new ShowInstanceLoader.Data(null);
 
         Task task = getTask(instanceKey.mTaskKey);
-        MergedInstance instance = getInstance(instanceKey);
+        Instance instance = getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -986,7 +986,7 @@ public class DomainFactory {
     public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
         MyCrashlytics.log("DomainFactory.setInstanceDateTime");
 
-        MergedInstance instance = getInstance(instanceKey);
+        Instance instance = getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1005,7 +1005,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         for (InstanceKey instanceKey : instanceKeys) {
-            MergedInstance instance = getInstance(instanceKey);
+            Instance instance = getInstance(instanceKey);
             instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
         }
 
@@ -1017,7 +1017,7 @@ public class DomainFactory {
     public synchronized void setInstanceAddHour(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHour");
 
-        MergedInstance instance = getInstance(instanceKey);
+        Instance instance = getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
         Calendar calendar = now.getCalendar();
@@ -1037,7 +1037,7 @@ public class DomainFactory {
     public synchronized void setInstanceNotificationDone(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
 
-        MergedInstance instance = getInstance(instanceKey);
+        Instance instance = getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1057,7 +1057,7 @@ public class DomainFactory {
         Stream.of(instanceKeys).forEach(instanceKey -> {
             Assert.assertTrue(instanceKey != null);
 
-            MergedInstance instance = getInstance(instanceKey);
+            Instance instance = getInstance(instanceKey);
 
             instance.setDone(true, now);
         });
@@ -1074,7 +1074,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        MergedInstance instance = setInstanceDone(now, instanceKey, done);
+        Instance instance = setInstanceDone(now, instanceKey, done);
 
         updateNotifications(context, new ArrayList<>(), now);
 
@@ -1084,8 +1084,8 @@ public class DomainFactory {
     }
 
     @NonNull
-    MergedInstance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull InstanceKey instanceKey, boolean done) {
-        MergedInstance instance = getInstance(instanceKey);
+    Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull InstanceKey instanceKey, boolean done) {
+        Instance instance = getInstance(instanceKey);
 
         instance.setDone(done, now);
 
@@ -1100,7 +1100,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         for (InstanceKey instanceKey : instanceKeys) {
-            MergedInstance instance = getInstance(instanceKey);
+            Instance instance = getInstance(instanceKey);
 
             instance.setNotified(now);
             instance.setNotificationShown(false, now);
@@ -1112,7 +1112,7 @@ public class DomainFactory {
     public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotified");
 
-        MergedInstance instance = getInstance(instanceKey);
+        Instance instance = getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1476,7 +1476,7 @@ public class DomainFactory {
 
         // relevant hack
         Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks().values()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
-        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances().values()).collect(Collectors.toMap(MergedInstance::getInstanceKey, InstanceRelevance::new));
+        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances().values()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
         Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
 
         Stream.of(getTasks().values())
@@ -1488,14 +1488,14 @@ public class DomainFactory {
                 .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
         Stream.of(getRootInstances(null, now.plusOne(), now))
-                .map(MergedInstance::getInstanceKey)
+                .map(Instance::getInstanceKey)
                 .map(instanceRelevances::get)
                 .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
         Stream.of(getExistingInstances().values())
                 .filter(instance -> instance.isRootInstance(now))
                 .filter(instance -> instance.isVisible(now))
-                .map(MergedInstance::getInstanceKey)
+                .map(Instance::getInstanceKey)
                 .map(instanceRelevances::get)
                 .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
@@ -1515,13 +1515,13 @@ public class DomainFactory {
         Assert.assertTrue(Stream.of(irrelevantTasks)
                 .noneMatch(task -> task.isVisible(now)));
 
-        List<MergedInstance> relevantExistingInstances = Stream.of(instanceRelevances.values())
+        List<Instance> relevantExistingInstances = Stream.of(instanceRelevances.values())
                 .filter(InstanceRelevance::getRelevant)
                 .map(InstanceRelevance::getInstance)
-                .filter(MergedInstance::exists)
+                .filter(Instance::exists)
                 .collect(Collectors.toList());
 
-        List<MergedInstance> irrelevantExistingInstances = new ArrayList<>(getExistingInstances().values());
+        List<Instance> irrelevantExistingInstances = new ArrayList<>(getExistingInstances().values());
         irrelevantExistingInstances.removeAll(relevantExistingInstances);
 
         Assert.assertTrue(Stream.of(irrelevantExistingInstances)
@@ -1542,7 +1542,7 @@ public class DomainFactory {
                 .forEach(Task::setRelevant);
 
         Stream.of(irrelevantExistingInstances)
-                .forEach(MergedInstance::setRelevant);
+                .forEach(Instance::setRelevant);
 
         Stream.of(irrelevantCustomTimes)
                 .forEach(CustomTime::setRelevant);
@@ -1569,11 +1569,11 @@ public class DomainFactory {
             }
         }
 
-        for (MergedInstance instance : irrelevant.mInstances) {
-            if (instance instanceof Instance) {
-                Assert.assertTrue(mExistingInstances.contains(instance));
+        for (Instance instance : irrelevant.mInstances) {
+            if (instance instanceof LocalInstance) {
+                Assert.assertTrue(mExistingLocalInstances.contains(instance));
 
-                mExistingInstances.remove(instance);
+                mExistingLocalInstances.remove(instance);
             }
         }
 
@@ -1680,15 +1680,15 @@ public class DomainFactory {
             sharedPreferences.edit().putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
         }
 
-        List<MergedInstance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
+        List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 
-        Map<InstanceKey, MergedInstance> notificationInstances = Stream.of(rootInstances)
+        Map<InstanceKey, Instance> notificationInstances = Stream.of(rootInstances)
                 .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
-                .collect(Collectors.toMap(MergedInstance::getInstanceKey, instance -> instance));
-
-        Map<InstanceKey, Instance> shownInstances = Stream.of(mExistingInstances)
-                .filter(Instance::getNotificationShown)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
+
+        Map<InstanceKey, LocalInstance> shownInstances = Stream.of(mExistingLocalInstances)
+                .filter(LocalInstance::getNotificationShown)
+                .collect(Collectors.toMap(LocalInstance::getInstanceKey, instance -> instance));
 
         Set<InstanceKey> shownInstanceKeys = shownInstances.keySet();
 
@@ -1704,7 +1704,7 @@ public class DomainFactory {
             for (InstanceKey showInstanceKey : showInstanceKeys) {
                 Assert.assertTrue(showInstanceKey != null);
 
-                MergedInstance showInstance = getInstance(showInstanceKey);
+                Instance showInstance = getInstance(showInstanceKey);
 
                 showInstance.setNotificationShown(true, now);
             }
@@ -1712,7 +1712,7 @@ public class DomainFactory {
             for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                 Assert.assertTrue(hideInstanceKey != null);
 
-                MergedInstance hideInstance = getInstance(hideInstanceKey);
+                Instance hideInstance = getInstance(hideInstanceKey);
 
                 hideInstance.setNotificationShown(false, now);
             }
@@ -1727,7 +1727,7 @@ public class DomainFactory {
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 notifyGroup(context, notificationInstances.values(), true, now);
             } else { // show instances
-                for (MergedInstance instance : notificationInstances.values()) {
+                for (Instance instance : notificationInstances.values()) {
                     Assert.assertTrue(instance != null);
 
                     notifyInstance(context, instance, true, now);
@@ -1742,7 +1742,7 @@ public class DomainFactory {
                         notifyGroup(context, notificationInstances.values(), true, now);
                     }
                 } else { // instances shown
-                    for (MergedInstance instance : shownInstances.values())
+                    for (Instance instance : shownInstances.values())
                         notificationManager.cancel(instance.getNotificationId());
 
                     notifyGroup(context, notificationInstances.values(), silent, now);
@@ -1751,21 +1751,21 @@ public class DomainFactory {
                 if (shownInstances.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     notificationManager.cancel(0);
 
-                    for (MergedInstance instance : notificationInstances.values()) {
+                    for (Instance instance : notificationInstances.values()) {
                         Assert.assertTrue(instance != null);
 
                         notifyInstance(context, instance, silent, now);
                     }
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                        MergedInstance instance = shownInstances.get(hideInstanceKey);
+                        Instance instance = shownInstances.get(hideInstanceKey);
                         Assert.assertTrue(instance != null);
 
                         notificationManager.cancel(instance.getNotificationId());
                     }
 
                     for (InstanceKey showInstanceKey : showInstanceKeys) {
-                        MergedInstance instance = notificationInstances.get(showInstanceKey);
+                        Instance instance = notificationInstances.get(showInstanceKey);
                         Assert.assertTrue(instance != null);
 
                         notifyInstance(context, instance, silent, now);
@@ -1780,8 +1780,8 @@ public class DomainFactory {
         }
 
         TimeStamp nextAlarm = null;
-        for (Instance existingInstance : mExistingInstances) {
-            TimeStamp instanceTimeStamp = existingInstance.getInstanceDateTime().getTimeStamp();
+        for (LocalInstance existingLocalInstance : mExistingLocalInstances) {
+            TimeStamp instanceTimeStamp = existingLocalInstance.getInstanceDateTime().getTimeStamp();
             if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
                 if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
                     nextAlarm = instanceTimeStamp;
@@ -1817,16 +1817,16 @@ public class DomainFactory {
         }
     }
 
-    private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull MergedInstance instance, @NonNull ExactTimeStamp now) {
+    private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull Instance instance, @NonNull ExactTimeStamp now) {
         return (taskKeys.contains(instance.getTaskKey()) || Stream.of(instance.getChildInstances(now)).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
     }
 
     // internal
 
     @NonNull
-    private ArrayList<MergedInstance> getExistingInstances(@NonNull Task task) {
-        ArrayList<MergedInstance> instances = new ArrayList<>();
-        for (MergedInstance instance : getExistingInstances().values()) {
+    private ArrayList<Instance> getExistingInstances(@NonNull Task task) {
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (Instance instance : getExistingInstances().values()) {
             Assert.assertTrue(instance != null);
             if (instance.getTaskKey().equals(task.getTaskKey()))
                 instances.add(instance);
@@ -1836,11 +1836,11 @@ public class DomainFactory {
     }
 
     @Nullable
-    public MergedInstance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        ArrayList<MergedInstance> taskInstances = getExistingInstances(task);
+    public Instance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
+        ArrayList<Instance> taskInstances = getExistingInstances(task);
 
-        ArrayList<MergedInstance> instances = new ArrayList<>();
-        for (MergedInstance instance : taskInstances) {
+        ArrayList<Instance> instances = new ArrayList<>();
+        for (Instance instance : taskInstances) {
             Assert.assertTrue(instance != null);
             if (instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
                 instances.add(instance);
@@ -1855,8 +1855,8 @@ public class DomainFactory {
     }
 
     @NonNull
-    public MergedInstance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        MergedInstance existingInstance = getExistingInstance(task, scheduleDateTime);
+    public Instance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
+        Instance existingInstance = getExistingInstance(task, scheduleDateTime);
 
         if (existingInstance != null) {
             return existingInstance;
@@ -1864,7 +1864,7 @@ public class DomainFactory {
             if (task.getTaskKey().mLocalTaskId != null) {
                 Assert.assertTrue(TextUtils.isEmpty(task.getTaskKey().mRemoteTaskId));
 
-                return new Instance(this, task.getTaskKey().mLocalTaskId, scheduleDateTime);
+                return new LocalInstance(this, task.getTaskKey().mLocalTaskId, scheduleDateTime);
             } else {
                 Assert.assertTrue(!TextUtils.isEmpty(task.getTaskKey().mRemoteTaskId));
 
@@ -1879,28 +1879,28 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<MergedInstance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
-        Map<InstanceKey, MergedInstance> allInstances = new HashMap<>();
+    public List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
+        Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
         allInstances.putAll(Stream.of(getExistingInstances().values())
                 .filter(instance -> instance.getTaskKey().equals(task.getTaskKey()))
                 .filter(instance -> instance.getScheduleDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
-                .collect(Collectors.toMap(MergedInstance::getInstanceKey, instance -> instance)));
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
 
         allInstances.putAll(Stream.of(task.getInstances(null, now.plusOne(), now))
-                .collect(Collectors.toMap(MergedInstance::getInstanceKey, instance -> instance)));
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
 
         return new ArrayList<>(allInstances.values());
     }
 
     @NonNull
-    private List<MergedInstance> getRootInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
+    private List<Instance> getRootInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
 
-        Map<InstanceKey, MergedInstance> allInstances = new HashMap<>();
+        Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
-        for (Instance instance : mExistingInstances) {
-            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
+        for (LocalInstance localInstance : mExistingLocalInstances) {
+            ExactTimeStamp instanceExactTimeStamp = localInstance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
             if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
                 continue;
@@ -1908,11 +1908,11 @@ public class DomainFactory {
             if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
                 continue;
 
-            allInstances.put(instance.getInstanceKey(), instance);
+            allInstances.put(localInstance.getInstanceKey(), localInstance);
         }
 
         for (Task task : getTasks().values()) {
-            for (MergedInstance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
+            for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
                 ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
                 if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
@@ -1932,8 +1932,8 @@ public class DomainFactory {
     }
 
     @NonNull
-    InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull Instance instance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
-        mExistingInstances.add(instance);
+    InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+        mExistingLocalInstances.add(localInstance);
 
         return mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
     }
@@ -1946,7 +1946,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private MergedInstance getInstance(@NonNull InstanceKey instanceKey) {
+    private Instance getInstance(@NonNull InstanceKey instanceKey) {
         Task task = getTask(instanceKey.mTaskKey);
 
         DateTime scheduleDateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
@@ -2253,10 +2253,10 @@ public class DomainFactory {
     }
 
     @NonNull
-    private HashMap<InstanceKey, GroupListLoader.InstanceData> getChildInstanceDatas(@NonNull MergedInstance instance, @NonNull ExactTimeStamp now, @NonNull GroupListLoader.InstanceDataParent instanceDataParent) {
+    private HashMap<InstanceKey, GroupListLoader.InstanceData> getChildInstanceDatas(@NonNull Instance instance, @NonNull ExactTimeStamp now, @NonNull GroupListLoader.InstanceDataParent instanceDataParent) {
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
-        for (MergedInstance childInstance : instance.getChildInstances(now)) {
+        for (Instance childInstance : instance.getChildInstances(now)) {
             Task childTask = getTask(childInstance.getTaskKey());
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
@@ -2298,7 +2298,7 @@ public class DomainFactory {
         }
     }
 
-    private void notifyInstance(@NonNull Context context, @NonNull MergedInstance instance, boolean silent, @NonNull ExactTimeStamp now) {
+    private void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
         Task task = instance.getTask();
         int notificationId = instance.getNotificationId();
         InstanceKey instanceKey = instance.getInstanceKey();
@@ -2319,22 +2319,22 @@ public class DomainFactory {
         PendingIntent pendingHourIntent = PendingIntent.getService(context, notificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, context.getString(R.string.hour), pendingHourIntent).build());
 
-        List<MergedInstance> childInstances = instance.getChildInstances(now);
+        List<Instance> childInstances = instance.getChildInstances(now);
 
         String text;
         NotificationCompat.Style style;
         if (!childInstances.isEmpty()) {
-            Stream<MergedInstance> notDone = Stream.of(childInstances)
+            Stream<Instance> notDone = Stream.of(childInstances)
                     .filter(childInstance -> childInstance.getDone() == null)
                     .sortBy(childInstance -> childInstance.getTask().getStartExactTimeStamp());
 
             //noinspection ConstantConditions
-            Stream<MergedInstance> done = Stream.of(childInstances)
+            Stream<Instance> done = Stream.of(childInstances)
                     .filter(childInstance -> childInstance.getDone() != null)
                     .sortBy(childInstance -> -childInstance.getDone().getLong());
 
             List<String> children = Stream.concat(notDone, done)
-                    .map(MergedInstance::getName)
+                    .map(Instance::getName)
                     .collect(Collectors.toList());
 
             text = TextUtils.join(", ", children);
@@ -2354,12 +2354,12 @@ public class DomainFactory {
         notify(context, instance.getName(), text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.getInstanceDateTime().getTimeStamp().getLong(), style, true);
     }
 
-    private void notifyGroup(@NonNull Context context, @NonNull Collection<MergedInstance> instances, boolean silent, @NonNull ExactTimeStamp now) {
+    private void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(instances.size() > TickService.MAX_NOTIFICATIONS);
 
         ArrayList<String> names = new ArrayList<>();
         ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
-        for (MergedInstance instance : instances) {
+        for (Instance instance : instances) {
             names.add(instance.getName());
             instanceKeys.add(instance.getInstanceKey());
         }
@@ -2453,9 +2453,9 @@ public class DomainFactory {
         public final List<Task> mTasks;
 
         @NonNull
-        public final List<MergedInstance> mInstances;
+        public final List<Instance> mInstances;
 
-        Irrelevant(@NonNull List<CustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<MergedInstance> instances) {
+        Irrelevant(@NonNull List<CustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<Instance> instances) {
             mCustomTimes = customTimes;
             mTasks = tasks;
             mInstances = instances;
@@ -2511,7 +2511,7 @@ public class DomainFactory {
 
             Stream.of(getExistingInstances(mTask))
                     .filter(instance -> instance.getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
-                    .map(MergedInstance::getInstanceKey)
+                    .map(Instance::getInstanceKey)
                     .map(instanceRelevances::get)
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
@@ -2534,10 +2534,10 @@ public class DomainFactory {
     }
 
     private static class InstanceRelevance {
-        private final MergedInstance mInstance;
+        private final Instance mInstance;
         private boolean mRelevant = false;
 
-        InstanceRelevance(@NonNull MergedInstance instance) {
+        InstanceRelevance(@NonNull Instance instance) {
             mInstance = instance;
         }
 
@@ -2555,7 +2555,7 @@ public class DomainFactory {
 
             // set parent instance relevant
             if (!mInstance.isRootInstance(now)) {
-                MergedInstance parentInstance = mInstance.getParentInstance(now);
+                Instance parentInstance = mInstance.getParentInstance(now);
                 Assert.assertTrue(parentInstance != null);
 
                 InstanceKey parentInstanceKey = parentInstance.getInstanceKey();
@@ -2604,7 +2604,7 @@ public class DomainFactory {
             return mRelevant;
         }
 
-        public MergedInstance getInstance() {
+        public Instance getInstance() {
             return mInstance;
         }
     }

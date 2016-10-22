@@ -39,7 +39,7 @@ public class SingleSchedule extends Schedule {
     }
 
     @NonNull
-    MergedInstance getInstance(@NonNull Task task) {
+    Instance getInstance(@NonNull Task task) {
         return mDomainFactory.getInstance(task, getDateTime());
     }
 
@@ -55,8 +55,8 @@ public class SingleSchedule extends Schedule {
 
     @NonNull
     @Override
-    public List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
-        List<MergedInstance> instances = new ArrayList<>();
+    public List<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp) {
+        List<Instance> instances = new ArrayList<>();
 
         ExactTimeStamp singleScheduleExactTimeStamp = getDateTime().getTimeStamp().toExactTimeStamp();
 

@@ -46,7 +46,7 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
 
     @Nullable
     @Override
-    protected MergedInstance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
+    protected Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli) {
         Date dateThisMonth = getDate(date.getYear(), date.getMonth());
 
         if (!dateThisMonth.equals(date))

@@ -58,7 +58,7 @@ public abstract class Schedule {
     public abstract Integer getCustomTimeId();
 
     @NonNull
-    public abstract List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
+    public abstract List<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
 
     public abstract boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now);
 

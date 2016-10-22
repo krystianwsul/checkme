@@ -10,7 +10,7 @@ import com.google.common.collect.Multimap;
 import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.domainmodel.MergedInstance;
+import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
@@ -261,7 +261,7 @@ public class RemoteFactory {
             }
         }
 
-        for (MergedInstance instance : irrelevant.mInstances) {
+        for (Instance instance : irrelevant.mInstances) {
             if (instance instanceof RemoteInstance) {
                 Assert.assertTrue(mExistingRemoteInstances.containsKey(((RemoteInstance) instance).getId()));
 

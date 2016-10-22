@@ -171,9 +171,9 @@ public abstract class Task {
 
     public void updateOldestVisible(@NonNull ExactTimeStamp now) {
         // 24 hack
-        List<MergedInstance> instances = mDomainFactory.getPastInstances(this, now);
+        List<Instance> instances = mDomainFactory.getPastInstances(this, now);
 
-        Optional<MergedInstance> optional = Stream.of(instances)
+        Optional<Instance> optional = Stream.of(instances)
                 .filter(instance -> instance.isVisible(now))
                 .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
 
@@ -194,7 +194,7 @@ public abstract class Task {
     protected abstract void setOldestVisible(@NonNull Date date);
 
     @NonNull
-    public List<MergedInstance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
+    public List<Instance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
         if (startExactTimeStamp == null) { // 24 hack
             Date oldestVisible = getOldestVisible();
             if (oldestVisible != null) {
@@ -203,7 +203,7 @@ public abstract class Task {
             }
         }
 
-        List<MergedInstance> instances = new ArrayList<>();
+        List<Instance> instances = new ArrayList<>();
         for (Schedule schedule : getSchedules())
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 

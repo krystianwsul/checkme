@@ -72,7 +72,7 @@ public class DomainFactoryTest {
 
         DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
 
-        MergedInstance rootInstance = domainFactory.getInstance(rootLocalTask, scheduleDateTime);
+        Instance rootInstance = domainFactory.getInstance(rootLocalTask, scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
@@ -167,7 +167,7 @@ public class DomainFactoryTest {
 
         DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
 
-        MergedInstance rootInstance = domainFactory.getInstance(rootLocalTask, scheduleDateTime);
+        Instance rootInstance = domainFactory.getInstance(rootLocalTask, scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
@@ -180,14 +180,14 @@ public class DomainFactoryTest {
         rootInstance = domainFactory.setInstanceDone(doneExactTimeStamp, rootInstance.getInstanceKey(), true);
         Assert.assertTrue(rootInstance.exists());
 
-        MergedInstance childInstanceDone = domainFactory.getInstance(childLocalTaskDone, scheduleDateTime);
+        Instance childInstanceDone = domainFactory.getInstance(childLocalTaskDone, scheduleDateTime);
         Assert.assertTrue(!childInstanceDone.exists());
         Assert.assertTrue(childInstanceDone.isVisible(doneExactTimeStamp));
 
         childInstanceDone = domainFactory.setInstanceDone(doneExactTimeStamp, childInstanceDone.getInstanceKey(), true);
         Assert.assertTrue(childInstanceDone.exists());
 
-        MergedInstance childInstanceExists = domainFactory.getInstance(childLocalTaskExists, scheduleDateTime);
+        Instance childInstanceExists = domainFactory.getInstance(childLocalTaskExists, scheduleDateTime);
         Assert.assertTrue(!childInstanceExists.exists());
         Assert.assertTrue(childInstanceExists.isVisible(doneExactTimeStamp));
 
@@ -197,7 +197,7 @@ public class DomainFactoryTest {
         childInstanceExists = domainFactory.setInstanceDone(doneExactTimeStamp, childInstanceExists.getInstanceKey(), false);
         Assert.assertTrue(childInstanceExists.exists());
 
-        MergedInstance childInstanceDoesntExist = domainFactory.getInstance(childLocalTaskDoesntExist, scheduleDateTime);
+        Instance childInstanceDoesntExist = domainFactory.getInstance(childLocalTaskDoesntExist, scheduleDateTime);
         Assert.assertTrue(!childInstanceDoesntExist.exists());
         Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp));
 

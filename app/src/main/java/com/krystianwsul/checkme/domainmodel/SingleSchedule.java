@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -20,12 +18,18 @@ import java.util.List;
 
 class SingleSchedule extends Schedule {
     @NonNull
-    private final SingleScheduleRecord mSingleScheduleRecord;
+    private final SingleScheduleBridge mSingleScheduleBridge;
 
-    SingleSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull SingleScheduleRecord singleScheduleRecord) {
-        super(domainFactory, scheduleRecord);
+    SingleSchedule(@NonNull DomainFactory domainFactory, @NonNull SingleScheduleBridge singleScheduleBridge) {
+        super(domainFactory);
 
-        mSingleScheduleRecord = singleScheduleRecord;
+        mSingleScheduleBridge = singleScheduleBridge;
+    }
+
+    @NonNull
+    @Override
+    protected ScheduleBridge getScheduleBridge() {
+        return mSingleScheduleBridge;
     }
 
     @NonNull
@@ -71,12 +75,12 @@ class SingleSchedule extends Schedule {
 
     @NonNull
     public Time getTime() {
-        Integer customTimeId = mSingleScheduleRecord.getCustomTimeId();
+        Integer customTimeId = mSingleScheduleBridge.getCustomTimeId();
         if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mSingleScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTime(mSingleScheduleBridge.getCustomTimeId());
         } else {
-            Integer hour = mSingleScheduleRecord.getHour();
-            Integer minute = mSingleScheduleRecord.getMinute();
+            Integer hour = mSingleScheduleBridge.getHour();
+            Integer minute = mSingleScheduleBridge.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
@@ -85,7 +89,7 @@ class SingleSchedule extends Schedule {
 
     @NonNull
     Date getDate() {
-        return new Date(mSingleScheduleRecord.getYear(), mSingleScheduleRecord.getMonth(), mSingleScheduleRecord.getDay());
+        return new Date(mSingleScheduleBridge.getYear(), mSingleScheduleBridge.getMonth(), mSingleScheduleBridge.getDay());
     }
 
     @NonNull
@@ -96,7 +100,7 @@ class SingleSchedule extends Schedule {
     @Nullable
     @Override
     public Integer getCustomTimeId() {
-        return mSingleScheduleRecord.getCustomTimeId();
+        return mSingleScheduleBridge.getCustomTimeId();
     }
 
     @Override

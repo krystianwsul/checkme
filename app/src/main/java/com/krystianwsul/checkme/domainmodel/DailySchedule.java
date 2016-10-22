@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -23,12 +21,18 @@ import java.util.Calendar;
 
 class DailySchedule extends RepeatingSchedule {
     @NonNull
-    private final DailyScheduleRecord mDailyScheduleRecord;
+    private final DailyScheduleBridge mDailyScheduleBridge;
 
-    DailySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull DailyScheduleRecord dailyScheduleRecord) {
-        super(domainFactory, scheduleRecord);
+    DailySchedule(@NonNull DomainFactory domainFactory, @NonNull DailyScheduleBridge dailyScheduleBridge) {
+        super(domainFactory);
 
-        mDailyScheduleRecord = dailyScheduleRecord;
+        mDailyScheduleBridge = dailyScheduleBridge;
+    }
+
+    @NonNull
+    @Override
+    protected ScheduleBridge getScheduleBridge() {
+        return mDailyScheduleBridge;
     }
 
     @NonNull
@@ -82,12 +86,12 @@ class DailySchedule extends RepeatingSchedule {
 
     @NonNull
     public Time getTime() {
-        Integer customTimeId = mDailyScheduleRecord.getCustomTimeId();
+        Integer customTimeId = mDailyScheduleBridge.getCustomTimeId();
         if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mDailyScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTime(mDailyScheduleBridge.getCustomTimeId());
         } else {
-            Integer hour = mDailyScheduleRecord.getHour();
-            Integer minute = mDailyScheduleRecord.getMinute();
+            Integer hour = mDailyScheduleBridge.getHour();
+            Integer minute = mDailyScheduleBridge.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
@@ -96,6 +100,6 @@ class DailySchedule extends RepeatingSchedule {
 
     @Override
     public Integer getCustomTimeId() {
-        return mDailyScheduleRecord.getCustomTimeId();
+        return mDailyScheduleBridge.getCustomTimeId();
     }
 }

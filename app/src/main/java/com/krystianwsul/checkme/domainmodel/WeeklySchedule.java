@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -23,12 +21,18 @@ import java.util.Calendar;
 
 class WeeklySchedule extends RepeatingSchedule {
     @NonNull
-    private final WeeklyScheduleRecord mWeeklyScheduleRecord;
+    private final WeeklyScheduleBridge mWeeklyScheduleBridge;
 
-    WeeklySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull WeeklyScheduleRecord weeklyScheduleRecord) {
-        super(domainFactory, scheduleRecord);
+    WeeklySchedule(@NonNull DomainFactory domainFactory, @NonNull WeeklyScheduleBridge weeklyScheduleBridge) {
+        super(domainFactory);
 
-        mWeeklyScheduleRecord = weeklyScheduleRecord;
+        mWeeklyScheduleBridge = weeklyScheduleBridge;
+    }
+
+    @NonNull
+    @Override
+    protected ScheduleBridge getScheduleBridge() {
+        return mWeeklyScheduleBridge;
     }
 
     @NonNull
@@ -86,12 +90,12 @@ class WeeklySchedule extends RepeatingSchedule {
 
     @NonNull
     private Time getTime() {
-        Integer customTimeId = mWeeklyScheduleRecord.getCustomTimeId();
+        Integer customTimeId = mWeeklyScheduleBridge.getCustomTimeId();
         if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mWeeklyScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTime(mWeeklyScheduleBridge.getCustomTimeId());
         } else {
-            Integer hour = mWeeklyScheduleRecord.getHour();
-            Integer minute = mWeeklyScheduleRecord.getMinute();
+            Integer hour = mWeeklyScheduleBridge.getHour();
+            Integer minute = mWeeklyScheduleBridge.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
@@ -100,7 +104,7 @@ class WeeklySchedule extends RepeatingSchedule {
 
     @NonNull
     private DayOfWeek getDayOfWeek() {
-        DayOfWeek dayOfWeek = DayOfWeek.values()[mWeeklyScheduleRecord.getDayOfWeek()];
+        DayOfWeek dayOfWeek = DayOfWeek.values()[mWeeklyScheduleBridge.getDayOfWeek()];
         Assert.assertTrue(dayOfWeek != null);
 
         return dayOfWeek;
@@ -108,6 +112,6 @@ class WeeklySchedule extends RepeatingSchedule {
 
     @Override
     public Integer getCustomTimeId() {
-        return mWeeklyScheduleRecord.getCustomTimeId();
+        return mWeeklyScheduleBridge.getCustomTimeId();
     }
 }

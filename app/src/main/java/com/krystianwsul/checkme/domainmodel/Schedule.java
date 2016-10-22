@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.domainmodel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -13,32 +12,31 @@ abstract class Schedule implements MergedSchedule {
     @NonNull
     final DomainFactory mDomainFactory;
 
-    @NonNull
-    private final ScheduleRecord mScheduleRecord;
-
-    Schedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
+    Schedule(@NonNull DomainFactory domainFactory) {
         mDomainFactory = domainFactory;
-        mScheduleRecord = scheduleRecord;
     }
 
     @NonNull
+    protected abstract ScheduleBridge getScheduleBridge();
+
+    @NonNull
     ExactTimeStamp getStartExactTimeStamp() {
-        return new ExactTimeStamp(mScheduleRecord.getStartTime());
+        return new ExactTimeStamp(getScheduleBridge().getStartTime());
     }
 
     @Nullable
     ExactTimeStamp getEndExactTimeStamp() {
-        if (mScheduleRecord.getEndTime() == null)
+        if (getScheduleBridge().getEndTime() == null)
             return null;
         else
-            return new ExactTimeStamp(mScheduleRecord.getEndTime());
+            return new ExactTimeStamp(getScheduleBridge().getEndTime());
     }
 
     @Override
     public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
-        mScheduleRecord.setEndTime(endExactTimeStamp.getLong());
+        getScheduleBridge().setEndTime(endExactTimeStamp.getLong());
     }
 
     @Override
@@ -52,10 +50,7 @@ abstract class Schedule implements MergedSchedule {
     @NonNull
     @Override
     public ScheduleType getType() {
-        ScheduleType scheduleType = ScheduleType.values()[mScheduleRecord.getType()];
-        Assert.assertTrue(scheduleType != null);
-
-        return scheduleType;
+        return getScheduleBridge().getScheduleType();
     }
 
     @Nullable

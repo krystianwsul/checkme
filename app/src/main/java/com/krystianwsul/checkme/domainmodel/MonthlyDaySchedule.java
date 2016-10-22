@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.persistencemodel.MonthlyDayScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -23,18 +21,24 @@ import java.util.Calendar;
 
 class MonthlyDaySchedule extends RepeatingSchedule {
     @NonNull
-    private final MonthlyDayScheduleRecord mMonthlyDayScheduleRecord;
+    private final MonthlyDayScheduleBridge mMonthlyDayScheduleBridge;
 
-    MonthlyDaySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull MonthlyDayScheduleRecord monthlyDayScheduleRecord) {
-        super(domainFactory, scheduleRecord);
+    MonthlyDaySchedule(@NonNull DomainFactory domainFactory, @NonNull MonthlyDayScheduleBridge monthlyDayScheduleBridge) {
+        super(domainFactory);
 
-        mMonthlyDayScheduleRecord = monthlyDayScheduleRecord;
+        mMonthlyDayScheduleBridge = monthlyDayScheduleBridge;
+    }
+
+    @NonNull
+    @Override
+    protected ScheduleBridge getScheduleBridge() {
+        return mMonthlyDayScheduleBridge;
     }
 
     @NonNull
     @Override
     public String getScheduleText(@NonNull Context context) {
-        String day = mMonthlyDayScheduleRecord.getDayOfMonth() + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mMonthlyDayScheduleRecord.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
+        String day = mMonthlyDayScheduleBridge.getDayOfMonth() + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mMonthlyDayScheduleBridge.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
         return day + ": " + getTime();
     }
@@ -94,21 +98,21 @@ class MonthlyDaySchedule extends RepeatingSchedule {
     }
 
     int getDayOfMonth() {
-        return mMonthlyDayScheduleRecord.getDayOfMonth();
+        return mMonthlyDayScheduleBridge.getDayOfMonth();
     }
 
     boolean getBeginningOfMonth() {
-        return mMonthlyDayScheduleRecord.getBeginningOfMonth();
+        return mMonthlyDayScheduleBridge.getBeginningOfMonth();
     }
 
     @NonNull
     Time getTime() {
-        Integer customTimeId = mMonthlyDayScheduleRecord.getCustomTimeId();
+        Integer customTimeId = mMonthlyDayScheduleBridge.getCustomTimeId();
         if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mMonthlyDayScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTime(mMonthlyDayScheduleBridge.getCustomTimeId());
         } else {
-            Integer hour = mMonthlyDayScheduleRecord.getHour();
-            Integer minute = mMonthlyDayScheduleRecord.getMinute();
+            Integer hour = mMonthlyDayScheduleBridge.getHour();
+            Integer minute = mMonthlyDayScheduleBridge.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
@@ -117,12 +121,12 @@ class MonthlyDaySchedule extends RepeatingSchedule {
 
     @NonNull
     private Date getDate(int year, int month) {
-        return Utils.getDateInMonth(year, month, mMonthlyDayScheduleRecord.getDayOfMonth(), mMonthlyDayScheduleRecord.getBeginningOfMonth());
+        return Utils.getDateInMonth(year, month, mMonthlyDayScheduleBridge.getDayOfMonth(), mMonthlyDayScheduleBridge.getBeginningOfMonth());
     }
 
     @Nullable
     @Override
     public Integer getCustomTimeId() {
-        return mMonthlyDayScheduleRecord.getCustomTimeId();
+        return mMonthlyDayScheduleBridge.getCustomTimeId();
     }
 }

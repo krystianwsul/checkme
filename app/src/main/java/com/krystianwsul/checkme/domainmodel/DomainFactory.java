@@ -1997,7 +1997,7 @@ public class DomainFactory {
         SingleScheduleRecord singleScheduleRecord = mPersistenceManager.getSingleScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(singleScheduleRecord != null);
 
-        return new SingleSchedule(this, scheduleRecord, singleScheduleRecord);
+        return new SingleSchedule(this, new LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord));
     }
 
     private DailySchedule loadDailySchedule(ScheduleRecord scheduleRecord) {
@@ -2006,7 +2006,7 @@ public class DomainFactory {
         DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.getDailyScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(dailyScheduleRecord != null);
 
-        return new DailySchedule(this, scheduleRecord, dailyScheduleRecord);
+        return new DailySchedule(this, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord));
     }
 
     private WeeklySchedule loadWeeklySchedule(ScheduleRecord scheduleRecord) {
@@ -2015,7 +2015,7 @@ public class DomainFactory {
         WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.getWeeklyScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(weeklyScheduleRecord != null);
 
-        return new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord);
+        return new WeeklySchedule(this, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord));
     }
 
     private MonthlyDaySchedule loadMonthlyDaySchedule(ScheduleRecord scheduleRecord) {
@@ -2024,7 +2024,7 @@ public class DomainFactory {
         MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.getMonthlyDayScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(monthlyDayScheduleRecord != null);
 
-        return new MonthlyDaySchedule(this, scheduleRecord, monthlyDayScheduleRecord);
+        return new MonthlyDaySchedule(this, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord));
     }
 
     private MonthlyWeekSchedule loadMonthlyWeekSchedule(ScheduleRecord scheduleRecord) {
@@ -2033,7 +2033,7 @@ public class DomainFactory {
         MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.getMonthlyWeekScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(monthlyWeekScheduleRecord != null);
 
-        return new MonthlyWeekSchedule(this, scheduleRecord, monthlyWeekScheduleRecord);
+        return new MonthlyWeekSchedule(this, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord));
     }
 
     @NonNull
@@ -2121,7 +2121,7 @@ public class DomainFactory {
 
                     SingleScheduleRecord singleScheduleRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
 
-                    schedules.add(new SingleSchedule(this, scheduleRecord, singleScheduleRecord));
+                    schedules.add(new SingleSchedule(this, new LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord)));
                     break;
                 }
                 case DAILY: {
@@ -2133,7 +2133,7 @@ public class DomainFactory {
 
                     DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
 
-                    schedules.add(new DailySchedule(this, scheduleRecord, dailyScheduleRecord));
+                    schedules.add(new DailySchedule(this, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord)));
                     break;
                 }
                 case WEEKLY: {
@@ -2146,7 +2146,7 @@ public class DomainFactory {
 
                     WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
 
-                    schedules.add(new WeeklySchedule(this, scheduleRecord, weeklyScheduleRecord));
+                    schedules.add(new WeeklySchedule(this, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord)));
                     break;
                 }
                 case MONTHLY_DAY: {
@@ -2156,7 +2156,7 @@ public class DomainFactory {
 
                     MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
 
-                    schedules.add(new MonthlyDaySchedule(this, scheduleRecord, monthlyDayScheduleRecord));
+                    schedules.add(new MonthlyDaySchedule(this, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)));
                     break;
                 }
                 case MONTHLY_WEEK: {
@@ -2166,7 +2166,7 @@ public class DomainFactory {
 
                     MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
 
-                    schedules.add(new MonthlyWeekSchedule(this, scheduleRecord, monthlyWeekScheduleRecord));
+                    schedules.add(new MonthlyWeekSchedule(this, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)));
                     break;
                 }
                 default:

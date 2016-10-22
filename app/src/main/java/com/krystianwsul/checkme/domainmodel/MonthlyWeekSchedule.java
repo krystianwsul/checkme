@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.persistencemodel.MonthlyWeekScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -24,18 +22,24 @@ import java.util.Calendar;
 
 class MonthlyWeekSchedule extends RepeatingSchedule {
     @NonNull
-    private final MonthlyWeekScheduleRecord mMonthlyWeekScheduleRecord;
+    private final MonthlyWeekScheduleBridge mMonthlyWeekScheduleBridge;
 
-    MonthlyWeekSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord, @NonNull MonthlyWeekScheduleRecord monthlyWeekScheduleRecord) {
-        super(domainFactory, scheduleRecord);
+    MonthlyWeekSchedule(@NonNull DomainFactory domainFactory, @NonNull MonthlyWeekScheduleBridge monthlyWeekScheduleBridge) {
+        super(domainFactory);
 
-        mMonthlyWeekScheduleRecord = monthlyWeekScheduleRecord;
+        mMonthlyWeekScheduleBridge = monthlyWeekScheduleBridge;
+    }
+
+    @NonNull
+    @Override
+    protected ScheduleBridge getScheduleBridge() {
+        return mMonthlyWeekScheduleBridge;
     }
 
     @NonNull
     @Override
     public String getScheduleText(@NonNull Context context) {
-        String day = mMonthlyWeekScheduleRecord.getDayOfMonth() + " " + getDayOfWeek() + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mMonthlyWeekScheduleRecord.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
+        String day = mMonthlyWeekScheduleBridge.getDayOfMonth() + " " + getDayOfWeek() + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mMonthlyWeekScheduleBridge.getBeginningOfMonth() ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
         return day + ": " + getTime();
     }
@@ -96,12 +100,12 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
 
     @NonNull
     Time getTime() {
-        Integer customTimeId = mMonthlyWeekScheduleRecord.getCustomTimeId();
+        Integer customTimeId = mMonthlyWeekScheduleBridge.getCustomTimeId();
         if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mMonthlyWeekScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTime(mMonthlyWeekScheduleBridge.getCustomTimeId());
         } else {
-            Integer hour = mMonthlyWeekScheduleRecord.getHour();
-            Integer minute = mMonthlyWeekScheduleRecord.getMinute();
+            Integer hour = mMonthlyWeekScheduleBridge.getHour();
+            Integer minute = mMonthlyWeekScheduleBridge.getMinute();
             Assert.assertTrue(hour != null);
             Assert.assertTrue(minute != null);
             return new NormalTime(hour, minute);
@@ -109,28 +113,28 @@ class MonthlyWeekSchedule extends RepeatingSchedule {
     }
 
     int getDayOfMonth() {
-        return mMonthlyWeekScheduleRecord.getDayOfMonth();
+        return mMonthlyWeekScheduleBridge.getDayOfMonth();
     }
 
     @NonNull
     DayOfWeek getDayOfWeek() {
-        DayOfWeek dayOfWeek = DayOfWeek.values()[mMonthlyWeekScheduleRecord.getDayOfWeek()];
+        DayOfWeek dayOfWeek = DayOfWeek.values()[mMonthlyWeekScheduleBridge.getDayOfWeek()];
         Assert.assertTrue(dayOfWeek != null);
 
         return dayOfWeek;
     }
 
     boolean getBeginningOfMonth() {
-        return mMonthlyWeekScheduleRecord.getBeginningOfMonth();
+        return mMonthlyWeekScheduleBridge.getBeginningOfMonth();
     }
 
     @NonNull
     private Date getDate(int year, int month) {
-        return Utils.getDateInMonth(year, month, mMonthlyWeekScheduleRecord.getDayOfMonth(), getDayOfWeek(), mMonthlyWeekScheduleRecord.getBeginningOfMonth());
+        return Utils.getDateInMonth(year, month, mMonthlyWeekScheduleBridge.getDayOfMonth(), getDayOfWeek(), mMonthlyWeekScheduleBridge.getBeginningOfMonth());
     }
 
     @Override
     public Integer getCustomTimeId() {
-        return mMonthlyWeekScheduleRecord.getCustomTimeId();
+        return mMonthlyWeekScheduleBridge.getCustomTimeId();
     }
 }

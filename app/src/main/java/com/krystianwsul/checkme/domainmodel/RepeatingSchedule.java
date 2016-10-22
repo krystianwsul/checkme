@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMilli;
@@ -17,8 +16,8 @@ import java.util.Calendar;
 import java.util.List;
 
 abstract class RepeatingSchedule extends Schedule {
-    RepeatingSchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
-        super(domainFactory, scheduleRecord);
+    RepeatingSchedule(@NonNull DomainFactory domainFactory) {
+        super(domainFactory);
     }
 
     @NonNull

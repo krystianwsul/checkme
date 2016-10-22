@@ -43,7 +43,7 @@ public abstract class Task {
     public String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
-        List<? extends MergedSchedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
+        List<Schedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
 
         if (isRootTask(exactTimeStamp)) {
             if (currentSchedules.isEmpty())
@@ -84,7 +84,7 @@ public abstract class Task {
         if (current(now)) {
             Task rootTask = getRootTask(now);
 
-            List<? extends MergedSchedule> schedules = rootTask.getCurrentSchedules(now);
+            List<Schedule> schedules = rootTask.getCurrentSchedules(now);
 
             if (schedules.isEmpty()) {
                 return true;
@@ -108,10 +108,10 @@ public abstract class Task {
     }
 
     @NonNull
-    protected abstract Collection<? extends MergedSchedule> getSchedules();
+    protected abstract Collection<Schedule> getSchedules();
 
     @NonNull
-    public List<MergedSchedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
+    public List<Schedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return Stream.of(getSchedules())
@@ -130,7 +130,7 @@ public abstract class Task {
     public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
         Assert.assertTrue(current(now));
 
-        List<MergedSchedule> schedules = getCurrentSchedules(now);
+        List<Schedule> schedules = getCurrentSchedules(now);
         if (isRootTask(now)) {
             Assert.assertTrue(Stream.of(schedules)
                     .allMatch(schedule -> schedule.current(now)));
@@ -204,7 +204,7 @@ public abstract class Task {
         }
 
         List<MergedInstance> instances = new ArrayList<>();
-        for (MergedSchedule schedule : getSchedules())
+        for (Schedule schedule : getSchedules())
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
         List<TaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);

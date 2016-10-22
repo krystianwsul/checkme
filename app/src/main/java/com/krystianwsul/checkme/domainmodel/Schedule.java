@@ -1,14 +1,18 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-public abstract class Schedule implements MergedSchedule {
+import java.util.List;
+
+public abstract class Schedule {
     @NonNull
     final DomainFactory mDomainFactory;
 
@@ -32,14 +36,12 @@ public abstract class Schedule implements MergedSchedule {
             return new ExactTimeStamp(getScheduleBridge().getEndTime());
     }
 
-    @Override
     public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         getScheduleBridge().setEndTime(endExactTimeStamp.getLong());
     }
 
-    @Override
     public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
@@ -48,11 +50,21 @@ public abstract class Schedule implements MergedSchedule {
     }
 
     @NonNull
-    @Override
     public ScheduleType getType() {
         return getScheduleBridge().getScheduleType();
     }
 
     @Nullable
     public abstract Integer getCustomTimeId();
+
+    @NonNull
+    public abstract List<MergedInstance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
+
+    public abstract boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now);
+
+    @NonNull
+    public abstract String getScheduleText(@NonNull Context context);
+
+    @Nullable
+    public abstract TimeStamp getNextAlarm(@NonNull ExactTimeStamp now);
 }

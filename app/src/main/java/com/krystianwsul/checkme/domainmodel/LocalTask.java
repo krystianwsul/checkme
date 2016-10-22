@@ -117,7 +117,7 @@ public class LocalTask extends Task {
 
     @NonNull
     @Override
-    protected Collection<? extends MergedSchedule> getSchedules() {
+    protected Collection<Schedule> getSchedules() {
         return mSchedules;
     }
 }

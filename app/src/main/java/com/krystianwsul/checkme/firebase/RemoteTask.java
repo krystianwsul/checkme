@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.domainmodel.MergedSchedule;
+import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -36,7 +36,7 @@ public class RemoteTask extends Task {
 
     @NonNull
     @Override
-    protected Collection<? extends MergedSchedule> getSchedules() {
+    protected Collection<Schedule> getSchedules() {
         if (mDomainFactory.getRemoteFactory().mRemoteSchedules.containsKey(mRemoteTaskRecord.getId()))
             return mDomainFactory.getRemoteFactory().mRemoteSchedules.get(mRemoteTaskRecord.getId());
         else

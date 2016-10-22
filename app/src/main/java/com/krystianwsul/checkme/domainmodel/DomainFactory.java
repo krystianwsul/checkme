@@ -828,14 +828,14 @@ public class DomainFactory {
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
 
             if (task.isRootTask(now)) {
-                List<? extends MergedSchedule> schedules = task.getCurrentSchedules(now);
+                List<Schedule> schedules = task.getCurrentSchedules(now);
 
                 parentTaskKey = null;
 
                 if (!schedules.isEmpty()) {
                     scheduleDatas = new ArrayList<>();
 
-                    for (MergedSchedule schedule : schedules) {
+                    for (Schedule schedule : schedules) {
                         Assert.assertTrue(schedule != null);
                         Assert.assertTrue(schedule.current(now));
 
@@ -1184,7 +1184,7 @@ public class DomainFactory {
         localTask.setName(name, note);
 
         if (localTask.isRootTask(now)) {
-            List<MergedSchedule> schedules = localTask.getCurrentSchedules(now);
+            List<Schedule> schedules = localTask.getCurrentSchedules(now);
 
             Stream.of(schedules)
                     .forEach(schedule -> schedule.setEndExactTimeStamp(now));
@@ -1789,7 +1789,7 @@ public class DomainFactory {
 
         for (Task task : getTasks().values()) {
             if (task.current(now) && task.isRootTask(now)) {
-                List<? extends MergedSchedule> schedules = task.getCurrentSchedules(now);
+                List<Schedule> schedules = task.getCurrentSchedules(now);
 
                 Optional<TimeStamp> optional = Stream.of(schedules)
                         .map(schedule -> schedule.getNextAlarm(now))
@@ -2518,7 +2518,7 @@ public class DomainFactory {
             // mark custom times relevant
             if (mTask.current(now))
                 Stream.of(mTask.getCurrentSchedules(now))
-                        .map(MergedSchedule::getCustomTimeId)
+                        .map(Schedule::getCustomTimeId)
                         .filter(customTimeId -> customTimeId != null)
                         .map(customTimeRelevances::get)
                         .forEach(CustomTimeRelevance::setRelevant);

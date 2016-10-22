@@ -9,17 +9,17 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-class LocalTaskHierarchy extends TaskHierarchy {
+public class LocalTaskHierarchy extends TaskHierarchy {
     @NonNull
     private final TaskHierarchyRecord mTaskHierarchyRecord;
 
-    LocalTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull TaskHierarchyRecord taskHierarchyRecord) {
+    public LocalTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull TaskHierarchyRecord taskHierarchyRecord) {
         super(domainFactory);
 
         mTaskHierarchyRecord = taskHierarchyRecord;
     }
 
-    int getId() {
+    public int getId() {
         return mTaskHierarchyRecord.getId();
     }
 

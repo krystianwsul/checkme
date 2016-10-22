@@ -18,7 +18,7 @@ public class CustomTime implements Time {
     @NonNull
     private final CustomTimeRecord mCustomTimeRecord;
 
-    CustomTime(@NonNull CustomTimeRecord customTimeRecord) {
+    public CustomTime(@NonNull CustomTimeRecord customTimeRecord) {
         mCustomTimeRecord = customTimeRecord;
     }
 

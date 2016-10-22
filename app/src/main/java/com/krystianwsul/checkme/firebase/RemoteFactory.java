@@ -96,7 +96,7 @@ public class RemoteFactory {
 
         mExistingRemoteInstances = new HashMap<>();
         for (RemoteInstanceRecord remoteInstanceRecord : mRemoteManager.mRemoteInstanceRecords.values()) {
-            InstanceShownRecord instanceShownRecord = domainFactory.getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute());
+            InstanceShownRecord instanceShownRecord = domainFactory.getLocalFactory().getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute());
 
             mExistingRemoteInstances.put(remoteInstanceRecord.getId(), new RemoteInstance(domainFactory, remoteInstanceRecord, instanceShownRecord));
         }

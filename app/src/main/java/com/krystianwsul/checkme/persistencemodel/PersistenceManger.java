@@ -58,8 +58,10 @@ public class PersistenceManger {
     private int mInstanceMaxId;
     private int mInstanceShownMaxId;
 
+    @NonNull
     public static synchronized PersistenceManger getInstance(Context context) {
         Assert.assertTrue(context != null);
+
         if (sInstance == null)
             sInstance = new PersistenceManger(context);
         return sInstance;

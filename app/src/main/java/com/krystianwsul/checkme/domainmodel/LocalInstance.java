@@ -17,7 +17,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Collections;
 
-class LocalInstance extends Instance {
+public class LocalInstance extends Instance {
     @Nullable
     private InstanceRecord mInstanceRecord;
 
@@ -27,7 +27,7 @@ class LocalInstance extends Instance {
     @Nullable
     private DateTime mScheduleDateTime;
 
-    LocalInstance(@NonNull DomainFactory domainFactory, @NonNull InstanceRecord instanceRecord) {
+    public LocalInstance(@NonNull DomainFactory domainFactory, @NonNull InstanceRecord instanceRecord) {
         super(domainFactory);
 
         mInstanceRecord = instanceRecord;

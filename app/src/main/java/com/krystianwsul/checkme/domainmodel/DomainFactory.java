@@ -26,10 +26,10 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
-import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
@@ -91,13 +91,6 @@ import java.util.TreeMap;
 public class DomainFactory {
     private static DomainFactory sDomainFactory;
 
-    private final PersistenceManger mPersistenceManager;
-
-    private final HashMap<Integer, CustomTime> mCustomTimes = new HashMap<>();
-    private final HashMap<Integer, LocalTask> mTasks = new HashMap<>();
-    private final HashMap<Integer, LocalTaskHierarchy> mTaskHierarchies = new HashMap<>();
-    private final ArrayList<LocalInstance> mExistingLocalInstances = new ArrayList<>();
-
     private static ExactTimeStamp sStart;
     private static ExactTimeStamp sRead;
     private static ExactTimeStamp sStop;
@@ -125,6 +118,7 @@ public class DomainFactory {
         }
     };
 
+    private LocalFactory mLocalFactory;
     private RemoteFactory mRemoteFactory;
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
@@ -146,8 +140,7 @@ public class DomainFactory {
     }
 
     private DomainFactory(Context context) {
-        mPersistenceManager = PersistenceManger.getInstance(context);
-        Assert.assertTrue(mPersistenceManager != null);
+        mLocalFactory = LocalFactory.getInstance(context);
 
         mRemoteFactory = new RemoteFactory(this, new ArrayList<>());
     }
@@ -155,64 +148,11 @@ public class DomainFactory {
     DomainFactory(PersistenceManger persistenceManger) {
         Assert.assertTrue(persistenceManger != null);
 
-        mPersistenceManager = persistenceManger;
+        mLocalFactory = new LocalFactory(persistenceManger);
     }
 
     private void initialize() {
-        Collection<CustomTimeRecord> customTimeRecords = mPersistenceManager.getCustomTimeRecords();
-        Assert.assertTrue(customTimeRecords != null);
-
-        for (CustomTimeRecord customTimeRecord : customTimeRecords) {
-            Assert.assertTrue(customTimeRecord != null);
-
-            CustomTime customTime = new CustomTime(customTimeRecord);
-            mCustomTimes.put(customTime.getId(), customTime);
-        }
-
-        Collection<TaskRecord> taskRecords = mPersistenceManager.getTaskRecords();
-        Assert.assertTrue(taskRecords != null);
-
-        for (TaskRecord taskRecord : taskRecords) {
-            Assert.assertTrue(taskRecord != null);
-
-            LocalTask localTask = new LocalTask(this, taskRecord);
-
-            ArrayList<Schedule> schedules = loadSchedules(taskRecord.getId());
-
-            localTask.addSchedules(schedules);
-
-            Assert.assertTrue(!mTasks.containsKey(localTask.getId()));
-            mTasks.put(localTask.getId(), localTask);
-        }
-
-        Collection<TaskHierarchyRecord> taskHierarchyRecords = mPersistenceManager.getTaskHierarchyRecords();
-        Assert.assertTrue(taskHierarchyRecords != null);
-
-        for (TaskHierarchyRecord taskHierarchyRecord : taskHierarchyRecords) {
-            Assert.assertTrue(taskHierarchyRecord != null);
-
-            LocalTask parentLocalTask = mTasks.get(taskHierarchyRecord.getParentTaskId());
-            Assert.assertTrue(parentLocalTask != null);
-
-            LocalTask childLocalTask = mTasks.get(taskHierarchyRecord.getChildTaskId());
-            Assert.assertTrue(childLocalTask != null);
-
-            LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
-
-            Assert.assertTrue(!mTaskHierarchies.containsKey(localTaskHierarchy.getId()));
-            mTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy);
-        }
-
-        Collection<InstanceRecord> instanceRecords = mPersistenceManager.getInstanceRecords();
-        Assert.assertTrue(instanceRecords != null);
-
-        for (InstanceRecord instanceRecord : instanceRecords) {
-            LocalTask localTask = mTasks.get(instanceRecord.getTaskId());
-            Assert.assertTrue(localTask != null);
-
-            LocalInstance localInstance = new LocalInstance(this, instanceRecord);
-            mExistingLocalInstances.add(localInstance);
-        }
+        mLocalFactory.initialize(this);
     }
 
     public long getReadMillis() {
@@ -225,7 +165,7 @@ public class DomainFactory {
 
     public synchronized void reset() {
         sDomainFactory = null;
-        mPersistenceManager.reset();
+        mLocalFactory.reset();
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
 
@@ -237,11 +177,11 @@ public class DomainFactory {
     }
 
     public int getInstanceCount() {
-        return mExistingLocalInstances.size();
+        return getExistingInstances().size();
     }
 
     public int getCustomTimeCount() {
-        return mCustomTimes.size();
+        return getCustomTimes().size();
     }
 
     private void save(@NonNull Context context, int dataId) {
@@ -251,7 +191,7 @@ public class DomainFactory {
     }
 
     private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds) {
-        mPersistenceManager.save(context);
+        mLocalFactory.save(context);
         mRemoteFactory.save();
         ObserverHolder.getObserverHolder().notifyDomainObservers(dataIds);
     }
@@ -298,7 +238,7 @@ public class DomainFactory {
 
     @NonNull
     private List<TaskHierarchy> getTaskHierarchies() {
-        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mTaskHierarchies.values());
+        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.mLocalTaskHierarchies.values());
         taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
         return taskHierarchies;
     }
@@ -324,8 +264,13 @@ public class DomainFactory {
 
     @NonNull
     private Map<TaskKey, Task> getTasks() {
-        return Stream.concat(Stream.of(mTasks.values()), Stream.of(mRemoteFactory.mRemoteTasks.values()))
+        return Stream.concat(Stream.of(mLocalFactory.mLocalTasks.values()), Stream.of(mRemoteFactory.mRemoteTasks.values()))
                 .collect(Collectors.toMap(Task::getTaskKey, task -> task));
+    }
+
+    @NonNull
+    private Map<Integer, CustomTime> getCustomTimes() {
+        return mLocalFactory.mLocalCustomTimes; // todo customtimes
     }
 
     @NonNull
@@ -374,51 +319,14 @@ public class DomainFactory {
     }
 
     @NonNull
-    public Map<InstanceKey, Instance> getExistingInstances() {
-        return Stream.concat(Stream.of(mExistingLocalInstances), Stream.of(mRemoteFactory.mExistingRemoteInstances.values()))
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
-    }
-
-    @Nullable
-    public InstanceShownRecord getInstanceShownRecord(@NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable Integer scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute) {
-        List<InstanceShownRecord> matches;
-        if (scheduleCustomTimeId != null) {
-            Assert.assertTrue(scheduleHour == null);
-            Assert.assertTrue(scheduleMinute == null);
-
-            matches = Stream.of(mPersistenceManager.getInstancesShownRecords())
-                    .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleYear)
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleMonth)
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDay)
-                    .filter(instanceShownRecord -> scheduleCustomTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
-                    .collect(Collectors.toList());
-        } else {
-            Assert.assertTrue(scheduleHour != null);
-            Assert.assertTrue(scheduleMinute != null);
-
-            matches = Stream.of(mPersistenceManager.getInstancesShownRecords())
-                    .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleYear)
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleMonth)
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDay)
-                    .filter(instanceShownRecord -> scheduleHour.equals(instanceShownRecord.getScheduleHour()))
-                    .filter(instanceShownRecord -> scheduleMinute.equals(instanceShownRecord.getScheduleMinute()))
-                    .collect(Collectors.toList());
-        }
-
-        if (matches.isEmpty()) {
-            return null;
-        } else {
-            Assert.assertTrue(matches.size() == 1);
-
-            return matches.get(0);
-        }
+    public LocalFactory getLocalFactory() {
+        return mLocalFactory;
     }
 
     @NonNull
-    public InstanceShownRecord createInstanceShownRecord(@NonNull RemoteTask remoteTask, @NonNull DateTime scheduleDateTime) {
-        return mPersistenceManager.createInstanceShownRecord(remoteTask, scheduleDateTime);
+    public Map<InstanceKey, Instance> getExistingInstances() {
+        return Stream.concat(Stream.of(mLocalFactory.mExistingLocalInstances), Stream.of(mRemoteFactory.mExistingRemoteInstances.values()))
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
     }
 
     // gets
@@ -450,7 +358,7 @@ public class DomainFactory {
         Assert.assertTrue(instance.getDone() == null);
 
         if (instance.getInstanceTimePair().mCustomTimeId != null) {
-            CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
+            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
             Assert.assertTrue(customTime != null);
 
             currentCustomTimes.put(customTime.getId(), customTime);
@@ -486,7 +394,7 @@ public class DomainFactory {
             instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDate(), instance.getName()));
 
             if (instance.getInstanceTimePair().mCustomTimeId != null) {
-                CustomTime customTime = mCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
+                CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
                 Assert.assertTrue(customTime != null);
 
                 currentCustomTimes.put(customTime.getId(), customTime);
@@ -506,7 +414,7 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getShowCustomTimeData");
 
-        CustomTime customTime = mCustomTimes.get(customTimeId);
+        CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
 
         HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
@@ -1172,7 +1080,7 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        LocalTask localTask = mTasks.get(taskId); // todo firebase
+        LocalTask localTask = mLocalFactory.mLocalTasks.get(taskId); // todo firebase
         Assert.assertTrue(localTask != null);
 
         List<TaskKey> taskKeys = new ArrayList<>();
@@ -1307,17 +1215,17 @@ public class DomainFactory {
                 .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
-        LocalTask parentLocalTask = mTasks.get(parentTaskId); // todo firebase
+        LocalTask parentLocalTask = mLocalFactory.mLocalTasks.get(parentTaskId); // todo firebase
         Assert.assertTrue(parentLocalTask != null);
         Assert.assertTrue(parentLocalTask.current(now));
 
         taskKeys.add(parentLocalTask.getTaskKey());
 
-        TaskRecord childTaskRecord = mPersistenceManager.createTaskRecord(name, now, note);
+        TaskRecord childTaskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, now, note);
 
         LocalTask childLocalTask = new LocalTask(this, childTaskRecord);
-        Assert.assertTrue(!mTasks.containsKey(childLocalTask.getId())); // todo firebase
-        mTasks.put(childLocalTask.getId(), childLocalTask); // todo firebase
+        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(childLocalTask.getId())); // todo firebase
+        mLocalFactory.mLocalTasks.put(childLocalTask.getId(), childLocalTask); // todo firebase
 
         createTaskHierarchy(parentLocalTask, childLocalTask, now);
 
@@ -1337,14 +1245,14 @@ public class DomainFactory {
 
         List<TaskKey> taskKeys = new ArrayList<>();
 
-        LocalTask localTask = mTasks.get(taskId); // todo firebase
+        LocalTask localTask = mLocalFactory.mLocalTasks.get(taskId); // todo firebase
         Assert.assertTrue(localTask != null);
 
         taskKeys.add(localTask.getTaskKey());
 
         localTask.setName(name, note);
 
-        LocalTask newParentLocalTask = mTasks.get(parentTaskId); // todo firebase
+        LocalTask newParentLocalTask = mLocalFactory.mLocalTasks.get(parentTaskId); // todo firebase
         Assert.assertTrue(newParentLocalTask != null);
 
         taskKeys.add(newParentLocalTask.getTaskKey());
@@ -1422,11 +1330,11 @@ public class DomainFactory {
         Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-        CustomTimeRecord customTimeRecord = mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
+        CustomTimeRecord customTimeRecord = mLocalFactory.mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
         Assert.assertTrue(customTimeRecord != null);
 
         CustomTime customTime = new CustomTime(customTimeRecord);
-        mCustomTimes.put(customTime.getId(), customTime);
+        mLocalFactory.mLocalCustomTimes.put(customTime.getId(), customTime);
 
         save(context, 0);
 
@@ -1438,7 +1346,7 @@ public class DomainFactory {
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        CustomTime customTime = mCustomTimes.get(customTimeId);
+        CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
 
         customTime.setName(name);
@@ -1460,7 +1368,7 @@ public class DomainFactory {
         Assert.assertTrue(!customTimeIds.isEmpty());
 
         for (int customTimeId : customTimeIds) {
-            CustomTime customTime = mCustomTimes.get(customTimeId);
+            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
             Assert.assertTrue(customTime != null);
 
             customTime.setCurrent();
@@ -1477,7 +1385,7 @@ public class DomainFactory {
         // relevant hack
         Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks().values()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances().values()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
-        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
+        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
 
         Stream.of(getTasks().values())
                 .filter(task -> task.current(now))
@@ -1532,7 +1440,7 @@ public class DomainFactory {
                 .map(CustomTimeRelevance::getCustomTime)
                 .collect(Collectors.toList());
 
-        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mCustomTimes.values());
+        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
         irrelevantCustomTimes.removeAll(relevantCustomTimes);
 
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
@@ -1551,7 +1459,7 @@ public class DomainFactory {
     }
 
     void removeIrrelevant(@NonNull Irrelevant irrelevant) {
-        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mTaskHierarchies.values()) // todo removal
+        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mLocalFactory.mLocalTaskHierarchies.values()) // todo removal
                 .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
                 .collect(Collectors.toList());
 
@@ -1559,26 +1467,26 @@ public class DomainFactory {
                 .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
 
         for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
-            mTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId()); // todo removal
+            mLocalFactory.mLocalTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId()); // todo removal
 
         for (Task task : irrelevant.mTasks) {
             if (task instanceof LocalTask) {
-                Assert.assertTrue(mTasks.containsKey(((LocalTask) task).getId())); // todo removal
+                Assert.assertTrue(mLocalFactory.mLocalTasks.containsKey(((LocalTask) task).getId())); // todo removal
 
-                mTasks.remove(((LocalTask) task).getId()); // todo removal
+                mLocalFactory.mLocalTasks.remove(((LocalTask) task).getId()); // todo removal
             }
         }
 
         for (Instance instance : irrelevant.mInstances) {
             if (instance instanceof LocalInstance) {
-                Assert.assertTrue(mExistingLocalInstances.contains(instance));
+                Assert.assertTrue(mLocalFactory.mExistingLocalInstances.contains(instance));
 
-                mExistingLocalInstances.remove(instance);
+                mLocalFactory.mExistingLocalInstances.remove(instance);
             }
         }
 
         Stream.of(irrelevant.mCustomTimes)
-                .forEach(mCustomTimes::remove); // todo customTimes
+                .forEach(mLocalFactory.mLocalCustomTimes::remove); // todo customTimes
 
         mRemoteFactory.removeIrrelevant(irrelevant);
     }
@@ -1590,11 +1498,11 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
+        TaskRecord taskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, now, note);
 
         LocalTask childLocalTask = new LocalTask(this, taskRecord);
-        Assert.assertTrue(!mTasks.containsKey(childLocalTask.getId())); // todo firebase
-        mTasks.put(childLocalTask.getId(), childLocalTask); // todo firbase
+        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(childLocalTask.getId())); // todo firebase
+        mLocalFactory.mLocalTasks.put(childLocalTask.getId(), childLocalTask); // todo firbase
 
         updateNotifications(context, new ArrayList<>(), now);
 
@@ -1617,11 +1525,11 @@ public class DomainFactory {
                 .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
-        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
+        TaskRecord taskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, now, note);
 
         LocalTask localTask = new LocalTask(this, taskRecord);
-        Assert.assertTrue(!mTasks.containsKey(localTask.getId())); // todo firebase
-        mTasks.put(localTask.getId(), localTask); // todo firebase
+        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(localTask.getId())); // todo firebase
+        mLocalFactory.mLocalTasks.put(localTask.getId(), localTask); // todo firebase
 
         joinTasks(localTask, joinTaskIds, now);
 
@@ -1637,7 +1545,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        LocalTask localTask = mTasks.get(taskId);  // todo firebase
+        LocalTask localTask = mLocalFactory.mLocalTasks.get(taskId);  // todo firebase
         Assert.assertTrue(localTask != null);
 
         localTask.setName(name, note);
@@ -1686,7 +1594,7 @@ public class DomainFactory {
                 .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
 
-        Map<InstanceKey, LocalInstance> shownInstances = Stream.of(mExistingLocalInstances)
+        Map<InstanceKey, LocalInstance> shownInstances = Stream.of(mLocalFactory.mExistingLocalInstances)
                 .filter(LocalInstance::getNotificationShown)
                 .collect(Collectors.toMap(LocalInstance::getInstanceKey, instance -> instance));
 
@@ -1780,7 +1688,7 @@ public class DomainFactory {
         }
 
         TimeStamp nextAlarm = null;
-        for (LocalInstance existingLocalInstance : mExistingLocalInstances) {
+        for (LocalInstance existingLocalInstance : mLocalFactory.mExistingLocalInstances) {
             TimeStamp instanceTimeStamp = existingLocalInstance.getInstanceDateTime().getTimeStamp();
             if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
                 if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
@@ -1871,7 +1779,7 @@ public class DomainFactory {
                 HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
                 Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
                 Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
-                InstanceShownRecord instanceShownRecord = getInstanceShownRecord(task.getTaskKey().mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute);
+                InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(task.getTaskKey().mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute);
 
                 return new RemoteInstance(this, task.getTaskKey().mRemoteTaskId, scheduleDateTime, instanceShownRecord);
             }
@@ -1899,7 +1807,7 @@ public class DomainFactory {
 
         Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
-        for (LocalInstance localInstance : mExistingLocalInstances) {
+        for (LocalInstance localInstance : mLocalFactory.mExistingLocalInstances) {
             ExactTimeStamp instanceExactTimeStamp = localInstance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
             if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
@@ -1933,9 +1841,9 @@ public class DomainFactory {
 
     @NonNull
     InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
-        mExistingLocalInstances.add(localInstance);
+        mLocalFactory.mExistingLocalInstances.add(localInstance);
 
-        return mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
+        return mLocalFactory.mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
     }
 
     @NonNull
@@ -1955,97 +1863,15 @@ public class DomainFactory {
     }
 
     @NonNull
-    private ArrayList<Schedule> loadSchedules(int localTaskId) {
-        List<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(localTaskId);
-        Assert.assertTrue(scheduleRecords != null);
-
-        ArrayList<Schedule> schedules = new ArrayList<>();
-
-        for (ScheduleRecord scheduleRecord : scheduleRecords) {
-            Assert.assertTrue(scheduleRecord.getType() >= 0);
-            Assert.assertTrue(scheduleRecord.getType() < ScheduleType.values().length);
-
-            ScheduleType scheduleType = ScheduleType.values()[scheduleRecord.getType()];
-
-            switch (scheduleType) {
-                case SINGLE:
-                    schedules.add(loadSingleSchedule(scheduleRecord));
-                    break;
-                case DAILY:
-                    schedules.add(loadDailySchedule(scheduleRecord));
-                    break;
-                case WEEKLY:
-                    schedules.add(loadWeeklySchedule(scheduleRecord));
-                    break;
-                case MONTHLY_DAY:
-                    schedules.add(loadMonthlyDaySchedule(scheduleRecord));
-                    break;
-                case MONTHLY_WEEK:
-                    schedules.add(loadMonthlyWeekSchedule(scheduleRecord));
-                    break;
-                default:
-                    throw new IndexOutOfBoundsException("unknown schedule type");
-            }
-        }
-
-        return schedules;
-    }
-
-    private Schedule loadSingleSchedule(ScheduleRecord scheduleRecord) {
-        Assert.assertTrue(scheduleRecord != null);
-
-        SingleScheduleRecord singleScheduleRecord = mPersistenceManager.getSingleScheduleRecord(scheduleRecord.getId());
-        Assert.assertTrue(singleScheduleRecord != null);
-
-        return new SingleSchedule(this, new LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord));
-    }
-
-    private DailySchedule loadDailySchedule(ScheduleRecord scheduleRecord) {
-        Assert.assertTrue(scheduleRecord != null);
-
-        DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.getDailyScheduleRecord(scheduleRecord.getId());
-        Assert.assertTrue(dailyScheduleRecord != null);
-
-        return new DailySchedule(this, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord));
-    }
-
-    private WeeklySchedule loadWeeklySchedule(ScheduleRecord scheduleRecord) {
-        Assert.assertTrue(scheduleRecord != null);
-
-        WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.getWeeklyScheduleRecord(scheduleRecord.getId());
-        Assert.assertTrue(weeklyScheduleRecord != null);
-
-        return new WeeklySchedule(this, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord));
-    }
-
-    private MonthlyDaySchedule loadMonthlyDaySchedule(ScheduleRecord scheduleRecord) {
-        Assert.assertTrue(scheduleRecord != null);
-
-        MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.getMonthlyDayScheduleRecord(scheduleRecord.getId());
-        Assert.assertTrue(monthlyDayScheduleRecord != null);
-
-        return new MonthlyDaySchedule(this, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord));
-    }
-
-    private MonthlyWeekSchedule loadMonthlyWeekSchedule(ScheduleRecord scheduleRecord) {
-        Assert.assertTrue(scheduleRecord != null);
-
-        MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.getMonthlyWeekScheduleRecord(scheduleRecord.getId());
-        Assert.assertTrue(monthlyWeekScheduleRecord != null);
-
-        return new MonthlyWeekSchedule(this, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord));
-    }
-
-    @NonNull
     private LocalTask createLocalTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, startExactTimeStamp, note);
+        TaskRecord taskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, startExactTimeStamp, note);
 
         LocalTask rootLocalTask = new LocalTask(this, taskRecord);
 
-        Assert.assertTrue(!mTasks.containsKey(rootLocalTask.getId()));
-        mTasks.put(rootLocalTask.getId(), rootLocalTask);
+        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(rootLocalTask.getId()));
+        mLocalFactory.mLocalTasks.put(rootLocalTask.getId(), rootLocalTask);
 
         return rootLocalTask;
     }
@@ -2055,7 +1881,7 @@ public class DomainFactory {
         if (timePair.mCustomTimeId != null) {
             Assert.assertTrue(timePair.mHourMinute == null);
 
-            CustomTime customTime = mCustomTimes.get(timePair.mCustomTimeId);
+            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(timePair.mCustomTimeId);
             Assert.assertTrue(customTime != null);
 
             return customTime;
@@ -2070,7 +1896,7 @@ public class DomainFactory {
         Assert.assertTrue(joinTaskIds.size() > 1);
 
         for (int joinTaskId : joinTaskIds) {
-            LocalTask joinLocalTask = mTasks.get(joinTaskId); // todo firebase
+            LocalTask joinLocalTask = mLocalFactory.mLocalTasks.get(joinTaskId); // todo firebase
             Assert.assertTrue(joinLocalTask != null);
             Assert.assertTrue(joinLocalTask.current(now));
 
@@ -2092,12 +1918,12 @@ public class DomainFactory {
         Assert.assertTrue(parentLocalTask.current(startExactTimeStamp));
         Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
 
-        TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp);
+        TaskHierarchyRecord taskHierarchyRecord = mLocalFactory.mPersistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp);
         Assert.assertTrue(taskHierarchyRecord != null);
 
         LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
-        Assert.assertTrue(!mTaskHierarchies.containsKey(localTaskHierarchy.getId())); // todo firebase
-        mTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy); // todo firebase
+        Assert.assertTrue(!mLocalFactory.mLocalTaskHierarchies.containsKey(localTaskHierarchy.getId())); // todo firebase
+        mLocalFactory.mLocalTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy); // todo firebase
     }
 
     @NonNull
@@ -2117,9 +1943,9 @@ public class DomainFactory {
                     Date date = singleScheduleData.Date;
                     Time time = getTime(singleScheduleData.TimePair);
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp);
 
-                    SingleScheduleRecord singleScheduleRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
+                    SingleScheduleRecord singleScheduleRecord = mLocalFactory.mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
 
                     schedules.add(new SingleSchedule(this, new LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord)));
                     break;
@@ -2129,9 +1955,9 @@ public class DomainFactory {
 
                     Time time = getTime(dailyScheduleData.TimePair);
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
 
-                    DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
+                    DailyScheduleRecord dailyScheduleRecord = mLocalFactory.mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
 
                     schedules.add(new DailySchedule(this, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord)));
                     break;
@@ -2142,9 +1968,9 @@ public class DomainFactory {
                     DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
                     Time time = getTime(weeklyScheduleData.TimePair);
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
 
-                    WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
+                    WeeklyScheduleRecord weeklyScheduleRecord = mLocalFactory.mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
 
                     schedules.add(new WeeklySchedule(this, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord)));
                     break;
@@ -2152,9 +1978,9 @@ public class DomainFactory {
                 case MONTHLY_DAY: {
                     CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
 
-                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
+                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mLocalFactory.mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
 
                     schedules.add(new MonthlyDaySchedule(this, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)));
                     break;
@@ -2162,9 +1988,9 @@ public class DomainFactory {
                 case MONTHLY_WEEK: {
                     CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
+                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
 
-                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
+                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mLocalFactory.mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
 
                     schedules.add(new MonthlyWeekSchedule(this, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)));
                     break;
@@ -2206,7 +2032,7 @@ public class DomainFactory {
         Assert.assertTrue(childLocalTask.current(exactTimeStamp));
 
         ArrayList<LocalTaskHierarchy> taskHierarchies = new ArrayList<>();
-        for (LocalTaskHierarchy localTaskHierarchy : mTaskHierarchies.values()) {
+        for (LocalTaskHierarchy localTaskHierarchy : mLocalFactory.mLocalTaskHierarchies.values()) {
             Assert.assertTrue(localTaskHierarchy != null);
 
             if (!localTaskHierarchy.current(exactTimeStamp))
@@ -2238,16 +2064,16 @@ public class DomainFactory {
 
     @NonNull
     public CustomTime getCustomTime(int customTimeId) {
-        Assert.assertTrue(mCustomTimes.containsKey(customTimeId));
+        Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(customTimeId));
 
-        CustomTime customTime = mCustomTimes.get(customTimeId);
+        CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
         Assert.assertTrue(customTime != null);
 
         return customTime;
     }
 
     private List<CustomTime> getCurrentCustomTimes() {
-        return Stream.of(mCustomTimes.values())
+        return Stream.of(mLocalFactory.mLocalCustomTimes.values())
                 .filter(CustomTime::getCurrent)
                 .collect(Collectors.toList());
     }
@@ -2480,14 +2306,14 @@ public class DomainFactory {
             TaskKey taskKey = mTask.getTaskKey();
 
             // mark parents relevant
-            Stream.of(mTaskHierarchies.values())
+            Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
                     .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
                     .map(TaskHierarchy::getParentTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark children relevant
-            Stream.of(mTaskHierarchies.values())
+            Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
                     .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(taskKey))
                     .map(TaskHierarchy::getChildTaskKey)
                     .map(taskRelevances::get)

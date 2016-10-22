@@ -22,13 +22,13 @@ public class LocalTask extends Task {
     @NonNull
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
 
-    LocalTask(@NonNull DomainFactory domainFactory, @NonNull TaskRecord taskRecord) {
+    public LocalTask(@NonNull DomainFactory domainFactory, @NonNull TaskRecord taskRecord) {
         super(domainFactory);
 
         mTaskRecord = taskRecord;
     }
 
-    void addSchedules(@NonNull List<Schedule> schedules) {
+    public void addSchedules(@NonNull List<Schedule> schedules) {
         mSchedules.addAll(schedules);
     }
 

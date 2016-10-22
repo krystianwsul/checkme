@@ -336,4 +336,9 @@ public class RemoteInstance extends Instance {
 
         return mRemoteInstanceRecord.getId();
     }
+
+    @Override
+    public boolean getNotificationShown() {
+        return (mInstanceShownRecord != null && mInstanceShownRecord.getNotificationShown());
+    }
 }

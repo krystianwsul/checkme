@@ -281,7 +281,8 @@ public class LocalInstance extends Instance {
         mInstanceRecord.setNotified(true);
     }
 
-    boolean getNotificationShown() {
+    @Override
+    public boolean getNotificationShown() {
         return (mInstanceRecord != null && mInstanceRecord.getNotificationShown());
     }
 

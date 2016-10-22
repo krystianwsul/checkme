@@ -109,25 +109,28 @@ public class RemoteManager {
         Map<String, Object> values = new HashMap<>();
 
         Stream.of(mRemoteTaskRecords.values())
-                .forEach(remoteRecord -> remoteRecord.addValues(values));
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteTaskHierarchyRecords.values())
-                .forEach(remoteRecord -> remoteRecord.addValues(values));
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteSingleScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.addValues(values));
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteDailyScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.addValues(values));
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteWeeklyScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.addValues(values));
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteMonthlyDayScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.addValues(values));
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteMonthlyWeekScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.addValues(values));
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
+
+        Stream.of(mRemoteInstanceRecords.values())
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         DatabaseWrapper.updateRecords(values);
     }

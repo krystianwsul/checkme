@@ -126,7 +126,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
             DatabaseWrapper.setUserData(sUserData);
 
-            DomainFactory.getDomainFactory(this).setUserData(sUserData);
+            DomainFactory.getDomainFactory(this).setUserData(this, sUserData);
 
             Log.e("asdf", "firebase logged in");
         } else {

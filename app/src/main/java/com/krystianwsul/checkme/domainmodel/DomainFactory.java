@@ -101,22 +101,8 @@ public class DomainFactory {
     @Nullable
     private Query mQuery;
 
-    @NonNull
-    private final ValueEventListener mValueEventListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            Log.e("asdf", "DomainFactory.mValueEventListeneronDataChange, dataSnapshot: " + dataSnapshot);
-
-            setRemoteTaskRecords(dataSnapshot);
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            Log.e("asdf", "DomainFactory.mValueEventListener.onCancelled", databaseError.toException());
-
-            MyCrashlytics.logException(databaseError.toException());
-        }
-    };
+    @Nullable
+    private ValueEventListener mValueEventListener;
 
     private LocalFactory mLocalFactory;
     private RemoteFactory mRemoteFactory;
@@ -164,6 +150,8 @@ public class DomainFactory {
     }
 
     public synchronized void reset() {
+        clearUserData();
+
         sDomainFactory = null;
         mLocalFactory.reset();
 
@@ -198,7 +186,7 @@ public class DomainFactory {
 
     // firebase
 
-    public synchronized void setUserData(@NonNull UserData userData) {
+    public synchronized void setUserData(@NonNull Context context, @NonNull UserData userData) {
         if (mUserData != null) {
             Assert.assertTrue(mQuery != null);
 
@@ -214,14 +202,33 @@ public class DomainFactory {
         mUserData = userData;
 
         mQuery = DatabaseWrapper.getTaskRecordsQuery(userData);
+
+        mValueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.e("asdf", "DomainFactory.mValueEventListeneronDataChange, dataSnapshot: " + dataSnapshot);
+
+                setRemoteTaskRecords(context.getApplicationContext(), dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("asdf", "DomainFactory.mValueEventListener.onCancelled", databaseError.toException());
+
+                MyCrashlytics.logException(databaseError.toException());
+            }
+        };
+
         mQuery.addValueEventListener(mValueEventListener);
     }
 
     public synchronized void clearUserData() {
         if (mUserData == null) {
             Assert.assertTrue(mQuery == null);
+            Assert.assertTrue(mValueEventListener == null);
         } else {
             Assert.assertTrue(mQuery != null);
+            Assert.assertTrue(mValueEventListener != null);
 
             mQuery.removeEventListener(mValueEventListener);
 
@@ -230,8 +237,10 @@ public class DomainFactory {
         }
     }
 
-    private synchronized void setRemoteTaskRecords(@NonNull DataSnapshot dataSnapshot) {
+    private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren());
+
+        updateNotifications(context, new ArrayList<>(), ExactTimeStamp.getNow());
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
@@ -1583,6 +1592,7 @@ public class DomainFactory {
     }
 
     private void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
+        Log.e("asdf", "DomainFactory.updateNotifications");
         if (!silent) {
             SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
             sharedPreferences.edit().putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
@@ -1594,9 +1604,9 @@ public class DomainFactory {
                 .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
 
-        Map<InstanceKey, LocalInstance> shownInstances = Stream.of(mLocalFactory.mExistingLocalInstances)
-                .filter(LocalInstance::getNotificationShown)
-                .collect(Collectors.toMap(LocalInstance::getInstanceKey, instance -> instance));
+        Map<InstanceKey, Instance> shownInstances = Stream.of(getExistingInstances().values())
+                .filter(Instance::getNotificationShown)
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
 
         Set<InstanceKey> shownInstanceKeys = shownInstances.keySet();
 
@@ -1807,8 +1817,8 @@ public class DomainFactory {
 
         Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
-        for (LocalInstance localInstance : mLocalFactory.mExistingLocalInstances) {
-            ExactTimeStamp instanceExactTimeStamp = localInstance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
+        for (Instance instance : getExistingInstances().values()) {
+            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
             if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
                 continue;
@@ -1816,7 +1826,7 @@ public class DomainFactory {
             if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
                 continue;
 
-            allInstances.put(localInstance.getInstanceKey(), localInstance);
+            allInstances.put(instance.getInstanceKey(), instance);
         }
 
         for (Task task : getTasks().values()) {
@@ -2049,16 +2059,6 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(taskHierarchies.size() == 1);
             return taskHierarchies.get(0);
-        }
-    }
-
-    void setParentHierarchyEndTimeStamp(@NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp exactEndTimeStamp) {
-        Assert.assertTrue(childLocalTask.current(exactEndTimeStamp));
-
-        LocalTaskHierarchy parentLocalTaskHierarchy = getParentTaskHierarchy(childLocalTask, exactEndTimeStamp);
-        if (parentLocalTaskHierarchy != null) {
-            Assert.assertTrue(parentLocalTaskHierarchy.current(exactEndTimeStamp));
-            parentLocalTaskHierarchy.setEndExactTimeStamp(exactEndTimeStamp);
         }
     }
 

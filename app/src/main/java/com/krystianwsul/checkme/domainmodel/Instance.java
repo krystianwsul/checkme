@@ -255,4 +255,6 @@ public abstract class Instance {
     }
 
     public abstract void setRelevant();
+
+    public abstract boolean getNotificationShown();
 }

@@ -25,13 +25,13 @@ public class LocalTaskHierarchy extends TaskHierarchy {
 
     @NonNull
     @Override
-    protected ExactTimeStamp getStartExactTimeStamp() {
+    public ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mTaskHierarchyRecord.getStartTime());
     }
 
     @Nullable
     @Override
-    protected ExactTimeStamp getEndExactTimeStamp() {
+    public ExactTimeStamp getEndExactTimeStamp() {
         if (mTaskHierarchyRecord.getEndTime() != null)
             return new ExactTimeStamp(mTaskHierarchyRecord.getEndTime());
         else
@@ -48,12 +48,26 @@ public class LocalTaskHierarchy extends TaskHierarchy {
     @NonNull
     @Override
     public TaskKey getParentTaskKey() {
-        return new TaskKey(mTaskHierarchyRecord.getParentTaskId());
+        return new TaskKey(getParentTaskId());
     }
 
     @NonNull
     @Override
     public TaskKey getChildTaskKey() {
-        return new TaskKey(mTaskHierarchyRecord.getChildTaskId());
+        return new TaskKey(getChildTaskId());
+    }
+
+    public int getParentTaskId() {
+        return mTaskHierarchyRecord.getParentTaskId();
+    }
+
+    public int getChildTaskId() {
+        return mTaskHierarchyRecord.getChildTaskId();
+    }
+
+    public void delete() {
+        mDomainFactory.getLocalFactory().deleteTaskHierarchy(this);
+
+        mTaskHierarchyRecord.delete();
     }
 }

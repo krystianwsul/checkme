@@ -112,19 +112,19 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
         }
     }
 
-    int getDayOfMonth() {
+    public int getDayOfMonth() {
         return mMonthlyWeekScheduleBridge.getDayOfMonth();
     }
 
     @NonNull
-    DayOfWeek getDayOfWeek() {
+    public DayOfWeek getDayOfWeek() {
         DayOfWeek dayOfWeek = DayOfWeek.values()[mMonthlyWeekScheduleBridge.getDayOfWeek()];
         Assert.assertTrue(dayOfWeek != null);
 
         return dayOfWeek;
     }
 
-    boolean getBeginningOfMonth() {
+    public boolean getBeginningOfMonth() {
         return mMonthlyWeekScheduleBridge.getBeginningOfMonth();
     }
 
@@ -136,5 +136,20 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
     @Override
     public Integer getCustomTimeId() {
         return mMonthlyWeekScheduleBridge.getCustomTimeId();
+    }
+
+    @Nullable
+    public HourMinute getHourMinute() {
+        if (mMonthlyWeekScheduleBridge.getCustomTimeId() != null) {
+            Assert.assertTrue(mMonthlyWeekScheduleBridge.getHour() == null);
+            Assert.assertTrue(mMonthlyWeekScheduleBridge.getMinute() == null);
+
+            return null;
+        } else {
+            Assert.assertTrue(mMonthlyWeekScheduleBridge.getHour() != null);
+            Assert.assertTrue(mMonthlyWeekScheduleBridge.getMinute() != null);
+
+            return new HourMinute(mMonthlyWeekScheduleBridge.getHour(), mMonthlyWeekScheduleBridge.getMinute());
+        }
     }
 }

@@ -97,11 +97,11 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
         }
     }
 
-    int getDayOfMonth() {
+    public int getDayOfMonth() {
         return mMonthlyDayScheduleBridge.getDayOfMonth();
     }
 
-    boolean getBeginningOfMonth() {
+    public boolean getBeginningOfMonth() {
         return mMonthlyDayScheduleBridge.getBeginningOfMonth();
     }
 
@@ -128,5 +128,20 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
     @Override
     public Integer getCustomTimeId() {
         return mMonthlyDayScheduleBridge.getCustomTimeId();
+    }
+
+    @Nullable
+    public HourMinute getHourMinute() {
+        if (mMonthlyDayScheduleBridge.getCustomTimeId() != null) {
+            Assert.assertTrue(mMonthlyDayScheduleBridge.getHour() == null);
+            Assert.assertTrue(mMonthlyDayScheduleBridge.getMinute() == null);
+
+            return null;
+        } else {
+            Assert.assertTrue(mMonthlyDayScheduleBridge.getHour() != null);
+            Assert.assertTrue(mMonthlyDayScheduleBridge.getMinute() != null);
+
+            return new HourMinute(mMonthlyDayScheduleBridge.getHour(), mMonthlyDayScheduleBridge.getMinute());
+        }
     }
 }

@@ -103,7 +103,7 @@ public class WeeklySchedule extends RepeatingSchedule {
     }
 
     @NonNull
-    private DayOfWeek getDayOfWeek() {
+    public DayOfWeek getDayOfWeek() {
         DayOfWeek dayOfWeek = DayOfWeek.values()[mWeeklyScheduleBridge.getDayOfWeek()];
         Assert.assertTrue(dayOfWeek != null);
 
@@ -113,5 +113,20 @@ public class WeeklySchedule extends RepeatingSchedule {
     @Override
     public Integer getCustomTimeId() {
         return mWeeklyScheduleBridge.getCustomTimeId();
+    }
+
+    @Nullable
+    public HourMinute getHourMinute() {
+        if (mWeeklyScheduleBridge.getCustomTimeId() != null) {
+            Assert.assertTrue(mWeeklyScheduleBridge.getHour() == null);
+            Assert.assertTrue(mWeeklyScheduleBridge.getMinute() == null);
+
+            return null;
+        } else {
+            Assert.assertTrue(mWeeklyScheduleBridge.getHour() != null);
+            Assert.assertTrue(mWeeklyScheduleBridge.getMinute() != null);
+
+            return new HourMinute(mWeeklyScheduleBridge.getHour(), mWeeklyScheduleBridge.getMinute());
+        }
     }
 }

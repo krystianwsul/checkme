@@ -76,4 +76,9 @@ public class RemoteSingleScheduleBridge implements SingleScheduleBridge {
     public ScheduleType getScheduleType() {
         return ScheduleType.SINGLE;
     }
+
+    @Override
+    public void delete() {
+        mRemoteSingleScheduleRecord.delete();
+    }
 }

@@ -93,11 +93,11 @@ public class JsonWrapper {
         instanceJson = null;
     }
 
-    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull SingleScheduleJson singleScheduleJson) {
-        Assert.assertTrue(!userDatas.isEmpty());
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull SingleScheduleJson singleScheduleJson) {
+        Assert.assertTrue(!recordOf.isEmpty());
 
-        recordOf = Stream.of(userDatas)
-                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+        this.recordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         taskJson = null;
         taskHierarchyJson = null;
@@ -109,11 +109,11 @@ public class JsonWrapper {
         instanceJson = null;
     }
 
-    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull DailyScheduleJson dailyScheduleJson) {
-        Assert.assertTrue(!userDatas.isEmpty());
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull DailyScheduleJson dailyScheduleJson) {
+        Assert.assertTrue(!recordOf.isEmpty());
 
-        recordOf = Stream.of(userDatas)
-                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+        this.recordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         taskJson = null;
         taskHierarchyJson = null;
@@ -125,11 +125,11 @@ public class JsonWrapper {
         instanceJson = null;
     }
 
-    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull WeeklyScheduleJson weeklyScheduleJson) {
-        Assert.assertTrue(!userDatas.isEmpty());
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull WeeklyScheduleJson weeklyScheduleJson) {
+        Assert.assertTrue(!recordOf.isEmpty());
 
-        recordOf = Stream.of(userDatas)
-                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+        this.recordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         taskJson = null;
         taskHierarchyJson = null;
@@ -141,11 +141,11 @@ public class JsonWrapper {
         instanceJson = null;
     }
 
-    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull MonthlyDayScheduleJson monthlyDayScheduleJson) {
-        Assert.assertTrue(!userDatas.isEmpty());
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull MonthlyDayScheduleJson monthlyDayScheduleJson) {
+        Assert.assertTrue(!recordOf.isEmpty());
 
-        recordOf = Stream.of(userDatas)
-                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+        this.recordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         taskJson = null;
         taskHierarchyJson = null;
@@ -157,11 +157,11 @@ public class JsonWrapper {
         instanceJson = null;
     }
 
-    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull MonthlyWeekScheduleJson monthlyWeekScheduleJson) {
-        Assert.assertTrue(!userDatas.isEmpty());
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull MonthlyWeekScheduleJson monthlyWeekScheduleJson) {
+        Assert.assertTrue(!recordOf.isEmpty());
 
-        recordOf = Stream.of(userDatas)
-                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
+        this.recordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         taskJson = null;
         taskHierarchyJson = null;

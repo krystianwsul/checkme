@@ -48,4 +48,9 @@ public class LocalMonthlyWeekScheduleBridge extends LocalScheduleBridge implemen
     public Integer getMinute() {
         return mMonthlyWeekScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mMonthlyWeekScheduleRecord.delete();
+    }
 }

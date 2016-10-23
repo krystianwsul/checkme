@@ -33,4 +33,9 @@ public class LocalDailyScheduleBridge extends LocalScheduleBridge implements Dai
     public Integer getMinute() {
         return mDailyScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mDailyScheduleRecord.delete();
+    }
 }

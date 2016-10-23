@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -119,7 +120,7 @@ public class LocalTask extends Task {
 
     @NonNull
     @Override
-    protected Collection<Schedule> getSchedules() {
+    public Collection<Schedule> getSchedules() {
         return mSchedules;
     }
 
@@ -127,5 +128,14 @@ public class LocalTask extends Task {
     @Override
     public Set<String> getRecordOf() {
         return new HashSet<>();
+    }
+
+    void delete() {
+        Stream.of(getSchedules())
+                .forEach(Schedule::delete);
+
+        mDomainFactory.getLocalFactory().deleteTask(this);
+
+        mTaskRecord.delete();
     }
 }

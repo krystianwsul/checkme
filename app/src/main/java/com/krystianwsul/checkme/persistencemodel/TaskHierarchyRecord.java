@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
@@ -131,13 +132,21 @@ public class TaskHierarchyRecord extends Record {
         return contentValues;
     }
 
+    @NonNull
     @Override
     UpdateCommand getUpdateCommand() {
         return getUpdateCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, mId);
     }
 
+    @NonNull
     @Override
     InsertCommand getInsertCommand() {
         return getInsertCommand(TABLE_TASK_HIERARCHIES);
+    }
+
+    @NonNull
+    @Override
+    DeleteCommand getDeleteCommand() {
+        return getDeleteCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, mId);
     }
 }

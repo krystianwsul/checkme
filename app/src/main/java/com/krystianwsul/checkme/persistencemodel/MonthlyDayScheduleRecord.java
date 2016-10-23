@@ -135,13 +135,21 @@ public class MonthlyDayScheduleRecord extends Record {
         return contentValues;
     }
 
+    @NonNull
     @Override
     UpdateCommand getUpdateCommand() {
         return getUpdateCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, mScheduleId);
     }
 
+    @NonNull
     @Override
     InsertCommand getInsertCommand() {
         return getInsertCommand(TABLE_MONTHLY_DAY_SCHEDULES);
+    }
+
+    @NonNull
+    @Override
+    DeleteCommand getDeleteCommand() {
+        return getDeleteCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, mScheduleId);
     }
 }

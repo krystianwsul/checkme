@@ -73,7 +73,7 @@ public class LocalInstance extends Instance {
 
     @NonNull
     @Override
-    protected Date getScheduleDate() {
+    public Date getScheduleDate() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);
@@ -262,6 +262,12 @@ public class LocalInstance extends Instance {
         return Collections.min(exactTimeStamps);
     }
 
+    public long getHierarchyTime() {
+        Assert.assertTrue(mInstanceRecord != null);
+
+        return mInstanceRecord.getHierarchyTime();
+    }
+
     @Override
     public String toString() {
         return getName() + " " + getInstanceDateTime();
@@ -308,5 +314,13 @@ public class LocalInstance extends Instance {
         Assert.assertTrue(mInstanceRecord != null);
 
         mInstanceRecord.setRelevant(false);
+    }
+
+    public void delete() {
+        Assert.assertTrue(mInstanceRecord != null);
+
+        mDomainFactory.getLocalFactory().deleteInstance(this);
+
+        mInstanceRecord.delete();
     }
 }

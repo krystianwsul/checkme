@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.SingleSchedule;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
-import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
@@ -262,7 +261,25 @@ public class LocalFactory {
     }
 
     @NonNull
-    public InstanceShownRecord createInstanceShownRecord(@NonNull RemoteTask remoteTask, @NonNull DateTime scheduleDateTime) {
-        return mPersistenceManager.createInstanceShownRecord(remoteTask, scheduleDateTime);
+    public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull DateTime scheduleDateTime) {
+        return mPersistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime);
+    }
+
+    public void deleteTask(@NonNull LocalTask localTask) {
+        Assert.assertTrue(mLocalTasks.containsKey(localTask.getId()));
+
+        mLocalTasks.remove(localTask.getId());
+    }
+
+    public void deleteTaskHierarchy(@NonNull LocalTaskHierarchy localTasHierarchy) {
+        Assert.assertTrue(mLocalTaskHierarchies.containsKey(localTasHierarchy.getId()));
+
+        mLocalTaskHierarchies.remove(localTasHierarchy.getId());
+    }
+
+    public void deleteInstance(@NonNull LocalInstance localInstance) {
+        Assert.assertTrue(mExistingLocalInstances.contains(localInstance));
+
+        mExistingLocalInstances.remove(localInstance);
     }
 }

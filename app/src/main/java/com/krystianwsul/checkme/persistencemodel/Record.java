@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
@@ -10,6 +11,7 @@ import junit.framework.Assert;
 abstract class Record {
     private boolean mCreated;
     boolean mChanged = false;
+    private boolean mDeleted = false;
 
     static int getMaxId(SQLiteDatabase sqLiteDatabase, String tableName, String idColumn) {
         Assert.assertTrue(sqLiteDatabase != null);
@@ -55,18 +57,46 @@ abstract class Record {
         return new UpdateCommand(tableName, getContentValues(), idColumn + " = " + id);
     }
 
-    public boolean needsInsert() {
+    @NonNull
+    DeleteCommand getDeleteCommand(@NonNull String tableName, @NonNull String idColumn, int id) {
+        Assert.assertTrue(!TextUtils.isEmpty(tableName));
+        Assert.assertTrue(!TextUtils.isEmpty(idColumn));
+
+        Assert.assertTrue(mDeleted);
+
+        mDeleted = false;
+
+        return new DeleteCommand(tableName, idColumn + " = " + id);
+    }
+
+    boolean needsInsert() {
         return !mCreated;
     }
 
-    public boolean needsUpdate() {
+    boolean needsUpdate() {
         Assert.assertTrue(mCreated);
         return mChanged;
     }
 
+    boolean needsDelete() {
+        Assert.assertTrue(mCreated);
+
+        return mDeleted;
+    }
+
+    public void delete() {
+        mDeleted = true;
+    }
+
     @SuppressWarnings("unused")
+    @NonNull
     abstract InsertCommand getInsertCommand();
 
     @SuppressWarnings("unused")
+    @NonNull
     abstract UpdateCommand getUpdateCommand();
+
+    @SuppressWarnings("unused")
+    @NonNull
+    abstract DeleteCommand getDeleteCommand();
 }

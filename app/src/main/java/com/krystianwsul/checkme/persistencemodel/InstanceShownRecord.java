@@ -188,13 +188,21 @@ public class InstanceShownRecord extends Record {
         return contentValues;
     }
 
+    @NonNull
     @Override
     UpdateCommand getUpdateCommand() {
         return getUpdateCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, mId);
     }
 
+    @NonNull
     @Override
     InsertCommand getInsertCommand() {
         return getInsertCommand(TABLE_INSTANCES_SHOWN);
+    }
+
+    @NonNull
+    @Override
+    DeleteCommand getDeleteCommand() {
+        return getDeleteCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, mId);
     }
 }

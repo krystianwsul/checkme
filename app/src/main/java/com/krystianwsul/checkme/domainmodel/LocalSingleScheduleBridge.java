@@ -48,4 +48,9 @@ public class LocalSingleScheduleBridge extends LocalScheduleBridge implements Si
     public Integer getMinute() {
         return mSingleScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mSingleScheduleRecord.delete();
+    }
 }

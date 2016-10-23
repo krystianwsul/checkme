@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
@@ -130,13 +131,21 @@ public class ScheduleRecord extends Record {
         return contentValues;
     }
 
+    @NonNull
     @Override
     UpdateCommand getUpdateCommand() {
         return getUpdateCommand(TABLE_SCHEDULES, COLUMN_ID, mId);
     }
 
+    @NonNull
     @Override
     InsertCommand getInsertCommand() {
         return getInsertCommand(TABLE_SCHEDULES);
+    }
+
+    @NonNull
+    @Override
+    DeleteCommand getDeleteCommand() {
+        return getDeleteCommand(TABLE_SCHEDULES, COLUMN_ID, mId);
     }
 }

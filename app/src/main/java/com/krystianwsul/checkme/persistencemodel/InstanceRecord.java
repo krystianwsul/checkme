@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
@@ -479,13 +480,21 @@ public class InstanceRecord extends Record {
         return contentValues;
     }
 
+    @NonNull
     @Override
     UpdateCommand getUpdateCommand() {
         return getUpdateCommand(TABLE_INSTANCES, COLUMN_ID, mId);
     }
 
+    @NonNull
     @Override
     InsertCommand getInsertCommand() {
         return getInsertCommand(TABLE_INSTANCES);
+    }
+
+    @NonNull
+    @Override
+    DeleteCommand getDeleteCommand() {
+        return getDeleteCommand(TABLE_INSTANCES, COLUMN_ID, mId);
     }
 }

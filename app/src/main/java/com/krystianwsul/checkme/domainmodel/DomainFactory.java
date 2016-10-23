@@ -30,6 +30,8 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
+import com.krystianwsul.checkme.firebase.RemoteTask;
+import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
@@ -1813,20 +1815,17 @@ public class DomainFactory {
     // internal
 
     @NonNull
-    private ArrayList<Instance> getExistingInstances(@NonNull Task task) {
-        ArrayList<Instance> instances = new ArrayList<>();
-        for (Instance instance : getExistingInstances().values()) {
-            Assert.assertTrue(instance != null);
-            if (instance.getTaskKey().equals(task.getTaskKey()))
-                instances.add(instance);
-        }
+    private List<Instance> getExistingInstances(@NonNull Task task) {
+        TaskKey taskKey = task.getTaskKey();
 
-        return instances;
+        return Stream.of(getExistingInstances().values())
+                .filter(instance -> instance.getTaskKey().equals(taskKey))
+                .collect(Collectors.toList());
     }
 
     @Nullable
     public Instance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        ArrayList<Instance> taskInstances = getExistingInstances(task);
+        List<Instance> taskInstances = getExistingInstances(task);
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (Instance instance : taskInstances) {
@@ -2342,6 +2341,85 @@ public class DomainFactory {
         notificationManager.notify(notificationId, notification);
     }
 
+    private void convertLocalToRemote(@NonNull LocalTask startingLocalTask, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
+        LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
+        convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, now, recordOf);
+
+        Assert.assertTrue(Stream.of(localToRemoteConversion.mLocalTasks.values())
+                .flatMap(localTask -> Stream.of(localTask.getSchedules()))
+                .noneMatch(schedule -> schedule.getCustomTimeId() != null)); // todo customtime
+
+        Assert.assertTrue(Stream.of(localToRemoteConversion.mLocalInstances)
+                .noneMatch(localInstance -> localInstance.getInstanceCustomTimeId() != null)); // todo customtime
+
+        for (LocalTask localTask : localToRemoteConversion.mLocalTasks.values()) {
+            Assert.assertTrue(localTask != null);
+
+            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(this, localTask, recordOf);
+            localToRemoteConversion.mRemoteTasks.put(localTask.getId(), remoteTask);
+        }
+
+        for (LocalTaskHierarchy localTaskHierarchy : localToRemoteConversion.mLocalTaskHierarchies) {
+            Assert.assertTrue(localTaskHierarchy != null);
+
+            RemoteTask parentRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getParentTaskId());
+            Assert.assertTrue(parentRemoteTask != null);
+
+            RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
+            Assert.assertTrue(childRemoteTask != null);
+
+            RemoteTaskHierarchy remoteTaskHierarchy = mRemoteFactory.copyLocalTaskHierarchy(this, localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId());
+            localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
+        }
+
+        for (LocalInstance localInstance : localToRemoteConversion.mLocalInstances) {
+            Assert.assertTrue(localInstance != null);
+
+            RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(localInstance.getTaskId());
+            Assert.assertTrue(remoteTask != null);
+
+            RemoteInstance remoteInstance = mRemoteFactory.copyLocalInstance(this, localInstance, recordOf, remoteTask.getId());
+            localToRemoteConversion.mRemoteInstances.add(remoteInstance);
+        }
+
+        Stream.of(localToRemoteConversion.mLocalTasks.values())
+                .forEach(LocalTask::delete);
+
+        Stream.of(localToRemoteConversion.mLocalTaskHierarchies)
+                .forEach(LocalTaskHierarchy::delete);
+
+        Stream.of(localToRemoteConversion.mLocalInstances)
+                .forEach(LocalInstance::delete);
+    }
+
+    private void convertLocalToRemoteHelper(@NonNull LocalToRemoteConversion localToRemoteConversion, @NonNull LocalTask localTask, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
+        if (localToRemoteConversion.mLocalTasks.containsKey(localTask.getId()))
+            return;
+
+        TaskKey taskKey = localTask.getTaskKey();
+
+        localToRemoteConversion.mLocalTasks.put(localTask.getId(), localTask);
+
+        List<LocalTaskHierarchy> parentLocalTaskHierarchies = Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
+                .filter(localTaskHierarchy -> localTaskHierarchy.getChildTaskKey().equals(taskKey))
+                .collect(Collectors.toList());
+
+        localToRemoteConversion.mLocalTaskHierarchies.addAll(parentLocalTaskHierarchies);
+
+        localToRemoteConversion.mLocalInstances.addAll(Stream.of(mLocalFactory.mExistingLocalInstances)
+                .filter(localInstance -> localInstance.getTaskKey().equals(taskKey))
+                .collect(Collectors.toList()));
+
+        Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
+                .filter(localTaskHierarchy -> localTaskHierarchy.getParentTaskKey().equals(taskKey))
+                .map(LocalTaskHierarchy::getChildTask)
+                .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) childTask, now, recordOf));
+
+        Stream.of(parentLocalTaskHierarchies)
+                .map(LocalTaskHierarchy::getParentTask)
+                .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) parentTask, now, recordOf));
+    }
+
     public static class Irrelevant {
         @NonNull
         public final List<CustomTime> mCustomTimes; // todo customTimes
@@ -2525,5 +2603,15 @@ public class DomainFactory {
         CustomTime getCustomTime() {
             return mCustomTime;
         }
+    }
+
+    private static class LocalToRemoteConversion {
+        final Map<Integer, LocalTask> mLocalTasks = new HashMap<>();
+        final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();
+        final List<LocalInstance> mLocalInstances = new ArrayList<>();
+
+        final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();
+        final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();
+        final List<RemoteInstance> mRemoteInstances = new ArrayList<>();
     }
 }

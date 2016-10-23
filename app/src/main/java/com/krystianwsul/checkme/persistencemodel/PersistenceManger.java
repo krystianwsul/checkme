@@ -12,7 +12,6 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.LocalTask;
-import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -485,6 +484,10 @@ public class PersistenceManger {
             if (instanceRecord.needsInsert())
                 insertCommands.add(instanceRecord.getInsertCommand());
 
+        for (InstanceShownRecord instanceShownRecord : mInstancesShownRecords)
+            if (instanceShownRecord.needsInsert())
+                insertCommands.add(instanceShownRecord.getInsertCommand());
+
         // update
 
         ArrayList<UpdateCommand> updateCommands = new ArrayList<>();
@@ -529,7 +532,101 @@ public class PersistenceManger {
             if (instanceRecord.needsUpdate())
                 updateCommands.add(instanceRecord.getUpdateCommand());
 
-        SaveService.startService(context, insertCommands, updateCommands);
+        for (InstanceShownRecord instanceShownRecord : mInstancesShownRecords)
+            if (instanceShownRecord.needsUpdate())
+                updateCommands.add(instanceShownRecord.getUpdateCommand());
+
+        ArrayList<DeleteCommand> deleteCommands = new ArrayList<>();
+
+        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords) {
+            if (customTimeRecord.needsDelete()) {
+                mCustomTimeRecords.remove(customTimeRecord);
+
+                deleteCommands.add(customTimeRecord.getDeleteCommand());
+            }
+        }
+
+        for (TaskRecord taskRecord : mTaskRecords) {
+            if (taskRecord.needsUpdate()) {
+                mTaskRecords.remove(taskRecord);
+
+                deleteCommands.add(taskRecord.getDeleteCommand());
+            }
+        }
+
+        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords) {
+            if (taskHierarchyRecord.needsUpdate()) {
+                mTaskHierarchyRecords.remove(taskHierarchyRecord);
+
+                deleteCommands.add(taskHierarchyRecord.getDeleteCommand());
+            }
+        }
+
+        for (ScheduleRecord scheduleRecord : mScheduleRecords) {
+            if (scheduleRecord.needsUpdate()) {
+                mScheduleRecords.remove(scheduleRecord);
+
+                deleteCommands.add(scheduleRecord.getDeleteCommand());
+            }
+        }
+
+        for (SingleScheduleRecord singleScheduleRecord : mSingleScheduleRecords.values()) {
+            if (singleScheduleRecord.needsUpdate()) {
+                mSingleScheduleRecords.remove(singleScheduleRecord.getScheduleId());
+
+                deleteCommands.add(singleScheduleRecord.getDeleteCommand());
+            }
+        }
+
+        for (DailyScheduleRecord dailyScheduleRecord : mDailyScheduleRecords.values()) {
+            if (dailyScheduleRecord.needsUpdate()) {
+                mDailyScheduleRecords.remove(dailyScheduleRecord.getScheduleId());
+
+                deleteCommands.add(dailyScheduleRecord.getDeleteCommand());
+            }
+        }
+
+        for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values()) {
+            if (weeklyScheduleRecord.needsUpdate()) {
+                mWeeklyScheduleRecords.remove(weeklyScheduleRecord.getScheduleId());
+
+                deleteCommands.add(weeklyScheduleRecord.getDeleteCommand());
+            }
+        }
+
+        for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : mMonthlyDayScheduleRecords.values()) {
+            if (monthlyDayScheduleRecord.needsUpdate()) {
+                mMonthlyDayScheduleRecords.remove(monthlyDayScheduleRecord.getScheduleId());
+
+                deleteCommands.add(monthlyDayScheduleRecord.getDeleteCommand());
+            }
+        }
+
+        for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : mMonthlyWeekScheduleRecords.values()) {
+            if (monthlyWeekScheduleRecord.needsUpdate()) {
+                mMonthlyWeekScheduleRecords.remove(monthlyWeekScheduleRecord.getScheduleId());
+
+                deleteCommands.add(monthlyWeekScheduleRecord.getDeleteCommand());
+            }
+        }
+
+        for (InstanceRecord instanceRecord : mInstanceRecords) {
+            if (instanceRecord.needsUpdate()) {
+                mInstanceRecords.remove(instanceRecord);
+
+                deleteCommands.add(instanceRecord.getDeleteCommand());
+            }
+        }
+
+        for (InstanceShownRecord instanceShownRecord : mInstancesShownRecords) {
+            if (instanceShownRecord.needsUpdate()) {
+                mInstancesShownRecords.remove(instanceShownRecord);
+
+                deleteCommands.add(instanceShownRecord.getDeleteCommand());
+            }
+        }
+
+        SaveService.startService(context, insertCommands, updateCommands, deleteCommands);
     }
 
     SQLiteDatabase getSQLiteDatabase() {
@@ -537,13 +634,15 @@ public class PersistenceManger {
     }
 
     @NonNull
-    public InstanceShownRecord createInstanceShownRecord(@NonNull RemoteTask remoteTask, @NonNull DateTime scheduleDateTime) {
+    public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull DateTime scheduleDateTime) {
+        Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
+
         int id = ++mInstanceShownMaxId;
 
         HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
         Integer hour = (hourMinute == null ? null : hourMinute.getHour());
         Integer minute = (hourMinute == null ? null : hourMinute.getMinute());
-        InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTask.getId(), scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute, false, false);
+        InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute, false, false);
         mInstancesShownRecords.add(instanceShownRecord);
         return instanceShownRecord;
     }

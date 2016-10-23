@@ -28,12 +28,21 @@ public abstract class Schedule {
         return new ExactTimeStamp(getScheduleBridge().getStartTime());
     }
 
+    public long getStartTime() {
+        return getScheduleBridge().getStartTime();
+    }
+
     @Nullable
     ExactTimeStamp getEndExactTimeStamp() {
         if (getScheduleBridge().getEndTime() == null)
             return null;
         else
             return new ExactTimeStamp(getScheduleBridge().getEndTime());
+    }
+
+    @Nullable
+    public Long getEndTime() {
+        return getScheduleBridge().getEndTime();
     }
 
     public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
@@ -67,4 +76,8 @@ public abstract class Schedule {
 
     @Nullable
     public abstract TimeStamp getNextAlarm(@NonNull ExactTimeStamp now);
+
+    void delete() {
+        getScheduleBridge().delete();
+    }
 }

@@ -71,4 +71,9 @@ public class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge 
     public Integer getMinute() {
         return mMonthlyDayScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mMonthlyDayScheduleRecord.delete();
+    }
 }

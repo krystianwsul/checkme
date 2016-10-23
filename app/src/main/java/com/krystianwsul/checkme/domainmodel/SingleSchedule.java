@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
@@ -88,7 +89,7 @@ public class SingleSchedule extends Schedule {
     }
 
     @NonNull
-    Date getDate() {
+    public Date getDate() {
         return new Date(mSingleScheduleBridge.getYear(), mSingleScheduleBridge.getMonth(), mSingleScheduleBridge.getDay());
     }
 
@@ -101,6 +102,21 @@ public class SingleSchedule extends Schedule {
     @Override
     public Integer getCustomTimeId() {
         return mSingleScheduleBridge.getCustomTimeId();
+    }
+
+    @Nullable
+    public HourMinute getHourMinute() {
+        if (mSingleScheduleBridge.getCustomTimeId() != null) {
+            Assert.assertTrue(mSingleScheduleBridge.getHour() == null);
+            Assert.assertTrue(mSingleScheduleBridge.getMinute() == null);
+
+            return null;
+        } else {
+            Assert.assertTrue(mSingleScheduleBridge.getHour() != null);
+            Assert.assertTrue(mSingleScheduleBridge.getMinute() != null);
+
+            return new HourMinute(mSingleScheduleBridge.getHour(), mSingleScheduleBridge.getMinute());
+        }
     }
 
     @Override

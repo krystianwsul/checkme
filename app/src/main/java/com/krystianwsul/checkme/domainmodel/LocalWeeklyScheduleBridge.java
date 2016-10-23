@@ -38,4 +38,9 @@ public class LocalWeeklyScheduleBridge extends LocalScheduleBridge implements We
     public Integer getMinute() {
         return mWeeklyScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mWeeklyScheduleRecord.delete();
+    }
 }

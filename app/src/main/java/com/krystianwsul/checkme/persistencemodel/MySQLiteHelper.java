@@ -32,6 +32,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
         CustomTimeRecord.onCreate(sqLiteDatabase);
 
         TaskRecord.onCreate(sqLiteDatabase);
@@ -51,6 +53,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        Assert.assertTrue(sqLiteDatabase != null);
+
         sqLiteDatabase.beginTransaction();
 
         try
@@ -197,7 +201,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                     insertCommands.add(weeklyScheduleRecord.getInsertCommand());
                 }
 
-                SaveService.save(sqLiteDatabase, insertCommands, new ArrayList<>());
+                SaveService.save(sqLiteDatabase, insertCommands, new ArrayList<>(), new ArrayList<>());
             }
 
             ScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);

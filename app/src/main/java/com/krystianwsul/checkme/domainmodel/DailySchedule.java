@@ -102,4 +102,19 @@ public class DailySchedule extends RepeatingSchedule {
     public Integer getCustomTimeId() {
         return mDailyScheduleBridge.getCustomTimeId();
     }
+
+    @Nullable
+    public HourMinute getHourMinute() {
+        if (mDailyScheduleBridge.getCustomTimeId() != null) {
+            Assert.assertTrue(mDailyScheduleBridge.getHour() == null);
+            Assert.assertTrue(mDailyScheduleBridge.getMinute() == null);
+
+            return null;
+        } else {
+            Assert.assertTrue(mDailyScheduleBridge.getHour() != null);
+            Assert.assertTrue(mDailyScheduleBridge.getMinute() != null);
+
+            return new HourMinute(mDailyScheduleBridge.getHour(), mDailyScheduleBridge.getMinute());
+        }
+    }
 }

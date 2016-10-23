@@ -13,7 +13,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
         super(id, jsonWrapper);
     }
 
-    RemoteInstanceRecord(@NonNull JsonWrapper jsonWrapper) {
+    public RemoteInstanceRecord(@NonNull JsonWrapper jsonWrapper) {
         super(jsonWrapper);
     }
 

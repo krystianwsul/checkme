@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-class RemoteTaskHierarchy extends TaskHierarchy {
+public class RemoteTaskHierarchy extends TaskHierarchy {
     @NonNull
     private final RemoteTaskHierarchyRecord mRemoteTaskHierarchyRecord;
 
@@ -29,7 +29,7 @@ class RemoteTaskHierarchy extends TaskHierarchy {
 
     @Nullable
     @Override
-    protected ExactTimeStamp getEndExactTimeStamp() {
+    public ExactTimeStamp getEndExactTimeStamp() {
         if (mRemoteTaskHierarchyRecord.getEndTime() != null)
             return new ExactTimeStamp(mRemoteTaskHierarchyRecord.getEndTime());
         else

@@ -66,4 +66,9 @@ public class RemoteWeeklyScheduleBridge implements WeeklyScheduleBridge {
     public Integer getMinute() {
         return mWeeklyScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mWeeklyScheduleRecord.delete();
+    }
 }

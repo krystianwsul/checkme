@@ -61,4 +61,9 @@ public class RemoteDailyScheduleBridge implements DailyScheduleBridge {
     public Integer getMinute() {
         return mDailyScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mDailyScheduleRecord.delete();
+    }
 }

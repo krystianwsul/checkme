@@ -43,4 +43,9 @@ public class LocalMonthlyDayScheduleBridge extends LocalScheduleBridge implement
     public Integer getMinute() {
         return mMonthlyDayScheduleRecord.getMinute();
     }
+
+    @Override
+    public void delete() {
+        mMonthlyDayScheduleRecord.delete();
+    }
 }

@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class Schedule {
     @NonNull
@@ -79,5 +80,9 @@ public abstract class Schedule {
 
     void delete() {
         getScheduleBridge().delete();
+    }
+
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        getScheduleBridge().updateRecordOf(addedFriends, removedFriends);
     }
 }

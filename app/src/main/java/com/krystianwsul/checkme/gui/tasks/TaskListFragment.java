@@ -15,7 +15,6 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -263,8 +262,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         for (TaskListLoader.ChildTaskData childTaskData : mData.mChildTaskDatas)
             printTree(lines, 1, childTaskData);
 
-        Log.e("asdf", "test:\n" + TextUtils.join("\n", lines));
-
         return TextUtils.join("\n", lines);
     }
 
@@ -331,7 +328,12 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         boolean allTasks = args.getBoolean(ALL_TASKS_KEY, false);
 
-        if (args.containsKey(TASK_KEY_KEY)) {
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(TASK_KEY_KEY)) {
+                mTaskKey = savedInstanceState.getParcelable(TASK_KEY_KEY);
+                Assert.assertTrue(mTaskKey != null);
+            }
+        } else if (args.containsKey(TASK_KEY_KEY)) {
             Assert.assertTrue(!allTasks);
 
             mTaskKey = args.getParcelable(TASK_KEY_KEY);
@@ -449,6 +451,9 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        if (mTaskKey != null)
+            outState.putParcelable(TASK_KEY_KEY, mTaskKey);
+
         if (mTreeViewAdapter != null) {
             List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
 
@@ -478,6 +483,14 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
     public void destroyLoader() {
         getLoaderManager().destroyLoader(0);
+    }
+
+    public void initLoader(@NonNull TaskKey taskKey) {
+        Assert.assertTrue(mTaskKey != null);
+
+        mTaskKey = taskKey;
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     public void selectAll() {

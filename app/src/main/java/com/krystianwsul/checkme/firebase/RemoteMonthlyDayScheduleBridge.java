@@ -8,34 +8,36 @@ import com.krystianwsul.checkme.firebase.records.RemoteMonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
+import java.util.Set;
+
 public class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge {
     @NonNull
-    private final RemoteMonthlyDayScheduleRecord mMonthlyDayScheduleRecord;
+    private final RemoteMonthlyDayScheduleRecord mRemoteMonthlyDayScheduleRecord;
 
     public RemoteMonthlyDayScheduleBridge(@NonNull RemoteMonthlyDayScheduleRecord monthlyDayScheduleRecord) {
-        mMonthlyDayScheduleRecord = monthlyDayScheduleRecord;
+        mRemoteMonthlyDayScheduleRecord = monthlyDayScheduleRecord;
     }
 
     @Override
     public long getStartTime() {
-        return mMonthlyDayScheduleRecord.getStartTime();
+        return mRemoteMonthlyDayScheduleRecord.getStartTime();
     }
 
     @Nullable
     @Override
     public Long getEndTime() {
-        return mMonthlyDayScheduleRecord.getEndTime();
+        return mRemoteMonthlyDayScheduleRecord.getEndTime();
     }
 
     @Override
     public void setEndTime(long endTime) {
-        mMonthlyDayScheduleRecord.setEndTime(endTime);
+        mRemoteMonthlyDayScheduleRecord.setEndTime(endTime);
     }
 
     @NonNull
     @Override
     public TaskKey getRootTaskKey() {
-        return new TaskKey(mMonthlyDayScheduleRecord.getTaskId());
+        return new TaskKey(mRemoteMonthlyDayScheduleRecord.getTaskId());
     }
 
     @NonNull
@@ -46,34 +48,39 @@ public class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge 
 
     @Override
     public int getDayOfMonth() {
-        return mMonthlyDayScheduleRecord.getDayOfMonth();
+        return mRemoteMonthlyDayScheduleRecord.getDayOfMonth();
     }
 
     @Override
     public boolean getBeginningOfMonth() {
-        return mMonthlyDayScheduleRecord.getBeginningOfMonth();
+        return mRemoteMonthlyDayScheduleRecord.getBeginningOfMonth();
     }
 
     @Nullable
     @Override
     public Integer getCustomTimeId() {
-        return mMonthlyDayScheduleRecord.getCustomTimeId();
+        return mRemoteMonthlyDayScheduleRecord.getCustomTimeId();
     }
 
     @Nullable
     @Override
     public Integer getHour() {
-        return mMonthlyDayScheduleRecord.getHour();
+        return mRemoteMonthlyDayScheduleRecord.getHour();
     }
 
     @Nullable
     @Override
     public Integer getMinute() {
-        return mMonthlyDayScheduleRecord.getMinute();
+        return mRemoteMonthlyDayScheduleRecord.getMinute();
     }
 
     @Override
     public void delete() {
-        mMonthlyDayScheduleRecord.delete();
+        mRemoteMonthlyDayScheduleRecord.delete();
+    }
+
+    @Override
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        mRemoteMonthlyDayScheduleRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

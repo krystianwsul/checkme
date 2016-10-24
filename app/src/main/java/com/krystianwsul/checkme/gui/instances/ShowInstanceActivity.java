@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
@@ -130,17 +131,20 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                startActivity(ShowTaskActivity.newIntent(this, mInstanceData.InstanceKey.mTaskKey));
+                getSupportLoaderManager().destroyLoader(0);
+                mGroupListFragment.destroyLoader();
+
+                startActivityForResult(ShowTaskActivity.newIntent(this, mInstanceData.InstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
                 break;
             case R.id.instance_menu_edit_task:
                 Assert.assertTrue(mInstanceData != null);
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                if (mInstanceData.IsRootTask)
-                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.mTaskKey));
-                else
-                    startActivity(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.mTaskKey));
+                getSupportLoaderManager().destroyLoader(0);
+                mGroupListFragment.destroyLoader();
+
+                startActivityForResult(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
                 break;
             case R.id.instance_menu_delete_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -259,5 +263,22 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         mSelectAllVisible = selectAllVisible;
 
         invalidateOptionsMenu();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Assert.assertTrue(requestCode == ShowTaskActivity.REQUEST_EDIT_TASK);
+
+        if (resultCode == RESULT_OK) {
+            Assert.assertTrue(data.hasExtra(ShowTaskActivity.TASK_KEY_KEY));
+
+            TaskKey taskKey = data.getParcelableExtra(ShowTaskActivity.TASK_KEY_KEY);
+            Assert.assertTrue(taskKey != null);
+
+            mInstanceKey = new InstanceKey(taskKey, mInstanceKey.ScheduleDate, mInstanceKey.ScheduleTimePair.mCustomTimeId, mInstanceKey.ScheduleTimePair.mHourMinute);
+        }
+
+        getSupportLoaderManager().initLoader(0, null, this);
+        mGroupListFragment.initLoader(mInstanceKey);
     }
 }

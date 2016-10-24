@@ -11,6 +11,8 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
+import java.util.Set;
+
 public class RemoteTaskHierarchy extends TaskHierarchy {
     @NonNull
     private final RemoteTaskHierarchyRecord mRemoteTaskHierarchyRecord;
@@ -58,5 +60,9 @@ public class RemoteTaskHierarchy extends TaskHierarchy {
     @NonNull
     public String getId() {
         return mRemoteTaskHierarchyRecord.getId();
+    }
+
+    void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        mRemoteTaskHierarchyRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

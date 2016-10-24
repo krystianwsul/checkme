@@ -1,10 +1,14 @@
 package com.krystianwsul.checkme.domainmodel;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.gui.MainActivity;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -137,5 +141,30 @@ public class LocalTask extends Task {
         mDomainFactory.getLocalFactory().deleteTask(this);
 
         mTaskRecord.delete();
+    }
+
+    @NonNull
+    @Override
+    protected Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now) {
+        if (friends.isEmpty()) {
+            return this;
+        } else {
+            UserData userData = MainActivity.getUserData();
+            Assert.assertTrue(userData != null);
+
+            friends.add(UserData.getKey(userData.email));
+
+            return mDomainFactory.convertLocalToRemote(context, now, this, friends);
+        }
+    }
+
+    @Override
+    protected void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        List<Schedule> schedules = mDomainFactory.createSchedules(this, scheduleDatas, now);
+        Assert.assertTrue(!schedules.isEmpty());
+
+        addSchedules(schedules);
     }
 }

@@ -188,4 +188,8 @@ public class JsonWrapper {
         monthlyWeekScheduleJson = null;
         this.instanceJson = instanceJson;
     }
+
+    public void setRecordOf(@NonNull Map<String, Boolean> recordOf) {
+        this.recordOf = recordOf;
+    }
 }

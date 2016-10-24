@@ -38,7 +38,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
     @Override
     public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getCreateChildTaskData(mTaskKey, getContext(), mExcludedTaskKeys);
+        return DomainFactory.getDomainFactory(getContext()).getCreateTaskData(mTaskKey, getContext(), mExcludedTaskKeys);
     }
 
     public interface ScheduleData {

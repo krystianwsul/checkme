@@ -8,6 +8,8 @@ import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
+import java.util.Set;
+
 public class RemoteSingleScheduleBridge implements SingleScheduleBridge {
     @NonNull
     private final RemoteSingleScheduleRecord mRemoteSingleScheduleRecord;
@@ -80,5 +82,10 @@ public class RemoteSingleScheduleBridge implements SingleScheduleBridge {
     @Override
     public void delete() {
         mRemoteSingleScheduleRecord.delete();
+    }
+
+    @Override
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        mRemoteSingleScheduleRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

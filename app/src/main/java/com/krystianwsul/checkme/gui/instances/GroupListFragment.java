@@ -3583,4 +3583,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     public void destroyLoader() {
         getLoaderManager().destroyLoader(0);
     }
+
+    public void initLoader(@NonNull InstanceKey instanceKey) {
+        Assert.assertTrue(mInstanceKey != null);
+
+        mInstanceKey = instanceKey;
+
+        getLoaderManager().initLoader(0, null, this);
+    }
 }

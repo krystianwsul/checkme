@@ -8,6 +8,8 @@ import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
+import java.util.Set;
+
 public class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridge {
     @NonNull
     private final RemoteMonthlyWeekScheduleRecord mRemoteMonthlyWeekScheduleRecord;
@@ -80,5 +82,10 @@ public class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridg
     @Override
     public void delete() {
         mRemoteMonthlyWeekScheduleRecord.delete();
+    }
+
+    @Override
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        mRemoteMonthlyWeekScheduleRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

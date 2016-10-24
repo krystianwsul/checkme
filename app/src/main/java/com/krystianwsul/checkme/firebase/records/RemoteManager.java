@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.records;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.annimon.stream.Stream;
 import com.google.firebase.database.DataSnapshot;
@@ -131,6 +132,8 @@ public class RemoteManager {
 
         Stream.of(mRemoteInstanceRecords.values())
                 .forEach(remoteRecord -> remoteRecord.getValues(values));
+
+        Log.e("asdf", "RemoteManager.save values: " + values);
 
         DatabaseWrapper.updateRecords(values);
     }

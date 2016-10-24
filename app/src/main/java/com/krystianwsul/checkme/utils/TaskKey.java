@@ -8,7 +8,9 @@ import android.text.TextUtils;
 
 import junit.framework.Assert;
 
-public class TaskKey implements Parcelable {
+import java.io.Serializable;
+
+public class TaskKey implements Parcelable, Serializable {
     @Nullable
     public final Integer mLocalTaskId;
 

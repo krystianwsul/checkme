@@ -5,15 +5,20 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 
 import junit.framework.Assert;
 
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Set;
 
 public class Utils {
     public static void share(@NonNull String text, @NonNull Activity activity) {
@@ -92,5 +97,12 @@ public class Utils {
         }
 
         return ret;
+    }
+
+    @NonNull
+    public static Set<String> userDatasToKeys(@NonNull Collection<UserData> userDatas) {
+        return Stream.of(userDatas)
+                .map(friend -> UserData.getKey(friend.email))
+                .collect(Collectors.toSet());
     }
 }

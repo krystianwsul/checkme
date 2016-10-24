@@ -85,7 +85,7 @@ public class InstanceShownRecord extends Record {
         int scheduleDay = cursor.getInt(4);
         Integer scheduleCustomTimeId = (cursor.isNull(5) ? null : cursor.getInt(5));
         Integer scheduleHour = (cursor.isNull(6) ? null : cursor.getInt(6));
-        Integer scheduleMinute = (cursor.isNull(7) ? null : cursor.getInt(77));
+        Integer scheduleMinute = (cursor.isNull(7) ? null : cursor.getInt(7));
         boolean notified = (cursor.getInt(8) == 1);
         boolean notificationShown = (cursor.getInt(9) == 1);
 

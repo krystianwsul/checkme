@@ -4,12 +4,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 
 import junit.framework.Assert;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,36 +61,28 @@ public abstract class RemoteRecord {
     }
 
     void getValues(@NonNull Map<String, Object> values) {
+        Assert.assertTrue(!mDeleted);
+        Assert.assertTrue(!mCreated);
         Assert.assertTrue(!mUpdated);
 
         if (mDelete) {
             Log.e("asdf", "RemoteRecord.getValues deleting " + mJsonWrapper);
 
-            Assert.assertTrue(!mDeleted);
             Assert.assertTrue(!mCreate);
-            Assert.assertTrue(!mCreated);
             Assert.assertTrue(mUpdate != null);
             Assert.assertTrue(mUpdate.isEmpty());
-            Assert.assertTrue(!mUpdated);
 
             mDeleted = true;
             values.put(getId(), null);
         } else if (mCreate) {
             Log.e("asdf", "RemoteRecord.getValues creating " + mJsonWrapper);
 
-            Assert.assertTrue(!mDeleted);
-            Assert.assertTrue(!mCreated);
             Assert.assertTrue(mUpdate == null);
-            Assert.assertTrue(!mUpdated);
 
             mCreated = true;
             values.put(getId(), mJsonWrapper);
-        } else if (mUpdate != null) {
+        } else if (mUpdate != null && !mUpdate.isEmpty()) {
             Log.e("asdf", "RemoteRecord.getValues updating " + mJsonWrapper);
-
-            Assert.assertTrue(!mDeleted);
-            Assert.assertTrue(!mCreated);
-            Assert.assertTrue(!mUpdated);
 
             mUpdated = true;
             values.putAll(mUpdate);
@@ -119,5 +114,26 @@ public abstract class RemoteRecord {
         Assert.assertTrue(!mUpdated);
 
         mDelete = true;
+    }
+
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        Assert.assertTrue(Stream.of(addedFriends)
+                .noneMatch(removedFriends::contains));
+
+        HashSet<String> recordOf = new HashSet<>(getRecordOf());
+        recordOf.addAll(addedFriends);
+        recordOf.removeAll(removedFriends);
+
+        setRecordOf(recordOf);
+    }
+
+
+    public void setRecordOf(@NonNull Set<String> recordOf) {
+        Map<String, Boolean> mapRecordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(key -> key, key -> true));
+
+        mJsonWrapper.setRecordOf(mapRecordOf);
+
+        addValue(getId() + "/recordOf", mapRecordOf);
     }
 }

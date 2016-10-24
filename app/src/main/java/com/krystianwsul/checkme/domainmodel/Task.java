@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -230,4 +231,9 @@ public abstract class Task {
 
     @NonNull
     public abstract Set<String> getRecordOf();
+
+    @NonNull
+    protected abstract Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now);
+
+    protected abstract void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now);
 }

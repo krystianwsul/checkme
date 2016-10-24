@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -25,7 +26,9 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class ShowTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
-    private static final String TASK_KEY_KEY = "taskKey";
+    public static final String TASK_KEY_KEY = "taskKey";
+
+    public static final int REQUEST_EDIT_TASK = 1;
 
     private TaskKey mTaskKey;
 
@@ -39,7 +42,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
     public static Intent newIntent(@NonNull Context context, @NonNull TaskKey taskKey) {
         Intent intent = new Intent(context, ShowTaskActivity.class);
-        intent.putExtra(TASK_KEY_KEY, taskKey);
+        intent.putExtra(TASK_KEY_KEY, (Parcelable) taskKey);
         return intent;
     }
 
@@ -58,11 +61,18 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
         mActionBar.setTitle(null);
 
-        Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(TASK_KEY_KEY));
+        if (savedInstanceState != null) {
+            Assert.assertTrue(savedInstanceState.containsKey(TASK_KEY_KEY));
 
-        mTaskKey = intent.getParcelableExtra(TASK_KEY_KEY);
-        Assert.assertTrue(mTaskKey != null);
+            mTaskKey = savedInstanceState.getParcelable(TASK_KEY_KEY);
+            Assert.assertTrue(mTaskKey != null);
+        } else {
+            Intent intent = getIntent();
+            Assert.assertTrue(intent.hasExtra(TASK_KEY_KEY));
+
+            mTaskKey = intent.getParcelableExtra(TASK_KEY_KEY);
+            Assert.assertTrue(mTaskKey != null);
+        }
 
         mTaskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
         if (mTaskListFragment == null) {
@@ -74,6 +84,26 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         }
 
         getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Assert.assertTrue(requestCode == REQUEST_EDIT_TASK);
+
+        if (resultCode == RESULT_OK) {
+            Assert.assertTrue(data.hasExtra(TASK_KEY_KEY));
+
+            mTaskKey = data.getParcelableExtra(TASK_KEY_KEY);
+            Assert.assertTrue(mTaskKey != null);
+
+            Intent result = new Intent();
+            result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) mTaskKey);
+
+            setResult(RESULT_OK, result);
+        }
+
+        getSupportLoaderManager().initLoader(0, null, this);
+        mTaskListFragment.initLoader(mTaskKey);
     }
 
     @Override
@@ -99,10 +129,10 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.task_menu_edit:
-                if (mData.IsRootTask)
-                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.mTaskKey));
-                else
-                    startActivity(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.mTaskKey));
+                getSupportLoaderManager().destroyLoader(0);
+                mTaskListFragment.destroyLoader();
+
+                startActivityForResult(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.mTaskKey), REQUEST_EDIT_TASK);
                 break;
             case R.id.task_menu_share:
                 Assert.assertTrue(mData != null);
@@ -183,5 +213,12 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         mSelectAllVisible = selectAllVisible;
 
         invalidateOptionsMenu();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(TASK_KEY_KEY, mTaskKey);
     }
 }

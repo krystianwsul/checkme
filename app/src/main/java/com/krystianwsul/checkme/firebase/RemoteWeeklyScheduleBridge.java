@@ -8,34 +8,36 @@ import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
+import java.util.Set;
+
 public class RemoteWeeklyScheduleBridge implements WeeklyScheduleBridge {
     @NonNull
-    private final RemoteWeeklyScheduleRecord mWeeklyScheduleRecord;
+    private final RemoteWeeklyScheduleRecord mRemoteWeeklyScheduleRecord;
 
     public RemoteWeeklyScheduleBridge(@NonNull RemoteWeeklyScheduleRecord weeklyScheduleRecord) {
-        mWeeklyScheduleRecord = weeklyScheduleRecord;
+        mRemoteWeeklyScheduleRecord = weeklyScheduleRecord;
     }
 
     @Override
     public long getStartTime() {
-        return mWeeklyScheduleRecord.getStartTime();
+        return mRemoteWeeklyScheduleRecord.getStartTime();
     }
 
     @Nullable
     @Override
     public Long getEndTime() {
-        return mWeeklyScheduleRecord.getEndTime();
+        return mRemoteWeeklyScheduleRecord.getEndTime();
     }
 
     @Override
     public void setEndTime(long endTime) {
-        mWeeklyScheduleRecord.setEndTime(endTime);
+        mRemoteWeeklyScheduleRecord.setEndTime(endTime);
     }
 
     @NonNull
     @Override
     public TaskKey getRootTaskKey() {
-        return new TaskKey(mWeeklyScheduleRecord.getTaskId());
+        return new TaskKey(mRemoteWeeklyScheduleRecord.getTaskId());
     }
 
     @NonNull
@@ -46,29 +48,34 @@ public class RemoteWeeklyScheduleBridge implements WeeklyScheduleBridge {
 
     @Override
     public int getDayOfWeek() {
-        return mWeeklyScheduleRecord.getDayOfWeek();
+        return mRemoteWeeklyScheduleRecord.getDayOfWeek();
     }
 
     @Nullable
     @Override
     public Integer getCustomTimeId() {
-        return mWeeklyScheduleRecord.getCustomTimeId();
+        return mRemoteWeeklyScheduleRecord.getCustomTimeId();
     }
 
     @Nullable
     @Override
     public Integer getHour() {
-        return mWeeklyScheduleRecord.getHour();
+        return mRemoteWeeklyScheduleRecord.getHour();
     }
 
     @Nullable
     @Override
     public Integer getMinute() {
-        return mWeeklyScheduleRecord.getMinute();
+        return mRemoteWeeklyScheduleRecord.getMinute();
     }
 
     @Override
     public void delete() {
-        mWeeklyScheduleRecord.delete();
+        mRemoteWeeklyScheduleRecord.delete();
+    }
+
+    @Override
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        mRemoteWeeklyScheduleRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

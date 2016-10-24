@@ -8,6 +8,8 @@ import com.krystianwsul.checkme.firebase.records.RemoteDailyScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
+import java.util.Set;
+
 public class RemoteDailyScheduleBridge implements DailyScheduleBridge {
     @NonNull
     private final RemoteDailyScheduleRecord mDailyScheduleRecord;
@@ -65,5 +67,10 @@ public class RemoteDailyScheduleBridge implements DailyScheduleBridge {
     @Override
     public void delete() {
         mDailyScheduleRecord.delete();
+    }
+
+    @Override
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        mDailyScheduleRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

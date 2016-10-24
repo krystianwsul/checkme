@@ -21,6 +21,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 public class RemoteInstance extends Instance {
     @Nullable
@@ -328,6 +329,8 @@ public class RemoteInstance extends Instance {
         Assert.assertTrue(mRemoteInstanceRecord != null);
 
         mRemoteInstanceRecord.delete();
+
+        // todo remove Instance shown records
     }
 
     @NonNull
@@ -340,5 +343,11 @@ public class RemoteInstance extends Instance {
     @Override
     public boolean getNotificationShown() {
         return (mInstanceShownRecord != null && mInstanceShownRecord.getNotificationShown());
+    }
+
+    void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        Assert.assertTrue(mRemoteInstanceRecord != null);
+
+        mRemoteInstanceRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

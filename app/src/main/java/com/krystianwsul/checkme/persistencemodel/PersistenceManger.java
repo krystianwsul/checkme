@@ -538,99 +538,51 @@ public class PersistenceManger {
 
         ArrayList<DeleteCommand> deleteCommands = new ArrayList<>();
 
-        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords) {
-            if (customTimeRecord.needsDelete()) {
-                mCustomTimeRecords.remove(customTimeRecord);
-
-                deleteCommands.add(customTimeRecord.getDeleteCommand());
-            }
-        }
-
-        for (TaskRecord taskRecord : mTaskRecords) {
-            if (taskRecord.needsUpdate()) {
-                mTaskRecords.remove(taskRecord);
-
-                deleteCommands.add(taskRecord.getDeleteCommand());
-            }
-        }
-
-        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords) {
-            if (taskHierarchyRecord.needsUpdate()) {
-                mTaskHierarchyRecords.remove(taskHierarchyRecord);
-
-                deleteCommands.add(taskHierarchyRecord.getDeleteCommand());
-            }
-        }
-
-        for (ScheduleRecord scheduleRecord : mScheduleRecords) {
-            if (scheduleRecord.needsUpdate()) {
-                mScheduleRecords.remove(scheduleRecord);
-
-                deleteCommands.add(scheduleRecord.getDeleteCommand());
-            }
-        }
-
-        for (SingleScheduleRecord singleScheduleRecord : mSingleScheduleRecords.values()) {
-            if (singleScheduleRecord.needsUpdate()) {
-                mSingleScheduleRecords.remove(singleScheduleRecord.getScheduleId());
-
-                deleteCommands.add(singleScheduleRecord.getDeleteCommand());
-            }
-        }
-
-        for (DailyScheduleRecord dailyScheduleRecord : mDailyScheduleRecords.values()) {
-            if (dailyScheduleRecord.needsUpdate()) {
-                mDailyScheduleRecords.remove(dailyScheduleRecord.getScheduleId());
-
-                deleteCommands.add(dailyScheduleRecord.getDeleteCommand());
-            }
-        }
-
-        for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values()) {
-            if (weeklyScheduleRecord.needsUpdate()) {
-                mWeeklyScheduleRecords.remove(weeklyScheduleRecord.getScheduleId());
-
-                deleteCommands.add(weeklyScheduleRecord.getDeleteCommand());
-            }
-        }
-
-        for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : mMonthlyDayScheduleRecords.values()) {
-            if (monthlyDayScheduleRecord.needsUpdate()) {
-                mMonthlyDayScheduleRecords.remove(monthlyDayScheduleRecord.getScheduleId());
-
-                deleteCommands.add(monthlyDayScheduleRecord.getDeleteCommand());
-            }
-        }
-
-        for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : mMonthlyWeekScheduleRecords.values()) {
-            if (monthlyWeekScheduleRecord.needsUpdate()) {
-                mMonthlyWeekScheduleRecords.remove(monthlyWeekScheduleRecord.getScheduleId());
-
-                deleteCommands.add(monthlyWeekScheduleRecord.getDeleteCommand());
-            }
-        }
-
-        for (InstanceRecord instanceRecord : mInstanceRecords) {
-            if (instanceRecord.needsUpdate()) {
-                mInstanceRecords.remove(instanceRecord);
-
-                deleteCommands.add(instanceRecord.getDeleteCommand());
-            }
-        }
-
-        for (InstanceShownRecord instanceShownRecord : mInstancesShownRecords) {
-            if (instanceShownRecord.needsUpdate()) {
-                mInstancesShownRecords.remove(instanceShownRecord);
-
-                deleteCommands.add(instanceShownRecord.getDeleteCommand());
-            }
-        }
+        deleteCommands.addAll(delete(mCustomTimeRecords));
+        deleteCommands.addAll(delete(mTaskRecords));
+        deleteCommands.addAll(delete(mTaskHierarchyRecords));
+        deleteCommands.addAll(delete(mScheduleRecords));
+        deleteCommands.addAll(delete(mSingleScheduleRecords));
+        deleteCommands.addAll(delete(mDailyScheduleRecords));
+        deleteCommands.addAll(delete(mWeeklyScheduleRecords));
+        deleteCommands.addAll(delete(mMonthlyDayScheduleRecords));
+        deleteCommands.addAll(delete(mMonthlyWeekScheduleRecords));
+        deleteCommands.addAll(delete(mInstanceRecords));
+        deleteCommands.addAll(delete(mInstancesShownRecords));
 
         SaveService.startService(context, insertCommands, updateCommands, deleteCommands);
     }
 
     SQLiteDatabase getSQLiteDatabase() {
         return mSQLiteDatabase;
+    }
+
+    @NonNull
+    private static List<DeleteCommand> delete(@NonNull Collection<? extends Record> collection) {
+        List<Record> deleted = Stream.of(collection)
+                .filter(Record::needsDelete)
+                .collect(Collectors.toList());
+
+        //noinspection SuspiciousMethodCalls
+        collection.removeAll(deleted);
+
+        return Stream.of(deleted)
+                .map(Record::getDeleteCommand)
+                .collect(Collectors.toList());
+    }
+
+    @NonNull
+    private static List<DeleteCommand> delete(@NonNull Map<Integer, ? extends Record> map) {
+        Map<Integer, Record> deleted = Stream.of(map)
+                .filter(pair -> pair.getValue().needsDelete())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        Stream.of(deleted.keySet())
+                .forEach(map::remove);
+
+        return Stream.of(deleted.values())
+                .map(Record::getDeleteCommand)
+                .collect(Collectors.toList());
     }
 
     @NonNull

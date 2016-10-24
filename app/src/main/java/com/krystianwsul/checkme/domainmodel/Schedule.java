@@ -78,7 +78,7 @@ public abstract class Schedule {
     @Nullable
     public abstract TimeStamp getNextAlarm(@NonNull ExactTimeStamp now);
 
-    void delete() {
+    public void delete() {
         getScheduleBridge().delete();
     }
 

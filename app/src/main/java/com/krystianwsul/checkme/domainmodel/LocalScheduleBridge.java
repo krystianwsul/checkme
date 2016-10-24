@@ -13,7 +13,7 @@ import java.util.Set;
 
 public abstract class LocalScheduleBridge implements ScheduleBridge {
     @NonNull
-    private final ScheduleRecord mScheduleRecord;
+    protected final ScheduleRecord mScheduleRecord;
 
     protected LocalScheduleBridge(@NonNull ScheduleRecord scheduleRecord) {
         mScheduleRecord = scheduleRecord;

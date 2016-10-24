@@ -122,6 +122,8 @@ public class RemoteTask extends Task {
 
     @Override
     public void setRelevant() {
+        Stream.of(getSchedules()).forEach(Schedule::delete);
+
         mRemoteTaskRecord.delete();
     }
 

@@ -36,6 +36,7 @@ public class LocalDailyScheduleBridge extends LocalScheduleBridge implements Dai
 
     @Override
     public void delete() {
+        mScheduleRecord.delete();
         mDailyScheduleRecord.delete();
     }
 }

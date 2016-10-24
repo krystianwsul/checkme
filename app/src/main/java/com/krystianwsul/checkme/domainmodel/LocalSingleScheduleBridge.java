@@ -51,6 +51,7 @@ public class LocalSingleScheduleBridge extends LocalScheduleBridge implements Si
 
     @Override
     public void delete() {
+        mScheduleRecord.delete();
         mSingleScheduleRecord.delete();
     }
 }

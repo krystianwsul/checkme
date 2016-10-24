@@ -41,6 +41,7 @@ public class LocalWeeklyScheduleBridge extends LocalScheduleBridge implements We
 
     @Override
     public void delete() {
+        mScheduleRecord.delete();
         mWeeklyScheduleRecord.delete();
     }
 }

@@ -920,7 +920,7 @@ public class DomainFactory {
             }
 
             Set<UserData> friends;
-            if (task.getRecordOf().isEmpty()) {
+            if (task.getRecordOf().isEmpty() || (parentTaskKey != null)) {
                 friends = new HashSet<>();
             } else {
                 Assert.assertTrue(mFriends != null);

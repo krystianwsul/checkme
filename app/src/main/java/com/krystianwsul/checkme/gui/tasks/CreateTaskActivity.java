@@ -45,6 +45,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -822,8 +823,15 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
         Assert.assertTrue(!hasValueParent() || !hasValueFriends());
 
-        if (hasValueFriends()) // todo friend
-            return true;
+        if (mTaskKey != null) {
+            Assert.assertTrue(mData.TaskData != null);
+
+            if (!mData.TaskData.mFriends.equals(new HashSet<>(mFriendEntries)))
+                return true;
+        } else {
+            if (hasValueFriends())
+                return true;
+        }
 
         if (mTaskKey != null) {
             Assert.assertTrue(mData.TaskData != null);

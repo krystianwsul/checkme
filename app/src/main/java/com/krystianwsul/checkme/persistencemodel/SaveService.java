@@ -48,7 +48,7 @@ public class SaveService extends IntentService {
         try {
             save(sqLiteDatabase, insertCommands, updateCommands, deleteCommands);
         } catch (Exception e) {
-            DomainFactory.getDomainFactory(this).reset();
+            DomainFactory.getDomainFactory(this).reset(this);
             throw e;
         }
     }

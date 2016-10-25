@@ -41,10 +41,18 @@ public class RemoteTask extends Task {
     }
 
     @NonNull
+    private RemoteFactory getRemoteFactory() {
+        RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
+        Assert.assertTrue(remoteFactory != null);
+
+        return remoteFactory;
+    }
+
+    @NonNull
     @Override
     protected Collection<Schedule> getSchedules() {
-        if (mDomainFactory.getRemoteFactory().mRemoteSchedules.containsKey(mRemoteTaskRecord.getId()))
-            return mDomainFactory.getRemoteFactory().mRemoteSchedules.get(mRemoteTaskRecord.getId());
+        if (getRemoteFactory().mRemoteSchedules.containsKey(mRemoteTaskRecord.getId()))
+            return getRemoteFactory().mRemoteSchedules.get(mRemoteTaskRecord.getId());
         else
             return new ArrayList<>();
     }
@@ -94,7 +102,7 @@ public class RemoteTask extends Task {
 
     @Override
     public void createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
-        mDomainFactory.getRemoteFactory().createChildTask(mDomainFactory, this, now, name, note);
+        getRemoteFactory().createChildTask(mDomainFactory, this, now, name, note);
     }
 
     @Nullable
@@ -165,7 +173,7 @@ public class RemoteTask extends Task {
                 .collect(Collectors.toSet());
         Assert.assertTrue(!removedFriends.contains(myKey));
 
-        mDomainFactory.getRemoteFactory().updateRecordOf(this, addedFriends, removedFriends);
+        getRemoteFactory().updateRecordOf(this, addedFriends, removedFriends);
 
         return this;
     }
@@ -179,6 +187,6 @@ public class RemoteTask extends Task {
 
     @Override
     protected void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now) {
-        mDomainFactory.getRemoteFactory().createSchedules(mDomainFactory, getRecordOf(), getId(), now, scheduleDatas);
+        getRemoteFactory().createSchedules(mDomainFactory, getRecordOf(), getId(), now, scheduleDatas);
     }
 }

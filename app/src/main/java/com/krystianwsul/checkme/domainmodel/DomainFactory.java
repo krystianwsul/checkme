@@ -117,7 +117,10 @@ public class DomainFactory {
     @Nullable
     private ValueEventListener mFriendListener;
 
+    @NonNull
     private LocalFactory mLocalFactory;
+
+    @Nullable
     private RemoteFactory mRemoteFactory;
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
@@ -140,8 +143,6 @@ public class DomainFactory {
 
     private DomainFactory(Context context) {
         mLocalFactory = LocalFactory.getInstance(context);
-
-        mRemoteFactory = new RemoteFactory(this, new ArrayList<>());
     }
 
     DomainFactory(PersistenceManger persistenceManger) {
@@ -162,8 +163,8 @@ public class DomainFactory {
         return (sStop.getLong() - sRead.getLong());
     }
 
-    public synchronized void reset() {
-        clearUserData();
+    public synchronized void reset(@NonNull Context context) {
+        clearUserData(context); // todo re-log in afterwards
 
         sDomainFactory = null;
         mLocalFactory.reset();
@@ -193,7 +194,10 @@ public class DomainFactory {
 
     private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds) {
         mLocalFactory.save(context);
-        mRemoteFactory.save();
+
+        if (mRemoteFactory != null)
+            mRemoteFactory.save();
+
         ObserverHolder.getObserverHolder().notifyDomainObservers(dataIds);
     }
 
@@ -207,7 +211,7 @@ public class DomainFactory {
             if (mUserData.equals(userData))
                 return;
 
-            clearUserData();
+            clearUserData(context);
         }
 
         Assert.assertTrue(mUserData == null);
@@ -261,7 +265,9 @@ public class DomainFactory {
         mFriendQuery.addValueEventListener(mFriendListener);
     }
 
-    public synchronized void clearUserData() {
+    public synchronized void clearUserData(@NonNull Context context) {
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
         if (mUserData == null) {
             Assert.assertTrue(mRecordQuery == null);
             Assert.assertTrue(mRecordListener == null);
@@ -273,7 +279,7 @@ public class DomainFactory {
             Assert.assertTrue(mFriendQuery != null);
             Assert.assertTrue(mFriendListener != null);
 
-            mRemoteFactory = new RemoteFactory(this, new ArrayList<>());
+            mRemoteFactory = null;
             mFriends = null;
 
             mUserData = null;
@@ -285,6 +291,10 @@ public class DomainFactory {
             mFriendQuery.removeEventListener(mFriendListener);
             mFriendQuery = null;
             mFriendListener = null;
+
+            updateNotifications(context, new ArrayList<>(), now);
+
+            ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
         }
     }
 
@@ -308,7 +318,10 @@ public class DomainFactory {
     @NonNull
     private List<TaskHierarchy> getTaskHierarchies() {
         List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.mLocalTaskHierarchies.values());
-        taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
+
+        if (mRemoteFactory != null)
+            taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
+
         return taskHierarchies;
     }
 
@@ -332,9 +345,15 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Map<TaskKey, Task> getTasks() {
-        return Stream.concat(Stream.of(mLocalFactory.mLocalTasks.values()), Stream.of(mRemoteFactory.mRemoteTasks.values()))
+    private Map<TaskKey, Task> getTasks() { // todo change to list
+        Map<TaskKey, Task> tasks = Stream.of(mLocalFactory.mLocalTasks.values())
                 .collect(Collectors.toMap(Task::getTaskKey, task -> task));
+
+        if (mRemoteFactory != null)
+            tasks.putAll(Stream.of(mRemoteFactory.mRemoteTasks.values())
+                    .collect(Collectors.toMap(Task::getTaskKey, task -> task)));
+
+        return tasks;
     }
 
     @NonNull
@@ -382,7 +401,7 @@ public class DomainFactory {
                 .collect(Collectors.toList());
     }
 
-    @NonNull
+    @Nullable
     public RemoteFactory getRemoteFactory() {
         return mRemoteFactory;
     }
@@ -393,9 +412,15 @@ public class DomainFactory {
     }
 
     @NonNull
-    public Map<InstanceKey, Instance> getExistingInstances() {
-        return Stream.concat(Stream.of(mLocalFactory.mExistingLocalInstances), Stream.of(mRemoteFactory.mExistingRemoteInstances.values()))
+    public Map<InstanceKey, Instance> getExistingInstances() { // todo change to list
+        Map<InstanceKey, Instance> instances = Stream.of(mLocalFactory.mExistingLocalInstances)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
+
+        if (mRemoteFactory != null)
+            instances.putAll(Stream.of(mRemoteFactory.mExistingRemoteInstances.values())
+                    .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
+
+        return instances;
     }
 
     @Nullable
@@ -1144,6 +1169,8 @@ public class DomainFactory {
         if (friendEntries.isEmpty()) {
             createScheduleRootTask(now, name, scheduleDatas, note);
         } else {
+            Assert.assertTrue(mRemoteFactory != null);
+
             mRemoteFactory.createScheduleRootTask(this, now, name, scheduleDatas, note, friendEntries);
         }
 
@@ -1570,7 +1597,11 @@ public class DomainFactory {
         Stream.of(irrelevant.mCustomTimes)
                 .forEach(mLocalFactory.mLocalCustomTimes::remove); // todo customTimes
 
-        mRemoteFactory.removeIrrelevant(irrelevant);
+        if (mRemoteFactory != null) {
+            mRemoteFactory.removeIrrelevant(irrelevant);
+
+            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.mRemoteTasks.keySet());
+        }
     }
 
     public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note) {
@@ -1684,15 +1715,52 @@ public class DomainFactory {
                 .filter(Instance::getNotificationShown)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
 
-        Set<InstanceKey> shownInstanceKeys = shownInstances.keySet();
+        HashSet<InstanceKey> shownInstanceKeys = new HashSet<>(shownInstances.keySet());
 
         List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
                 .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
                 .collect(Collectors.toList());
 
-        List<InstanceKey> hideInstanceKeys = Stream.of(shownInstances.keySet())
+        HashSet<InstanceKey> hideInstanceKeys = Stream.of(shownInstances.keySet())
                 .filter(instanceKey -> !notificationInstances.containsKey(instanceKey))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(HashSet::new));
+
+        Set<TaskKey> allTaskKeys = getTasks().keySet();
+
+        Map<InstanceKey, Integer> hideInstanceShownRecordNotificationIds = new HashMap<>();
+        for (InstanceShownRecord instanceShownRecord : mLocalFactory.mPersistenceManager.getInstancesShownRecords()) {
+            TaskKey taskKey = new TaskKey(instanceShownRecord.getTaskId());
+
+            if (allTaskKeys.contains(taskKey))
+                continue;
+
+            if (!instanceShownRecord.getNotificationShown())
+                continue;
+
+            Date scheduleDate = new Date(instanceShownRecord.getScheduleYear(), instanceShownRecord.getScheduleMonth(), instanceShownRecord.getScheduleDay());
+            Integer customTimeId = instanceShownRecord.getScheduleCustomTimeId();
+            HourMinute hourMinute;
+            if (customTimeId != null) {
+                Assert.assertTrue(instanceShownRecord.getScheduleHour() == null);
+                Assert.assertTrue(instanceShownRecord.getScheduleMinute() == null);
+
+                hourMinute = null;
+            } else {
+                Assert.assertTrue(instanceShownRecord.getScheduleHour() != null);
+                Assert.assertTrue(instanceShownRecord.getScheduleMinute() != null);
+
+                hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
+            }
+
+            InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, customTimeId, hourMinute);
+
+            shownInstanceKeys.add(instanceKey);
+            hideInstanceKeys.add(instanceKey);
+
+            instanceShownRecord.setNotificationShown(false);
+
+            hideInstanceShownRecordNotificationIds.put(instanceKey, Instance.getNotificationId(scheduleDate, customTimeId, hourMinute, taskKey));
+        }
 
         if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
             for (InstanceKey showInstanceKey : showInstanceKeys) {
@@ -1706,9 +1774,13 @@ public class DomainFactory {
             for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                 Assert.assertTrue(hideInstanceKey != null);
 
-                Instance hideInstance = getInstance(hideInstanceKey);
+                if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                    Instance hideInstance = getInstance(hideInstanceKey);
 
-                hideInstance.setNotificationShown(false, now);
+                    hideInstance.setNotificationShown(false, now);
+                } else {
+                    Assert.assertTrue(hideInstanceShownRecordNotificationIds.containsKey(hideInstanceKey));
+                }
             }
         }
 
@@ -1729,20 +1801,32 @@ public class DomainFactory {
             }
         } else {
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                if (shownInstances.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
                         notifyGroup(context, notificationInstances.values(), silent, now);
                     } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
                         notifyGroup(context, notificationInstances.values(), true, now);
                     }
                 } else { // instances shown
-                    for (Instance instance : shownInstances.values())
-                        notificationManager.cancel(instance.getNotificationId());
+                    for (InstanceKey shownInstanceKey : shownInstanceKeys) {
+                        if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
+                            Instance shownInstance = shownInstances.get(shownInstanceKey);
+                            Assert.assertTrue(shownInstance != null);
+
+                            notificationManager.cancel(shownInstance.getNotificationId());
+                        } else {
+                            Assert.assertTrue(hideInstanceShownRecordNotificationIds.containsKey(shownInstanceKey));
+
+                            int notificationId = hideInstanceShownRecordNotificationIds.get(shownInstanceKey);
+
+                            notificationManager.cancel(notificationId);
+                        }
+                    }
 
                     notifyGroup(context, notificationInstances.values(), silent, now);
                 }
             } else { // show instances
-                if (shownInstances.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     notificationManager.cancel(0);
 
                     for (Instance instance : notificationInstances.values()) {
@@ -1752,10 +1836,18 @@ public class DomainFactory {
                     }
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                        Instance instance = shownInstances.get(hideInstanceKey);
-                        Assert.assertTrue(instance != null);
+                        if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                            Instance instance = shownInstances.get(hideInstanceKey);
+                            Assert.assertTrue(instance != null);
 
-                        notificationManager.cancel(instance.getNotificationId());
+                            notificationManager.cancel(instance.getNotificationId());
+                        } else {
+                            Assert.assertTrue(hideInstanceShownRecordNotificationIds.containsKey(hideInstanceKey));
+
+                            int notificationId = hideInstanceShownRecordNotificationIds.get(hideInstanceKey);
+
+                            notificationManager.cancel(notificationId);
+                        }
                     }
 
                     for (InstanceKey showInstanceKey : showInstanceKeys) {
@@ -2346,6 +2438,8 @@ public class DomainFactory {
 
     @NonNull
     RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull Set<String> recordOf) {
+        Assert.assertTrue(mRemoteFactory != null);
+
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
 
@@ -2356,7 +2450,7 @@ public class DomainFactory {
         Assert.assertTrue(Stream.of(localToRemoteConversion.mLocalInstances)
                 .noneMatch(localInstance -> localInstance.getInstanceCustomTimeId() != null)); // todo customtime
 
-        updateNotifications(context, false, false, new ArrayList<>(), now, Stream.of(localToRemoteConversion.mLocalTasks.values())
+        updateNotifications(context, true, false, new ArrayList<>(), now, Stream.of(localToRemoteConversion.mLocalTasks.values())
                 .map(Task::getTaskKey)
                 .collect(Collectors.toList()));
 

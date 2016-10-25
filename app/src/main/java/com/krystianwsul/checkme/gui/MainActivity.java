@@ -132,7 +132,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         } else {
             sUserData = null;
 
-            DomainFactory.getDomainFactory(this).clearUserData();
+            DomainFactory.getDomainFactory(this).clearUserData(this);
 
             Log.e("asdf", "firebase logged out");
         }

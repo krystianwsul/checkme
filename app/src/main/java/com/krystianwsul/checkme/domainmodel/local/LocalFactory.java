@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @SuppressLint("UseSparseArrays")
 public class LocalFactory {
@@ -281,5 +282,9 @@ public class LocalFactory {
         Assert.assertTrue(mExistingLocalInstances.contains(localInstance));
 
         mExistingLocalInstances.remove(localInstance);
+    }
+
+    public void deleteInstanceShownRecords(@NonNull Set<String> taskIds) {
+        mPersistenceManager.deleteInstanceShownRecords(taskIds);
     }
 }

@@ -277,7 +277,10 @@ public class RemoteInstance extends Instance {
         mTaskId = null;
         mScheduleDateTime = null;
 
-        mRemoteInstanceRecord = mDomainFactory.getRemoteFactory().createRemoteInstanceRecord((RemoteTask) task, this, scheduleDateTime, now);
+        RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
+        Assert.assertTrue(remoteFactory != null);
+
+        mRemoteInstanceRecord = remoteFactory.createRemoteInstanceRecord((RemoteTask) task, this, scheduleDateTime, now);
     }
 
     @Override
@@ -329,8 +332,6 @@ public class RemoteInstance extends Instance {
         Assert.assertTrue(mRemoteInstanceRecord != null);
 
         mRemoteInstanceRecord.delete();
-
-        // todo remove Instance shown records
     }
 
     @NonNull

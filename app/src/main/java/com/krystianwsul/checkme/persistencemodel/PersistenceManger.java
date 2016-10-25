@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PersistenceManger {
     private static PersistenceManger sInstance;
@@ -597,5 +598,14 @@ public class PersistenceManger {
         InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute, false, false);
         mInstancesShownRecords.add(instanceShownRecord);
         return instanceShownRecord;
+    }
+
+    public void deleteInstanceShownRecords(@NonNull Set<String> taskIds) {
+        List<InstanceShownRecord> remove = Stream.of(mInstancesShownRecords)
+                .filterNot(instanceShownRecord -> taskIds.contains(instanceShownRecord.getTaskId()))
+                .collect(Collectors.toList());
+
+        Stream.of(remove)
+                .forEach(InstanceShownRecord::delete);
     }
 }

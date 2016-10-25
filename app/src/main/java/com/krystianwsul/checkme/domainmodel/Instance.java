@@ -210,10 +210,10 @@ public abstract class Instance {
      */
 
     public int getNotificationId() {
-        Date scheduleDate = getScheduleDate();
+        return getNotificationId(getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute(), getTaskKey());
+    }
 
-        Integer scheduleCustomTimeId = getScheduleCustomTimeId();
-        HourMinute scheduleHourMinute = getScheduleHourMinute();
+    public static int getNotificationId(@NonNull Date scheduleDate, @Nullable Integer scheduleCustomTimeId, @Nullable HourMinute scheduleHourMinute, @NonNull TaskKey taskKey) {
         Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
 
         int hash = scheduleDate.getMonth();
@@ -228,7 +228,7 @@ public abstract class Instance {
         }
 
         //noinspection NumericOverflow
-        hash += 12 * 31 * 73 * 24 * 60 * 10000 * getTaskKey().hashCode();
+        hash += 12 * 31 * 73 * 24 * 60 * 10000 * taskKey.hashCode();
 
         return hash;
     }

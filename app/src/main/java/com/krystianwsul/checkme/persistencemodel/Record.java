@@ -18,11 +18,25 @@ abstract class Record {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
         Assert.assertTrue(!TextUtils.isEmpty(idColumn));
 
+        /*
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT MAX(" + idColumn + ") FROM " + tableName, null);
         Assert.assertTrue(cursor.getColumnCount() == 1);
         cursor.moveToFirst();
 
         int max = (cursor.isNull(0) ? 0 : cursor.getInt(0));
+
+        cursor.close();
+        */
+
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT seq FROM SQLITE_SEQUENCE WHERE name='" + tableName + "'", null);
+        cursor.moveToFirst();
+
+        int max;
+        if (cursor.isAfterLast()) {
+            max = 0;
+        } else {
+            max = cursor.getInt(0);
+        }
 
         cursor.close();
 
@@ -75,7 +89,8 @@ abstract class Record {
 
     boolean needsUpdate() {
         Assert.assertTrue(mCreated);
-        return mChanged;
+
+        return (mChanged && !mDeleted);
     }
 
     boolean needsDelete() {

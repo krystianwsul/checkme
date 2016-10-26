@@ -228,15 +228,19 @@ public class RemoteFactory {
 
         mRemoteTasks.put(childTask.getId(), childTask);
 
-        TaskHierarchyJson taskHierarchyJson = new TaskHierarchyJson(parentTask.getId(), childTaskRecord.getId(), now.getLong(), null);
-        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(new JsonWrapper(parentTask.getRecordOf(), taskHierarchyJson));
+        createTaskHierarchy(domainFactory, parentTask, childTask, now);
+
+        return childTask;
+    }
+
+    void createTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull RemoteTask parentRemoteTask, @NonNull RemoteTask childRemoteTask, @NonNull ExactTimeStamp now) {
+        TaskHierarchyJson taskHierarchyJson = new TaskHierarchyJson(parentRemoteTask.getId(), childRemoteTask.getId(), now.getLong(), null);
+        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(new JsonWrapper(parentRemoteTask.getRecordOf(), taskHierarchyJson));
 
         RemoteTaskHierarchy remoteTaskHierarchy = new RemoteTaskHierarchy(domainFactory, remoteTaskHierarchyRecord);
         Assert.assertTrue(!mRemoteTaskHierarchies.containsKey(remoteTaskHierarchy.getId()));
 
         mRemoteTaskHierarchies.put(remoteTaskHierarchy.getId(), remoteTaskHierarchy);
-
-        return childTask;
     }
 
     @NonNull

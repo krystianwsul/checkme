@@ -355,7 +355,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskKey.mLocalTaskId, name, mParent.mTaskKey.mLocalTaskId, mNote); // todo firebase
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, mData.DataId, mTaskKey, name, mParent.mTaskKey, mNote);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);

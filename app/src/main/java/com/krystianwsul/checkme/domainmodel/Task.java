@@ -236,4 +236,6 @@ public abstract class Task {
     protected abstract Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now);
 
     protected abstract void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now);
+
+    protected abstract void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now);
 }

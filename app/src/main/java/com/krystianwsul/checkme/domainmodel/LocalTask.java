@@ -167,4 +167,11 @@ public class LocalTask extends Task {
 
         addSchedules(schedules);
     }
+
+    @Override
+    protected void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(childTask instanceof LocalTask);
+
+        mDomainFactory.createTaskHierarchy(this, (LocalTask) childTask, now);
+    }
 }

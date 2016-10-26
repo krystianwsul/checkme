@@ -152,7 +152,6 @@ public class RemoteTask extends Task {
         Assert.assertTrue(userData != null);
 
         String myKey = UserData.getKey(userData.email);
-
         Assert.assertTrue(!friends.contains(myKey));
 
         Set<String> allFriends = mDomainFactory.getFriends().keySet();
@@ -188,5 +187,12 @@ public class RemoteTask extends Task {
     @Override
     protected void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now) {
         getRemoteFactory().createSchedules(mDomainFactory, getRecordOf(), getId(), now, scheduleDatas);
+    }
+
+    @Override
+    protected void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(childTask instanceof RemoteTask);
+
+        getRemoteFactory().createTaskHierarchy(mDomainFactory, this, (RemoteTask) childTask, now);
     }
 }

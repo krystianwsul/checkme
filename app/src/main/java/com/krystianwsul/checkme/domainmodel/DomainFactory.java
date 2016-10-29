@@ -1682,29 +1682,13 @@ public class DomainFactory {
                 .filterNot(instance -> removedTaskKeys.contains(instance.getTaskKey()))
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
 
-        Map<InstanceKey, Instance> shownInstances = Stream.of(getExistingInstances().values())
+        HashSet<InstanceKey> shownInstanceKeys = new HashSet<>(Stream.of(getExistingInstances().values())
                 .filter(Instance::getNotificationShown)
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
+                .map(Instance::getInstanceKey)
+                .collect(Collectors.toSet()));
 
-        HashSet<InstanceKey> shownInstanceKeys = new HashSet<>(shownInstances.keySet());
-
-        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
-                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
-                .collect(Collectors.toList());
-
-        HashSet<InstanceKey> hideInstanceKeys = Stream.of(shownInstances.keySet())
-                .filter(instanceKey -> !notificationInstances.containsKey(instanceKey))
-                .collect(Collectors.toCollection(HashSet::new));
-
-        Set<TaskKey> allTaskKeys = getTasks().keySet();
-
-        Map<InstanceKey, Integer> hideInstanceShownRecordNotificationIds = new HashMap<>();
+        Map<InstanceKey, Pair<Integer, InstanceShownRecord>> instanceShownRecordNotificationDatas = new HashMap<>();
         for (InstanceShownRecord instanceShownRecord : mLocalFactory.mPersistenceManager.getInstancesShownRecords()) {
-            TaskKey taskKey = new TaskKey(instanceShownRecord.getTaskId());
-
-            if (allTaskKeys.contains(taskKey))
-                continue;
-
             if (!instanceShownRecord.getNotificationShown())
                 continue;
 
@@ -1723,35 +1707,44 @@ public class DomainFactory {
                 hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
             }
 
+            TaskKey taskKey = new TaskKey(instanceShownRecord.getTaskId());
+
             InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, customTimeId, hourMinute);
 
             shownInstanceKeys.add(instanceKey);
-            hideInstanceKeys.add(instanceKey);
 
-            instanceShownRecord.setNotificationShown(false);
-
-            hideInstanceShownRecordNotificationIds.put(instanceKey, Instance.getNotificationId(scheduleDate, customTimeId, hourMinute, taskKey));
+            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.getNotificationId(scheduleDate, customTimeId, hourMinute, taskKey), instanceShownRecord));
         }
 
-        if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-            for (InstanceKey showInstanceKey : showInstanceKeys) {
-                Assert.assertTrue(showInstanceKey != null);
+        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
+                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
+                .collect(Collectors.toList());
 
-                Instance showInstance = getInstance(showInstanceKey);
+        Set<InstanceKey> hideInstanceKeys = Stream.of(shownInstanceKeys)
+                .filter(instanceKey -> !notificationInstances.containsKey(instanceKey))
+                .collect(Collectors.toSet());
 
-                showInstance.setNotificationShown(true, now);
-            }
+        for (InstanceKey showInstanceKey : showInstanceKeys) {
+            Assert.assertTrue(showInstanceKey != null);
 
-            for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                Assert.assertTrue(hideInstanceKey != null);
+            Instance showInstance = getInstance(showInstanceKey);
 
-                if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
-                    Instance hideInstance = getInstance(hideInstanceKey);
+            showInstance.setNotificationShown(true, now);
+        }
 
-                    hideInstance.setNotificationShown(false, now);
-                } else {
-                    Assert.assertTrue(hideInstanceShownRecordNotificationIds.containsKey(hideInstanceKey));
-                }
+        Set<TaskKey> allTaskKeys = getTasks().keySet();
+
+        for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+            Assert.assertTrue(hideInstanceKey != null);
+
+            if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                Instance hideInstance = getInstance(hideInstanceKey);
+
+                hideInstance.setNotificationShown(false, now);
+            } else {
+                Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
+
+                instanceShownRecordNotificationDatas.get(hideInstanceKey).second.setNotificationShown(false);
             }
         }
 
@@ -1781,14 +1774,13 @@ public class DomainFactory {
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
                         if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
-                            Instance shownInstance = shownInstances.get(shownInstanceKey);
-                            Assert.assertTrue(shownInstance != null);
+                            Instance shownInstance = getInstance(shownInstanceKey);
 
                             notificationManager.cancel(shownInstance.getNotificationId());
                         } else {
-                            Assert.assertTrue(hideInstanceShownRecordNotificationIds.containsKey(shownInstanceKey));
+                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
 
-                            int notificationId = hideInstanceShownRecordNotificationIds.get(shownInstanceKey);
+                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
 
                             notificationManager.cancel(notificationId);
                         }
@@ -1808,14 +1800,13 @@ public class DomainFactory {
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                         if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
-                            Instance instance = shownInstances.get(hideInstanceKey);
-                            Assert.assertTrue(instance != null);
+                            Instance instance = getInstance(hideInstanceKey);
 
                             notificationManager.cancel(instance.getNotificationId());
                         } else {
-                            Assert.assertTrue(hideInstanceShownRecordNotificationIds.containsKey(hideInstanceKey));
+                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
-                            int notificationId = hideInstanceShownRecordNotificationIds.get(hideInstanceKey);
+                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
                             notificationManager.cancel(notificationId);
                         }

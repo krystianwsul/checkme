@@ -19,7 +19,6 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -51,10 +50,7 @@ public class RemoteTask extends Task {
     @NonNull
     @Override
     protected Collection<Schedule> getSchedules() {
-        if (getRemoteFactory().mRemoteSchedules.containsKey(mRemoteTaskRecord.getId()))
-            return getRemoteFactory().mRemoteSchedules.get(mRemoteTaskRecord.getId());
-        else
-            return new ArrayList<>();
+        return getRemoteFactory().getSchedules(getId());
     }
 
     @NonNull

@@ -52,7 +52,6 @@ import com.krystianwsul.checkme.notifications.InstanceHourService;
 import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
-import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -155,10 +154,14 @@ public class DomainFactory {
     }
 
     public synchronized void reset(@NonNull Context context) {
-        clearUserData(context); // todo re-log in afterwards
+        UserData userData = mUserData;
+        clearUserData(context);
 
         sDomainFactory = null;
         mLocalFactory.reset();
+
+        if (userData != null)
+            setUserData(context, userData);
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
 
@@ -1267,7 +1270,7 @@ public class DomainFactory {
         Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-        CustomTimeRecord customTimeRecord = mLocalFactory.mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
+        CustomTimeRecord customTimeRecord = mLocalFactory.mPersistenceManager.createCustomTimeRecord(name, hourMinutes); // todo customtime
         Assert.assertTrue(customTimeRecord != null);
 
         CustomTime customTime = new CustomTime(customTimeRecord);
@@ -1542,13 +1545,6 @@ public class DomainFactory {
     }
 
     @NonNull
-    InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
-        mLocalFactory.mExistingLocalInstances.add(localInstance);
-
-        return mLocalFactory.mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
-    }
-
-    @NonNull
     private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
         Time time = mLocalFactory.getTime(timePair);
 
@@ -1585,31 +1581,6 @@ public class DomainFactory {
             Task parentTask = parentTaskHierarchy.getParentTask();
             Assert.assertTrue(parentTask.current(exactTimeStamp));
             return parentTask;
-        }
-    }
-
-    @Nullable
-    private LocalTaskHierarchy getParentTaskHierarchy(@NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(childLocalTask.current(exactTimeStamp));
-
-        ArrayList<LocalTaskHierarchy> taskHierarchies = new ArrayList<>();
-        for (LocalTaskHierarchy localTaskHierarchy : mLocalFactory.mLocalTaskHierarchies.values()) {
-            Assert.assertTrue(localTaskHierarchy != null);
-
-            if (!localTaskHierarchy.current(exactTimeStamp))
-                continue;
-
-            if (localTaskHierarchy.getChildTask() != childLocalTask)
-                continue;
-
-            taskHierarchies.add(localTaskHierarchy);
-        }
-
-        if (taskHierarchies.isEmpty()) {
-            return null;
-        } else {
-            Assert.assertTrue(taskHierarchies.size() == 1);
-            return taskHierarchies.get(0);
         }
     }
 
@@ -1827,7 +1798,7 @@ public class DomainFactory {
         Assert.assertTrue(mRemoteFactory != null);
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
-        convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
+        mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
 
         Assert.assertTrue(Stream.of(localToRemoteConversion.mLocalTasks.values())
                 .flatMap(localTask -> Stream.of(localTask.getSchedules()))
@@ -1885,34 +1856,6 @@ public class DomainFactory {
         return remoteTask;
     }
 
-    private void convertLocalToRemoteHelper(@NonNull LocalToRemoteConversion localToRemoteConversion, @NonNull LocalTask localTask, @NonNull Set<String> recordOf) {
-        if (localToRemoteConversion.mLocalTasks.containsKey(localTask.getId()))
-            return;
-
-        TaskKey taskKey = localTask.getTaskKey();
-
-        localToRemoteConversion.mLocalTasks.put(localTask.getId(), localTask);
-
-        List<LocalTaskHierarchy> parentLocalTaskHierarchies = Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
-                .filter(localTaskHierarchy -> localTaskHierarchy.getChildTaskKey().equals(taskKey))
-                .collect(Collectors.toList());
-
-        localToRemoteConversion.mLocalTaskHierarchies.addAll(parentLocalTaskHierarchies);
-
-        localToRemoteConversion.mLocalInstances.addAll(Stream.of(mLocalFactory.mExistingLocalInstances)
-                .filter(localInstance -> localInstance.getTaskKey().equals(taskKey))
-                .collect(Collectors.toList()));
-
-        Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
-                .filter(localTaskHierarchy -> localTaskHierarchy.getParentTaskKey().equals(taskKey))
-                .map(LocalTaskHierarchy::getChildTask)
-                .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) childTask, recordOf));
-
-        Stream.of(parentLocalTaskHierarchies)
-                .map(LocalTaskHierarchy::getParentTask)
-                .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) parentTask, recordOf));
-    }
-
     public void joinTasks(@NonNull Task newParentTask, @NonNull List<Task> joinTasks, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(newParentTask.current(now));
         Assert.assertTrue(joinTasks.size() > 1);
@@ -1937,10 +1880,10 @@ public class DomainFactory {
 
     @NonNull
     private List<TaskHierarchy> getTaskHierarchies() {
-        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.mLocalTaskHierarchies.values());
+        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.getTaskHierarchies());
 
         if (mRemoteFactory != null)
-            taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
+            taskHierarchies.addAll(mRemoteFactory.getTaskHierarchies());
 
         return taskHierarchies;
     }
@@ -1966,11 +1909,11 @@ public class DomainFactory {
 
     @NonNull
     private Map<TaskKey, Task> getTasks() { // todo change to list
-        Map<TaskKey, Task> tasks = Stream.of(mLocalFactory.mLocalTasks.values())
+        Map<TaskKey, Task> tasks = Stream.of(mLocalFactory.getTasks())
                 .collect(Collectors.toMap(Task::getTaskKey, task -> task));
 
         if (mRemoteFactory != null)
-            tasks.putAll(Stream.of(mRemoteFactory.mRemoteTasks.values())
+            tasks.putAll(Stream.of(mRemoteFactory.getTasks().values())
                     .collect(Collectors.toMap(Task::getTaskKey, task -> task)));
 
         return tasks;
@@ -2033,11 +1976,11 @@ public class DomainFactory {
 
     @NonNull
     public Map<InstanceKey, Instance> getExistingInstances() { // todo change to list
-        Map<InstanceKey, Instance> instances = Stream.of(mLocalFactory.mExistingLocalInstances)
+        Map<InstanceKey, Instance> instances = Stream.of(mLocalFactory.getExistingInstances())
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
 
         if (mRemoteFactory != null)
-            instances.putAll(Stream.of(mRemoteFactory.mExistingRemoteInstances.values())
+            instances.putAll(Stream.of(mRemoteFactory.getExistingInstances())
                     .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
 
         return instances;
@@ -2104,7 +2047,7 @@ public class DomainFactory {
         // relevant hack
         Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks().values()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances().values()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
-        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
+        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new)); // todo customtime
 
         Stream.of(getTasks().values())
                 .filter(task -> task.current(now))
@@ -2159,7 +2102,7 @@ public class DomainFactory {
                 .map(CustomTimeRelevance::getCustomTime)
                 .collect(Collectors.toList());
 
-        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
+        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values()); // todo customtime
         irrelevantCustomTimes.removeAll(relevantCustomTimes);
 
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
@@ -2178,40 +2121,17 @@ public class DomainFactory {
     }
 
     void removeIrrelevant(@NonNull Irrelevant irrelevant) {
-        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mLocalFactory.mLocalTaskHierarchies.values()) // todo removal
-                .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
-                .collect(Collectors.toList());
-
-        Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
-                .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
-
-        for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
-            mLocalFactory.mLocalTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId()); // todo removal
-
-        for (Task task : irrelevant.mTasks) {
-            if (task instanceof LocalTask) {
-                Assert.assertTrue(mLocalFactory.mLocalTasks.containsKey(((LocalTask) task).getId())); // todo removal
-
-                mLocalFactory.mLocalTasks.remove(((LocalTask) task).getId()); // todo removal
-            }
-        }
-
-        for (Instance instance : irrelevant.mInstances) {
-            if (instance instanceof LocalInstance) {
-                Assert.assertTrue(mLocalFactory.mExistingLocalInstances.contains(instance));
-
-                mLocalFactory.mExistingLocalInstances.remove(instance);
-            }
-        }
-
-        Stream.of(irrelevant.mCustomTimes)
-                .forEach(mLocalFactory.mLocalCustomTimes::remove); // todo customTimes
-
         if (mRemoteFactory != null) {
             mRemoteFactory.removeIrrelevant(irrelevant);
 
-            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.mRemoteTasks.keySet());
+            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.getTasks().keySet());
+        } else {
+            Assert.assertTrue(Stream.of(irrelevant.mTasks).noneMatch(task -> task instanceof RemoteTask));
+            Assert.assertTrue(Stream.of(irrelevant.mInstances).noneMatch(instance -> instance instanceof RemoteInstance));
+            // todo customtimes
         }
+
+        mLocalFactory.removeIrrelevant(irrelevant);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
@@ -2237,7 +2157,7 @@ public class DomainFactory {
                 .collect(Collectors.toSet()));
 
         Map<InstanceKey, Pair<Integer, InstanceShownRecord>> instanceShownRecordNotificationDatas = new HashMap<>();
-        for (InstanceShownRecord instanceShownRecord : mLocalFactory.mPersistenceManager.getInstancesShownRecords()) {
+        for (InstanceShownRecord instanceShownRecord : mLocalFactory.getInstanceShownRecords()) {
             if (!instanceShownRecord.getNotificationShown())
                 continue;
 
@@ -2453,14 +2373,14 @@ public class DomainFactory {
             TaskKey taskKey = mTask.getTaskKey();
 
             // mark parents relevant
-            Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
+            Stream.of(getTaskHierarchies())
                     .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
                     .map(TaskHierarchy::getParentTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark children relevant
-            Stream.of(mLocalFactory.mLocalTaskHierarchies.values())
+            Stream.of(getTaskHierarchies())
                     .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(taskKey))
                     .map(TaskHierarchy::getChildTaskKey)
                     .map(taskRelevances::get)
@@ -2603,10 +2523,10 @@ public class DomainFactory {
         }
     }
 
-    private static class LocalToRemoteConversion {
-        final Map<Integer, LocalTask> mLocalTasks = new HashMap<>();
-        final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();
-        final List<LocalInstance> mLocalInstances = new ArrayList<>();
+    public static class LocalToRemoteConversion {
+        public final Map<Integer, LocalTask> mLocalTasks = new HashMap<>();
+        public final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();
+        public final List<LocalInstance> mLocalInstances = new ArrayList<>();
 
         final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();
         final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();

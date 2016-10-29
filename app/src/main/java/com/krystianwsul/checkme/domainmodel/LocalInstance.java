@@ -62,7 +62,7 @@ public class LocalInstance extends Instance {
     @NonNull
     @Override
     public TaskKey getTaskKey() {
-        return new TaskKey(getTaskId()); // todo firebase
+        return new TaskKey(getTaskId());
     }
 
     @NonNull
@@ -237,7 +237,7 @@ public class LocalInstance extends Instance {
         mTaskId = null;
         mScheduleDateTime = null;
 
-        mInstanceRecord = mDomainFactory.createInstanceRecord(localTask, this, scheduleDateTime, now);
+        mInstanceRecord = mDomainFactory.getLocalFactory().createInstanceRecord(localTask, this, scheduleDateTime, now);
     }
 
     @NonNull

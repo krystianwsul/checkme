@@ -49,7 +49,7 @@ public class PersistenceManger {
 
     private final List<InstanceRecord> mInstanceRecords;
 
-    private final List<InstanceShownRecord> mInstancesShownRecords;
+    private final List<InstanceShownRecord> mInstanceShownRecords;
 
     private int mCustomTimeMaxId;
     private int mTaskMaxId;
@@ -140,7 +140,7 @@ public class PersistenceManger {
 
         mInstanceMaxId = InstanceRecord.getMaxId(mSQLiteDatabase);
 
-        mInstancesShownRecords = InstanceShownRecord.getInstancesShownRecords(mSQLiteDatabase);
+        mInstanceShownRecords = InstanceShownRecord.getInstancesShownRecords(mSQLiteDatabase);
 
         mInstanceShownMaxId = InstanceShownRecord.getMaxId(mSQLiteDatabase);
     }
@@ -158,7 +158,7 @@ public class PersistenceManger {
         mMonthlyDayScheduleRecords = new HashMap<>();
         mMonthlyWeekScheduleRecords = new HashMap<>();
         mInstanceRecords = new ArrayList<>();
-        mInstancesShownRecords = new ArrayList<>();
+        mInstanceShownRecords = new ArrayList<>();
 
         mCustomTimeMaxId = 0;
         mTaskMaxId = 0;
@@ -219,8 +219,8 @@ public class PersistenceManger {
         return mInstanceRecords;
     }
 
-    public List<InstanceShownRecord> getInstancesShownRecords() {
-        return mInstancesShownRecords;
+    public List<InstanceShownRecord> getInstanceShownRecords() {
+        return mInstanceShownRecords;
     }
 
     public CustomTimeRecord createCustomTimeRecord(String name, Map<DayOfWeek, HourMinute> hourMinutes) {
@@ -485,7 +485,7 @@ public class PersistenceManger {
             if (instanceRecord.needsInsert())
                 insertCommands.add(instanceRecord.getInsertCommand());
 
-        for (InstanceShownRecord instanceShownRecord : mInstancesShownRecords)
+        for (InstanceShownRecord instanceShownRecord : mInstanceShownRecords)
             if (instanceShownRecord.needsInsert())
                 insertCommands.add(instanceShownRecord.getInsertCommand());
 
@@ -533,7 +533,7 @@ public class PersistenceManger {
             if (instanceRecord.needsUpdate())
                 updateCommands.add(instanceRecord.getUpdateCommand());
 
-        for (InstanceShownRecord instanceShownRecord : mInstancesShownRecords)
+        for (InstanceShownRecord instanceShownRecord : mInstanceShownRecords)
             if (instanceShownRecord.needsUpdate())
                 updateCommands.add(instanceShownRecord.getUpdateCommand());
 
@@ -549,7 +549,7 @@ public class PersistenceManger {
         deleteCommands.addAll(delete(mMonthlyDayScheduleRecords));
         deleteCommands.addAll(delete(mMonthlyWeekScheduleRecords));
         deleteCommands.addAll(delete(mInstanceRecords));
-        deleteCommands.addAll(delete(mInstancesShownRecords));
+        deleteCommands.addAll(delete(mInstanceShownRecords));
 
         SaveService.startService(context, insertCommands, updateCommands, deleteCommands);
     }
@@ -596,12 +596,12 @@ public class PersistenceManger {
         Integer hour = (hourMinute == null ? null : hourMinute.getHour());
         Integer minute = (hourMinute == null ? null : hourMinute.getMinute());
         InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute, false, false);
-        mInstancesShownRecords.add(instanceShownRecord);
+        mInstanceShownRecords.add(instanceShownRecord);
         return instanceShownRecord;
     }
 
     public void deleteInstanceShownRecords(@NonNull Set<String> taskIds) {
-        List<InstanceShownRecord> remove = Stream.of(mInstancesShownRecords)
+        List<InstanceShownRecord> remove = Stream.of(mInstanceShownRecords)
                 .filterNot(instanceShownRecord -> taskIds.contains(instanceShownRecord.getTaskId()))
                 .collect(Collectors.toList());
 

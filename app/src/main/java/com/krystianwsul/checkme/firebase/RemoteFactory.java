@@ -65,16 +65,16 @@ public class RemoteFactory {
     private final RemoteManager mRemoteManager;
 
     @NonNull
-    public final Map<String, RemoteTask> mRemoteTasks;
+    private final Map<String, RemoteTask> mRemoteTasks;
 
     @NonNull
-    public final Map<String, RemoteTaskHierarchy> mRemoteTaskHierarchies;
+    private final Map<String, RemoteTaskHierarchy> mRemoteTaskHierarchies;
 
     @NonNull
-    final Multimap<String, Schedule> mRemoteSchedules;
+    private final Multimap<String, Schedule> mRemoteSchedules;
 
     @NonNull
-    public final Map<String, RemoteInstance> mExistingRemoteInstances;
+    private final Map<String, RemoteInstance> mExistingRemoteInstances;
 
     public RemoteFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children) {
         mRemoteManager = new RemoteManager(children);
@@ -139,7 +139,7 @@ public class RemoteFactory {
         return remoteTask;
     }
 
-    public void createSchedules(@NonNull DomainFactory domainFactory, @NonNull Set<String> recordOf, @NonNull String taskId, @NonNull ExactTimeStamp now, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas) {
+    void createSchedules(@NonNull DomainFactory domainFactory, @NonNull Set<String> recordOf, @NonNull String taskId, @NonNull ExactTimeStamp now, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas) {
         Assert.assertTrue(!TextUtils.isEmpty(taskId));
 
         for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
@@ -253,7 +253,7 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public RemoteInstanceRecord createRemoteInstanceRecord(@NonNull RemoteTask remoteTask, @NonNull RemoteInstance remoteInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+    RemoteInstanceRecord createRemoteInstanceRecord(@NonNull RemoteTask remoteTask, @NonNull RemoteInstance remoteInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
         HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
         Integer hour = (hourMinute == null ? null : hourMinute.getHour());
         Integer minute = (hourMinute == null ? null : hourMinute.getMinute());
@@ -524,5 +524,28 @@ public class RemoteFactory {
         final List<RemoteTask> mRemoteTasks = new ArrayList<>();
         final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();
         final List<RemoteInstance> mRemoteInstances = new ArrayList<>();
+    }
+
+    @NonNull
+    public Map<String, RemoteTask> getTasks() {
+        return mRemoteTasks;
+    }
+
+    @NonNull
+    public Collection<RemoteTaskHierarchy> getTaskHierarchies() {
+        return mRemoteTaskHierarchies.values();
+    }
+
+    @NonNull
+    public Collection<RemoteInstance> getExistingInstances() {
+        return mExistingRemoteInstances.values();
+    }
+
+    @NonNull
+    Collection<Schedule> getSchedules(@NonNull String taskId) {
+        if (mRemoteSchedules.containsKey(taskId))
+            return mRemoteSchedules.get(taskId);
+        else
+            return new ArrayList<>();
     }
 }

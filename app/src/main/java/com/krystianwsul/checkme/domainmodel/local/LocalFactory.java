@@ -11,6 +11,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.LocalDailyScheduleBridge;
 import com.krystianwsul.checkme.domainmodel.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.LocalMonthlyDayScheduleBridge;
@@ -23,6 +24,7 @@ import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.SingleSchedule;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
@@ -38,6 +40,7 @@ import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -59,19 +62,19 @@ public class LocalFactory {
     private static LocalFactory sLocalFactory;
 
     @NonNull
-    public final PersistenceManger mPersistenceManager;
+    public final PersistenceManger mPersistenceManager; // todo customtimes
 
     @NonNull
-    public final HashMap<Integer, CustomTime> mLocalCustomTimes = new HashMap<>();
+    public final HashMap<Integer, CustomTime> mLocalCustomTimes = new HashMap<>(); // todo customtimes
 
     @NonNull
-    public final HashMap<Integer, LocalTask> mLocalTasks = new HashMap<>();
+    private final HashMap<Integer, LocalTask> mLocalTasks = new HashMap<>();
 
     @NonNull
-    public final HashMap<Integer, LocalTaskHierarchy> mLocalTaskHierarchies = new HashMap<>();
+    private final HashMap<Integer, LocalTaskHierarchy> mLocalTaskHierarchies = new HashMap<>();
 
     @NonNull
-    public final ArrayList<LocalInstance> mExistingLocalInstances = new ArrayList<>();
+    private final ArrayList<LocalInstance> mExistingLocalInstances = new ArrayList<>();
 
     public static LocalFactory getInstance(@NonNull Context context) {
         if (sLocalFactory == null)
@@ -239,7 +242,7 @@ public class LocalFactory {
             Assert.assertTrue(scheduleHour == null);
             Assert.assertTrue(scheduleMinute == null);
 
-            matches = Stream.of(mPersistenceManager.getInstancesShownRecords())
+            matches = Stream.of(mPersistenceManager.getInstanceShownRecords())
                     .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleYear)
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleMonth)
@@ -250,7 +253,7 @@ public class LocalFactory {
             Assert.assertTrue(scheduleHour != null);
             Assert.assertTrue(scheduleMinute != null);
 
-            matches = Stream.of(mPersistenceManager.getInstancesShownRecords())
+            matches = Stream.of(mPersistenceManager.getInstanceShownRecords())
                     .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleYear)
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleMonth)
@@ -439,5 +442,91 @@ public class LocalFactory {
         createTaskHierarchy(domainFactory, parentTask, childLocalTask, now);
 
         return childLocalTask;
+    }
+
+    @NonNull
+    public InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+        mExistingLocalInstances.add(localInstance);
+
+        return mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
+    }
+
+    public void removeIrrelevant(@NonNull DomainFactory.Irrelevant irrelevant) {
+        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mLocalTaskHierarchies.values())
+                .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
+                .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
+
+        for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
+            mLocalTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId());
+
+        for (Task task : irrelevant.mTasks) {
+            if (task instanceof LocalTask) {
+                Assert.assertTrue(mLocalTasks.containsKey(((LocalTask) task).getId()));
+
+                mLocalTasks.remove(((LocalTask) task).getId());
+            }
+        }
+
+        for (Instance instance : irrelevant.mInstances) {
+            if (instance instanceof LocalInstance) {
+                Assert.assertTrue(mExistingLocalInstances.contains(instance));
+
+                mExistingLocalInstances.remove(instance);
+            }
+        }
+
+        Stream.of(irrelevant.mCustomTimes)
+                .forEach(mLocalCustomTimes::remove); // todo customTimes
+    }
+
+    @NonNull
+    public List<InstanceShownRecord> getInstanceShownRecords() {
+        return mPersistenceManager.getInstanceShownRecords();
+    }
+
+    @NonNull
+    public Collection<LocalTask> getTasks() {
+        return mLocalTasks.values();
+    }
+
+    public void convertLocalToRemoteHelper(@NonNull DomainFactory.LocalToRemoteConversion localToRemoteConversion, @NonNull LocalTask localTask, @NonNull Set<String> recordOf) {
+        if (localToRemoteConversion.mLocalTasks.containsKey(localTask.getId()))
+            return;
+
+        TaskKey taskKey = localTask.getTaskKey();
+
+        localToRemoteConversion.mLocalTasks.put(localTask.getId(), localTask);
+
+        List<LocalTaskHierarchy> parentLocalTaskHierarchies = Stream.of(mLocalTaskHierarchies.values())
+                .filter(localTaskHierarchy -> localTaskHierarchy.getChildTaskKey().equals(taskKey))
+                .collect(Collectors.toList());
+
+        localToRemoteConversion.mLocalTaskHierarchies.addAll(parentLocalTaskHierarchies);
+
+        localToRemoteConversion.mLocalInstances.addAll(Stream.of(mExistingLocalInstances)
+                .filter(localInstance -> localInstance.getTaskKey().equals(taskKey))
+                .collect(Collectors.toList()));
+
+        Stream.of(mLocalTaskHierarchies.values())
+                .filter(localTaskHierarchy -> localTaskHierarchy.getParentTaskKey().equals(taskKey))
+                .map(LocalTaskHierarchy::getChildTask)
+                .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) childTask, recordOf));
+
+        Stream.of(parentLocalTaskHierarchies)
+                .map(LocalTaskHierarchy::getParentTask)
+                .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) parentTask, recordOf));
+    }
+
+    @NonNull
+    public Collection<LocalTaskHierarchy> getTaskHierarchies() {
+        return mLocalTaskHierarchies.values();
+    }
+
+    @NonNull
+    public List<LocalInstance> getExistingInstances() {
+        return mExistingLocalInstances;
     }
 }

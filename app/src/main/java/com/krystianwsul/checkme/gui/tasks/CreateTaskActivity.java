@@ -58,7 +58,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     private static final String PARENT_TASK_KEY_HINT_KEY = "parentTaskKeyHint";
     private static final String SCHEDULE_HINT_KEY = "scheduleHint";
 
-    private static final String PARENT_ID = "parentId";
+    private static final String PARENT_KEY_KEY = "parentKey";
     private static final String PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment";
 
     private static final String HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition";
@@ -536,7 +536,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             }
 
             if (mParent != null) {
-                outState.putInt(PARENT_ID, mParent.mTaskKey.mLocalTaskId); // todo firebase
+                outState.putParcelable(PARENT_KEY_KEY, mParent.mTaskKey);
             }
 
             if (!TextUtils.isEmpty(mNote))
@@ -612,9 +612,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         });
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(SCHEDULE_ENTRIES_KEY)) {
-            if (mSavedInstanceState.containsKey(PARENT_ID)) {
-                int parentId = mSavedInstanceState.getInt(PARENT_ID);
-                mParent = findTaskData(new TaskKey(parentId)); // todo firebase
+            if (mSavedInstanceState.containsKey(PARENT_KEY_KEY)) {
+                TaskKey parentKey = mSavedInstanceState.getParcelable(PARENT_KEY_KEY);
+                Assert.assertTrue(parentKey != null);
+
+                mParent = findTaskData(parentKey);
             }
 
             if (mSavedInstanceState.containsKey(NOTE_KEY)) {

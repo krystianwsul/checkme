@@ -306,119 +306,6 @@ public class DomainFactory {
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
 
-    @NonNull
-    private List<TaskHierarchy> getTaskHierarchies() {
-        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.mLocalTaskHierarchies.values());
-
-        if (mRemoteFactory != null)
-            taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
-
-        return taskHierarchies;
-    }
-
-    @Nullable
-    public TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(childTask.current(exactTimeStamp));
-
-        TaskKey childTaskKey = childTask.getTaskKey();
-
-        List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchies())
-                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(childTaskKey))
-                .collect(Collectors.toList());
-
-        if (taskHierarchies.isEmpty()) {
-            return null;
-        } else {
-            Assert.assertTrue(taskHierarchies.size() == 1);
-            return taskHierarchies.get(0);
-        }
-    }
-
-    @NonNull
-    private Map<TaskKey, Task> getTasks() { // todo change to list
-        Map<TaskKey, Task> tasks = Stream.of(mLocalFactory.mLocalTasks.values())
-                .collect(Collectors.toMap(Task::getTaskKey, task -> task));
-
-        if (mRemoteFactory != null)
-            tasks.putAll(Stream.of(mRemoteFactory.mRemoteTasks.values())
-                    .collect(Collectors.toMap(Task::getTaskKey, task -> task)));
-
-        return tasks;
-    }
-
-    @NonNull
-    private Map<Integer, CustomTime> getCustomTimes() {
-        return mLocalFactory.mLocalCustomTimes; // todo customtimes
-    }
-
-    @NonNull
-    public Task getTask(@NonNull TaskKey taskKey) {
-        Map<TaskKey, Task> tasks = getTasks();
-        Assert.assertTrue(tasks.containsKey(taskKey));
-
-        Task task = tasks.get(taskKey);
-        Assert.assertTrue(task != null);
-
-        return task;
-    }
-
-    @NonNull
-    public List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(parentTask.current(exactTimeStamp));
-
-        return Stream.of(getChildTaskHierarchies(parentTask))
-                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .map(TaskHierarchy::getChildTask)
-                .filter(childTask -> childTask.current(exactTimeStamp))
-                .sortBy(Task::getStartExactTimeStamp)
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    public List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
-        TaskKey parentTaskKey = parentTask.getTaskKey();
-
-        return Stream.of(getTaskHierarchies())
-                .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(parentTaskKey))
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
-        return Stream.of(parentTask.getChildTasks(now))
-                .sortBy(Task::getStartExactTimeStamp)
-                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
-                .collect(Collectors.toList());
-    }
-
-    @Nullable
-    public RemoteFactory getRemoteFactory() {
-        return mRemoteFactory;
-    }
-
-    @NonNull
-    public LocalFactory getLocalFactory() {
-        return mLocalFactory;
-    }
-
-    @NonNull
-    public Map<InstanceKey, Instance> getExistingInstances() { // todo change to list
-        Map<InstanceKey, Instance> instances = Stream.of(mLocalFactory.mExistingLocalInstances)
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
-
-        if (mRemoteFactory != null)
-            instances.putAll(Stream.of(mRemoteFactory.mExistingRemoteInstances.values())
-                    .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
-
-        return instances;
-    }
-
-    @Nullable
-    public Map<String, UserData> getFriends() {
-        return mFriends;
-    }
-
     // gets
 
     @SuppressWarnings("EmptyMethod")
@@ -625,12 +512,6 @@ public class DomainFactory {
     }
 
     @NonNull
-    private List<GroupListLoader.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
-        return Stream.of(parentTask.getChildTasks(now))
-                .map(childTask -> new GroupListLoader.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp()))
-                .collect(Collectors.toList());
-    }
-
     public synchronized ShowGroupLoader.Data getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
         fakeDelay();
 
@@ -960,42 +841,11 @@ public class DomainFactory {
         return getTaskListData(now, context, taskKey);
     }
 
-    @NonNull
-    TaskListLoader.Data getTaskListData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable TaskKey taskKey) {
-        List<TaskListLoader.ChildTaskData> childTaskDatas;
-        String note;
-
-        if (taskKey != null) {
-            Task parentTask = getTask(taskKey);
-
-            List<Task> tasks = parentTask.getChildTasks(now);
-            childTaskDatas = Stream.of(tasks)
-                    .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
-                    .collect(Collectors.toList());
-
-            note = parentTask.getNote();
-        } else {
-            childTaskDatas = Stream.of(getTasks().values())
-                    .filter(task -> task.current(now))
-                    .filter(task -> task.isVisible(now))
-                    .filter(task -> task.isRootTask(now))
-                    .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
-                    .collect(Collectors.toList());
-
-            note = null;
-        }
-
-        Collections.sort(childTaskDatas, (TaskListLoader.ChildTaskData lhs, TaskListLoader.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
-        if (taskKey == null)
-            Collections.reverse(childTaskDatas);
-
-        return new TaskListLoader.Data(childTaskDatas, note);
-    }
-
     // sets
 
     public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
         MyCrashlytics.log("DomainFactory.setInstanceDateTime");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
 
@@ -1010,6 +860,7 @@ public class DomainFactory {
 
     public synchronized void setInstancesDateTime(@NonNull Context context, int dataId, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
         MyCrashlytics.log("DomainFactory.setInstancesDateTime");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(instanceKeys.size() > 1);
 
@@ -1027,6 +878,7 @@ public class DomainFactory {
 
     public synchronized void setInstanceAddHour(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHour");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
 
@@ -1047,6 +899,7 @@ public class DomainFactory {
 
     public synchronized void setInstanceNotificationDone(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
 
@@ -1062,6 +915,7 @@ public class DomainFactory {
     @NonNull
     public synchronized ExactTimeStamp setInstancesDone(@NonNull Context context, int dataId, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstancesDone");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1082,6 +936,7 @@ public class DomainFactory {
 
     public synchronized ExactTimeStamp setInstanceDone(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey, boolean done) {
         MyCrashlytics.log("DomainFactory.setInstanceDone");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1094,17 +949,9 @@ public class DomainFactory {
         return instance.getDone();
     }
 
-    @NonNull
-    Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull InstanceKey instanceKey, boolean done) {
-        Instance instance = getInstance(instanceKey);
-
-        instance.setDone(done, now);
-
-        return instance;
-    }
-
     public synchronized void setInstancesNotified(@NonNull Context context, int dataId, @NonNull ArrayList<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstancesNotified");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
@@ -1122,6 +969,7 @@ public class DomainFactory {
 
     public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotified");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
 
@@ -1135,6 +983,7 @@ public class DomainFactory {
 
     public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
@@ -1157,6 +1006,7 @@ public class DomainFactory {
     @NonNull
     public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
@@ -1198,6 +1048,7 @@ public class DomainFactory {
 
     public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
@@ -1246,6 +1097,7 @@ public class DomainFactory {
 
     public synchronized void createChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createChildTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1263,6 +1115,7 @@ public class DomainFactory {
 
     public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createJoinChildTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskKeys.size() > 1);
@@ -1307,6 +1160,7 @@ public class DomainFactory {
     @NonNull
     public synchronized TaskKey updateChildTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.updateChildTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1361,6 +1215,7 @@ public class DomainFactory {
 
     public synchronized void setTaskEndTimeStamp(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, @NonNull TaskKey taskKey) {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!dataIds.isEmpty());
 
@@ -1378,6 +1233,7 @@ public class DomainFactory {
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!taskKeys.isEmpty());
 
@@ -1399,6 +1255,7 @@ public class DomainFactory {
 
     public synchronized int createCustomTime(@NonNull Context context, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.log("DomainFactory.createCustomTime");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1423,6 +1280,7 @@ public class DomainFactory {
 
     public synchronized void updateCustomTime(@NonNull Context context, int dataId, int customTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.log("DomainFactory.updateCustomTime");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1444,6 +1302,7 @@ public class DomainFactory {
 
     public synchronized void setCustomTimeCurrent(@NonNull Context context, int dataId, @NonNull List<Integer> customTimeIds) {
         MyCrashlytics.log("DomainFactory.setCustomTimeCurrent");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!customTimeIds.isEmpty());
 
@@ -1457,126 +1316,9 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    @NonNull
-    Irrelevant setIrrelevant(@NonNull ExactTimeStamp now) {
-        for (Task task : getTasks().values())
-            task.updateOldestVisible(now);
-
-        // relevant hack
-        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks().values()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
-        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances().values()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
-        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
-
-        Stream.of(getTasks().values())
-                .filter(task -> task.current(now))
-                .filter(task -> task.isRootTask(now))
-                .filter(task -> task.isVisible(now))
-                .map(Task::getTaskKey)
-                .map(taskRelevances::get)
-                .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
-
-        Stream.of(getRootInstances(null, now.plusOne(), now))
-                .map(Instance::getInstanceKey)
-                .map(instanceRelevances::get)
-                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
-
-        Stream.of(getExistingInstances().values())
-                .filter(instance -> instance.isRootInstance(now))
-                .filter(instance -> instance.isVisible(now))
-                .map(Instance::getInstanceKey)
-                .map(instanceRelevances::get)
-                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
-
-        Stream.of(getCurrentCustomTimes())
-                .map(CustomTime::getId)
-                .map(customTimeRelevances::get)
-                .forEach(CustomTimeRelevance::setRelevant);
-
-        List<Task> relevantTasks = Stream.of(taskRelevances.values())
-                .filter(TaskRelevance::getRelevant)
-                .map(TaskRelevance::getTask)
-                .collect(Collectors.toList());
-
-        List<Task> irrelevantTasks = new ArrayList<>(getTasks().values());
-        irrelevantTasks.removeAll(relevantTasks);
-
-        Assert.assertTrue(Stream.of(irrelevantTasks)
-                .noneMatch(task -> task.isVisible(now)));
-
-        List<Instance> relevantExistingInstances = Stream.of(instanceRelevances.values())
-                .filter(InstanceRelevance::getRelevant)
-                .map(InstanceRelevance::getInstance)
-                .filter(Instance::exists)
-                .collect(Collectors.toList());
-
-        List<Instance> irrelevantExistingInstances = new ArrayList<>(getExistingInstances().values());
-        irrelevantExistingInstances.removeAll(relevantExistingInstances);
-
-        Assert.assertTrue(Stream.of(irrelevantExistingInstances)
-                .noneMatch(instance -> instance.isVisible(now)));
-
-        List<CustomTime> relevantCustomTimes = Stream.of(customTimeRelevances.values())
-                .filter(CustomTimeRelevance::getRelevant)
-                .map(CustomTimeRelevance::getCustomTime)
-                .collect(Collectors.toList());
-
-        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
-        irrelevantCustomTimes.removeAll(relevantCustomTimes);
-
-        Assert.assertTrue(Stream.of(irrelevantCustomTimes)
-                .noneMatch(CustomTime::getCurrent));
-
-        Stream.of(irrelevantTasks)
-                .forEach(Task::setRelevant);
-
-        Stream.of(irrelevantExistingInstances)
-                .forEach(Instance::setRelevant);
-
-        Stream.of(irrelevantCustomTimes)
-                .forEach(CustomTime::setRelevant);
-
-        return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
-    }
-
-    void removeIrrelevant(@NonNull Irrelevant irrelevant) {
-        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mLocalFactory.mLocalTaskHierarchies.values()) // todo removal
-                .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
-                .collect(Collectors.toList());
-
-        Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
-                .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
-
-        for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
-            mLocalFactory.mLocalTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId()); // todo removal
-
-        for (Task task : irrelevant.mTasks) {
-            if (task instanceof LocalTask) {
-                Assert.assertTrue(mLocalFactory.mLocalTasks.containsKey(((LocalTask) task).getId())); // todo removal
-
-                mLocalFactory.mLocalTasks.remove(((LocalTask) task).getId()); // todo removal
-            }
-        }
-
-        for (Instance instance : irrelevant.mInstances) {
-            if (instance instanceof LocalInstance) {
-                Assert.assertTrue(mLocalFactory.mExistingLocalInstances.contains(instance));
-
-                mLocalFactory.mExistingLocalInstances.remove(instance);
-            }
-        }
-
-        Stream.of(irrelevant.mCustomTimes)
-                .forEach(mLocalFactory.mLocalCustomTimes::remove); // todo customTimes
-
-        if (mRemoteFactory != null) {
-            mRemoteFactory.removeIrrelevant(irrelevant);
-
-            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.mRemoteTasks.keySet());
-        }
-    }
-
     public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1597,6 +1339,7 @@ public class DomainFactory {
 
     public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createJoinRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskKeys.size() > 1);
@@ -1645,6 +1388,7 @@ public class DomainFactory {
     @NonNull
     public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.updateRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
@@ -1676,6 +1420,9 @@ public class DomainFactory {
     }
 
     public synchronized void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
+        MyCrashlytics.log("DomainFactory.updateNotifications");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         updateNotifications(context, silent, registering, taskKeys, now, new ArrayList<>());
@@ -1685,210 +1432,6 @@ public class DomainFactory {
         save(context, 0);
 
         removeIrrelevant(irrelevant);
-    }
-
-    private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
-        updateNotifications(context, true, false, taskKeys, now, new ArrayList<>());
-    }
-
-    private void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
-        if (!silent) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
-            sharedPreferences.edit().putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
-        }
-
-        List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
-
-        Map<InstanceKey, Instance> notificationInstances = Stream.of(rootInstances)
-                .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
-                .filterNot(instance -> removedTaskKeys.contains(instance.getTaskKey()))
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
-
-        HashSet<InstanceKey> shownInstanceKeys = new HashSet<>(Stream.of(getExistingInstances().values())
-                .filter(Instance::getNotificationShown)
-                .map(Instance::getInstanceKey)
-                .collect(Collectors.toSet()));
-
-        Map<InstanceKey, Pair<Integer, InstanceShownRecord>> instanceShownRecordNotificationDatas = new HashMap<>();
-        for (InstanceShownRecord instanceShownRecord : mLocalFactory.mPersistenceManager.getInstancesShownRecords()) {
-            if (!instanceShownRecord.getNotificationShown())
-                continue;
-
-            Date scheduleDate = new Date(instanceShownRecord.getScheduleYear(), instanceShownRecord.getScheduleMonth(), instanceShownRecord.getScheduleDay());
-            Integer customTimeId = instanceShownRecord.getScheduleCustomTimeId();
-            HourMinute hourMinute;
-            if (customTimeId != null) {
-                Assert.assertTrue(instanceShownRecord.getScheduleHour() == null);
-                Assert.assertTrue(instanceShownRecord.getScheduleMinute() == null);
-
-                hourMinute = null;
-            } else {
-                Assert.assertTrue(instanceShownRecord.getScheduleHour() != null);
-                Assert.assertTrue(instanceShownRecord.getScheduleMinute() != null);
-
-                hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
-            }
-
-            TaskKey taskKey = new TaskKey(instanceShownRecord.getTaskId());
-
-            InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, customTimeId, hourMinute);
-
-            shownInstanceKeys.add(instanceKey);
-
-            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.getNotificationId(scheduleDate, customTimeId, hourMinute, taskKey), instanceShownRecord));
-        }
-
-        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
-                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
-                .collect(Collectors.toList());
-
-        Set<InstanceKey> hideInstanceKeys = Stream.of(shownInstanceKeys)
-                .filter(instanceKey -> !notificationInstances.containsKey(instanceKey))
-                .collect(Collectors.toSet());
-
-        for (InstanceKey showInstanceKey : showInstanceKeys) {
-            Assert.assertTrue(showInstanceKey != null);
-
-            Instance showInstance = getInstance(showInstanceKey);
-
-            showInstance.setNotificationShown(true, now);
-        }
-
-        Set<TaskKey> allTaskKeys = getTasks().keySet();
-
-        for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-            Assert.assertTrue(hideInstanceKey != null);
-
-            if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
-                Instance hideInstance = getInstance(hideInstanceKey);
-
-                hideInstance.setNotificationShown(false, now);
-            } else {
-                Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
-
-                instanceShownRecordNotificationDatas.get(hideInstanceKey).second.setNotificationShown(false);
-            }
-        }
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Assert.assertTrue(notificationManager != null);
-
-        if (registering) {
-            Assert.assertTrue(silent);
-
-            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                notifyGroup(context, notificationInstances.values(), true, now);
-            } else { // show instances
-                for (Instance instance : notificationInstances.values()) {
-                    Assert.assertTrue(instance != null);
-
-                    notifyInstance(context, instance, true, now);
-                }
-            }
-        } else {
-            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        notifyGroup(context, notificationInstances.values(), silent, now);
-                    } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
-                        notifyGroup(context, notificationInstances.values(), true, now);
-                    }
-                } else { // instances shown
-                    for (InstanceKey shownInstanceKey : shownInstanceKeys) {
-                        if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
-                            Instance shownInstance = getInstance(shownInstanceKey);
-
-                            notificationManager.cancel(shownInstance.getNotificationId());
-                        } else {
-                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
-
-                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
-
-                            notificationManager.cancel(notificationId);
-                        }
-                    }
-
-                    notifyGroup(context, notificationInstances.values(), silent, now);
-                }
-            } else { // show instances
-                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    notificationManager.cancel(0);
-
-                    for (Instance instance : notificationInstances.values()) {
-                        Assert.assertTrue(instance != null);
-
-                        notifyInstance(context, instance, silent, now);
-                    }
-                } else { // instances shown
-                    for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                        if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
-                            Instance instance = getInstance(hideInstanceKey);
-
-                            notificationManager.cancel(instance.getNotificationId());
-                        } else {
-                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
-
-                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
-
-                            notificationManager.cancel(notificationId);
-                        }
-                    }
-
-                    for (InstanceKey showInstanceKey : showInstanceKeys) {
-                        Instance instance = notificationInstances.get(showInstanceKey);
-                        Assert.assertTrue(instance != null);
-
-                        notifyInstance(context, instance, silent, now);
-                    }
-
-                    Stream.of(notificationInstances.values())
-                            .filter(instance -> updateInstance(taskKeys, instance, now))
-                            .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                            .forEach(instance -> notifyInstance(context, instance, true, now));
-                }
-            }
-        }
-
-        TimeStamp nextAlarm = null;
-        for (Instance existingInstance : getExistingInstances().values()) {
-            TimeStamp instanceTimeStamp = existingInstance.getInstanceDateTime().getTimeStamp();
-            if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
-                if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
-                    nextAlarm = instanceTimeStamp;
-        }
-
-        for (Task task : getTasks().values()) {
-            if (task.current(now) && task.isRootTask(now)) {
-                List<Schedule> schedules = task.getCurrentSchedules(now);
-
-                Optional<TimeStamp> optional = Stream.of(schedules)
-                        .map(schedule -> schedule.getNextAlarm(now))
-                        .filter(timeStamp -> timeStamp != null)
-                        .min(TimeStamp::compareTo);
-
-                if (optional.isPresent()) {
-                    TimeStamp scheduleTimeStamp = optional.get();
-                    Assert.assertTrue(scheduleTimeStamp != null);
-                    Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
-
-                    if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
-                        nextAlarm = scheduleTimeStamp;
-                }
-            }
-        }
-
-        if (nextAlarm != null) {
-            Intent nextIntent = TickService.getIntent(context, false, false, new ArrayList<>());
-
-            PendingIntent pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Assert.assertTrue(pendingIntent != null);
-
-            setExact(context, nextAlarm.getLong(), pendingIntent);
-        }
-    }
-
-    private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull Instance instance, @NonNull ExactTimeStamp now) {
-        return (taskKeys.contains(instance.getTaskKey()) || Stream.of(instance.getChildInstances(now)).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
     }
 
     // internal
@@ -2390,6 +1933,489 @@ public class DomainFactory {
 
             newParentTask.addChild(joinTask, now);
         }
+    }
+
+    @NonNull
+    private List<TaskHierarchy> getTaskHierarchies() {
+        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.mLocalTaskHierarchies.values());
+
+        if (mRemoteFactory != null)
+            taskHierarchies.addAll(mRemoteFactory.mRemoteTaskHierarchies.values());
+
+        return taskHierarchies;
+    }
+
+    @Nullable
+    public TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(childTask.current(exactTimeStamp));
+
+        TaskKey childTaskKey = childTask.getTaskKey();
+
+        List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchies())
+                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
+                .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(childTaskKey))
+                .collect(Collectors.toList());
+
+        if (taskHierarchies.isEmpty()) {
+            return null;
+        } else {
+            Assert.assertTrue(taskHierarchies.size() == 1);
+            return taskHierarchies.get(0);
+        }
+    }
+
+    @NonNull
+    private Map<TaskKey, Task> getTasks() { // todo change to list
+        Map<TaskKey, Task> tasks = Stream.of(mLocalFactory.mLocalTasks.values())
+                .collect(Collectors.toMap(Task::getTaskKey, task -> task));
+
+        if (mRemoteFactory != null)
+            tasks.putAll(Stream.of(mRemoteFactory.mRemoteTasks.values())
+                    .collect(Collectors.toMap(Task::getTaskKey, task -> task)));
+
+        return tasks;
+    }
+
+    @NonNull
+    private Map<Integer, CustomTime> getCustomTimes() {
+        return mLocalFactory.mLocalCustomTimes; // todo customtimes
+    }
+
+    @NonNull
+    public Task getTask(@NonNull TaskKey taskKey) {
+        Map<TaskKey, Task> tasks = getTasks();
+        Assert.assertTrue(tasks.containsKey(taskKey));
+
+        Task task = tasks.get(taskKey);
+        Assert.assertTrue(task != null);
+
+        return task;
+    }
+
+    @NonNull
+    public List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
+        Assert.assertTrue(parentTask.current(exactTimeStamp));
+
+        return Stream.of(getChildTaskHierarchies(parentTask))
+                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
+                .map(TaskHierarchy::getChildTask)
+                .filter(childTask -> childTask.current(exactTimeStamp))
+                .sortBy(Task::getStartExactTimeStamp)
+                .collect(Collectors.toList());
+    }
+
+    @NonNull
+    public List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
+        TaskKey parentTaskKey = parentTask.getTaskKey();
+
+        return Stream.of(getTaskHierarchies())
+                .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(parentTaskKey))
+                .collect(Collectors.toList());
+    }
+
+    @NonNull
+    private List<TaskListLoader.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
+        return Stream.of(parentTask.getChildTasks(now))
+                .sortBy(Task::getStartExactTimeStamp)
+                .map(childTask -> new TaskListLoader.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
+                .collect(Collectors.toList());
+    }
+
+    @Nullable
+    public RemoteFactory getRemoteFactory() {
+        return mRemoteFactory;
+    }
+
+    @NonNull
+    public LocalFactory getLocalFactory() {
+        return mLocalFactory;
+    }
+
+    @NonNull
+    public Map<InstanceKey, Instance> getExistingInstances() { // todo change to list
+        Map<InstanceKey, Instance> instances = Stream.of(mLocalFactory.mExistingLocalInstances)
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
+
+        if (mRemoteFactory != null)
+            instances.putAll(Stream.of(mRemoteFactory.mExistingRemoteInstances.values())
+                    .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
+
+        return instances;
+    }
+
+    @Nullable
+    public Map<String, UserData> getFriends() {
+        return mFriends;
+    }
+
+    @NonNull
+    private List<GroupListLoader.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
+        return Stream.of(parentTask.getChildTasks(now))
+                .map(childTask -> new GroupListLoader.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp()))
+                .collect(Collectors.toList());
+    }
+
+    @NonNull
+    TaskListLoader.Data getTaskListData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable TaskKey taskKey) {
+        List<TaskListLoader.ChildTaskData> childTaskDatas;
+        String note;
+
+        if (taskKey != null) {
+            Task parentTask = getTask(taskKey);
+
+            List<Task> tasks = parentTask.getChildTasks(now);
+            childTaskDatas = Stream.of(tasks)
+                    .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                    .collect(Collectors.toList());
+
+            note = parentTask.getNote();
+        } else {
+            childTaskDatas = Stream.of(getTasks().values())
+                    .filter(task -> task.current(now))
+                    .filter(task -> task.isVisible(now))
+                    .filter(task -> task.isRootTask(now))
+                    .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                    .collect(Collectors.toList());
+
+            note = null;
+        }
+
+        Collections.sort(childTaskDatas, (TaskListLoader.ChildTaskData lhs, TaskListLoader.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
+        if (taskKey == null)
+            Collections.reverse(childTaskDatas);
+
+        return new TaskListLoader.Data(childTaskDatas, note);
+    }
+
+    @NonNull
+    Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull InstanceKey instanceKey, boolean done) {
+        Instance instance = getInstance(instanceKey);
+
+        instance.setDone(done, now);
+
+        return instance;
+    }
+
+    @NonNull
+    Irrelevant setIrrelevant(@NonNull ExactTimeStamp now) {
+        for (Task task : getTasks().values())
+            task.updateOldestVisible(now);
+
+        // relevant hack
+        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks().values()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
+        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances().values()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
+        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new));
+
+        Stream.of(getTasks().values())
+                .filter(task -> task.current(now))
+                .filter(task -> task.isRootTask(now))
+                .filter(task -> task.isVisible(now))
+                .map(Task::getTaskKey)
+                .map(taskRelevances::get)
+                .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+        Stream.of(getRootInstances(null, now.plusOne(), now))
+                .map(Instance::getInstanceKey)
+                .map(instanceRelevances::get)
+                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+        Stream.of(getExistingInstances().values())
+                .filter(instance -> instance.isRootInstance(now))
+                .filter(instance -> instance.isVisible(now))
+                .map(Instance::getInstanceKey)
+                .map(instanceRelevances::get)
+                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
+
+        Stream.of(getCurrentCustomTimes())
+                .map(CustomTime::getId)
+                .map(customTimeRelevances::get)
+                .forEach(CustomTimeRelevance::setRelevant);
+
+        List<Task> relevantTasks = Stream.of(taskRelevances.values())
+                .filter(TaskRelevance::getRelevant)
+                .map(TaskRelevance::getTask)
+                .collect(Collectors.toList());
+
+        List<Task> irrelevantTasks = new ArrayList<>(getTasks().values());
+        irrelevantTasks.removeAll(relevantTasks);
+
+        Assert.assertTrue(Stream.of(irrelevantTasks)
+                .noneMatch(task -> task.isVisible(now)));
+
+        List<Instance> relevantExistingInstances = Stream.of(instanceRelevances.values())
+                .filter(InstanceRelevance::getRelevant)
+                .map(InstanceRelevance::getInstance)
+                .filter(Instance::exists)
+                .collect(Collectors.toList());
+
+        List<Instance> irrelevantExistingInstances = new ArrayList<>(getExistingInstances().values());
+        irrelevantExistingInstances.removeAll(relevantExistingInstances);
+
+        Assert.assertTrue(Stream.of(irrelevantExistingInstances)
+                .noneMatch(instance -> instance.isVisible(now)));
+
+        List<CustomTime> relevantCustomTimes = Stream.of(customTimeRelevances.values())
+                .filter(CustomTimeRelevance::getRelevant)
+                .map(CustomTimeRelevance::getCustomTime)
+                .collect(Collectors.toList());
+
+        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
+        irrelevantCustomTimes.removeAll(relevantCustomTimes);
+
+        Assert.assertTrue(Stream.of(irrelevantCustomTimes)
+                .noneMatch(CustomTime::getCurrent));
+
+        Stream.of(irrelevantTasks)
+                .forEach(Task::setRelevant);
+
+        Stream.of(irrelevantExistingInstances)
+                .forEach(Instance::setRelevant);
+
+        Stream.of(irrelevantCustomTimes)
+                .forEach(CustomTime::setRelevant);
+
+        return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
+    }
+
+    void removeIrrelevant(@NonNull Irrelevant irrelevant) {
+        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mLocalFactory.mLocalTaskHierarchies.values()) // todo removal
+                .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
+                .collect(Collectors.toList());
+
+        Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
+                .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
+
+        for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
+            mLocalFactory.mLocalTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId()); // todo removal
+
+        for (Task task : irrelevant.mTasks) {
+            if (task instanceof LocalTask) {
+                Assert.assertTrue(mLocalFactory.mLocalTasks.containsKey(((LocalTask) task).getId())); // todo removal
+
+                mLocalFactory.mLocalTasks.remove(((LocalTask) task).getId()); // todo removal
+            }
+        }
+
+        for (Instance instance : irrelevant.mInstances) {
+            if (instance instanceof LocalInstance) {
+                Assert.assertTrue(mLocalFactory.mExistingLocalInstances.contains(instance));
+
+                mLocalFactory.mExistingLocalInstances.remove(instance);
+            }
+        }
+
+        Stream.of(irrelevant.mCustomTimes)
+                .forEach(mLocalFactory.mLocalCustomTimes::remove); // todo customTimes
+
+        if (mRemoteFactory != null) {
+            mRemoteFactory.removeIrrelevant(irrelevant);
+
+            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.mRemoteTasks.keySet());
+        }
+    }
+
+    private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
+        updateNotifications(context, true, false, taskKeys, now, new ArrayList<>());
+    }
+
+    private void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
+        if (!silent) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+            sharedPreferences.edit().putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
+        }
+
+        List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
+
+        Map<InstanceKey, Instance> notificationInstances = Stream.of(rootInstances)
+                .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
+                .filterNot(instance -> removedTaskKeys.contains(instance.getTaskKey()))
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
+
+        HashSet<InstanceKey> shownInstanceKeys = new HashSet<>(Stream.of(getExistingInstances().values())
+                .filter(Instance::getNotificationShown)
+                .map(Instance::getInstanceKey)
+                .collect(Collectors.toSet()));
+
+        Map<InstanceKey, Pair<Integer, InstanceShownRecord>> instanceShownRecordNotificationDatas = new HashMap<>();
+        for (InstanceShownRecord instanceShownRecord : mLocalFactory.mPersistenceManager.getInstancesShownRecords()) {
+            if (!instanceShownRecord.getNotificationShown())
+                continue;
+
+            Date scheduleDate = new Date(instanceShownRecord.getScheduleYear(), instanceShownRecord.getScheduleMonth(), instanceShownRecord.getScheduleDay());
+            Integer customTimeId = instanceShownRecord.getScheduleCustomTimeId();
+            HourMinute hourMinute;
+            if (customTimeId != null) {
+                Assert.assertTrue(instanceShownRecord.getScheduleHour() == null);
+                Assert.assertTrue(instanceShownRecord.getScheduleMinute() == null);
+
+                hourMinute = null;
+            } else {
+                Assert.assertTrue(instanceShownRecord.getScheduleHour() != null);
+                Assert.assertTrue(instanceShownRecord.getScheduleMinute() != null);
+
+                hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
+            }
+
+            TaskKey taskKey = new TaskKey(instanceShownRecord.getTaskId());
+
+            InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, customTimeId, hourMinute);
+
+            shownInstanceKeys.add(instanceKey);
+
+            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.getNotificationId(scheduleDate, customTimeId, hourMinute, taskKey), instanceShownRecord));
+        }
+
+        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
+                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
+                .collect(Collectors.toList());
+
+        Set<InstanceKey> hideInstanceKeys = Stream.of(shownInstanceKeys)
+                .filter(instanceKey -> !notificationInstances.containsKey(instanceKey))
+                .collect(Collectors.toSet());
+
+        for (InstanceKey showInstanceKey : showInstanceKeys) {
+            Assert.assertTrue(showInstanceKey != null);
+
+            Instance showInstance = getInstance(showInstanceKey);
+
+            showInstance.setNotificationShown(true, now);
+        }
+
+        Set<TaskKey> allTaskKeys = getTasks().keySet();
+
+        for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+            Assert.assertTrue(hideInstanceKey != null);
+
+            if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                Instance hideInstance = getInstance(hideInstanceKey);
+
+                hideInstance.setNotificationShown(false, now);
+            } else {
+                Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
+
+                instanceShownRecordNotificationDatas.get(hideInstanceKey).second.setNotificationShown(false);
+            }
+        }
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Assert.assertTrue(notificationManager != null);
+
+        if (registering) {
+            Assert.assertTrue(silent);
+
+            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
+                notifyGroup(context, notificationInstances.values(), true, now);
+            } else { // show instances
+                for (Instance instance : notificationInstances.values()) {
+                    Assert.assertTrue(instance != null);
+
+                    notifyInstance(context, instance, true, now);
+                }
+            }
+        } else {
+            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
+                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
+                        notifyGroup(context, notificationInstances.values(), silent, now);
+                    } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
+                        notifyGroup(context, notificationInstances.values(), true, now);
+                    }
+                } else { // instances shown
+                    for (InstanceKey shownInstanceKey : shownInstanceKeys) {
+                        if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
+                            Instance shownInstance = getInstance(shownInstanceKey);
+
+                            notificationManager.cancel(shownInstance.getNotificationId());
+                        } else {
+                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
+
+                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
+
+                            notificationManager.cancel(notificationId);
+                        }
+                    }
+
+                    notifyGroup(context, notificationInstances.values(), silent, now);
+                }
+            } else { // show instances
+                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                    notificationManager.cancel(0);
+
+                    for (Instance instance : notificationInstances.values()) {
+                        Assert.assertTrue(instance != null);
+
+                        notifyInstance(context, instance, silent, now);
+                    }
+                } else { // instances shown
+                    for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                        if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                            Instance instance = getInstance(hideInstanceKey);
+
+                            notificationManager.cancel(instance.getNotificationId());
+                        } else {
+                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
+
+                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
+
+                            notificationManager.cancel(notificationId);
+                        }
+                    }
+
+                    for (InstanceKey showInstanceKey : showInstanceKeys) {
+                        Instance instance = notificationInstances.get(showInstanceKey);
+                        Assert.assertTrue(instance != null);
+
+                        notifyInstance(context, instance, silent, now);
+                    }
+
+                    Stream.of(notificationInstances.values())
+                            .filter(instance -> updateInstance(taskKeys, instance, now))
+                            .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
+                            .forEach(instance -> notifyInstance(context, instance, true, now));
+                }
+            }
+        }
+
+        TimeStamp nextAlarm = null;
+        for (Instance existingInstance : getExistingInstances().values()) {
+            TimeStamp instanceTimeStamp = existingInstance.getInstanceDateTime().getTimeStamp();
+            if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
+                if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
+                    nextAlarm = instanceTimeStamp;
+        }
+
+        for (Task task : getTasks().values()) {
+            if (task.current(now) && task.isRootTask(now)) {
+                List<Schedule> schedules = task.getCurrentSchedules(now);
+
+                Optional<TimeStamp> optional = Stream.of(schedules)
+                        .map(schedule -> schedule.getNextAlarm(now))
+                        .filter(timeStamp -> timeStamp != null)
+                        .min(TimeStamp::compareTo);
+
+                if (optional.isPresent()) {
+                    TimeStamp scheduleTimeStamp = optional.get();
+                    Assert.assertTrue(scheduleTimeStamp != null);
+                    Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
+
+                    if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
+                        nextAlarm = scheduleTimeStamp;
+                }
+            }
+        }
+
+        if (nextAlarm != null) {
+            Intent nextIntent = TickService.getIntent(context, false, false, new ArrayList<>());
+
+            PendingIntent pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Assert.assertTrue(pendingIntent != null);
+
+            setExact(context, nextAlarm.getLong(), pendingIntent);
+        }
+    }
+
+    private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull Instance instance, @NonNull ExactTimeStamp now) {
+        return (taskKeys.contains(instance.getTaskKey()) || Stream.of(instance.getChildInstances(now)).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
     }
 
     public static class Irrelevant {

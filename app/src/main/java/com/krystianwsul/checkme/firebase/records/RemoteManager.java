@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RemoteManager {
+    private boolean mSaved = false;
+
     @NonNull
     public final Map<String, RemoteTaskRecord> mRemoteTaskRecords = new HashMap<>();
 
@@ -135,7 +137,14 @@ public class RemoteManager {
 
         Log.e("asdf", "RemoteManager.save values: " + values);
 
-        DatabaseWrapper.updateRecords(values);
+        if (!values.isEmpty()) {
+            mSaved = true;
+            DatabaseWrapper.updateRecords(values);
+        }
+    }
+
+    public boolean isSaved() {
+        return mSaved;
     }
 
     @NonNull

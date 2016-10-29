@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -219,8 +218,13 @@ public class RemoteFactory {
     }
 
     public void save() {
-        Log.e("asdf", "RemoteFactory.save");
+        Assert.assertTrue(!mRemoteManager.isSaved());
+
         mRemoteManager.save();
+    }
+
+    public boolean isSaved() {
+        return mRemoteManager.isSaved();
     }
 
     @NonNull

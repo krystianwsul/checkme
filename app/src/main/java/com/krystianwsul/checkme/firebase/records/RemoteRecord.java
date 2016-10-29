@@ -70,7 +70,6 @@ public abstract class RemoteRecord {
 
             Assert.assertTrue(!mCreate);
             Assert.assertTrue(mUpdate != null);
-            Assert.assertTrue(mUpdate.isEmpty());
 
             mDeleted = true;
             values.put(getId(), null);
@@ -108,10 +107,9 @@ public abstract class RemoteRecord {
         Assert.assertTrue(!mDeleted);
         Assert.assertTrue(!mUpdated);
         Assert.assertTrue(!mCreated);
+        Assert.assertTrue(!mDelete);
         Assert.assertTrue(!mCreate);
         Assert.assertTrue(mUpdate != null);
-        Assert.assertTrue(mUpdate.isEmpty());
-        Assert.assertTrue(!mUpdated);
 
         mDelete = true;
     }
@@ -128,7 +126,7 @@ public abstract class RemoteRecord {
     }
 
 
-    public void setRecordOf(@NonNull Set<String> recordOf) {
+    private void setRecordOf(@NonNull Set<String> recordOf) {
         Map<String, Boolean> mapRecordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(key -> key, key -> true));
 

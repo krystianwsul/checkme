@@ -162,7 +162,7 @@ public class LocalTask extends Task {
     protected void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        List<Schedule> schedules = mDomainFactory.createSchedules(this, scheduleDatas, now);
+        List<Schedule> schedules = mDomainFactory.getLocalFactory().createSchedules(mDomainFactory, this, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
 
         addSchedules(schedules);

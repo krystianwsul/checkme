@@ -63,7 +63,7 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
 
-        LocalTask rootLocalTask = domainFactory.createScheduleRootTask(startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
+        LocalTask rootLocalTask = domainFactory.getLocalFactory().createScheduleRootTask(domainFactory, startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
 
         Assert.assertTrue(rootLocalTask.isVisible(startExactTimeStamp));
 
@@ -138,7 +138,7 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
 
-        LocalTask rootLocalTask = domainFactory.createScheduleRootTask(startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
+        LocalTask rootLocalTask = domainFactory.getLocalFactory().createScheduleRootTask(domainFactory, startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
 
         Assert.assertTrue(rootLocalTask.isVisible(startExactTimeStamp));
 

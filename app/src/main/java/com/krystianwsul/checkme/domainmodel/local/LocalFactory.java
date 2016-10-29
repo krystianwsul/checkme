@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -23,6 +24,7 @@ import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.SingleSchedule;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
@@ -36,7 +38,13 @@ import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
+import com.krystianwsul.checkme.utils.time.DayOfWeek;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.NormalTime;
+import com.krystianwsul.checkme.utils.time.Time;
+import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -286,5 +294,126 @@ public class LocalFactory {
 
     public void deleteInstanceShownRecords(@NonNull Set<String> taskIds) {
         mPersistenceManager.deleteInstanceShownRecords(taskIds);
+    }
+
+    @NonNull
+    public LocalTask createScheduleRootTask(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        LocalTask rootLocalTask = createLocalTaskHelper(domainFactory, name, now, note);
+
+        List<Schedule> schedules = createSchedules(domainFactory, rootLocalTask, scheduleDatas, now);
+        Assert.assertTrue(!schedules.isEmpty());
+
+        rootLocalTask.addSchedules(schedules);
+
+        return rootLocalTask;
+    }
+
+    @NonNull
+    public LocalTask createLocalTaskHelper(@NonNull DomainFactory domainFactory, @NonNull String name, @NonNull ExactTimeStamp now, @Nullable String note) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        TaskRecord taskRecord = mPersistenceManager.createTaskRecord(name, now, note);
+
+        LocalTask rootLocalTask = new LocalTask(domainFactory, taskRecord);
+
+        Assert.assertTrue(!mLocalTasks.containsKey(rootLocalTask.getId()));
+        mLocalTasks.put(rootLocalTask.getId(), rootLocalTask);
+
+        return rootLocalTask;
+    }
+
+    @NonNull
+    public List<Schedule> createSchedules(@NonNull DomainFactory domainFactory, @NonNull LocalTask rootLocalTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+        Assert.assertTrue(rootLocalTask.current(startExactTimeStamp));
+
+        List<Schedule> schedules = new ArrayList<>();
+
+        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
+            Assert.assertTrue(scheduleData != null);
+
+            switch (scheduleData.getScheduleType()) {
+                case SINGLE: {
+                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
+
+                    Date date = singleScheduleData.Date;
+                    Time time = getTime(singleScheduleData.TimePair);
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp);
+
+                    SingleScheduleRecord singleScheduleRecord = mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
+
+                    schedules.add(new SingleSchedule(domainFactory, new LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord)));
+                    break;
+                }
+                case DAILY: {
+                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
+
+                    Time time = getTime(dailyScheduleData.TimePair);
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
+
+                    DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
+
+                    schedules.add(new DailySchedule(domainFactory, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord)));
+                    break;
+                }
+                case WEEKLY: {
+                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
+
+                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
+                    Time time = getTime(weeklyScheduleData.TimePair);
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
+
+                    WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
+
+                    schedules.add(new WeeklySchedule(domainFactory, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord)));
+                    break;
+                }
+                case MONTHLY_DAY: {
+                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
+
+                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
+
+                    schedules.add(new MonthlyDaySchedule(domainFactory, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)));
+                    break;
+                }
+                case MONTHLY_WEEK: {
+                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
+
+                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
+
+                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
+
+                    schedules.add(new MonthlyWeekSchedule(domainFactory, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)));
+                    break;
+                }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        return schedules;
+    }
+
+    @NonNull
+    public Time getTime(@NonNull TimePair timePair) {
+        if (timePair.mCustomTimeId != null) {
+            Assert.assertTrue(timePair.mHourMinute == null);
+
+            CustomTime customTime = mLocalCustomTimes.get(timePair.mCustomTimeId);
+            Assert.assertTrue(customTime != null);
+
+            return customTime;
+        } else {
+            Assert.assertTrue(timePair.mHourMinute != null);
+            return new NormalTime(timePair.mHourMinute);
+        }
     }
 }

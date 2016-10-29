@@ -52,19 +52,12 @@ import com.krystianwsul.checkme.notifications.InstanceHourService;
 import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
-import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
-import com.krystianwsul.checkme.persistencemodel.MonthlyDayScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.MonthlyWeekScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
-import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
-import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
-import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -1143,21 +1136,6 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    @NonNull
-    LocalTask createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-
-        LocalTask rootLocalTask = createLocalTaskHelper(name, now, note);
-
-        List<Schedule> schedules = createSchedules(rootLocalTask, scheduleDatas, now);
-        Assert.assertTrue(!schedules.isEmpty());
-
-        rootLocalTask.addSchedules(schedules);
-
-        return rootLocalTask;
-    }
-
     public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask");
 
@@ -1167,7 +1145,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         if (friendEntries.isEmpty()) {
-            createScheduleRootTask(now, name, scheduleDatas, note);
+            mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
@@ -1226,9 +1204,9 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskIds.size() > 1);
 
-        LocalTask rootLocalTask = createLocalTaskHelper(name, now, note);
+        LocalTask rootLocalTask = mLocalFactory.createLocalTaskHelper(this, name, now, note);
 
-        List<Schedule> schedules = createSchedules(rootLocalTask, scheduleDatas, now);
+        List<Schedule> schedules = mLocalFactory.createSchedules(this, rootLocalTask, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
 
         rootLocalTask.addSchedules(schedules);
@@ -1267,21 +1245,10 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        if (parentTaskKey.mLocalTaskId != null) { // todo firebase?
-            Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
+        Task parentTask = getTask(parentTaskKey);
+        Assert.assertTrue(parentTask.current(now));
 
-            Task parentTask = getTask(parentTaskKey);
-            Assert.assertTrue(parentTask.current(now));
-
-            parentTask.createChildTask(now, name, note);
-        } else {
-            Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
-
-            Task parentTask = getTask(parentTaskKey);
-            Assert.assertTrue(parentTask.current(now));
-
-            parentTask.createChildTask(now, name, note);
-        }
+        parentTask.createChildTask(now, name, note);
 
         updateNotifications(context, Collections.singletonList(parentTaskKey), now);
 
@@ -1298,7 +1265,7 @@ public class DomainFactory {
         Assert.assertTrue(parentTask.current(now));
         Assert.assertTrue(parentTask instanceof LocalTask);
 
-        LocalTask childLocalTask = createLocalTaskHelper(name, now, note);
+        LocalTask childLocalTask = mLocalFactory.createLocalTaskHelper(this, name, now, note);
 
         createTaskHierarchy((LocalTask) parentTask, childLocalTask, now);
 
@@ -1620,11 +1587,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TaskRecord taskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, now, note);
-
-        LocalTask childLocalTask = new LocalTask(this, taskRecord);
-        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(childLocalTask.getId())); // todo firebase
-        mLocalFactory.mLocalTasks.put(childLocalTask.getId(), childLocalTask); // todo firbase
+        LocalTask childLocalTask = mLocalFactory.createLocalTaskHelper(this, name, now, note); // todo firebase
 
         updateNotifications(context, new ArrayList<>(), now);
 
@@ -2032,7 +1995,7 @@ public class DomainFactory {
 
     @NonNull
     private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
-        Time time = getTime(timePair);
+        Time time = mLocalFactory.getTime(timePair);
 
         return new DateTime(date, time);
     }
@@ -2044,35 +2007,6 @@ public class DomainFactory {
         DateTime scheduleDateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
 
         return getInstance(task, scheduleDateTime);
-    }
-
-    @NonNull
-    private LocalTask createLocalTaskHelper(@NonNull String name, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        TaskRecord taskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, startExactTimeStamp, note);
-
-        LocalTask rootLocalTask = new LocalTask(this, taskRecord);
-
-        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(rootLocalTask.getId()));
-        mLocalFactory.mLocalTasks.put(rootLocalTask.getId(), rootLocalTask);
-
-        return rootLocalTask;
-    }
-
-    @NonNull
-    private Time getTime(@NonNull TimePair timePair) {
-        if (timePair.mCustomTimeId != null) {
-            Assert.assertTrue(timePair.mHourMinute == null);
-
-            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(timePair.mCustomTimeId);
-            Assert.assertTrue(customTime != null);
-
-            return customTime;
-        } else {
-            Assert.assertTrue(timePair.mHourMinute != null);
-            return new NormalTime(timePair.mHourMinute);
-        }
     }
 
     private void joinTasks(@NonNull LocalTask newParentLocalTask, @NonNull List<Integer> joinTaskIds, @NonNull ExactTimeStamp now) {
@@ -2108,83 +2042,6 @@ public class DomainFactory {
         LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
         Assert.assertTrue(!mLocalFactory.mLocalTaskHierarchies.containsKey(localTaskHierarchy.getId())); // todo firebase
         mLocalFactory.mLocalTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy); // todo firebase
-    }
-
-    @NonNull
-    List<Schedule> createSchedules(@NonNull LocalTask rootLocalTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(rootLocalTask.current(startExactTimeStamp));
-
-        List<Schedule> schedules = new ArrayList<>();
-
-        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
-            Assert.assertTrue(scheduleData != null);
-
-            switch (scheduleData.getScheduleType()) {
-                case SINGLE: {
-                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
-
-                    Date date = singleScheduleData.Date;
-                    Time time = getTime(singleScheduleData.TimePair);
-
-                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp);
-
-                    SingleScheduleRecord singleScheduleRecord = mLocalFactory.mPersistenceManager.createSingleScheduleRecord(scheduleRecord.getId(), date, time);
-
-                    schedules.add(new SingleSchedule(this, new LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord)));
-                    break;
-                }
-                case DAILY: {
-                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
-
-                    Time time = getTime(dailyScheduleData.TimePair);
-
-                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
-
-                    DailyScheduleRecord dailyScheduleRecord = mLocalFactory.mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
-
-                    schedules.add(new DailySchedule(this, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord)));
-                    break;
-                }
-                case WEEKLY: {
-                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
-
-                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
-                    Time time = getTime(weeklyScheduleData.TimePair);
-
-                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
-
-                    WeeklyScheduleRecord weeklyScheduleRecord = mLocalFactory.mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
-
-                    schedules.add(new WeeklySchedule(this, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord)));
-                    break;
-                }
-                case MONTHLY_DAY: {
-                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
-
-                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
-
-                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mLocalFactory.mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
-
-                    schedules.add(new MonthlyDaySchedule(this, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)));
-                    break;
-                }
-                case MONTHLY_WEEK: {
-                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
-
-                    ScheduleRecord scheduleRecord = mLocalFactory.mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
-
-                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mLocalFactory.mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
-
-                    schedules.add(new MonthlyWeekSchedule(this, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)));
-                    break;
-                }
-                default:
-                    throw new UnsupportedOperationException();
-            }
-        }
-
-        return schedules;
     }
 
     @NonNull

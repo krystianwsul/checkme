@@ -395,13 +395,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds, mNote);
+                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds, mNote); // todo firebase
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote);
+                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote); // todo firebase
 
                         finish();
                     }

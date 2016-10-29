@@ -82,7 +82,7 @@ public abstract class Task {
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
-    boolean isVisible(@NonNull ExactTimeStamp now) {
+    protected boolean isVisible(@NonNull ExactTimeStamp now) {
         if (current(now)) {
             Task rootTask = getRootTask(now);
 

@@ -1579,14 +1579,20 @@ public class DomainFactory {
         }
     }
 
-    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note) {
+    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        LocalTask childLocalTask = mLocalFactory.createLocalTaskHelper(this, name, now, note); // todo firebase
+        if (friendEntries.isEmpty()) {
+            mLocalFactory.createLocalTaskHelper(this, name, now, note);
+        } else {
+            Assert.assertTrue(mRemoteFactory != null);
+
+            mRemoteFactory.createRemoteTaskHelper(this, now, name, note, friendEntries);
+        }
 
         updateNotifications(context, new ArrayList<>(), now);
 

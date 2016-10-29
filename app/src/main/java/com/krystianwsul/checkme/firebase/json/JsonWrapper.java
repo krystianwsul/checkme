@@ -30,22 +30,6 @@ public class JsonWrapper {
 
     }
 
-    public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull TaskJson taskJson) {
-        Assert.assertTrue(!userDatas.isEmpty());
-
-        recordOf = Stream.of(userDatas)
-                .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
-
-        this.taskJson = taskJson;
-        taskHierarchyJson = null;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
-        instanceJson = null;
-    }
-
     public JsonWrapper(@NonNull List<UserData> userDatas, @NonNull TaskHierarchyJson taskHierarchyJson) {
         Assert.assertTrue(!userDatas.isEmpty());
 

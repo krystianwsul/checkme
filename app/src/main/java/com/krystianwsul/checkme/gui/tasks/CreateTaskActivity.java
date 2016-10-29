@@ -80,7 +80,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateTaskActivity.this::finish;
 
     private TaskKey mTaskKey;
-    private ArrayList<Integer> mTaskIds;
+    private ArrayList<Integer> mTaskIds; // todo firebase
 
     @Nullable
     private CreateTaskActivity.ScheduleHint mScheduleHint;
@@ -336,7 +336,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mTaskIds.size() > 1);
                         Assert.assertTrue(!hasValueFriends()); // todo friends
 
-                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, getScheduleDatas(), mTaskIds, mNote);
+                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, mData.DataId, name, getScheduleDatas(), mTaskIds, mNote); // todo firebase
 
                         finish();
                     } else {
@@ -378,11 +378,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         finish();
                     }
                 } else {  // no reminder
-                    Assert.assertTrue(!hasValueFriends()); // todo friends
-
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskIds == null);
+                        Assert.assertTrue(!hasValueFriends()); // todo friends
 
                         TaskKey taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskKey.mLocalTaskId, name, mNote); // todo firebase
 
@@ -394,6 +393,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         finish();
                     } else if (mTaskIds != null) {
                         Assert.assertTrue(mData.TaskData == null);
+                        Assert.assertTrue(!hasValueFriends()); // todo friends
 
                         DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskIds, mNote); // todo firebase
 
@@ -401,7 +401,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote); // todo firebase
+                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote, mFriendEntries);
 
                         finish();
                     }

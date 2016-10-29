@@ -112,6 +112,15 @@ public class RemoteFactory {
 
     @NonNull
     public RemoteTask createScheduleRootTask(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        RemoteTask remoteTask = createRemoteTaskHelper(domainFactory, now, name, note, friendEntries);
+
+        createSchedules(domainFactory, remoteTask.getRecordOf(), remoteTask.getId(), now, scheduleDatas);
+
+        return remoteTask;
+    }
+
+    @NonNull
+    public RemoteTask createRemoteTaskHelper(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note);
 
         UserData userData = MainActivity.getUserData();
@@ -124,14 +133,11 @@ public class RemoteFactory {
                 .map(friend -> UserData.getKey(friend.email))
                 .collect(Collectors.toSet());
 
-        RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(userDatas, taskJson));
-        String taskId = remoteTaskRecord.getId();
+        RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(recordOf, taskJson));
 
         RemoteTask remoteTask = new RemoteTask(domainFactory, remoteTaskRecord);
         Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
         mRemoteTasks.put(remoteTask.getId(), remoteTask);
-
-        createSchedules(domainFactory, recordOf, taskId, now, scheduleDatas);
 
         return remoteTask;
     }

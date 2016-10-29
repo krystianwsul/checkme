@@ -257,4 +257,9 @@ public abstract class Instance {
     public abstract void setRelevant();
 
     public abstract boolean getNotificationShown();
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + getName() + " " + getScheduleDateTime().toString() + " " + getInstanceDateTime().toString();
+    }
 }

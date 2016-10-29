@@ -994,7 +994,6 @@ public class DomainFactory {
         return new TaskListLoader.Data(childTaskDatas, note);
     }
 
-
     // sets
 
     public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {

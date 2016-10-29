@@ -269,11 +269,6 @@ public class LocalInstance extends Instance {
     }
 
     @Override
-    public String toString() {
-        return getName() + " " + getInstanceDateTime();
-    }
-
-    @Override
     public boolean getNotified() {
         return (mInstanceRecord != null && mInstanceRecord.getNotified());
     }

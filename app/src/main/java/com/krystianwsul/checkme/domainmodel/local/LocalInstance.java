@@ -1,8 +1,11 @@
-package com.krystianwsul.checkme.domainmodel;
+package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.Instance;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -27,7 +30,7 @@ public class LocalInstance extends Instance {
     @Nullable
     private DateTime mScheduleDateTime;
 
-    public LocalInstance(@NonNull DomainFactory domainFactory, @NonNull InstanceRecord instanceRecord) {
+    LocalInstance(@NonNull DomainFactory domainFactory, @NonNull InstanceRecord instanceRecord) {
         super(domainFactory);
 
         mInstanceRecord = instanceRecord;
@@ -36,7 +39,7 @@ public class LocalInstance extends Instance {
         mScheduleDateTime = null;
     }
 
-    LocalInstance(@NonNull DomainFactory domainFactory, int taskId, @NonNull DateTime scheduleDateTime) {
+    public LocalInstance(@NonNull DomainFactory domainFactory, int taskId, @NonNull DateTime scheduleDateTime) {
         super(domainFactory);
 
         mInstanceRecord = null;
@@ -45,7 +48,7 @@ public class LocalInstance extends Instance {
         mScheduleDateTime = scheduleDateTime;
     }
 
-    int getTaskId() {
+    public int getTaskId() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);

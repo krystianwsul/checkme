@@ -1,8 +1,10 @@
-package com.krystianwsul.checkme.domainmodel;
+package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -13,7 +15,7 @@ public class LocalTaskHierarchy extends TaskHierarchy {
     @NonNull
     private final TaskHierarchyRecord mTaskHierarchyRecord;
 
-    public LocalTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull TaskHierarchyRecord taskHierarchyRecord) {
+    LocalTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull TaskHierarchyRecord taskHierarchyRecord) {
         super(domainFactory);
 
         mTaskHierarchyRecord = taskHierarchyRecord;

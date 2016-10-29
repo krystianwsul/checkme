@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.utils.time.Date;

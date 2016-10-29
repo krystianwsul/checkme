@@ -27,6 +27,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
+import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
+import com.krystianwsul.checkme.domainmodel.local.LocalTask;
+import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
@@ -1449,7 +1452,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    public Instance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
+    Instance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
         List<Instance> taskInstances = getExistingInstances(task);
 
         ArrayList<Instance> instances = new ArrayList<>();
@@ -1492,7 +1495,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
+    List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
         allInstances.putAll(Stream.of(getExistingInstances().values())
@@ -1561,7 +1564,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<TaskHierarchy> getParentTaskHierarchies(Task childTask) {
+    List<TaskHierarchy> getParentTaskHierarchies(Task childTask) {
         Assert.assertTrue(childTask != null);
 
         return Stream.of(getTaskHierarchies())
@@ -1570,7 +1573,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    public Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
@@ -1794,7 +1797,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull Set<String> recordOf) {
+    public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull Set<String> recordOf) {
         Assert.assertTrue(mRemoteFactory != null);
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
@@ -1856,7 +1859,7 @@ public class DomainFactory {
         return remoteTask;
     }
 
-    public void joinTasks(@NonNull Task newParentTask, @NonNull List<Task> joinTasks, @NonNull ExactTimeStamp now) {
+    private void joinTasks(@NonNull Task newParentTask, @NonNull List<Task> joinTasks, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(newParentTask.current(now));
         Assert.assertTrue(joinTasks.size() > 1);
 
@@ -1889,7 +1892,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    public TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.current(exactTimeStamp));
 
         TaskKey childTaskKey = childTask.getTaskKey();
@@ -1925,7 +1928,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public Task getTask(@NonNull TaskKey taskKey) {
+    Task getTask(@NonNull TaskKey taskKey) {
         Map<TaskKey, Task> tasks = getTasks();
         Assert.assertTrue(tasks.containsKey(taskKey));
 
@@ -1936,7 +1939,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
         return Stream.of(getChildTaskHierarchies(parentTask))
@@ -1948,7 +1951,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
+    List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
         TaskKey parentTaskKey = parentTask.getTaskKey();
 
         return Stream.of(getTaskHierarchies())
@@ -1975,7 +1978,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public Map<InstanceKey, Instance> getExistingInstances() { // todo change to list
+    private Map<InstanceKey, Instance> getExistingInstances() { // todo change to list
         Map<InstanceKey, Instance> instances = Stream.of(mLocalFactory.getExistingInstances())
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
 

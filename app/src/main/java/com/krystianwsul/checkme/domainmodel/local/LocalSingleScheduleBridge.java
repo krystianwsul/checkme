@@ -1,16 +1,17 @@
-package com.krystianwsul.checkme.domainmodel;
+package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.domainmodel.SingleScheduleBridge;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
 
-public class LocalSingleScheduleBridge extends LocalScheduleBridge implements SingleScheduleBridge {
+class LocalSingleScheduleBridge extends LocalScheduleBridge implements SingleScheduleBridge {
     @NonNull
     private final SingleScheduleRecord mSingleScheduleRecord;
 
-    public LocalSingleScheduleBridge(@NonNull ScheduleRecord scheduleRecord, @NonNull SingleScheduleRecord singleScheduleRecord) {
+    LocalSingleScheduleBridge(@NonNull ScheduleRecord scheduleRecord, @NonNull SingleScheduleRecord singleScheduleRecord) {
         super(scheduleRecord);
 
         mSingleScheduleRecord = singleScheduleRecord;

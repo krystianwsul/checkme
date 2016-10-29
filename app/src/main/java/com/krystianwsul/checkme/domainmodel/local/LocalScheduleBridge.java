@@ -1,8 +1,9 @@
-package com.krystianwsul.checkme.domainmodel;
+package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.domainmodel.ScheduleBridge;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -11,11 +12,11 @@ import junit.framework.Assert;
 
 import java.util.Set;
 
-public abstract class LocalScheduleBridge implements ScheduleBridge {
+abstract class LocalScheduleBridge implements ScheduleBridge {
     @NonNull
-    protected final ScheduleRecord mScheduleRecord;
+    final ScheduleRecord mScheduleRecord;
 
-    protected LocalScheduleBridge(@NonNull ScheduleRecord scheduleRecord) {
+    LocalScheduleBridge(@NonNull ScheduleRecord scheduleRecord) {
         mScheduleRecord = scheduleRecord;
     }
 

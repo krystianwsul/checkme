@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel;
+package com.krystianwsul.checkme.domainmodel.local;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -6,6 +6,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.Schedule;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -29,13 +32,13 @@ public class LocalTask extends Task {
     @NonNull
     private final ArrayList<Schedule> mSchedules = new ArrayList<>();
 
-    public LocalTask(@NonNull DomainFactory domainFactory, @NonNull TaskRecord taskRecord) {
+    LocalTask(@NonNull DomainFactory domainFactory, @NonNull TaskRecord taskRecord) {
         super(domainFactory);
 
         mTaskRecord = taskRecord;
     }
 
-    public void addSchedules(@NonNull List<Schedule> schedules) {
+    void addSchedules(@NonNull List<Schedule> schedules) {
         mSchedules.addAll(schedules);
     }
 
@@ -135,7 +138,7 @@ public class LocalTask extends Task {
         return new HashSet<>();
     }
 
-    void delete() {
+    public void delete() {
         Stream.of(getSchedules())
                 .forEach(Schedule::delete);
 

@@ -12,14 +12,6 @@ import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Instance;
-import com.krystianwsul.checkme.domainmodel.LocalDailyScheduleBridge;
-import com.krystianwsul.checkme.domainmodel.LocalInstance;
-import com.krystianwsul.checkme.domainmodel.LocalMonthlyDayScheduleBridge;
-import com.krystianwsul.checkme.domainmodel.LocalMonthlyWeekScheduleBridge;
-import com.krystianwsul.checkme.domainmodel.LocalSingleScheduleBridge;
-import com.krystianwsul.checkme.domainmodel.LocalTask;
-import com.krystianwsul.checkme.domainmodel.LocalTaskHierarchy;
-import com.krystianwsul.checkme.domainmodel.LocalWeeklyScheduleBridge;
 import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
@@ -277,19 +269,19 @@ public class LocalFactory {
         return mPersistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime);
     }
 
-    public void deleteTask(@NonNull LocalTask localTask) {
+    void deleteTask(@NonNull LocalTask localTask) {
         Assert.assertTrue(mLocalTasks.containsKey(localTask.getId()));
 
         mLocalTasks.remove(localTask.getId());
     }
 
-    public void deleteTaskHierarchy(@NonNull LocalTaskHierarchy localTasHierarchy) {
+    void deleteTaskHierarchy(@NonNull LocalTaskHierarchy localTasHierarchy) {
         Assert.assertTrue(mLocalTaskHierarchies.containsKey(localTasHierarchy.getId()));
 
         mLocalTaskHierarchies.remove(localTasHierarchy.getId());
     }
 
-    public void deleteInstance(@NonNull LocalInstance localInstance) {
+    void deleteInstance(@NonNull LocalInstance localInstance) {
         Assert.assertTrue(mExistingLocalInstances.contains(localInstance));
 
         mExistingLocalInstances.remove(localInstance);
@@ -329,7 +321,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public List<Schedule> createSchedules(@NonNull DomainFactory domainFactory, @NonNull LocalTask rootLocalTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
+    List<Schedule> createSchedules(@NonNull DomainFactory domainFactory, @NonNull LocalTask rootLocalTask, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(rootLocalTask.current(startExactTimeStamp));
 
@@ -420,7 +412,7 @@ public class LocalFactory {
         }
     }
 
-    public void createTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
+    void createTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(parentLocalTask.current(startExactTimeStamp));
         Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
 
@@ -445,7 +437,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+    InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
         mExistingLocalInstances.add(localInstance);
 
         return mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);

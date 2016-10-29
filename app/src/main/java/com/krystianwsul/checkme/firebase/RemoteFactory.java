@@ -54,7 +54,9 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,8 +113,8 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public RemoteTask createScheduleRootTask(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
-        RemoteTask remoteTask = createRemoteTaskHelper(domainFactory, now, name, note, friendEntries);
+    public RemoteTask createScheduleRootTask(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull Collection<String> friends) {
+        RemoteTask remoteTask = createRemoteTaskHelper(domainFactory, now, name, note, friends);
 
         createSchedules(domainFactory, remoteTask.getRecordOf(), remoteTask.getId(), now, scheduleDatas);
 
@@ -120,18 +122,14 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public RemoteTask createRemoteTaskHelper(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public RemoteTask createRemoteTaskHelper(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull Collection<String> friends) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note);
 
         UserData userData = MainActivity.getUserData();
         Assert.assertTrue(userData != null);
 
-        List<UserData> userDatas = new ArrayList<>(friendEntries);
-        userDatas.add(userData);
-
-        Set<String> recordOf = Stream.of(userDatas)
-                .map(friend -> UserData.getKey(friend.email))
-                .collect(Collectors.toSet());
+        Set<String> recordOf = new HashSet<>(friends);
+        recordOf.add(UserData.getKey(userData.email));
 
         RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(recordOf, taskJson));
 

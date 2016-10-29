@@ -156,7 +156,8 @@ public abstract class Task {
         setMyEndExactTimeStamp(now);
     }
 
-    public abstract void createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note);
+    @NonNull
+    public abstract Task createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note);
 
     @Nullable
     public abstract ExactTimeStamp getEndExactTimeStamp();
@@ -237,5 +238,5 @@ public abstract class Task {
 
     protected abstract void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now);
 
-    protected abstract void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now);
+    public abstract void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now);
 }

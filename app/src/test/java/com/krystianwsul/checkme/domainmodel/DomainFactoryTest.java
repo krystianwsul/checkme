@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
-import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -145,21 +144,21 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.isEmpty());
 
-        LocalTask childLocalTaskDone = domainFactory.createLocalChildTask(startExactTimeStamp, new TaskKey(rootLocalTask.getId()), "child task done", null);
+        LocalTask childLocalTaskDone = domainFactory.getLocalFactory().createChildTask(domainFactory, startExactTimeStamp, rootLocalTask, "child task done", null);
 
         Assert.assertTrue(childLocalTaskDone.isVisible(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.size() == 1);
 
-        LocalTask childLocalTaskExists = domainFactory.createLocalChildTask(startExactTimeStamp, new TaskKey(rootLocalTask.getId()), "child task exists", null);
+        LocalTask childLocalTaskExists = domainFactory.getLocalFactory().createChildTask(domainFactory, startExactTimeStamp, rootLocalTask, "child task exists", null);
 
         Assert.assertTrue(childLocalTaskExists.isVisible(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.size() == 2);
 
-        LocalTask childLocalTaskDoesntExist = domainFactory.createLocalChildTask(startExactTimeStamp, new TaskKey(rootLocalTask.getId()), "child task doesn't exist", null);
+        LocalTask childLocalTaskDoesntExist = domainFactory.getLocalFactory().createChildTask(domainFactory, startExactTimeStamp, rootLocalTask, "child task doesn't exist", null);
         Assert.assertTrue(childLocalTaskDoesntExist.isVisible(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);

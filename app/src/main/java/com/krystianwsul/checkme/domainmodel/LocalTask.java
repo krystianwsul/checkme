@@ -117,9 +117,10 @@ public class LocalTask extends Task {
         return new TaskKey(mTaskRecord.getId());
     }
 
+    @NonNull
     @Override
-    public void createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
-        mDomainFactory.createLocalChildTask(now, getTaskKey(), name, note);
+    public Task createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
+        return mDomainFactory.getLocalFactory().createChildTask(mDomainFactory, now, this, name, note);
     }
 
     @NonNull
@@ -169,9 +170,9 @@ public class LocalTask extends Task {
     }
 
     @Override
-    protected void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
+    public void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(childTask instanceof LocalTask);
 
-        mDomainFactory.createTaskHierarchy(this, (LocalTask) childTask, now);
+        mDomainFactory.getLocalFactory().createTaskHierarchy(mDomainFactory, this, (LocalTask) childTask, now);
     }
 }

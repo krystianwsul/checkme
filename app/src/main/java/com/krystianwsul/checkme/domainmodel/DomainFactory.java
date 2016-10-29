@@ -55,8 +55,6 @@ import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
-import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
-import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -1148,7 +1146,7 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            mRemoteFactory.createScheduleRootTask(this, now, name, scheduleDatas, note, friendEntries);
+            mRemoteFactory.createScheduleRootTask(this, now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
         }
 
         updateNotifications(context, new ArrayList<>(), now);
@@ -1157,7 +1155,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friends) {
+    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1168,7 +1166,7 @@ public class DomainFactory {
         Task task = getTask(taskKey);
         Assert.assertTrue(task.current(now));
 
-        task = task.updateFriends(Utils.userDatasToKeys(friends), context, now);
+        task = task.updateFriends(Utils.userDatasToKeys(friendEntries), context, now);
 
         List<TaskKey> taskKeys = new ArrayList<>();
         taskKeys.add(task.getTaskKey());
@@ -1198,39 +1196,48 @@ public class DomainFactory {
         return task.getTaskKey();
     }
 
-    private void createScheduleJoinRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        LocalTask rootLocalTask = mLocalFactory.createLocalTaskHelper(this, name, now, note);
-
-        List<Schedule> schedules = mLocalFactory.createSchedules(this, rootLocalTask, scheduleDatas, now);
-        Assert.assertTrue(!schedules.isEmpty());
-
-        rootLocalTask.addSchedules(schedules);
-
-        joinTasks(rootLocalTask, joinTaskIds, now);
-    }
-
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(joinTaskIds.size() > 1);
+        Assert.assertTrue(joinTaskKeys.size() > 1);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<TaskKey> taskKeys = Stream.of(joinTaskIds)
-                .map(TaskKey::new)
+        Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
+
+        List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTask)
+                .collect(Collectors.toList());
+
+        for (Task task : joinTasks)
+            mergedFriends.addAll(task.getRecordOf());
+
+        Task newParentTask;
+        if (mUserData != null) {
+            Assert.assertTrue(mRemoteFactory != null);
+
+            mergedFriends.remove(UserData.getKey(mUserData.email));
+
+            newParentTask = mRemoteFactory.createScheduleRootTask(this, now, name, scheduleDatas, note, mergedFriends);
+        } else {
+            Assert.assertTrue(mergedFriends.isEmpty());
+
+            newParentTask = mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
+        }
+
+        joinTasks = Stream.of(joinTasks)
+                .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
+                .collect(Collectors.toList());
+
+        List<TaskKey> taskKeys = Stream.of(joinTasks)
                 .map(task -> task.getParentTask(now))
                 .filter(parentTask -> parentTask != null)
                 .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
-        createScheduleJoinRootTask(now, name, scheduleDatas, joinTaskIds, note);
+        joinTasks(newParentTask, joinTasks, now);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1254,54 +1261,43 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    @NonNull
-    LocalTask createLocalChildTask(@NonNull ExactTimeStamp now, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
-        Assert.assertTrue(parentTaskKey.mLocalTaskId != null);
-        Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        Task parentTask = getTask(parentTaskKey);
-        Assert.assertTrue(parentTask.current(now));
-        Assert.assertTrue(parentTask instanceof LocalTask);
-
-        LocalTask childLocalTask = mLocalFactory.createLocalTaskHelper(this, name, now, note);
-
-        createTaskHierarchy((LocalTask) parentTask, childLocalTask, now);
-
-        return childLocalTask;
-    }
-
-    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, int parentTaskId, @NonNull String name, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
+    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createJoinChildTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(joinTaskIds.size() > 1);
+        Assert.assertTrue(joinTaskKeys.size() > 1);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<TaskKey> taskKeys = Stream.of(joinTaskIds)
-                .map(TaskKey::new)
+        Task parentTask = getTask(parentTaskKey);
+        Assert.assertTrue(parentTask.current(now));
+
+        Set<String> mergedFriends = new HashSet<>(parentTask.getRecordOf());
+
+        List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTask)
+                .collect(Collectors.toList());
+
+        for (Task task : joinTasks)
+            mergedFriends.addAll(task.getRecordOf());
+
+        parentTask = parentTask.updateFriends(mergedFriends, context, now);
+
+        joinTasks = Stream.of(joinTasks)
+                .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
+                .collect(Collectors.toList());
+
+        List<TaskKey> taskKeys = Stream.of(joinTasks)
                 .map(task -> task.getParentTask(now))
-                .filter(parentTask -> parentTask != null)
+                .filter(joinParentTask -> joinParentTask != null)
                 .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
-        LocalTask parentLocalTask = mLocalFactory.mLocalTasks.get(parentTaskId); // todo firebase
-        Assert.assertTrue(parentLocalTask != null);
-        Assert.assertTrue(parentLocalTask.current(now));
+        taskKeys.add(parentTask.getTaskKey());
 
-        taskKeys.add(parentLocalTask.getTaskKey());
+        Task childTask = parentTask.createChildTask(now, name, note);
 
-        TaskRecord childTaskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, now, note);
-
-        LocalTask childLocalTask = new LocalTask(this, childTaskRecord);
-        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(childLocalTask.getId())); // todo firebase
-        mLocalFactory.mLocalTasks.put(childLocalTask.getId(), childLocalTask); // todo firebase
-
-        createTaskHierarchy(parentLocalTask, childLocalTask, now);
-
-        joinTasks(childLocalTask, joinTaskIds, now);
+        joinTasks(childTask, joinTasks, now);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1591,7 +1587,7 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            mRemoteFactory.createRemoteTaskHelper(this, now, name, note, friendEntries);
+            mRemoteFactory.createRemoteTaskHelper(this, now, name, note, Utils.userDatasToKeys(friendEntries));
         }
 
         updateNotifications(context, new ArrayList<>(), now);
@@ -1599,29 +1595,47 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<Integer> joinTaskIds, @Nullable String note) {
+    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.createJoinRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(joinTaskIds.size() > 1);
+        Assert.assertTrue(joinTaskKeys.size() > 1);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<TaskKey> taskKeys = Stream.of(joinTaskIds)
-                .map(TaskKey::new)
+        Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
+
+        List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTask)
+                .collect(Collectors.toList());
+
+        for (Task task : joinTasks)
+            mergedFriends.addAll(task.getRecordOf());
+
+        Task newParentTask;
+        if (mUserData != null) {
+            Assert.assertTrue(mRemoteFactory != null);
+
+            mergedFriends.remove(UserData.getKey(mUserData.email));
+
+            newParentTask = mRemoteFactory.createRemoteTaskHelper(this, now, name, note, mergedFriends);
+        } else {
+            Assert.assertTrue(mergedFriends.isEmpty());
+
+            newParentTask = mLocalFactory.createLocalTaskHelper(this, name, now, note);
+        }
+
+        joinTasks = Stream.of(joinTasks)
+                .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
+                .collect(Collectors.toList());
+
+        List<TaskKey> taskKeys = Stream.of(joinTasks)
                 .map(task -> task.getParentTask(now))
                 .filter(parentTask -> parentTask != null)
                 .map(Task::getTaskKey)
                 .collect(Collectors.toList());
 
-        TaskRecord taskRecord = mLocalFactory.mPersistenceManager.createTaskRecord(name, now, note);
-
-        LocalTask localTask = new LocalTask(this, taskRecord);
-        Assert.assertTrue(!mLocalFactory.mLocalTasks.containsKey(localTask.getId())); // todo firebase
-        mLocalFactory.mLocalTasks.put(localTask.getId(), localTask); // todo firebase
-
-        joinTasks(localTask, joinTaskIds, now);
+        joinTasks(newParentTask, joinTasks, now);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1629,34 +1643,36 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, int taskId, @NonNull String name, @Nullable String note) {
+    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
         MyCrashlytics.log("DomainFactory.updateRootTask");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        LocalTask localTask = mLocalFactory.mLocalTasks.get(taskId);  // todo firebase
-        Assert.assertTrue(localTask != null);
+        Task task = getTask(taskKey);
+        Assert.assertTrue(task.current(now));
 
-        localTask.setName(name, note);
+        task = task.updateFriends(Utils.userDatasToKeys(friendEntries), context, now);
+
+        task.setName(name, note);
 
         List<TaskKey> taskKeys = new ArrayList<>();
 
-        LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(localTask, now);
-        if (localTaskHierarchy != null) {
-            localTaskHierarchy.setEndExactTimeStamp(now);
-            taskKeys.add(localTaskHierarchy.getParentTaskKey());
+        TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+        if (taskHierarchy != null) {
+            taskHierarchy.setEndExactTimeStamp(now);
+            taskKeys.add(taskHierarchy.getParentTaskKey());
         }
 
-        Stream.of(localTask.getCurrentSchedules(now))
+        Stream.of(task.getCurrentSchedules(now))
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
         updateNotifications(context, taskKeys, now);
 
         save(context, dataId);
 
-        return localTask.getTaskKey();
+        return task.getTaskKey();
     }
 
     public synchronized void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
@@ -2003,41 +2019,6 @@ public class DomainFactory {
         DateTime scheduleDateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
 
         return getInstance(task, scheduleDateTime);
-    }
-
-    private void joinTasks(@NonNull LocalTask newParentLocalTask, @NonNull List<Integer> joinTaskIds, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(newParentLocalTask.current(now));
-        Assert.assertTrue(joinTaskIds.size() > 1);
-
-        for (int joinTaskId : joinTaskIds) {
-            LocalTask joinLocalTask = mLocalFactory.mLocalTasks.get(joinTaskId); // todo firebase
-            Assert.assertTrue(joinLocalTask != null);
-            Assert.assertTrue(joinLocalTask.current(now));
-
-            if (joinLocalTask.isRootTask(now)) {
-                Stream.of(joinLocalTask.getCurrentSchedules(now))
-                        .forEach(schedule -> schedule.setEndExactTimeStamp(now));
-            } else {
-                LocalTaskHierarchy localTaskHierarchy = getParentTaskHierarchy(joinLocalTask, now);
-                Assert.assertTrue(localTaskHierarchy != null);
-
-                localTaskHierarchy.setEndExactTimeStamp(now);
-            }
-
-            createTaskHierarchy(newParentLocalTask, joinLocalTask, now);
-        }
-    }
-
-    void createTaskHierarchy(@NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
-        Assert.assertTrue(parentLocalTask.current(startExactTimeStamp));
-        Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
-
-        TaskHierarchyRecord taskHierarchyRecord = mLocalFactory.mPersistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp);
-        Assert.assertTrue(taskHierarchyRecord != null);
-
-        LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(this, taskHierarchyRecord);
-        Assert.assertTrue(!mLocalFactory.mLocalTaskHierarchies.containsKey(localTaskHierarchy.getId())); // todo firebase
-        mLocalFactory.mLocalTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy); // todo firebase
     }
 
     @NonNull
@@ -2387,6 +2368,28 @@ public class DomainFactory {
         Stream.of(parentLocalTaskHierarchies)
                 .map(LocalTaskHierarchy::getParentTask)
                 .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) parentTask, recordOf));
+    }
+
+    public void joinTasks(@NonNull Task newParentTask, @NonNull List<Task> joinTasks, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(newParentTask.current(now));
+        Assert.assertTrue(joinTasks.size() > 1);
+
+        for (Task joinTask : joinTasks) {
+            Assert.assertTrue(joinTask != null);
+            Assert.assertTrue(joinTask.current(now));
+
+            if (joinTask.isRootTask(now)) {
+                Stream.of(joinTask.getCurrentSchedules(now))
+                        .forEach(schedule -> schedule.setEndExactTimeStamp(now));
+            } else {
+                TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, now);
+                Assert.assertTrue(taskHierarchy != null);
+
+                taskHierarchy.setEndExactTimeStamp(now);
+            }
+
+            newParentTask.addChild(joinTask, now);
+        }
     }
 
     public static class Irrelevant {

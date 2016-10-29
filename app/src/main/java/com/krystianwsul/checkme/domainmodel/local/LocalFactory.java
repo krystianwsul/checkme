@@ -416,4 +416,28 @@ public class LocalFactory {
             return new NormalTime(timePair.mHourMinute);
         }
     }
+
+    public void createTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
+        Assert.assertTrue(parentLocalTask.current(startExactTimeStamp));
+        Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
+
+        TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp);
+        Assert.assertTrue(taskHierarchyRecord != null);
+
+        LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(domainFactory, taskHierarchyRecord);
+        Assert.assertTrue(!mLocalTaskHierarchies.containsKey(localTaskHierarchy.getId()));
+        mLocalTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy);
+    }
+
+    @NonNull
+    public LocalTask createChildTask(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull LocalTask parentTask, @NonNull String name, @Nullable String note) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(parentTask.current(now));
+
+        LocalTask childLocalTask = createLocalTaskHelper(domainFactory, name, now, note);
+
+        createTaskHierarchy(domainFactory, parentTask, childLocalTask, now);
+
+        return childLocalTask;
+    }
 }

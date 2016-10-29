@@ -100,9 +100,10 @@ public class RemoteTask extends Task {
         return mRemoteTaskRecord.getId();
     }
 
+    @NonNull
     @Override
-    public void createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
-        getRemoteFactory().createChildTask(mDomainFactory, this, now, name, note);
+    public Task createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
+        return getRemoteFactory().createChildTask(mDomainFactory, this, now, name, note);
     }
 
     @Nullable
@@ -190,7 +191,7 @@ public class RemoteTask extends Task {
     }
 
     @Override
-    protected void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
+    public void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(childTask instanceof RemoteTask);
 
         getRemoteFactory().createTaskHierarchy(mDomainFactory, this, (RemoteTask) childTask, now);

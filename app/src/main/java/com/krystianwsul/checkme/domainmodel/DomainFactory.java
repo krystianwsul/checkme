@@ -111,7 +111,7 @@ public class DomainFactory {
     private ValueEventListener mFriendListener;
 
     @NonNull
-    private LocalFactory mLocalFactory;
+    private final LocalFactory mLocalFactory;
 
     @Nullable
     private RemoteFactory mRemoteFactory;

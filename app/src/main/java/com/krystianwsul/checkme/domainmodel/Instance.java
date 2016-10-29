@@ -39,7 +39,7 @@ public abstract class Instance {
     protected abstract Date getScheduleDate();
 
     @Nullable
-    public Integer getScheduleCustomTimeId() {
+    private Integer getScheduleCustomTimeId() {
         Time scheduleTime = getScheduleTime();
         if (scheduleTime instanceof CustomTime)
             return ((CustomTime) scheduleTime).getId();
@@ -48,7 +48,7 @@ public abstract class Instance {
     }
 
     @Nullable
-    public HourMinute getScheduleHourMinute() {
+    private HourMinute getScheduleHourMinute() {
         Time scheduleTime = getScheduleTime();
         if (scheduleTime instanceof NormalTime)
             return ((NormalTime) scheduleTime).getHourMinute();
@@ -73,7 +73,7 @@ public abstract class Instance {
     public abstract boolean exists();
 
     @NonNull
-    public DateTime getInstanceDateTime() {
+    DateTime getInstanceDateTime() {
         return new DateTime(getInstanceDate(), getInstanceTime());
     }
 
@@ -81,7 +81,7 @@ public abstract class Instance {
     protected abstract Time getInstanceTime();
 
     @NonNull
-    public List<Instance> getChildInstances(@NonNull ExactTimeStamp now) {
+    List<Instance> getChildInstances(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
         Task task = getTask();
@@ -112,7 +112,7 @@ public abstract class Instance {
     @NonNull
     public abstract String getName();
 
-    public boolean isRootInstance(@NonNull ExactTimeStamp now) {
+    protected boolean isRootInstance(@NonNull ExactTimeStamp now) {
         return getTask().isRootTask(getHierarchyExactTimeStamp(now));
     }
 
@@ -136,7 +136,7 @@ public abstract class Instance {
     }
 
     @Nullable
-    protected HourMinute getInstanceHourMinute() {
+    private HourMinute getInstanceHourMinute() {
         Time instanceTime = getInstanceTime();
         if (instanceTime instanceof NormalTime)
             return ((NormalTime) instanceTime).getHourMinute();
@@ -166,7 +166,7 @@ public abstract class Instance {
 
     public abstract void setNotified(@NonNull ExactTimeStamp now);
 
-    public boolean isVisible(@NonNull ExactTimeStamp now) {
+    boolean isVisible(@NonNull ExactTimeStamp now) {
         boolean isVisible = isVisibleHelper(now);
 
         if (isVisible) {
@@ -209,11 +209,11 @@ public abstract class Instance {
         4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
      */
 
-    public int getNotificationId() {
+    int getNotificationId() {
         return getNotificationId(getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute(), getTaskKey());
     }
 
-    public static int getNotificationId(@NonNull Date scheduleDate, @Nullable Integer scheduleCustomTimeId, @Nullable HourMinute scheduleHourMinute, @NonNull TaskKey taskKey) {
+    static int getNotificationId(@NonNull Date scheduleDate, @Nullable Integer scheduleCustomTimeId, @Nullable HourMinute scheduleHourMinute, @NonNull TaskKey taskKey) {
         Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
 
         int hash = scheduleDate.getMonth();
@@ -234,7 +234,7 @@ public abstract class Instance {
     }
 
     @Nullable
-    public Instance getParentInstance(@NonNull ExactTimeStamp now) {
+    protected Instance getParentInstance(@NonNull ExactTimeStamp now) {
         ExactTimeStamp hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now);
 
         Task task = getTask();

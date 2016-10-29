@@ -52,13 +52,13 @@ public class InstanceShownRecord extends Record {
                 + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0);");
     }
 
-    @SuppressWarnings("UnusedParameters")
+    @SuppressWarnings({"UnusedParameters", "EmptyMethod"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
 
     }
 
     @NonNull
-    public static ArrayList<InstanceShownRecord> getInstancesShownRecords(SQLiteDatabase sqLiteDatabase) {
+    static ArrayList<InstanceShownRecord> getInstancesShownRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
         ArrayList<InstanceShownRecord> instancesShownRecords = new ArrayList<>();

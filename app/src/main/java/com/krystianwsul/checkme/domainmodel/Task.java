@@ -42,7 +42,7 @@ public abstract class Task {
     public abstract String getName();
 
     @Nullable
-    public String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
+    String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         List<Schedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
@@ -70,19 +70,19 @@ public abstract class Task {
     public abstract TaskKey getTaskKey();
 
     @NonNull
-    public List<Task> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
+    List<Task> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getChildTasks(this, exactTimeStamp);
     }
 
-    public boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
+    boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
-    public boolean isVisible(@NonNull ExactTimeStamp now) {
+    boolean isVisible(@NonNull ExactTimeStamp now) {
         if (current(now)) {
             Task rootTask = getRootTask(now);
 
@@ -101,7 +101,7 @@ public abstract class Task {
     }
 
     @NonNull
-    public Task getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    private Task getRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Task parentTask = getParentTask(exactTimeStamp);
         if (parentTask == null)
             return this;
@@ -113,7 +113,7 @@ public abstract class Task {
     protected abstract Collection<Schedule> getSchedules();
 
     @NonNull
-    public List<Schedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
+    List<Schedule> getCurrentSchedules(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return Stream.of(getSchedules())
@@ -121,7 +121,7 @@ public abstract class Task {
                 .collect(Collectors.toList());
     }
 
-    public boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return (getParentTask(exactTimeStamp) == null);
@@ -129,7 +129,7 @@ public abstract class Task {
 
     protected abstract void setMyEndExactTimeStamp(@NonNull ExactTimeStamp now);
 
-    public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
         Assert.assertTrue(current(now));
 
         List<Schedule> schedules = getCurrentSchedules(now);
@@ -163,7 +163,7 @@ public abstract class Task {
     public abstract ExactTimeStamp getEndExactTimeStamp();
 
     @Nullable
-    public Task getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    Task getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return mDomainFactory.getParentTask(this, exactTimeStamp);
@@ -172,7 +172,7 @@ public abstract class Task {
     @Nullable
     public abstract Date getOldestVisible();
 
-    public void updateOldestVisible(@NonNull ExactTimeStamp now) {
+    void updateOldestVisible(@NonNull ExactTimeStamp now) {
         // 24 hack
         List<Instance> instances = mDomainFactory.getPastInstances(this, now);
 
@@ -197,7 +197,7 @@ public abstract class Task {
     protected abstract void setOldestVisible(@NonNull Date date);
 
     @NonNull
-    public List<Instance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
+    List<Instance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
         if (startExactTimeStamp == null) { // 24 hack
             Date oldestVisible = getOldestVisible();
             if (oldestVisible != null) {

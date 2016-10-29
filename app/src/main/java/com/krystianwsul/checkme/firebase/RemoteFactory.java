@@ -223,6 +223,7 @@ public class RemoteFactory {
         mRemoteManager.save();
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isSaved() {
         return mRemoteManager.isSaved();
     }

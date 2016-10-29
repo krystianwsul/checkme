@@ -14,6 +14,7 @@ public class DailyScheduleJson extends ScheduleJson {
 
     private Integer minute;
 
+    @SuppressWarnings("unused")
     public DailyScheduleJson() {
 
     }

@@ -44,12 +44,12 @@ public class SingleScheduleRecord extends Record {
                 + COLUMN_MINUTE + " INTEGER);");
     }
 
-    @SuppressWarnings("UnusedParameters")
+    @SuppressWarnings({"UnusedParameters", "EmptyMethod"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
 
     }
 
-    public static ArrayList<SingleScheduleRecord> getSingleScheduleRecords(SQLiteDatabase sqLiteDatabase, List<Integer> scheduleIds) {
+    static ArrayList<SingleScheduleRecord> getSingleScheduleRecords(SQLiteDatabase sqLiteDatabase, List<Integer> scheduleIds) {
         Assert.assertTrue(sqLiteDatabase != null);
         Assert.assertTrue(scheduleIds != null);
         Assert.assertTrue(!scheduleIds.isEmpty());

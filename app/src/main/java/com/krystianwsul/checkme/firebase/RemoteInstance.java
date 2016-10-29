@@ -36,7 +36,7 @@ public class RemoteInstance extends Instance {
     @Nullable
     private InstanceShownRecord mInstanceShownRecord;
 
-    public RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteInstanceRecord remoteInstanceRecord, @Nullable InstanceShownRecord instanceShownRecord) {
+    RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteInstanceRecord remoteInstanceRecord, @Nullable InstanceShownRecord instanceShownRecord) {
         super(domainFactory);
 
         mRemoteInstanceRecord = remoteInstanceRecord;
@@ -57,7 +57,7 @@ public class RemoteInstance extends Instance {
     }
 
     @NonNull
-    public String getTaskId() {
+    private String getTaskId() {
         if (mRemoteInstanceRecord != null) {
             Assert.assertTrue(TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime == null);
@@ -72,7 +72,7 @@ public class RemoteInstance extends Instance {
     }
 
     @NonNull
-    public Date getScheduleDate() {
+    protected Date getScheduleDate() {
         if (mRemoteInstanceRecord != null) {
             Assert.assertTrue(TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime == null);

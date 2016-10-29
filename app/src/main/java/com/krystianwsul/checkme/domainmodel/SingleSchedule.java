@@ -40,7 +40,7 @@ public class SingleSchedule extends Schedule {
     }
 
     @NonNull
-    Instance getInstance(@NonNull Task task) {
+    private Instance getInstance(@NonNull Task task) {
         return mDomainFactory.getInstance(task, getDateTime());
     }
 

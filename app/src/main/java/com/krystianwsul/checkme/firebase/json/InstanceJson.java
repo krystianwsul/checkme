@@ -30,6 +30,7 @@ public class InstanceJson {
 
     private long hierarchyTime;
 
+    @SuppressWarnings("unused")
     public InstanceJson() {
 
     }

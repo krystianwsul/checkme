@@ -87,7 +87,7 @@ public class RemoteFactory {
     private final Map<String, RemoteInstance> mExistingRemoteInstances;
 
     @NonNull
-    public final Map<String, RemoteCustomTime> mRemoteCustomTimes; // todo customtimes scope
+    private final Map<String, RemoteCustomTime> mRemoteCustomTimes;
 
     public RemoteFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserData userData) {
         mDomainFactory = domainFactory;
@@ -134,9 +134,8 @@ public class RemoteFactory {
             Assert.assertTrue(remoteCustomTimeRecord != null);
 
             if (remoteCustomTimeRecord.getOwnerId().equals(userId)) {
-                if (domainFactory.getLocalFactory().mLocalCustomTimes.containsKey(remoteCustomTimeRecord.getLocalId())) {
-                    LocalCustomTime localCustomTime = domainFactory.getLocalFactory().mLocalCustomTimes.get(remoteCustomTimeRecord.getLocalId());
-                    Assert.assertTrue(localCustomTime != null);
+                if (domainFactory.getLocalFactory().hasLocalCustomTime(remoteCustomTimeRecord.getLocalId())) {
+                    LocalCustomTime localCustomTime = domainFactory.getLocalFactory().getLocalCustomTime(remoteCustomTimeRecord.getLocalId());
 
                     localCustomTime.setRemoteCustomTimeRecord(remoteCustomTimeRecord);
                 } else {
@@ -761,8 +760,7 @@ public class RemoteFactory {
 
         int localCustomTimeId = customTimeKey.mLocalCustomTimeId;
 
-        Assert.assertTrue(mDomainFactory.getLocalFactory().mLocalCustomTimes.containsKey(localCustomTimeId));
-        LocalCustomTime localCustomTime = mDomainFactory.getLocalFactory().mLocalCustomTimes.get(localCustomTimeId);
+        LocalCustomTime localCustomTime = mDomainFactory.getLocalFactory().getLocalCustomTime(localCustomTimeId);
 
         if (!localCustomTime.hasRemoteRecord()) {
             CustomTimeJson customTimeJson = new CustomTimeJson(UserData.getKey(mUserData.email), localCustomTime.getId(), localCustomTime.getName(), localCustomTime.getHourMinute(DayOfWeek.SUNDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.SUNDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.MONDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.MONDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.TUESDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.TUESDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.THURSDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.THURSDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.FRIDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.FRIDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.SATURDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.SATURDAY).getMinute());
@@ -776,5 +774,21 @@ public class RemoteFactory {
         }
 
         return localCustomTime.getRemoteId();
+    }
+
+    @NonNull
+    public RemoteCustomTime getRemoteCustomTime(@NonNull String remoteCustomTimeId) {
+        Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTimeId));
+        Assert.assertTrue(mRemoteCustomTimes.containsKey(remoteCustomTimeId));
+
+        RemoteCustomTime remoteCustomTime = mRemoteCustomTimes.get(remoteCustomTimeId);
+        Assert.assertTrue(remoteCustomTime != null);
+
+        return remoteCustomTime;
+    }
+
+    @NonNull
+    public Collection<RemoteCustomTime> getRemoteCustomTimes() {
+        return mRemoteCustomTimes.values();
     }
 }

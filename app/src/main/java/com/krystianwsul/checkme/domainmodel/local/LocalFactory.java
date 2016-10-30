@@ -36,6 +36,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressLint("UseSparseArrays")
@@ -52,10 +54,10 @@ public class LocalFactory {
     private static LocalFactory sLocalFactory;
 
     @NonNull
-    public final PersistenceManger mPersistenceManager; // todo customtimes scope
+    private final PersistenceManger mPersistenceManager;
 
     @NonNull
-    public final HashMap<Integer, LocalCustomTime> mLocalCustomTimes = new HashMap<>(); // todo customtimes scope
+    private final HashMap<Integer, LocalCustomTime> mLocalCustomTimes = new HashMap<>();
 
     @NonNull
     private final HashMap<Integer, LocalTask> mLocalTasks = new HashMap<>();
@@ -524,5 +526,76 @@ public class LocalFactory {
     @NonNull
     public List<LocalInstance> getExistingInstances() {
         return mExistingLocalInstances;
+    }
+
+    @NonNull
+    public LocalCustomTime createLocalCustomTime(@NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.SUNDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.MONDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.TUESDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.WEDNESDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.THURSDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
+        Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
+
+        CustomTimeRecord customTimeRecord = mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
+        Assert.assertTrue(customTimeRecord != null);
+
+        LocalCustomTime localCustomTime = new LocalCustomTime(customTimeRecord);
+        Assert.assertTrue(!mLocalCustomTimes.containsKey(localCustomTime.getId()));
+
+        mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);
+
+        return localCustomTime;
+    }
+
+    @NonNull
+    public LocalCustomTime getLocalCustomTime(int localCustomTimeId) {
+        Assert.assertTrue(mLocalCustomTimes.containsKey(localCustomTimeId));
+
+        LocalCustomTime localCustomTime = mLocalCustomTimes.get(localCustomTimeId);
+        Assert.assertTrue(localCustomTime != null);
+
+        return localCustomTime;
+    }
+
+    @NonNull
+    public Collection<LocalCustomTime> getLocalCustomTimes() {
+        return mLocalCustomTimes.values();
+    }
+
+    public void clearRemoteCustomTimeRecords() {
+        Stream.of(mLocalCustomTimes.values())
+                .filter(LocalCustomTime::hasRemoteRecord)
+                .forEach(LocalCustomTime::clearRemoteRecord);
+    }
+
+    @NonNull
+    public List<LocalCustomTime> getCurrentCustomTimes() {
+        return Stream.of(mLocalCustomTimes.values())
+                .filter(LocalCustomTime::getCurrent)
+                .collect(Collectors.toList());
+    }
+
+    @Nullable
+    public LocalCustomTime getLocalCustomTime(@NonNull String remoteCustomTimeId) {
+        List<LocalCustomTime> matches = Stream.of(mLocalCustomTimes.values())
+                .filter(localCustomTime -> localCustomTime.hasRemoteRecord() && localCustomTime.getRemoteId().equals(remoteCustomTimeId))
+                .collect(Collectors.toList());
+
+        if (matches.isEmpty()) {
+            return null;
+        } else {
+            Assert.assertTrue(matches.size() == 1);
+
+            return matches.get(0);
+        }
+
+    }
+
+    public boolean hasLocalCustomTime(int localCustomTimeId) {
+        return mLocalCustomTimes.containsKey(localCustomTimeId);
     }
 }

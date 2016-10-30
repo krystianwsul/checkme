@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
-import com.krystianwsul.checkme.firebase.RemoteCustomTime;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteTask;
@@ -56,7 +55,6 @@ import com.krystianwsul.checkme.notifications.InstanceDoneService;
 import com.krystianwsul.checkme.notifications.InstanceHourService;
 import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService;
 import com.krystianwsul.checkme.notifications.TickService;
-import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -278,9 +276,7 @@ public class DomainFactory {
             Assert.assertTrue(mFriendQuery != null);
             Assert.assertTrue(mFriendListener != null);
 
-            Stream.of(mLocalFactory.mLocalCustomTimes.values())
-                    .filter(LocalCustomTime::hasRemoteRecord)
-                    .forEach(LocalCustomTime::clearRemoteRecord);
+            mLocalFactory.clearRemoteCustomTimeRecords();
 
             mRemoteFactory = null;
             mFriends = null;
@@ -403,8 +399,7 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getShowCustomTimeData");
 
-        LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(localCustomTimeId);
-        Assert.assertTrue(localCustomTime != null);
+        LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(localCustomTimeId);
 
         HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
@@ -1281,11 +1276,7 @@ public class DomainFactory {
         Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-        CustomTimeRecord customTimeRecord = mLocalFactory.mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
-        Assert.assertTrue(customTimeRecord != null);
-
-        LocalCustomTime localCustomTime = new LocalCustomTime(customTimeRecord);
-        mLocalFactory.mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);
+        LocalCustomTime localCustomTime = mLocalFactory.createLocalCustomTime(name, hourMinutes);
 
         save(context, 0);
 
@@ -1298,8 +1289,7 @@ public class DomainFactory {
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(localCustomTimeId);
-        Assert.assertTrue(localCustomTime != null);
+        LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(localCustomTimeId);
 
         localCustomTime.setName(name);
 
@@ -1321,8 +1311,7 @@ public class DomainFactory {
         Assert.assertTrue(!localCustomTimeIds.isEmpty());
 
         for (int localCustomTimeId : localCustomTimeIds) {
-            LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(localCustomTimeId);
-            Assert.assertTrue(localCustomTime != null);
+            LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(localCustomTimeId);
 
             localCustomTime.setCurrent();
         }
@@ -1486,10 +1475,8 @@ public class DomainFactory {
             return customTimeKey.mRemoteCustomTimeId;
         } else {
             Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
-            Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(customTimeKey.mLocalCustomTimeId));
 
-            LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(customTimeKey.mLocalCustomTimeId);
-            Assert.assertTrue(localCustomTime != null);
+            LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(customTimeKey.mLocalCustomTimeId);
 
             Assert.assertTrue(localCustomTime.hasRemoteRecord());
 
@@ -1603,24 +1590,7 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(timePair.mCustomTimeKey != null);
 
-            if (timePair.mCustomTimeKey.mLocalCustomTimeId != null) {
-                Assert.assertTrue(TextUtils.isEmpty(timePair.mCustomTimeKey.mRemoteCustomTimeId));
-                Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(timePair.mCustomTimeKey.mLocalCustomTimeId));
-
-                LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(timePair.mCustomTimeKey.mLocalCustomTimeId);
-                Assert.assertTrue(localCustomTime != null);
-
-                return localCustomTime;
-            } else {
-                Assert.assertTrue(!TextUtils.isEmpty(timePair.mCustomTimeKey.mRemoteCustomTimeId));
-                Assert.assertTrue(mRemoteFactory != null);
-                Assert.assertTrue(mRemoteFactory.mRemoteCustomTimes.containsKey(timePair.mCustomTimeKey.mRemoteCustomTimeId));
-
-                RemoteCustomTime remoteCustomTime = mRemoteFactory.mRemoteCustomTimes.get(timePair.mCustomTimeKey.mRemoteCustomTimeId);
-                Assert.assertTrue(remoteCustomTime != null);
-
-                return remoteCustomTime;
-            }
+            return getCustomTime(timePair.mCustomTimeKey);
         }
     }
 
@@ -1667,29 +1637,18 @@ public class DomainFactory {
         if (customTimeKey.mLocalCustomTimeId != null) {
             Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
 
-            Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(customTimeKey.mLocalCustomTimeId));
-
-            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeKey.mLocalCustomTimeId);
-            Assert.assertTrue(customTime != null);
-
-            return customTime;
+            return mLocalFactory.getLocalCustomTime(customTimeKey.mLocalCustomTimeId);
         } else {
             Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
             Assert.assertTrue(mRemoteFactory != null);
 
-            Assert.assertTrue(mRemoteFactory.mRemoteCustomTimes.containsKey(customTimeKey.mRemoteCustomTimeId));
-
-            CustomTime customTime = mRemoteFactory.mRemoteCustomTimes.get(customTimeKey.mRemoteCustomTimeId);
-            Assert.assertTrue(customTime != null);
-
-            return customTime;
+            return mRemoteFactory.getRemoteCustomTime(customTimeKey.mRemoteCustomTimeId);
         }
     }
 
+    @NonNull
     private List<LocalCustomTime> getCurrentCustomTimes() {
-        return Stream.of(mLocalFactory.mLocalCustomTimes.values())
-                .filter(LocalCustomTime::getCurrent)
-                .collect(Collectors.toList());
+        return mLocalFactory.getCurrentCustomTimes();
     }
 
     @NonNull
@@ -2011,10 +1970,10 @@ public class DomainFactory {
 
     @NonNull
     private List<CustomTime> getCustomTimes() {
-        List<CustomTime> customTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
+        List<CustomTime> customTimes = new ArrayList<>(mLocalFactory.getLocalCustomTimes());
 
         if (mRemoteFactory != null)
-            customTimes.addAll(mRemoteFactory.mRemoteCustomTimes.values());
+            customTimes.addAll(mRemoteFactory.getRemoteCustomTimes());
 
         return customTimes;
     }
@@ -2140,7 +2099,7 @@ public class DomainFactory {
         // relevant hack
         Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
-        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(LocalCustomTime::getId, CustomTimeRelevance::new));
+        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.getLocalCustomTimes()).collect(Collectors.toMap(LocalCustomTime::getId, CustomTimeRelevance::new));
 
         Stream.of(getTasks())
                 .filter(task -> task.current(now))
@@ -2195,7 +2154,7 @@ public class DomainFactory {
                 .map(CustomTimeRelevance::getCustomTime)
                 .collect(Collectors.toList());
 
-        List<LocalCustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
+        List<LocalCustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.getLocalCustomTimes());
         irrelevantCustomTimes.removeAll(relevantCustomTimes);
 
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
@@ -2601,16 +2560,12 @@ public class DomainFactory {
 
     @NonNull
     public CustomTimeKey getCustomTimeKey(@NonNull String remoteCustomTimeId) {
-        List<LocalCustomTime> matches = Stream.of(mLocalFactory.mLocalCustomTimes.values())
-                .filter(localCustomTime -> localCustomTime.hasRemoteRecord() && localCustomTime.getRemoteId().equals(remoteCustomTimeId))
-                .collect(Collectors.toList());
+        LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(remoteCustomTimeId);
 
-        if (matches.isEmpty()) {
+        if (localCustomTime == null) {
             return new CustomTimeKey(remoteCustomTimeId);
         } else {
-            Assert.assertTrue(matches.size() == 1);
-
-            return matches.get(0).getCustomTimeKey();
+            return localCustomTime.getCustomTimeKey();
         }
     }
 

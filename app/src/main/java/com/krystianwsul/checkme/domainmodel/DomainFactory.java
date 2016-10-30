@@ -2468,8 +2468,8 @@ public class DomainFactory {
             if (mTask.current(now))
                 Stream.of(mTask.getCurrentSchedules(now))
                         .map(Schedule::getCustomTimeKey)
-                        .filter(customTimeId -> customTimeId != null)
-                        .map(customTimeRelevances::get)
+                        .filter(customTimeKey -> customTimeKey != null && customTimeKey.mLocalCustomTimeId != null)
+                        .map(customTimeKey -> customTimeRelevances.get(customTimeKey.mLocalCustomTimeId))
                         .forEach(CustomTimeRelevance::setRelevant);
         }
 

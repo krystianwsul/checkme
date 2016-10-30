@@ -25,6 +25,7 @@ public class JsonWrapper {
     public MonthlyDayScheduleJson monthlyDayScheduleJson;
     public MonthlyWeekScheduleJson monthlyWeekScheduleJson;
     public InstanceJson instanceJson;
+    public CustomTimeJson customTimeJson;
 
     public JsonWrapper() {
 
@@ -36,13 +37,7 @@ public class JsonWrapper {
         recordOf = Stream.of(userDatas)
                 .collect(Collectors.toMap(friend -> UserData.getKey(friend.email), friend -> true));
 
-        taskJson = null;
         this.taskHierarchyJson = taskHierarchyJson;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull TaskJson taskJson) {
@@ -52,13 +47,6 @@ public class JsonWrapper {
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         this.taskJson = taskJson;
-        taskHierarchyJson = null;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
-        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull TaskHierarchyJson taskHierarchyJson) {
@@ -67,14 +55,7 @@ public class JsonWrapper {
         this.recordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
-        taskJson = null;
         this.taskHierarchyJson = taskHierarchyJson;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
-        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull SingleScheduleJson singleScheduleJson) {
@@ -83,14 +64,7 @@ public class JsonWrapper {
         this.recordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
-        taskJson = null;
-        taskHierarchyJson = null;
         this.singleScheduleJson = singleScheduleJson;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
-        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull DailyScheduleJson dailyScheduleJson) {
@@ -99,14 +73,7 @@ public class JsonWrapper {
         this.recordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
-        taskJson = null;
-        taskHierarchyJson = null;
-        singleScheduleJson = null;
         this.dailyScheduleJson = dailyScheduleJson;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
-        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull WeeklyScheduleJson weeklyScheduleJson) {
@@ -115,14 +82,7 @@ public class JsonWrapper {
         this.recordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
-        taskJson = null;
-        taskHierarchyJson = null;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
         this.weeklyScheduleJson = weeklyScheduleJson;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
-        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull MonthlyDayScheduleJson monthlyDayScheduleJson) {
@@ -131,14 +91,7 @@ public class JsonWrapper {
         this.recordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
-        taskJson = null;
-        taskHierarchyJson = null;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
         this.monthlyDayScheduleJson = monthlyDayScheduleJson;
-        monthlyWeekScheduleJson = null;
-        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull MonthlyWeekScheduleJson monthlyWeekScheduleJson) {
@@ -147,14 +100,7 @@ public class JsonWrapper {
         this.recordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
-        taskJson = null;
-        taskHierarchyJson = null;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
         this.monthlyWeekScheduleJson = monthlyWeekScheduleJson;
-        instanceJson = null;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull InstanceJson instanceJson) {
@@ -163,14 +109,16 @@ public class JsonWrapper {
         this.recordOf = Stream.of(recordOf)
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
-        taskJson = null;
-        taskHierarchyJson = null;
-        singleScheduleJson = null;
-        dailyScheduleJson = null;
-        weeklyScheduleJson = null;
-        monthlyDayScheduleJson = null;
-        monthlyWeekScheduleJson = null;
         this.instanceJson = instanceJson;
+    }
+
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull CustomTimeJson customTimeJsonJson) {
+        Assert.assertTrue(!recordOf.isEmpty());
+
+        this.recordOf = Stream.of(recordOf)
+                .collect(Collectors.toMap(friend -> friend, friend -> true));
+
+        this.customTimeJson = customTimeJsonJson;
     }
 
     public void setRecordOf(@NonNull Map<String, Boolean> recordOf) {

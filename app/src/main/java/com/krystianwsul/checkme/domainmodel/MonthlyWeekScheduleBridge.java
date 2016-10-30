@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.utils.CustomTimeKey;
+
 public interface MonthlyWeekScheduleBridge extends ScheduleBridge {
     int getDayOfMonth();
 
@@ -10,7 +12,7 @@ public interface MonthlyWeekScheduleBridge extends ScheduleBridge {
     boolean getBeginningOfMonth();
 
     @Nullable
-    Integer getCustomTimeId();
+    CustomTimeKey getCustomTimeKey();
 
     @Nullable
     Integer getHour();

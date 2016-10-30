@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
@@ -30,7 +31,7 @@ public class InstanceShownRecord extends Record {
     private final int mScheduleMonth;
     private final int mScheduleDay;
 
-    private final Integer mScheduleCustomTimeId;
+    private final String mScheduleCustomTimeId;
 
     private final Integer mScheduleHour;
     private final Integer mScheduleMinute;
@@ -83,7 +84,7 @@ public class InstanceShownRecord extends Record {
         int scheduleYear = cursor.getInt(2);
         int scheduleMonth = cursor.getInt(3);
         int scheduleDay = cursor.getInt(4);
-        Integer scheduleCustomTimeId = (cursor.isNull(5) ? null : cursor.getInt(5));
+        String scheduleCustomTimeId = (cursor.isNull(5) ? null : cursor.getString(5));
         Integer scheduleHour = (cursor.isNull(6) ? null : cursor.getInt(6));
         Integer scheduleMinute = (cursor.isNull(7) ? null : cursor.getInt(7));
         boolean notified = (cursor.getInt(8) == 1);
@@ -100,7 +101,7 @@ public class InstanceShownRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID);
     }
 
-    InstanceShownRecord(boolean created, int id, @NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, boolean notified, boolean notificationShown) {
+    InstanceShownRecord(boolean created, int id, @NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, boolean notified, boolean notificationShown) {
         super(created);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
@@ -143,14 +144,17 @@ public class InstanceShownRecord extends Record {
         return mScheduleDay;
     }
 
-    public Integer getScheduleCustomTimeId() {
+    @Nullable
+    public String getScheduleCustomTimeId() {
         return mScheduleCustomTimeId;
     }
 
+    @Nullable
     public Integer getScheduleHour() {
         return mScheduleHour;
     }
 
+    @Nullable
     public Integer getScheduleMinute() {
         return mScheduleMinute;
     }

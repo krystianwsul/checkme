@@ -32,11 +32,12 @@ public class CustomTimeJson {
     private int saturdayHour;
     private int saturdayMinute;
 
+    @SuppressWarnings("unused")
     public CustomTimeJson() {
 
     }
 
-    CustomTimeJson(@NonNull String ownerId, int localId, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
+    public CustomTimeJson(@NonNull String ownerId, int localId, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute) {
         Assert.assertTrue(!TextUtils.isEmpty(ownerId));
         Assert.assertTrue(!TextUtils.isEmpty(name));
 

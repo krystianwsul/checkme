@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
+import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -275,7 +276,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
             TaskKey taskKey = data.getParcelableExtra(ShowTaskActivity.TASK_KEY_KEY);
             Assert.assertTrue(taskKey != null);
 
-            mInstanceKey = new InstanceKey(taskKey, mInstanceKey.ScheduleDate, mInstanceKey.ScheduleTimePair.mCustomTimeId, mInstanceKey.ScheduleTimePair.mHourMinute);
+            mInstanceKey = new InstanceKey(taskKey, mInstanceKey.ScheduleDate, new TimePair(mInstanceKey.ScheduleTimePair.mCustomTimeKey, mInstanceKey.ScheduleTimePair.mHourMinute));
         }
 
         getSupportLoaderManager().initLoader(0, null, this);

@@ -5,12 +5,12 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
+import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -293,17 +293,26 @@ public class PersistenceManger {
         Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
-        Pair<CustomTime, HourMinute> pair = time.getPair();
+        Integer customTimeId;
+        Integer hour;
+        Integer minute;
 
-        CustomTime customTime = pair.first;
-        HourMinute hourMinute = pair.second;
+        if (time.getTimePair().mCustomTimeKey != null) {
+            Assert.assertTrue(time.getTimePair().mHourMinute == null);
 
-        Assert.assertTrue((customTime == null) != (hourMinute == null));
+            customTimeId = time.getTimePair().mCustomTimeKey.mLocalCustomTimeId;
+            Assert.assertTrue(customTimeId != null);
 
-        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+            hour = null;
+            minute = null;
+        } else {
+            Assert.assertTrue(time.getTimePair().mHourMinute != null);
 
-        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
-        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+            customTimeId = null;
+
+            hour = time.getTimePair().mHourMinute.getHour();
+            minute = time.getTimePair().mHourMinute.getMinute();
+        }
 
         SingleScheduleRecord singleScheduleRecord = new SingleScheduleRecord(false, scheduleId, date.getYear(), date.getMonth(), date.getDay(), customTimeId, hour, minute);
         mSingleScheduleRecords.put(singleScheduleRecord.getScheduleId(), singleScheduleRecord);
@@ -319,17 +328,26 @@ public class PersistenceManger {
         Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
-        Pair<CustomTime, HourMinute> pair = time.getPair();
+        Integer customTimeId;
+        Integer hour;
+        Integer minute;
 
-        CustomTime customTime = pair.first;
-        HourMinute hourMinute = pair.second;
+        if (time.getTimePair().mCustomTimeKey != null) {
+            Assert.assertTrue(time.getTimePair().mHourMinute == null);
 
-        Assert.assertTrue((customTime == null) != (hourMinute == null));
+            customTimeId = time.getTimePair().mCustomTimeKey.mLocalCustomTimeId;
+            Assert.assertTrue(customTimeId != null);
 
-        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+            hour = null;
+            minute = null;
+        } else {
+            Assert.assertTrue(time.getTimePair().mHourMinute != null);
 
-        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
-        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+            customTimeId = null;
+
+            hour = time.getTimePair().mHourMinute.getHour();
+            minute = time.getTimePair().mHourMinute.getMinute();
+        }
 
         DailyScheduleRecord dailyScheduleRecord = new DailyScheduleRecord(false, scheduleId, customTimeId, hour, minute);
         mDailyScheduleRecords.put(scheduleId, dailyScheduleRecord);
@@ -345,17 +363,26 @@ public class PersistenceManger {
         Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
-        Pair<CustomTime, HourMinute> pair = time.getPair();
+        Integer customTimeId;
+        Integer hour;
+        Integer minute;
 
-        CustomTime customTime = pair.first;
-        HourMinute hourMinute = pair.second;
+        if (time.getTimePair().mCustomTimeKey != null) {
+            Assert.assertTrue(time.getTimePair().mHourMinute == null);
 
-        Assert.assertTrue((customTime == null) != (hourMinute == null));
+            customTimeId = time.getTimePair().mCustomTimeKey.mLocalCustomTimeId;
+            Assert.assertTrue(customTimeId != null);
 
-        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+            hour = null;
+            minute = null;
+        } else {
+            Assert.assertTrue(time.getTimePair().mHourMinute != null);
 
-        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
-        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+            customTimeId = null;
+
+            hour = time.getTimePair().mHourMinute.getHour();
+            minute = time.getTimePair().mHourMinute.getMinute();
+        }
 
         WeeklyScheduleRecord weeklyScheduleRecord = new WeeklyScheduleRecord(false, scheduleId, dayOfWeek.ordinal(), customTimeId, hour, minute);
         mWeeklyScheduleRecords.put(scheduleId, weeklyScheduleRecord);
@@ -371,17 +398,26 @@ public class PersistenceManger {
         Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
-        Pair<CustomTime, HourMinute> pair = time.getPair();
+        Integer customTimeId;
+        Integer hour;
+        Integer minute;
 
-        CustomTime customTime = pair.first;
-        HourMinute hourMinute = pair.second;
+        if (time.getTimePair().mCustomTimeKey != null) {
+            Assert.assertTrue(time.getTimePair().mHourMinute == null);
 
-        Assert.assertTrue((customTime == null) != (hourMinute == null));
+            customTimeId = time.getTimePair().mCustomTimeKey.mLocalCustomTimeId;
+            Assert.assertTrue(customTimeId != null);
 
-        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+            hour = null;
+            minute = null;
+        } else {
+            Assert.assertTrue(time.getTimePair().mHourMinute != null);
 
-        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
-        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+            customTimeId = null;
+
+            hour = time.getTimePair().mHourMinute.getHour();
+            minute = time.getTimePair().mHourMinute.getMinute();
+        }
 
         MonthlyDayScheduleRecord monthlyDayScheduleRecord = new MonthlyDayScheduleRecord(false, scheduleId, dayOfMonth, beginningOfMonth, customTimeId, hour, minute);
         mMonthlyDayScheduleRecords.put(scheduleId, monthlyDayScheduleRecord);
@@ -397,17 +433,26 @@ public class PersistenceManger {
         Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
         Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
 
-        Pair<CustomTime, HourMinute> pair = time.getPair();
+        Integer customTimeId;
+        Integer hour;
+        Integer minute;
 
-        CustomTime customTime = pair.first;
-        HourMinute hourMinute = pair.second;
+        if (time.getTimePair().mCustomTimeKey != null) {
+            Assert.assertTrue(time.getTimePair().mHourMinute == null);
 
-        Assert.assertTrue((customTime == null) != (hourMinute == null));
+            customTimeId = time.getTimePair().mCustomTimeKey.mLocalCustomTimeId;
+            Assert.assertTrue(customTimeId != null);
 
-        Integer customTimeId = (customTime != null ? customTime.getId() : null);
+            hour = null;
+            minute = null;
+        } else {
+            Assert.assertTrue(time.getTimePair().mHourMinute != null);
 
-        Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
-        Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
+            customTimeId = null;
+
+            hour = time.getTimePair().mHourMinute.getHour();
+            minute = time.getTimePair().mHourMinute.getMinute();
+        }
 
         MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = new MonthlyWeekScheduleRecord(false, scheduleId, dayOfMonth, dayOfWeek.ordinal(), beginningOfMonth, customTimeId, hour, minute);
         mMonthlyWeekScheduleRecords.put(scheduleId, monthlyWeekScheduleRecord);
@@ -424,7 +469,9 @@ public class PersistenceManger {
         Integer scheduleHour = null;
         Integer scheduleMinute = null;
         if (scheduleDateTime.getTime() instanceof CustomTime) {
-            scheduleCustomTimeId = ((CustomTime) scheduleTime).getId();
+            Assert.assertTrue(scheduleDateTime.getTime() instanceof LocalCustomTime);
+
+            scheduleCustomTimeId = ((LocalCustomTime) scheduleTime).getId();
         } else {
             Assert.assertTrue(scheduleTime instanceof NormalTime);
 
@@ -587,15 +634,12 @@ public class PersistenceManger {
     }
 
     @NonNull
-    public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull DateTime scheduleDateTime) {
+    public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull Date scheduleDate, @Nullable String remoteCustomTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
 
         int id = ++mInstanceShownMaxId;
 
-        HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
-        Integer hour = (hourMinute == null ? null : hourMinute.getHour());
-        Integer minute = (hourMinute == null ? null : hourMinute.getMinute());
-        InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute, false, false);
+        InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTaskId, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), remoteCustomTimeId, hour, minute, false, false);
         mInstanceShownRecords.add(instanceShownRecord);
         return instanceShownRecord;
     }

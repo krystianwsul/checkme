@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -76,9 +77,9 @@ public class SingleSchedule extends Schedule {
 
     @NonNull
     public Time getTime() {
-        Integer customTimeId = mSingleScheduleBridge.getCustomTimeId();
-        if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mSingleScheduleBridge.getCustomTimeId());
+        CustomTimeKey customTimeKey = mSingleScheduleBridge.getCustomTimeKey();
+        if (customTimeKey != null) {
+            return mDomainFactory.getCustomTime(customTimeKey);
         } else {
             Integer hour = mSingleScheduleBridge.getHour();
             Integer minute = mSingleScheduleBridge.getMinute();
@@ -100,13 +101,13 @@ public class SingleSchedule extends Schedule {
 
     @Nullable
     @Override
-    public Integer getCustomTimeId() {
-        return mSingleScheduleBridge.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        return mSingleScheduleBridge.getCustomTimeKey();
     }
 
     @Nullable
     public HourMinute getHourMinute() {
-        if (mSingleScheduleBridge.getCustomTimeId() != null) {
+        if (mSingleScheduleBridge.getCustomTimeKey() != null) {
             Assert.assertTrue(mSingleScheduleBridge.getHour() == null);
             Assert.assertTrue(mSingleScheduleBridge.getMinute() == null);
 

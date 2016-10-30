@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -53,7 +54,6 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
             return null;
 
         HourMinute hourMinute = getTime().getHourMinute(date.getDayOfWeek());
-        Assert.assertTrue(hourMinute != null);
 
         if (startHourMilli != null && startHourMilli.compareTo(hourMinute.toHourMilli()) > 0)
             return null;
@@ -100,9 +100,9 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
 
     @NonNull
     Time getTime() {
-        Integer customTimeId = mMonthlyWeekScheduleBridge.getCustomTimeId();
-        if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mMonthlyWeekScheduleBridge.getCustomTimeId());
+        CustomTimeKey customTimeKey = mMonthlyWeekScheduleBridge.getCustomTimeKey();
+        if (customTimeKey != null) {
+            return mDomainFactory.getCustomTime(customTimeKey);
         } else {
             Integer hour = mMonthlyWeekScheduleBridge.getHour();
             Integer minute = mMonthlyWeekScheduleBridge.getMinute();
@@ -134,13 +134,13 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
     }
 
     @Override
-    public Integer getCustomTimeId() {
-        return mMonthlyWeekScheduleBridge.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        return mMonthlyWeekScheduleBridge.getCustomTimeKey();
     }
 
     @Nullable
     public HourMinute getHourMinute() {
-        if (mMonthlyWeekScheduleBridge.getCustomTimeId() != null) {
+        if (mMonthlyWeekScheduleBridge.getCustomTimeKey() != null) {
             Assert.assertTrue(mMonthlyWeekScheduleBridge.getHour() == null);
             Assert.assertTrue(mMonthlyWeekScheduleBridge.getMinute() == null);
 

@@ -6,9 +6,10 @@ import android.support.v4.util.Pair;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 
 public class NormalTime implements Time {
+    @NonNull
     private final HourMinute mHourMinute;
 
-    public NormalTime(HourMinute hourMinute) {
+    public NormalTime(@NonNull HourMinute hourMinute) {
         mHourMinute = hourMinute;
     }
 
@@ -16,14 +17,17 @@ public class NormalTime implements Time {
         mHourMinute = new HourMinute(hour, minute);
     }
 
-    public HourMinute getHourMinute(DayOfWeek dayOfWeek) {
+    @NonNull
+    public HourMinute getHourMinute(@NonNull DayOfWeek dayOfWeek) {
         return mHourMinute;
     }
 
+    @NonNull
     public HourMinute getHourMinute() {
         return mHourMinute;
     }
 
+    @NonNull
     public String toString() {
         return mHourMinute.toString();
     }

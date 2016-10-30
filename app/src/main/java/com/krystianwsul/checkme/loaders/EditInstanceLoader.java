@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -13,6 +14,7 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
+import java.util.Map;
 import java.util.TreeMap;
 
 public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
@@ -31,18 +33,23 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
+        @NonNull
         public final InstanceKey InstanceKey;
-        public final Date InstanceDate;
-        public final TimePair InstanceTimePair;
-        public final String Name;
-        public final TreeMap<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(InstanceKey instanceKey, Date instanceDate, TimePair instanceTimePair, String name, TreeMap<Integer, CustomTimeData> customTimeDatas) {
-            Assert.assertTrue(instanceKey != null);
-            Assert.assertTrue(instanceDate != null);
-            Assert.assertTrue(instanceTimePair != null);
+        @NonNull
+        public final Date InstanceDate;
+
+        @NonNull
+        public final TimePair InstanceTimePair;
+
+        @NonNull
+        public final String Name;
+
+        @NonNull
+        public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
+
+        public Data(@NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair, @NonNull String name, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(customTimeDatas != null);
 
             InstanceKey = instanceKey;
             InstanceDate = instanceDate;
@@ -74,23 +81,27 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     }
 
     public static class CustomTimeData {
-        public final int Id;
+        @NonNull
+        public final CustomTimeKey mCustomTimeKey;
+
+        @NonNull
         public final String Name;
+
+        @NonNull
         public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(int id, String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
+        public CustomTimeData(@NonNull CustomTimeKey customTimeKey, @NonNull String name, @NonNull TreeMap<DayOfWeek, HourMinute> hourMinutes) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
             Assert.assertTrue(hourMinutes.size() == 7);
 
-            Id = id;
+            mCustomTimeKey = customTimeKey;
             Name = name;
             HourMinutes = hourMinutes;
         }
 
         @Override
         public int hashCode() {
-            return (Id + Name.hashCode() + HourMinutes.hashCode());
+            return (mCustomTimeKey.hashCode() + Name.hashCode() + HourMinutes.hashCode());
         }
 
         @Override
@@ -106,7 +117,7 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
 
             CustomTimeData customTimeData = (CustomTimeData) object;
 
-            return (Id == customTimeData.Id && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
+            return (mCustomTimeKey.equals(customTimeData.mCustomTimeKey) && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
         }
     }
 }

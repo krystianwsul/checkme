@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -57,13 +58,13 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
 
     @NonNull
     @Override
-    String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
+    String getText(@NonNull Map<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
         String day = Utils.ordinal(mMonthWeekNumber) + " " + mMonthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mBeginningOfMonth ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
-        if (mTimePair.mCustomTimeId != null) {
+        if (mTimePair.mCustomTimeKey != null) {
             Assert.assertTrue(mTimePair.mHourMinute == null);
 
-            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeId);
+            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeKey);
             Assert.assertTrue(customTimeData != null);
 
             return day + ", " + customTimeData.Name;

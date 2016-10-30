@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -32,17 +33,17 @@ public abstract class Instance {
 
     @NonNull
     public InstanceKey getInstanceKey() {
-        return new InstanceKey(getTaskKey(), getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute());
+        return new InstanceKey(getTaskKey(), getScheduleDate(), new TimePair(getScheduleCustomTimeKey(), getScheduleHourMinute()));
     }
 
     @NonNull
     protected abstract Date getScheduleDate();
 
     @Nullable
-    private Integer getScheduleCustomTimeId() {
+    CustomTimeKey getScheduleCustomTimeKey() {
         Time scheduleTime = getScheduleTime();
         if (scheduleTime instanceof CustomTime)
-            return ((CustomTime) scheduleTime).getId();
+            return ((CustomTime) scheduleTime).getCustomTimeKey();
         else
             return null;
     }
@@ -123,14 +124,14 @@ public abstract class Instance {
 
     @NonNull
     public TimePair getInstanceTimePair() {
-        return new TimePair(getInstanceCustomTimeId(), getInstanceHourMinute());
+        return new TimePair(getInstanceCustomTimeKey(), getInstanceHourMinute());
     }
 
     @Nullable
-    protected Integer getInstanceCustomTimeId() {
+    CustomTimeKey getInstanceCustomTimeKey() {
         Time instanceTime = getInstanceTime();
         if (instanceTime instanceof CustomTime)
-            return ((CustomTime) instanceTime).getId();
+            return ((CustomTime) instanceTime).getCustomTimeKey();
         else
             return null;
     }
@@ -210,21 +211,21 @@ public abstract class Instance {
      */
 
     int getNotificationId() {
-        return getNotificationId(getScheduleDate(), getScheduleCustomTimeId(), getScheduleHourMinute(), getTaskKey());
+        return getNotificationId(getScheduleDate(), getScheduleCustomTimeKey(), getScheduleHourMinute(), getTaskKey());
     }
 
-    static int getNotificationId(@NonNull Date scheduleDate, @Nullable Integer scheduleCustomTimeId, @Nullable HourMinute scheduleHourMinute, @NonNull TaskKey taskKey) {
-        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
+    static int getNotificationId(@NonNull Date scheduleDate, @Nullable CustomTimeKey scheduleCustomTimeKey, @Nullable HourMinute scheduleHourMinute, @NonNull TaskKey taskKey) {
+        Assert.assertTrue((scheduleCustomTimeKey == null) != (scheduleHourMinute == null));
 
         int hash = scheduleDate.getMonth();
         hash += 12 * scheduleDate.getDay();
         hash += 12 * 31 * (scheduleDate.getYear() - 2015);
 
-        if (scheduleCustomTimeId == null) {
+        if (scheduleCustomTimeKey == null) {
             hash += 12 * 31 * 73 * (scheduleHourMinute.getHour() + 1);
             hash += 12 * 31 * 73 * 24 * (scheduleHourMinute.getMinute() + 1);
         } else {
-            hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeId;
+            hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeKey.hashCode();
         }
 
         //noinspection NumericOverflow
@@ -251,7 +252,7 @@ public abstract class Instance {
 
     @NonNull
     public TimePair getScheduleTimePair() {
-        return new TimePair(getScheduleCustomTimeId(), getScheduleHourMinute());
+        return new TimePair(getScheduleCustomTimeKey(), getScheduleHourMinute());
     }
 
     public abstract void setRelevant();

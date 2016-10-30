@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -52,7 +53,6 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
             return null;
 
         HourMinute hourMinute = getTime().getHourMinute(date.getDayOfWeek());
-        Assert.assertTrue(hourMinute != null);
 
         if (startHourMilli != null && startHourMilli.compareTo(hourMinute.toHourMilli()) > 0)
             return null;
@@ -107,9 +107,9 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
 
     @NonNull
     Time getTime() {
-        Integer customTimeId = mMonthlyDayScheduleBridge.getCustomTimeId();
-        if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mMonthlyDayScheduleBridge.getCustomTimeId());
+        CustomTimeKey customTimeKey = mMonthlyDayScheduleBridge.getCustomTimeKey();
+        if (customTimeKey != null) {
+            return mDomainFactory.getCustomTime(customTimeKey);
         } else {
             Integer hour = mMonthlyDayScheduleBridge.getHour();
             Integer minute = mMonthlyDayScheduleBridge.getMinute();
@@ -126,13 +126,13 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
 
     @Nullable
     @Override
-    public Integer getCustomTimeId() {
-        return mMonthlyDayScheduleBridge.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        return mMonthlyDayScheduleBridge.getCustomTimeKey();
     }
 
     @Nullable
     public HourMinute getHourMinute() {
-        if (mMonthlyDayScheduleBridge.getCustomTimeId() != null) {
+        if (mMonthlyDayScheduleBridge.getCustomTimeKey() != null) {
             Assert.assertTrue(mMonthlyDayScheduleBridge.getHour() == null);
             Assert.assertTrue(mMonthlyDayScheduleBridge.getMinute() == null);
 

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.domainmodel.DailyScheduleBridge;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 
 class LocalDailyScheduleBridge extends LocalScheduleBridge implements DailyScheduleBridge {
     @NonNull
@@ -19,8 +20,11 @@ class LocalDailyScheduleBridge extends LocalScheduleBridge implements DailySched
 
     @Nullable
     @Override
-    public Integer getCustomTimeId() {
-        return mDailyScheduleRecord.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        if (mDailyScheduleRecord.getCustomTimeId() != null)
+            return new CustomTimeKey(mDailyScheduleRecord.getCustomTimeId());
+        else
+            return null;
     }
 
     @Nullable

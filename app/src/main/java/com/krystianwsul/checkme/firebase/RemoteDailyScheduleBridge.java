@@ -2,42 +2,49 @@ package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DailyScheduleBridge;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.records.RemoteDailyScheduleRecord;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 import java.util.Set;
 
-public class RemoteDailyScheduleBridge implements DailyScheduleBridge {
+class RemoteDailyScheduleBridge implements DailyScheduleBridge {
     @NonNull
-    private final RemoteDailyScheduleRecord mDailyScheduleRecord;
+    private final DomainFactory mDomainFactory;
 
-    public RemoteDailyScheduleBridge(@NonNull RemoteDailyScheduleRecord dailyScheduleRecord) {
-        mDailyScheduleRecord = dailyScheduleRecord;
+    @NonNull
+    private final RemoteDailyScheduleRecord mRemoteDailyScheduleRecord;
+
+    RemoteDailyScheduleBridge(@NonNull DomainFactory domainFactory, @NonNull RemoteDailyScheduleRecord dailyScheduleRecord) {
+        mDomainFactory = domainFactory;
+        mRemoteDailyScheduleRecord = dailyScheduleRecord;
     }
 
     @Override
     public long getStartTime() {
-        return mDailyScheduleRecord.getStartTime();
+        return mRemoteDailyScheduleRecord.getStartTime();
     }
 
     @Nullable
     @Override
     public Long getEndTime() {
-        return mDailyScheduleRecord.getEndTime();
+        return mRemoteDailyScheduleRecord.getEndTime();
     }
 
     @Override
     public void setEndTime(long endTime) {
-        mDailyScheduleRecord.setEndTime(endTime);
+        mRemoteDailyScheduleRecord.setEndTime(endTime);
     }
 
     @NonNull
     @Override
     public TaskKey getRootTaskKey() {
-        return new TaskKey(mDailyScheduleRecord.getTaskId());
+        return new TaskKey(mRemoteDailyScheduleRecord.getTaskId());
     }
 
     @NonNull
@@ -48,29 +55,36 @@ public class RemoteDailyScheduleBridge implements DailyScheduleBridge {
 
     @Nullable
     @Override
-    public Integer getCustomTimeId() {
-        return mDailyScheduleRecord.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        if (!TextUtils.isEmpty(mRemoteDailyScheduleRecord.getCustomTimeId()))
+            return mDomainFactory.getCustomTimeKey(mRemoteDailyScheduleRecord.getCustomTimeId());
+        else
+            return null;
     }
 
     @Nullable
     @Override
     public Integer getHour() {
-        return mDailyScheduleRecord.getHour();
+        return mRemoteDailyScheduleRecord.getHour();
     }
 
     @Nullable
     @Override
     public Integer getMinute() {
-        return mDailyScheduleRecord.getMinute();
+        return mRemoteDailyScheduleRecord.getMinute();
     }
 
     @Override
     public void delete() {
-        mDailyScheduleRecord.delete();
+        mRemoteDailyScheduleRecord.delete();
     }
 
     @Override
     public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        mDailyScheduleRecord.updateRecordOf(addedFriends, removedFriends);
+        mRemoteDailyScheduleRecord.updateRecordOf(addedFriends, removedFriends);
+
+        CustomTimeKey customTimeKey = getCustomTimeKey();
+        if (customTimeKey != null)
+            mDomainFactory.getCustomTime(customTimeKey).updateRecordOf(addedFriends, removedFriends);
     }
 }

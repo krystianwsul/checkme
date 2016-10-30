@@ -2,19 +2,26 @@ package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.SingleScheduleBridge;
 import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 import java.util.Set;
 
-public class RemoteSingleScheduleBridge implements SingleScheduleBridge {
+class RemoteSingleScheduleBridge implements SingleScheduleBridge {
+    @NonNull
+    private final DomainFactory mDomainFactory;
+
     @NonNull
     private final RemoteSingleScheduleRecord mRemoteSingleScheduleRecord;
 
-    public RemoteSingleScheduleBridge(@NonNull RemoteSingleScheduleRecord remoteSingleScheduleRecord) {
+    RemoteSingleScheduleBridge(@NonNull DomainFactory domainFactory, @NonNull RemoteSingleScheduleRecord remoteSingleScheduleRecord) {
+        mDomainFactory = domainFactory;
         mRemoteSingleScheduleRecord = remoteSingleScheduleRecord;
     }
 
@@ -35,8 +42,11 @@ public class RemoteSingleScheduleBridge implements SingleScheduleBridge {
 
     @Nullable
     @Override
-    public Integer getCustomTimeId() {
-        return mRemoteSingleScheduleRecord.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        if (!TextUtils.isEmpty(mRemoteSingleScheduleRecord.getCustomTimeId()))
+            return mDomainFactory.getCustomTimeKey(mRemoteSingleScheduleRecord.getCustomTimeId());
+        else
+            return null;
     }
 
     @Nullable
@@ -87,5 +97,9 @@ public class RemoteSingleScheduleBridge implements SingleScheduleBridge {
     @Override
     public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         mRemoteSingleScheduleRecord.updateRecordOf(addedFriends, removedFriends);
+
+        CustomTimeKey customTimeKey = getCustomTimeKey();
+        if (customTimeKey != null)
+            mDomainFactory.getCustomTime(customTimeKey).updateRecordOf(addedFriends, removedFriends);
     }
 }

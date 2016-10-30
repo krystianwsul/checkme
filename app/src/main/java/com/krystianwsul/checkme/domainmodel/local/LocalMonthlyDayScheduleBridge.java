@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.domainmodel.MonthlyDayScheduleBridge;
 import com.krystianwsul.checkme.persistencemodel.MonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 
 class LocalMonthlyDayScheduleBridge extends LocalScheduleBridge implements MonthlyDayScheduleBridge {
     @NonNull
@@ -29,8 +30,11 @@ class LocalMonthlyDayScheduleBridge extends LocalScheduleBridge implements Month
 
     @Nullable
     @Override
-    public Integer getCustomTimeId() {
-        return mMonthlyDayScheduleRecord.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        if (mMonthlyDayScheduleRecord.getCustomTimeId() != null)
+            return new CustomTimeKey(mMonthlyDayScheduleRecord.getCustomTimeId());
+        else
+            return null;
     }
 
     @Nullable

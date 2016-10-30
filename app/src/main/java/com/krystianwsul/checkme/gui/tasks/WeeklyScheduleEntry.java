@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -45,11 +46,11 @@ class WeeklyScheduleEntry extends ScheduleEntry {
 
     @NonNull
     @Override
-    String getText(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
-        if (mTimePair.mCustomTimeId != null) {
+    String getText(@NonNull Map<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
+        if (mTimePair.mCustomTimeKey != null) {
             Assert.assertTrue(mTimePair.mHourMinute == null);
 
-            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeId);
+            CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeKey);
             Assert.assertTrue(customTimeData != null);
 
             return mDayOfWeek.toString() + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDayOfWeek).toString() + ")";

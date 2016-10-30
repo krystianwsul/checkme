@@ -5,39 +5,41 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.utils.CustomTimeKey;
+
 import junit.framework.Assert;
 
 import java.io.Serializable;
 
 public class TimePair implements Parcelable, Serializable {
     @Nullable
-    public final Integer mCustomTimeId;
+    public final CustomTimeKey mCustomTimeKey;
 
     @Nullable
     public final HourMinute mHourMinute;
 
-    public TimePair(@Nullable Integer customTimeId, @Nullable HourMinute hourMinute) {
-        Assert.assertTrue((customTimeId == null) != (hourMinute == null));
+    public TimePair(@Nullable CustomTimeKey customTimeKey, @Nullable HourMinute hourMinute) {
+        Assert.assertTrue((customTimeKey == null) != (hourMinute == null));
 
-        mCustomTimeId = customTimeId;
+        mCustomTimeKey = customTimeKey;
         mHourMinute = hourMinute;
     }
 
-    public TimePair(int customTimeId) {
-        mCustomTimeId = customTimeId;
+    public TimePair(@NonNull CustomTimeKey customTimeKey) {
+        mCustomTimeKey = customTimeKey;
         mHourMinute = null;
     }
 
     public TimePair(@NonNull HourMinute hourMinute) {
-        mCustomTimeId = null;
+        mCustomTimeKey = null;
         mHourMinute = hourMinute;
     }
 
     @Override
     public int hashCode() {
-        if (mCustomTimeId != null) {
+        if (mCustomTimeKey != null) {
             Assert.assertTrue(mHourMinute == null);
-            return mCustomTimeId.hashCode();
+            return mCustomTimeKey.hashCode();
         } else {
             Assert.assertTrue(mHourMinute != null);
             return mHourMinute.hashCode();
@@ -57,9 +59,9 @@ public class TimePair implements Parcelable, Serializable {
 
         TimePair timePair = (TimePair) object;
 
-        if (mCustomTimeId != null) {
+        if (mCustomTimeKey != null) {
             Assert.assertTrue(mHourMinute == null);
-            return mCustomTimeId.equals(timePair.mCustomTimeId);
+            return mCustomTimeKey.equals(timePair.mCustomTimeKey);
         } else {
             Assert.assertTrue(mHourMinute != null);
             return mHourMinute.equals(timePair.mHourMinute);
@@ -68,7 +70,7 @@ public class TimePair implements Parcelable, Serializable {
 
     @NonNull
     public TimePair copy() {
-        return new TimePair(mCustomTimeId, mHourMinute);
+        return new TimePair(mCustomTimeKey, mHourMinute);
     }
 
     @Override
@@ -78,9 +80,9 @@ public class TimePair implements Parcelable, Serializable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        if (mCustomTimeId != null) {
+        if (mCustomTimeKey != null) {
             out.writeInt(1);
-            out.writeInt(mCustomTimeId);
+            out.writeParcelable(mCustomTimeKey, 0);
         } else {
             out.writeInt(2);
             out.writeParcelable(mHourMinute, 0);
@@ -91,9 +93,9 @@ public class TimePair implements Parcelable, Serializable {
         @Override
         public TimePair createFromParcel(Parcel source) {
             if (source.readInt() == 1) {
-                return new TimePair(source.readInt(), null);
+                return new TimePair(source.readParcelable(CustomTimeKey.class.getClassLoader()), null);
             } else {
-                return new TimePair(null, source.readParcelable(com.krystianwsul.checkme.utils.time.HourMinute.class.getClassLoader()));
+                return new TimePair(null, source.readParcelable(HourMinute.class.getClassLoader()));
             }
         }
 

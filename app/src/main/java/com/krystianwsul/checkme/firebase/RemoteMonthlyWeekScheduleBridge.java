@@ -2,19 +2,26 @@ package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekScheduleBridge;
 import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 import java.util.Set;
 
-public class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridge {
+class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridge {
+    @NonNull
+    private final DomainFactory mDomainFactory;
+
     @NonNull
     private final RemoteMonthlyWeekScheduleRecord mRemoteMonthlyWeekScheduleRecord;
 
-    public RemoteMonthlyWeekScheduleBridge(@NonNull RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord) {
+    RemoteMonthlyWeekScheduleBridge(@NonNull DomainFactory domainFactory, @NonNull RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord) {
+        mDomainFactory = domainFactory;
         mRemoteMonthlyWeekScheduleRecord = remoteMonthlyWeekScheduleRecord;
     }
 
@@ -63,8 +70,11 @@ public class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridg
 
     @Nullable
     @Override
-    public Integer getCustomTimeId() {
-        return mRemoteMonthlyWeekScheduleRecord.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        if (!TextUtils.isEmpty(mRemoteMonthlyWeekScheduleRecord.getCustomTimeId()))
+            return mDomainFactory.getCustomTimeKey(mRemoteMonthlyWeekScheduleRecord.getCustomTimeId());
+        else
+            return null;
     }
 
     @Nullable
@@ -87,5 +97,9 @@ public class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridg
     @Override
     public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         mRemoteMonthlyWeekScheduleRecord.updateRecordOf(addedFriends, removedFriends);
+
+        CustomTimeKey customTimeKey = getCustomTimeKey();
+        if (customTimeKey != null)
+            mDomainFactory.getCustomTime(customTimeKey).updateRecordOf(addedFriends, removedFriends);
     }
 }

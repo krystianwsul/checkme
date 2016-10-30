@@ -2,11 +2,13 @@ package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -105,7 +107,7 @@ public class LocalInstance extends Instance {
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTime(customTimeId);
+                return mDomainFactory.getCustomTime(new CustomTimeKey(customTimeId));
             } else {
                 return new NormalTime(hour, minute);
             }
@@ -149,7 +151,7 @@ public class LocalInstance extends Instance {
             Assert.assertTrue((mInstanceRecord.getInstanceHour() == null) || (mInstanceRecord.getInstanceCustomTimeId() == null));
 
             if (mInstanceRecord.getInstanceCustomTimeId() != null) {
-                return mDomainFactory.getCustomTime(mInstanceRecord.getInstanceCustomTimeId());
+                return mDomainFactory.getCustomTime(new CustomTimeKey(mInstanceRecord.getInstanceCustomTimeId()));
             } else if (mInstanceRecord.getInstanceHour() != null) {
                 return new NormalTime(mInstanceRecord.getInstanceHour(), mInstanceRecord.getInstanceMinute());
             } else {
@@ -174,9 +176,12 @@ public class LocalInstance extends Instance {
         mInstanceRecord.setInstanceMonth(date.getMonth());
         mInstanceRecord.setInstanceDay(date.getDay());
 
-        if (timePair.mCustomTimeId != null) {
+        if (timePair.mCustomTimeKey != null) {
             Assert.assertTrue(timePair.mHourMinute == null);
-            mInstanceRecord.setInstanceCustomTimeId(timePair.mCustomTimeId);
+            Assert.assertTrue(timePair.mCustomTimeKey.mLocalCustomTimeId != null);
+            Assert.assertTrue(TextUtils.isEmpty(timePair.mCustomTimeKey.mRemoteCustomTimeId));
+
+            mInstanceRecord.setInstanceCustomTimeId(timePair.mCustomTimeKey.mLocalCustomTimeId);
             mInstanceRecord.setInstanceHour(null);
             mInstanceRecord.setInstanceMinute(null);
         } else {

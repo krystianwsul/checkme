@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.json;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.krystianwsul.checkme.utils.ScheduleType;
 
@@ -10,22 +11,22 @@ import junit.framework.Assert;
 public class WeeklyScheduleJson extends ScheduleJson {
     private int dayOfWeek;
 
-    private Integer customTimeId;
+    private String customTimeId;
 
     private Integer hour;
 
     private Integer minute;
 
+    @SuppressWarnings("unused")
     public WeeklyScheduleJson() {
 
     }
 
-    public WeeklyScheduleJson(@NonNull String taskId, long startTime, @Nullable Long endTime, int dayOfWeek, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
+    public WeeklyScheduleJson(@NonNull String taskId, long startTime, @Nullable Long endTime, int dayOfWeek, @Nullable String customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         super(taskId, startTime, endTime, ScheduleType.WEEKLY.ordinal());
 
         Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (customTimeId == null));
-        Assert.assertTrue((hour != null) || (customTimeId != null));
+        Assert.assertTrue((hour == null) != TextUtils.isEmpty(customTimeId));
 
         this.dayOfWeek = dayOfWeek;
 
@@ -40,7 +41,7 @@ public class WeeklyScheduleJson extends ScheduleJson {
     }
 
     @Nullable
-    public Integer getCustomTimeId() {
+    public String getCustomTimeId() {
         return customTimeId;
     }
 

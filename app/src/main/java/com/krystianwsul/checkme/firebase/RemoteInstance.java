@@ -93,7 +93,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue(TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime == null);
 
-            Integer customTimeId = mRemoteInstanceRecord.getScheduleCustomTimeId();
+            String customTimeId = mRemoteInstanceRecord.getScheduleCustomTimeId();
             Integer hour = mRemoteInstanceRecord.getScheduleHour();
             Integer minute = mRemoteInstanceRecord.getScheduleMinute();
 
@@ -101,7 +101,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTime(customTimeId); // todo customtime
+                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(customTimeId));
             } else {
                 return new NormalTime(hour, minute);
             }
@@ -176,7 +176,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue((mRemoteInstanceRecord.getInstanceHour() == null) || (mRemoteInstanceRecord.getInstanceCustomTimeId() == null));
 
             if (mRemoteInstanceRecord.getInstanceCustomTimeId() != null) {
-                return mDomainFactory.getCustomTime(mRemoteInstanceRecord.getInstanceCustomTimeId());
+                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(mRemoteInstanceRecord.getInstanceCustomTimeId()));
             } else if (mRemoteInstanceRecord.getInstanceHour() != null) {
                 return new NormalTime(mRemoteInstanceRecord.getInstanceHour(), mRemoteInstanceRecord.getInstanceMinute());
             } else {
@@ -229,9 +229,9 @@ public class RemoteInstance extends Instance {
         mRemoteInstanceRecord.setInstanceMonth(date.getMonth());
         mRemoteInstanceRecord.setInstanceDay(date.getDay());
 
-        if (timePair.mCustomTimeId != null) {
+        if (timePair.mCustomTimeKey != null) {
             Assert.assertTrue(timePair.mHourMinute == null);
-            mRemoteInstanceRecord.setInstanceCustomTimeId(timePair.mCustomTimeId);
+            mRemoteInstanceRecord.setInstanceCustomTimeId(mDomainFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey));
             mRemoteInstanceRecord.setInstanceHour(null);
             mRemoteInstanceRecord.setInstanceMinute(null);
         } else {
@@ -253,7 +253,7 @@ public class RemoteInstance extends Instance {
     private void createInstanceShownRecord() {
         Assert.assertTrue(mInstanceShownRecord == null);
 
-        mInstanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(((RemoteTask) getTask()).getId(), getScheduleDateTime());
+        mInstanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(mDomainFactory, ((RemoteTask) getTask()).getId(), getScheduleDateTime());
     }
 
     @Override

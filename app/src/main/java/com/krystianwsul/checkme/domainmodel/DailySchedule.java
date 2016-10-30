@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -47,7 +48,6 @@ public class DailySchedule extends RepeatingSchedule {
         DayOfWeek day = date.getDayOfWeek();
 
         HourMinute hourMinute = getTime().getHourMinute(day);
-        Assert.assertTrue(hourMinute != null);
 
         if (startHourMilli != null && startHourMilli.compareTo(hourMinute.toHourMilli()) > 0)
             return null;
@@ -86,9 +86,9 @@ public class DailySchedule extends RepeatingSchedule {
 
     @NonNull
     public Time getTime() {
-        Integer customTimeId = mDailyScheduleBridge.getCustomTimeId();
-        if (customTimeId != null) {
-            return mDomainFactory.getCustomTime(mDailyScheduleBridge.getCustomTimeId());
+        CustomTimeKey customTimeKey = mDailyScheduleBridge.getCustomTimeKey();
+        if (customTimeKey != null) {
+            return mDomainFactory.getCustomTime(mDailyScheduleBridge.getCustomTimeKey());
         } else {
             Integer hour = mDailyScheduleBridge.getHour();
             Integer minute = mDailyScheduleBridge.getMinute();
@@ -99,13 +99,13 @@ public class DailySchedule extends RepeatingSchedule {
     }
 
     @Override
-    public Integer getCustomTimeId() {
-        return mDailyScheduleBridge.getCustomTimeId();
+    public CustomTimeKey getCustomTimeKey() {
+        return mDailyScheduleBridge.getCustomTimeKey();
     }
 
     @Nullable
     public HourMinute getHourMinute() {
-        if (mDailyScheduleBridge.getCustomTimeId() != null) {
+        if (mDailyScheduleBridge.getCustomTimeKey() != null) {
             Assert.assertTrue(mDailyScheduleBridge.getHour() == null);
             Assert.assertTrue(mDailyScheduleBridge.getMinute() == null);
 

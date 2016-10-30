@@ -750,10 +750,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
             HourMinute hourMinute;
             TimePair timePair = singleScheduleEntry.mTimePair;
-            if (timePair.mCustomTimeId != null) {
+            if (timePair.mCustomTimeKey != null) {
                 Assert.assertTrue(timePair.mHourMinute == null);
 
-                hourMinute = mData.CustomTimeDatas.get(timePair.mCustomTimeId).HourMinutes.get(singleScheduleEntry.mDate.getDayOfWeek());
+                hourMinute = mData.CustomTimeDatas.get(timePair.mCustomTimeKey).HourMinutes.get(singleScheduleEntry.mDate.getDayOfWeek());
             } else {
                 Assert.assertTrue(timePair.mHourMinute != null);
 

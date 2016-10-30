@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -29,6 +30,7 @@ import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -72,10 +74,10 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
 
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
-        public void onCustomTimeSelected(int customTimeId) {
+        public void onCustomTimeSelected(@NonNull CustomTimeKey customTimeKey) {
             Assert.assertTrue(mData != null);
 
-            mTimePairPersist.setCustomTimeId(customTimeId);
+            mTimePairPersist.setCustomTimeKey(customTimeKey);
 
             updateTimeText();
 
@@ -299,7 +301,6 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
             mTimePairPersist = new TimePairPersist();
 
             mInitialHourMinute = mTimePairPersist.getHourMinute();
-            Assert.assertTrue(mInitialHourMinute != null);
         }
 
         mActionBar.setTitle(Stream.of(mData.InstanceDatas.values())
@@ -317,8 +318,9 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         mEditInstanceTime.setOnClickListener(v -> {
             Assert.assertTrue(mData != null);
             ArrayList<TimeDialogFragment.CustomTimeData> customTimeDatas = new ArrayList<>(Stream.of(mData.CustomTimeDatas.values())
+                    .filter(customTimeData -> customTimeData.mCustomTimeKey.mLocalCustomTimeId != null)
                     .sortBy(customTimeData -> customTimeData.HourMinutes.get(mDate.getDayOfWeek()))
-                    .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
+                    .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")"))
                     .collect(Collectors.toList()));
 
             TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas);
@@ -356,8 +358,8 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mDate != null);
 
-        if (mTimePairPersist.getCustomTimeId() != null) {
-            EditInstancesLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId());
+        if (mTimePairPersist.getCustomTimeKey() != null) {
+            EditInstancesLoader.CustomTimeData customTimeData = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeKey());
             Assert.assertTrue(customTimeData != null);
 
             mEditInstanceTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")");
@@ -378,11 +380,11 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
     private boolean isValidDateTime() {
         if (mData != null) {
             HourMinute hourMinute;
-            if (mTimePairPersist.getCustomTimeId() != null) {
-                if (!mData.CustomTimeDatas.containsKey(mTimePairPersist.getCustomTimeId()))
+            if (mTimePairPersist.getCustomTimeKey() != null) {
+                if (!mData.CustomTimeDatas.containsKey(mTimePairPersist.getCustomTimeKey()))
                     return false; //cached data doesn't contain new custom time
 
-                hourMinute = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeId()).HourMinutes.get(mDate.getDayOfWeek());
+                hourMinute = mData.CustomTimeDatas.get(mTimePairPersist.getCustomTimeKey()).HourMinutes.get(mDate.getDayOfWeek());
             } else {
                 hourMinute = mTimePairPersist.getHourMinute();
             }
@@ -437,11 +439,10 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         if (!date.equals(mDate))
             return true;
 
-        if (mTimePairPersist.getCustomTimeId() != null)
+        if (mTimePairPersist.getCustomTimeKey() != null)
             return true;
 
         Assert.assertTrue(mInitialHourMinute != null);
-        Assert.assertTrue(mTimePairPersist.getHourMinute() != null);
 
         if (!mTimePairPersist.getHourMinute().equals(mInitialHourMinute))
             return true;
@@ -457,6 +458,6 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         Assert.assertTrue(mTimePairPersist != null);
 
         if (resultCode > 0)
-            mTimePairPersist.setCustomTimeId(resultCode);
+            mTimePairPersist.setCustomTimeKey(new CustomTimeKey(resultCode));
     }
 }

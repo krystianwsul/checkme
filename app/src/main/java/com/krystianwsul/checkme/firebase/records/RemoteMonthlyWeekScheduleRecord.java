@@ -55,7 +55,7 @@ public class RemoteMonthlyWeekScheduleRecord extends RemoteScheduleRecord {
     }
 
     @Nullable
-    public Integer getCustomTimeId() {
+    public String getCustomTimeId() {
         return getMonthlyWeekScheduleJson().getCustomTimeId();
     }
 

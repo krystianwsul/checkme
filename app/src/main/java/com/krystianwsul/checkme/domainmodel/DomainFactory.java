@@ -26,11 +26,13 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.RemoteCustomTime;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteTask;
@@ -57,6 +59,7 @@ import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -82,7 +85,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
@@ -276,6 +278,10 @@ public class DomainFactory {
             Assert.assertTrue(mFriendQuery != null);
             Assert.assertTrue(mFriendListener != null);
 
+            Stream.of(mLocalFactory.mLocalCustomTimes.values())
+                    .filter(LocalCustomTime::hasRemoteRecord)
+                    .forEach(LocalCustomTime::clearRemoteRecord);
+
             mRemoteFactory = null;
             mFriends = null;
 
@@ -296,7 +302,9 @@ public class DomainFactory {
     }
 
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
-        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren());
+        Assert.assertTrue(mUserData != null);
+
+        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData);
 
         updateNotifications(context, new ArrayList<>(), ExactTimeStamp.getNow());
 
@@ -333,23 +341,22 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Map<Integer, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
+        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance.isRootInstance(now));
         Assert.assertTrue(instance.getDone() == null);
 
-        if (instance.getInstanceTimePair().mCustomTimeId != null) {
-            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
-            Assert.assertTrue(customTime != null);
+        if (instance.getInstanceTimePair().mCustomTimeKey != null) {
+            CustomTime customTime = getCustomTime(instance.getInstanceTimePair().mCustomTimeKey);
 
-            currentCustomTimes.put(customTime.getId(), customTime);
+            currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
         }
 
-        TreeMap<Integer, EditInstanceLoader.CustomTimeData> customTimeDatas = new TreeMap<>();
+        Map<CustomTimeKey, EditInstanceLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : currentCustomTimes.values())
-            customTimeDatas.put(customTime.getId(), new EditInstanceLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstanceLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
         return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas);
     }
@@ -364,8 +371,8 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Map<Integer, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
+        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
         HashMap<InstanceKey, EditInstancesLoader.InstanceData> instanceDatas = new HashMap<>();
 
@@ -376,35 +383,34 @@ public class DomainFactory {
 
             instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDate(), instance.getName()));
 
-            if (instance.getInstanceTimePair().mCustomTimeId != null) {
-                CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(instance.getInstanceTimePair().mCustomTimeId);
-                Assert.assertTrue(customTime != null);
+            if (instance.getInstanceTimePair().mCustomTimeKey != null) {
+                CustomTime customTime = getCustomTime(instance.getInstanceTimePair().mCustomTimeKey);
 
-                currentCustomTimes.put(customTime.getId(), customTime);
+                currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
             }
         }
 
-        TreeMap<Integer, EditInstancesLoader.CustomTimeData> customTimeDatas = new TreeMap<>();
+        Map<CustomTimeKey, EditInstancesLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : currentCustomTimes.values())
-            customTimeDatas.put(customTime.getId(), new EditInstancesLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstancesLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
         return new EditInstancesLoader.Data(instanceDatas, customTimeDatas);
     }
 
     @NonNull
-    public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int customTimeId) {
+    public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int localCustomTimeId) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getShowCustomTimeData");
 
-        CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
-        Assert.assertTrue(customTime != null);
+        LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(localCustomTimeId);
+        Assert.assertTrue(localCustomTime != null);
 
         HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
-            hourMinutes.put(dayOfWeek, customTime.getHourMinute(dayOfWeek));
+            hourMinutes.put(dayOfWeek, localCustomTime.getHourMinute(dayOfWeek));
 
-        return new ShowCustomTimeLoader.Data(customTime.getId(), customTime.getName(), hourMinutes);
+        return new ShowCustomTimeLoader.Data(localCustomTime.getId(), localCustomTime.getName(), hourMinutes);
     }
 
     @NonNull
@@ -413,13 +419,13 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getShowCustomTimesData");
 
-        List<CustomTime> currentCustomTimes = getCurrentCustomTimes();
+        List<LocalCustomTime> currentCustomTimes = getCurrentCustomTimes();
 
         ArrayList<ShowCustomTimesLoader.CustomTimeData> entries = new ArrayList<>();
-        for (CustomTime customTime : currentCustomTimes) {
-            Assert.assertTrue(customTime != null);
+        for (LocalCustomTime localCustomTime : currentCustomTimes) {
+            Assert.assertTrue(localCustomTime != null);
 
-            entries.add(new ShowCustomTimesLoader.CustomTimeData(customTime.getId(), customTime.getName()));
+            entries.add(new ShowCustomTimesLoader.CustomTimeData(localCustomTime.getId(), localCustomTime.getName()));
         }
 
         return new ShowCustomTimesLoader.Data(entries);
@@ -704,8 +710,8 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Map<Integer, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getId, customTime -> customTime));
+        Map<CustomTimeKey, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
+                .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
         CreateTaskLoader.TaskData taskData = null;
         if (taskKey != null) {
@@ -734,7 +740,7 @@ public class DomainFactory {
 
                                 CustomTime weeklyCustomTime = singleSchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
                                 break;
                             }
                             case DAILY: {
@@ -746,7 +752,7 @@ public class DomainFactory {
 
                                 CustomTime dailyCustomTime = time.getPair().first;
                                 if (dailyCustomTime != null)
-                                    customTimes.put(dailyCustomTime.getId(), dailyCustomTime);
+                                    customTimes.put(dailyCustomTime.getCustomTimeKey(), dailyCustomTime);
 
                                 break;
                             }
@@ -759,7 +765,7 @@ public class DomainFactory {
 
                                 CustomTime weeklyCustomTime = pair.second.getPair().first;
                                 if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
 
                                 break;
                             }
@@ -770,7 +776,7 @@ public class DomainFactory {
 
                                 CustomTime weeklyCustomTime = monthlyDaySchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
 
                                 break;
                             }
@@ -781,7 +787,7 @@ public class DomainFactory {
 
                                 CustomTime weeklyCustomTime = monthlyWeekSchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getId(), weeklyCustomTime);
+                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
 
                                 break;
                             }
@@ -815,9 +821,9 @@ public class DomainFactory {
 
         Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskKeys);
 
-        @SuppressLint("UseSparseArrays") HashMap<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        @SuppressLint("UseSparseArrays") HashMap<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes.values())
-            customTimeDatas.put(customTime.getId(), new CreateTaskLoader.CustomTimeData(customTime.getId(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
         Set<UserData> friends = (mFriends != null ? new HashSet<>(mFriends.values()) : new HashSet<>());
 
@@ -1003,7 +1009,7 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            mRemoteFactory.createScheduleRootTask(this, now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
+            mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
         }
 
         updateNotifications(context, new ArrayList<>(), now);
@@ -1079,7 +1085,7 @@ public class DomainFactory {
 
             mergedFriends.remove(UserData.getKey(mUserData.email));
 
-            newParentTask = mRemoteFactory.createScheduleRootTask(this, now, name, scheduleDatas, note, mergedFriends);
+            newParentTask = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, mergedFriends);
         } else {
             Assert.assertTrue(mergedFriends.isEmpty());
 
@@ -1275,50 +1281,50 @@ public class DomainFactory {
         Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-        CustomTimeRecord customTimeRecord = mLocalFactory.mPersistenceManager.createCustomTimeRecord(name, hourMinutes); // todo customtime
+        CustomTimeRecord customTimeRecord = mLocalFactory.mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
         Assert.assertTrue(customTimeRecord != null);
 
-        CustomTime customTime = new CustomTime(customTimeRecord);
-        mLocalFactory.mLocalCustomTimes.put(customTime.getId(), customTime);
+        LocalCustomTime localCustomTime = new LocalCustomTime(customTimeRecord);
+        mLocalFactory.mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);
 
         save(context, 0);
 
-        return customTime.getId();
+        return localCustomTime.getId();
     }
 
-    public synchronized void updateCustomTime(@NonNull Context context, int dataId, int customTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized void updateCustomTime(@NonNull Context context, int dataId, int localCustomTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.log("DomainFactory.updateCustomTime");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
-        Assert.assertTrue(customTime != null);
+        LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(localCustomTimeId);
+        Assert.assertTrue(localCustomTime != null);
 
-        customTime.setName(name);
+        localCustomTime.setName(name);
 
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
             HourMinute hourMinute = hourMinutes.get(dayOfWeek);
             Assert.assertTrue(hourMinute != null);
 
-            if (hourMinute.compareTo(customTime.getHourMinute(dayOfWeek)) != 0)
-                customTime.setHourMinute(dayOfWeek, hourMinute);
+            if (hourMinute.compareTo(localCustomTime.getHourMinute(dayOfWeek)) != 0)
+                localCustomTime.setHourMinute(dayOfWeek, hourMinute);
         }
 
         save(context, dataId);
     }
 
-    public synchronized void setCustomTimeCurrent(@NonNull Context context, int dataId, @NonNull List<Integer> customTimeIds) {
+    public synchronized void setCustomTimeCurrent(@NonNull Context context, int dataId, @NonNull List<Integer> localCustomTimeIds) {
         MyCrashlytics.log("DomainFactory.setCustomTimeCurrent");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
-        Assert.assertTrue(!customTimeIds.isEmpty());
+        Assert.assertTrue(!localCustomTimeIds.isEmpty());
 
-        for (int customTimeId : customTimeIds) {
-            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
-            Assert.assertTrue(customTime != null);
+        for (int localCustomTimeId : localCustomTimeIds) {
+            LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(localCustomTimeId);
+            Assert.assertTrue(localCustomTime != null);
 
-            customTime.setCurrent();
+            localCustomTime.setCurrent();
         }
 
         save(context, dataId);
@@ -1337,7 +1343,7 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            mRemoteFactory.createRemoteTaskHelper(this, now, name, note, Utils.userDatasToKeys(friendEntries));
+            mRemoteFactory.createRemoteTaskHelper(now, name, note, Utils.userDatasToKeys(friendEntries));
         }
 
         updateNotifications(context, new ArrayList<>(), now);
@@ -1369,7 +1375,7 @@ public class DomainFactory {
 
             mergedFriends.remove(UserData.getKey(mUserData.email));
 
-            newParentTask = mRemoteFactory.createRemoteTaskHelper(this, now, name, note, mergedFriends);
+            newParentTask = mRemoteFactory.createRemoteTaskHelper(now, name, note, mergedFriends);
         } else {
             Assert.assertTrue(mergedFriends.isEmpty());
 
@@ -1473,6 +1479,25 @@ public class DomainFactory {
     }
 
     @NonNull
+    public String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey) {
+        if (!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId)) {
+            Assert.assertTrue(customTimeKey.mLocalCustomTimeId == null);
+
+            return customTimeKey.mRemoteCustomTimeId;
+        } else {
+            Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
+            Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(customTimeKey.mLocalCustomTimeId));
+
+            LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(customTimeKey.mLocalCustomTimeId);
+            Assert.assertTrue(localCustomTime != null);
+
+            Assert.assertTrue(localCustomTime.hasRemoteRecord());
+
+            return localCustomTime.getRemoteId();
+        }
+    }
+
+    @NonNull
     public Instance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
         Instance existingInstance = getExistingInstance(task, scheduleDateTime);
 
@@ -1486,10 +1511,30 @@ public class DomainFactory {
             } else {
                 Assert.assertTrue(!TextUtils.isEmpty(task.getTaskKey().mRemoteTaskId));
 
+                String remoteCustomTimeId;
+                Integer hour;
+                Integer minute;
+
+                CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().mCustomTimeKey;
                 HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
-                Integer hour = (hourMinute != null ? hourMinute.getHour() : null);
-                Integer minute = (hourMinute != null ? hourMinute.getMinute() : null);
-                InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(task.getTaskKey().mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), scheduleDateTime.getTime().getTimePair().mCustomTimeId, hour, minute);
+
+                if (customTimeKey != null) {
+                    Assert.assertTrue(hourMinute == null);
+
+                    remoteCustomTimeId = getRemoteCustomTimeId(customTimeKey);
+
+                    hour = null;
+                    minute = null;
+                } else {
+                    Assert.assertTrue(hourMinute != null);
+
+                    remoteCustomTimeId = null;
+
+                    hour = hourMinute.getHour();
+                    minute = hourMinute.getMinute();
+                }
+
+                InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(task.getTaskKey().mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
 
                 return new RemoteInstance(this, task.getTaskKey().mRemoteTaskId, scheduleDateTime, instanceShownRecord);
             }
@@ -1550,10 +1595,38 @@ public class DomainFactory {
     }
 
     @NonNull
-    private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
-        Time time = mLocalFactory.getTime(timePair);
+    public Time getTime(@NonNull TimePair timePair) {
+        if (timePair.mHourMinute != null) {
+            Assert.assertTrue(timePair.mCustomTimeKey == null);
 
-        return new DateTime(date, time);
+            return new NormalTime(timePair.mHourMinute);
+        } else {
+            Assert.assertTrue(timePair.mCustomTimeKey != null);
+
+            if (timePair.mCustomTimeKey.mLocalCustomTimeId != null) {
+                Assert.assertTrue(TextUtils.isEmpty(timePair.mCustomTimeKey.mRemoteCustomTimeId));
+                Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(timePair.mCustomTimeKey.mLocalCustomTimeId));
+
+                LocalCustomTime localCustomTime = mLocalFactory.mLocalCustomTimes.get(timePair.mCustomTimeKey.mLocalCustomTimeId);
+                Assert.assertTrue(localCustomTime != null);
+
+                return localCustomTime;
+            } else {
+                Assert.assertTrue(!TextUtils.isEmpty(timePair.mCustomTimeKey.mRemoteCustomTimeId));
+                Assert.assertTrue(mRemoteFactory != null);
+                Assert.assertTrue(mRemoteFactory.mRemoteCustomTimes.containsKey(timePair.mCustomTimeKey.mRemoteCustomTimeId));
+
+                RemoteCustomTime remoteCustomTime = mRemoteFactory.mRemoteCustomTimes.get(timePair.mCustomTimeKey.mRemoteCustomTimeId);
+                Assert.assertTrue(remoteCustomTime != null);
+
+                return remoteCustomTime;
+            }
+        }
+    }
+
+    @NonNull
+    private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
+        return new DateTime(date, getTime(timePair));
     }
 
     @NonNull
@@ -1590,18 +1663,32 @@ public class DomainFactory {
     }
 
     @NonNull
-    public CustomTime getCustomTime(int customTimeId) {
-        Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(customTimeId));
+    public CustomTime getCustomTime(@NonNull CustomTimeKey customTimeKey) {
+        if (customTimeKey.mLocalCustomTimeId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
 
-        CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeId);
-        Assert.assertTrue(customTime != null);
+            Assert.assertTrue(mLocalFactory.mLocalCustomTimes.containsKey(customTimeKey.mLocalCustomTimeId));
 
-        return customTime;
+            CustomTime customTime = mLocalFactory.mLocalCustomTimes.get(customTimeKey.mLocalCustomTimeId);
+            Assert.assertTrue(customTime != null);
+
+            return customTime;
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
+            Assert.assertTrue(mRemoteFactory != null);
+
+            Assert.assertTrue(mRemoteFactory.mRemoteCustomTimes.containsKey(customTimeKey.mRemoteCustomTimeId));
+
+            CustomTime customTime = mRemoteFactory.mRemoteCustomTimes.get(customTimeKey.mRemoteCustomTimeId);
+            Assert.assertTrue(customTime != null);
+
+            return customTime;
+        }
     }
 
-    private List<CustomTime> getCurrentCustomTimes() {
+    private List<LocalCustomTime> getCurrentCustomTimes() {
         return Stream.of(mLocalFactory.mLocalCustomTimes.values())
-                .filter(CustomTime::getCurrent)
+                .filter(LocalCustomTime::getCurrent)
                 .collect(Collectors.toList());
     }
 
@@ -1801,16 +1888,10 @@ public class DomainFactory {
     @NonNull
     public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull Set<String> recordOf) {
         Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mUserData != null);
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
-
-        Assert.assertTrue(Stream.of(localToRemoteConversion.mLocalTasks.values())
-                .flatMap(localTask -> Stream.of(localTask.getSchedules()))
-                .noneMatch(schedule -> schedule.getCustomTimeId() != null)); // todo customtime
-
-        Assert.assertTrue(Stream.of(localToRemoteConversion.mLocalInstances)
-                .noneMatch(localInstance -> localInstance.getInstanceCustomTimeId() != null)); // todo customtime
 
         updateNotifications(context, true, false, new ArrayList<>(), now, Stream.of(localToRemoteConversion.mLocalTasks.values())
                 .map(Task::getTaskKey)
@@ -1819,7 +1900,7 @@ public class DomainFactory {
         for (LocalTask localTask : localToRemoteConversion.mLocalTasks.values()) {
             Assert.assertTrue(localTask != null);
 
-            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(this, localTask, recordOf);
+            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(localTask, recordOf);
             localToRemoteConversion.mRemoteTasks.put(localTask.getId(), remoteTask);
         }
 
@@ -1832,7 +1913,7 @@ public class DomainFactory {
             RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
             Assert.assertTrue(childRemoteTask != null);
 
-            RemoteTaskHierarchy remoteTaskHierarchy = mRemoteFactory.copyLocalTaskHierarchy(this, localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId());
+            RemoteTaskHierarchy remoteTaskHierarchy = mRemoteFactory.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId());
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 
@@ -1842,7 +1923,7 @@ public class DomainFactory {
             RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(localInstance.getTaskId());
             Assert.assertTrue(remoteTask != null);
 
-            RemoteInstance remoteInstance = mRemoteFactory.copyLocalInstance(this, localInstance, recordOf, remoteTask.getId());
+            RemoteInstance remoteInstance = mRemoteFactory.copyLocalInstance(localInstance, recordOf, remoteTask.getId());
             localToRemoteConversion.mRemoteInstances.add(remoteInstance);
         }
 
@@ -1929,8 +2010,13 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Map<Integer, CustomTime> getCustomTimes() {
-        return mLocalFactory.mLocalCustomTimes; // todo customtimes
+    private List<CustomTime> getCustomTimes() {
+        List<CustomTime> customTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
+
+        if (mRemoteFactory != null)
+            customTimes.addAll(mRemoteFactory.mRemoteCustomTimes.values());
+
+        return customTimes;
     }
 
     @NonNull
@@ -1991,12 +2077,6 @@ public class DomainFactory {
             instances.addAll(mRemoteFactory.getExistingInstances());
 
         return instances;
-    }
-
-    @NonNull
-    private Map<InstanceKey, Instance> getExistingInstanceMap() {
-        return Stream.of(getExistingInstances())
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
     }
 
     @Nullable
@@ -2060,7 +2140,7 @@ public class DomainFactory {
         // relevant hack
         Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
-        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(CustomTime::getId, CustomTimeRelevance::new)); // todo customtime
+        Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.mLocalCustomTimes.values()).collect(Collectors.toMap(LocalCustomTime::getId, CustomTimeRelevance::new));
 
         Stream.of(getTasks())
                 .filter(task -> task.current(now))
@@ -2083,7 +2163,7 @@ public class DomainFactory {
                 .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
         Stream.of(getCurrentCustomTimes())
-                .map(CustomTime::getId)
+                .map(LocalCustomTime::getId)
                 .map(customTimeRelevances::get)
                 .forEach(CustomTimeRelevance::setRelevant);
 
@@ -2110,16 +2190,16 @@ public class DomainFactory {
         Assert.assertTrue(Stream.of(irrelevantExistingInstances)
                 .noneMatch(instance -> instance.isVisible(now)));
 
-        List<CustomTime> relevantCustomTimes = Stream.of(customTimeRelevances.values())
+        List<LocalCustomTime> relevantCustomTimes = Stream.of(customTimeRelevances.values())
                 .filter(CustomTimeRelevance::getRelevant)
                 .map(CustomTimeRelevance::getCustomTime)
                 .collect(Collectors.toList());
 
-        List<CustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values()); // todo customtime
+        List<LocalCustomTime> irrelevantCustomTimes = new ArrayList<>(mLocalFactory.mLocalCustomTimes.values());
         irrelevantCustomTimes.removeAll(relevantCustomTimes);
 
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
-                .noneMatch(CustomTime::getCurrent));
+                .noneMatch(LocalCustomTime::getCurrent));
 
         Stream.of(irrelevantTasks)
                 .forEach(Task::setRelevant);
@@ -2128,7 +2208,7 @@ public class DomainFactory {
                 .forEach(Instance::setRelevant);
 
         Stream.of(irrelevantCustomTimes)
-                .forEach(CustomTime::setRelevant);
+                .forEach(LocalCustomTime::setRelevant);
 
         return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
     }
@@ -2141,7 +2221,6 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(Stream.of(irrelevant.mTasks).noneMatch(task -> task instanceof RemoteTask));
             Assert.assertTrue(Stream.of(irrelevant.mInstances).noneMatch(instance -> instance instanceof RemoteInstance));
-            // todo customtimes
         }
 
         mLocalFactory.removeIrrelevant(irrelevant);
@@ -2175,27 +2254,32 @@ public class DomainFactory {
                 continue;
 
             Date scheduleDate = new Date(instanceShownRecord.getScheduleYear(), instanceShownRecord.getScheduleMonth(), instanceShownRecord.getScheduleDay());
-            Integer customTimeId = instanceShownRecord.getScheduleCustomTimeId();
+            String remoteCustomTimeId = instanceShownRecord.getScheduleCustomTimeId();
+
+            CustomTimeKey customTimeKey;
             HourMinute hourMinute;
-            if (customTimeId != null) {
+
+            if (!TextUtils.isEmpty(remoteCustomTimeId)) {
                 Assert.assertTrue(instanceShownRecord.getScheduleHour() == null);
                 Assert.assertTrue(instanceShownRecord.getScheduleMinute() == null);
 
+                customTimeKey = getCustomTimeKey(remoteCustomTimeId);
                 hourMinute = null;
             } else {
                 Assert.assertTrue(instanceShownRecord.getScheduleHour() != null);
                 Assert.assertTrue(instanceShownRecord.getScheduleMinute() != null);
 
+                customTimeKey = null;
                 hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
             }
 
             TaskKey taskKey = new TaskKey(instanceShownRecord.getTaskId());
 
-            InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, customTimeId, hourMinute);
+            InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, new TimePair(customTimeKey, hourMinute));
 
             shownInstanceKeys.add(instanceKey);
 
-            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.getNotificationId(scheduleDate, customTimeId, hourMinute, taskKey), instanceShownRecord));
+            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.getNotificationId(scheduleDate, customTimeKey, hourMinute, taskKey), instanceShownRecord));
         }
 
         List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
@@ -2353,7 +2437,7 @@ public class DomainFactory {
 
     public static class Irrelevant {
         @NonNull
-        public final List<CustomTime> mCustomTimes; // todo customTimes
+        public final List<LocalCustomTime> mCustomTimes;
 
         @NonNull
         public final List<Task> mTasks;
@@ -2361,7 +2445,7 @@ public class DomainFactory {
         @NonNull
         public final List<Instance> mInstances;
 
-        Irrelevant(@NonNull List<CustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<Instance> instances) {
+        Irrelevant(@NonNull List<LocalCustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<Instance> instances) {
             mCustomTimes = customTimes;
             mTasks = tasks;
             mInstances = instances;
@@ -2424,7 +2508,7 @@ public class DomainFactory {
             // mark custom times relevant
             if (mTask.current(now))
                 Stream.of(mTask.getCurrentSchedules(now))
-                        .map(Schedule::getCustomTimeId)
+                        .map(Schedule::getCustomTimeKey)
                         .filter(customTimeId -> customTimeId != null)
                         .map(customTimeRelevances::get)
                         .forEach(CustomTimeRelevance::setRelevant);
@@ -2488,18 +2572,18 @@ public class DomainFactory {
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // set custom time relevant
-            Integer scheduleCustomTimeId = mInstance.getScheduleTimePair().mCustomTimeId;
-            if (scheduleCustomTimeId != null) {
-                CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(scheduleCustomTimeId);
+            CustomTimeKey scheduleCustomTimeKey = mInstance.getScheduleCustomTimeKey();
+            if (scheduleCustomTimeKey != null && scheduleCustomTimeKey.mLocalCustomTimeId != null) {
+                CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(scheduleCustomTimeKey.mLocalCustomTimeId);
                 Assert.assertTrue(customTimeRelevance != null);
 
                 customTimeRelevance.setRelevant();
             }
 
             // set custom time relevant
-            Integer instanceCustomTimeId = mInstance.getInstanceTimePair().mCustomTimeId;
-            if (instanceCustomTimeId != null) {
-                CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(instanceCustomTimeId);
+            CustomTimeKey instanceCustomTimeId = mInstance.getInstanceCustomTimeKey();
+            if (instanceCustomTimeId != null && instanceCustomTimeId.mLocalCustomTimeId != null) {
+                CustomTimeRelevance customTimeRelevance = customTimeRelevances.get(instanceCustomTimeId.mLocalCustomTimeId);
                 Assert.assertTrue(customTimeRelevance != null);
 
                 customTimeRelevance.setRelevant();
@@ -2515,12 +2599,29 @@ public class DomainFactory {
         }
     }
 
+    @NonNull
+    public CustomTimeKey getCustomTimeKey(@NonNull String remoteCustomTimeId) {
+        List<LocalCustomTime> matches = Stream.of(mLocalFactory.mLocalCustomTimes.values())
+                .filter(localCustomTime -> localCustomTime.hasRemoteRecord() && localCustomTime.getRemoteId().equals(remoteCustomTimeId))
+                .collect(Collectors.toList());
+
+        if (matches.isEmpty()) {
+            return new CustomTimeKey(remoteCustomTimeId);
+        } else {
+            Assert.assertTrue(matches.size() == 1);
+
+            return matches.get(0).getCustomTimeKey();
+        }
+    }
+
     private static class CustomTimeRelevance {
-        private final CustomTime mCustomTime;
+        @NonNull
+        private final LocalCustomTime mCustomTime;
+
         private boolean mRelevant = false;
 
-        CustomTimeRelevance(@NonNull CustomTime customTime) {
-            mCustomTime = customTime;
+        CustomTimeRelevance(@NonNull LocalCustomTime localCustomTime) {
+            mCustomTime = localCustomTime;
         }
 
         void setRelevant() {
@@ -2531,7 +2632,8 @@ public class DomainFactory {
             return mRelevant;
         }
 
-        CustomTime getCustomTime() {
+        @NonNull
+        LocalCustomTime getCustomTime() {
             return mCustomTime;
         }
     }

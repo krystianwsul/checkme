@@ -37,6 +37,7 @@ import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -91,7 +92,7 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
 
     private MDButton mButton;
 
-    private Map<Integer, CreateTaskLoader.CustomTimeData> mCustomTimeDatas;
+    private Map<CustomTimeKey, CreateTaskLoader.CustomTimeData> mCustomTimeDatas;
     private ScheduleDialogListener mScheduleDialogListener;
 
     private ScheduleDialogData mScheduleDialogData;
@@ -100,10 +101,10 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
 
     private final TimeDialogFragment.TimeDialogListener mTimeDialogListener = new TimeDialogFragment.TimeDialogListener() {
         @Override
-        public void onCustomTimeSelected(int customTimeId) {
+        public void onCustomTimeSelected(@NonNull CustomTimeKey customTimeKey) {
             Assert.assertTrue(mCustomTimeDatas != null);
 
-            mScheduleDialogData.mTimePairPersist.setCustomTimeId(customTimeId);
+            mScheduleDialogData.mTimePairPersist.setCustomTimeKey(customTimeKey);
 
             updateFields();
         }
@@ -320,22 +321,25 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
             switch (mScheduleDialogData.mScheduleType) {
                 case SINGLE:
                     customTimeDatas = Stream.of(mCustomTimeDatas.values())
+                            .filter(customTimeData -> customTimeData.mCustomTimeKey.mLocalCustomTimeId != null)
                             .sortBy(customTimeData -> customTimeData.HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek()))
-                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek()) + ")"))
+                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek()) + ")"))
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
                 case DAILY:
                 case MONTHLY_DAY:
                 case MONTHLY_WEEK:
                     customTimeDatas = Stream.of(mCustomTimeDatas.values())
-                            .sortBy(customTimeData -> customTimeData.Id)
-                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name))
+                            .filter(customTimeData -> customTimeData.mCustomTimeKey.mLocalCustomTimeId != null)
+                            .sortBy(customTimeData -> customTimeData.mCustomTimeKey.mLocalCustomTimeId)
+                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name))
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
                 case WEEKLY:
                     customTimeDatas = Stream.of(mCustomTimeDatas.values())
+                            .filter(customTimeData -> customTimeData.mCustomTimeKey.mLocalCustomTimeId != null)
                             .sortBy(customTimeData -> customTimeData.HourMinutes.get(mScheduleDialogData.mDayOfWeek))
-                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.Id, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDayOfWeek) + ")"))
+                            .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDayOfWeek) + ")"))
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
                 default:
@@ -541,7 +545,7 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
             updateFields();
     }
 
-    public void initialize(@NonNull Map<Integer, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull ScheduleDialogListener scheduleDialogListener) {
+    public void initialize(@NonNull Map<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull ScheduleDialogListener scheduleDialogListener) {
         mCustomTimeDatas = customTimeDatas;
         mScheduleDialogListener = scheduleDialogListener;
 
@@ -619,7 +623,7 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
 
         if (resultCode > 0) {
             mCustomTimeDatas = null;
-            mScheduleDialogData.mTimePairPersist.setCustomTimeId(resultCode);
+            mScheduleDialogData.mTimePairPersist.setCustomTimeKey(new CustomTimeKey(resultCode));
         }
     }
 
@@ -634,8 +638,8 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
             case SINGLE:
                 mScheduleDialogDate.setText(mScheduleDialogData.mDate.getDisplayText(getContext()));
 
-                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
-                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeKey() != null) {
+                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeKey());
                     Assert.assertTrue(customTimeData != null);
 
                     mScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek()) + ")");
@@ -645,8 +649,8 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
 
                 break;
             case DAILY:
-                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
-                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeKey() != null) {
+                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeKey());
                     Assert.assertTrue(customTimeData != null);
 
                     mScheduleDialogTime.setText(customTimeData.Name);
@@ -656,8 +660,8 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
 
                 break;
             case WEEKLY:
-                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
-                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeKey() != null) {
+                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeKey());
                     Assert.assertTrue(customTimeData != null);
 
                     mScheduleDialogTime.setText(customTimeData.Name + " (" + customTimeData.HourMinutes.get(mScheduleDialogData.mDayOfWeek) + ")");
@@ -670,8 +674,8 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
             case MONTHLY_WEEK:
                 mScheduleDialogMonthDayNumber.setText(Utils.ordinal(mScheduleDialogData.mMonthDayNumber));
 
-                if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
-                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId());
+                if (mScheduleDialogData.mTimePairPersist.getCustomTimeKey() != null) {
+                    CreateTaskLoader.CustomTimeData customTimeData = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeKey());
                     Assert.assertTrue(customTimeData != null);
 
                     mScheduleDialogTime.setText(customTimeData.Name);
@@ -714,11 +718,11 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
             return true;
 
         HourMinute hourMinute;
-        if (mScheduleDialogData.mTimePairPersist.getCustomTimeId() != null) {
-            if (!mCustomTimeDatas.containsKey(mScheduleDialogData.mTimePairPersist.getCustomTimeId()))
+        if (mScheduleDialogData.mTimePairPersist.getCustomTimeKey() != null) {
+            if (!mCustomTimeDatas.containsKey(mScheduleDialogData.mTimePairPersist.getCustomTimeKey()))
                 return false; //cached data doesn't contain new custom time
 
-            hourMinute = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeId()).HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek());
+            hourMinute = mCustomTimeDatas.get(mScheduleDialogData.mTimePairPersist.getCustomTimeKey()).HourMinutes.get(mScheduleDialogData.mDate.getDayOfWeek());
         } else {
             hourMinute = mScheduleDialogData.mTimePairPersist.getHourMinute();
         }

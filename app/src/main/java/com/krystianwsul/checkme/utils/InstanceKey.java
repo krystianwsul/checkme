@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.utils.time.Date;
-import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
@@ -22,20 +21,18 @@ public class InstanceKey implements Parcelable, Serializable {
     @NonNull
     public final TimePair ScheduleTimePair;
 
-    public InstanceKey(@NonNull TaskKey taskKey, @NonNull Date scheduleDate, Integer scheduleCustomTimeId, HourMinute scheduleHourMinute) {
-        Assert.assertTrue(scheduleDate != null);
-        Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
-
+    public InstanceKey(@NonNull TaskKey taskKey, @NonNull Date scheduleDate, @NonNull TimePair scheduleTimePair) {
         mTaskKey = taskKey;
         ScheduleDate = scheduleDate;
-        ScheduleTimePair = new TimePair(scheduleCustomTimeId, scheduleHourMinute);
+        ScheduleTimePair = scheduleTimePair;
     }
 
     @Override
     public int hashCode() {
-        return mTaskKey.hashCode() + ScheduleDate.hashCode() + (ScheduleTimePair.mCustomTimeId != null ? ScheduleTimePair.mCustomTimeId : 0) + (ScheduleTimePair.mHourMinute != null ? ScheduleTimePair.mHourMinute.hashCode() : 0);
+        return mTaskKey.hashCode() + ScheduleDate.hashCode() + ScheduleTimePair.hashCode();
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean equals(Object object) {
         if (object == null)
@@ -55,15 +52,10 @@ public class InstanceKey implements Parcelable, Serializable {
         if (!ScheduleDate.equals(instanceKey.ScheduleDate))
             return false;
 
-        if (ScheduleTimePair.mCustomTimeId == null) {
-            Assert.assertTrue(ScheduleTimePair.mHourMinute != null);
+        if (!ScheduleTimePair.equals(instanceKey.ScheduleTimePair))
+            return false;
 
-            return (instanceKey.ScheduleTimePair.mCustomTimeId == null && ScheduleTimePair.mHourMinute.equals(instanceKey.ScheduleTimePair.mHourMinute));
-        } else {
-            Assert.assertTrue(ScheduleTimePair.mHourMinute == null);
-
-            return (instanceKey.ScheduleTimePair.mCustomTimeId != null && ScheduleTimePair.mCustomTimeId.equals(instanceKey.ScheduleTimePair.mCustomTimeId));
-        }
+        return true;
     }
 
     @Override
@@ -90,11 +82,7 @@ public class InstanceKey implements Parcelable, Serializable {
             TimePair scheduleTimePair = source.readParcelable(TimePair.class.getClassLoader());
             Assert.assertTrue(scheduleTimePair != null);
 
-            Integer scheduleCustomTimeId = scheduleTimePair.mCustomTimeId;
-            HourMinute scheduleHourMinute = scheduleTimePair.mHourMinute;
-            Assert.assertTrue((scheduleCustomTimeId == null) != (scheduleHourMinute == null));
-
-            return new InstanceKey(taskKey, scheduleDate, scheduleCustomTimeId, scheduleHourMinute);
+            return new InstanceKey(taskKey, scheduleDate, scheduleTimePair);
         }
 
         @Override

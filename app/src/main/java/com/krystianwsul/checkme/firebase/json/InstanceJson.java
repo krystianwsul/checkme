@@ -14,7 +14,7 @@ public class InstanceJson {
     private int scheduleMonth;
     private int scheduleDay;
 
-    private Integer scheduleCustomTimeId;
+    private String scheduleCustomTimeId;
 
     private Integer scheduleHour;
     private Integer scheduleMinute;
@@ -23,7 +23,7 @@ public class InstanceJson {
     private Integer instanceMonth;
     private Integer instanceDay;
 
-    private Integer instanceCustomTimeId;
+    private String instanceCustomTimeId;
 
     private Integer instanceHour;
     private Integer instanceMinute;
@@ -35,7 +35,7 @@ public class InstanceJson {
 
     }
 
-    public InstanceJson(@NonNull String taskId, @Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable Integer scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable Integer instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
+    public InstanceJson(@NonNull String taskId, @Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable String instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
@@ -95,7 +95,7 @@ public class InstanceJson {
     }
 
     @Nullable
-    public Integer getScheduleCustomTimeId() {
+    public String getScheduleCustomTimeId() {
         return scheduleCustomTimeId;
     }
 
@@ -125,7 +125,7 @@ public class InstanceJson {
     }
 
     @Nullable
-    public Integer getInstanceCustomTimeId() {
+    public String getInstanceCustomTimeId() {
         return instanceCustomTimeId;
     }
 
@@ -155,7 +155,7 @@ public class InstanceJson {
         this.instanceDay = instanceDay;
     }
 
-    public void setInstanceCustomTimeId(@Nullable Integer instanceCustomTimeId) {
+    public void setInstanceCustomTimeId(@Nullable String instanceCustomTimeId) {
         this.instanceCustomTimeId = instanceCustomTimeId;
     }
 

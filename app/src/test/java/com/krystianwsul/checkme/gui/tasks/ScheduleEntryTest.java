@@ -169,7 +169,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(!scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
     }
 
@@ -191,7 +191,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.FRIDAY));
         Assert.assertTrue(!scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
     }
 
@@ -211,7 +211,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
     }
 
@@ -231,7 +231,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.WEDNESDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
     }
 
@@ -251,7 +251,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
     }
 
@@ -271,7 +271,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.WEDNESDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
     }
 
@@ -291,7 +291,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(!scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
     }
 
@@ -314,7 +314,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.FRIDAY));
         Assert.assertTrue(!scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
     }
 
@@ -335,7 +335,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
     }
 
@@ -356,7 +356,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.WEDNESDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
     }
 
@@ -377,7 +377,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
     }
 
@@ -398,7 +398,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.WEDNESDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
     }
 
@@ -419,7 +419,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(!scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
     }
 
@@ -443,7 +443,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.FRIDAY));
         Assert.assertTrue(!scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
     }
 
@@ -465,7 +465,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
     }
 
@@ -487,7 +487,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.WEDNESDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
     }
 
@@ -509,7 +509,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
     }
 
@@ -531,7 +531,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.WEDNESDAY));
         Assert.assertTrue(scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
     }
 
@@ -553,7 +553,7 @@ public class ScheduleEntryTest {
         Assert.assertTrue(scheduleDialogData.mMonthWeekDay.equals(DayOfWeek.THURSDAY));
         Assert.assertTrue(!scheduleDialogData.mBeginningOfMonth);
         Assert.assertTrue(scheduleDialogData.mTimePairPersist.getHourMinute().equals(hourMinute));
-        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeId() == null);
+        Assert.assertTrue(scheduleDialogData.mTimePairPersist.getCustomTimeKey() == null);
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
     }
 }

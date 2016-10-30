@@ -47,7 +47,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     @Nullable
-    public Integer getScheduleCustomTimeId() {
+    public String getScheduleCustomTimeId() {
         return getInstanceJson().getScheduleCustomTimeId();
     }
 
@@ -77,7 +77,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     @Nullable
-    public Integer getInstanceCustomTimeId() {
+    public String getInstanceCustomTimeId() {
         return getInstanceJson().getInstanceCustomTimeId();
     }
 
@@ -110,7 +110,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
         addValue(getId() + "/instanceJson/instanceDay", instanceDay);
     }
 
-    public void setInstanceCustomTimeId(@Nullable Integer instanceCustomTimeId) {
+    public void setInstanceCustomTimeId(@Nullable String instanceCustomTimeId) {
         getInstanceJson().setInstanceCustomTimeId(instanceCustomTimeId);
         addValue(getId() + "/instanceJson/instanceCustomTimeId", instanceCustomTimeId);
     }

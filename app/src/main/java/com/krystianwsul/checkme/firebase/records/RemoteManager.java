@@ -41,6 +41,9 @@ public class RemoteManager {
     @NonNull
     public final Map<String, RemoteInstanceRecord> mRemoteInstanceRecords = new HashMap<>();
 
+    @NonNull
+    public final Map<String, RemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
+
     public RemoteManager(@NonNull Iterable<DataSnapshot> children) {
         for (DataSnapshot child : children) {
             Assert.assertTrue(child != null);
@@ -59,6 +62,7 @@ public class RemoteManager {
                 Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.instanceJson == null);
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteTaskRecords.put(key, new RemoteTaskRecord(key, jsonWrapper));
             } else if (jsonWrapper.taskHierarchyJson != null) {
@@ -68,6 +72,7 @@ public class RemoteManager {
                 Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.instanceJson == null);
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteTaskHierarchyRecords.put(key, new RemoteTaskHierarchyRecord(key, jsonWrapper));
             } else if (jsonWrapper.singleScheduleJson != null) {
@@ -76,6 +81,7 @@ public class RemoteManager {
                 Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.instanceJson == null);
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteSingleScheduleRecords.put(key, new RemoteSingleScheduleRecord(key, jsonWrapper));
             } else if (jsonWrapper.dailyScheduleJson != null) {
@@ -83,27 +89,35 @@ public class RemoteManager {
                 Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.instanceJson == null);
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteDailyScheduleRecords.put(key, new RemoteDailyScheduleRecord(key, jsonWrapper));
             } else if (jsonWrapper.weeklyScheduleJson != null) {
                 Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.instanceJson == null);
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteWeeklyScheduleRecords.put(key, new RemoteWeeklyScheduleRecord(key, jsonWrapper));
             } else if (jsonWrapper.monthlyDayScheduleJson != null) {
                 Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.instanceJson == null);
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteMonthlyDayScheduleRecords.put(key, new RemoteMonthlyDayScheduleRecord(key, jsonWrapper));
             } else if (jsonWrapper.monthlyWeekScheduleJson != null) {
                 Assert.assertTrue(jsonWrapper.instanceJson == null);
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteMonthlyWeekScheduleRecords.put(key, new RemoteMonthlyWeekScheduleRecord(key, jsonWrapper));
-            } else {
-                Assert.assertTrue(jsonWrapper.instanceJson != null);
+            } else if (jsonWrapper.instanceJson != null) {
+                Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteInstanceRecords.put(key, new RemoteInstanceRecord(key, jsonWrapper));
+            } else {
+                Assert.assertTrue(jsonWrapper.customTimeJson != null);
+
+                mRemoteCustomTimeRecords.put(key, new RemoteCustomTimeRecord(key, jsonWrapper));
             }
         }
     }
@@ -133,6 +147,9 @@ public class RemoteManager {
                 .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteInstanceRecords.values())
+                .forEach(remoteRecord -> remoteRecord.getValues(values));
+
+        Stream.of(mRemoteCustomTimeRecords.values())
                 .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Log.e("asdf", "RemoteManager.save values: " + values);
@@ -217,5 +234,14 @@ public class RemoteManager {
 
         mRemoteInstanceRecords.put(remoteInstanceRecord.getId(), remoteInstanceRecord);
         return remoteInstanceRecord;
+    }
+
+    @NonNull
+    public RemoteCustomTimeRecord newRemoteCustomTimeRecord(@NonNull JsonWrapper jsonWrapper) {
+        RemoteCustomTimeRecord remoteCustomTimeRecord = new RemoteCustomTimeRecord(jsonWrapper);
+        Assert.assertTrue(!mRemoteInstanceRecords.containsKey(remoteCustomTimeRecord.getId()));
+
+        mRemoteCustomTimeRecords.put(remoteCustomTimeRecord.getId(), remoteCustomTimeRecord);
+        return remoteCustomTimeRecord;
     }
 }

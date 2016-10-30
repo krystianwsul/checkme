@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
@@ -46,7 +47,7 @@ public abstract class Schedule {
         return getScheduleBridge().getEndTime();
     }
 
-    public void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
+    void setEndExactTimeStamp(@NonNull ExactTimeStamp endExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp));
 
         getScheduleBridge().setEndTime(endExactTimeStamp.getLong());
@@ -65,7 +66,7 @@ public abstract class Schedule {
     }
 
     @Nullable
-    public abstract Integer getCustomTimeId();
+    public abstract CustomTimeKey getCustomTimeKey();
 
     @NonNull
     public abstract List<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);

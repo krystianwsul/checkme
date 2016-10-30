@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -53,12 +54,12 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final Map<TaskKey, TaskTreeData> TaskTreeDatas;
 
         @NonNull
-        public final Map<Integer, CustomTimeData> CustomTimeDatas;
+        public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
 
         @NonNull
         public final Set<UserData> mFriends;
 
-        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<Integer, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends) {
+        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends) {
             TaskData = taskData;
             TaskTreeDatas = taskTreeDatas;
             CustomTimeDatas = customTimeDatas;
@@ -318,23 +319,27 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     public static class CustomTimeData {
-        public final int Id;
+        @NonNull
+        public final CustomTimeKey mCustomTimeKey;
+
+        @NonNull
         public final String Name;
+
+        @NonNull
         public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(int id, String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
+        public CustomTimeData(@NonNull CustomTimeKey customTimeKey, @NonNull String name, @NonNull TreeMap<DayOfWeek, HourMinute> hourMinutes) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
             Assert.assertTrue(hourMinutes.size() == 7);
 
-            Id = id;
+            mCustomTimeKey = customTimeKey;
             Name = name;
             HourMinutes = hourMinutes;
         }
 
         @Override
         public int hashCode() {
-            return (Id + Name.hashCode() + HourMinutes.hashCode());
+            return (mCustomTimeKey.hashCode() + Name.hashCode() + HourMinutes.hashCode());
         }
 
         @SuppressWarnings("SimplifiableIfStatement")
@@ -351,7 +356,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
             CustomTimeData customTimeData = (CustomTimeData) object;
 
-            if (Id != customTimeData.Id)
+            if (!mCustomTimeKey.equals(customTimeData.mCustomTimeKey))
                 return false;
 
             if (!Name.equals(customTimeData.Name))

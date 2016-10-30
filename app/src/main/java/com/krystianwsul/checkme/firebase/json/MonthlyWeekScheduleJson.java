@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.json;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.krystianwsul.checkme.utils.ScheduleType;
 
@@ -12,7 +13,7 @@ public class MonthlyWeekScheduleJson extends ScheduleJson {
     private int dayOfWeek;
     private boolean beginningOfMonth;
 
-    private Integer customTimeId;
+    private String customTimeId;
 
     private Integer hour;
 
@@ -23,12 +24,12 @@ public class MonthlyWeekScheduleJson extends ScheduleJson {
 
     }
 
-    public MonthlyWeekScheduleJson(@NonNull String taskId, long startTime, @Nullable Long endTime, int dayOfMonth, int dayOfWeek, boolean beginningOfMonth, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
+    public MonthlyWeekScheduleJson(@NonNull String taskId, long startTime, @Nullable Long endTime, int dayOfMonth, int dayOfWeek, boolean beginningOfMonth, @Nullable String customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         super(taskId, startTime, endTime, ScheduleType.MONTHLY_WEEK.ordinal());
 
         Assert.assertTrue((hour == null) == (minute == null));
-        Assert.assertTrue((hour == null) || (customTimeId == null));
-        Assert.assertTrue((hour != null) || (customTimeId != null));
+        Assert.assertTrue((hour == null) || TextUtils.isEmpty(customTimeId));
+        Assert.assertTrue((hour != null) || !TextUtils.isEmpty(customTimeId));
 
         this.dayOfMonth = dayOfMonth;
         this.dayOfWeek = dayOfWeek;
@@ -53,7 +54,7 @@ public class MonthlyWeekScheduleJson extends ScheduleJson {
     }
 
     @Nullable
-    public Integer getCustomTimeId() {
+    public String getCustomTimeId() {
         return customTimeId;
     }
 

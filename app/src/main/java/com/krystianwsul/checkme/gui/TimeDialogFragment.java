@@ -11,6 +11,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 
 import junit.framework.Assert;
 
@@ -63,8 +64,8 @@ public class TimeDialogFragment extends AbstractDialogFragment {
                     Assert.assertTrue(which < customTimeDatas.size() + 2);
 
                     if (which < customTimeDatas.size()) {
-                        int id = customTimeDatas.get(which).Id;
-                        mTimeDialogListener.onCustomTimeSelected(id);
+                        CustomTimeKey customTimeKey = customTimeDatas.get(which).mCustomTimeKey;
+                        mTimeDialogListener.onCustomTimeSelected(customTimeKey);
                     } else if (which == customTimeDatas.size()) {
                         mTimeDialogListener.onOtherSelected();
                     } else {
@@ -81,7 +82,7 @@ public class TimeDialogFragment extends AbstractDialogFragment {
     }
 
     public interface TimeDialogListener {
-        void onCustomTimeSelected(int customTimeId);
+        void onCustomTimeSelected(@NonNull CustomTimeKey customTimeKey);
 
         void onOtherSelected();
 
@@ -89,14 +90,16 @@ public class TimeDialogFragment extends AbstractDialogFragment {
     }
 
     public static class CustomTimeData implements Parcelable {
-        public final int Id;
+        @NonNull
+        public final CustomTimeKey mCustomTimeKey;
+
+        @NonNull
         public final String Name;
 
-        public CustomTimeData(int id, String name) {
-            Assert.assertTrue(name != null);
+        public CustomTimeData(@NonNull CustomTimeKey customTimeKey, @NonNull String name) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
-            Id = id;
+            mCustomTimeKey = customTimeKey;
             Name = name;
         }
 
@@ -107,20 +110,20 @@ public class TimeDialogFragment extends AbstractDialogFragment {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(Id);
+            dest.writeParcelable(mCustomTimeKey, 0);
             dest.writeString(Name);
         }
 
         public static final Parcelable.Creator<CustomTimeData> CREATOR = new Creator<CustomTimeData>() {
             @Override
             public CustomTimeData createFromParcel(Parcel source) {
-                int id = source.readInt();
-                String name = source.readString();
+                CustomTimeKey customTimeKey = source.readParcelable(CustomTimeKey.class.getClassLoader());
+                Assert.assertTrue(customTimeKey != null);
 
-                Assert.assertTrue(name != null);
+                String name = source.readString();
                 Assert.assertTrue(!TextUtils.isEmpty(name));
 
-                return new CustomTimeData(id, name);
+                return new CustomTimeData(customTimeKey, name);
             }
 
             @Override

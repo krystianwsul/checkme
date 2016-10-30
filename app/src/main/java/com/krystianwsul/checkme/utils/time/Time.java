@@ -6,7 +6,8 @@ import android.support.v4.util.Pair;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 
 public interface Time {
-    HourMinute getHourMinute(DayOfWeek dayOfWeek);
+    @NonNull
+    HourMinute getHourMinute(@NonNull DayOfWeek dayOfWeek);
 
     @NonNull
     Pair<CustomTime, HourMinute> getPair();

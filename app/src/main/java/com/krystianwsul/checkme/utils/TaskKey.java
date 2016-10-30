@@ -32,11 +32,11 @@ public class TaskKey implements Parcelable, Serializable {
     @Override
     public int hashCode() {
         if (mLocalTaskId != null) {
-            Assert.assertTrue(mRemoteTaskId == null);
+            Assert.assertTrue(TextUtils.isEmpty(mRemoteTaskId));
 
             return mLocalTaskId;
         } else {
-            Assert.assertTrue(mRemoteTaskId != null);
+            Assert.assertTrue(!TextUtils.isEmpty(mRemoteTaskId));
 
             return mRemoteTaskId.hashCode();
         }

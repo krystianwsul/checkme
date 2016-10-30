@@ -8,7 +8,6 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Instance;
@@ -37,7 +36,6 @@ import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
@@ -54,10 +52,10 @@ public class LocalFactory {
     private static LocalFactory sLocalFactory;
 
     @NonNull
-    public final PersistenceManger mPersistenceManager; // todo customtimes
+    public final PersistenceManger mPersistenceManager; // todo customtimes scope
 
     @NonNull
-    public final HashMap<Integer, CustomTime> mLocalCustomTimes = new HashMap<>(); // todo customtimes
+    public final HashMap<Integer, LocalCustomTime> mLocalCustomTimes = new HashMap<>(); // todo customtimes scope
 
     @NonNull
     private final HashMap<Integer, LocalTask> mLocalTasks = new HashMap<>();
@@ -96,8 +94,8 @@ public class LocalFactory {
         for (CustomTimeRecord customTimeRecord : customTimeRecords) {
             Assert.assertTrue(customTimeRecord != null);
 
-            CustomTime customTime = new CustomTime(customTimeRecord);
-            mLocalCustomTimes.put(customTime.getId(), customTime);
+            LocalCustomTime localCustomTime = new LocalCustomTime(customTimeRecord);
+            mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);
         }
 
         Collection<TaskRecord> taskRecords = mPersistenceManager.getTaskRecords();
@@ -228,7 +226,7 @@ public class LocalFactory {
     }
 
     @Nullable
-    public InstanceShownRecord getInstanceShownRecord(@NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable Integer scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute) {
+    public InstanceShownRecord getInstanceShownRecord(@NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute) {
         List<InstanceShownRecord> matches;
         if (scheduleCustomTimeId != null) {
             Assert.assertTrue(scheduleHour == null);
@@ -265,8 +263,29 @@ public class LocalFactory {
     }
 
     @NonNull
-    public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull DateTime scheduleDateTime) {
-        return mPersistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime);
+    public InstanceShownRecord createInstanceShownRecord(@NonNull DomainFactory domainFactory, @NonNull String remoteTaskId, @NonNull DateTime scheduleDateTime) {
+        TimePair timePair = scheduleDateTime.getTime().getTimePair();
+
+        String remoteCustomTimeId;
+        Integer hour;
+        Integer minute;
+        if (timePair.mHourMinute != null) {
+            Assert.assertTrue(timePair.mCustomTimeKey == null);
+
+            remoteCustomTimeId = null;
+
+            hour = timePair.mHourMinute.getHour();
+            minute = timePair.mHourMinute.getMinute();
+        } else {
+            Assert.assertTrue(timePair.mCustomTimeKey != null);
+
+            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey);
+
+            hour = null;
+            minute = null;
+        }
+
+        return mPersistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime.getDate(), remoteCustomTimeId, hour, minute);
     }
 
     void deleteTask(@NonNull LocalTask localTask) {
@@ -335,7 +354,7 @@ public class LocalFactory {
                     CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
 
                     Date date = singleScheduleData.Date;
-                    Time time = getTime(singleScheduleData.TimePair);
+                    Time time = domainFactory.getTime(singleScheduleData.TimePair);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp);
 
@@ -347,7 +366,7 @@ public class LocalFactory {
                 case DAILY: {
                     CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
 
-                    Time time = getTime(dailyScheduleData.TimePair);
+                    Time time = domainFactory.getTime(dailyScheduleData.TimePair);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
 
@@ -360,7 +379,7 @@ public class LocalFactory {
                     CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
 
                     DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
-                    Time time = getTime(weeklyScheduleData.TimePair);
+                    Time time = domainFactory.getTime(weeklyScheduleData.TimePair);
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
 
@@ -374,7 +393,7 @@ public class LocalFactory {
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
 
-                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, getTime(monthlyDayScheduleData.TimePair));
+                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, domainFactory.getTime(monthlyDayScheduleData.TimePair));
 
                     schedules.add(new MonthlyDaySchedule(domainFactory, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)));
                     break;
@@ -384,7 +403,7 @@ public class LocalFactory {
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
 
-                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, getTime(monthlyWeekScheduleData.TimePair));
+                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, domainFactory.getTime(monthlyWeekScheduleData.TimePair));
 
                     schedules.add(new MonthlyWeekSchedule(domainFactory, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)));
                     break;
@@ -395,21 +414,6 @@ public class LocalFactory {
         }
 
         return schedules;
-    }
-
-    @NonNull
-    public Time getTime(@NonNull TimePair timePair) {
-        if (timePair.mCustomTimeId != null) {
-            Assert.assertTrue(timePair.mHourMinute == null);
-
-            CustomTime customTime = mLocalCustomTimes.get(timePair.mCustomTimeId);
-            Assert.assertTrue(customTime != null);
-
-            return customTime;
-        } else {
-            Assert.assertTrue(timePair.mHourMinute != null);
-            return new NormalTime(timePair.mHourMinute);
-        }
     }
 
     void createTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
@@ -471,7 +475,7 @@ public class LocalFactory {
         }
 
         Stream.of(irrelevant.mCustomTimes)
-                .forEach(mLocalCustomTimes::remove); // todo customTimes
+                .forEach(mLocalCustomTimes::remove);
     }
 
     @NonNull

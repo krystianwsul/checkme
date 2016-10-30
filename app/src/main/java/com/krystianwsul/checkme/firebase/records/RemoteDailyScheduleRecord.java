@@ -43,7 +43,7 @@ public class RemoteDailyScheduleRecord extends RemoteScheduleRecord {
     }
 
     @Nullable
-    public Integer getCustomTimeId() {
+    public String getCustomTimeId() {
         return getDailyScheduleJson().getCustomTimeId();
     }
 

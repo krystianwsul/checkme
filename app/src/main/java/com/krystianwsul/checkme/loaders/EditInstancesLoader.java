@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -14,6 +15,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> {
@@ -34,13 +36,14 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
     }
 
     public static class Data extends DomainLoader.Data {
+        @NonNull
         public final HashMap<InstanceKey, InstanceData> InstanceDatas;
-        public final TreeMap<Integer, CustomTimeData> CustomTimeDatas;
 
-        public Data(HashMap<InstanceKey, InstanceData> instanceDatas, TreeMap<Integer, CustomTimeData> customTimeDatas) {
-            Assert.assertTrue(instanceDatas != null);
+        @NonNull
+        public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
+
+        public Data(@NonNull HashMap<InstanceKey, InstanceData> instanceDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas) {
             Assert.assertTrue(instanceDatas.size() > 1);
-            Assert.assertTrue(customTimeDatas != null);
 
             InstanceDatas = instanceDatas;
             CustomTimeDatas = customTimeDatas;
@@ -110,23 +113,27 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
     }
 
     public static class CustomTimeData {
-        public final int Id;
+        @NonNull
+        public final CustomTimeKey mCustomTimeKey;
+
+        @NonNull
         public final String Name;
+
+        @NonNull
         public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(int id, String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
+        public CustomTimeData(@NonNull CustomTimeKey customTimeKey, @NonNull String name, @NonNull TreeMap<DayOfWeek, HourMinute> hourMinutes) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
             Assert.assertTrue(hourMinutes.size() == 7);
 
-            Id = id;
+            mCustomTimeKey = customTimeKey;
             Name = name;
             HourMinutes = hourMinutes;
         }
 
         @Override
         public int hashCode() {
-            return (Id + Name.hashCode() + HourMinutes.hashCode());
+            return (mCustomTimeKey.hashCode() + Name.hashCode() + HourMinutes.hashCode());
         }
 
         @Override
@@ -142,7 +149,7 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
 
             CustomTimeData customTimeData = (CustomTimeData) object;
 
-            return (Id == customTimeData.Id && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
+            return (mCustomTimeKey.equals(customTimeData.mCustomTimeKey) && Name.equals(customTimeData.Name) && HourMinutes.equals(customTimeData.HourMinutes));
         }
     }
 }

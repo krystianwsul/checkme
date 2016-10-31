@@ -1166,15 +1166,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    @NonNull
-    public synchronized TaskKey updateChildTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
-        MyCrashlytics.log("DomainFactory.updateChildTask");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
+    Pair<TaskKey, List<TaskKey>> updateChildTask(@NonNull ExactTimeStamp now, @NonNull Context context, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
         List<TaskKey> taskKeys = new ArrayList<>();
 
         Task task = getTask(taskKey);
@@ -1215,11 +1207,27 @@ public class DomainFactory {
             taskKeys.add(oldTaskHierarchy.getParentTaskKey());
         }
 
-        updateNotifications(context, taskKeys, now);
+        return new Pair<>(task.getTaskKey(), taskKeys);
+    }
+
+    @NonNull
+    public synchronized TaskKey updateChildTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
+        MyCrashlytics.log("DomainFactory.updateChildTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        Pair<TaskKey, List<TaskKey>> pair = updateChildTask(now, context, taskKey, name, parentTaskKey, note);
+        Assert.assertTrue(pair.first != null);
+        Assert.assertTrue(pair.second != null);
+
+        updateNotifications(context, pair.second, now);
 
         save(context, dataId);
 
-        return task.getTaskKey();
+        return pair.first;
     }
 
     public synchronized void setTaskEndTimeStamp(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, @NonNull TaskKey taskKey) {

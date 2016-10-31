@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -173,14 +172,7 @@ public abstract class Instance {
         if (isVisible) {
             Task task = getTask();
 
-            Date oldestVisible = task.getOldestVisible();
-
-            // zone hack
-            if (!(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getDate()) <= 0)) {
-                Log.e("asdf", getName() + " oldest: " + oldestVisible + ", schedule: " + getScheduleDateTime() + ", instance: " + getInstanceDateTime() + ", exists: " + exists());
-            }
-
-            //Assert.assertTrue(oldestVisible == null || oldestVisible.compareTo(getScheduleDateTime().getTimeStamp().getDate()) <= 0 || exists());
+            task.correctOldestVisible(getScheduleDateTime().getDate()); // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
         }
 
         return isVisible;

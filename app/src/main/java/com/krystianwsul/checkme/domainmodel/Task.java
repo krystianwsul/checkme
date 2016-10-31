@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
@@ -82,6 +83,7 @@ public abstract class Task {
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);
     }
 
+    @SuppressWarnings("WeakerAccess") // bo inheritance i testy
     protected boolean isVisible(@NonNull ExactTimeStamp now) {
         if (current(now)) {
             Task rootTask = getRootTask(now);
@@ -192,6 +194,15 @@ public abstract class Task {
         }
 
         setOldestVisible(oldestVisible);
+    }
+
+    void correctOldestVisible(@NonNull Date date) {
+        Date oldestVisible = getOldestVisible();
+        if (oldestVisible != null && oldestVisible.compareTo(date) < 0) {
+            Log.e("asdf", getName() + " old oldest: " + oldestVisible + ", new oldest: " + date);
+
+            setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
+        }
     }
 
     protected abstract void setOldestVisible(@NonNull Date date);

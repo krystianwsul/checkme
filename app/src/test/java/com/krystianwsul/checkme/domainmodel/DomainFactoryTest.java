@@ -22,13 +22,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Collections;
 
-@SuppressWarnings("UnnecessaryLocalVariable")
+import static org.mockito.Matchers.any;
+
+@SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TextUtils.class, android.util.Log.class, Context.class})
 public class DomainFactoryTest {
@@ -39,6 +43,14 @@ public class DomainFactoryTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(TextUtils.class);
         PowerMockito.mockStatic(Log.class);
+
+        PowerMockito.when(TextUtils.isEmpty(any(CharSequence.class))).thenAnswer(new Answer<Boolean>() {
+            @Override
+            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                CharSequence a = (CharSequence) invocation.getArguments()[0];
+                return !(a != null && a.length() > 0);
+            }
+        });
     }
 
     @SuppressWarnings("EmptyMethod")
@@ -63,16 +75,16 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
 
-        LocalTask rootLocalTask = domainFactory.getLocalFactory().createScheduleRootTask(domainFactory, startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
+        Task rootTask = domainFactory.getLocalFactory().createScheduleRootTask(domainFactory, startExactTimeStamp, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null);
 
-        Assert.assertTrue(rootLocalTask.isVisible(startExactTimeStamp));
+        Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.isEmpty());
 
         DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
 
-        Instance rootInstance = domainFactory.getInstance(rootLocalTask, scheduleDateTime);
+        Instance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
@@ -96,7 +108,7 @@ public class DomainFactoryTest {
         Assert.assertTrue(irrelevantBefore.mTasks.isEmpty());
         Assert.assertTrue(irrelevantBefore.mInstances.isEmpty());
 
-        Assert.assertTrue(rootLocalTask.getOldestVisible().equals(startDate));
+        Assert.assertTrue(rootTask.getOldestVisible().equals(startDate));
 
         Assert.assertTrue(domainFactory.getTaskListData(nextDayBeforeExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(nextDayBeforeExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.isEmpty());
@@ -111,9 +123,9 @@ public class DomainFactoryTest {
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 1);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 1);
 
-        Assert.assertTrue(rootLocalTask.getOldestVisible().equals(nextDayAfterDate));
+        Assert.assertTrue(rootTask.getOldestVisible().equals(nextDayAfterDate));
 
-        Assert.assertTrue(!rootLocalTask.isVisible(nextDayAfterExactTimeStamp));
+        Assert.assertTrue(!rootTask.isVisible(nextDayAfterExactTimeStamp));
 
         Assert.assertTrue(!rootInstance.isVisible(nextDayAfterExactTimeStamp));
 
@@ -245,5 +257,50 @@ public class DomainFactoryTest {
         domainFactory.removeIrrelevant(irrelevantAfter);
 
         Assert.assertTrue(domainFactory.getTaskListData(nextDayAfterExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
+    }
+
+    @Test
+    public void testRelevantSingleAndNoReminderNextDay() {
+        PersistenceManger persistenceManger = new PersistenceManger();
+
+        DomainFactory domainFactory = new DomainFactory(persistenceManger);
+
+        Date startDate = new Date(2016, 1, 1);
+        ExactTimeStamp startExactTimeStamp = new ExactTimeStamp(startDate, new HourMilli(1, 0, 0, 0));
+
+        Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
+
+        Task singleTask = domainFactory.getLocalFactory().createScheduleRootTask(domainFactory, startExactTimeStamp, "single", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(new Date(2016, 1, 1), new TimePair(new HourMinute(2, 0)))), null);
+
+        Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
+
+        Task noReminderTask = domainFactory.getLocalFactory().createLocalTaskHelper(domainFactory, "no reminder", startExactTimeStamp, null);
+
+        Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 2);
+
+        DomainFactory.Irrelevant irrelevantFirstDay = domainFactory.setIrrelevant(new ExactTimeStamp(startDate, new HourMilli(3, 0, 0, 0)));
+        Assert.assertTrue(irrelevantFirstDay.mTasks.isEmpty());
+        Assert.assertTrue(irrelevantFirstDay.mInstances.isEmpty());
+
+        Assert.assertTrue(singleTask.getOldestVisible().equals(startDate));
+        Assert.assertTrue(noReminderTask.getOldestVisible().equals(startDate));
+
+        Date nextDay = new Date(2016, 1, 2);
+
+        DomainFactory.Irrelevant irrelevantNextDayBefore = domainFactory.setIrrelevant(new ExactTimeStamp(nextDay, new HourMilli(3, 0, 0, 0)));
+        Assert.assertTrue(irrelevantNextDayBefore.mTasks.isEmpty());
+        Assert.assertTrue(irrelevantNextDayBefore.mInstances.isEmpty());
+
+        Assert.assertTrue(singleTask.getOldestVisible().equals(startDate));
+        Assert.assertTrue(noReminderTask.getOldestVisible().equals(nextDay));
+
+        domainFactory.updateChildTask(new ExactTimeStamp(nextDay, new HourMilli(4, 0, 0, 0)), mContext, noReminderTask.getTaskKey(), noReminderTask.getName(), singleTask.getTaskKey(), noReminderTask.getNote());
+        Assert.assertTrue(irrelevantNextDayBefore.mTasks.isEmpty());
+        Assert.assertTrue(irrelevantNextDayBefore.mInstances.isEmpty());
+
+        Assert.assertTrue(singleTask.getOldestVisible().equals(startDate));
+        Assert.assertTrue(noReminderTask.getOldestVisible().equals(nextDay));
+
+        Assert.assertTrue(domainFactory.getTaskListData(new ExactTimeStamp(nextDay, new HourMilli(5, 0, 0, 0)), mContext, null).mChildTaskDatas.size() == 1);
     }
 }

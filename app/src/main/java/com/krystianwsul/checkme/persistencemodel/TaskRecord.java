@@ -5,12 +5,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class TaskRecord extends Record {
     static final String TABLE_TASKS = "tasks";
@@ -108,6 +110,14 @@ public class TaskRecord extends Record {
                     + COLUMN_NOTE;
 
             sqLiteDatabase.execSQL("DROP INDEX tasksIndexRelevant");
+
+            Cursor dbCursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
+            String[] columnNames = dbCursor.getColumnNames();
+
+            Log.e("asdf", "column names before: " + Arrays.toString(columnNames));
+
+            dbCursor.close();
+
             sqLiteDatabase.execSQL(
                     "CREATE TEMPORARY TABLE t2_backup(" + columns + ");" +
                             "INSERT INTO t2_backup SELECT " + columns + " FROM " + TABLE_TASKS + ";" +
@@ -123,6 +133,13 @@ public class TaskRecord extends Record {
                             + COLUMN_NOTE + " TEXT);" +
                             "INSERT INTO " + TABLE_TASKS + " SELECT * FROM t2_backup;" +
                             "DROP TABLE t2_backup;");
+
+            dbCursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
+            columnNames = dbCursor.getColumnNames();
+
+            Log.e("asdf", "column names after: " + Arrays.toString(columnNames));
+
+            dbCursor.close();
         }
     }
 

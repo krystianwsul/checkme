@@ -110,8 +110,7 @@ public class CustomTimeRecord extends Record {
                     + ", " + COLUMN_CURRENT;
 
             sqLiteDatabase.execSQL("DROP INDEX customTimesIndexRelevant");
-            sqLiteDatabase.execSQL(
-                    "DROP TABLE t1_backup IF EXISTS;" + "CREATE TEMPORARY TABLE t1_backup(" + columnList + ");" +
+            sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t1_backup(" + columnList + ");" +
                             "INSERT INTO t1_backup SELECT " + columnList + " FROM " + TABLE_CUSTOM_TIMES + ";" +
                             "DROP TABLE " + TABLE_CUSTOM_TIMES + ";" +
                             "CREATE TABLE " + TABLE_CUSTOM_TIMES

@@ -245,7 +245,7 @@ public class PersistenceManger {
 
         int id = ++mCustomTimeMaxId;
 
-        CustomTimeRecord customTimeRecord = new CustomTimeRecord(false, id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute(), true, true);
+        CustomTimeRecord customTimeRecord = new CustomTimeRecord(false, id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute(), true);
         mCustomTimeRecords.add(customTimeRecord);
         return customTimeRecord;
     }
@@ -256,7 +256,7 @@ public class PersistenceManger {
 
         int id = ++mTaskMaxId;
 
-        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, true, null, null, null, note);
+        TaskRecord taskRecord = new TaskRecord(false, id, name, startExactTimeStamp.getLong(), null, null, null, null, note);
         mTaskRecords.add(taskRecord);
 
         return taskRecord;
@@ -482,7 +482,7 @@ public class PersistenceManger {
 
         int id = ++mInstanceMaxId;
 
-        InstanceRecord instanceRecord = new InstanceRecord(false, id, localTask.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false, true);
+        InstanceRecord instanceRecord = new InstanceRecord(false, id, localTask.getId(), null, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.getLong(), false, false);
         mInstanceRecords.add(instanceRecord);
         return instanceRecord;
     }

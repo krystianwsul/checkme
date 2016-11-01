@@ -25,7 +25,7 @@ public class LocalCustomTime implements CustomTime {
     @Nullable
     private RemoteCustomTimeRecord mRemoteCustomTimeRecord;
 
-    public LocalCustomTime(@NonNull CustomTimeRecord customTimeRecord) {
+    LocalCustomTime(@NonNull CustomTimeRecord customTimeRecord) {
         mCustomTimeRecord = customTimeRecord;
     }
 
@@ -175,7 +175,7 @@ public class LocalCustomTime implements CustomTime {
     }
 
     public void setRelevant() {
-        mCustomTimeRecord.setRelevant(false);
+        mCustomTimeRecord.delete();
 
         if (mRemoteCustomTimeRecord != null)
             mRemoteCustomTimeRecord.delete();
@@ -243,7 +243,7 @@ public class LocalCustomTime implements CustomTime {
         return (mRemoteCustomTimeRecord != null);
     }
 
-    public void clearRemoteRecord() {
+    void clearRemoteRecord() {
         Assert.assertTrue(hasRemoteRecord());
 
         mRemoteCustomTimeRecord = null;

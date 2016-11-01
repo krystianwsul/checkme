@@ -316,7 +316,7 @@ public class LocalInstance extends Instance {
     public void setRelevant() {
         Assert.assertTrue(mInstanceRecord != null);
 
-        mInstanceRecord.setRelevant(false);
+        mInstanceRecord.delete();
     }
 
     public void delete() {

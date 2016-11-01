@@ -35,9 +35,6 @@ public class InstanceRecord extends Record {
     private static final String COLUMN_HIERARCHY_TIME = "hierarchyTime";
     private static final String COLUMN_NOTIFIED = "notified";
     private static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
-    private static final String COLUMN_RELEVANT = "relevant";
-
-    private static final String INDEX_RELEVANT = "instancesIndexRelevant";
 
     private static final String INDEX_TASK_SCHEDULE_HOUR_MINUTE = "instanceIndexTaskScheduleHourMinute";
     private static final String INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID = "instanceIndexTaskScheduleCustomTimeId";
@@ -70,8 +67,6 @@ public class InstanceRecord extends Record {
     private boolean mNotified;
     private boolean mNotificationShown;
 
-    private boolean mRelevant;
-
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_INSTANCES
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -91,10 +86,7 @@ public class InstanceRecord extends Record {
                 + COLUMN_INSTANCE_MINUTE + " INTEGER, "
                 + COLUMN_HIERARCHY_TIME + " INTEGER NOT NULL, "
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
-                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
-                + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1);");
-
-        sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_INSTANCES + "(" + COLUMN_RELEVANT + " DESC)");
+                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0);");
 
         sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_HOUR_MINUTE + " ON " + TABLE_INSTANCES
                 + "("
@@ -123,9 +115,9 @@ public class InstanceRecord extends Record {
 
         if (oldVersion <= 5) {
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_INSTANCES
-                    + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
+                    + " ADD COLUMN relevant INTEGER NOT NULL DEFAULT 1");
 
-            sqLiteDatabase.execSQL("UPDATE " + TABLE_INSTANCES + " SET " + COLUMN_RELEVANT + " = 1");
+            sqLiteDatabase.execSQL("UPDATE " + TABLE_INSTANCES + " SET relevant = 1");
         }
 
         if (oldVersion <= 6) {
@@ -142,7 +134,7 @@ public class InstanceRecord extends Record {
         }
 
         if (oldVersion <= 7) {
-            sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_INSTANCES + "(" + COLUMN_RELEVANT + " DESC)");
+            sqLiteDatabase.execSQL("CREATE INDEX instancesIndexRelevant ON " + TABLE_INSTANCES + "(relevant DESC)");
         }
 
         if (oldVersion <= 11) {
@@ -225,14 +217,79 @@ public class InstanceRecord extends Record {
                     + COLUMN_SCHEDULE_CUSTOM_TIME_ID
                     + ")");
         }
+
+        if (oldVersion < 16) {
+            String columnList = COLUMN_ID + ", "
+                    + COLUMN_TASK_ID + ", "
+                    + COLUMN_DONE + ", "
+                    + COLUMN_SCHEDULE_YEAR + ", "
+                    + COLUMN_SCHEDULE_MONTH + ", "
+                    + COLUMN_SCHEDULE_DAY + ", "
+                    + COLUMN_SCHEDULE_CUSTOM_TIME_ID + ", "
+                    + COLUMN_SCHEDULE_HOUR + ", "
+                    + COLUMN_SCHEDULE_MINUTE + ", "
+                    + COLUMN_INSTANCE_YEAR + ", "
+                    + COLUMN_INSTANCE_MONTH + ", "
+                    + COLUMN_INSTANCE_DAY + ", "
+                    + COLUMN_INSTANCE_CUSTOM_TIME_ID + ", "
+                    + COLUMN_INSTANCE_HOUR + ", "
+                    + COLUMN_INSTANCE_MINUTE + ", "
+                    + COLUMN_HIERARCHY_TIME + ", "
+                    + COLUMN_NOTIFIED + ", "
+                    + COLUMN_NOTIFICATION_SHOWN;
+
+            sqLiteDatabase.execSQL("DROP INDEX instancesIndexRelevant");
+            sqLiteDatabase.execSQL(
+                    "CREATE TEMPORARY TABLE t3_backup(" + columnList + ");" +
+                            "INSERT INTO t3_backup SELECT " + columnList + " FROM " + TABLE_INSTANCES + ";" +
+                            "DROP TABLE " + TABLE_INSTANCES + ";" +
+                            "CREATE TABLE " + TABLE_INSTANCES
+                            + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            + COLUMN_TASK_ID + " INTEGER NOT NULL REFERENCES " + TaskRecord.TABLE_TASKS + "(" + TaskRecord.COLUMN_ID + "), "
+                            + COLUMN_DONE + " INTEGER, "
+                            + COLUMN_SCHEDULE_YEAR + " INTEGER NOT NULL, "
+                            + COLUMN_SCHEDULE_MONTH + " INTEGER NOT NULL, "
+                            + COLUMN_SCHEDULE_DAY + " INTEGER NOT NULL, "
+                            + COLUMN_SCHEDULE_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
+                            + COLUMN_SCHEDULE_HOUR + " INTEGER, "
+                            + COLUMN_SCHEDULE_MINUTE + " INTEGER, "
+                            + COLUMN_INSTANCE_YEAR + " INTEGER, "
+                            + COLUMN_INSTANCE_MONTH + " INTEGER, "
+                            + COLUMN_INSTANCE_DAY + " INTEGER, "
+                            + COLUMN_INSTANCE_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
+                            + COLUMN_INSTANCE_HOUR + " INTEGER, "
+                            + COLUMN_INSTANCE_MINUTE + " INTEGER, "
+                            + COLUMN_HIERARCHY_TIME + " INTEGER NOT NULL, "
+                            + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
+                            + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0);" +
+                            "CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_HOUR_MINUTE + " ON " + TABLE_INSTANCES
+                            + "("
+                            + COLUMN_TASK_ID + ", "
+                            + COLUMN_SCHEDULE_YEAR + ", "
+                            + COLUMN_SCHEDULE_MONTH + ", "
+                            + COLUMN_SCHEDULE_DAY + ", "
+                            + COLUMN_SCHEDULE_HOUR + ", "
+                            + COLUMN_SCHEDULE_MINUTE
+                            + ")" +
+                            "CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID + " ON " + TABLE_INSTANCES
+                            + "("
+                            + COLUMN_TASK_ID + ", "
+                            + COLUMN_SCHEDULE_YEAR + ", "
+                            + COLUMN_SCHEDULE_MONTH + ", "
+                            + COLUMN_SCHEDULE_DAY + ", "
+                            + COLUMN_SCHEDULE_CUSTOM_TIME_ID
+                            + ")" +
+                            "INSERT INTO " + TABLE_INSTANCES + " SELECT * FROM t3_backup;" +
+                            "DROP TABLE t3_backup;");
+        }
     }
 
-    public static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {
+    static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
         ArrayList<InstanceRecord> instanceRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, COLUMN_RELEVANT + " = 1", null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             instanceRecords.add(cursorToInstanceRecord(cursor));
@@ -265,7 +322,6 @@ public class InstanceRecord extends Record {
         long hierarchyTime = cursor.getLong(15);
         boolean notified = (cursor.getInt(16) == 1);
         boolean notificationShown = (cursor.getInt(17) == 1);
-        boolean relevant = (cursor.getInt(18) == 1);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
@@ -279,7 +335,7 @@ public class InstanceRecord extends Record {
         boolean hasInstanceTime = ((instanceHour != null) || (instanceCustomTimeId != null));
         Assert.assertTrue(hasInstanceDate == hasInstanceTime);
 
-        return new InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown, relevant);
+        return new InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown);
     }
 
     static int getMaxId(SQLiteDatabase sqLiteDatabase) {
@@ -287,7 +343,7 @@ public class InstanceRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID);
     }
 
-    InstanceRecord(boolean created, int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown, boolean relevant) {
+    InstanceRecord(boolean created, int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
         super(created);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
@@ -330,8 +386,6 @@ public class InstanceRecord extends Record {
         mNotified = notified;
 
         mNotificationShown = notificationShown;
-
-        mRelevant = relevant;
     }
 
     public int getId() {
@@ -451,11 +505,6 @@ public class InstanceRecord extends Record {
         mChanged = true;
     }
 
-    public void setRelevant(boolean relevant) {
-        mRelevant = relevant;
-        mChanged = true;
-    }
-
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
@@ -476,7 +525,6 @@ public class InstanceRecord extends Record {
         contentValues.put(COLUMN_HIERARCHY_TIME, mHierarchyTime);
         contentValues.put(COLUMN_NOTIFIED, mNotified ? 1 : 0);
         contentValues.put(COLUMN_NOTIFICATION_SHOWN, mNotificationShown ? 1 : 0);
-        contentValues.put(COLUMN_RELEVANT, mRelevant ? 1 : 0);
         return contentValues;
     }
 

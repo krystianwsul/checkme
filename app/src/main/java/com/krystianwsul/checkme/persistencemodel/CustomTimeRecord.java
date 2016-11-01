@@ -30,9 +30,6 @@ public class CustomTimeRecord extends Record {
     private static final String COLUMN_SATURDAY_HOUR = "saturdayHour";
     private static final String COLUMN_SATURDAY_MINUTE = "saturdayMinute";
     private static final String COLUMN_CURRENT = "current";
-    private static final String COLUMN_RELEVANT = "relevant";
-
-    private static final String INDEX_RELEVANT = "customTimesIndexRelevant";
 
     private final int mId;
     private String mName;
@@ -60,8 +57,6 @@ public class CustomTimeRecord extends Record {
 
     private boolean mCurrent;
 
-    private boolean mRelevant;
-
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
@@ -82,9 +77,7 @@ public class CustomTimeRecord extends Record {
                 + COLUMN_FRIDAY_MINUTE + " INTEGER NOT NULL, "
                 + COLUMN_SATURDAY_HOUR + " INTEGER NOT NULL, "
                 + COLUMN_SATURDAY_MINUTE + " INTEGER NOT NULL, "
-                + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1, "
-                + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1);");
-        sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_CUSTOM_TIMES + "(" + COLUMN_RELEVANT + " DESC)");
+                + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);");
     }
 
     @SuppressWarnings("UnusedParameters")
@@ -93,18 +86,63 @@ public class CustomTimeRecord extends Record {
 
         if (oldVersion <= 8) {
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_CUSTOM_TIMES
-                    + " ADD COLUMN " + COLUMN_RELEVANT + " INTEGER NOT NULL DEFAULT 1");
+                    + " ADD COLUMN relevant INTEGER NOT NULL DEFAULT 1");
 
-            sqLiteDatabase.execSQL("CREATE INDEX " + INDEX_RELEVANT + " ON " + TABLE_CUSTOM_TIMES + "(" + COLUMN_RELEVANT + " DESC)");
+            sqLiteDatabase.execSQL("CREATE INDEX customTimesIndexRelevant ON " + TABLE_CUSTOM_TIMES + "(relevant DESC)");
+        }
+
+        if (oldVersion < 16) {
+            String columnList = COLUMN_NAME
+                    + ", " + COLUMN_SUNDAY_HOUR
+                    + ", " + COLUMN_SUNDAY_MINUTE
+                    + ", " + COLUMN_MONDAY_HOUR
+                    + ", " + COLUMN_MONDAY_MINUTE
+                    + ", " + COLUMN_TUESDAY_HOUR
+                    + ", " + COLUMN_TUESDAY_MINUTE
+                    + ", " + COLUMN_WEDNESDAY_HOUR
+                    + ", " + COLUMN_WEDNESDAY_MINUTE
+                    + ", " + COLUMN_THURSDAY_HOUR
+                    + ", " + COLUMN_THURSDAY_MINUTE
+                    + ", " + COLUMN_FRIDAY_HOUR
+                    + ", " + COLUMN_FRIDAY_MINUTE
+                    + ", " + COLUMN_SATURDAY_HOUR
+                    + ", " + COLUMN_SATURDAY_MINUTE
+                    + ", " + COLUMN_CURRENT;
+
+            sqLiteDatabase.execSQL("DROP INDEX customTimesIndexRelevant");
+            sqLiteDatabase.execSQL(
+                    "DROP TABLE t1_backup IF EXISTS;" + "CREATE TEMPORARY TABLE t1_backup(" + columnList + ");" +
+                            "INSERT INTO t1_backup SELECT " + columnList + " FROM " + TABLE_CUSTOM_TIMES + ";" +
+                            "DROP TABLE " + TABLE_CUSTOM_TIMES + ";" +
+                            "CREATE TABLE " + TABLE_CUSTOM_TIMES
+                            + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            + COLUMN_NAME + " TEXT NOT NULL, "
+                            + COLUMN_SUNDAY_HOUR + " INTEGER NOT NULL, "
+                            + COLUMN_SUNDAY_MINUTE + " INTEGER NOT NULL, "
+                            + COLUMN_MONDAY_HOUR + " INTEGER NOT NULL, "
+                            + COLUMN_MONDAY_MINUTE + " INTEGER NOT NULL, "
+                            + COLUMN_TUESDAY_HOUR + " INTEGER NOT NULL, "
+                            + COLUMN_TUESDAY_MINUTE + " INTEGER NOT NULL, "
+                            + COLUMN_WEDNESDAY_HOUR + " INTEGER NOT NULL, "
+                            + COLUMN_WEDNESDAY_MINUTE + " INTEGER NOT NULL, "
+                            + COLUMN_THURSDAY_HOUR + " INTEGER NOT NULL, "
+                            + COLUMN_THURSDAY_MINUTE + " INTEGER NOT NULL, "
+                            + COLUMN_FRIDAY_HOUR + " INTEGER NOT NULL, "
+                            + COLUMN_FRIDAY_MINUTE + " INTEGER NOT NULL, "
+                            + COLUMN_SATURDAY_HOUR + " INTEGER NOT NULL, "
+                            + COLUMN_SATURDAY_MINUTE + " INTEGER NOT NULL, "
+                            + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);" +
+                            "INSERT INTO " + TABLE_CUSTOM_TIMES + " SELECT * FROM t1_backup;" +
+                            "DROP TABLE t1_backup;");
         }
     }
 
-    public static ArrayList<CustomTimeRecord> getCustomTimeRecords(SQLiteDatabase sqLiteDatabase) {
+    static ArrayList<CustomTimeRecord> getCustomTimeRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
         ArrayList<CustomTimeRecord> customTimeRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, COLUMN_RELEVANT + " = 1", null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             customTimeRecords.add(cursorToCustomTimeRecord(cursor));
@@ -135,9 +173,8 @@ public class CustomTimeRecord extends Record {
         int saturdayHour = cursor.getInt(14);
         int saturdayMinute = cursor.getInt(15);
         boolean current = (cursor.getInt(16) == 1);
-        boolean relevant = (cursor.getInt(17) == 1);
 
-        return new CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current, relevant);
+        return new CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
     }
 
     static int getMaxId(SQLiteDatabase sqLiteDatabase) {
@@ -145,7 +182,7 @@ public class CustomTimeRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID);
     }
 
-    CustomTimeRecord(boolean created, int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current, boolean relevant) {
+    CustomTimeRecord(boolean created, int id, String name, int sundayHour, int sundayMinute, int mondayHour, int mondayMinute, int tuesdayHour, int tuesdayMinute, int wednesdayHour, int wednesdayMinute, int thursdayHour, int thursdayMinute, int fridayHour, int fridayMinute, int saturdayHour, int saturdayMinute, boolean current) {
         super(created);
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -175,8 +212,6 @@ public class CustomTimeRecord extends Record {
         mSaturdayMinute = saturdayMinute;
 
         mCurrent = current;
-
-        mRelevant = relevant;
     }
 
     public int getId() {
@@ -254,10 +289,6 @@ public class CustomTimeRecord extends Record {
         return mCurrent;
     }
 
-    public boolean getRelevant() {
-        return mRelevant;
-    }
-
     public void setSundayHour(int hour) {
         mSundayHour = hour;
         mChanged = true;
@@ -333,11 +364,6 @@ public class CustomTimeRecord extends Record {
         mChanged = true;
     }
 
-    public void setRelevant(boolean relevant) {
-        mRelevant = relevant;
-        mChanged = true;
-    }
-
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
@@ -357,7 +383,6 @@ public class CustomTimeRecord extends Record {
         contentValues.put(COLUMN_SATURDAY_HOUR, mSaturdayHour);
         contentValues.put(COLUMN_SATURDAY_MINUTE, mSaturdayMinute);
         contentValues.put(COLUMN_CURRENT, mCurrent);
-        contentValues.put(COLUMN_RELEVANT, mRelevant);
 
         return contentValues;
     }

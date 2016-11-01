@@ -105,7 +105,7 @@ public class LocalTask extends Task {
 
     @Override
     public void setRelevant() {
-        mTaskRecord.setRelevant(false);
+        mTaskRecord.delete();
     }
 
     @Nullable

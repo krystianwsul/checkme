@@ -15,7 +15,7 @@ import java.util.List;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 16;
 
     private static SQLiteDatabase sSQLiteDatabase;
 

@@ -118,11 +118,10 @@ public class TaskRecord extends Record {
 
             dbCursor.close();
 
-            sqLiteDatabase.execSQL(
-                    "CREATE TEMPORARY TABLE t2_backup(" + columns + ");" +
-                            "INSERT INTO t2_backup SELECT " + columns + " FROM " + TABLE_TASKS + ";" +
-                            "DROP TABLE " + TABLE_TASKS + ";" +
-                            "CREATE TABLE " + TABLE_TASKS
+            sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t2_backup(" + columns + ");");
+            sqLiteDatabase.execSQL("INSERT INTO t2_backup SELECT " + columns + " FROM " + TABLE_TASKS + ";");
+            sqLiteDatabase.execSQL("DROP TABLE " + TABLE_TASKS + ";");
+            sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_TASKS
                             + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                             + COLUMN_NAME + " TEXT NOT NULL, "
                             + COLUMN_START_TIME + " TEXT NOT NULL, "
@@ -130,9 +129,9 @@ public class TaskRecord extends Record {
                             + COLUMN_OLDEST_VISIBLE_YEAR + " INTEGER, "
                             + COLUMN_OLDEST_VISIBLE_MONTH + " INTEGER, "
                             + COLUMN_OLDEST_VISIBLE_DAY + " INTEGER, "
-                            + COLUMN_NOTE + " TEXT);" +
-                            "INSERT INTO " + TABLE_TASKS + " SELECT * FROM t2_backup;" +
-                            "DROP TABLE t2_backup;");
+                    + COLUMN_NOTE + " TEXT);");
+            sqLiteDatabase.execSQL("INSERT INTO " + TABLE_TASKS + " SELECT * FROM t2_backup;");
+            sqLiteDatabase.execSQL("DROP TABLE t2_backup;");
 
             dbCursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
             columnNames = dbCursor.getColumnNames();

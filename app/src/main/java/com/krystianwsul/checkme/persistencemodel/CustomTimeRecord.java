@@ -110,10 +110,10 @@ public class CustomTimeRecord extends Record {
                     + ", " + COLUMN_CURRENT;
 
             sqLiteDatabase.execSQL("DROP INDEX customTimesIndexRelevant");
-            sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t1_backup(" + columnList + ");" +
-                            "INSERT INTO t1_backup SELECT " + columnList + " FROM " + TABLE_CUSTOM_TIMES + ";" +
-                            "DROP TABLE " + TABLE_CUSTOM_TIMES + ";" +
-                            "CREATE TABLE " + TABLE_CUSTOM_TIMES
+            sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t1_backup(" + columnList + ");");
+            sqLiteDatabase.execSQL("INSERT INTO t1_backup SELECT " + columnList + " FROM " + TABLE_CUSTOM_TIMES + ";");
+            sqLiteDatabase.execSQL("DROP TABLE " + TABLE_CUSTOM_TIMES + ";");
+            sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_CUSTOM_TIMES
                             + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                             + COLUMN_NAME + " TEXT NOT NULL, "
                             + COLUMN_SUNDAY_HOUR + " INTEGER NOT NULL, "
@@ -130,9 +130,9 @@ public class CustomTimeRecord extends Record {
                             + COLUMN_FRIDAY_MINUTE + " INTEGER NOT NULL, "
                             + COLUMN_SATURDAY_HOUR + " INTEGER NOT NULL, "
                             + COLUMN_SATURDAY_MINUTE + " INTEGER NOT NULL, "
-                            + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);" +
-                            "INSERT INTO " + TABLE_CUSTOM_TIMES + " SELECT * FROM t1_backup;" +
-                            "DROP TABLE t1_backup;");
+                    + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);");
+            sqLiteDatabase.execSQL("INSERT INTO " + TABLE_CUSTOM_TIMES + " SELECT * FROM t1_backup;");
+            sqLiteDatabase.execSQL("DROP TABLE t1_backup;");
         }
     }
 

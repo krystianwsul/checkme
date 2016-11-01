@@ -239,11 +239,10 @@ public class InstanceRecord extends Record {
                     + COLUMN_NOTIFICATION_SHOWN;
 
             sqLiteDatabase.execSQL("DROP INDEX instancesIndexRelevant");
-            sqLiteDatabase.execSQL(
-                    "CREATE TEMPORARY TABLE t3_backup(" + columnList + ");" +
-                            "INSERT INTO t3_backup SELECT " + columnList + " FROM " + TABLE_INSTANCES + ";" +
-                            "DROP TABLE " + TABLE_INSTANCES + ";" +
-                            "CREATE TABLE " + TABLE_INSTANCES
+            sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t3_backup(" + columnList + ");");
+            sqLiteDatabase.execSQL("INSERT INTO t3_backup SELECT " + columnList + " FROM " + TABLE_INSTANCES + ";");
+            sqLiteDatabase.execSQL("DROP TABLE " + TABLE_INSTANCES + ";");
+            sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_INSTANCES
                             + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                             + COLUMN_TASK_ID + " INTEGER NOT NULL REFERENCES " + TaskRecord.TABLE_TASKS + "(" + TaskRecord.COLUMN_ID + "), "
                             + COLUMN_DONE + " INTEGER, "
@@ -261,8 +260,8 @@ public class InstanceRecord extends Record {
                             + COLUMN_INSTANCE_MINUTE + " INTEGER, "
                             + COLUMN_HIERARCHY_TIME + " INTEGER NOT NULL, "
                             + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
-                            + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0);" +
-                            "CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_HOUR_MINUTE + " ON " + TABLE_INSTANCES
+                    + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0);");
+            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_HOUR_MINUTE + " ON " + TABLE_INSTANCES
                             + "("
                             + COLUMN_TASK_ID + ", "
                             + COLUMN_SCHEDULE_YEAR + ", "
@@ -270,17 +269,17 @@ public class InstanceRecord extends Record {
                             + COLUMN_SCHEDULE_DAY + ", "
                             + COLUMN_SCHEDULE_HOUR + ", "
                             + COLUMN_SCHEDULE_MINUTE
-                            + ")" +
-                            "CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID + " ON " + TABLE_INSTANCES
+                    + ")");
+            sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID + " ON " + TABLE_INSTANCES
                             + "("
                             + COLUMN_TASK_ID + ", "
                             + COLUMN_SCHEDULE_YEAR + ", "
                             + COLUMN_SCHEDULE_MONTH + ", "
                             + COLUMN_SCHEDULE_DAY + ", "
                             + COLUMN_SCHEDULE_CUSTOM_TIME_ID
-                            + ")" +
-                            "INSERT INTO " + TABLE_INSTANCES + " SELECT * FROM t3_backup;" +
-                            "DROP TABLE t3_backup;");
+                    + ")");
+            sqLiteDatabase.execSQL("INSERT INTO " + TABLE_INSTANCES + " SELECT * FROM t3_backup;");
+            sqLiteDatabase.execSQL("DROP TABLE t3_backup;");
         }
     }
 

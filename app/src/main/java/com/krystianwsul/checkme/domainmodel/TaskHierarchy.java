@@ -50,4 +50,6 @@ public abstract class TaskHierarchy {
     }
 
     public abstract void setEndExactTimeStamp(@NonNull ExactTimeStamp now);
+
+    public abstract void delete();
 }

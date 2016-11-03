@@ -100,6 +100,8 @@ public class TaskRecord extends Record {
         }
 
         if (oldVersion < 16) {
+            sqLiteDatabase.delete(TABLE_TASKS, "relevant = 0", null);
+
             String columns = COLUMN_ID + ", "
                     + COLUMN_NAME + ", "
                     + COLUMN_START_TIME + ", "

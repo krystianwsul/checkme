@@ -313,12 +313,7 @@ public class LocalInstance extends Instance {
         return (mInstanceRecord != null);
     }
 
-    public void setRelevant() {
-        Assert.assertTrue(mInstanceRecord != null);
-
-        mInstanceRecord.delete();
-    }
-
+    @Override
     public void delete() {
         Assert.assertTrue(mInstanceRecord != null);
 

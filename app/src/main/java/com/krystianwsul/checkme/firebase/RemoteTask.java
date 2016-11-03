@@ -10,6 +10,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.Task;
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -126,9 +127,17 @@ public class RemoteTask extends Task {
     }
 
     @Override
-    public void setRelevant() {
-        Stream.of(getSchedules()).forEach(Schedule::delete);
+    public void delete() {
+        TaskKey taskKey = getTaskKey();
 
+        Stream.of(mDomainFactory.getLocalFactory().getTaskHierarchies())
+                .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
+                .forEach(TaskHierarchy::delete);
+
+        Stream.of(getSchedules())
+                .forEach(Schedule::delete);
+
+        getRemoteFactory().deleteTask(this);
         mRemoteTaskRecord.delete();
     }
 
@@ -191,5 +200,10 @@ public class RemoteTask extends Task {
         Assert.assertTrue(childTask instanceof RemoteTask);
 
         getRemoteFactory().createTaskHierarchy(this, (RemoteTask) childTask, now);
+    }
+
+    @Override
+    protected void deleteSchedule(@NonNull Schedule schedule) {
+        getRemoteFactory().deleteSchedule(this, schedule);
     }
 }

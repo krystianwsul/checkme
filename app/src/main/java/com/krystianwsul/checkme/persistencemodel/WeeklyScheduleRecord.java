@@ -4,12 +4,10 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class WeeklyScheduleRecord extends Record {
     private static final String TABLE_WEEKLY_SCHEDULES = "weeklySchedules";
@@ -40,16 +38,16 @@ public class WeeklyScheduleRecord extends Record {
 
     @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-
+        if (oldVersion < 16) {
+            sqLiteDatabase.delete(TABLE_WEEKLY_SCHEDULES, COLUMN_SCHEDULE_ID + " NOT IN (SELECT " + ScheduleRecord.COLUMN_ID + " FROM " + ScheduleRecord.TABLE_SCHEDULES + ")", null);
+        }
     }
 
     @NonNull
-    static ArrayList<WeeklyScheduleRecord> getWeeklyScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase, @NonNull List<Integer> scheduleIds) {
-        Assert.assertTrue(!scheduleIds.isEmpty());
-
+    static ArrayList<WeeklyScheduleRecord> getWeeklyScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
         ArrayList<WeeklyScheduleRecord> weeklyScheduleRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULES, null, COLUMN_SCHEDULE_ID + " IN (" + TextUtils.join(", ", scheduleIds) + ")", null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULES, null, null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             weeklyScheduleRecords.add(cursorToWeeklyScheduleRecord(cursor));

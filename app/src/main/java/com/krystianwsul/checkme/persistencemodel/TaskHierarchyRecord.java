@@ -4,12 +4,10 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class TaskHierarchyRecord extends Record {
     private static final String TABLE_TASK_HIERARCHIES = "taskHierarchies";
@@ -39,18 +37,17 @@ public class TaskHierarchyRecord extends Record {
 
     @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_TASK_HIERARCHIES);
-        //onCreate(sqLiteDatabase);
+        if (oldVersion < 16) {
+            sqLiteDatabase.delete(TABLE_TASK_HIERARCHIES, COLUMN_CHILD_TASK_ID + " NOT IN (SELECT " + TaskRecord.TABLE_TASKS + " FROM " + TaskRecord.TABLE_TASKS + ")", null);
+        }
     }
 
-    public static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase, List<Integer> childTaskIds) {
+    public static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
-        Assert.assertTrue(childTaskIds != null);
-        Assert.assertTrue(!childTaskIds.isEmpty());
 
         ArrayList<TaskHierarchyRecord> taskHierarchyRecords = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_TASK_HIERARCHIES, null, COLUMN_CHILD_TASK_ID + " IN (" + TextUtils.join(", ", childTaskIds) + ")", null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_TASK_HIERARCHIES, null, null, null, null, null, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             taskHierarchyRecords.add(cursorToTaskHierarchyRecord(cursor));

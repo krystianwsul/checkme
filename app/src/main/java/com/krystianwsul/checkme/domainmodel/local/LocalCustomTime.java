@@ -174,11 +174,11 @@ public class LocalCustomTime implements CustomTime {
         return new TimePair(new CustomTimeKey(mCustomTimeRecord.getId()), null);
     }
 
-    public void setRelevant() {
+    public void delete() {
         mCustomTimeRecord.delete();
 
         if (mRemoteCustomTimeRecord != null)
-            mRemoteCustomTimeRecord.delete();
+            mRemoteCustomTimeRecord.delete(); // todo remove remote custom time records on sync?
     }
 
     @NonNull

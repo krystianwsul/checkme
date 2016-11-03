@@ -65,4 +65,13 @@ public class RemoteTaskHierarchy extends TaskHierarchy {
     void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         mRemoteTaskHierarchyRecord.updateRecordOf(addedFriends, removedFriends);
     }
+
+    public void delete() {
+        RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
+        Assert.assertTrue(remoteFactory != null);
+
+        remoteFactory.deleteTaskHierarchy(this);
+
+        mRemoteTaskHierarchyRecord.delete();
+    }
 }

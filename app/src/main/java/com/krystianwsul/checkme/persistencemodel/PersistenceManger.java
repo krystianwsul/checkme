@@ -81,58 +81,31 @@ public class PersistenceManger {
 
         mTaskMaxId = TaskRecord.getMaxId(mSQLiteDatabase);
 
-        List<Integer> taskIds = Stream.of(mTaskRecords)
-                .map(TaskRecord::getId)
-                .collect(Collectors.toList());
-
         if (mTaskRecords.isEmpty())
             mTaskHierarchyRecords = new ArrayList<>();
         else
-            mTaskHierarchyRecords = TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase, taskIds);
+            mTaskHierarchyRecords = TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase);
         Assert.assertTrue(mTaskHierarchyRecords != null);
 
         mTaskHierarchyMaxId = TaskHierarchyRecord.getMaxId(mSQLiteDatabase);
 
-        if (mTaskRecords.isEmpty())
-            mScheduleRecords = new ArrayList<>();
-        else
-            mScheduleRecords = ScheduleRecord.getScheduleRecords(mSQLiteDatabase, taskIds);
-        Assert.assertTrue(mScheduleRecords != null);
+        mScheduleRecords = ScheduleRecord.getScheduleRecords(mSQLiteDatabase);
 
         mScheduleMaxId = ScheduleRecord.getMaxId(mSQLiteDatabase);
 
-        List<Integer> scheduleIds = Stream.of(mScheduleRecords)
-                .map(ScheduleRecord::getId)
-                .collect(Collectors.toList());
-
-        if (scheduleIds.isEmpty())
-            mSingleScheduleRecords = new HashMap<>();
-        else
-            mSingleScheduleRecords = Stream.of(SingleScheduleRecord.getSingleScheduleRecords(mSQLiteDatabase, scheduleIds))
+        mSingleScheduleRecords = Stream.of(SingleScheduleRecord.getSingleScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(SingleScheduleRecord::getScheduleId, singleScheduleRecord -> singleScheduleRecord));
 
-        if (scheduleIds.isEmpty())
-            mDailyScheduleRecords = new HashMap<>();
-        else
-            mDailyScheduleRecords = Stream.of(DailyScheduleRecord.getDailyScheduleRecords(mSQLiteDatabase, scheduleIds))
+        mDailyScheduleRecords = Stream.of(DailyScheduleRecord.getDailyScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(DailyScheduleRecord::getScheduleId, dailyScheduleRecord -> dailyScheduleRecord));
 
-        if (scheduleIds.isEmpty())
-            mWeeklyScheduleRecords = new HashMap<>();
-        else
-            mWeeklyScheduleRecords = Stream.of(WeeklyScheduleRecord.getWeeklyScheduleRecords(mSQLiteDatabase, scheduleIds))
+        mWeeklyScheduleRecords = Stream.of(WeeklyScheduleRecord.getWeeklyScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(WeeklyScheduleRecord::getScheduleId, weeklyScheduleRecord -> weeklyScheduleRecord));
 
-        if (scheduleIds.isEmpty())
-            mMonthlyDayScheduleRecords = new HashMap<>();
-        else
-            mMonthlyDayScheduleRecords = Stream.of(MonthlyDayScheduleRecord.getMonthlyDayScheduleRecords(mSQLiteDatabase, scheduleIds))
+        mMonthlyDayScheduleRecords = Stream.of(MonthlyDayScheduleRecord.getMonthlyDayScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(MonthlyDayScheduleRecord::getScheduleId, monthlyDayScheduleRecord -> monthlyDayScheduleRecord));
 
-        if (scheduleIds.isEmpty())
-            mMonthlyWeekScheduleRecords = new HashMap<>();
-        else
-            mMonthlyWeekScheduleRecords = Stream.of(MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(mSQLiteDatabase, scheduleIds))
+        mMonthlyWeekScheduleRecords = Stream.of(MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(MonthlyWeekScheduleRecord::getScheduleId, monthlyWeekScheduleRecord -> monthlyWeekScheduleRecord));
 
         mInstanceRecords = InstanceRecord.getInstanceRecords(mSQLiteDatabase);

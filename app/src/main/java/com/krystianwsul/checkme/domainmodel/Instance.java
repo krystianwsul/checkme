@@ -247,7 +247,7 @@ public abstract class Instance {
         return new TimePair(getScheduleCustomTimeKey(), getScheduleHourMinute());
     }
 
-    public abstract void setRelevant();
+    public abstract void delete();
 
     public abstract boolean getNotificationShown();
 

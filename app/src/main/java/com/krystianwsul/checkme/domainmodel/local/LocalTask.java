@@ -9,6 +9,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.Task;
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -104,7 +105,17 @@ public class LocalTask extends Task {
     }
 
     @Override
-    public void setRelevant() {
+    public void delete() {
+        TaskKey taskKey = getTaskKey();
+
+        Stream.of(mDomainFactory.getLocalFactory().getTaskHierarchies())
+                .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
+                .forEach(TaskHierarchy::delete);
+
+        Stream.of(getSchedules())
+                .forEach(Schedule::delete);
+
+        mDomainFactory.getLocalFactory().deleteTask(this);
         mTaskRecord.delete();
     }
 
@@ -138,15 +149,6 @@ public class LocalTask extends Task {
         return new HashSet<>();
     }
 
-    public void delete() {
-        Stream.of(getSchedules())
-                .forEach(Schedule::delete);
-
-        mDomainFactory.getLocalFactory().deleteTask(this);
-
-        mTaskRecord.delete();
-    }
-
     @NonNull
     @Override
     protected Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now) {
@@ -177,5 +179,12 @@ public class LocalTask extends Task {
         Assert.assertTrue(childTask instanceof LocalTask);
 
         mDomainFactory.getLocalFactory().createTaskHierarchy(mDomainFactory, this, (LocalTask) childTask, now);
+    }
+
+    @Override
+    protected void deleteSchedule(@NonNull Schedule schedule) {
+        Assert.assertTrue(mSchedules.contains(schedule));
+
+        mSchedules.remove(schedule);
     }
 }

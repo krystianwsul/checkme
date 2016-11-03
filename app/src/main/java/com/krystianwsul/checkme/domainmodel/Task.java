@@ -237,7 +237,7 @@ public abstract class Task {
         return instances;
     }
 
-    public abstract void setRelevant();
+    public abstract void delete();
 
     public abstract void setName(@NonNull String name, @Nullable String note);
 
@@ -250,4 +250,6 @@ public abstract class Task {
     protected abstract void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now);
 
     public abstract void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now);
+
+    protected abstract void deleteSchedule(@NonNull Schedule schedule);
 }

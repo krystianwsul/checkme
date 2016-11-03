@@ -80,6 +80,7 @@ public abstract class Schedule {
     public abstract TimeStamp getNextAlarm(@NonNull ExactTimeStamp now);
 
     public void delete() {
+        mDomainFactory.getTask(getScheduleBridge().getRootTaskKey()).deleteSchedule(this);
         getScheduleBridge().delete();
     }
 

@@ -2169,13 +2169,13 @@ public class DomainFactory {
                 .noneMatch(LocalCustomTime::getCurrent));
 
         Stream.of(irrelevantTasks)
-                .forEach(Task::setRelevant);
+                .forEach(Task::delete);
 
         Stream.of(irrelevantExistingInstances)
-                .forEach(Instance::setRelevant);
+                .forEach(Instance::delete);
 
         Stream.of(irrelevantCustomTimes)
-                .forEach(LocalCustomTime::setRelevant);
+                .forEach(LocalCustomTime::delete);
 
         return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
     }

@@ -328,8 +328,13 @@ public class RemoteInstance extends Instance {
     }
 
     @Override
-    public void setRelevant() {
+    public void delete() {
         Assert.assertTrue(mRemoteInstanceRecord != null);
+
+        RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
+        Assert.assertTrue(remoteFactory != null);
+
+        remoteFactory.deleteInstance(this);
 
         mRemoteInstanceRecord.delete();
     }

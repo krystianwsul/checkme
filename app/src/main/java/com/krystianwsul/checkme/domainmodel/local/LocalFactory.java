@@ -450,34 +450,20 @@ public class LocalFactory {
     }
 
     public void removeIrrelevant(@NonNull DomainFactory.Irrelevant irrelevant) {
-        List<LocalTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mLocalTaskHierarchies.values())
-                .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
-                .collect(Collectors.toList());
-
-        Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
-                .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
-
-        for (LocalTaskHierarchy irrelevantLocalTaskHierarchy : irrelevantTaskHierarchies)
-            mLocalTaskHierarchies.remove(irrelevantLocalTaskHierarchy.getId());
-
         for (Task task : irrelevant.mTasks) {
             if (task instanceof LocalTask) {
-                Assert.assertTrue(mLocalTasks.containsKey(((LocalTask) task).getId()));
-
-                mLocalTasks.remove(((LocalTask) task).getId());
+                Assert.assertTrue(!mLocalTasks.containsKey(((LocalTask) task).getId()));
             }
         }
 
         for (Instance instance : irrelevant.mInstances) {
             if (instance instanceof LocalInstance) {
-                Assert.assertTrue(mExistingLocalInstances.contains(instance));
-
-                mExistingLocalInstances.remove(instance);
+                Assert.assertTrue(!mExistingLocalInstances.contains(instance));
             }
         }
 
-        Stream.of(irrelevant.mCustomTimes)
-                .forEach(mLocalCustomTimes::remove);
+        for (LocalCustomTime localCustomTime : irrelevant.mCustomTimes)
+            Assert.assertTrue(!mLocalCustomTimes.containsKey(localCustomTime.getId()));
     }
 
     @NonNull

@@ -110,9 +110,6 @@ public class InstanceRecord extends Record {
 
     @SuppressWarnings("UnusedParameters")
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_INSTANCES);
-        //onCreate(sqLiteDatabase);
-
         if (oldVersion <= 5) {
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_INSTANCES
                     + " ADD COLUMN relevant INTEGER NOT NULL DEFAULT 1");
@@ -219,6 +216,8 @@ public class InstanceRecord extends Record {
         }
 
         if (oldVersion < 16) {
+            sqLiteDatabase.delete(TABLE_INSTANCES, "relevant = 0", null);
+
             String columnList = COLUMN_ID + ", "
                     + COLUMN_TASK_ID + ", "
                     + COLUMN_DONE + ", "

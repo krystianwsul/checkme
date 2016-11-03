@@ -398,29 +398,15 @@ public class RemoteFactory {
     }
 
     public void removeIrrelevant(@NonNull DomainFactory.Irrelevant irrelevant) {
-        List<RemoteTaskHierarchy> irrelevantTaskHierarchies = Stream.of(mRemoteTaskHierarchies.values())
-                .filter(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getChildTask()))
-                .collect(Collectors.toList());
-
-        Assert.assertTrue(Stream.of(irrelevantTaskHierarchies)
-                .allMatch(taskHierarchy -> irrelevant.mTasks.contains(taskHierarchy.getParentTask())));
-
-        for (RemoteTaskHierarchy irrelevantTaskHierarchy : irrelevantTaskHierarchies)
-            mRemoteTaskHierarchies.remove(irrelevantTaskHierarchy.getId());
-
         for (Task task : irrelevant.mTasks) {
             if (task instanceof RemoteTask) {
-                Assert.assertTrue(mRemoteTasks.containsKey(((RemoteTask) task).getId()));
-
-                mRemoteTasks.remove(((RemoteTask) task).getId());
+                Assert.assertTrue(!mRemoteTasks.containsKey(((RemoteTask) task).getId()));
             }
         }
 
         for (Instance instance : irrelevant.mInstances) {
             if (instance instanceof RemoteInstance) {
-                Assert.assertTrue(mExistingRemoteInstances.containsKey(((RemoteInstance) instance).getId()));
-
-                mExistingRemoteInstances.remove(((RemoteInstance) instance).getId());
+                Assert.assertTrue(!mExistingRemoteInstances.containsKey(((RemoteInstance) instance).getId()));
             }
         }
     }
@@ -790,5 +776,32 @@ public class RemoteFactory {
     @NonNull
     public Collection<RemoteCustomTime> getRemoteCustomTimes() {
         return mRemoteCustomTimes.values();
+    }
+
+    void deleteTask(@NonNull RemoteTask remoteTask) {
+        Assert.assertTrue(mRemoteTasks.containsKey(remoteTask.getId()));
+
+        mRemoteTasks.remove(remoteTask.getId());
+    }
+
+    void deleteSchedule(@NonNull RemoteTask remoteTask, @NonNull Schedule schedule) {
+        Assert.assertTrue(mRemoteSchedules.containsKey(remoteTask.getId()));
+        Assert.assertTrue(mRemoteSchedules.containsEntry(remoteTask.getId(), schedule));
+
+        mRemoteSchedules.remove(remoteTask.getId(), schedule);
+    }
+
+    void deleteTaskHierarchy(@NonNull RemoteTaskHierarchy remoteTasHierarchy) {
+        Assert.assertTrue(mRemoteTaskHierarchies.containsKey(remoteTasHierarchy.getId()));
+
+        mRemoteTaskHierarchies.remove(remoteTasHierarchy.getId());
+    }
+
+    void deleteInstance(@NonNull RemoteInstance remoteInstance) {
+        String id = remoteInstance.getId();
+
+        Assert.assertTrue(mExistingRemoteInstances.containsKey(id));
+
+        mExistingRemoteInstances.remove(id);
     }
 }

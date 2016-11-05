@@ -94,7 +94,8 @@ public class CustomTimeRecord extends Record {
         if (oldVersion < 16) {
             sqLiteDatabase.delete(TABLE_CUSTOM_TIMES, "relevant = 0", null);
 
-            String columnList = COLUMN_NAME
+            String columnList = COLUMN_ID
+                    + ", " + COLUMN_NAME
                     + ", " + COLUMN_SUNDAY_HOUR
                     + ", " + COLUMN_SUNDAY_MINUTE
                     + ", " + COLUMN_MONDAY_HOUR

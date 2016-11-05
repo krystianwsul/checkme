@@ -38,11 +38,11 @@ public class TaskHierarchyRecord extends Record {
     @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (oldVersion < 16) {
-            sqLiteDatabase.delete(TABLE_TASK_HIERARCHIES, COLUMN_CHILD_TASK_ID + " NOT IN (SELECT " + TaskRecord.TABLE_TASKS + " FROM " + TaskRecord.TABLE_TASKS + ")", null);
+            sqLiteDatabase.delete(TABLE_TASK_HIERARCHIES, COLUMN_CHILD_TASK_ID + " NOT IN (SELECT " + TaskRecord.COLUMN_ID + " FROM " + TaskRecord.TABLE_TASKS + ")", null);
         }
     }
 
-    public static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {
+    static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
         ArrayList<TaskHierarchyRecord> taskHierarchyRecords = new ArrayList<>();

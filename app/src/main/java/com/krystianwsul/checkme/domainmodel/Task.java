@@ -198,7 +198,7 @@ public abstract class Task {
 
     void correctOldestVisible(@NonNull Date date) {
         Date oldestVisible = getOldestVisible();
-        if (oldestVisible != null && oldestVisible.compareTo(date) < 0) {
+        if (oldestVisible != null && date.compareTo(oldestVisible) < 0) {
             Log.e("asdf", getName() + " old oldest: " + oldestVisible + ", new oldest: " + date);
 
             setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów

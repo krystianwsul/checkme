@@ -68,16 +68,25 @@ public class RemoteTaskRecord extends RemoteRecord {
     }
 
     public void setOldestVisibleYear(int oldestVisibleYear) {
+        if (getOldestVisibleYear() != null && getOldestVisibleYear().equals(oldestVisibleYear))
+            return;
+
         getTaskJson().setOldestVisibleYear(oldestVisibleYear);
         addValue(getId() + "/taskJson/oldestVisibleYear", oldestVisibleYear);
     }
 
     public void setOldestVisibleMonth(int oldestVisibleMonth) {
+        if (getOldestVisibleMonth() != null && getOldestVisibleMonth().equals(oldestVisibleMonth))
+            return;
+
         getTaskJson().setOldestVisibleMonth(oldestVisibleMonth);
         addValue(getId() + "/taskJson/oldestVisibleMonth", oldestVisibleMonth);
     }
 
     public void setOldestVisibleDay(int oldestVisibleDay) {
+        if (getOldestVisibleDay() != null && getOldestVisibleDay().equals(oldestVisibleDay))
+            return;
+
         getTaskJson().setOldestVisibleDay(oldestVisibleDay);
         addValue(getId() + "/taskJson/oldestVisibleDay", oldestVisibleDay);
     }
@@ -85,11 +94,22 @@ public class RemoteTaskRecord extends RemoteRecord {
     public void setName(@NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
+        if (getName().equals(name))
+            return;
+
         getTaskJson().setName(name);
         addValue(getId() + "/taskJson/name", name);
     }
 
     public void setNote(@Nullable String note) {
+        if (TextUtils.isEmpty(getNote())) {
+            if (TextUtils.isEmpty(note))
+                return;
+        } else {
+            if (getNote().equals(note))
+                return;
+        }
+
         getTaskJson().setNote(note);
         addValue(getId() + "/taskJson/note", note);
     }

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.records;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
@@ -96,36 +97,57 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     public void setInstanceYear(int instanceYear) {
+        if (getInstanceYear() != null && getInstanceYear().equals(instanceYear))
+            return;
+
         getInstanceJson().setInstanceYear(instanceYear);
         addValue(getId() + "/instanceJson/instanceYear", instanceYear);
     }
 
     public void setInstanceMonth(int instanceMonth) {
+        if (getInstanceMonth() != null && getInstanceMonth().equals(instanceMonth))
+            return;
+
         getInstanceJson().setInstanceMonth(instanceMonth);
         addValue(getId() + "/instanceJson/instanceMonth", instanceMonth);
     }
 
     public void setInstanceDay(int instanceDay) {
+        if (getInstanceDay() != null && getInstanceDay().equals(instanceDay))
+            return;
+
         getInstanceJson().setInstanceDay(instanceDay);
         addValue(getId() + "/instanceJson/instanceDay", instanceDay);
     }
 
     public void setInstanceCustomTimeId(@Nullable String instanceCustomTimeId) {
+        if (!TextUtils.isEmpty(getInstanceCustomTimeId()) && getInstanceCustomTimeId().equals(instanceCustomTimeId))
+            return;
+
         getInstanceJson().setInstanceCustomTimeId(instanceCustomTimeId);
         addValue(getId() + "/instanceJson/instanceCustomTimeId", instanceCustomTimeId);
     }
 
     public void setInstanceHour(@Nullable Integer instanceHour) {
+        if (getInstanceHour() != null && getInstanceHour().equals(instanceHour))
+            return;
+
         getInstanceJson().setInstanceHour(instanceHour);
         addValue(getId() + "/instanceJson/instanceHour", instanceHour);
     }
 
     public void setInstanceMinute(@Nullable Integer instanceMinute) {
+        if (getInstanceMinute() != null && getInstanceMinute().equals(instanceMinute))
+            return;
+
         getInstanceJson().setInstanceMinute(instanceMinute);
         addValue(getId() + "/instanceJson/instanceMinute", instanceMinute);
     }
 
     public void setDone(@Nullable Long done) {
+        if (getDone() != null && getDone().equals(done))
+            return;
+
         getInstanceJson().setDone(done);
         addValue(getId() + "/instanceJson/done", done);
     }

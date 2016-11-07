@@ -13,7 +13,7 @@ public class RemoteCustomTimeRecord extends RemoteRecord {
         super(id, jsonWrapper);
     }
 
-    public RemoteCustomTimeRecord(@NonNull JsonWrapper jsonWrapper) {
+    RemoteCustomTimeRecord(@NonNull JsonWrapper jsonWrapper) {
         super(jsonWrapper);
     }
 
@@ -98,76 +98,121 @@ public class RemoteCustomTimeRecord extends RemoteRecord {
     public void setName(@NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
+        if (getName().equals(name))
+            return;
+
         getCustomTimeJson().setName(name);
         addValue(getId() + "/customTimeJson/name", name);
     }
 
     public void setSundayHour(int hour) {
+        if (getSundayHour() == hour)
+            return;
+
         getCustomTimeJson().setSundayHour(hour);
         addValue(getId() + "/customTimeJson/sundayHour", hour);
     }
 
     public void setSundayMinute(int minute) {
+        if (getSundayMinute() == minute)
+            return;
+
         getCustomTimeJson().setSundayMinute(minute);
         addValue(getId() + "/customTimeJson/sundayMinute", minute);
     }
 
     public void setMondayHour(int hour) {
+        if (getMondayHour() == hour)
+            return;
+
         getCustomTimeJson().setMondayHour(hour);
         addValue(getId() + "/customTimeJson/mondayHour", hour);
     }
 
     public void setMondayMinute(int minute) {
+        if (getMondayMinute() == minute)
+            return;
+
         getCustomTimeJson().setMondayMinute(minute);
         addValue(getId() + "/customTimeJson/mondayMinute", minute);
     }
 
     public void setTuesdayHour(int hour) {
+        if (getTuesdayHour() == hour)
+            return;
+
         getCustomTimeJson().setTuesdayHour(hour);
         addValue(getId() + "/customTimeJson/tuesdayHour", hour);
     }
 
     public void setTuesdayMinute(int minute) {
+        if (getTuesdayMinute() == minute)
+            return;
+
         getCustomTimeJson().setTuesdayMinute(minute);
         addValue(getId() + "/customTimeJson/tuesdayMinute", minute);
     }
 
     public void setWednesdayHour(int hour) {
+        if (getWednesdayHour() == hour)
+            return;
+
         getCustomTimeJson().setWednesdayHour(hour);
         addValue(getId() + "/customTimeJson/wednesdayHour", hour);
     }
 
     public void setWednesdayMinute(int minute) {
+        if (getWednesdayMinute() == minute)
+            return;
+
         getCustomTimeJson().setWednesdayMinute(minute);
         addValue(getId() + "/customTimeJson/wednesdayMinute", minute);
     }
 
     public void setThursdayHour(int hour) {
+        if (getThursdayHour() == hour)
+            return;
+
         getCustomTimeJson().setThursdayHour(hour);
         addValue(getId() + "/customTimeJson/thursdayHour", hour);
     }
 
     public void setThursdayMinute(int minute) {
+        if (getThursdayMinute() == minute)
+            return;
+
         getCustomTimeJson().setThursdayMinute(minute);
         addValue(getId() + "/customTimeJson/thursdayMinute", minute);
     }
 
     public void setFridayHour(int hour) {
+        if (getFridayHour() == hour)
+            return;
+
         getCustomTimeJson().setFridayHour(hour);
         addValue(getId() + "/customTimeJson/fridayHour", hour);
     }
 
     public void setFridayMinute(int minute) {
+        if (getFridayMinute() == minute)
+            return;
+
         getCustomTimeJson().setFridayMinute(minute);
         addValue(getId() + "/customTimeJson/fridayMinute", minute);
     }
 
     public void setSaturdayHour(int hour) {
+        if (getSaturdayHour() == hour)
+            return;
+
         getCustomTimeJson().setSaturdayHour(hour);
         addValue(getId() + "/customTimeJson/saturdayHour", hour);
     }
 
     public void setSaturdayMinute(int minute) {
+        if (getSundayMinute() == minute)
+            return;
+
         getCustomTimeJson().setSaturdayMinute(minute);
         addValue(getId() + "/customTimeJson/saturdayMinute", minute);
     }

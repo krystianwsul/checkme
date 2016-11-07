@@ -96,7 +96,7 @@ public class LocalFactory {
         for (CustomTimeRecord customTimeRecord : customTimeRecords) {
             Assert.assertTrue(customTimeRecord != null);
 
-            LocalCustomTime localCustomTime = new LocalCustomTime(customTimeRecord);
+            LocalCustomTime localCustomTime = new LocalCustomTime(domainFactory, customTimeRecord);
             mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);
         }
 
@@ -308,6 +308,12 @@ public class LocalFactory {
         mExistingLocalInstances.remove(localInstance);
     }
 
+    void deleteCustomTime(@NonNull LocalCustomTime localCustomTime) {
+        Assert.assertTrue(mLocalCustomTimes.containsKey(localCustomTime.getId()));
+
+        mLocalCustomTimes.remove(localCustomTime.getId());
+    }
+
     public void deleteInstanceShownRecords(@NonNull Set<String> taskIds) {
         mPersistenceManager.deleteInstanceShownRecords(taskIds);
     }
@@ -515,7 +521,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public LocalCustomTime createLocalCustomTime(@NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
+    public LocalCustomTime createLocalCustomTime(@NonNull DomainFactory domainFactory, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SUNDAY) != null);
@@ -529,7 +535,7 @@ public class LocalFactory {
         CustomTimeRecord customTimeRecord = mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
         Assert.assertTrue(customTimeRecord != null);
 
-        LocalCustomTime localCustomTime = new LocalCustomTime(customTimeRecord);
+        LocalCustomTime localCustomTime = new LocalCustomTime(domainFactory, customTimeRecord);
         Assert.assertTrue(!mLocalCustomTimes.containsKey(localCustomTime.getId()));
 
         mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);

@@ -112,7 +112,7 @@ public class LocalTask extends Task {
                 .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
                 .forEach(TaskHierarchy::delete);
 
-        Stream.of(getSchedules())
+        Stream.of(new ArrayList<>(getSchedules()))
                 .forEach(Schedule::delete);
 
         mDomainFactory.getLocalFactory().deleteTask(this);

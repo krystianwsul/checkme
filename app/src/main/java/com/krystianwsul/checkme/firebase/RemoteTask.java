@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -130,11 +131,11 @@ public class RemoteTask extends Task {
     public void delete() {
         TaskKey taskKey = getTaskKey();
 
-        Stream.of(mDomainFactory.getLocalFactory().getTaskHierarchies())
+        Stream.of(getRemoteFactory().getTaskHierarchies())
                 .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
                 .forEach(TaskHierarchy::delete);
 
-        Stream.of(getSchedules())
+        Stream.of(new ArrayList<>(getSchedules()))
                 .forEach(Schedule::delete);
 
         getRemoteFactory().deleteTask(this);

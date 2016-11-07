@@ -6,6 +6,7 @@ import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.CustomTime;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -20,12 +21,16 @@ import java.util.TreeMap;
 
 public class LocalCustomTime implements CustomTime {
     @NonNull
+    private final DomainFactory mDomainFactory;
+
+    @NonNull
     private final CustomTimeRecord mCustomTimeRecord;
 
     @Nullable
     private RemoteCustomTimeRecord mRemoteCustomTimeRecord;
 
-    LocalCustomTime(@NonNull CustomTimeRecord customTimeRecord) {
+    LocalCustomTime(@NonNull DomainFactory domainFactory, @NonNull CustomTimeRecord customTimeRecord) {
+        mDomainFactory = domainFactory;
         mCustomTimeRecord = customTimeRecord;
     }
 
@@ -175,6 +180,8 @@ public class LocalCustomTime implements CustomTime {
     }
 
     public void delete() {
+        mDomainFactory.getLocalFactory().deleteCustomTime(this);
+
         mCustomTimeRecord.delete();
 
         if (mRemoteCustomTimeRecord != null)

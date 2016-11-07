@@ -1284,7 +1284,7 @@ public class DomainFactory {
         Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-        LocalCustomTime localCustomTime = mLocalFactory.createLocalCustomTime(name, hourMinutes);
+        LocalCustomTime localCustomTime = mLocalFactory.createLocalCustomTime(this, name, hourMinutes);
 
         save(context, 0);
 

@@ -185,7 +185,7 @@ public class LocalCustomTime implements CustomTime {
         mCustomTimeRecord.delete();
 
         if (mRemoteCustomTimeRecord != null)
-            mRemoteCustomTimeRecord.delete(); // todo remove remote custom time records on sync?
+            mRemoteCustomTimeRecord.delete();
     }
 
     @NonNull

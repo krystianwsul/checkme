@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -89,7 +90,7 @@ public class WeeklySchedule extends RepeatingSchedule {
     }
 
     @NonNull
-    private Time getTime() {
+    Time getTime() {
         CustomTimeKey customTimeKey = mWeeklyScheduleBridge.getCustomTimeKey();
         if (customTimeKey != null) {
             return mDomainFactory.getCustomTime(customTimeKey);
@@ -128,5 +129,11 @@ public class WeeklySchedule extends RepeatingSchedule {
 
             return new HourMinute(mWeeklyScheduleBridge.getHour(), mWeeklyScheduleBridge.getMinute());
         }
+    }
+
+    @NonNull
+    @Override
+    public CreateTaskLoader.ScheduleData getScheduleData() {
+        return new CreateTaskLoader.WeeklyScheduleData(getDayOfWeek(), getTime().getTimePair());
     }
 }

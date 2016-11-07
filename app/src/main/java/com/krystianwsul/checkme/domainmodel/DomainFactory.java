@@ -731,7 +731,7 @@ public class DomainFactory {
                             case SINGLE: {
                                 SingleSchedule singleSchedule = (SingleSchedule) schedule;
 
-                                scheduleDatas.add(new CreateTaskLoader.SingleScheduleData(singleSchedule.getDate(), singleSchedule.getTime().getTimePair()));
+                                scheduleDatas.add(singleSchedule.getScheduleData());
 
                                 CustomTime weeklyCustomTime = singleSchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
@@ -741,11 +741,9 @@ public class DomainFactory {
                             case DAILY: {
                                 DailySchedule dailySchedule = (DailySchedule) schedule;
 
-                                Time time = dailySchedule.getTime();
+                                scheduleDatas.add(dailySchedule.getScheduleData());
 
-                                scheduleDatas.add(new CreateTaskLoader.DailyScheduleData(time.getTimePair()));
-
-                                CustomTime dailyCustomTime = time.getPair().first;
+                                CustomTime dailyCustomTime = dailySchedule.getTime().getPair().first;
                                 if (dailyCustomTime != null)
                                     customTimes.put(dailyCustomTime.getCustomTimeKey(), dailyCustomTime);
 
@@ -754,11 +752,9 @@ public class DomainFactory {
                             case WEEKLY: {
                                 WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
 
-                                Pair<DayOfWeek, Time> pair = weeklySchedule.getDayOfWeekTime();
+                                scheduleDatas.add(weeklySchedule.getScheduleData());
 
-                                scheduleDatas.add(new CreateTaskLoader.WeeklyScheduleData(pair.first, pair.second.getTimePair()));
-
-                                CustomTime weeklyCustomTime = pair.second.getPair().first;
+                                CustomTime weeklyCustomTime = weeklySchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
                                     customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
 
@@ -767,7 +763,7 @@ public class DomainFactory {
                             case MONTHLY_DAY: {
                                 MonthlyDaySchedule monthlyDaySchedule = (MonthlyDaySchedule) schedule;
 
-                                scheduleDatas.add(new CreateTaskLoader.MonthlyDayScheduleData(monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), monthlyDaySchedule.getTime().getTimePair()));
+                                scheduleDatas.add(monthlyDaySchedule.getScheduleData());
 
                                 CustomTime weeklyCustomTime = monthlyDaySchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
@@ -778,7 +774,7 @@ public class DomainFactory {
                             case MONTHLY_WEEK: {
                                 MonthlyWeekSchedule monthlyWeekSchedule = (MonthlyWeekSchedule) schedule;
 
-                                scheduleDatas.add(new CreateTaskLoader.MonthlyWeekScheduleData(monthlyWeekSchedule.getDayOfMonth(), monthlyWeekSchedule.getDayOfWeek(), monthlyWeekSchedule.getBeginningOfMonth(), monthlyWeekSchedule.getTime().getTimePair()));
+                                scheduleDatas.add(monthlyWeekSchedule.getScheduleData());
 
                                 CustomTime weeklyCustomTime = monthlyWeekSchedule.getTime().getPair().first;
                                 if (weeklyCustomTime != null)
@@ -1032,12 +1028,7 @@ public class DomainFactory {
 
         task.setName(name, note);
 
-        if (task.isRootTask(now)) {
-            List<Schedule> schedules = task.getCurrentSchedules(now);
-
-            Stream.of(schedules)
-                    .forEach(schedule -> schedule.setEndExactTimeStamp(now));
-        } else {
+        if (!task.isRootTask(now)) {
             TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
             Assert.assertTrue(taskHierarchy != null);
 
@@ -1046,7 +1037,7 @@ public class DomainFactory {
             taskKeys.add(taskHierarchy.getParentTaskKey());
         }
 
-        task.addSchedules(scheduleDatas, now);
+        task.updateSchedules(scheduleDatas, now);
 
         updateNotifications(context, taskKeys, now);
 

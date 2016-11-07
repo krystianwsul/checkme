@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -87,4 +88,7 @@ public abstract class Schedule {
     public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         getScheduleBridge().updateRecordOf(addedFriends, removedFriends);
     }
+
+    @NonNull
+    public abstract CreateTaskLoader.ScheduleData getScheduleData();
 }

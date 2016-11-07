@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -143,5 +144,11 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
 
             return new HourMinute(mMonthlyDayScheduleBridge.getHour(), mMonthlyDayScheduleBridge.getMinute());
         }
+    }
+
+    @NonNull
+    @Override
+    public CreateTaskLoader.ScheduleData getScheduleData() {
+        return new CreateTaskLoader.MonthlyDayScheduleData(getDayOfMonth(), getBeginningOfMonth(), getTime().getTimePair());
     }
 }

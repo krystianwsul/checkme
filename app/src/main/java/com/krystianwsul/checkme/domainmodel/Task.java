@@ -247,6 +247,25 @@ public abstract class Task {
     @NonNull
     protected abstract Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now);
 
+    void updateSchedules(@NonNull List<CreateTaskLoader.ScheduleData> newScheduleDatas, @NonNull ExactTimeStamp now) {
+        List<Schedule> removeSchedules = new ArrayList<>();
+        List<CreateTaskLoader.ScheduleData> addScheduleDatas = new ArrayList<>(newScheduleDatas);
+
+        List<Schedule> oldSchedules = getCurrentSchedules(now);
+        for (Schedule schedule : oldSchedules) {
+            if (addScheduleDatas.contains(schedule.getScheduleData())) {
+                addScheduleDatas.remove(schedule.getScheduleData());
+            } else {
+                removeSchedules.add(schedule);
+            }
+        }
+
+        Stream.of(removeSchedules)
+                .forEach(schedule -> schedule.setEndExactTimeStamp(now));
+
+        addSchedules(addScheduleDatas, now);
+    }
+
     protected abstract void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now);
 
     public abstract void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now);

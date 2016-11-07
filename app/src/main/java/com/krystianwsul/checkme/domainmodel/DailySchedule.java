@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -116,5 +117,11 @@ public class DailySchedule extends RepeatingSchedule {
 
             return new HourMinute(mDailyScheduleBridge.getHour(), mDailyScheduleBridge.getMinute());
         }
+    }
+
+    @NonNull
+    @Override
+    public CreateTaskLoader.ScheduleData getScheduleData() {
+        return new CreateTaskLoader.DailyScheduleData(getTime().getTimePair());
     }
 }

@@ -103,8 +103,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
 
         @Override
         public int hashCode() {
-            int hashCode = 0;
-            hashCode += Name.hashCode();
+            int hashCode = Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
             hashCode += Children.hashCode();

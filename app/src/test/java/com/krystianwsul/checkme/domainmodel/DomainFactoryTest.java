@@ -123,12 +123,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 1);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 1);
 
-        Assert.assertTrue(rootTask.getOldestVisible().equals(nextDayAfterDate));
-
-        Assert.assertTrue(!rootTask.isVisible(nextDayAfterExactTimeStamp));
-
-        Assert.assertTrue(!rootInstance.isVisible(nextDayAfterExactTimeStamp));
-
         domainFactory.removeIrrelevant(irrelevantAfter);
 
         Assert.assertTrue(domainFactory.getTaskListData(nextDayAfterExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
@@ -238,21 +232,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(irrelevantAfter.mCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 4);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 3);
-
-        Assert.assertTrue(childLocalTaskDone.getOldestVisible().equals(nextDayAfterDate));
-        Assert.assertTrue(childLocalTaskExists.getOldestVisible().equals(nextDayAfterDate));
-        Assert.assertTrue(childLocalTaskDoesntExist.getOldestVisible().equals(nextDayAfterDate));
-        Assert.assertTrue(rootLocalTask.getOldestVisible().equals(nextDayAfterDate));
-
-        Assert.assertTrue(!rootLocalTask.isVisible(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childLocalTaskDone.isVisible(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childLocalTaskExists.isVisible(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childLocalTaskDoesntExist.isVisible(nextDayAfterExactTimeStamp));
-
-        Assert.assertTrue(!rootInstance.isVisible(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childInstanceDone.isVisible(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childInstanceExists.isVisible(nextDayAfterExactTimeStamp));
-        Assert.assertTrue(!childInstanceDoesntExist.isVisible(nextDayAfterExactTimeStamp));
 
         domainFactory.removeIrrelevant(irrelevantAfter);
 

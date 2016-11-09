@@ -427,11 +427,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
-        fakeDelay();
-
-        MyCrashlytics.log("DomainFactory.getGroupListData");
-
+    GroupListLoader.Data getGroupListData(@NonNull ExactTimeStamp now, @NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
         Assert.assertTrue(position >= 0);
 
         ExactTimeStamp startExactTimeStamp;
@@ -440,7 +436,7 @@ public class DomainFactory {
         if (position == 0) {
             startExactTimeStamp = null;
         } else {
-            Calendar startCalendar = Calendar.getInstance();
+            Calendar startCalendar = now.getCalendar();
 
             switch (timeRange) {
                 case DAY:
@@ -461,7 +457,7 @@ public class DomainFactory {
             startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMilli(0, 0, 0, 0));
         }
 
-        Calendar endCalendar = Calendar.getInstance();
+        Calendar endCalendar = now.getCalendar();
 
         switch (timeRange) {
             case DAY:
@@ -480,8 +476,6 @@ public class DomainFactory {
         }
 
         endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMilli(0, 0, 0, 0));
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
 
         List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
@@ -516,6 +510,17 @@ public class DomainFactory {
         data.setInstanceDatas(instanceDatas);
 
         return data;
+    }
+
+    @NonNull
+    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
+        fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getGroupListData");
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        return getGroupListData(now, context, position, timeRange);
     }
 
     @NonNull
@@ -1046,15 +1051,11 @@ public class DomainFactory {
         return task.getTaskKey();
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
-        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
+    @NonNull
+    List<TaskKey> createScheduleJoinRootTask(@NonNull ExactTimeStamp now, @NonNull Context context, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskKeys.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
 
@@ -1090,6 +1091,21 @@ public class DomainFactory {
                 .collect(Collectors.toList());
 
         joinTasks(newParentTask, joinTasks, now);
+
+        return taskKeys;
+    }
+
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+        Assert.assertTrue(joinTaskKeys.size() > 1);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        List<TaskKey> taskKeys = createScheduleJoinRootTask(now, context, name, scheduleDatas, joinTaskKeys, note, friendEntries);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1348,6 +1364,7 @@ public class DomainFactory {
         Assert.assertTrue(joinTaskKeys.size() > 1);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
+
 
         Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
 

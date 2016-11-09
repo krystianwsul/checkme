@@ -5,8 +5,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
+import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -28,7 +31,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Matchers.any;
 
@@ -281,5 +287,43 @@ public class DomainFactoryTest {
         Assert.assertTrue(noReminderTask.getOldestVisible().equals(nextDay));
 
         Assert.assertTrue(domainFactory.getTaskListData(new ExactTimeStamp(nextDay, new HourMilli(5, 0, 0, 0)), mContext, null).mChildTaskDatas.size() == 1);
+    }
+
+    @Test
+    public void testJoinLeavesPreviousInstances() {
+        PersistenceManger persistenceManger = new PersistenceManger();
+
+        DomainFactory domainFactory = new DomainFactory(persistenceManger);
+
+        Date startDate = new Date(2016, 11, 9);
+        HourMilli startHourMilli = new HourMilli(1, 0, 0, 0);
+
+        ExactTimeStamp startExactTimeStamp = new ExactTimeStamp(startDate, startHourMilli);
+
+        Assert.assertTrue(domainFactory.getGroupListData(startExactTimeStamp, mContext, 0, MainActivity.TimeRange.DAY).InstanceDatas.isEmpty());
+
+        Date singleDate = startDate;
+        TimePair singleTimePair = new TimePair(new HourMinute(2, 0));
+
+        CreateTaskLoader.SingleScheduleData singleData = new CreateTaskLoader.SingleScheduleData(singleDate, singleTimePair);
+
+        Task singleTask1 = domainFactory.getLocalFactory().createScheduleRootTask(domainFactory, startExactTimeStamp, "singleTask1", Collections.singletonList(singleData), null);
+        Task singleTask2 = domainFactory.getLocalFactory().createScheduleRootTask(domainFactory, startExactTimeStamp, "singleTask2", Collections.singletonList(singleData), null);
+
+        Assert.assertTrue(domainFactory.getGroupListData(new ExactTimeStamp(singleDate, new HourMilli(2, 0, 0, 0)), mContext, 0, MainActivity.TimeRange.DAY).InstanceDatas.size() == 2);
+
+        ExactTimeStamp joinExactTimeStamp = new ExactTimeStamp(singleDate, new HourMilli(3, 0, 0, 0));
+
+        CreateTaskLoader.SingleScheduleData joinData = new CreateTaskLoader.SingleScheduleData(singleDate, new TimePair(new HourMinute(4, 0)));
+
+        List<TaskKey> joinTaskKeys = Arrays.asList(singleTask1.getTaskKey(), singleTask2.getTaskKey());
+
+        domainFactory.createScheduleJoinRootTask(joinExactTimeStamp, mContext, "joinTask", Collections.singletonList(joinData), joinTaskKeys, null, new ArrayList<>());
+
+        // throw in a tick here or something so the instances get created
+
+        GroupListLoader.Data data = domainFactory.getGroupListData(new ExactTimeStamp(singleDate, new HourMilli(5, 0, 0, 0)), mContext, 0, MainActivity.TimeRange.DAY);
+
+        Assert.assertTrue(data.InstanceDatas.size() == 3);
     }
 }

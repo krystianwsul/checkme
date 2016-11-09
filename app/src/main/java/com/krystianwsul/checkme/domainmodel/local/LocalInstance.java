@@ -264,6 +264,10 @@ public class LocalInstance extends Instance {
         if (done != null)
             exactTimeStamps.add(done.minusOne());
 
+        // podobno zapobiega znikaniu preexistent instances z root po join
+        // zastąpić scheduleTime?
+        // ale najpierw napisz test
+
         if (mInstanceRecord != null)
             exactTimeStamps.add(new ExactTimeStamp(mInstanceRecord.getHierarchyTime()));
 

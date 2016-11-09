@@ -1066,8 +1066,9 @@ public class DomainFactory {
             mergedFriends.addAll(task.getRecordOf());
 
         Task newParentTask;
-        if (mUserData != null) {
+        if (!mergedFriends.isEmpty()) {
             Assert.assertTrue(mRemoteFactory != null);
+            Assert.assertTrue(mUserData != null);
 
             mergedFriends.remove(UserData.getKey(mUserData.email));
 
@@ -1358,8 +1359,9 @@ public class DomainFactory {
             mergedFriends.addAll(task.getRecordOf());
 
         Task newParentTask;
-        if (mUserData != null) {
+        if (!mergedFriends.isEmpty()) {
             Assert.assertTrue(mRemoteFactory != null);
+            Assert.assertTrue(mUserData != null);
 
             mergedFriends.remove(UserData.getKey(mUserData.email));
 

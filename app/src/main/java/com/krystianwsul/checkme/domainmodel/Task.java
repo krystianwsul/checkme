@@ -8,6 +8,7 @@ import android.util.Log;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -199,7 +200,11 @@ public abstract class Task {
     void correctOldestVisible(@NonNull Date date) {
         Date oldestVisible = getOldestVisible();
         if (oldestVisible != null && date.compareTo(oldestVisible) < 0) {
-            Log.e("asdf", getName() + " old oldest: " + oldestVisible + ", new oldest: " + date);
+            String message = getName() + " old oldest: " + oldestVisible + ", new oldest: " + date;
+
+            Log.e("asdf", message);
+
+            MyCrashlytics.logException(new OldestVisibleException(message));
 
             setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
         }
@@ -272,4 +277,10 @@ public abstract class Task {
     public abstract void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now);
 
     protected abstract void deleteSchedule(@NonNull Schedule schedule);
+
+    private static class OldestVisibleException extends Exception {
+        OldestVisibleException(@NonNull String message) {
+            super(message);
+        }
+    }
 }

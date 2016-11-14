@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -186,6 +187,8 @@ public abstract class Instance {
     public abstract void setNotified(@NonNull ExactTimeStamp now);
 
     boolean isVisible(@NonNull ExactTimeStamp now) {
+        MyCrashlytics.log("sprawdzanie Instance.isVisible dla " + getInstanceKey());
+
         boolean isVisible = isVisibleHelper(now);
 
         if (isVisible) {

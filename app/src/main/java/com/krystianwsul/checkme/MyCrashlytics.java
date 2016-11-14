@@ -21,6 +21,12 @@ public class MyCrashlytics {
             Fabric.with(organizatorApplication, new Crashlytics());
     }
 
+    public static void initialize() {
+        Assert.assertTrue(sEnabled == null);
+
+        sEnabled = false;
+    }
+
     public static void log(@NonNull String message) {
         Assert.assertTrue(!TextUtils.isEmpty(message));
         Assert.assertTrue(sEnabled != null);

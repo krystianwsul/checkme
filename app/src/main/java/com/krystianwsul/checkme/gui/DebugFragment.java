@@ -91,7 +91,7 @@ public class DebugFragment extends AbstractFragment {
             stringBuilder.append(domainFactory.getCustomTimeCount());
 
             ExactTimeStamp t1 = ExactTimeStamp.getNow();
-            DomainFactory.getDomainFactory(getContext()).getGroupListData(getActivity(), 0, MainActivity.TimeRange.DAY);
+            DomainFactory.getDomainFactory(getContext()).getGroupListData(getActivity(), ExactTimeStamp.getNow(), 0, MainActivity.TimeRange.DAY);
             ExactTimeStamp t2 = ExactTimeStamp.getNow();
 
             stringBuilder.append("\ntoday: ");

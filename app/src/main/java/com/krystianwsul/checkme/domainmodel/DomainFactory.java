@@ -1,18 +1,10 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,7 +17,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
-import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
@@ -38,8 +29,6 @@ import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
-import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
-import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
@@ -50,10 +39,6 @@ import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
-import com.krystianwsul.checkme.notifications.GroupNotificationDeleteService;
-import com.krystianwsul.checkme.notifications.InstanceDoneService;
-import com.krystianwsul.checkme.notifications.InstanceHourService;
-import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
@@ -76,7 +61,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -427,7 +411,11 @@ public class DomainFactory {
     }
 
     @NonNull
-    GroupListLoader.Data getGroupListData(@NonNull ExactTimeStamp now, @NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
+    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
+        fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getGroupListData");
+
         Assert.assertTrue(position >= 0);
 
         ExactTimeStamp startExactTimeStamp;
@@ -510,17 +498,6 @@ public class DomainFactory {
         data.setInstanceDatas(instanceDatas);
 
         return data;
-    }
-
-    @NonNull
-    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
-        fakeDelay();
-
-        MyCrashlytics.log("DomainFactory.getGroupListData");
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        return getGroupListData(now, context, position, timeRange);
     }
 
     @NonNull
@@ -950,9 +927,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Instance instance = setInstanceDone(now, instanceKey, done);
-
-        updateNotifications(context, new ArrayList<>(), now);
+        Instance instance = setInstanceDone(now, context, instanceKey, done);
 
         save(context, dataId);
 
@@ -991,26 +966,34 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
-        MyCrashlytics.log("DomainFactory.createScheduleRootTask");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
+    @NonNull
+    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
+        Task task;
         if (friendEntries.isEmpty()) {
-            mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
+            task = mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
+            task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
         }
 
         updateNotifications(context, new ArrayList<>(), now);
 
         save(context, dataId);
+
+        return task;
+    }
+
+    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        MyCrashlytics.log("DomainFactory.createScheduleRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, friendEntries);
     }
 
     @NonNull
@@ -1051,8 +1034,10 @@ public class DomainFactory {
         return task.getTaskKey();
     }
 
-    @NonNull
-    List<TaskKey> createScheduleJoinRootTask(@NonNull ExactTimeStamp now, @NonNull Context context, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskKeys.size() > 1);
@@ -1092,42 +1077,33 @@ public class DomainFactory {
 
         joinTasks(newParentTask, joinTasks, now);
 
-        return taskKeys;
-    }
-
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
-        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(!scheduleDatas.isEmpty());
-        Assert.assertTrue(joinTaskKeys.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        List<TaskKey> taskKeys = createScheduleJoinRootTask(now, context, name, scheduleDatas, joinTaskKeys, note, friendEntries);
-
         updateNotifications(context, taskKeys, now);
 
         save(context, dataId);
+    }
+
+    Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Task parentTask = getTask(parentTaskKey);
+        Assert.assertTrue(parentTask.current(now));
+
+        Task childTask = parentTask.createChildTask(now, name, note);
+
+        updateNotifications(context, Collections.singletonList(parentTaskKey), now);
+
+        save(context, dataId);
+
+        return childTask;
     }
 
     public synchronized void createChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createChildTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task parentTask = getTask(parentTaskKey);
-        Assert.assertTrue(parentTask.current(now));
-
-        parentTask.createChildTask(now, name, note);
-
-        updateNotifications(context, Collections.singletonList(parentTaskKey), now);
-
-        save(context, dataId);
+        createChildTask(context, now, dataId, parentTaskKey, name, note);
     }
 
     public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
@@ -1174,7 +1150,13 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    Pair<TaskKey, List<TaskKey>> updateChildTask(@NonNull ExactTimeStamp now, @NonNull Context context, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
+    @NonNull
+    public synchronized TaskKey updateChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
+        MyCrashlytics.log("DomainFactory.updateChildTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
         List<TaskKey> taskKeys = new ArrayList<>();
 
         Task task = getTask(taskKey);
@@ -1215,27 +1197,11 @@ public class DomainFactory {
             taskKeys.add(oldTaskHierarchy.getParentTaskKey());
         }
 
-        return new Pair<>(task.getTaskKey(), taskKeys);
-    }
-
-    @NonNull
-    public synchronized TaskKey updateChildTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
-        MyCrashlytics.log("DomainFactory.updateChildTask");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        Pair<TaskKey, List<TaskKey>> pair = updateChildTask(now, context, taskKey, name, parentTaskKey, note);
-        Assert.assertTrue(pair.first != null);
-        Assert.assertTrue(pair.second != null);
-
-        updateNotifications(context, pair.second, now);
+        updateNotifications(context, taskKeys, now);
 
         save(context, dataId);
 
-        return pair.first;
+        return task.getTaskKey();
     }
 
     public synchronized void setTaskEndTimeStamp(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, @NonNull TaskKey taskKey) {
@@ -1335,25 +1301,33 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
-        MyCrashlytics.log("DomainFactory.createRootTask");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
+    @NonNull
+    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
+        Task task;
         if (friendEntries.isEmpty()) {
-            mLocalFactory.createLocalTaskHelper(this, name, now, note);
+            task = mLocalFactory.createLocalTaskHelper(this, name, now, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            mRemoteFactory.createRemoteTaskHelper(now, name, note, Utils.userDatasToKeys(friendEntries));
+            task = mRemoteFactory.createRemoteTaskHelper(now, name, note, Utils.userDatasToKeys(friendEntries));
         }
 
         updateNotifications(context, new ArrayList<>(), now);
 
         save(context, dataId);
+
+        return task;
+    }
+
+    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        MyCrashlytics.log("DomainFactory.createRootTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        createRootTask(context, now, dataId, name, note, friendEntries);
     }
 
     public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
@@ -1703,165 +1677,6 @@ public class DomainFactory {
                 .collect(Collectors.toMap(Task::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
     }
 
-    // notifications
-
-    @SuppressLint("NewApi")
-    private void setExact(@NonNull Context context, long time, @NonNull PendingIntent pendingIntent) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-        }
-    }
-
-    private void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
-        Task task = instance.getTask();
-        int notificationId = instance.getNotificationId();
-        InstanceKey instanceKey = instance.getInstanceKey();
-
-        Intent deleteIntent = InstanceNotificationDeleteService.getIntent(context, instanceKey);
-        PendingIntent pendingDeleteIntent = PendingIntent.getService(context, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        Intent contentIntent = ShowInstanceActivity.getNotificationIntent(context, instanceKey);
-        PendingIntent pendingContentIntent = PendingIntent.getActivity(context, notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        ArrayList<NotificationCompat.Action> actions = new ArrayList<>();
-
-        Intent doneIntent = InstanceDoneService.getIntent(context, instanceKey, notificationId);
-        PendingIntent pendingDoneIntent = PendingIntent.getService(context, notificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, context.getString(R.string.done), pendingDoneIntent).build());
-
-        Intent hourIntent = InstanceHourService.getIntent(context, instanceKey, notificationId);
-        PendingIntent pendingHourIntent = PendingIntent.getService(context, notificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, context.getString(R.string.hour), pendingHourIntent).build());
-
-        List<Instance> childInstances = instance.getChildInstances(now);
-
-        String text;
-        NotificationCompat.Style style;
-        if (!childInstances.isEmpty()) {
-            Stream<Instance> notDone = Stream.of(childInstances)
-                    .filter(childInstance -> childInstance.getDone() == null)
-                    .sortBy(childInstance -> childInstance.getTask().getStartExactTimeStamp());
-
-            //noinspection ConstantConditions
-            Stream<Instance> done = Stream.of(childInstances)
-                    .filter(childInstance -> childInstance.getDone() != null)
-                    .sortBy(childInstance -> -childInstance.getDone().getLong());
-
-            List<String> children = Stream.concat(notDone, done)
-                    .map(Instance::getName)
-                    .collect(Collectors.toList());
-
-            text = TextUtils.join(", ", children);
-            style = getInboxStyle(context, children);
-        } else if (!TextUtils.isEmpty(task.getNote())) {
-            text = task.getNote();
-
-            NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-            bigTextStyle.bigText(task.getNote());
-
-            style = bigTextStyle;
-        } else {
-            text = null;
-            style = null;
-        }
-
-        notify(context, instance.getName(), text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.getInstanceDateTime().getTimeStamp().getLong(), style, true);
-    }
-
-    private void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(instances.size() > TickService.MAX_NOTIFICATIONS);
-
-        ArrayList<String> names = new ArrayList<>();
-        ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
-        for (Instance instance : instances) {
-            names.add(instance.getName());
-            instanceKeys.add(instance.getInstanceKey());
-        }
-
-        Intent deleteIntent = GroupNotificationDeleteService.getIntent(context, instanceKeys);
-        PendingIntent pendingDeleteIntent = PendingIntent.getService(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        Intent contentIntent = ShowNotificationGroupActivity.getIntent(context, instanceKeys);
-        PendingIntent pendingContentIntent = PendingIntent.getActivity(context, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        NotificationCompat.InboxStyle inboxStyle = getInboxStyle(context, Stream.of(instances)
-                .sorted((lhs, rhs) -> {
-                    int timeStampComparison = lhs.getInstanceDateTime().getTimeStamp().compareTo(rhs.getInstanceDateTime().getTimeStamp());
-                    if (timeStampComparison != 0)
-                        return timeStampComparison;
-
-                    return lhs.getTask().getStartExactTimeStamp().compareTo(rhs.getTask().getStartExactTimeStamp());
-                })
-                .map(notificationInstanceData -> notificationInstanceData.getName() + " (" + notificationInstanceData.getDisplayText(context, now) + ")")
-                .collect(Collectors.toList()));
-
-        notify(context, instances.size() + " " + context.getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, new ArrayList<>(), null, inboxStyle, false);
-    }
-
-    @NonNull
-    private NotificationCompat.InboxStyle getInboxStyle(@NonNull Context context, @NonNull List<String> lines) {
-        Assert.assertTrue(!lines.isEmpty());
-
-        int max = 5;
-
-        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-
-        Stream.of(lines)
-                .limit(max)
-                .forEach(inboxStyle::addLine);
-
-        int extraCount = lines.size() - max;
-
-        if (extraCount > 0)
-            inboxStyle.setSummaryText("+" + extraCount + " " + context.getString(R.string.more));
-
-        return inboxStyle;
-    }
-
-    private void notify(@NonNull Context context, @NonNull String title, @Nullable String text, int notificationId, @NonNull PendingIntent deleteIntent, @NonNull PendingIntent contentIntent, boolean silent, @NonNull List<NotificationCompat.Action> actions, @Nullable Long when, @Nullable NotificationCompat.Style style, boolean autoCancel) {
-        Assert.assertTrue(!TextUtils.isEmpty(title));
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        NotificationCompat.Builder builder = (new NotificationCompat.Builder(context))
-                .setContentTitle(title)
-                .setSmallIcon(R.drawable.ikona_bez)
-                .setDeleteIntent(deleteIntent)
-                .setContentIntent(contentIntent)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
-
-        if (!TextUtils.isEmpty(text))
-            builder.setContentText(text);
-
-        if (!silent)
-            builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
-
-        Assert.assertTrue(actions.size() <= 3);
-
-        Stream.of(actions)
-                .forEach(builder::addAction);
-
-        if (when != null)
-            builder.setWhen(when);
-
-        if (style != null)
-            builder.setStyle(style);
-
-        if (autoCancel)
-            builder.setAutoCancel(true);
-
-        Notification notification = builder.build();
-
-        if (!silent)
-            notification.defaults |= Notification.DEFAULT_VIBRATE;
-
-        notificationManager.notify(notificationId, notification);
-    }
-
     @NonNull
     public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull Set<String> recordOf) {
         Assert.assertTrue(mRemoteFactory != null);
@@ -2101,10 +1916,12 @@ public class DomainFactory {
     }
 
     @NonNull
-    Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull InstanceKey instanceKey, boolean done) {
+    Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull Context context, @NonNull InstanceKey instanceKey, boolean done) {
         Instance instance = getInstance(instanceKey);
 
         instance.setDone(done, now);
+
+        updateNotifications(context, new ArrayList<>(), now);
 
         return instance;
     }
@@ -2291,67 +2108,64 @@ public class DomainFactory {
             }
         }
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Assert.assertTrue(notificationManager != null);
-
         if (registering) {
             Assert.assertTrue(silent);
 
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                notifyGroup(context, notificationInstances.values(), true, now);
+                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
             } else { // show instances
                 for (Instance instance : notificationInstances.values()) {
                     Assert.assertTrue(instance != null);
 
-                    notifyInstance(context, instance, true, now);
+                    NotificationWrapper.getInstance().notifyInstance(context, instance, true, now);
                 }
             }
         } else {
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        notifyGroup(context, notificationInstances.values(), silent, now);
+                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
                     } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
-                        notifyGroup(context, notificationInstances.values(), true, now);
+                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
                     }
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
                         if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
                             Instance shownInstance = getInstance(shownInstanceKey);
 
-                            notificationManager.cancel(shownInstance.getNotificationId());
+                            NotificationWrapper.getInstance().cancel(context, shownInstance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
 
-                            notificationManager.cancel(notificationId);
+                            NotificationWrapper.getInstance().cancel(context, notificationId);
                         }
                     }
 
-                    notifyGroup(context, notificationInstances.values(), silent, now);
+                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
                 }
             } else { // show instances
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    notificationManager.cancel(0);
+                    NotificationWrapper.getInstance().cancel(context, 0);
 
                     for (Instance instance : notificationInstances.values()) {
                         Assert.assertTrue(instance != null);
 
-                        notifyInstance(context, instance, silent, now);
+                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
                     }
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                         if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                             Instance instance = getInstance(hideInstanceKey);
 
-                            notificationManager.cancel(instance.getNotificationId());
+                            NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
-                            notificationManager.cancel(notificationId);
+                            NotificationWrapper.getInstance().cancel(context, notificationId);
                         }
                     }
 
@@ -2359,13 +2173,13 @@ public class DomainFactory {
                         Instance instance = notificationInstances.get(showInstanceKey);
                         Assert.assertTrue(instance != null);
 
-                        notifyInstance(context, instance, silent, now);
+                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
                     }
 
                     Stream.of(notificationInstances.values())
                             .filter(instance -> updateInstance(taskKeys, instance, now))
                             .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                            .forEach(instance -> notifyInstance(context, instance, true, now));
+                            .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now));
                 }
             }
         }
@@ -2398,14 +2212,8 @@ public class DomainFactory {
             }
         }
 
-        if (nextAlarm != null) {
-            Intent nextIntent = TickService.getIntent(context, false, false, new ArrayList<>());
-
-            PendingIntent pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Assert.assertTrue(pendingIntent != null);
-
-            setExact(context, nextAlarm.getLong(), pendingIntent);
-        }
+        if (nextAlarm != null)
+            NotificationWrapper.getInstance().setAlarm(context, nextAlarm);
     }
 
     private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull Instance instance, @NonNull ExactTimeStamp now) {

@@ -8,7 +8,7 @@ import android.text.TextUtils;
 
 import junit.framework.Assert;
 
-class InsertCommand implements Parcelable {
+public class InsertCommand implements Parcelable {
     private final String mTableName;
     private final ContentValues mContentValues;
 
@@ -21,7 +21,7 @@ class InsertCommand implements Parcelable {
         mContentValues = contentValues;
     }
 
-    public void execute(SQLiteDatabase sqLiteDatabase) {
+    void execute(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
         long id = sqLiteDatabase.insert(mTableName, null, mContentValues);

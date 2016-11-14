@@ -35,21 +35,21 @@ public class PersistenceManger {
 
     private final SQLiteDatabase mSQLiteDatabase;
 
-    private final List<CustomTimeRecord> mCustomTimeRecords;
+    final List<CustomTimeRecord> mCustomTimeRecords;
 
-    private final List<TaskRecord> mTaskRecords;
-    private final List<TaskHierarchyRecord> mTaskHierarchyRecords;
+    final List<TaskRecord> mTaskRecords;
+    final List<TaskHierarchyRecord> mTaskHierarchyRecords;
 
-    private final List<ScheduleRecord> mScheduleRecords;
-    private final Map<Integer, SingleScheduleRecord> mSingleScheduleRecords;
-    private final Map<Integer, DailyScheduleRecord> mDailyScheduleRecords;
-    private final Map<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords;
-    private final Map<Integer, MonthlyDayScheduleRecord> mMonthlyDayScheduleRecords;
-    private final Map<Integer, MonthlyWeekScheduleRecord> mMonthlyWeekScheduleRecords;
+    final List<ScheduleRecord> mScheduleRecords;
+    final Map<Integer, SingleScheduleRecord> mSingleScheduleRecords;
+    final Map<Integer, DailyScheduleRecord> mDailyScheduleRecords;
+    final Map<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords;
+    final Map<Integer, MonthlyDayScheduleRecord> mMonthlyDayScheduleRecords;
+    final Map<Integer, MonthlyWeekScheduleRecord> mMonthlyWeekScheduleRecords;
 
-    private final List<InstanceRecord> mInstanceRecords;
+    final List<InstanceRecord> mInstanceRecords;
 
-    private final List<InstanceShownRecord> mInstanceShownRecords;
+    final List<InstanceShownRecord> mInstanceShownRecords;
 
     private int mCustomTimeMaxId;
     private int mTaskMaxId;
@@ -461,149 +461,11 @@ public class PersistenceManger {
     }
 
     public void save(@NonNull Context context) {
-        // save
-
-        ArrayList<InsertCommand> insertCommands = new ArrayList<>();
-
-        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords)
-            if (customTimeRecord.needsInsert())
-                insertCommands.add(customTimeRecord.getInsertCommand());
-
-        for (TaskRecord taskRecord : mTaskRecords)
-            if (taskRecord.needsInsert())
-                insertCommands.add(taskRecord.getInsertCommand());
-
-        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords)
-            if (taskHierarchyRecord.needsInsert())
-                insertCommands.add(taskHierarchyRecord.getInsertCommand());
-
-        for (ScheduleRecord scheduleRecord : mScheduleRecords)
-            if (scheduleRecord.needsInsert())
-                insertCommands.add(scheduleRecord.getInsertCommand());
-
-        for (SingleScheduleRecord singleScheduleRecord : mSingleScheduleRecords.values())
-            if (singleScheduleRecord.needsInsert())
-                insertCommands.add(singleScheduleRecord.getInsertCommand());
-
-        for (DailyScheduleRecord dailyScheduleRecord : mDailyScheduleRecords.values())
-            if (dailyScheduleRecord.needsInsert())
-                insertCommands.add(dailyScheduleRecord.getInsertCommand());
-
-        for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values())
-            if (weeklyScheduleRecord.needsInsert())
-                insertCommands.add(weeklyScheduleRecord.getInsertCommand());
-
-        for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : mMonthlyDayScheduleRecords.values())
-            if (monthlyDayScheduleRecord.needsInsert())
-                insertCommands.add(monthlyDayScheduleRecord.getInsertCommand());
-
-        for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : mMonthlyWeekScheduleRecords.values())
-            if (monthlyWeekScheduleRecord.needsInsert())
-                insertCommands.add(monthlyWeekScheduleRecord.getInsertCommand());
-
-        for (InstanceRecord instanceRecord : mInstanceRecords)
-            if (instanceRecord.needsInsert())
-                insertCommands.add(instanceRecord.getInsertCommand());
-
-        for (InstanceShownRecord instanceShownRecord : mInstanceShownRecords)
-            if (instanceShownRecord.needsInsert())
-                insertCommands.add(instanceShownRecord.getInsertCommand());
-
-        // update
-
-        ArrayList<UpdateCommand> updateCommands = new ArrayList<>();
-
-        for (CustomTimeRecord customTimeRecord : mCustomTimeRecords)
-            if (customTimeRecord.needsUpdate())
-                updateCommands.add(customTimeRecord.getUpdateCommand());
-
-        for (TaskRecord taskRecord : mTaskRecords)
-            if (taskRecord.needsUpdate())
-                updateCommands.add(taskRecord.getUpdateCommand());
-
-        for (TaskHierarchyRecord taskHierarchyRecord : mTaskHierarchyRecords)
-            if (taskHierarchyRecord.needsUpdate())
-                updateCommands.add(taskHierarchyRecord.getUpdateCommand());
-
-        for (ScheduleRecord scheduleRecord : mScheduleRecords)
-            if (scheduleRecord.needsUpdate())
-                updateCommands.add(scheduleRecord.getUpdateCommand());
-
-        for (SingleScheduleRecord singleScheduleRecord : mSingleScheduleRecords.values())
-            if (singleScheduleRecord.needsUpdate())
-                updateCommands.add(singleScheduleRecord.getUpdateCommand());
-
-        for (DailyScheduleRecord dailyScheduleRecord : mDailyScheduleRecords.values())
-            if (dailyScheduleRecord.needsUpdate())
-                updateCommands.add(dailyScheduleRecord.getUpdateCommand());
-
-        for (WeeklyScheduleRecord weeklyScheduleRecord : mWeeklyScheduleRecords.values())
-            if (weeklyScheduleRecord.needsUpdate())
-                updateCommands.add(weeklyScheduleRecord.getUpdateCommand());
-
-        for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : mMonthlyDayScheduleRecords.values())
-            if (monthlyDayScheduleRecord.needsUpdate())
-                updateCommands.add(monthlyDayScheduleRecord.getUpdateCommand());
-
-        for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : mMonthlyWeekScheduleRecords.values())
-            if (monthlyWeekScheduleRecord.needsUpdate())
-                updateCommands.add(monthlyWeekScheduleRecord.getUpdateCommand());
-
-        for (InstanceRecord instanceRecord : mInstanceRecords)
-            if (instanceRecord.needsUpdate())
-                updateCommands.add(instanceRecord.getUpdateCommand());
-
-        for (InstanceShownRecord instanceShownRecord : mInstanceShownRecords)
-            if (instanceShownRecord.needsUpdate())
-                updateCommands.add(instanceShownRecord.getUpdateCommand());
-
-        ArrayList<DeleteCommand> deleteCommands = new ArrayList<>();
-
-        deleteCommands.addAll(delete(mCustomTimeRecords));
-        deleteCommands.addAll(delete(mTaskRecords));
-        deleteCommands.addAll(delete(mTaskHierarchyRecords));
-        deleteCommands.addAll(delete(mScheduleRecords));
-        deleteCommands.addAll(delete(mSingleScheduleRecords));
-        deleteCommands.addAll(delete(mDailyScheduleRecords));
-        deleteCommands.addAll(delete(mWeeklyScheduleRecords));
-        deleteCommands.addAll(delete(mMonthlyDayScheduleRecords));
-        deleteCommands.addAll(delete(mMonthlyWeekScheduleRecords));
-        deleteCommands.addAll(delete(mInstanceRecords));
-        deleteCommands.addAll(delete(mInstanceShownRecords));
-
-        SaveService.startService(context, insertCommands, updateCommands, deleteCommands);
+        SaveService.Factory.getInstance().startService(context, this);
     }
 
     SQLiteDatabase getSQLiteDatabase() {
         return mSQLiteDatabase;
-    }
-
-    @NonNull
-    private static List<DeleteCommand> delete(@NonNull Collection<? extends Record> collection) {
-        List<Record> deleted = Stream.of(collection)
-                .filter(Record::needsDelete)
-                .collect(Collectors.toList());
-
-        //noinspection SuspiciousMethodCalls
-        collection.removeAll(deleted);
-
-        return Stream.of(deleted)
-                .map(Record::getDeleteCommand)
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    private static List<DeleteCommand> delete(@NonNull Map<Integer, ? extends Record> map) {
-        Map<Integer, Record> deleted = Stream.of(map)
-                .filter(pair -> pair.getValue().needsDelete())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        Stream.of(deleted.keySet())
-                .forEach(map::remove);
-
-        return Stream.of(deleted.values())
-                .map(Record::getDeleteCommand)
-                .collect(Collectors.toList());
     }
 
     @NonNull

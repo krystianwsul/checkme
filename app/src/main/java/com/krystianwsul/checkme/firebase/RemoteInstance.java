@@ -19,8 +19,6 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Set;
 
 public class RemoteInstance extends Instance {
@@ -188,28 +186,6 @@ public class RemoteInstance extends Instance {
 
             return mScheduleDateTime.getTime();
         }
-    }
-
-    @NonNull
-    protected ExactTimeStamp getHierarchyExactTimeStamp(@NonNull ExactTimeStamp now) {
-        ArrayList<ExactTimeStamp> exactTimeStamps = new ArrayList<>();
-
-        exactTimeStamps.add(now);
-
-        Task task = getTask();
-
-        ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
-        if (taskEndExactTimeStamp != null)
-            exactTimeStamps.add(taskEndExactTimeStamp.minusOne());
-
-        ExactTimeStamp done = getDone();
-        if (done != null)
-            exactTimeStamps.add(done.minusOne());
-
-        if (mRemoteInstanceRecord != null)
-            exactTimeStamps.add(new ExactTimeStamp(mRemoteInstanceRecord.getHierarchyTime()));
-
-        return Collections.min(exactTimeStamps);
     }
 
     @NonNull

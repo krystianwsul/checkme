@@ -19,6 +19,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -107,7 +108,25 @@ public abstract class Instance {
     }
 
     @NonNull
-    protected abstract ExactTimeStamp getHierarchyExactTimeStamp(@NonNull ExactTimeStamp now);
+    private ExactTimeStamp getHierarchyExactTimeStamp(@NonNull ExactTimeStamp now) {
+        ArrayList<ExactTimeStamp> exactTimeStamps = new ArrayList<>();
+
+        exactTimeStamps.add(now);
+
+        Task task = getTask();
+
+        ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
+        if (taskEndExactTimeStamp != null)
+            exactTimeStamps.add(taskEndExactTimeStamp.minusOne());
+
+        ExactTimeStamp done = getDone();
+        if (done != null)
+            exactTimeStamps.add(done.minusOne());
+
+        exactTimeStamps.add(getScheduleDateTime().getTimeStamp().toExactTimeStamp());
+
+        return Collections.min(exactTimeStamps);
+    }
 
     @NonNull
     public abstract String getName();

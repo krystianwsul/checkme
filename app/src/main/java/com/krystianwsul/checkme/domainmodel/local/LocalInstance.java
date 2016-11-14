@@ -6,7 +6,6 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Instance;
-import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -18,9 +17,6 @@ import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class LocalInstance extends Instance {
     @Nullable
@@ -248,32 +244,7 @@ public class LocalInstance extends Instance {
         mInstanceRecord = mDomainFactory.getLocalFactory().createInstanceRecord(localTask, this, scheduleDateTime, now);
     }
 
-    @NonNull
-    protected ExactTimeStamp getHierarchyExactTimeStamp(@NonNull ExactTimeStamp now) {
-        ArrayList<ExactTimeStamp> exactTimeStamps = new ArrayList<>();
-
-        exactTimeStamps.add(now);
-
-        Task task = getTask();
-
-        ExactTimeStamp taskEndExactTimeStamp = task.getEndExactTimeStamp();
-        if (taskEndExactTimeStamp != null)
-            exactTimeStamps.add(taskEndExactTimeStamp.minusOne());
-
-        ExactTimeStamp done = getDone();
-        if (done != null)
-            exactTimeStamps.add(done.minusOne());
-
-        // podobno zapobiega znikaniu preexistent instances z root po join
-        // zastąpić scheduleTime?
-        // ale najpierw napisz test
-
-        if (mInstanceRecord != null)
-            exactTimeStamps.add(new ExactTimeStamp(mInstanceRecord.getHierarchyTime()));
-
-        return Collections.min(exactTimeStamps);
-    }
-
+    @Deprecated
     public long getHierarchyTime() {
         Assert.assertTrue(mInstanceRecord != null);
 

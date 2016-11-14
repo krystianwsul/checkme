@@ -263,7 +263,8 @@ public abstract class Task {
         Stream.of(removeSchedules)
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
-        addSchedules(addScheduleDatas, now);
+        if (!addScheduleDatas.isEmpty())
+            addSchedules(addScheduleDatas, now);
     }
 
     protected abstract void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now);

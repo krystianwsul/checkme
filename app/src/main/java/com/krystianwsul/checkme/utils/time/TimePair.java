@@ -74,6 +74,19 @@ public class TimePair implements Parcelable, Serializable {
     }
 
     @Override
+    public String toString() {
+        if (mCustomTimeKey != null) {
+            Assert.assertTrue(mHourMinute == null);
+
+            return super.toString() + ": " + mCustomTimeKey;
+        } else {
+            Assert.assertTrue(mHourMinute != null);
+
+            return super.toString() + ": " + mHourMinute;
+        }
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

@@ -60,7 +60,7 @@ public class InstanceKey implements Parcelable, Serializable {
 
     @Override
     public String toString() {
-        return super.toString() + ": TaskKey: " + mTaskKey + ", ScheduleDate: " + ScheduleDate + ", ScheduleTimePair: " + ScheduleTimePair;
+        return super.toString() + ": " + mTaskKey + ", " + ScheduleDate + ", " + ScheduleTimePair;
     }
 
     @Override

@@ -68,7 +68,7 @@ public class TaskKey implements Parcelable, Serializable {
 
     @Override
     public String toString() {
-        return "TaskKey " + mLocalTaskId + " - " + mRemoteTaskId;
+        return super.toString() + ": " + mLocalTaskId + ", " + mRemoteTaskId;
     }
 
     @Override

@@ -204,7 +204,7 @@ public abstract class Task {
 
             Log.e("asdf", message);
 
-            MyCrashlytics.logException(new OldestVisibleException(message));
+            MyCrashlytics.logException(new OldestVisibleException2(message));
 
             setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
         }
@@ -278,8 +278,8 @@ public abstract class Task {
 
     protected abstract void deleteSchedule(@NonNull Schedule schedule);
 
-    private static class OldestVisibleException extends Exception {
-        OldestVisibleException(@NonNull String message) {
+    private static class OldestVisibleException2 extends Exception {
+        OldestVisibleException2(@NonNull String message) {
             super(message);
         }
     }

@@ -187,7 +187,7 @@ public abstract class Instance {
     public abstract void setNotified(@NonNull ExactTimeStamp now);
 
     boolean isVisible(@NonNull ExactTimeStamp now) {
-        MyCrashlytics.log("sprawdzanie Instance.isVisible dla " + getInstanceKey());
+        MyCrashlytics.log("sprawdzanie Instance.isVisible dla " + getName() + ": " + getInstanceKey());
 
         boolean isVisible = isVisibleHelper(now);
 

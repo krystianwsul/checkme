@@ -97,7 +97,7 @@ public abstract class Instance {
 
             Task childTask = taskHierarchy.getChildTask();
 
-            Instance existingChildInstance = mDomainFactory.getExistingInstance(childTask, scheduleDateTime);
+            Instance existingChildInstance = mDomainFactory.getExistingInstanceIfPresent(childTask, scheduleDateTime);
             if (existingChildInstance != null) {
                 childInstances.add(existingChildInstance);
             } else if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.getChildTask().notDeleted(hierarchyExactTimeStamp)) {

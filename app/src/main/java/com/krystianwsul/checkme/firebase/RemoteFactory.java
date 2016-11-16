@@ -46,6 +46,8 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
+import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.InstanceMap;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -84,7 +86,7 @@ public class RemoteFactory {
     private final Multimap<String, Schedule> mRemoteSchedules;
 
     @NonNull
-    private final Map<String, RemoteInstance> mExistingRemoteInstances;
+    private final InstanceMap<RemoteInstance> mExistingRemoteInstances = new InstanceMap<>();
 
     @NonNull
     private final Map<String, RemoteCustomTime> mRemoteCustomTimes;
@@ -119,11 +121,10 @@ public class RemoteFactory {
         for (RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord : mRemoteManager.mRemoteMonthlyWeekScheduleRecords.values())
             mRemoteSchedules.put(remoteMonthlyWeekScheduleRecord.getTaskId(), new MonthlyWeekSchedule(domainFactory, new RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)));
 
-        mExistingRemoteInstances = new HashMap<>();
         for (RemoteInstanceRecord remoteInstanceRecord : mRemoteManager.mRemoteInstanceRecords.values()) {
             InstanceShownRecord instanceShownRecord = domainFactory.getLocalFactory().getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute());
 
-            mExistingRemoteInstances.put(remoteInstanceRecord.getId(), new RemoteInstance(domainFactory, remoteInstanceRecord, instanceShownRecord));
+            mExistingRemoteInstances.add(new RemoteInstance(domainFactory, remoteInstanceRecord, instanceShownRecord));
         }
 
         String userId = UserData.getKey(userData.email);
@@ -390,9 +391,8 @@ public class RemoteFactory {
         JsonWrapper jsonWrapper = new JsonWrapper(remoteTask.getRecordOf(), instanceJson);
 
         RemoteInstanceRecord remoteInstanceRecord = mRemoteManager.newRemoteInstanceRecord(jsonWrapper);
-        Assert.assertTrue(!mExistingRemoteInstances.containsKey(remoteInstanceRecord.getId()));
 
-        mExistingRemoteInstances.put(remoteInstanceRecord.getId(), remoteInstance);
+        mExistingRemoteInstances.add(remoteInstance);
 
         return remoteInstanceRecord;
     }
@@ -406,7 +406,7 @@ public class RemoteFactory {
 
         for (Instance instance : irrelevant.mInstances) {
             if (instance instanceof RemoteInstance) {
-                Assert.assertTrue(!mExistingRemoteInstances.containsKey(((RemoteInstance) instance).getId()));
+                Assert.assertTrue(!mExistingRemoteInstances.contains(((RemoteInstance) instance)));
             }
         }
     }
@@ -660,9 +660,7 @@ public class RemoteFactory {
         }
 
         RemoteInstance remoteInstance = new RemoteInstance(mDomainFactory, remoteInstanceRecord, instanceShownRecord);
-        Assert.assertTrue(!mExistingRemoteInstances.containsKey(remoteInstance.getId()));
-
-        mExistingRemoteInstances.put(remoteInstance.getId(), remoteInstance);
+        mExistingRemoteInstances.add(remoteInstance);
 
         return remoteInstance;
     }
@@ -696,9 +694,7 @@ public class RemoteFactory {
 
         updateRecordOfData.mRemoteTaskHierarchies.addAll(parentRemoteTaskHierarchies);
 
-        updateRecordOfData.mRemoteInstances.addAll(Stream.of(mExistingRemoteInstances.values())
-                .filter(remoteInstance -> remoteInstance.getTaskKey().equals(taskKey))
-                .collect(Collectors.toList()));
+        updateRecordOfData.mRemoteInstances.addAll(mExistingRemoteInstances.get(taskKey).values());
 
         Stream.of(mRemoteTaskHierarchies.values())
                 .filter(localTaskHierarchy -> localTaskHierarchy.getParentTaskKey().equals(taskKey))
@@ -726,10 +722,12 @@ public class RemoteFactory {
         return mRemoteTaskHierarchies.values();
     }
 
+    /*
     @NonNull
     public Collection<RemoteInstance> getExistingInstances() {
         return mExistingRemoteInstances.values();
     }
+    */
 
     @NonNull
     Collection<Schedule> getSchedules(@NonNull String taskId) {
@@ -798,10 +796,25 @@ public class RemoteFactory {
     }
 
     void deleteInstance(@NonNull RemoteInstance remoteInstance) {
-        String id = remoteInstance.getId();
+        mExistingRemoteInstances.removeForce(remoteInstance);
+    }
 
-        Assert.assertTrue(mExistingRemoteInstances.containsKey(id));
+    public int getInstanceCount() {
+        return mExistingRemoteInstances.size();
+    }
 
-        mExistingRemoteInstances.remove(id);
+    @NonNull
+    public Map<InstanceKey, RemoteInstance> getExistingInstances(@NonNull TaskKey taskKey) {
+        return mExistingRemoteInstances.get(taskKey);
+    }
+
+    @NonNull
+    public List<RemoteInstance> getExistingInstances() {
+        return mExistingRemoteInstances.values();
+    }
+
+    @Nullable
+    public RemoteInstance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
+        return mExistingRemoteInstances.getIfPresent(instanceKey);
     }
 }

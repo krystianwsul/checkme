@@ -30,6 +30,8 @@ import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
+import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.InstanceMap;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -66,7 +68,7 @@ public class LocalFactory {
     private final HashMap<Integer, LocalTaskHierarchy> mLocalTaskHierarchies = new HashMap<>();
 
     @NonNull
-    private final ArrayList<LocalInstance> mExistingLocalInstances = new ArrayList<>();
+    private final InstanceMap<LocalInstance> mExistingLocalInstances = new InstanceMap<>();
 
     public static LocalFactory getInstance(@NonNull Context context) {
         if (sLocalFactory == null)
@@ -303,9 +305,7 @@ public class LocalFactory {
     }
 
     void deleteInstance(@NonNull LocalInstance localInstance) {
-        Assert.assertTrue(mExistingLocalInstances.contains(localInstance));
-
-        mExistingLocalInstances.remove(localInstance);
+        mExistingLocalInstances.removeForce(localInstance);
     }
 
     void deleteCustomTime(@NonNull LocalCustomTime localCustomTime) {
@@ -437,7 +437,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public LocalTask createChildTask(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull LocalTask parentTask, @NonNull String name, @Nullable String note) {
+    LocalTask createChildTask(@NonNull DomainFactory domainFactory, @NonNull ExactTimeStamp now, @NonNull LocalTask parentTask, @NonNull String name, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(parentTask.current(now));
 
@@ -464,7 +464,7 @@ public class LocalFactory {
 
         for (Instance instance : irrelevant.mInstances) {
             if (instance instanceof LocalInstance) {
-                Assert.assertTrue(!mExistingLocalInstances.contains(instance));
+                Assert.assertTrue(!mExistingLocalInstances.contains((LocalInstance) instance));
             }
         }
 
@@ -496,9 +496,7 @@ public class LocalFactory {
 
         localToRemoteConversion.mLocalTaskHierarchies.addAll(parentLocalTaskHierarchies);
 
-        localToRemoteConversion.mLocalInstances.addAll(Stream.of(mExistingLocalInstances)
-                .filter(localInstance -> localInstance.getTaskKey().equals(taskKey))
-                .collect(Collectors.toList()));
+        localToRemoteConversion.mLocalInstances.addAll(mExistingLocalInstances.get(taskKey).values());
 
         Stream.of(mLocalTaskHierarchies.values())
                 .filter(localTaskHierarchy -> localTaskHierarchy.getParentTaskKey().equals(taskKey))
@@ -515,10 +513,12 @@ public class LocalFactory {
         return mLocalTaskHierarchies.values();
     }
 
+    /*
     @NonNull
     public List<LocalInstance> getExistingInstances() {
         return mExistingLocalInstances;
     }
+    */
 
     @NonNull
     public LocalCustomTime createLocalCustomTime(@NonNull DomainFactory domainFactory, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
@@ -589,5 +589,24 @@ public class LocalFactory {
 
     public boolean hasLocalCustomTime(int localCustomTimeId) {
         return mLocalCustomTimes.containsKey(localCustomTimeId);
+    }
+
+    public int getInstanceCount() {
+        return mExistingLocalInstances.size();
+    }
+
+    @NonNull
+    public Map<InstanceKey, LocalInstance> getExistingInstances(@NonNull TaskKey taskKey) {
+        return mExistingLocalInstances.get(taskKey);
+    }
+
+    @NonNull
+    public List<LocalInstance> getExistingInstances() {
+        return mExistingLocalInstances.values();
+    }
+
+    @Nullable
+    public LocalInstance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
+        return mExistingLocalInstances.getIfPresent(instanceKey);
     }
 }

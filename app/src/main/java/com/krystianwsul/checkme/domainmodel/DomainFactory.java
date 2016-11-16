@@ -160,7 +160,10 @@ public class DomainFactory {
     }
 
     public int getInstanceCount() {
-        return getExistingInstances().size();
+        int count = mLocalFactory.getInstanceCount();
+        if (mRemoteFactory != null)
+            count += mRemoteFactory.getInstanceCount();
+        return count;
     }
 
     public int getCustomTimeCount() {
@@ -416,6 +419,8 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getGroupListData");
 
+        ExactTimeStamp t1 = ExactTimeStamp.getNow();
+
         Assert.assertTrue(position >= 0);
 
         ExactTimeStamp startExactTimeStamp;
@@ -445,6 +450,9 @@ public class DomainFactory {
             startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMilli(0, 0, 0, 0));
         }
 
+        ExactTimeStamp t2 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d1:" + (t2.getLong() - t1.getLong()));
+
         Calendar endCalendar = now.getCalendar();
 
         switch (timeRange) {
@@ -465,7 +473,13 @@ public class DomainFactory {
 
         endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMilli(0, 0, 0, 0));
 
+        ExactTimeStamp t3 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d2:" + (t3.getLong() - t2.getLong()));
+
         List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
+
+        ExactTimeStamp t4 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d3:" + (t4.getLong() - t3.getLong()));
 
         List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
@@ -482,6 +496,9 @@ public class DomainFactory {
                     .collect(Collectors.toList());
         }
 
+        ExactTimeStamp t5 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d4:" + (t5.getLong() - t4.getLong()));
+
         GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, taskDatas, null);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
@@ -495,7 +512,13 @@ public class DomainFactory {
             instanceDatas.put(instanceData.InstanceKey, instanceData);
         }
 
+        ExactTimeStamp t6 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d5:" + (t6.getLong() - t5.getLong()));
+
         data.setInstanceDatas(instanceDatas);
+
+        ExactTimeStamp t7 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d6:" + (t7.getLong() - t6.getLong()));
 
         return data;
     }
@@ -1435,28 +1458,30 @@ public class DomainFactory {
     private List<Instance> getExistingInstances(@NonNull Task task) {
         TaskKey taskKey = task.getTaskKey();
 
-        return Stream.of(getExistingInstances())
-                .filter(instance -> instance.getTaskKey().equals(taskKey))
-                .collect(Collectors.toList());
+        List<Instance> instances = new ArrayList<>(mLocalFactory.getExistingInstances(taskKey).values());
+        if (mRemoteFactory != null)
+            instances.addAll(mRemoteFactory.getExistingInstances(taskKey).values());
+
+        return instances;
     }
 
     @Nullable
-    Instance getExistingInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        List<Instance> taskInstances = getExistingInstances(task);
+    Instance getExistingInstanceIfPresent(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
+        InstanceKey instanceKey = new InstanceKey(task.getTaskKey(), scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
 
-        ArrayList<Instance> instances = new ArrayList<>();
-        for (Instance instance : taskInstances) {
-            Assert.assertTrue(instance != null);
-            if (instance.getScheduleDateTime().compareTo(scheduleDateTime) == 0)
-                instances.add(instance);
-        }
+        return getExistingInstanceIfPresent(instanceKey);
+    }
 
-        if (!instances.isEmpty()) {
-            Assert.assertTrue(instances.size() == 1);
-            return instances.get(0);
-        } else {
-            return null;
-        }
+    @Nullable
+    private Instance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
+        Instance instance = mLocalFactory.getExistingInstanceIfPresent(instanceKey);
+        if (instance != null)
+            return instance;
+
+        if (mRemoteFactory != null)
+            return mRemoteFactory.getExistingInstanceIfPresent(instanceKey);
+
+        return null;
     }
 
     @NonNull
@@ -1478,7 +1503,7 @@ public class DomainFactory {
 
     @NonNull
     public Instance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        Instance existingInstance = getExistingInstance(task, scheduleDateTime);
+        Instance existingInstance = getExistingInstanceIfPresent(task, scheduleDateTime);
 
         if (existingInstance != null) {
             return existingInstance;
@@ -1524,8 +1549,7 @@ public class DomainFactory {
     List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
-        allInstances.putAll(Stream.of(getExistingInstances())
-                .filter(instance -> instance.getTaskKey().equals(task.getTaskKey()))
+        allInstances.putAll(Stream.of(getExistingInstances(task))
                 .filter(instance -> instance.getScheduleDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
 

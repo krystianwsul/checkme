@@ -285,6 +285,10 @@ public class InstanceRecord extends Record {
     static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
+
+        //sqLiteDatabase.delete(TABLE_INSTANCES, COLUMN_TASK_ID + " NOT IN (SELECT " + TaskRecord.COLUMN_ID + " FROM " + TaskRecord.TABLE_TASKS + ")", null);
+
+
         ArrayList<InstanceRecord> instanceRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, null, null, null, null, null);

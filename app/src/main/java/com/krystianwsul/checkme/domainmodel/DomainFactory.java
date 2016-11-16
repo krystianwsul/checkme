@@ -156,7 +156,10 @@ public class DomainFactory {
     }
 
     public int getTaskCount() {
-        return getTasks().size();
+        int count = mLocalFactory.getTaskCount();
+        if (mRemoteFactory != null)
+            count += mRemoteFactory.getTaskCount();
+        return count;
     }
 
     public int getInstanceCount() {
@@ -487,7 +490,7 @@ public class DomainFactory {
 
         List<GroupListLoader.TaskData> taskDatas = null;
         if (position == 0) {
-            taskDatas = Stream.of(getTasks())
+            taskDatas = getTasks()
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
@@ -503,7 +506,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
-            Task task = getTask(instance.getTaskKey());
+            Task task = getTaskForce(instance.getTaskKey());
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
@@ -583,7 +586,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
-            Task task = getTask(instance.getTaskKey());
+            Task task = getTaskForce(instance.getTaskKey());
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
@@ -611,17 +614,14 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        Map<TaskKey, Task> taskMap = getTaskMap();
-        if (taskMap.containsKey(instanceKey.mTaskKey)) {
-            Task task = taskMap.get(instanceKey.mTaskKey);
-            Assert.assertTrue(task != null);
-
+        Task task = getTaskIfPresent(instanceKey.mTaskKey);
+        if (task != null) {
             Instance instance = getInstance(instanceKey);
 
             GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
 
             for (Instance childInstance : instance.getChildInstances(now)) {
-                Task childTask = getTask(childInstance.getTaskKey());
+                Task childTask = getTaskForce(childInstance.getTaskKey());
 
                 Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
@@ -690,10 +690,10 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getShowInstanceData");
 
-        if (!getTaskMap().containsKey(instanceKey.mTaskKey))
+        Task task = getTaskIfPresent(instanceKey.mTaskKey);
+        if (task == null)
             return new ShowInstanceLoader.Data(null);
 
-        Task task = getTask(instanceKey.mTaskKey);
         Instance instance = getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -715,7 +715,7 @@ public class DomainFactory {
 
         CreateTaskLoader.TaskData taskData = null;
         if (taskKey != null) {
-            Task task = getTask(taskKey);
+            Task task = getTaskForce(taskKey);
 
             TaskKey parentTaskKey;
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
@@ -834,7 +834,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task task = getTask(taskKey);
+        Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
         return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getTaskKey());
@@ -1029,7 +1029,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task task = getTask(taskKey);
+        Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
         task = task.updateFriends(Utils.userDatasToKeys(friendEntries), context, now);
@@ -1068,7 +1068,7 @@ public class DomainFactory {
         Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
-                .map(this::getTask)
+                .map(this::getTaskForce)
                 .collect(Collectors.toList());
 
         for (Task task : joinTasks)
@@ -1108,7 +1108,7 @@ public class DomainFactory {
     Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Task parentTask = getTask(parentTaskKey);
+        Task parentTask = getTaskForce(parentTaskKey);
         Assert.assertTrue(parentTask.current(now));
 
         Task childTask = parentTask.createChildTask(now, name, note);
@@ -1138,13 +1138,13 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task parentTask = getTask(parentTaskKey);
+        Task parentTask = getTaskForce(parentTaskKey);
         Assert.assertTrue(parentTask.current(now));
 
         Set<String> mergedFriends = new HashSet<>(parentTask.getRecordOf());
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
-                .map(this::getTask)
+                .map(this::getTaskForce)
                 .collect(Collectors.toList());
 
         for (Task task : joinTasks)
@@ -1182,10 +1182,10 @@ public class DomainFactory {
 
         List<TaskKey> taskKeys = new ArrayList<>();
 
-        Task task = getTask(taskKey);
+        Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        Task newParentTask = getTask(parentTaskKey);
+        Task newParentTask = getTaskForce(parentTaskKey);
         Assert.assertTrue(task.current(now));
 
         Set<String> mergedFriends = new HashSet<>(task.getRecordOf());
@@ -1235,7 +1235,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task task = getTask(taskKey);
+        Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
         task.setEndExactTimeStamp(now);
@@ -1256,7 +1256,7 @@ public class DomainFactory {
         for (TaskKey taskKey : taskKeys) {
             Assert.assertTrue(taskKey != null);
 
-            Task task = getTask(taskKey);
+            Task task = getTaskForce(taskKey);
             Assert.assertTrue(task.current(now));
 
             task.setEndExactTimeStamp(now);
@@ -1366,7 +1366,7 @@ public class DomainFactory {
         Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
-                .map(this::getTask)
+                .map(this::getTaskForce)
                 .collect(Collectors.toList());
 
         for (Task task : joinTasks)
@@ -1412,7 +1412,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Task task = getTask(taskKey);
+        Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
         task = task.updateFriends(Utils.userDatasToKeys(friendEntries), context, now);
@@ -1466,22 +1466,24 @@ public class DomainFactory {
     }
 
     @Nullable
-    Instance getExistingInstanceIfPresent(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        InstanceKey instanceKey = new InstanceKey(task.getTaskKey(), scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
+    Instance getExistingInstanceIfPresent(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
+        InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
 
         return getExistingInstanceIfPresent(instanceKey);
     }
 
     @Nullable
     private Instance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
-        Instance instance = mLocalFactory.getExistingInstanceIfPresent(instanceKey);
-        if (instance != null)
-            return instance;
+        if (instanceKey.mTaskKey.mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(instanceKey.mTaskKey.mRemoteTaskId));
 
-        if (mRemoteFactory != null)
+            return mLocalFactory.getExistingInstanceIfPresent(instanceKey);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.mTaskKey.mRemoteTaskId));
+            Assert.assertTrue(mRemoteFactory != null);
+
             return mRemoteFactory.getExistingInstanceIfPresent(instanceKey);
-
-        return null;
+        }
     }
 
     @NonNull
@@ -1502,46 +1504,52 @@ public class DomainFactory {
     }
 
     @NonNull
-    public Instance getInstance(@NonNull Task task, @NonNull DateTime scheduleDateTime) {
-        Instance existingInstance = getExistingInstanceIfPresent(task, scheduleDateTime);
+    private Instance generateInstance(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
+        if (taskKey.mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
+
+            return new LocalInstance(this, taskKey.mLocalTaskId, scheduleDateTime);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+
+            String remoteCustomTimeId;
+            Integer hour;
+            Integer minute;
+
+            CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().mCustomTimeKey;
+            HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
+
+            if (customTimeKey != null) {
+                Assert.assertTrue(hourMinute == null);
+
+                remoteCustomTimeId = getRemoteCustomTimeId(customTimeKey);
+
+                hour = null;
+                minute = null;
+            } else {
+                Assert.assertTrue(hourMinute != null);
+
+                remoteCustomTimeId = null;
+
+                hour = hourMinute.getHour();
+                minute = hourMinute.getMinute();
+            }
+
+            InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(taskKey.mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
+
+            return new RemoteInstance(this, taskKey.mRemoteTaskId, scheduleDateTime, instanceShownRecord);
+        }
+    }
+
+    @NonNull
+    @Deprecated
+    public Instance getInstance(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
+        Instance existingInstance = getExistingInstanceIfPresent(taskKey, scheduleDateTime);
 
         if (existingInstance != null) {
             return existingInstance;
         } else {
-            if (task.getTaskKey().mLocalTaskId != null) {
-                Assert.assertTrue(TextUtils.isEmpty(task.getTaskKey().mRemoteTaskId));
-
-                return new LocalInstance(this, task.getTaskKey().mLocalTaskId, scheduleDateTime);
-            } else {
-                Assert.assertTrue(!TextUtils.isEmpty(task.getTaskKey().mRemoteTaskId));
-
-                String remoteCustomTimeId;
-                Integer hour;
-                Integer minute;
-
-                CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().mCustomTimeKey;
-                HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
-
-                if (customTimeKey != null) {
-                    Assert.assertTrue(hourMinute == null);
-
-                    remoteCustomTimeId = getRemoteCustomTimeId(customTimeKey);
-
-                    hour = null;
-                    minute = null;
-                } else {
-                    Assert.assertTrue(hourMinute != null);
-
-                    remoteCustomTimeId = null;
-
-                    hour = hourMinute.getHour();
-                    minute = hourMinute.getMinute();
-                }
-
-                InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(task.getTaskKey().mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
-
-                return new RemoteInstance(this, task.getTaskKey().mRemoteTaskId, scheduleDateTime, instanceShownRecord);
-            }
+            return generateInstance(taskKey, scheduleDateTime);
         }
     }
 
@@ -1577,7 +1585,7 @@ public class DomainFactory {
             allInstances.put(instance.getInstanceKey(), instance);
         }
 
-        for (Task task : getTasks()) {
+        getTasks().forEach(task -> {
             for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
                 ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
 
@@ -1589,7 +1597,7 @@ public class DomainFactory {
 
                 allInstances.put(instance.getInstanceKey(), instance);
             }
-        }
+        });
 
         return Stream.of(allInstances.values())
                 .filter(instance -> instance.isRootInstance(now))
@@ -1617,11 +1625,13 @@ public class DomainFactory {
 
     @NonNull
     private Instance getInstance(@NonNull InstanceKey instanceKey) {
-        Task task = getTask(instanceKey.mTaskKey);
+        Instance instance = getExistingInstanceIfPresent(instanceKey);
+        if (instance != null)
+            return instance;
 
-        DateTime scheduleDateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
+        DateTime dateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
 
-        return getInstance(task, scheduleDateTime);
+        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
     }
 
     @NonNull
@@ -1672,7 +1682,7 @@ public class DomainFactory {
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
         for (Instance childInstance : instance.getChildInstances(now)) {
-            Task childTask = getTask(childInstance.getTaskKey());
+            Task childTask = getTaskForce(childInstance.getTaskKey());
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
@@ -1693,11 +1703,11 @@ public class DomainFactory {
 
     @NonNull
     private Map<TaskKey, CreateTaskLoader.TaskTreeData> getTaskDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
-        return Stream.of(getTasks())
+        return getTasks()
+                .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
-                .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .collect(Collectors.toMap(Task::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
     }
 
@@ -1809,20 +1819,14 @@ public class DomainFactory {
         }
     }
 
+    @Deprecated
     @NonNull
-    private List<Task> getTasks() {
-        List<Task> tasks = new ArrayList<>(mLocalFactory.getTasks());
-
-        if (mRemoteFactory != null)
-            tasks.addAll(mRemoteFactory.getTasks().values());
-
-        return tasks;
-    }
-
-    @NonNull
-    private Map<TaskKey, Task> getTaskMap() {
-        return Stream.of(getTasks())
-                .collect(Collectors.toMap(Task::getTaskKey, task -> task));
+    private Stream<Task> getTasks() {
+        if (mRemoteFactory != null) {
+            return Stream.concat(Stream.of(mLocalFactory.getTasks()), Stream.of(mRemoteFactory.getTasks()));
+        } else {
+            return Stream.of(mLocalFactory.getTasks());
+        }
     }
 
     @NonNull
@@ -1836,14 +1840,31 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task getTask(@NonNull TaskKey taskKey) {
-        Map<TaskKey, Task> tasks = getTaskMap();
-        Assert.assertTrue(tasks.containsKey(taskKey));
+    Task getTaskForce(@NonNull TaskKey taskKey) {
+        if (taskKey.mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
-        Task task = tasks.get(taskKey);
-        Assert.assertTrue(task != null);
+            return mLocalFactory.getTaskForce(taskKey.mLocalTaskId);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+            Assert.assertTrue(mRemoteFactory != null);
 
-        return task;
+            return mRemoteFactory.getTaskForce(taskKey.mRemoteTaskId);
+        }
+    }
+
+    @Nullable
+    private Task getTaskIfPresent(@NonNull TaskKey taskKey) {
+        if (taskKey.mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
+
+            return mLocalFactory.getTaskIfPresent(taskKey.mLocalTaskId);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+            Assert.assertTrue(mRemoteFactory != null);
+
+            return mRemoteFactory.getTaskIfPresent(taskKey.mRemoteTaskId);
+        }
     }
 
     @NonNull
@@ -1885,6 +1906,7 @@ public class DomainFactory {
         return mLocalFactory;
     }
 
+    @Deprecated
     @NonNull
     private List<Instance> getExistingInstances() {
         List<Instance> instances = new ArrayList<>(mLocalFactory.getExistingInstances());
@@ -1913,7 +1935,7 @@ public class DomainFactory {
         String note;
 
         if (taskKey != null) {
-            Task parentTask = getTask(taskKey);
+            Task parentTask = getTaskForce(taskKey);
 
             List<Task> tasks = parentTask.getChildTasks(now);
             childTaskDatas = Stream.of(tasks)
@@ -1922,7 +1944,7 @@ public class DomainFactory {
 
             note = parentTask.getNote();
         } else {
-            childTaskDatas = Stream.of(getTasks())
+            childTaskDatas = getTasks()
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
@@ -1952,15 +1974,17 @@ public class DomainFactory {
 
     @NonNull
     Irrelevant setIrrelevant(@NonNull ExactTimeStamp now) {
-        for (Task task : getTasks())
+        List<Task> tasks = getTasks().collect(Collectors.toList());
+
+        for (Task task : tasks)
             task.updateOldestVisible(now);
 
         // relevant hack
-        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(getTasks()).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
+        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(tasks).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
         Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.getLocalCustomTimes()).collect(Collectors.toMap(LocalCustomTime::getId, CustomTimeRelevance::new));
 
-        Stream.of(getTasks())
+        Stream.of(tasks)
                 .filter(task -> task.current(now))
                 .filter(task -> task.isRootTask(now))
                 .filter(task -> task.isVisible(now))
@@ -1990,7 +2014,7 @@ public class DomainFactory {
                 .map(TaskRelevance::getTask)
                 .collect(Collectors.toList());
 
-        List<Task> irrelevantTasks = getTasks();
+        List<Task> irrelevantTasks = new ArrayList<>(tasks);
         irrelevantTasks.removeAll(relevantTasks);
 
         Assert.assertTrue(Stream.of(irrelevantTasks)
@@ -2035,7 +2059,7 @@ public class DomainFactory {
         if (mRemoteFactory != null) {
             mRemoteFactory.removeIrrelevant(irrelevant);
 
-            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.getTasks().keySet());
+            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.getTaskKeys());
         } else {
             Assert.assertTrue(Stream.of(irrelevant.mTasks).noneMatch(task -> task instanceof RemoteTask));
             Assert.assertTrue(Stream.of(irrelevant.mInstances).noneMatch(instance -> instance instanceof RemoteInstance));
@@ -2046,6 +2070,16 @@ public class DomainFactory {
 
     private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
         updateNotifications(context, true, false, taskKeys, now, new ArrayList<>());
+    }
+
+    @NonNull
+    private Set<TaskKey> getTaskKeys() {
+        HashSet<TaskKey> taskKeys = new HashSet<>(Stream.of(mLocalFactory.getTaskIds()).map(TaskKey::new).collect(Collectors.toList()));
+
+        if (mRemoteFactory != null)
+            taskKeys.addAll(Stream.of(mRemoteFactory.getTaskKeys()).map(TaskKey::new).collect(Collectors.toList()));
+
+        return taskKeys;
     }
 
     private void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
@@ -2116,7 +2150,7 @@ public class DomainFactory {
             showInstance.setNotificationShown(true, now);
         }
 
-        Set<TaskKey> allTaskKeys = getTaskMap().keySet();
+        Set<TaskKey> allTaskKeys = getTaskKeys();
 
         for (InstanceKey hideInstanceKey : hideInstanceKeys) {
             Assert.assertTrue(hideInstanceKey != null);
@@ -2216,7 +2250,7 @@ public class DomainFactory {
                     nextAlarm = instanceTimeStamp;
         }
 
-        for (Task task : getTasks()) {
+        for (Task task : getTasks().collect(Collectors.toList())) {
             if (task.current(now) && task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
 
@@ -2348,6 +2382,9 @@ public class DomainFactory {
 
             // set task relevant
             TaskRelevance taskRelevance = taskRelevances.get(mInstance.getTaskKey());
+            if (taskRelevance == null) {
+                Log.e("asdf", "missing task for " + mInstance.getTaskKey());
+            }
             Assert.assertTrue(taskRelevance != null);
 
             taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now);

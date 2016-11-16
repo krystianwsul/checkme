@@ -35,15 +35,15 @@ public abstract class TaskHierarchy {
 
     @NonNull
     public Task getParentTask() {
-        return mDomainFactory.getTask(getParentTaskKey());
+        return mDomainFactory.getTaskForce(getParentTaskKey());
     }
 
     @NonNull
     public Task getChildTask() {
-        return mDomainFactory.getTask(getChildTaskKey());
+        return mDomainFactory.getTaskForce(getChildTaskKey());
     }
 
-    public boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
+    boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
 
         return (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0);

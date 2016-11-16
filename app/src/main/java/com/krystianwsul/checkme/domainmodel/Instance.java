@@ -95,13 +95,13 @@ public abstract class Instance {
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
 
-            Task childTask = taskHierarchy.getChildTask();
+            TaskKey childTaskKey = taskHierarchy.getChildTaskKey();
 
-            Instance existingChildInstance = mDomainFactory.getExistingInstanceIfPresent(childTask, scheduleDateTime);
+            Instance existingChildInstance = mDomainFactory.getExistingInstanceIfPresent(childTaskKey, scheduleDateTime);
             if (existingChildInstance != null) {
                 childInstances.add(existingChildInstance);
             } else if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.getChildTask().notDeleted(hierarchyExactTimeStamp)) {
-                childInstances.add(mDomainFactory.getInstance(childTask, scheduleDateTime));
+                childInstances.add(mDomainFactory.getInstance(childTaskKey, scheduleDateTime));
             }
         }
 
@@ -138,7 +138,7 @@ public abstract class Instance {
 
     @NonNull
     public Task getTask() {
-        return mDomainFactory.getTask(getTaskKey());
+        return mDomainFactory.getTaskForce(getTaskKey());
     }
 
     @NonNull
@@ -261,7 +261,7 @@ public abstract class Instance {
 
         Assert.assertTrue(parentTask.current(hierarchyExactTimeStamp));
 
-        return mDomainFactory.getInstance(parentTask, getScheduleDateTime());
+        return mDomainFactory.getInstance(parentTask.getTaskKey(), getScheduleDateTime());
     }
 
     @NonNull

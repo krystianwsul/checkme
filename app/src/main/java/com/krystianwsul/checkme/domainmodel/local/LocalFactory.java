@@ -477,6 +477,7 @@ public class LocalFactory {
         return mPersistenceManager.getInstanceShownRecords();
     }
 
+    @Deprecated
     @NonNull
     public Collection<LocalTask> getTasks() {
         return mLocalTasks.values();
@@ -512,13 +513,6 @@ public class LocalFactory {
     public Collection<LocalTaskHierarchy> getTaskHierarchies() {
         return mLocalTaskHierarchies.values();
     }
-
-    /*
-    @NonNull
-    public List<LocalInstance> getExistingInstances() {
-        return mExistingLocalInstances;
-    }
-    */
 
     @NonNull
     public LocalCustomTime createLocalCustomTime(@NonNull DomainFactory domainFactory, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
@@ -600,6 +594,7 @@ public class LocalFactory {
         return mExistingLocalInstances.get(taskKey);
     }
 
+    @Deprecated
     @NonNull
     public List<LocalInstance> getExistingInstances() {
         return mExistingLocalInstances.values();
@@ -608,5 +603,27 @@ public class LocalFactory {
     @Nullable
     public LocalInstance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
         return mExistingLocalInstances.getIfPresent(instanceKey);
+    }
+
+    @NonNull
+    public LocalTask getTaskForce(int taskId) {
+        LocalTask localTask = mLocalTasks.get(taskId);
+        Assert.assertTrue(localTask != null);
+
+        return localTask;
+    }
+
+    @Nullable
+    public LocalTask getTaskIfPresent(int taskId) {
+        return mLocalTasks.get(taskId);
+    }
+
+    @NonNull
+    public Set<Integer> getTaskIds() {
+        return mLocalTasks.keySet();
+    }
+
+    public int getTaskCount() {
+        return mLocalTasks.size();
     }
 }

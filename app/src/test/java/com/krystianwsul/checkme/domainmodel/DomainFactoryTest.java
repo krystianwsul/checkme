@@ -133,7 +133,7 @@ public class DomainFactoryTest {
 
         DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
 
-        Instance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
+        Instance rootInstance = domainFactory.getInstance(rootTask.getTaskKey(), scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
@@ -222,7 +222,7 @@ public class DomainFactoryTest {
 
         DateTime scheduleDateTime = new DateTime(startDate, new NormalTime(scheduleHourMinute));
 
-        Instance rootInstance = domainFactory.getInstance(rootTask, scheduleDateTime);
+        Instance rootInstance = domainFactory.getInstance(rootTask.getTaskKey(), scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
@@ -235,14 +235,14 @@ public class DomainFactoryTest {
         rootInstance = domainFactory.setInstanceDone(doneExactTimeStamp, mContext, rootInstance.getInstanceKey(), true);
         Assert.assertTrue(rootInstance.exists());
 
-        Instance childInstanceDone = domainFactory.getInstance(childTaskDone, scheduleDateTime);
+        Instance childInstanceDone = domainFactory.getInstance(childTaskDone.getTaskKey(), scheduleDateTime);
         Assert.assertTrue(!childInstanceDone.exists());
         Assert.assertTrue(childInstanceDone.isVisible(doneExactTimeStamp));
 
         childInstanceDone = domainFactory.setInstanceDone(doneExactTimeStamp, mContext, childInstanceDone.getInstanceKey(), true);
         Assert.assertTrue(childInstanceDone.exists());
 
-        Instance childInstanceExists = domainFactory.getInstance(childTaskExists, scheduleDateTime);
+        Instance childInstanceExists = domainFactory.getInstance(childTaskExists.getTaskKey(), scheduleDateTime);
         Assert.assertTrue(!childInstanceExists.exists());
         Assert.assertTrue(childInstanceExists.isVisible(doneExactTimeStamp));
 
@@ -252,7 +252,7 @@ public class DomainFactoryTest {
         childInstanceExists = domainFactory.setInstanceDone(doneExactTimeStamp, mContext, childInstanceExists.getInstanceKey(), false);
         Assert.assertTrue(childInstanceExists.exists());
 
-        Instance childInstanceDoesntExist = domainFactory.getInstance(childTaskDoesntExist, scheduleDateTime);
+        Instance childInstanceDoesntExist = domainFactory.getInstance(childTaskDoesntExist.getTaskKey(), scheduleDateTime);
         Assert.assertTrue(!childInstanceDoesntExist.exists());
         Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp));
 

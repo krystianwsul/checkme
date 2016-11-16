@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -62,12 +61,7 @@ public class WeeklySchedule extends RepeatingSchedule {
         DateTime scheduleDateTime = new DateTime(date, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return mDomainFactory.getInstance(task, scheduleDateTime);
-    }
-
-    @NonNull
-    Pair<DayOfWeek, Time> getDayOfWeekTime() {
-        return new Pair<>(getDayOfWeek(), getTime());
+        return mDomainFactory.getInstance(task.getTaskKey(), scheduleDateTime);
     }
 
     @NonNull

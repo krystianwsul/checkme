@@ -712,22 +712,16 @@ public class RemoteFactory {
         final List<RemoteInstance> mRemoteInstances = new ArrayList<>();
     }
 
+    @Deprecated
     @NonNull
-    public Map<String, RemoteTask> getTasks() {
-        return mRemoteTasks;
+    public Collection<RemoteTask> getTasks() {
+        return mRemoteTasks.values();
     }
 
     @NonNull
     public Collection<RemoteTaskHierarchy> getTaskHierarchies() {
         return mRemoteTaskHierarchies.values();
     }
-
-    /*
-    @NonNull
-    public Collection<RemoteInstance> getExistingInstances() {
-        return mExistingRemoteInstances.values();
-    }
-    */
 
     @NonNull
     Collection<Schedule> getSchedules(@NonNull String taskId) {
@@ -808,6 +802,7 @@ public class RemoteFactory {
         return mExistingRemoteInstances.get(taskKey);
     }
 
+    @Deprecated
     @NonNull
     public List<RemoteInstance> getExistingInstances() {
         return mExistingRemoteInstances.values();
@@ -816,5 +811,31 @@ public class RemoteFactory {
     @Nullable
     public RemoteInstance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
         return mExistingRemoteInstances.getIfPresent(instanceKey);
+    }
+
+    @NonNull
+    public RemoteTask getTaskForce(@NonNull String taskId) {
+        Assert.assertTrue(!TextUtils.isEmpty(taskId));
+
+        RemoteTask remoteTask = mRemoteTasks.get(taskId);
+        Assert.assertTrue(remoteTask != null);
+
+        return remoteTask;
+    }
+
+    @Nullable
+    public RemoteTask getTaskIfPresent(@NonNull String taskId) {
+        Assert.assertTrue(!TextUtils.isEmpty(taskId));
+
+        return mRemoteTasks.get(taskId);
+    }
+
+    @NonNull
+    public Set<String> getTaskKeys() {
+        return mRemoteTasks.keySet();
+    }
+
+    public int getTaskCount() {
+        return mRemoteTasks.size();
     }
 }

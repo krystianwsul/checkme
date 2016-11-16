@@ -59,7 +59,7 @@ public class DailySchedule extends RepeatingSchedule {
         DateTime scheduleDateTime = new DateTime(date, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return mDomainFactory.getInstance(task, scheduleDateTime);
+        return mDomainFactory.getInstance(task.getTaskKey(), scheduleDateTime);
     }
 
     @Nullable

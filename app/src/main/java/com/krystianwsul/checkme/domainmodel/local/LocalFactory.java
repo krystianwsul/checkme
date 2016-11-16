@@ -33,6 +33,7 @@ import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.InstanceMap;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -65,7 +66,7 @@ public class LocalFactory {
     private final HashMap<Integer, LocalTask> mLocalTasks = new HashMap<>();
 
     @NonNull
-    private final HashMap<Integer, LocalTaskHierarchy> mLocalTaskHierarchies = new HashMap<>();
+    private final TaskHierarchyContainer<Integer, LocalTaskHierarchy> mLocalTaskHierarchies = new TaskHierarchyContainer<>();
 
     @NonNull
     private final InstanceMap<LocalInstance> mExistingLocalInstances = new InstanceMap<>();
@@ -132,8 +133,7 @@ public class LocalFactory {
 
             LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(domainFactory, taskHierarchyRecord);
 
-            Assert.assertTrue(!mLocalTaskHierarchies.containsKey(localTaskHierarchy.getId()));
-            mLocalTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy);
+            mLocalTaskHierarchies.add(localTaskHierarchy.getId(), localTaskHierarchy);
         }
 
         Collection<InstanceRecord> instanceRecords = mPersistenceManager.getInstanceRecords();
@@ -298,10 +298,8 @@ public class LocalFactory {
         mLocalTasks.remove(localTask.getId());
     }
 
-    void deleteTaskHierarchy(@NonNull LocalTaskHierarchy localTasHierarchy) {
-        Assert.assertTrue(mLocalTaskHierarchies.containsKey(localTasHierarchy.getId()));
-
-        mLocalTaskHierarchies.remove(localTasHierarchy.getId());
+    void deleteTaskHierarchy(@NonNull LocalTaskHierarchy localTaskHierarchy) {
+        mLocalTaskHierarchies.removeForce(localTaskHierarchy.getId());
     }
 
     void deleteInstance(@NonNull LocalInstance localInstance) {
@@ -432,8 +430,7 @@ public class LocalFactory {
         Assert.assertTrue(taskHierarchyRecord != null);
 
         LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(domainFactory, taskHierarchyRecord);
-        Assert.assertTrue(!mLocalTaskHierarchies.containsKey(localTaskHierarchy.getId()));
-        mLocalTaskHierarchies.put(localTaskHierarchy.getId(), localTaskHierarchy);
+        mLocalTaskHierarchies.add(localTaskHierarchy.getId(), localTaskHierarchy);
     }
 
     @NonNull
@@ -491,16 +488,13 @@ public class LocalFactory {
 
         localToRemoteConversion.mLocalTasks.put(localTask.getId(), localTask);
 
-        List<LocalTaskHierarchy> parentLocalTaskHierarchies = Stream.of(mLocalTaskHierarchies.values())
-                .filter(localTaskHierarchy -> localTaskHierarchy.getChildTaskKey().equals(taskKey))
-                .collect(Collectors.toList());
+        Set<LocalTaskHierarchy> parentLocalTaskHierarchies = mLocalTaskHierarchies.getByChildTaskKey(taskKey);
 
         localToRemoteConversion.mLocalTaskHierarchies.addAll(parentLocalTaskHierarchies);
 
         localToRemoteConversion.mLocalInstances.addAll(mExistingLocalInstances.get(taskKey).values());
 
-        Stream.of(mLocalTaskHierarchies.values())
-                .filter(localTaskHierarchy -> localTaskHierarchy.getParentTaskKey().equals(taskKey))
+        Stream.of(mLocalTaskHierarchies.getByParentTaskKey(taskKey))
                 .map(LocalTaskHierarchy::getChildTask)
                 .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) childTask, recordOf));
 
@@ -509,10 +503,12 @@ public class LocalFactory {
                 .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) parentTask, recordOf));
     }
 
+    /*
     @NonNull
     public Collection<LocalTaskHierarchy> getTaskHierarchies() {
         return mLocalTaskHierarchies.values();
     }
+    */
 
     @NonNull
     public LocalCustomTime createLocalCustomTime(@NonNull DomainFactory domainFactory, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
@@ -625,5 +621,15 @@ public class LocalFactory {
 
     public int getTaskCount() {
         return mLocalTasks.size();
+    }
+
+    @NonNull
+    public Set<LocalTaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+        return mLocalTaskHierarchies.getByChildTaskKey(childTaskKey);
+    }
+
+    @NonNull
+    public Set<LocalTaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+        return mLocalTaskHierarchies.getByParentTaskKey(parentTaskKey);
     }
 }

@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Instance {
     @NonNull
@@ -90,7 +91,7 @@ public abstract class Instance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        List<TaskHierarchy> taskHierarchies = mDomainFactory.getChildTaskHierarchies(task);
+        Set<? extends TaskHierarchy> taskHierarchies = mDomainFactory.getTaskHierarchiesByParentTaskKey(task.getTaskKey());
         HashSet<Instance> childInstances = new HashSet<>();
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);

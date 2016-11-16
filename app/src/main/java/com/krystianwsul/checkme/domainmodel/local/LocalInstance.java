@@ -238,10 +238,10 @@ public class LocalInstance extends Instance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
+        mInstanceRecord = mDomainFactory.getLocalFactory().createInstanceRecord(localTask, this, scheduleDateTime, now);
+
         mTaskId = null;
         mScheduleDateTime = null;
-
-        mInstanceRecord = mDomainFactory.getLocalFactory().createInstanceRecord(localTask, this, scheduleDateTime, now);
     }
 
     @Deprecated

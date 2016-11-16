@@ -453,9 +453,6 @@ public class DomainFactory {
             startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMilli(0, 0, 0, 0));
         }
 
-        ExactTimeStamp t2 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d1:" + (t2.getLong() - t1.getLong()));
-
         Calendar endCalendar = now.getCalendar();
 
         switch (timeRange) {
@@ -476,17 +473,20 @@ public class DomainFactory {
 
         endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMilli(0, 0, 0, 0));
 
-        ExactTimeStamp t3 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d2:" + (t3.getLong() - t2.getLong()));
+        ExactTimeStamp t2 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d1:" + (t2.getLong() - t1.getLong()));
 
         List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
-        ExactTimeStamp t4 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d3:" + (t4.getLong() - t3.getLong()));
+        ExactTimeStamp t3 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d2:" + (t3.getLong() - t2.getLong()));
 
         List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
+
+        ExactTimeStamp t4 = ExactTimeStamp.getNow();
+        Log.e("asdf", "d3:" + (t4.getLong() - t3.getLong()));
 
         List<GroupListLoader.TaskData> taskDatas = null;
         if (position == 0) {
@@ -1635,12 +1635,31 @@ public class DomainFactory {
     }
 
     @NonNull
-    List<TaskHierarchy> getParentTaskHierarchies(Task childTask) {
-        Assert.assertTrue(childTask != null);
+    Set<? extends TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+        if (childTaskKey.mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(childTaskKey.mRemoteTaskId));
 
-        return Stream.of(getTaskHierarchies())
-                .filter(taskHierarchy -> taskHierarchy.getChildTask() == childTask)
-                .collect(Collectors.toList());
+            return mLocalFactory.getTaskHierarchiesByChildTaskKey(childTaskKey);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.mRemoteTaskId));
+            Assert.assertTrue(mRemoteFactory != null);
+
+            return mRemoteFactory.getTaskHierarchiesByChildTaskKey(childTaskKey);
+        }
+    }
+
+    @NonNull
+    Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+        if (parentTaskKey.mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
+
+            return mLocalFactory.getTaskHierarchiesByParentTaskKey(parentTaskKey);
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
+            Assert.assertTrue(mRemoteFactory != null);
+
+            return mRemoteFactory.getTaskHierarchiesByParentTaskKey(parentTaskKey);
+        }
     }
 
     @Nullable
@@ -1790,6 +1809,7 @@ public class DomainFactory {
         }
     }
 
+    /*
     @NonNull
     private List<TaskHierarchy> getTaskHierarchies() {
         List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.getTaskHierarchies());
@@ -1799,6 +1819,7 @@ public class DomainFactory {
 
         return taskHierarchies;
     }
+    */
 
     @Nullable
     TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
@@ -1806,9 +1827,8 @@ public class DomainFactory {
 
         TaskKey childTaskKey = childTask.getTaskKey();
 
-        List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchies())
+        List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchiesByChildTaskKey(childTaskKey))
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(childTaskKey))
                 .collect(Collectors.toList());
 
         if (taskHierarchies.isEmpty()) {
@@ -1871,20 +1891,11 @@ public class DomainFactory {
     List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
-        return Stream.of(getChildTaskHierarchies(parentTask))
+        return Stream.of(getTaskHierarchiesByParentTaskKey(parentTask.getTaskKey()))
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
                 .map(TaskHierarchy::getChildTask)
                 .filter(childTask -> childTask.current(exactTimeStamp))
                 .sortBy(Task::getStartExactTimeStamp)
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask) {
-        TaskKey parentTaskKey = parentTask.getTaskKey();
-
-        return Stream.of(getTaskHierarchies())
-                .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(parentTaskKey))
                 .collect(Collectors.toList());
     }
 
@@ -2313,15 +2324,13 @@ public class DomainFactory {
             TaskKey taskKey = mTask.getTaskKey();
 
             // mark parents relevant
-            Stream.of(getTaskHierarchies())
-                    .filter(taskHierarchy -> taskHierarchy.getChildTaskKey().equals(taskKey))
+            Stream.of(getTaskHierarchiesByChildTaskKey(taskKey))
                     .map(TaskHierarchy::getParentTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark children relevant
-            Stream.of(getTaskHierarchies())
-                    .filter(taskHierarchy -> taskHierarchy.getParentTaskKey().equals(taskKey))
+            Stream.of(getTaskHierarchiesByParentTaskKey(taskKey))
                     .map(TaskHierarchy::getChildTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));

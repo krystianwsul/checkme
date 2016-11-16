@@ -48,6 +48,7 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.InstanceMap;
+import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -80,7 +81,7 @@ public class RemoteFactory {
     private final Map<String, RemoteTask> mRemoteTasks;
 
     @NonNull
-    private final Map<String, RemoteTaskHierarchy> mRemoteTaskHierarchies;
+    private final TaskHierarchyContainer<String, RemoteTaskHierarchy> mRemoteTaskHierarchies = new TaskHierarchyContainer<>();
 
     @NonNull
     private final Multimap<String, Schedule> mRemoteSchedules;
@@ -101,9 +102,9 @@ public class RemoteFactory {
                 .map(remoteTaskRecord -> new RemoteTask(domainFactory, remoteTaskRecord))
                 .collect(Collectors.toMap(RemoteTask::getId, remoteTask -> remoteTask));
 
-        mRemoteTaskHierarchies = Stream.of(mRemoteManager.mRemoteTaskHierarchyRecords.values())
+        Stream.of(mRemoteManager.mRemoteTaskHierarchyRecords.values())
                 .map(remoteTaskHierarchyRecord -> new RemoteTaskHierarchy(domainFactory, remoteTaskHierarchyRecord))
-                .collect(Collectors.toMap(RemoteTaskHierarchy::getId, remoteTaskHierarchy -> remoteTaskHierarchy));
+                .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
 
         mRemoteSchedules = ArrayListMultimap.create();
         for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteManager.mRemoteSingleScheduleRecords.values())
@@ -356,9 +357,8 @@ public class RemoteFactory {
         RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(new JsonWrapper(parentRemoteTask.getRecordOf(), taskHierarchyJson));
 
         RemoteTaskHierarchy remoteTaskHierarchy = new RemoteTaskHierarchy(mDomainFactory, remoteTaskHierarchyRecord);
-        Assert.assertTrue(!mRemoteTaskHierarchies.containsKey(remoteTaskHierarchy.getId()));
 
-        mRemoteTaskHierarchies.put(remoteTaskHierarchy.getId(), remoteTaskHierarchy);
+        mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy);
     }
 
     @NonNull
@@ -591,9 +591,8 @@ public class RemoteFactory {
         RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(new JsonWrapper(recordOf, taskHierarchyJson));
 
         RemoteTaskHierarchy remoteTaskHierarchy = new RemoteTaskHierarchy(mDomainFactory, remoteTaskHierarchyRecord);
-        Assert.assertTrue(!mRemoteTaskHierarchies.containsKey(remoteTaskHierarchy.getId()));
 
-        mRemoteTaskHierarchies.put(remoteTaskHierarchy.getId(), remoteTaskHierarchy);
+        mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy);
 
         return remoteTaskHierarchy;
     }
@@ -688,16 +687,13 @@ public class RemoteFactory {
 
         updateRecordOfData.mRemoteTasks.add(remoteTask);
 
-        List<RemoteTaskHierarchy> parentRemoteTaskHierarchies = Stream.of(mRemoteTaskHierarchies.values())
-                .filter(remoteTaskHierarchy -> remoteTaskHierarchy.getChildTaskKey().equals(taskKey))
-                .collect(Collectors.toList());
+        Set<RemoteTaskHierarchy> parentRemoteTaskHierarchies = mRemoteTaskHierarchies.getByChildTaskKey(taskKey);
 
         updateRecordOfData.mRemoteTaskHierarchies.addAll(parentRemoteTaskHierarchies);
 
         updateRecordOfData.mRemoteInstances.addAll(mExistingRemoteInstances.get(taskKey).values());
 
-        Stream.of(mRemoteTaskHierarchies.values())
-                .filter(localTaskHierarchy -> localTaskHierarchy.getParentTaskKey().equals(taskKey))
+        Stream.of(mRemoteTaskHierarchies.getByParentTaskKey(taskKey))
                 .map(RemoteTaskHierarchy::getChildTask)
                 .forEach(childTask -> updateRecordOfHelper(updateRecordOfData, (RemoteTask) childTask));
 
@@ -718,10 +714,12 @@ public class RemoteFactory {
         return mRemoteTasks.values();
     }
 
+    /*
     @NonNull
     public Collection<RemoteTaskHierarchy> getTaskHierarchies() {
         return mRemoteTaskHierarchies.values();
     }
+    */
 
     @NonNull
     Collection<Schedule> getSchedules(@NonNull String taskId) {
@@ -784,9 +782,7 @@ public class RemoteFactory {
     }
 
     void deleteTaskHierarchy(@NonNull RemoteTaskHierarchy remoteTasHierarchy) {
-        Assert.assertTrue(mRemoteTaskHierarchies.containsKey(remoteTasHierarchy.getId()));
-
-        mRemoteTaskHierarchies.remove(remoteTasHierarchy.getId());
+        mRemoteTaskHierarchies.removeForce(remoteTasHierarchy.getId());
     }
 
     void deleteInstance(@NonNull RemoteInstance remoteInstance) {
@@ -837,5 +833,15 @@ public class RemoteFactory {
 
     public int getTaskCount() {
         return mRemoteTasks.size();
+    }
+
+    @NonNull
+    public Set<RemoteTaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+        return mRemoteTaskHierarchies.getByChildTaskKey(childTaskKey);
+    }
+
+    @NonNull
+    public Set<RemoteTaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+        return mRemoteTaskHierarchies.getByParentTaskKey(parentTaskKey);
     }
 }

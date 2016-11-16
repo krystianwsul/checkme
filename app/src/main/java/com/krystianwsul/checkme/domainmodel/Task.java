@@ -226,7 +226,7 @@ public abstract class Task {
         for (Schedule schedule : getSchedules())
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
-        List<TaskHierarchy> taskHierarchies = mDomainFactory.getParentTaskHierarchies(this);
+        Set<? extends TaskHierarchy> taskHierarchies = mDomainFactory.getTaskHierarchiesByChildTaskKey(this.getTaskKey());
 
         ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
 

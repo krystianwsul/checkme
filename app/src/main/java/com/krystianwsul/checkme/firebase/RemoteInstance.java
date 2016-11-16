@@ -250,13 +250,13 @@ public class RemoteInstance extends Instance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        mTaskId = null;
-        mScheduleDateTime = null;
-
         RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
         Assert.assertTrue(remoteFactory != null);
 
         mRemoteInstanceRecord = remoteFactory.createRemoteInstanceRecord((RemoteTask) task, this, scheduleDateTime, now);
+
+        mTaskId = null;
+        mScheduleDateTime = null;
     }
 
     @Override

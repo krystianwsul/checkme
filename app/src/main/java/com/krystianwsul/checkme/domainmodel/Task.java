@@ -180,9 +180,6 @@ public abstract class Task {
         // 24 hack
         List<Instance> instances = mDomainFactory.getPastInstances(this, now);
 
-        for (Instance instance : instances)
-            OrganizatorApplication.logInfo(this, "updateOldestVisible: instance " + instance.getScheduleDateTime() + " exists? " + instance.exists() + ", visible? " + instance.isVisible(now));
-
         Optional<Instance> optional = Stream.of(instances)
                 .filter(instance -> instance.isVisible(now))
                 .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
@@ -198,9 +195,15 @@ public abstract class Task {
             oldestVisible = now.getDate();
         }
 
-        setOldestVisible(oldestVisible);
+        Date oldOldestVisible = getOldestVisible();
+        if (oldOldestVisible == null || !oldOldestVisible.equals(oldestVisible)) {
+            setOldestVisible(oldestVisible);
 
-        OrganizatorApplication.logInfo(this, "updateOldestVisible " + oldestVisible);
+            for (Instance instance : instances)
+                OrganizatorApplication.logInfo(this, "updateOldestVisible: instance " + instance.getScheduleDateTime() + " exists? " + instance.exists() + ", visible? " + instance.isVisible(now));
+
+            OrganizatorApplication.logInfo(this, "updateOldestVisible " + oldestVisible);
+        }
     }
 
     void correctOldestVisible(@NonNull Date date) {

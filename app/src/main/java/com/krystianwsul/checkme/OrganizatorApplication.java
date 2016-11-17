@@ -29,16 +29,20 @@ public class OrganizatorApplication extends Application {
         FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
 
         sSharedPreferences = getSharedPreferences("asdf", Context.MODE_PRIVATE);
+
+        Log.e("asdf", "task log:" + sSharedPreferences.getString("asdf", ""));
     }
 
     public static void logInfo(@NonNull Task task, @NonNull String message) {
         if (!logTask(task.getTaskKey()))
             return;
 
+        message = ExactTimeStamp.getNow() + ", " + task.getTaskKey().mLocalTaskId + " - " + task.getName() + ": " + message;
+
         Log.e("asdf", "logging message: " + message);
 
         String asdf = sSharedPreferences.getString("asdf", "");
-        asdf = asdf + "\n" + ExactTimeStamp.getNow() + ", " + task.getTaskKey().mLocalTaskId + " - " + task.getName() + ": " + message;
+        asdf = asdf + "\n" + message;
         sSharedPreferences.edit()
                 .putString("asdf", asdf)
                 .apply();

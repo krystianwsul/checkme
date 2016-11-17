@@ -9,6 +9,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
+import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -179,6 +180,9 @@ public abstract class Task {
         // 24 hack
         List<Instance> instances = mDomainFactory.getPastInstances(this, now);
 
+        for (Instance instance : instances)
+            OrganizatorApplication.logInfo(this, "updateOldestVisible: instance " + instance.getScheduleDateTime() + " exists? " + instance.exists() + ", visible? " + instance.isVisible(now));
+
         Optional<Instance> optional = Stream.of(instances)
                 .filter(instance -> instance.isVisible(now))
                 .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
@@ -195,6 +199,8 @@ public abstract class Task {
         }
 
         setOldestVisible(oldestVisible);
+
+        OrganizatorApplication.logInfo(this, "updateOldestVisible " + oldestVisible);
     }
 
     void correctOldestVisible(@NonNull Date date) {
@@ -204,9 +210,11 @@ public abstract class Task {
 
             Log.e("asdf", message);
 
-            MyCrashlytics.logException(new OldestVisibleException2(message));
+            MyCrashlytics.logException(new OldestVisibleException3(message));
 
             setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
+
+            OrganizatorApplication.logInfo(this, "correctOldestVisible " + message);
         }
     }
 
@@ -278,8 +286,8 @@ public abstract class Task {
 
     protected abstract void deleteSchedule(@NonNull Schedule schedule);
 
-    private static class OldestVisibleException2 extends Exception {
-        OldestVisibleException2(@NonNull String message) {
+    private static class OldestVisibleException3 extends Exception {
+        OldestVisibleException3(@NonNull String message) {
             super(message);
         }
     }

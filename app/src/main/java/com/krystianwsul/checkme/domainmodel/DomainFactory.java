@@ -422,8 +422,6 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getGroupListData");
 
-        ExactTimeStamp t1 = ExactTimeStamp.getNow();
-
         Assert.assertTrue(position >= 0);
 
         ExactTimeStamp startExactTimeStamp;
@@ -473,20 +471,11 @@ public class DomainFactory {
 
         endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMilli(0, 0, 0, 0));
 
-        ExactTimeStamp t2 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d1:" + (t2.getLong() - t1.getLong()));
-
         List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
-
-        ExactTimeStamp t3 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d2:" + (t3.getLong() - t2.getLong()));
 
         List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
-
-        ExactTimeStamp t4 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d3:" + (t4.getLong() - t3.getLong()));
 
         List<GroupListLoader.TaskData> taskDatas = null;
         if (position == 0) {
@@ -498,9 +487,6 @@ public class DomainFactory {
                     .map(task -> new GroupListLoader.TaskData(task.getTaskKey(), task.getName(), getChildTaskDatas(task, now), task.getStartExactTimeStamp()))
                     .collect(Collectors.toList());
         }
-
-        ExactTimeStamp t5 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d4:" + (t5.getLong() - t4.getLong()));
 
         GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, taskDatas, null);
 
@@ -515,13 +501,7 @@ public class DomainFactory {
             instanceDatas.put(instanceData.InstanceKey, instanceData);
         }
 
-        ExactTimeStamp t6 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d5:" + (t6.getLong() - t5.getLong()));
-
         data.setInstanceDatas(instanceDatas);
-
-        ExactTimeStamp t7 = ExactTimeStamp.getNow();
-        Log.e("asdf", "d6:" + (t7.getLong() - t6.getLong()));
 
         return data;
     }
@@ -634,6 +614,8 @@ public class DomainFactory {
 
             return data;
         } else { // todo probably should wrap all data in this loader in a nullable object at some point
+            // to się dzieje jeśli usunie się task w ShowTaskActivity
+
             GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, false, null, null);
 
             data.setInstanceDatas(new HashMap<>());
@@ -1445,11 +1427,12 @@ public class DomainFactory {
 
         updateNotifications(context, silent, registering, taskKeys, now, new ArrayList<>());
 
-        Irrelevant irrelevant = setIrrelevant(now);
+        setIrrelevant(now);
+
+        if (mRemoteFactory != null)
+            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.getTaskKeys());
 
         save(context, 0);
-
-        removeIrrelevant(irrelevant);
     }
 
     // internal
@@ -1542,7 +1525,6 @@ public class DomainFactory {
     }
 
     @NonNull
-    @Deprecated
     public Instance getInstance(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
         Instance existingInstance = getExistingInstanceIfPresent(taskKey, scheduleDateTime);
 
@@ -1839,7 +1821,6 @@ public class DomainFactory {
         }
     }
 
-    @Deprecated
     @NonNull
     private Stream<Task> getTasks() {
         if (mRemoteFactory != null) {
@@ -1917,7 +1898,6 @@ public class DomainFactory {
         return mLocalFactory;
     }
 
-    @Deprecated
     @NonNull
     private List<Instance> getExistingInstances() {
         List<Instance> instances = new ArrayList<>(mLocalFactory.getExistingInstances());
@@ -2064,19 +2044,6 @@ public class DomainFactory {
                 .forEach(LocalCustomTime::delete);
 
         return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
-    }
-
-    void removeIrrelevant(@NonNull Irrelevant irrelevant) {
-        if (mRemoteFactory != null) {
-            mRemoteFactory.removeIrrelevant(irrelevant);
-
-            mLocalFactory.deleteInstanceShownRecords(mRemoteFactory.getTaskKeys());
-        } else {
-            Assert.assertTrue(Stream.of(irrelevant.mTasks).noneMatch(task -> task instanceof RemoteTask));
-            Assert.assertTrue(Stream.of(irrelevant.mInstances).noneMatch(instance -> instance instanceof RemoteInstance));
-        }
-
-        mLocalFactory.removeIrrelevant(irrelevant);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
@@ -2284,15 +2251,15 @@ public class DomainFactory {
         return (taskKeys.contains(instance.getTaskKey()) || Stream.of(instance.getChildInstances(now)).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
     }
 
-    public static class Irrelevant {
+    static class Irrelevant {
         @NonNull
-        public final List<LocalCustomTime> mCustomTimes;
+        final List<LocalCustomTime> mCustomTimes;
 
         @NonNull
-        public final List<Task> mTasks;
+        final List<Task> mTasks;
 
         @NonNull
-        public final List<Instance> mInstances;
+        final List<Instance> mInstances;
 
         Irrelevant(@NonNull List<LocalCustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<Instance> instances) {
             mCustomTimes = customTimes;

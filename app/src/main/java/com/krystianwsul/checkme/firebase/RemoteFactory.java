@@ -11,12 +11,10 @@ import com.google.common.collect.Multimap;
 import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.SingleSchedule;
-import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
@@ -397,20 +395,6 @@ public class RemoteFactory {
         return remoteInstanceRecord;
     }
 
-    public void removeIrrelevant(@NonNull DomainFactory.Irrelevant irrelevant) {
-        for (Task task : irrelevant.mTasks) {
-            if (task instanceof RemoteTask) {
-                Assert.assertTrue(!mRemoteTasks.containsKey(((RemoteTask) task).getId()));
-            }
-        }
-
-        for (Instance instance : irrelevant.mInstances) {
-            if (instance instanceof RemoteInstance) {
-                Assert.assertTrue(!mExistingRemoteInstances.contains(((RemoteInstance) instance)));
-            }
-        }
-    }
-
     @NonNull
     public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Set<String> recordOf) {
         Long endTime = (localTask.getEndExactTimeStamp() != null ? localTask.getEndExactTimeStamp().getLong() : null);
@@ -708,18 +692,10 @@ public class RemoteFactory {
         final List<RemoteInstance> mRemoteInstances = new ArrayList<>();
     }
 
-    @Deprecated
     @NonNull
     public Collection<RemoteTask> getTasks() {
         return mRemoteTasks.values();
     }
-
-    /*
-    @NonNull
-    public Collection<RemoteTaskHierarchy> getTaskHierarchies() {
-        return mRemoteTaskHierarchies.values();
-    }
-    */
 
     @NonNull
     Collection<Schedule> getSchedules(@NonNull String taskId) {
@@ -798,7 +774,6 @@ public class RemoteFactory {
         return mExistingRemoteInstances.get(taskKey);
     }
 
-    @Deprecated
     @NonNull
     public List<RemoteInstance> getExistingInstances() {
         return mExistingRemoteInstances.values();

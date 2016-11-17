@@ -244,7 +244,6 @@ public class LocalInstance extends Instance {
         mScheduleDateTime = null;
     }
 
-    @Deprecated
     public long getHierarchyTime() {
         Assert.assertTrue(mInstanceRecord != null);
 

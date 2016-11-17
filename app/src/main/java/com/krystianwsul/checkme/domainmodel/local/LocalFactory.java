@@ -10,12 +10,10 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.SingleSchedule;
-import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
@@ -452,29 +450,11 @@ public class LocalFactory {
         return mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
     }
 
-    public void removeIrrelevant(@NonNull DomainFactory.Irrelevant irrelevant) {
-        for (Task task : irrelevant.mTasks) {
-            if (task instanceof LocalTask) {
-                Assert.assertTrue(!mLocalTasks.containsKey(((LocalTask) task).getId()));
-            }
-        }
-
-        for (Instance instance : irrelevant.mInstances) {
-            if (instance instanceof LocalInstance) {
-                Assert.assertTrue(!mExistingLocalInstances.contains((LocalInstance) instance));
-            }
-        }
-
-        for (LocalCustomTime localCustomTime : irrelevant.mCustomTimes)
-            Assert.assertTrue(!mLocalCustomTimes.containsKey(localCustomTime.getId()));
-    }
-
     @NonNull
     public List<InstanceShownRecord> getInstanceShownRecords() {
         return mPersistenceManager.getInstanceShownRecords();
     }
 
-    @Deprecated
     @NonNull
     public Collection<LocalTask> getTasks() {
         return mLocalTasks.values();
@@ -590,7 +570,6 @@ public class LocalFactory {
         return mExistingLocalInstances.get(taskKey);
     }
 
-    @Deprecated
     @NonNull
     public List<LocalInstance> getExistingInstances() {
         return mExistingLocalInstances.values();

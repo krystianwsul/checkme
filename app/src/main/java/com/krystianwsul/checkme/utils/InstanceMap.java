@@ -115,7 +115,6 @@ public class InstanceMap<T extends Instance> {
                 .reduce(0, (x, y) -> x + y);
     }
 
-    @Deprecated
     @NonNull
     public List<T> values() {
         return Stream.of(mInstances.values())

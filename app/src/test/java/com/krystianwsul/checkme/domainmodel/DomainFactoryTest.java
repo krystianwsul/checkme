@@ -172,8 +172,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 1);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 1);
 
-        domainFactory.removeIrrelevant(irrelevantAfter);
-
         Assert.assertTrue(domainFactory.getTaskListData(nextDayAfterExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
     }
 
@@ -281,8 +279,6 @@ public class DomainFactoryTest {
         Assert.assertTrue(irrelevantAfter.mCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 4);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 3);
-
-        domainFactory.removeIrrelevant(irrelevantAfter);
 
         Assert.assertTrue(domainFactory.getTaskListData(nextDayAfterExactTimeStamp, mContext, null).mChildTaskDatas.isEmpty());
     }

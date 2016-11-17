@@ -2253,36 +2253,31 @@ public class DomainFactory {
             }
         }
 
+        Optional<TimeStamp> minInstancesTimeStamp = Stream.of(getExistingInstances())
+                .map(existingInstance -> existingInstance.getInstanceDateTime().getTimeStamp())
+                .filter(timeStamp -> timeStamp.toExactTimeStamp().compareTo(now) > 0)
+                .min(TimeStamp::compareTo);
+
         TimeStamp nextAlarm = null;
-        for (Instance existingInstance : getExistingInstances()) {
-            TimeStamp instanceTimeStamp = existingInstance.getInstanceDateTime().getTimeStamp();
-            if (instanceTimeStamp.toExactTimeStamp().compareTo(now) > 0)
-                if (nextAlarm == null || instanceTimeStamp.compareTo(nextAlarm) < 0)
-                    nextAlarm = instanceTimeStamp;
-        }
+        if (minInstancesTimeStamp.isPresent())
+            nextAlarm = minInstancesTimeStamp.get();
 
-        for (Task task : getTasks().collect(Collectors.toList())) {
-            if (task.current(now) && task.isRootTask(now)) {
-                List<Schedule> schedules = task.getCurrentSchedules(now);
+        Optional<TimeStamp> minSchedulesTimeStamp = getTasks()
+                .filter(task -> task.current(now))
+                .filter(task -> task.isRootTask(now))
+                .flatMap(task -> Stream.of(task.getCurrentSchedules(now)))
+                .map(schedule -> schedule.getNextAlarm(now))
+                .filter(timeStamp -> timeStamp != null)
+                .min(TimeStamp::compareTo);
 
-                Optional<TimeStamp> optional = Stream.of(schedules)
-                        .map(schedule -> schedule.getNextAlarm(now))
-                        .filter(timeStamp -> timeStamp != null)
-                        .min(TimeStamp::compareTo);
+        if (minSchedulesTimeStamp.isPresent() && (nextAlarm == null || nextAlarm.compareTo(minSchedulesTimeStamp.get()) > 0))
+            nextAlarm = minSchedulesTimeStamp.get();
 
-                if (optional.isPresent()) {
-                    TimeStamp scheduleTimeStamp = optional.get();
-                    Assert.assertTrue(scheduleTimeStamp != null);
-                    Assert.assertTrue(scheduleTimeStamp.toExactTimeStamp().compareTo(now) > 0);
+        if (nextAlarm != null) {
+            Assert.assertTrue(nextAlarm.toExactTimeStamp().compareTo(now) > 0);
 
-                    if (nextAlarm == null || scheduleTimeStamp.compareTo(nextAlarm) < 0)
-                        nextAlarm = scheduleTimeStamp;
-                }
-            }
-        }
-
-        if (nextAlarm != null)
             NotificationWrapper.getInstance().setAlarm(context, nextAlarm);
+        }
     }
 
     private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull Instance instance, @NonNull ExactTimeStamp now) {

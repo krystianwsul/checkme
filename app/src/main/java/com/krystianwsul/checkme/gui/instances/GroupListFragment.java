@@ -3561,7 +3561,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             GroupListLoader.InstanceData instanceData1 = (GroupListLoader.InstanceData) instanceData.mInstanceDataParent;
             recursiveExists(instanceData1);
         } else {
-            Assert.assertTrue(instanceData.mInstanceDataParent instanceof GroupListLoader.Data);
+            Assert.assertTrue(instanceData.mInstanceDataParent instanceof GroupListLoader.DataWrapper);
         }
     }
 

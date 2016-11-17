@@ -78,7 +78,47 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         }
     }
 
-    public static class Data extends DomainLoader.Data implements InstanceDataParent {
+    public static class Data extends DomainLoader.Data {
+        @Nullable
+        public final DataWrapper mDataWrapper;
+
+        public Data(@Nullable DataWrapper dataWrapper) {
+            mDataWrapper = dataWrapper;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            if (mDataWrapper != null)
+                hashCode += mDataWrapper.hashCode();
+            return hashCode;
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof Data))
+                return false;
+
+            Data data = (Data) object;
+
+            if ((mDataWrapper == null) != (data.mDataWrapper == null))
+                return false;
+
+            if ((mDataWrapper != null) && !mDataWrapper.equals(data.mDataWrapper))
+                return false;
+
+            return true;
+        }
+    }
+
+    public static class DataWrapper implements InstanceDataParent {
         public HashMap<InstanceKey, InstanceData> InstanceDatas;
 
         @NonNull
@@ -93,7 +133,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         @Nullable
         public final String mNote;
 
-        public Data(@NonNull List<CustomTimeData> customTimeDatas, @Nullable Boolean taskEditable, @Nullable List<TaskData> taskDatas, @Nullable String note) {
+        public DataWrapper(@NonNull List<CustomTimeData> customTimeDatas, @Nullable Boolean taskEditable, @Nullable List<TaskData> taskDatas, @Nullable String note) {
             CustomTimeDatas = customTimeDatas;
             TaskEditable = taskEditable;
             TaskDatas = taskDatas;
@@ -126,33 +166,33 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             if (object == this)
                 return true;
 
-            if (!(object instanceof Data))
+            if (!(object instanceof DataWrapper))
                 return false;
 
-            Data data = (Data) object;
+            DataWrapper dataWrapper = (DataWrapper) object;
 
-            if (!InstanceDatas.equals(data.InstanceDatas))
+            if (!InstanceDatas.equals(dataWrapper.InstanceDatas))
                 return false;
 
-            if (!CustomTimeDatas.equals(data.CustomTimeDatas))
+            if (!CustomTimeDatas.equals(dataWrapper.CustomTimeDatas))
                 return false;
 
-            if ((TaskEditable == null) != (data.TaskEditable == null))
+            if ((TaskEditable == null) != (dataWrapper.TaskEditable == null))
                 return false;
 
-            if ((TaskEditable != null) && !TaskEditable.equals(data.TaskEditable))
+            if ((TaskEditable != null) && !TaskEditable.equals(dataWrapper.TaskEditable))
                 return false;
 
-            if ((TaskDatas == null) != (data.TaskDatas == null))
+            if ((TaskDatas == null) != (dataWrapper.TaskDatas == null))
                 return false;
 
-            if ((TaskDatas != null) && !TaskDatas.equals(data.TaskDatas))
+            if ((TaskDatas != null) && !TaskDatas.equals(dataWrapper.TaskDatas))
                 return false;
 
-            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(data.mNote))
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(dataWrapper.mNote))
                 return false;
 
-            if (!TextUtils.isEmpty(mNote) && !mNote.equals(data.mNote))
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(dataWrapper.mNote))
                 return false;
 
             return true;

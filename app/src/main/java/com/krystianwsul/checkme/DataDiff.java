@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.loaders.GroupListLoader;
@@ -15,10 +16,7 @@ import java.util.Map;
 public class DataDiff {
     private static List<String> sDiff;
 
-    public static void diffData(GroupListLoader.Data oldData, GroupListLoader.Data newData) {
-        Assert.assertTrue(oldData != null);
-        Assert.assertTrue(newData != null);
-
+    public static void diffData(@NonNull GroupListLoader.DataWrapper oldData, @NonNull GroupListLoader.DataWrapper newData) {
         sDiff = new ArrayList<>();
 
         diffMap("", oldData.InstanceDatas, newData.InstanceDatas);

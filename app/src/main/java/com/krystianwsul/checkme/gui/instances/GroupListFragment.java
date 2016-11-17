@@ -469,7 +469,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     @Nullable
     public String getShareData() {
         Assert.assertTrue(mData != null);
-        List<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>(mData.InstanceDatas.values());
+        Assert.assertTrue(mData.mDataWrapper != null);
+
+        List<GroupListLoader.InstanceData> instanceDatas = new ArrayList<>(mData.mDataWrapper.InstanceDatas.values());
 
         Collections.sort(instanceDatas, (lhs, rhs) -> {
             int timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp);
@@ -671,8 +673,15 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<GroupListLoader.Data> loader, GroupListLoader.Data data) {
+        Assert.assertTrue(data != null);
+
+        if (data.mDataWrapper == null)
+            return;
+
         if (mData != null) {
-            DataDiff.diffData(mData, data);
+            Assert.assertTrue(mData.mDataWrapper != null);
+
+            DataDiff.diffData(mData.mDataWrapper, data.mDataWrapper);
             Log.e("asdf", "difference w data:\n" + DataDiff.getDiff());
         }
 
@@ -709,7 +718,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            Assert.assertTrue(data.TaskEditable == null);
+            Assert.assertTrue(data.mDataWrapper.TaskEditable == null);
 
             showFab = true;
             mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition)))));
@@ -719,7 +728,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            Assert.assertTrue(data.TaskEditable == null);
+            Assert.assertTrue(data.mDataWrapper.TaskEditable == null);
 
             if (mTimeStamp.compareTo(TimeStamp.getNow()) > 0) {
                 showFab = true;
@@ -732,9 +741,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         } else if (mInstanceKey != null) {
             Assert.assertTrue(mInstanceKeys == null);
 
-            Assert.assertTrue(data.TaskEditable != null);
+            Assert.assertTrue(data.mDataWrapper.TaskEditable != null);
 
-            if (data.TaskEditable) {
+            if (data.mDataWrapper.TaskEditable) {
                 showFab = true;
                 mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, mInstanceKey.mTaskKey)));
 
@@ -747,7 +756,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         } else {
             Assert.assertTrue(mInstanceKeys != null);
             Assert.assertTrue(!mInstanceKeys.isEmpty());
-            Assert.assertTrue(data.TaskEditable == null);
+            Assert.assertTrue(data.mDataWrapper.TaskEditable == null);
 
             showFab = false;
 
@@ -759,13 +768,13 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             mFirst = false;
         }
 
-        mTreeViewAdapter = GroupAdapter.getAdapter(this, data.DataId, data.CustomTimeDatas, useGroups(), showFab, data.InstanceDatas.values(), mExpansionState, mSelectedNodes, data.TaskDatas, data.mNote);
+        mTreeViewAdapter = GroupAdapter.getAdapter(this, data.DataId, data.mDataWrapper.CustomTimeDatas, useGroups(), showFab, data.mDataWrapper.InstanceDatas.values(), mExpansionState, mSelectedNodes, data.mDataWrapper.TaskDatas, data.mDataWrapper.mNote);
 
         mGroupListRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
-        if (data.InstanceDatas.isEmpty() && TextUtils.isEmpty(data.mNote) && (data.TaskDatas == null || data.TaskDatas.isEmpty())) {
+        if (data.mDataWrapper.InstanceDatas.isEmpty() && TextUtils.isEmpty(data.mDataWrapper.mNote) && (data.mDataWrapper.TaskDatas == null || data.mDataWrapper.TaskDatas.isEmpty())) {
             mGroupListRecycler.setVisibility(View.GONE);
 
             if (emptyTextId != null) {
@@ -782,8 +791,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
     private void updateSelectAll() {
         Assert.assertTrue(mData != null);
+        Assert.assertTrue(mData.mDataWrapper != null);
 
-        ((GroupListListener) getActivity()).setGroupSelectAllVisibility(mPosition, Stream.of(mData.InstanceDatas.values())
+        ((GroupListListener) getActivity()).setGroupSelectAllVisibility(mPosition, Stream.of(mData.mDataWrapper.InstanceDatas.values())
                 .anyMatch(instanceData -> instanceData.Done == null));
     }
 

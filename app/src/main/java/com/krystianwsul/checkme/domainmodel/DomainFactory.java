@@ -488,7 +488,8 @@ public class DomainFactory {
                     .collect(Collectors.toList());
         }
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, taskDatas, null);
+        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, taskDatas, null);
+        GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
@@ -496,12 +497,12 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), data, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instanceData.InstanceKey, instanceData);
         }
 
-        data.setInstanceDatas(instanceDatas);
+        dataWrapper.setInstanceDatas(instanceDatas);
 
         return data;
     }
@@ -562,7 +563,8 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null, null);
+        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, null, null);
+        GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
@@ -570,12 +572,12 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), data, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
 
-        data.setInstanceDatas(instanceDatas);
+        dataWrapper.setInstanceDatas(instanceDatas);
 
         return data;
     }
@@ -595,33 +597,27 @@ public class DomainFactory {
                 .collect(Collectors.toList());
 
         Task task = getTaskIfPresent(instanceKey.mTaskKey);
-        if (task != null) {
-            Instance instance = getInstance(instanceKey);
+        if (task == null)
+            return new GroupListLoader.Data(null);
 
-            GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, task.current(now), null, task.getNote());
+        Instance instance = getInstance(instanceKey);
 
-            for (Instance childInstance : instance.getChildInstances(now)) {
-                Task childTask = getTaskForce(childInstance.getTaskKey());
+        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, task.current(now), null, task.getNote());
+        GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
 
-                Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
+        for (Instance childInstance : instance.getChildInstances(now)) {
+            Task childTask = getTaskForce(childInstance.getTaskKey());
 
-                GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), data, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp());
-                instanceData.setChildren(getChildInstanceDatas(childInstance, now, instanceData));
-                instanceDatas.put(childInstance.getInstanceKey(), instanceData);
-            }
+            Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
-            data.setInstanceDatas(instanceDatas);
-
-            return data;
-        } else { // todo probably should wrap all data in this loader in a nullable object at some point
-            // to się dzieje jeśli usunie się task w ShowTaskActivity
-
-            GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, false, null, null);
-
-            data.setInstanceDatas(new HashMap<>());
-
-            return data;
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), dataWrapper, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp());
+            instanceData.setChildren(getChildInstanceDatas(childInstance, now, instanceData));
+            instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }
+
+        dataWrapper.setInstanceDatas(instanceDatas);
+
+        return data;
     }
 
     @NonNull
@@ -648,7 +644,8 @@ public class DomainFactory {
                 .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.Data data = new GroupListLoader.Data(customTimeDatas, null, null, null);
+        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, null, null);
+        GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : instances) {
@@ -656,12 +653,12 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), data, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
 
-        data.setInstanceDatas(instanceDatas);
+        dataWrapper.setInstanceDatas(instanceDatas);
 
         return data;
     }
@@ -676,11 +673,12 @@ public class DomainFactory {
         if (task == null)
             return new ShowInstanceLoader.Data(null);
 
-        Instance instance = getInstance(instanceKey);
-
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+        Instance instance = getInstance(instanceKey);
+        if (!task.current(now) && !instance.exists())
+            return new ShowInstanceLoader.Data(null);
+
         return new ShowInstanceLoader.Data(new ShowInstanceLoader.InstanceData(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now)));
     }
 

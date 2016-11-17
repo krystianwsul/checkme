@@ -213,26 +213,46 @@ public abstract class Task {
     protected abstract void setOldestVisible(@NonNull Date date);
 
     @NonNull
-    List<Instance> getInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
-        if (startExactTimeStamp == null) { // 24 hack
+    List<Instance> getInstances(@Nullable ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenEndExactTimeStamp, @NonNull ExactTimeStamp now) {
+        if (givenStartExactTimeStamp == null) { // 24 hack
             Date oldestVisible = getOldestVisible();
             if (oldestVisible != null) {
                 HourMilli zero = new HourMilli(0, 0, 0, 0);
-                startExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
+                givenStartExactTimeStamp = new ExactTimeStamp(oldestVisible, zero);
             }
         }
 
+        ExactTimeStamp myStartTimeStamp = getStartExactTimeStamp();
+        ExactTimeStamp myEndTimeStamp = getEndExactTimeStamp();
+
+        ExactTimeStamp startExactTimeStamp;
+        ExactTimeStamp endExactTimeStamp;
+
+        if (givenStartExactTimeStamp == null || (givenStartExactTimeStamp.compareTo(myStartTimeStamp) < 0))
+            startExactTimeStamp = myStartTimeStamp;
+        else
+            startExactTimeStamp = givenStartExactTimeStamp;
+
+        if (myEndTimeStamp == null || (myEndTimeStamp.compareTo(givenEndExactTimeStamp) > 0))
+            endExactTimeStamp = givenEndExactTimeStamp;
+        else
+            endExactTimeStamp = myEndTimeStamp;
+
         List<Instance> instances = new ArrayList<>();
+
+        if (startExactTimeStamp.compareTo(endExactTimeStamp) >= 0)
+            return instances;
+
+        Assert.assertTrue(startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
+
         for (Schedule schedule : getSchedules())
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
         Set<? extends TaskHierarchy> taskHierarchies = mDomainFactory.getTaskHierarchiesByChildTaskKey(this.getTaskKey());
 
-        ExactTimeStamp finalStartExactTimeStamp = startExactTimeStamp;
-
         instances.addAll(Stream.of(taskHierarchies)
                 .map(TaskHierarchy::getParentTask)
-                .map(task -> task.getInstances(finalStartExactTimeStamp, endExactTimeStamp, now))
+                .map(task -> task.getInstances(startExactTimeStamp, endExactTimeStamp, now))
                 .flatMap(Stream::of)
                 .map(instance -> instance.getChildInstances(now))
                 .flatMap(Stream::of)

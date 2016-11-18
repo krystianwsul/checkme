@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
+import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
@@ -2053,6 +2054,8 @@ public class DomainFactory {
 
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
                 .noneMatch(LocalCustomTime::getCurrent));
+
+        Stream.of(irrelevantExistingInstances).forEach(irrelevantExistingInstance -> OrganizatorApplication.logInfo(irrelevantExistingInstance.getTask(), "deleting instance " + irrelevantExistingInstance.getName() + " " + irrelevantExistingInstance.getScheduleDateTime()));
 
         Stream.of(irrelevantTasks)
                 .forEach(Task::delete);

@@ -295,8 +295,6 @@ public class LocalInstance extends Instance {
 
     @Override
     public void delete() {
-        OrganizatorApplication.logInfo(getTask(), "deleting instance " + getName() + " " + getScheduleDateTime());
-
         Assert.assertTrue(mInstanceRecord != null);
 
         mDomainFactory.getLocalFactory().deleteInstance(this);

@@ -278,4 +278,8 @@ public abstract class Instance {
     public String toString() {
         return super.toString() + " " + getName() + " " + getScheduleDateTime().toString() + " " + getInstanceDateTime().toString();
     }
+
+    public String desc() {
+        return getName() + " - " + getScheduleDateTime().toString();
+    }
 }

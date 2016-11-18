@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.firebase.database.FirebaseDatabase;
@@ -30,7 +31,9 @@ public class OrganizatorApplication extends Application {
 
         sSharedPreferences = getSharedPreferences("asdf", Context.MODE_PRIVATE);
 
-        Log.e("asdf", "task log:" + sSharedPreferences.getString("asdf", ""));
+        for (String line : TextUtils.split(sSharedPreferences.getString("asdf", ""), "\n")) {
+            Log.e("asdf", "task log:" + line);
+        }
     }
 
     public static void logInfo(@NonNull Task task, @NonNull String message) {

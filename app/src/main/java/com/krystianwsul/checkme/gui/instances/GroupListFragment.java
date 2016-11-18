@@ -678,8 +678,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         if (data.mDataWrapper == null)
             return;
 
-        // todo fix fab when task deleted
-
         if (mData != null) {
             Assert.assertTrue(mData.mDataWrapper != null);
 
@@ -765,10 +763,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             emptyTextId = null;
         }
 
-        if (mFirst) {
-            mFloatingActionButton.setVisibility(showFab ? View.VISIBLE : View.GONE);
-            mFirst = false;
-        }
+        mFloatingActionButton.setVisibility(showFab ? View.VISIBLE : View.GONE);
 
         mTreeViewAdapter = GroupAdapter.getAdapter(this, data.DataId, data.mDataWrapper.CustomTimeDatas, useGroups(), showFab, data.mDataWrapper.InstanceDatas.values(), mExpansionState, mSelectedNodes, data.mDataWrapper.TaskDatas, data.mDataWrapper.mNote);
 

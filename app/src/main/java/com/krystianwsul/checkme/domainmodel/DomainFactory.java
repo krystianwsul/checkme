@@ -679,7 +679,7 @@ public class DomainFactory {
         if (!task.current(now) && !instance.exists())
             return new ShowInstanceLoader.Data(null);
 
-        return new ShowInstanceLoader.Data(new ShowInstanceLoader.InstanceData(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now)));
+        return new ShowInstanceLoader.Data(new ShowInstanceLoader.InstanceData(instance.getInstanceKey(), instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists()));
     }
 
     @NonNull

@@ -66,15 +66,21 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
     }
 
     public static class InstanceData {
+        @NonNull
         public final InstanceKey InstanceKey;
+
+        @NonNull
         public final String Name;
+
+        @Nullable
         public final String DisplayText;
+
         public boolean Done;
         public final boolean TaskCurrent;
         public final boolean IsRootInstance;
+        public final boolean mExists;
 
-        public InstanceData(InstanceKey instanceKey, String name, String displayText, boolean done, boolean taskCurrent, boolean isRootInstance) {
-            Assert.assertTrue(instanceKey != null);
+        public InstanceData(@NonNull InstanceKey instanceKey, @NonNull String name, @Nullable String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, boolean exists) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             InstanceKey = instanceKey;
@@ -83,6 +89,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             Done = done;
             TaskCurrent = taskCurrent;
             IsRootInstance = isRootInstance;
+            mExists = exists;
         }
 
         @Override
@@ -95,6 +102,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             hashCode += (Done ? 1 : 0);
             hashCode += (TaskCurrent ? 1 : 0);
             hashCode += (IsRootInstance ? 1 : 0);
+            hashCode += (mExists ? 1 : 0);
             return hashCode;
         }
 
@@ -121,7 +129,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             if (TextUtils.isEmpty(DisplayText) != TextUtils.isEmpty(instanceData.DisplayText))
                 return false;
 
-            if (!TextUtils.isEmpty(instanceData.DisplayText) && !DisplayText.equals(instanceData.DisplayText))
+            if (!TextUtils.isEmpty(DisplayText) && !DisplayText.equals(instanceData.DisplayText))
                 return false;
 
             if (Done != instanceData.Done)
@@ -131,6 +139,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
                 return false;
 
             if (IsRootInstance != instanceData.IsRootInstance)
+                return false;
+
+            if (mExists != instanceData.mExists)
                 return false;
 
             return true;

@@ -86,7 +86,7 @@ public class DataDiff {
             sDiff.add(indent + "oldInstanceData.IsRootTask == " + oldInstanceData.IsRootTask + ", newInstanceData.IsRootTask == " + newInstanceData.IsRootTask);
 
         if (oldInstanceData.Exists != newInstanceData.Exists)
-            sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.Exists + ", newInstanceData.Exists == " + newInstanceData.Exists);
+            sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.Exists + ", newInstanceData.mExists == " + newInstanceData.Exists);
 
         if (!oldInstanceData.InstanceTimePair.equals(newInstanceData.InstanceTimePair))
             sDiff.add(indent + "oldInstanceData.InstanceTimePair == " + oldInstanceData.InstanceTimePair + ", newInstanceData.InstanceTimePair == " + newInstanceData.InstanceTimePair);

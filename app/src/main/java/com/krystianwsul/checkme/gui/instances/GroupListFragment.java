@@ -678,6 +678,8 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         if (data.mDataWrapper == null)
             return;
 
+        // todo fix fab when task deleted
+
         if (mData != null) {
             Assert.assertTrue(mData.mDataWrapper != null);
 

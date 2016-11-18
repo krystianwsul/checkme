@@ -155,12 +155,15 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mDataId);
 
-                getSupportLoaderManager().destroyLoader(0);
-                mGroupListFragment.destroyLoader();
+                if (!mInstanceData.mExists) {
+                    getSupportLoaderManager().destroyLoader(0);
+                    mGroupListFragment.destroyLoader();
+                }
 
                 DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceData.InstanceKey.mTaskKey);
 
-                finish();
+                if (!mInstanceData.mExists)
+                    finish();
                 break;
             case R.id.instance_menu_select_all: {
                 Assert.assertTrue(mGroupListFragment != null);

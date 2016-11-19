@@ -2062,6 +2062,7 @@ public class DomainFactory {
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
                 .noneMatch(LocalCustomTime::getCurrent));
 
+        Stream.of(irrelevantTasks).forEach(irrelevantTask -> OrganizatorApplication.logInfo(irrelevantTask, "deleting task " + irrelevantTask.getTaskKey().mLocalTaskId + " - " + irrelevantTask.getName()));
         Stream.of(irrelevantExistingInstances).forEach(irrelevantExistingInstance -> OrganizatorApplication.logInfo(irrelevantExistingInstance.getTask(), "deleting instance " + irrelevantExistingInstance.getName() + " " + irrelevantExistingInstance.getScheduleDateTime()));
 
         Stream.of(irrelevantTasks)
@@ -2325,12 +2326,14 @@ public class DomainFactory {
         }
 
         void setRelevant(@NonNull String parentSource, @NonNull Map<TaskKey, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
+            OrganizatorApplication.logInfo(mTask, "marked visible by " + parentSource);
+
             if (mRelevant)
                 return;
 
             mRelevant = true;
 
-            String source = parentSource + ", " + mTask.getName();
+            String source = parentSource + ", " + mTask.getTaskKey().mLocalTaskId + " - " + mTask.getName();
 
             TaskKey taskKey = mTask.getTaskKey();
 

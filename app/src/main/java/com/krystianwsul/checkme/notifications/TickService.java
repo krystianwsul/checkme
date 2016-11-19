@@ -63,6 +63,6 @@ public class TickService extends IntentService {
         List<TaskKey> taskKeys = intent.getParcelableArrayListExtra(TASK_KEYS_KEY);
         Assert.assertTrue(taskKeys != null);
 
-        DomainFactory.getDomainFactory(this).updateNotifications(this, silent, registering, taskKeys);
+        DomainFactory.getDomainFactory(this).updateNotificationsTick(this, silent, registering, taskKeys);
     }
 }

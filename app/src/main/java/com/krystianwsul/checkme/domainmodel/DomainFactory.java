@@ -951,9 +951,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Instance instance = setInstanceDone(now, context, instanceKey, done);
-
-        save(context, dataId);
+        Instance instance = setInstanceDone(context, now, dataId, instanceKey, done);
 
         return instance.getDone();
     }
@@ -1210,8 +1208,6 @@ public class DomainFactory {
         if (oldParentTask == null) {
             Stream.of(task.getCurrentSchedules(now))
                     .forEach(schedule -> schedule.setEndExactTimeStamp(now));
-
-            newParentTask.addChild(task, now);
         } else if (oldParentTask != newParentTask) {
             TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(task, now);
             Assert.assertTrue(oldTaskHierarchy != null);
@@ -1220,6 +1216,8 @@ public class DomainFactory {
 
             taskKeys.add(oldTaskHierarchy.getParentTaskKey());
         }
+
+        newParentTask.addChild(task, now);
 
         updateNotifications(context, taskKeys, now);
 
@@ -1438,12 +1436,8 @@ public class DomainFactory {
         return task.getTaskKey();
     }
 
-    public synchronized void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
-        MyCrashlytics.log("DomainFactory.updateNotifications");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
+    @NonNull
+    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
         updateNotifications(context, silent, registering, taskKeys, now, new ArrayList<>());
 
         Irrelevant irrelevant = setIrrelevant(now);
@@ -1451,6 +1445,17 @@ public class DomainFactory {
         save(context, 0);
 
         removeIrrelevant(irrelevant);
+
+        return irrelevant;
+    }
+
+    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
+        MyCrashlytics.log("DomainFactory.updateNotifications");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        updateNotificationsTick(context, now, silent, registering, taskKeys);
     }
 
     // internal
@@ -1974,12 +1979,14 @@ public class DomainFactory {
     }
 
     @NonNull
-    Instance setInstanceDone(@NonNull ExactTimeStamp now, @NonNull Context context, @NonNull InstanceKey instanceKey, boolean done) {
+    Instance setInstanceDone(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull InstanceKey instanceKey, boolean done) {
         Instance instance = getInstance(instanceKey);
 
         instance.setDone(done, now);
 
         updateNotifications(context, new ArrayList<>(), now);
+
+        save(context, dataId);
 
         return instance;
     }
@@ -2099,7 +2106,11 @@ public class DomainFactory {
     private void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
         if (!silent) {
             SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
-            sharedPreferences.edit().putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong()).apply();
+            Assert.assertTrue(sharedPreferences != null);
+
+            sharedPreferences.edit()
+                    .putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong())
+                    .apply();
         }
 
         List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack

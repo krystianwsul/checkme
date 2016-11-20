@@ -194,20 +194,23 @@ public abstract class Task {
             oldestVisible = now.getDate();
         }
 
-        setOldestVisible(oldestVisible);
+        Date oldOldestVisible = getOldestVisible();
+        if (oldOldestVisible == null || !oldOldestVisible.equals(oldestVisible)) {
+            setOldestVisible(oldestVisible);
+        }
     }
 
     void correctOldestVisible(@NonNull Date date) {
         Date oldestVisible = getOldestVisible();
-        if (oldestVisible != null && date.compareTo(oldestVisible) < 0) {
-            String message = getName() + " old oldest: " + oldestVisible + ", new oldest: " + date;
+        Assert.assertTrue(oldestVisible != null && date.compareTo(oldestVisible) < 0);
 
-            Log.e("asdf", message);
+        String message = getName() + " old oldest: " + oldestVisible + ", new oldest: " + date;
 
-            MyCrashlytics.logException(new OldestVisibleException2(message));
+        Log.e("asdf", message);
 
-            setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
-        }
+        MyCrashlytics.logException(new OldestVisibleException4(message));
+
+        setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
     }
 
     protected abstract void setOldestVisible(@NonNull Date date);
@@ -298,8 +301,8 @@ public abstract class Task {
 
     protected abstract void deleteSchedule(@NonNull Schedule schedule);
 
-    private static class OldestVisibleException2 extends Exception {
-        OldestVisibleException2(@NonNull String message) {
+    private static class OldestVisibleException4 extends Exception {
+        OldestVisibleException4(@NonNull String message) {
             super(message);
         }
     }

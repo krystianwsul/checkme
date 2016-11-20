@@ -30,6 +30,7 @@ import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.persistencemodel.WeeklyScheduleRecord;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.InstanceMap;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -566,7 +567,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public Map<InstanceKey, LocalInstance> getExistingInstances(@NonNull TaskKey taskKey) {
+    public Map<ScheduleKey, LocalInstance> getExistingInstances(@NonNull TaskKey taskKey) {
         return mExistingLocalInstances.get(taskKey);
     }
 

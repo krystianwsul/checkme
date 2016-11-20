@@ -46,6 +46,7 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.InstanceMap;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -770,7 +771,7 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public Map<InstanceKey, RemoteInstance> getExistingInstances(@NonNull TaskKey taskKey) {
+    public Map<ScheduleKey, RemoteInstance> getExistingInstances(@NonNull TaskKey taskKey) {
         return mExistingRemoteInstances.get(taskKey);
     }
 

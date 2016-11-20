@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InstanceMap<T extends Instance> {
-    private final HashMap<TaskKey, HashMap<InstanceKey, T>> mInstances = new HashMap<>();
+    private final HashMap<TaskKey, HashMap<ScheduleKey, T>> mInstances = new HashMap<>();
 
     public InstanceMap() {
 
@@ -22,7 +22,7 @@ public class InstanceMap<T extends Instance> {
     public void add(@NonNull T instance) {
         TaskKey taskKey = instance.getTaskKey();
 
-        HashMap<InstanceKey, T> innerMap = mInstances.get(taskKey);
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(taskKey);
         if (innerMap == null) {
             innerMap = new HashMap<>();
             mInstances.put(taskKey, innerMap);
@@ -30,22 +30,22 @@ public class InstanceMap<T extends Instance> {
 
         InstanceKey instanceKey = instance.getInstanceKey();
 
-        Assert.assertTrue(!innerMap.containsKey(instanceKey));
+        Assert.assertTrue(!innerMap.containsKey(instanceKey.mScheduleKey));
 
-        innerMap.put(instanceKey, instance);
+        innerMap.put(instanceKey.mScheduleKey, instance);
     }
 
     @Deprecated
     public boolean contains(@NonNull T instance) {
         TaskKey taskKey = instance.getTaskKey();
 
-        HashMap<InstanceKey, T> innerMap = mInstances.get(taskKey);
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(taskKey);
         if (innerMap == null)
             return false;
 
         InstanceKey instanceKey = instance.getInstanceKey();
 
-        T innerInstance = innerMap.get(instanceKey);
+        T innerInstance = innerMap.get(instanceKey.mScheduleKey);
         if (innerInstance == null)
             return false;
 
@@ -57,32 +57,32 @@ public class InstanceMap<T extends Instance> {
     public void removeIfPresent(@NonNull Instance instance) {
         TaskKey taskKey = instance.getTaskKey();
 
-        HashMap<InstanceKey, T> innerMap = mInstances.get(taskKey);
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(taskKey);
         if (innerMap == null)
             return;
 
         InstanceKey instanceKey = instance.getInstanceKey();
 
-        innerMap.remove(instanceKey);
+        innerMap.remove(instanceKey.mScheduleKey);
     }
 
     public void removeForce(@NonNull Instance instance) {
         TaskKey taskKey = instance.getTaskKey();
 
-        HashMap<InstanceKey, T> innerMap = mInstances.get(taskKey);
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(taskKey);
         Assert.assertTrue(innerMap != null);
 
         InstanceKey instanceKey = instance.getInstanceKey();
 
-        T innerInstance = innerMap.get(instanceKey);
+        T innerInstance = innerMap.get(instanceKey.mScheduleKey);
         Assert.assertTrue(instance.equals(innerInstance));
 
-        innerMap.remove(instanceKey);
+        innerMap.remove(instanceKey.mScheduleKey);
     }
 
     @NonNull
-    public HashMap<InstanceKey, T> get(@NonNull TaskKey taskKey) {
-        HashMap<InstanceKey, T> innerMap = mInstances.get(taskKey);
+    public HashMap<ScheduleKey, T> get(@NonNull TaskKey taskKey) {
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(taskKey);
         if (innerMap == null)
             return new HashMap<>();
         else
@@ -91,19 +91,19 @@ public class InstanceMap<T extends Instance> {
 
     @Nullable
     public T getIfPresent(@NonNull InstanceKey instanceKey) {
-        HashMap<InstanceKey, T> innerMap = mInstances.get(instanceKey.mTaskKey);
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(instanceKey.mTaskKey);
         if (innerMap == null)
             return null;
 
-        return innerMap.get(instanceKey);
+        return innerMap.get(instanceKey.mScheduleKey);
     }
 
     @NonNull
     public T getForce(@NonNull InstanceKey instanceKey) {
-        HashMap<InstanceKey, T> innerMap = mInstances.get(instanceKey.mTaskKey);
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(instanceKey.mTaskKey);
         Assert.assertTrue(innerMap != null);
 
-        T instance = innerMap.get(instanceKey);
+        T instance = innerMap.get(instanceKey.mScheduleKey);
         Assert.assertTrue(instance != null);
 
         return instance;

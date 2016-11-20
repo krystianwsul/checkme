@@ -16,20 +16,21 @@ public class InstanceKey implements Parcelable, Serializable {
     public final TaskKey mTaskKey;
 
     @NonNull
-    public final Date ScheduleDate;
-
-    @NonNull
-    public final TimePair ScheduleTimePair;
+    public final ScheduleKey mScheduleKey;
 
     public InstanceKey(@NonNull TaskKey taskKey, @NonNull Date scheduleDate, @NonNull TimePair scheduleTimePair) {
         mTaskKey = taskKey;
-        ScheduleDate = scheduleDate;
-        ScheduleTimePair = scheduleTimePair;
+        mScheduleKey = new ScheduleKey(scheduleDate, scheduleTimePair);
+    }
+
+    private InstanceKey(@NonNull TaskKey taskKey, @NonNull ScheduleKey scheduleKey) {
+        mTaskKey = taskKey;
+        mScheduleKey = scheduleKey;
     }
 
     @Override
     public int hashCode() {
-        return mTaskKey.hashCode() + ScheduleDate.hashCode() + ScheduleTimePair.hashCode();
+        return mTaskKey.hashCode() + mScheduleKey.hashCode();
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -49,10 +50,7 @@ public class InstanceKey implements Parcelable, Serializable {
         if (!mTaskKey.equals(instanceKey.mTaskKey))
             return false;
 
-        if (!ScheduleDate.equals(instanceKey.ScheduleDate))
-            return false;
-
-        if (!ScheduleTimePair.equals(instanceKey.ScheduleTimePair))
+        if (!mScheduleKey.equals(instanceKey.mScheduleKey))
             return false;
 
         return true;
@@ -60,7 +58,7 @@ public class InstanceKey implements Parcelable, Serializable {
 
     @Override
     public String toString() {
-        return super.toString() + ": " + mTaskKey + ", " + ScheduleDate + ", " + ScheduleTimePair;
+        return super.toString() + ": " + mTaskKey + ", " + mScheduleKey;
     }
 
     @Override
@@ -71,8 +69,7 @@ public class InstanceKey implements Parcelable, Serializable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mTaskKey, 0);
-        out.writeParcelable(ScheduleDate, 0);
-        out.writeParcelable(ScheduleTimePair, 0);
+        out.writeParcelable(mScheduleKey, 0);
     }
 
     public static final Parcelable.Creator<InstanceKey> CREATOR = new Creator<InstanceKey>() {
@@ -81,13 +78,10 @@ public class InstanceKey implements Parcelable, Serializable {
             TaskKey taskKey = source.readParcelable(TaskKey.class.getClassLoader());
             Assert.assertTrue(taskKey != null);
 
-            Date scheduleDate = source.readParcelable(Date.class.getClassLoader());
-            Assert.assertTrue(scheduleDate != null);
+            ScheduleKey scheduleKey = source.readParcelable(Date.class.getClassLoader());
+            Assert.assertTrue(scheduleKey != null);
 
-            TimePair scheduleTimePair = source.readParcelable(TimePair.class.getClassLoader());
-            Assert.assertTrue(scheduleTimePair != null);
-
-            return new InstanceKey(taskKey, scheduleDate, scheduleTimePair);
+            return new InstanceKey(taskKey, scheduleKey);
         }
 
         @Override

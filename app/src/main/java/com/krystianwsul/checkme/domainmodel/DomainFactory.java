@@ -1614,7 +1614,7 @@ public class DomainFactory {
         if (instance != null)
             return instance;
 
-        DateTime dateTime = getDateTime(instanceKey.ScheduleDate, instanceKey.ScheduleTimePair);
+        DateTime dateTime = getDateTime(instanceKey.mScheduleKey.ScheduleDate, instanceKey.mScheduleKey.ScheduleTimePair);
 
         return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
     }
@@ -1793,18 +1793,6 @@ public class DomainFactory {
             newParentTask.addChild(joinTask, now);
         }
     }
-
-    /*
-    @NonNull
-    private List<TaskHierarchy> getTaskHierarchies() {
-        List<TaskHierarchy> taskHierarchies = new ArrayList<>(mLocalFactory.getTaskHierarchies());
-
-        if (mRemoteFactory != null)
-            taskHierarchies.addAll(mRemoteFactory.getTaskHierarchies());
-
-        return taskHierarchies;
-    }
-    */
 
     @Nullable
     TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {

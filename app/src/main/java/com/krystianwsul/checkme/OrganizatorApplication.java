@@ -30,6 +30,11 @@ public class OrganizatorApplication extends Application {
         FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
 
         sSharedPreferences = getSharedPreferences("asdf", Context.MODE_PRIVATE);
+        /*
+        sSharedPreferences.edit()
+                .putString("asdf", null)
+                .apply();
+                */
 
         for (String line : TextUtils.split(sSharedPreferences.getString("asdf", ""), "\n")) {
             Log.e("asdf", "task log:" + line);

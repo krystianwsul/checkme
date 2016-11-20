@@ -86,7 +86,9 @@ public abstract class Task {
     }
 
     @SuppressWarnings("WeakerAccess") // bo inheritance i testy
-    protected boolean isVisible(@NonNull ExactTimeStamp now) {
+    protected boolean isVisible(@NonNull ExactTimeStamp now, @NonNull String oldPath) {
+        String path = oldPath + ", " + getTaskKey().mLocalTaskId + " - " + getName();
+
         if (current(now)) {
             Task rootTask = getRootTask(now);
 
@@ -96,7 +98,7 @@ public abstract class Task {
                 return true;
             }
 
-            if (Stream.of(schedules).anyMatch(schedule -> schedule.isVisible(this, now))) {
+            if (Stream.of(schedules).anyMatch(schedule -> schedule.isVisible(this, now, path))) {
                 return true;
             }
         }
@@ -181,7 +183,7 @@ public abstract class Task {
         List<Instance> instances = mDomainFactory.getPastInstances(this, now);
 
         Optional<Instance> optional = Stream.of(instances)
-                .filter(instance -> instance.isVisible(now))
+                .filter(instance -> instance.isVisible(now, "updateOldestVisible 1"))
                 .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
 
         Date oldestVisible;
@@ -200,13 +202,13 @@ public abstract class Task {
             setOldestVisible(oldestVisible);
 
             for (Instance instance : instances)
-                OrganizatorApplication.logInfo(this, "updateOldestVisible: instance " + instance.getScheduleDateTime() + " exists? " + instance.exists() + ", visible? " + instance.isVisible(now));
+                OrganizatorApplication.logInfo(this, "updateOldestVisible: instance " + instance.getScheduleDateTime() + " exists? " + instance.exists() + ", visible? " + instance.isVisible(now, "updateOldestVisible 2"));
 
             OrganizatorApplication.logInfo(this, "updateOldestVisible " + oldestVisible);
         }
     }
 
-    void correctOldestVisible(@NonNull Date date) {
+    void correctOldestVisible(@NonNull Date date, @NonNull String path) {
         Date oldestVisible = getOldestVisible();
         if (oldestVisible != null && date.compareTo(oldestVisible) < 0) {
             String message = getName() + " old oldest: " + oldestVisible + ", new oldest: " + date;
@@ -218,6 +220,7 @@ public abstract class Task {
             setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
 
             OrganizatorApplication.logInfo(this, "correctOldestVisible " + message);
+            OrganizatorApplication.logInfo(this, "correction path: " + path);
         }
     }
 

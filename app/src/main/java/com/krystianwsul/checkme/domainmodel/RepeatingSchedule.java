@@ -70,7 +70,7 @@ abstract class RepeatingSchedule extends Schedule {
     protected abstract Instance getInstanceInDate(@NonNull Task task, @NonNull Date date, @Nullable HourMilli startHourMilli, @Nullable HourMilli endHourMilli);
 
     @Override
-    public boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now) {
+    public boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now, @NonNull String oldPath) {
         Assert.assertTrue(current(now));
 
         return true;

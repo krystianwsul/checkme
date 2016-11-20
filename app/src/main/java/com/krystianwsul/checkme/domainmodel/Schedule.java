@@ -72,7 +72,7 @@ public abstract class Schedule {
     @NonNull
     public abstract List<Instance> getInstances(@NonNull Task task, ExactTimeStamp givenStartExactTimeStamp, @NonNull ExactTimeStamp givenExactEndTimeStamp);
 
-    public abstract boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now);
+    public abstract boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now, @NonNull String oldPath);
 
     @NonNull
     public abstract String getScheduleText(@NonNull Context context);

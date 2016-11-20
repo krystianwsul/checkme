@@ -145,7 +145,7 @@ public class DomainFactoryTest {
 
         Task rootTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null, new ArrayList<>());
 
-        Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
+        Assert.assertTrue(rootTask.isVisible(startExactTimeStamp, "testRelevantSingleNoChildren 1"));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.isEmpty());
@@ -155,7 +155,7 @@ public class DomainFactoryTest {
         Instance rootInstance = domainFactory.getInstance(rootTask.getTaskKey(), scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
-        Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
+        Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp, "testRelevantSingleNoChildren 2"));
 
         Date doneDate = startDate;
         HourMilli doneHourMilli = new HourMilli(1, 0, 0, 0);
@@ -214,27 +214,27 @@ public class DomainFactoryTest {
 
         Task rootTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, "root task", Collections.singletonList(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(scheduleHourMinute))), null, new ArrayList<>());
 
-        Assert.assertTrue(rootTask.isVisible(startExactTimeStamp));
+        Assert.assertTrue(rootTask.isVisible(startExactTimeStamp, "testRelevantSingleWithChildren 1"));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.isEmpty());
 
         Task childTaskDone = domainFactory.createChildTask(mContext, startExactTimeStamp, 0, rootTask.getTaskKey(), "child task done", null);
 
-        Assert.assertTrue(childTaskDone.isVisible(startExactTimeStamp));
+        Assert.assertTrue(childTaskDone.isVisible(startExactTimeStamp, "testRelevantSingleWithChildren 2"));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.size() == 1);
 
         Task childTaskExists = domainFactory.createChildTask(mContext, startExactTimeStamp, 0, rootTask.getTaskKey(), "child task exists", null);
 
-        Assert.assertTrue(childTaskExists.isVisible(startExactTimeStamp));
+        Assert.assertTrue(childTaskExists.isVisible(startExactTimeStamp, "testRelevantSingleWithChildren 3"));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.size() == 2);
 
         Task childTaskDoesntExist = domainFactory.createChildTask(mContext, startExactTimeStamp, 0, rootTask.getTaskKey(), "child task doesn't exist", null);
-        Assert.assertTrue(childTaskDoesntExist.isVisible(startExactTimeStamp));
+        Assert.assertTrue(childTaskDoesntExist.isVisible(startExactTimeStamp, "testRelevantSingleWithChildren 4"));
 
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.size() == 1);
         Assert.assertTrue(domainFactory.getTaskListData(startExactTimeStamp, mContext, null).mChildTaskDatas.get(0).Children.size() == 3);
@@ -244,7 +244,7 @@ public class DomainFactoryTest {
         Instance rootInstance = domainFactory.getInstance(rootTask.getTaskKey(), scheduleDateTime);
 
         Assert.assertTrue(!rootInstance.exists());
-        Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp));
+        Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp, "testRelevantSingleWithChildren 5"));
 
         Date doneDate = startDate;
         HourMilli doneHourMilli = new HourMilli(1, 0, 0, 0);
@@ -256,14 +256,14 @@ public class DomainFactoryTest {
 
         Instance childInstanceDone = domainFactory.getInstance(childTaskDone.getTaskKey(), scheduleDateTime);
         Assert.assertTrue(!childInstanceDone.exists());
-        Assert.assertTrue(childInstanceDone.isVisible(doneExactTimeStamp));
+        Assert.assertTrue(childInstanceDone.isVisible(doneExactTimeStamp, "testRelevantSingleWithChildren 6"));
 
         childInstanceDone = domainFactory.setInstanceDone(mContext, doneExactTimeStamp, 0, childInstanceDone.getInstanceKey(), true);
         Assert.assertTrue(childInstanceDone.exists());
 
         Instance childInstanceExists = domainFactory.getInstance(childTaskExists.getTaskKey(), scheduleDateTime);
         Assert.assertTrue(!childInstanceExists.exists());
-        Assert.assertTrue(childInstanceExists.isVisible(doneExactTimeStamp));
+        Assert.assertTrue(childInstanceExists.isVisible(doneExactTimeStamp, "testRelevantSingleWithChildren 7"));
 
         childInstanceExists = domainFactory.setInstanceDone(mContext, doneExactTimeStamp, 0, childInstanceExists.getInstanceKey(), true);
         Assert.assertTrue(childInstanceExists.exists());
@@ -273,7 +273,7 @@ public class DomainFactoryTest {
 
         Instance childInstanceDoesntExist = domainFactory.getInstance(childTaskDoesntExist.getTaskKey(), scheduleDateTime);
         Assert.assertTrue(!childInstanceDoesntExist.exists());
-        Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp));
+        Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp, "testRelevantSingleWithChildren 8"));
 
         Date nextDayBeforeDate = new Date(2016, 1, 2);
         HourMilli nextDayBeforeHourMilli = new HourMilli(0, 0, 0, 0);

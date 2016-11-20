@@ -122,10 +122,12 @@ public class SingleSchedule extends Schedule {
     }
 
     @Override
-    public boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now) {
+    public boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now, @NonNull String oldPath) {
         Assert.assertTrue(current(now));
 
-        return getInstance(task).isVisible(now);
+        String path = oldPath + ", singleSchedule";
+
+        return getInstance(task).isVisible(now, path);
     }
 
     @NonNull

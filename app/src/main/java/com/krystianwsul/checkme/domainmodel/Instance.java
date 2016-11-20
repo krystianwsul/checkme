@@ -187,21 +187,22 @@ public abstract class Instance {
 
     public abstract void setNotified(@NonNull ExactTimeStamp now);
 
-    boolean isVisible(@NonNull ExactTimeStamp now) {
+    boolean isVisible(@NonNull ExactTimeStamp now, @NonNull String oldPath) {
         MyCrashlytics.log("sprawdzanie Instance.isVisible dla " + getName() + ": " + getInstanceKey());
+        String path = oldPath + ", " + desc();
 
-        boolean isVisible = isVisibleHelper(now);
+        boolean isVisible = isVisibleHelper(now, path);
 
         if (isVisible) {
             Task task = getTask();
 
-            task.correctOldestVisible(getScheduleDateTime().getDate()); // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
+            task.correctOldestVisible(getScheduleDateTime().getDate(), path); // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
         }
 
         return isVisible;
     }
 
-    private boolean isVisibleHelper(@NonNull ExactTimeStamp now) {
+    private boolean isVisibleHelper(@NonNull ExactTimeStamp now, @NonNull String path) {
         Calendar calendar = now.getCalendar();
         calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
         ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
@@ -211,7 +212,7 @@ public abstract class Instance {
             ExactTimeStamp done = getDone();
             return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
         } else {
-            return parentInstance.isVisible(now);
+            return parentInstance.isVisible(now, path);
         }
     }
 

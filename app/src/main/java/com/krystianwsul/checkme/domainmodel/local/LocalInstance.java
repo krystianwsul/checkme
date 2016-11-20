@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
@@ -207,8 +206,6 @@ public class LocalInstance extends Instance {
 
     @Override
     public void setDone(boolean done, @NonNull ExactTimeStamp now) {
-        OrganizatorApplication.logInfo(getTask(), "setting done = " + done + " for instance " + getName() + " " + getScheduleDateTime());
-
         if (done) {
             if (mInstanceRecord == null) {
                 createInstanceHierarchy(now);
@@ -237,8 +234,6 @@ public class LocalInstance extends Instance {
     }
 
     private void createInstanceRecord(@NonNull ExactTimeStamp now) {
-        OrganizatorApplication.logInfo(getTask(), "creating instance " + getName() + " " + getScheduleDateTime());
-
         LocalTask localTask = (LocalTask) getTask();
 
         DateTime scheduleDateTime = getScheduleDateTime();

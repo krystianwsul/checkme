@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -187,22 +186,28 @@ public abstract class Instance {
 
     public abstract void setNotified(@NonNull ExactTimeStamp now);
 
-    boolean isVisible(@NonNull ExactTimeStamp now, @NonNull String oldPath) {
-        MyCrashlytics.log("sprawdzanie Instance.isVisible dla " + getName() + ": " + getInstanceKey());
-        String path = oldPath + ", " + desc();
-
-        boolean isVisible = isVisibleHelper(now, path);
+    boolean isVisible(@NonNull ExactTimeStamp now) {
+        boolean isVisible = isVisibleHelper(now);
 
         if (isVisible) {
             Task task = getTask();
 
-            task.correctOldestVisible(getScheduleDateTime().getDate(), path); // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
+            Date oldestVisible = task.getOldestVisible();
+            Date date = getScheduleDateTime().getDate();
+
+            if (oldestVisible != null && date.compareTo(oldestVisible) < 0) {
+                if (exists()) {
+                    task.correctOldestVisible(date); // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
+                } else {
+                    return false;
+                }
+            }
         }
 
         return isVisible;
     }
 
-    private boolean isVisibleHelper(@NonNull ExactTimeStamp now, @NonNull String path) {
+    private boolean isVisibleHelper(@NonNull ExactTimeStamp now) {
         Calendar calendar = now.getCalendar();
         calendar.add(Calendar.DAY_OF_YEAR, -1); // 24 hack
         ExactTimeStamp twentyFourHoursAgo = new ExactTimeStamp(calendar);
@@ -212,7 +217,7 @@ public abstract class Instance {
             ExactTimeStamp done = getDone();
             return (done == null || (done.compareTo(twentyFourHoursAgo) > 0));
         } else {
-            return parentInstance.isVisible(now, path);
+            return parentInstance.isVisible(now);
         }
     }
 
@@ -278,9 +283,5 @@ public abstract class Instance {
     @Override
     public String toString() {
         return super.toString() + " " + getName() + " " + getScheduleDateTime().toString() + " " + getInstanceDateTime().toString();
-    }
-
-    public String desc() {
-        return getName() + " - " + getScheduleDateTime().toString();
     }
 }

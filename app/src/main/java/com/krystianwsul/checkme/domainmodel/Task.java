@@ -9,7 +9,6 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
-import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -86,9 +85,7 @@ public abstract class Task {
     }
 
     @SuppressWarnings("WeakerAccess") // bo inheritance i testy
-    protected boolean isVisible(@NonNull ExactTimeStamp now, @NonNull String oldPath) {
-        String path = oldPath + ", " + getTaskKey().mLocalTaskId + " - " + getName();
-
+    protected boolean isVisible(@NonNull ExactTimeStamp now) {
         if (current(now)) {
             Task rootTask = getRootTask(now);
 
@@ -98,7 +95,7 @@ public abstract class Task {
                 return true;
             }
 
-            if (Stream.of(schedules).anyMatch(schedule -> schedule.isVisible(this, now, path))) {
+            if (Stream.of(schedules).anyMatch(schedule -> schedule.isVisible(this, now))) {
                 return true;
             }
         }
@@ -183,7 +180,7 @@ public abstract class Task {
         List<Instance> instances = mDomainFactory.getPastInstances(this, now);
 
         Optional<Instance> optional = Stream.of(instances)
-                .filter(instance -> instance.isVisible(now, "updateOldestVisible 1"))
+                .filter(instance -> instance.isVisible(now))
                 .min((lhs, rhs) -> lhs.getScheduleDateTime().compareTo(rhs.getScheduleDateTime()));
 
         Date oldestVisible;
@@ -200,28 +197,20 @@ public abstract class Task {
         Date oldOldestVisible = getOldestVisible();
         if (oldOldestVisible == null || !oldOldestVisible.equals(oldestVisible)) {
             setOldestVisible(oldestVisible);
-
-            for (Instance instance : instances)
-                OrganizatorApplication.logInfo(this, "updateOldestVisible: instance " + instance.getScheduleDateTime() + " exists? " + instance.exists() + ", visible? " + instance.isVisible(now, "updateOldestVisible 2"));
-
-            OrganizatorApplication.logInfo(this, "updateOldestVisible " + oldestVisible);
         }
     }
 
-    void correctOldestVisible(@NonNull Date date, @NonNull String path) {
+    void correctOldestVisible(@NonNull Date date) {
         Date oldestVisible = getOldestVisible();
-        if (oldestVisible != null && date.compareTo(oldestVisible) < 0) {
-            String message = getName() + " old oldest: " + oldestVisible + ", new oldest: " + date;
+        Assert.assertTrue(oldestVisible != null && date.compareTo(oldestVisible) < 0);
 
-            Log.e("asdf", message);
+        String message = getName() + " old oldest: " + oldestVisible + ", new oldest: " + date;
 
-            MyCrashlytics.logException(new OldestVisibleException3(message));
+        Log.e("asdf", message);
 
-            setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
+        MyCrashlytics.logException(new OldestVisibleException4(message));
 
-            OrganizatorApplication.logInfo(this, "correctOldestVisible " + message);
-            OrganizatorApplication.logInfo(this, "correction path: " + path);
-        }
+        setOldestVisible(date); // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
     }
 
     protected abstract void setOldestVisible(@NonNull Date date);
@@ -292,8 +281,8 @@ public abstract class Task {
 
     protected abstract void deleteSchedule(@NonNull Schedule schedule);
 
-    private static class OldestVisibleException3 extends Exception {
-        OldestVisibleException3(@NonNull String message) {
+    private static class OldestVisibleException4 extends Exception {
+        OldestVisibleException4(@NonNull String message) {
             super(message);
         }
     }

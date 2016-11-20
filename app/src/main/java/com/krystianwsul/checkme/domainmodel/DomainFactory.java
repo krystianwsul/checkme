@@ -17,7 +17,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
-import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
@@ -493,7 +492,7 @@ public class DomainFactory {
         if (position == 0) {
             taskDatas = getTasks()
                     .filter(task -> task.current(now))
-                    .filter(task -> task.isVisible(now, "getGroupListData"))
+                    .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
                     .filter(task -> task.getCurrentSchedules(now).isEmpty())
                     .map(task -> new GroupListLoader.TaskData(task.getTaskKey(), task.getName(), getChildTaskDatas(task, now), task.getStartExactTimeStamp()))
@@ -1607,7 +1606,7 @@ public class DomainFactory {
 
         return Stream.of(allInstances.values())
                 .filter(instance -> instance.isRootInstance(now))
-                .filter(instance -> instance.isVisible(now, "getRootInstances"))
+                .filter(instance -> instance.isVisible(now))
                 .collect(Collectors.toList());
     }
 
@@ -1731,7 +1730,7 @@ public class DomainFactory {
         return getTasks()
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .filter(task -> task.current(now))
-                .filter(task -> task.isVisible(now, "getTaskDatas"))
+                .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
                 .collect(Collectors.toMap(Task::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
     }
@@ -1963,7 +1962,7 @@ public class DomainFactory {
         } else {
             childTaskDatas = getTasks()
                     .filter(task -> task.current(now))
-                    .filter(task -> task.isVisible(now, "getTaskListData"))
+                    .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
                     .map(task -> new TaskListLoader.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
                     .collect(Collectors.toList());
@@ -2006,22 +2005,22 @@ public class DomainFactory {
         Stream.of(tasks)
                 .filter(task -> task.current(now))
                 .filter(task -> task.isRootTask(now))
-                .filter(task -> task.isVisible(now, "setIrrelevant a"))
+                .filter(task -> task.isVisible(now))
                 .map(Task::getTaskKey)
                 .map(taskRelevances::get)
-                .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevance.mTask.getName(), taskRelevances, instanceRelevances, customTimeRelevances, now));
+                .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
         Stream.of(getRootInstances(null, now.plusOne(), now))
                 .map(Instance::getInstanceKey)
                 .map(instanceRelevances::get)
-                .forEach(instanceRelevance -> instanceRelevance.setRelevant(instanceRelevance.mInstance.desc(), taskRelevances, instanceRelevances, customTimeRelevances, now));
+                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
         Stream.of(getExistingInstances())
                 .filter(instance -> instance.isRootInstance(now))
-                .filter(instance -> instance.isVisible(now, "setIrrelevant 1"))
+                .filter(instance -> instance.isVisible(now))
                 .map(Instance::getInstanceKey)
                 .map(instanceRelevances::get)
-                .forEach(instanceRelevance -> instanceRelevance.setRelevant(instanceRelevance.mInstance.desc(), taskRelevances, instanceRelevances, customTimeRelevances, now));
+                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
         Stream.of(getCurrentCustomTimes())
                 .map(LocalCustomTime::getId)
@@ -2037,7 +2036,7 @@ public class DomainFactory {
         irrelevantTasks.removeAll(relevantTasks);
 
         Assert.assertTrue(Stream.of(irrelevantTasks)
-                .noneMatch(task -> task.isVisible(now, "setIrrelevant b")));
+                .noneMatch(task -> task.isVisible(now)));
 
         List<Instance> relevantExistingInstances = Stream.of(instanceRelevances.values())
                 .filter(InstanceRelevance::getRelevant)
@@ -2049,7 +2048,7 @@ public class DomainFactory {
         irrelevantExistingInstances.removeAll(relevantExistingInstances);
 
         Assert.assertTrue(Stream.of(irrelevantExistingInstances)
-                .noneMatch(instance -> instance.isVisible(now, "setIrrelevant 2")));
+                .noneMatch(instance -> instance.isVisible(now)));
 
         List<LocalCustomTime> relevantCustomTimes = Stream.of(customTimeRelevances.values())
                 .filter(CustomTimeRelevance::getRelevant)
@@ -2061,9 +2060,6 @@ public class DomainFactory {
 
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
                 .noneMatch(LocalCustomTime::getCurrent));
-
-        Stream.of(irrelevantTasks).forEach(irrelevantTask -> OrganizatorApplication.logInfo(irrelevantTask, "deleting task " + irrelevantTask.getTaskKey().mLocalTaskId + " - " + irrelevantTask.getName()));
-        Stream.of(irrelevantExistingInstances).forEach(irrelevantExistingInstance -> OrganizatorApplication.logInfo(irrelevantExistingInstance.getTask(), "deleting instance " + irrelevantExistingInstance.getName() + " " + irrelevantExistingInstance.getScheduleDateTime()));
 
         Stream.of(irrelevantTasks)
                 .forEach(Task::delete);
@@ -2325,15 +2321,11 @@ public class DomainFactory {
             mTask = task;
         }
 
-        void setRelevant(@NonNull String parentSource, @NonNull Map<TaskKey, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
-            OrganizatorApplication.logInfo(mTask, "marked visible by " + parentSource);
-
+        void setRelevant(@NonNull Map<TaskKey, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
             if (mRelevant)
                 return;
 
             mRelevant = true;
-
-            String source = parentSource + ", " + mTask.getTaskKey().mLocalTaskId + " - " + mTask.getName();
 
             TaskKey taskKey = mTask.getTaskKey();
 
@@ -2341,13 +2333,13 @@ public class DomainFactory {
             Stream.of(getTaskHierarchiesByChildTaskKey(taskKey))
                     .map(TaskHierarchy::getParentTaskKey)
                     .map(taskRelevances::get)
-                    .forEach(taskRelevance -> taskRelevance.setRelevant(source, taskRelevances, instanceRelevances, customTimeRelevances, now));
+                    .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark children relevant
             Stream.of(getTaskHierarchiesByParentTaskKey(taskKey))
                     .map(TaskHierarchy::getChildTaskKey)
                     .map(taskRelevances::get)
-                    .forEach(taskRelevance -> taskRelevance.setRelevant(source, taskRelevances, instanceRelevances, customTimeRelevances, now));
+                    .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             Date oldestVisible = mTask.getOldestVisible();
             Assert.assertTrue(oldestVisible != null);
@@ -2363,13 +2355,13 @@ public class DomainFactory {
 
                         return instanceRelevances.get(instanceKey);
                     })
-                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(source, taskRelevances, instanceRelevances, customTimeRelevances, now));
+                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             Stream.of(getExistingInstances(mTask))
                     .filter(instance -> instance.getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
                     .map(Instance::getInstanceKey)
                     .map(instanceRelevances::get)
-                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(source, taskRelevances, instanceRelevances, customTimeRelevances, now));
+                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark custom times relevant
             if (mTask.current(now))
@@ -2397,21 +2389,17 @@ public class DomainFactory {
             mInstance = instance;
         }
 
-        void setRelevant(@NonNull String oldSource, @NonNull Map<TaskKey, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
-            OrganizatorApplication.logInfo(mInstance.getTask(), "instance " + mInstance.getScheduleDateTime() + " marked visible by " + oldSource);
-
+        void setRelevant(@NonNull Map<TaskKey, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, CustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
             if (mRelevant)
                 return;
 
             mRelevant = true;
 
-            String source = oldSource + ", " + mInstance.desc();
-
             // set task relevant
             TaskRelevance taskRelevance = taskRelevances.get(mInstance.getTaskKey());
             Assert.assertTrue(taskRelevance != null);
 
-            taskRelevance.setRelevant(source, taskRelevances, instanceRelevances, customTimeRelevances, now);
+            taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now);
 
             // set parent instance relevant
             if (!mInstance.isRootInstance(now)) {
@@ -2426,7 +2414,7 @@ public class DomainFactory {
                 InstanceRelevance parentInstanceRelevance = instanceRelevances.get(parentInstanceKey);
                 Assert.assertTrue(parentInstanceRelevance != null);
 
-                parentInstanceRelevance.setRelevant(source, taskRelevances, instanceRelevances, customTimeRelevances, now);
+                parentInstanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now);
             }
 
             // set child instances relevant
@@ -2439,7 +2427,7 @@ public class DomainFactory {
 
                         return instanceRelevances.get(instanceKey);
                     })
-                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(source, taskRelevances, instanceRelevances, customTimeRelevances, now));
+                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // set custom time relevant
             CustomTimeKey scheduleCustomTimeKey = mInstance.getScheduleCustomTimeKey();

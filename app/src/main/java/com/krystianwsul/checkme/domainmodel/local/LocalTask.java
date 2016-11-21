@@ -108,7 +108,7 @@ public class LocalTask extends Task {
     public void delete() {
         TaskKey taskKey = getTaskKey();
 
-        Stream.of(mDomainFactory.getLocalFactory().getTaskHierarchiesByChildTaskKey(taskKey))
+        Stream.of(new ArrayList<>(mDomainFactory.getLocalFactory().getTaskHierarchiesByChildTaskKey(taskKey)))
                 .forEach(TaskHierarchy::delete);
 
         Stream.of(new ArrayList<>(getSchedules()))

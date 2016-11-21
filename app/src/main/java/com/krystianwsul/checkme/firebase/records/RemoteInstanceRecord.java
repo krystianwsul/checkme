@@ -5,150 +5,207 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
+import com.krystianwsul.checkme.utils.ScheduleKey;
+import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
 public class RemoteInstanceRecord extends RemoteRecord {
-    RemoteInstanceRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
-    }
+    @NonNull
+    private final RemoteTaskRecord mRemoteTaskRecord;
 
-    public RemoteInstanceRecord(@NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+    @NonNull
+    private final InstanceJson mInstanceJson;
+
+    RemoteInstanceRecord(boolean create, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull InstanceJson instanceJson) {
+        super(create);
+
+        mRemoteTaskRecord = remoteTaskRecord;
+        mInstanceJson = instanceJson;
     }
 
     @NonNull
-    private InstanceJson getInstanceJson() {
-        InstanceJson instanceJson = mJsonWrapper.instanceJson;
-        Assert.assertTrue(instanceJson != null);
+    @Override
+    protected String getKey() {
+        return mRemoteTaskRecord.getId() + "/taskJson/instances/" + scheduleKeyToString(getScheduleKey());
+    }
 
-        return instanceJson;
+    @NonNull
+    private static ScheduleKey getScheduleKey(@NonNull RemoteInstanceRecord remoteInstanceRecord) {
+        Date scheduleDate = new Date(remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay());
+
+        String scheduleCustomTimeId = remoteInstanceRecord.getScheduleCustomTimeId();
+
+        TimePair scheduleTimePair;
+        if (!TextUtils.isEmpty(scheduleCustomTimeId)) {
+            Assert.assertTrue(remoteInstanceRecord.getScheduleHour() == null);
+            Assert.assertTrue(remoteInstanceRecord.getScheduleMinute() == null);
+
+            scheduleTimePair = new TimePair(new CustomTimeKey(scheduleCustomTimeId));
+        } else {
+            Assert.assertTrue(remoteInstanceRecord.getScheduleHour() != null);
+            Assert.assertTrue(remoteInstanceRecord.getScheduleMinute() != null);
+
+            scheduleTimePair = new TimePair(new HourMinute(remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute()));
+        }
+
+        return new ScheduleKey(scheduleDate, scheduleTimePair);
+    }
+
+    @NonNull
+    ScheduleKey getScheduleKey() {
+        return getScheduleKey(this);
+    }
+
+    @NonNull
+    public static String scheduleKeyToString(@NonNull ScheduleKey scheduleKey) {
+        String key = scheduleKey.ScheduleDate.getYear() + "-" + scheduleKey.ScheduleDate.getMonth() + "-" + scheduleKey.ScheduleDate.getDay();
+        if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
+            Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
+            Assert.assertTrue(!TextUtils.isEmpty(scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId));
+
+            key += "-" + scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId;
+        } else {
+            Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute != null);
+
+            key += "-" + scheduleKey.ScheduleTimePair.mHourMinute.getHour() + "-" + scheduleKey.ScheduleTimePair.mHourMinute.getMinute();
+        }
+
+        return key;
+    }
+
+    @NonNull
+    @Override
+    protected Object getCreateObject() {
+        return mInstanceJson;
     }
 
     @NonNull
     public String getTaskId() {
-        return getInstanceJson().getTaskId();
+        return mRemoteTaskRecord.getId();
     }
 
     public Long getDone() {
-        return getInstanceJson().getDone();
+        return mInstanceJson.getDone();
     }
 
     public int getScheduleYear() {
-        return getInstanceJson().getScheduleYear();
+        return mInstanceJson.getScheduleYear();
     }
 
     public int getScheduleMonth() {
-        return getInstanceJson().getScheduleMonth();
+        return mInstanceJson.getScheduleMonth();
     }
 
     public int getScheduleDay() {
-        return getInstanceJson().getScheduleDay();
+        return mInstanceJson.getScheduleDay();
     }
 
     @Nullable
     public String getScheduleCustomTimeId() {
-        return getInstanceJson().getScheduleCustomTimeId();
+        return mInstanceJson.getScheduleCustomTimeId();
     }
 
     @Nullable
     public Integer getScheduleHour() {
-        return getInstanceJson().getScheduleHour();
+        return mInstanceJson.getScheduleHour();
     }
 
     @Nullable
     public Integer getScheduleMinute() {
-        return getInstanceJson().getScheduleMinute();
+        return mInstanceJson.getScheduleMinute();
     }
 
     @Nullable
     public Integer getInstanceYear() {
-        return getInstanceJson().getInstanceYear();
+        return mInstanceJson.getInstanceYear();
     }
 
     @Nullable
     public Integer getInstanceMonth() {
-        return getInstanceJson().getInstanceMonth();
+        return mInstanceJson.getInstanceMonth();
     }
 
     @Nullable
     public Integer getInstanceDay() {
-        return getInstanceJson().getInstanceDay();
+        return mInstanceJson.getInstanceDay();
     }
 
     @Nullable
     public String getInstanceCustomTimeId() {
-        return getInstanceJson().getInstanceCustomTimeId();
+        return mInstanceJson.getInstanceCustomTimeId();
     }
 
     @Nullable
     public Integer getInstanceHour() {
-        return getInstanceJson().getInstanceHour();
+        return mInstanceJson.getInstanceHour();
     }
 
     @Nullable
     public Integer getInstanceMinute() {
-        return getInstanceJson().getInstanceMinute();
+        return mInstanceJson.getInstanceMinute();
     }
 
     public long getHierarchyTime() {
-        return getInstanceJson().getHierarchyTime();
+        return mInstanceJson.getHierarchyTime();
     }
 
     public void setInstanceYear(int instanceYear) {
         if (getInstanceYear() != null && getInstanceYear().equals(instanceYear))
             return;
 
-        getInstanceJson().setInstanceYear(instanceYear);
-        addValue(getId() + "/instanceJson/instanceYear", instanceYear);
+        mInstanceJson.setInstanceYear(instanceYear);
+        addValue(getKey() + "/instanceYear", instanceYear);
     }
 
     public void setInstanceMonth(int instanceMonth) {
         if (getInstanceMonth() != null && getInstanceMonth().equals(instanceMonth))
             return;
 
-        getInstanceJson().setInstanceMonth(instanceMonth);
-        addValue(getId() + "/instanceJson/instanceMonth", instanceMonth);
+        mInstanceJson.setInstanceMonth(instanceMonth);
+        addValue(getKey() + "/instanceMonth", instanceMonth);
     }
 
     public void setInstanceDay(int instanceDay) {
         if (getInstanceDay() != null && getInstanceDay().equals(instanceDay))
             return;
 
-        getInstanceJson().setInstanceDay(instanceDay);
-        addValue(getId() + "/instanceJson/instanceDay", instanceDay);
+        mInstanceJson.setInstanceDay(instanceDay);
+        addValue(getKey() + "/instanceDay", instanceDay);
     }
 
     public void setInstanceCustomTimeId(@Nullable String instanceCustomTimeId) {
         if (!TextUtils.isEmpty(getInstanceCustomTimeId()) && getInstanceCustomTimeId().equals(instanceCustomTimeId))
             return;
 
-        getInstanceJson().setInstanceCustomTimeId(instanceCustomTimeId);
-        addValue(getId() + "/instanceJson/instanceCustomTimeId", instanceCustomTimeId);
+        mInstanceJson.setInstanceCustomTimeId(instanceCustomTimeId);
+        addValue(getKey() + "/instanceCustomTimeId", instanceCustomTimeId);
     }
 
     public void setInstanceHour(@Nullable Integer instanceHour) {
         if (getInstanceHour() != null && getInstanceHour().equals(instanceHour))
             return;
 
-        getInstanceJson().setInstanceHour(instanceHour);
-        addValue(getId() + "/instanceJson/instanceHour", instanceHour);
+        mInstanceJson.setInstanceHour(instanceHour);
+        addValue(getKey() + "/instanceHour", instanceHour);
     }
 
     public void setInstanceMinute(@Nullable Integer instanceMinute) {
         if (getInstanceMinute() != null && getInstanceMinute().equals(instanceMinute))
             return;
 
-        getInstanceJson().setInstanceMinute(instanceMinute);
-        addValue(getId() + "/instanceJson/instanceMinute", instanceMinute);
+        mInstanceJson.setInstanceMinute(instanceMinute);
+        addValue(getKey() + "/instanceMinute", instanceMinute);
     }
 
     public void setDone(@Nullable Long done) {
         if (getDone() != null && getDone().equals(done))
             return;
 
-        getInstanceJson().setDone(done);
-        addValue(getId() + "/instanceJson/done", done);
+        mInstanceJson.setDone(done);
+        addValue(getKey() + "/done", done);
     }
 }

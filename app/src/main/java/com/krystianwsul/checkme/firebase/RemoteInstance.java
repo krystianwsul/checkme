@@ -19,8 +19,6 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.Set;
-
 public class RemoteInstance extends Instance {
     @Nullable
     private RemoteInstanceRecord mRemoteInstanceRecord;
@@ -253,7 +251,7 @@ public class RemoteInstance extends Instance {
         RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
         Assert.assertTrue(remoteFactory != null);
 
-        mRemoteInstanceRecord = remoteFactory.createRemoteInstanceRecord((RemoteTask) task, this, scheduleDateTime, now);
+        mRemoteInstanceRecord = ((RemoteTask) task).createRemoteInstanceRecord(this, scheduleDateTime, now);
 
         mTaskId = null;
         mScheduleDateTime = null;
@@ -310,26 +308,13 @@ public class RemoteInstance extends Instance {
         RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
         Assert.assertTrue(remoteFactory != null);
 
-        remoteFactory.deleteInstance(this);
+        ((RemoteTask) getTask()).deleteInstance(this);
 
         mRemoteInstanceRecord.delete();
-    }
-
-    @NonNull
-    public String getId() {
-        Assert.assertTrue(mRemoteInstanceRecord != null);
-
-        return mRemoteInstanceRecord.getId();
     }
 
     @Override
     public boolean getNotificationShown() {
         return (mInstanceShownRecord != null && mInstanceShownRecord.getNotificationShown());
-    }
-
-    void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        Assert.assertTrue(mRemoteInstanceRecord != null);
-
-        mRemoteInstanceRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

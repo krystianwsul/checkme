@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
 
 import junit.framework.Assert;
 
-public class RemoteTaskHierarchyRecord extends RemoteRecord {
+public class RemoteTaskHierarchyRecord extends RootRemoteRecord {
     RemoteTaskHierarchyRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(id, jsonWrapper);
     }

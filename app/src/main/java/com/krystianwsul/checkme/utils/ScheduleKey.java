@@ -18,7 +18,7 @@ public class ScheduleKey implements Parcelable, Serializable {
     @NonNull
     public final TimePair ScheduleTimePair;
 
-    ScheduleKey(@NonNull Date scheduleDate, @NonNull TimePair scheduleTimePair) {
+    public ScheduleKey(@NonNull Date scheduleDate, @NonNull TimePair scheduleTimePair) {
         ScheduleDate = scheduleDate;
         ScheduleTimePair = scheduleTimePair;
     }

@@ -23,7 +23,7 @@ public class InstanceKey implements Parcelable, Serializable {
         mScheduleKey = new ScheduleKey(scheduleDate, scheduleTimePair);
     }
 
-    private InstanceKey(@NonNull TaskKey taskKey, @NonNull ScheduleKey scheduleKey) {
+    public InstanceKey(@NonNull TaskKey taskKey, @NonNull ScheduleKey scheduleKey) {
         mTaskKey = taskKey;
         mScheduleKey = scheduleKey;
     }

@@ -3,19 +3,46 @@ package com.krystianwsul.checkme.firebase.records;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 
 import junit.framework.Assert;
 
-public class RemoteTaskRecord extends RemoteRecord {
+import java.util.HashMap;
+import java.util.Map;
+
+public class RemoteTaskRecord extends RootRemoteRecord {
+    @NonNull
+    private final Map<ScheduleKey, RemoteInstanceRecord> mRemoteInstanceRecords = new HashMap<>();
+
     RemoteTaskRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(id, jsonWrapper);
+
+        initialize();
     }
 
     RemoteTaskRecord(@NonNull JsonWrapper jsonWrapper) {
         super(jsonWrapper);
+
+        initialize();
+    }
+
+    private void initialize() {
+        for (Map.Entry<String, InstanceJson> entry : getTaskJson().getInstances().entrySet()) {
+            InstanceJson instanceJson = entry.getValue();
+            Assert.assertTrue(instanceJson != null);
+
+            RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(false, this, instanceJson);
+
+            ScheduleKey scheduleKey = remoteInstanceRecord.getScheduleKey();
+            Assert.assertTrue(entry.getKey().equals(RemoteInstanceRecord.scheduleKeyToString(scheduleKey)));
+
+            mRemoteInstanceRecords.put(scheduleKey, remoteInstanceRecord);
+        }
     }
 
     @NonNull
@@ -58,6 +85,11 @@ public class RemoteTaskRecord extends RemoteRecord {
     @Nullable
     public Integer getOldestVisibleDay() {
         return getTaskJson().getOldestVisibleDay();
+    }
+
+    @NonNull
+    public Map<ScheduleKey, RemoteInstanceRecord> getRemoteInstanceRecords() {
+        return mRemoteInstanceRecords;
     }
 
     public void setEndTime(long endTime) {
@@ -112,5 +144,53 @@ public class RemoteTaskRecord extends RemoteRecord {
 
         getTaskJson().setNote(note);
         addValue(getId() + "/taskJson/note", note);
+    }
+
+    @Override
+    void getValues(@NonNull Map<String, Object> values) {
+        Assert.assertTrue(!mDeleted);
+        Assert.assertTrue(!mCreated);
+        Assert.assertTrue(!mUpdated);
+
+        if (mDelete) {
+            Log.e("asdf", "RemoteRecord.getValues deleting " + this);
+
+            Assert.assertTrue(!mCreate);
+            Assert.assertTrue(mUpdate != null);
+
+            mDeleted = true;
+            values.put(getKey(), null);
+        } else if (mCreate) {
+            Log.e("asdf", "RemoteRecord.getValues creating " + this);
+
+            Assert.assertTrue(mUpdate == null);
+
+            mCreated = true;
+            values.put(getKey(), getCreateObject());
+
+            for (RemoteInstanceRecord remoteInstanceRecord : mRemoteInstanceRecords.values())
+                remoteInstanceRecord.getValues(values);
+        } else {
+            Assert.assertTrue(mUpdate != null);
+
+            if (!mUpdate.isEmpty()) {
+                Log.e("asdf", "RemoteRecord.getValues updating " + this);
+
+                mUpdated = true;
+                values.putAll(mUpdate);
+            }
+
+            for (RemoteInstanceRecord remoteInstanceRecord : mRemoteInstanceRecords.values())
+                remoteInstanceRecord.getValues(values);
+        }
+    }
+
+    @NonNull
+    public RemoteInstanceRecord newRemoteInstanceRecord(@NonNull InstanceJson instanceJson) {
+        RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(true, this, instanceJson);
+        Assert.assertTrue(!mRemoteInstanceRecords.containsKey(remoteInstanceRecord.getScheduleKey()));
+
+        mRemoteInstanceRecords.put(remoteInstanceRecord.getScheduleKey(), remoteInstanceRecord);
+        return remoteInstanceRecord;
     }
 }

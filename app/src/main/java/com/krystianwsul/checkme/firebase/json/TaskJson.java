@@ -6,6 +6,9 @@ import android.text.TextUtils;
 
 import junit.framework.Assert;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SuppressWarnings("unused")
 public class TaskJson {
     private String name;
@@ -22,11 +25,14 @@ public class TaskJson {
 
     private String note;
 
+    @Nullable
+    private Map<String, InstanceJson> instances;
+
     public TaskJson() {
 
     }
 
-    public TaskJson(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note) {
+    public TaskJson(@NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note, @NonNull Map<String, InstanceJson> instances) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
@@ -41,6 +47,8 @@ public class TaskJson {
         this.oldestVisibleYear = oldestVisibleYear;
 
         this.note = note;
+
+        this.instances = instances;
     }
 
     @NonNull
@@ -76,6 +84,14 @@ public class TaskJson {
     @Nullable
     public String getNote() {
         return note;
+    }
+
+    @NonNull
+    public Map<String, InstanceJson> getInstances() {
+        if (instances == null)
+            return new HashMap<>();
+        else
+            return instances;
     }
 
     public void setEndTime(long endTime) {

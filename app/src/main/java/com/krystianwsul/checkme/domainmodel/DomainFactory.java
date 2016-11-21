@@ -61,6 +61,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1440,17 +1441,6 @@ public class DomainFactory {
 
     // internal
 
-    @NonNull
-    private List<Instance> getExistingInstances(@NonNull Task task) {
-        TaskKey taskKey = task.getTaskKey();
-
-        List<Instance> instances = new ArrayList<>(mLocalFactory.getExistingInstances(taskKey).values());
-        if (mRemoteFactory != null)
-            instances.addAll(mRemoteFactory.getExistingInstances(taskKey).values());
-
-        return instances;
-    }
-
     @Nullable
     Instance getExistingInstanceIfPresent(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
         InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
@@ -1542,7 +1532,7 @@ public class DomainFactory {
     List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
-        allInstances.putAll(Stream.of(getExistingInstances(task))
+        allInstances.putAll(Stream.of(task.getExistingInstances().values())
                 .filter(instance -> instance.getScheduleDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
 
@@ -1724,14 +1714,14 @@ public class DomainFactory {
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
 
         updateNotifications(context, true, false, new ArrayList<>(), now, Stream.of(localToRemoteConversion.mLocalTasks.values())
-                .map(Task::getTaskKey)
+                .map(pair -> pair.first.getTaskKey())
                 .collect(Collectors.toList()));
 
-        for (LocalTask localTask : localToRemoteConversion.mLocalTasks.values()) {
-            Assert.assertTrue(localTask != null);
+        for (Pair<LocalTask, Collection<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+            Assert.assertTrue(pair != null);
 
-            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(localTask, recordOf);
-            localToRemoteConversion.mRemoteTasks.put(localTask.getId(), remoteTask);
+            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(pair.first, recordOf, pair.second);
+            localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
         }
 
         for (LocalTaskHierarchy localTaskHierarchy : localToRemoteConversion.mLocalTaskHierarchies) {
@@ -1747,24 +1737,15 @@ public class DomainFactory {
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 
-        for (LocalInstance localInstance : localToRemoteConversion.mLocalInstances) {
-            Assert.assertTrue(localInstance != null);
+        for (Pair<LocalTask, Collection<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+            pair.first.delete();
 
-            RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(localInstance.getTaskId());
-            Assert.assertTrue(remoteTask != null);
-
-            RemoteInstance remoteInstance = mRemoteFactory.copyLocalInstance(localInstance, recordOf, remoteTask.getId());
-            localToRemoteConversion.mRemoteInstances.add(remoteInstance);
+            Stream.of(pair.second)
+                    .forEach(LocalInstance::delete);
         }
-
-        Stream.of(localToRemoteConversion.mLocalTasks.values())
-                .forEach(LocalTask::delete);
 
         Stream.of(localToRemoteConversion.mLocalTaskHierarchies)
                 .forEach(LocalTaskHierarchy::delete);
-
-        Stream.of(localToRemoteConversion.mLocalInstances)
-                .forEach(LocalInstance::delete);
 
         RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(startingLocalTask.getId());
         Assert.assertTrue(remoteTask != null);
@@ -2310,7 +2291,7 @@ public class DomainFactory {
                     })
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
-            Stream.of(getExistingInstances(mTask))
+            Stream.of(mTask.getExistingInstances().values())
                     .filter(instance -> instance.getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
                     .map(Instance::getInstanceKey)
                     .map(instanceRelevances::get)
@@ -2446,9 +2427,8 @@ public class DomainFactory {
     }
 
     public static class LocalToRemoteConversion {
-        public final Map<Integer, LocalTask> mLocalTasks = new HashMap<>();
+        public final Map<Integer, Pair<LocalTask, Collection<LocalInstance>>> mLocalTasks = new HashMap<>();
         public final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();
-        public final List<LocalInstance> mLocalInstances = new ArrayList<>();
 
         final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();
         final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();

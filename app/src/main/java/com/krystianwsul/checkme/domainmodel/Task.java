@@ -10,6 +10,7 @@ import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -20,6 +21,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public abstract class Task {
@@ -306,4 +308,7 @@ public abstract class Task {
             super(message);
         }
     }
+
+    @NonNull
+    public abstract Map<ScheduleKey, ? extends Instance> getExistingInstances();
 }

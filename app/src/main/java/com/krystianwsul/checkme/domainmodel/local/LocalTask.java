@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
@@ -14,6 +15,7 @@ import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class LocalTask extends Task {
@@ -185,5 +188,11 @@ public class LocalTask extends Task {
         Assert.assertTrue(mSchedules.contains(schedule));
 
         mSchedules.remove(schedule);
+    }
+
+    @NonNull
+    @Override
+    public Map<ScheduleKey, ? extends Instance> getExistingInstances() {
+        return mDomainFactory.getLocalFactory().getExistingInstances(getTaskKey());
     }
 }

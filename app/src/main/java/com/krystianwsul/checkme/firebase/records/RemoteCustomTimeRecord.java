@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 
 import junit.framework.Assert;
 
-public class RemoteCustomTimeRecord extends RemoteRecord {
+public class RemoteCustomTimeRecord extends RootRemoteRecord {
     RemoteCustomTimeRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(id, jsonWrapper);
     }

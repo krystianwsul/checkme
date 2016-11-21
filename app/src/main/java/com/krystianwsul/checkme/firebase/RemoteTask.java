@@ -11,28 +11,41 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
+import com.krystianwsul.checkme.firebase.json.InstanceJson;
+import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class RemoteTask extends Task {
     @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
+    @NonNull
+    private final Map<ScheduleKey, RemoteInstance> mExistingRemoteInstances;
+
     RemoteTask(@NonNull DomainFactory domainFactory, @NonNull RemoteTaskRecord remoteTaskRecord) {
         super(domainFactory);
 
         mRemoteTaskRecord = remoteTaskRecord;
+        mExistingRemoteInstances = Stream.of(mRemoteTaskRecord.getRemoteInstanceRecords().values())
+                .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute())))
+                .collect(Collectors.toMap(RemoteInstance::getScheduleKey, remoteInstance -> remoteInstance));
     }
 
     @NonNull
@@ -205,5 +218,59 @@ public class RemoteTask extends Task {
     @Override
     protected void deleteSchedule(@NonNull Schedule schedule) {
         getRemoteFactory().deleteSchedule(this, schedule);
+    }
+
+    @NonNull
+    RemoteInstanceRecord createRemoteInstanceRecord(@NonNull RemoteInstance remoteInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+        String remoteCustomTimeId;
+        Integer hour;
+        Integer minute;
+
+        CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().mCustomTimeKey;
+        HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
+
+        if (customTimeKey != null) {
+            Assert.assertTrue(hourMinute == null);
+
+            remoteCustomTimeId = mDomainFactory.getRemoteCustomTimeId(customTimeKey);
+
+            hour = null;
+            minute = null;
+        } else {
+            Assert.assertTrue(hourMinute != null);
+
+            remoteCustomTimeId = null;
+
+            hour = hourMinute.getHour();
+            minute = hourMinute.getMinute();
+        }
+
+        InstanceJson instanceJson = new InstanceJson(null, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute, null, null, null, null, null, null, now.getLong());
+
+        RemoteInstanceRecord remoteInstanceRecord = mRemoteTaskRecord.newRemoteInstanceRecord(instanceJson);
+
+        mExistingRemoteInstances.put(remoteInstance.getScheduleKey(), remoteInstance);
+
+        return remoteInstanceRecord;
+    }
+
+    @Override
+    @NonNull
+    public Map<ScheduleKey, RemoteInstance> getExistingInstances() {
+        return mExistingRemoteInstances;
+    }
+
+    void deleteInstance(@NonNull RemoteInstance remoteInstance) {
+        ScheduleKey scheduleKey = remoteInstance.getScheduleKey();
+
+        Assert.assertTrue(mExistingRemoteInstances.containsKey(scheduleKey));
+        Assert.assertTrue(remoteInstance.equals(mExistingRemoteInstances.get(scheduleKey)));
+
+        mExistingRemoteInstances.remove(scheduleKey);
+    }
+
+    @Nullable
+    RemoteInstance getExistingInstanceIfPresent(@NonNull ScheduleKey scheduleKey) {
+        return mExistingRemoteInstances.get(scheduleKey);
     }
 }

@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 
-abstract class RemoteScheduleRecord extends RemoteRecord {
+abstract class RemoteScheduleRecord extends RootRemoteRecord {
     RemoteScheduleRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(id, jsonWrapper);
     }

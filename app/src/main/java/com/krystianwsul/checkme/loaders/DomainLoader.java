@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
+import android.util.Log;
 
 import com.krystianwsul.checkme.domainmodel.ObserverHolder;
 
@@ -20,6 +21,8 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     // main thread
     @Override
     public void deliverResult(D data) {
+        if (data == null)
+            Log.e("asdf", "here be dragons " + this.getClass().getName());
         Assert.assertTrue(data != null);
 
         if (isReset())

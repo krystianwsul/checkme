@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
@@ -467,13 +468,11 @@ public class LocalFactory {
 
         TaskKey taskKey = localTask.getTaskKey();
 
-        localToRemoteConversion.mLocalTasks.put(localTask.getId(), localTask);
+        localToRemoteConversion.mLocalTasks.put(localTask.getId(), Pair.create(localTask, mExistingLocalInstances.get(taskKey).values()));
 
         Set<LocalTaskHierarchy> parentLocalTaskHierarchies = mLocalTaskHierarchies.getByChildTaskKey(taskKey);
 
         localToRemoteConversion.mLocalTaskHierarchies.addAll(parentLocalTaskHierarchies);
-
-        localToRemoteConversion.mLocalInstances.addAll(mExistingLocalInstances.get(taskKey).values());
 
         Stream.of(mLocalTaskHierarchies.getByParentTaskKey(taskKey))
                 .map(LocalTaskHierarchy::getChildTask)
@@ -567,7 +566,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public Map<ScheduleKey, LocalInstance> getExistingInstances(@NonNull TaskKey taskKey) {
+    Map<ScheduleKey, LocalInstance> getExistingInstances(@NonNull TaskKey taskKey) {
         return mExistingLocalInstances.get(taskKey);
     }
 

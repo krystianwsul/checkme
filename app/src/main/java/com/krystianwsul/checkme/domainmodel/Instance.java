@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -34,7 +35,12 @@ public abstract class Instance {
 
     @NonNull
     public InstanceKey getInstanceKey() {
-        return new InstanceKey(getTaskKey(), getScheduleDate(), new TimePair(getScheduleCustomTimeKey(), getScheduleHourMinute()));
+        return new InstanceKey(getTaskKey(), getScheduleKey());
+    }
+
+    @NonNull
+    public ScheduleKey getScheduleKey() {
+        return new ScheduleKey(getScheduleDate(), new TimePair(getScheduleCustomTimeKey(), getScheduleHourMinute()));
     }
 
     @NonNull

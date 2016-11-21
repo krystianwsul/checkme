@@ -24,7 +24,6 @@ public class JsonWrapper {
     public WeeklyScheduleJson weeklyScheduleJson;
     public MonthlyDayScheduleJson monthlyDayScheduleJson;
     public MonthlyWeekScheduleJson monthlyWeekScheduleJson;
-    public InstanceJson instanceJson;
     public CustomTimeJson customTimeJson;
 
     public JsonWrapper() {
@@ -101,15 +100,6 @@ public class JsonWrapper {
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         this.monthlyWeekScheduleJson = monthlyWeekScheduleJson;
-    }
-
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull InstanceJson instanceJson) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        this.recordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(friend -> friend, friend -> true));
-
-        this.instanceJson = instanceJson;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull CustomTimeJson customTimeJsonJson) {

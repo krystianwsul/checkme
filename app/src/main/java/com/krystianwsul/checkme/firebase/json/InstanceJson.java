@@ -1,13 +1,10 @@
 package com.krystianwsul.checkme.firebase.json;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
 public class InstanceJson {
-    private String taskId;
-
     private Long done;
 
     private int scheduleYear;
@@ -35,7 +32,7 @@ public class InstanceJson {
 
     }
 
-    public InstanceJson(@NonNull String taskId, @Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable String instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
+    public InstanceJson(@Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable String instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
@@ -47,8 +44,6 @@ public class InstanceJson {
         Assert.assertTrue((instanceHour == null) || (instanceCustomTimeId == null));
         boolean hasInstanceTime = ((instanceHour != null) || (instanceCustomTimeId != null));
         Assert.assertTrue(hasInstanceDate == hasInstanceTime);
-
-        this.taskId = taskId;
 
         this.done = done;
 
@@ -71,11 +66,6 @@ public class InstanceJson {
         this.instanceMinute = instanceMinute;
 
         this.hierarchyTime = hierarchyTime;
-    }
-
-    @NonNull
-    public String getTaskId() {
-        return taskId;
     }
 
     public Long getDone() {

@@ -4,61 +4,36 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.firebase.DatabaseWrapper;
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
-
 import junit.framework.Assert;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public abstract class RemoteRecord {
-    private final String mId;
-    final JsonWrapper mJsonWrapper;
+abstract class RemoteRecord {
+    boolean mDelete = false;
+    boolean mDeleted = false;
 
-    private boolean mDelete = false;
-    private boolean mDeleted = false;
+    final boolean mCreate;
+    boolean mCreated = false;
 
-    private final boolean mCreate;
-    private boolean mCreated = false;
+    final Map<String, Object> mUpdate;
+    boolean mUpdated = false;
 
-    private final Map<String, Object> mUpdate;
-    private boolean mUpdated = false;
-
-    RemoteRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        mId = id;
-        mJsonWrapper = jsonWrapper;
-
-        mCreate = false;
-        mUpdate = new HashMap<>();
-    }
-
-    RemoteRecord(@NonNull JsonWrapper jsonWrapper) {
-        mId = DatabaseWrapper.getRecordId();
-        mJsonWrapper = jsonWrapper;
-
-        mCreate = true;
-        mUpdate = null;
+    RemoteRecord(boolean create) {
+        if (create) {
+            mCreate = true;
+            mUpdate = null;
+        } else {
+            mCreate = false;
+            mUpdate = new HashMap<>();
+        }
     }
 
     @NonNull
-    public String getId() {
-        return mId;
-    }
+    protected abstract String getKey();
 
     @NonNull
-    public Set<String> getRecordOf() {
-        return mJsonWrapper.recordOf.keySet();
-    }
-
-    @NonNull
-    public JsonWrapper getJsonWrapper() {
-        return mJsonWrapper;
-    }
+    protected abstract Object getCreateObject();
 
     void getValues(@NonNull Map<String, Object> values) {
         Assert.assertTrue(!mDeleted);
@@ -66,25 +41,29 @@ public abstract class RemoteRecord {
         Assert.assertTrue(!mUpdated);
 
         if (mDelete) {
-            Log.e("asdf", "RemoteRecord.getValues deleting " + mJsonWrapper);
+            Log.e("asdf", "RemoteRecord.getValues deleting " + this);
 
             Assert.assertTrue(!mCreate);
             Assert.assertTrue(mUpdate != null);
 
             mDeleted = true;
-            values.put(getId(), null);
+            values.put(getKey(), null);
         } else if (mCreate) {
-            Log.e("asdf", "RemoteRecord.getValues creating " + mJsonWrapper);
+            Log.e("asdf", "RemoteRecord.getValues creating " + this);
 
             Assert.assertTrue(mUpdate == null);
 
             mCreated = true;
-            values.put(getId(), mJsonWrapper);
-        } else if (mUpdate != null && !mUpdate.isEmpty()) {
-            Log.e("asdf", "RemoteRecord.getValues updating " + mJsonWrapper);
+            values.put(getKey(), getCreateObject());
+        } else {
+            Assert.assertTrue(mUpdate != null);
 
-            mUpdated = true;
-            values.putAll(mUpdate);
+            if (!mUpdate.isEmpty()) {
+                Log.e("asdf", "RemoteRecord.getValues updating " + this);
+
+                mUpdated = true;
+                values.putAll(mUpdate);
+            }
         }
     }
 
@@ -112,26 +91,5 @@ public abstract class RemoteRecord {
         Assert.assertTrue(mUpdate != null);
 
         mDelete = true;
-    }
-
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        Assert.assertTrue(Stream.of(addedFriends)
-                .noneMatch(removedFriends::contains));
-
-        HashSet<String> recordOf = new HashSet<>(getRecordOf());
-        recordOf.addAll(addedFriends);
-        recordOf.removeAll(removedFriends);
-
-        setRecordOf(recordOf);
-    }
-
-
-    private void setRecordOf(@NonNull Set<String> recordOf) {
-        Map<String, Boolean> mapRecordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(key -> key, key -> true));
-
-        mJsonWrapper.setRecordOf(mapRecordOf);
-
-        addValue(getId() + "/recordOf", mapRecordOf);
     }
 }

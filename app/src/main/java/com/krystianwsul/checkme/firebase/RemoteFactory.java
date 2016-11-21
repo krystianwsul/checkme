@@ -42,24 +42,21 @@ import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.InstanceMap;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
-import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,9 +81,6 @@ public class RemoteFactory {
 
     @NonNull
     private final Multimap<String, Schedule> mRemoteSchedules;
-
-    @NonNull
-    private final InstanceMap<RemoteInstance> mExistingRemoteInstances = new InstanceMap<>();
 
     @NonNull
     private final Map<String, RemoteCustomTime> mRemoteCustomTimes;
@@ -120,12 +114,6 @@ public class RemoteFactory {
 
         for (RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord : mRemoteManager.mRemoteMonthlyWeekScheduleRecords.values())
             mRemoteSchedules.put(remoteMonthlyWeekScheduleRecord.getTaskId(), new MonthlyWeekSchedule(domainFactory, new RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)));
-
-        for (RemoteInstanceRecord remoteInstanceRecord : mRemoteManager.mRemoteInstanceRecords.values()) {
-            InstanceShownRecord instanceShownRecord = domainFactory.getLocalFactory().getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute());
-
-            mExistingRemoteInstances.add(new RemoteInstance(domainFactory, remoteInstanceRecord, instanceShownRecord));
-        }
 
         String userId = UserData.getKey(userData.email);
 
@@ -166,7 +154,7 @@ public class RemoteFactory {
 
     @NonNull
     public RemoteTask createRemoteTaskHelper(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull Collection<String> friends) {
-        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note);
+        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
 
         UserData userData = MainActivity.getUserData();
         Assert.assertTrue(userData != null);
@@ -338,7 +326,7 @@ public class RemoteFactory {
 
     @NonNull
     RemoteTask createChildTask(@NonNull RemoteTask parentTask, @NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
-        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note);
+        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
         RemoteTaskRecord childTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(parentTask.getRecordOf(), taskJson));
 
         RemoteTask childTask = new RemoteTask(mDomainFactory, childTaskRecord);
@@ -361,43 +349,7 @@ public class RemoteFactory {
     }
 
     @NonNull
-    RemoteInstanceRecord createRemoteInstanceRecord(@NonNull RemoteTask remoteTask, @NonNull RemoteInstance remoteInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
-        String remoteCustomTimeId;
-        Integer hour;
-        Integer minute;
-
-        CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().mCustomTimeKey;
-        HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
-
-        if (customTimeKey != null) {
-            Assert.assertTrue(hourMinute == null);
-
-            remoteCustomTimeId = mDomainFactory.getRemoteCustomTimeId(customTimeKey);
-
-            hour = null;
-            minute = null;
-        } else {
-            Assert.assertTrue(hourMinute != null);
-
-            remoteCustomTimeId = null;
-
-            hour = hourMinute.getHour();
-            minute = hourMinute.getMinute();
-        }
-
-        InstanceJson instanceJson = new InstanceJson(remoteTask.getId(), null, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute, null, null, null, null, null, null, now.getLong());
-
-        JsonWrapper jsonWrapper = new JsonWrapper(remoteTask.getRecordOf(), instanceJson);
-
-        RemoteInstanceRecord remoteInstanceRecord = mRemoteManager.newRemoteInstanceRecord(jsonWrapper);
-
-        mExistingRemoteInstances.add(remoteInstance);
-
-        return remoteInstanceRecord;
-    }
-
-    @NonNull
-    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Set<String> recordOf) {
+    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Set<String> recordOf, @NonNull Collection<LocalInstance> localInstances) {
         Long endTime = (localTask.getEndExactTimeStamp() != null ? localTask.getEndExactTimeStamp().getLong() : null);
         Assert.assertTrue(!recordOf.isEmpty());
 
@@ -415,7 +367,17 @@ public class RemoteFactory {
             oldestVisibleDay = null;
         }
 
-        TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote());
+        Map<String, InstanceJson> instanceJsons = new HashMap<>();
+        for (LocalInstance localInstance : localInstances) {
+            Assert.assertTrue(localInstance.getTaskId() == localTask.getId());
+
+            InstanceJson instanceJson = getInstanceJson(localInstance, recordOf);
+            ScheduleKey scheduleKey = localInstance.getScheduleKey();
+
+            instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(scheduleKey), instanceJson);
+        }
+
+        TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote(), instanceJsons);
         RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(recordOf, taskJson));
 
         RemoteTask remoteTask = new RemoteTask(mDomainFactory, remoteTaskRecord);
@@ -583,9 +545,8 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public RemoteInstance copyLocalInstance(@NonNull LocalInstance localInstance, @NonNull Set<String> recordOf, @NonNull String remoteTaskId) {
+    private InstanceJson getInstanceJson(@NonNull LocalInstance localInstance, @NonNull Set<String> recordOf) {
         Assert.assertTrue(!recordOf.isEmpty());
-        Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
 
         Long done = (localInstance.getDone() != null ? localInstance.getDone().getLong() : null);
 
@@ -633,20 +594,7 @@ public class RemoteFactory {
             instanceMinute = null;
         }
 
-        InstanceJson instanceJson = new InstanceJson(remoteTaskId, done, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleRemoteCustomTimeId, scheduleHour, scheduleMinute, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.getHierarchyTime());
-        RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(new JsonWrapper(recordOf, instanceJson));
-
-        InstanceShownRecord instanceShownRecord;
-        if (localInstance.getNotificationShown() || localInstance.getNotified()) {
-            instanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(mDomainFactory, remoteTaskId, localInstance.getScheduleDateTime());
-        } else {
-            instanceShownRecord = null;
-        }
-
-        RemoteInstance remoteInstance = new RemoteInstance(mDomainFactory, remoteInstanceRecord, instanceShownRecord);
-        mExistingRemoteInstances.add(remoteInstance);
-
-        return remoteInstance;
+        return new InstanceJson(done, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleRemoteCustomTimeId, scheduleHour, scheduleMinute, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.getHierarchyTime());
     }
 
     public void updateRecordOf(@NonNull RemoteTask startingRemoteTask, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
@@ -659,9 +607,6 @@ public class RemoteFactory {
 
         for (RemoteTaskHierarchy remoteTaskHierarchy : updateRecordOfData.mRemoteTaskHierarchies)
             remoteTaskHierarchy.updateRecordOf(addedFriends, removedFriends);
-
-        for (RemoteInstance remoteInstance : updateRecordOfData.mRemoteInstances)
-            remoteInstance.updateRecordOf(addedFriends, removedFriends);
     }
 
     private void updateRecordOfHelper(@NonNull UpdateRecordOfData updateRecordOfData, @NonNull RemoteTask remoteTask) {
@@ -676,8 +621,6 @@ public class RemoteFactory {
 
         updateRecordOfData.mRemoteTaskHierarchies.addAll(parentRemoteTaskHierarchies);
 
-        updateRecordOfData.mRemoteInstances.addAll(mExistingRemoteInstances.get(taskKey).values());
-
         Stream.of(mRemoteTaskHierarchies.getByParentTaskKey(taskKey))
                 .map(RemoteTaskHierarchy::getChildTask)
                 .forEach(childTask -> updateRecordOfHelper(updateRecordOfData, (RemoteTask) childTask));
@@ -690,7 +633,6 @@ public class RemoteFactory {
     private static class UpdateRecordOfData {
         final List<RemoteTask> mRemoteTasks = new ArrayList<>();
         final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();
-        final List<RemoteInstance> mRemoteInstances = new ArrayList<>();
     }
 
     @NonNull
@@ -762,27 +704,31 @@ public class RemoteFactory {
         mRemoteTaskHierarchies.removeForce(remoteTasHierarchy.getId());
     }
 
-    void deleteInstance(@NonNull RemoteInstance remoteInstance) {
-        mExistingRemoteInstances.removeForce(remoteInstance);
-    }
-
     public int getInstanceCount() {
-        return mExistingRemoteInstances.size();
-    }
-
-    @NonNull
-    public Map<ScheduleKey, RemoteInstance> getExistingInstances(@NonNull TaskKey taskKey) {
-        return mExistingRemoteInstances.get(taskKey);
+        return Stream.of(mRemoteTasks.values())
+                .map(remoteTask -> remoteTask.getExistingInstances().size())
+                .reduce(0, (x, y) -> x + y);
     }
 
     @NonNull
     public List<RemoteInstance> getExistingInstances() {
-        return mExistingRemoteInstances.values();
+        return Stream.of(mRemoteTasks.values())
+                .flatMap(remoteTask -> Stream.of(remoteTask.getExistingInstances().values()))
+                .collect(Collectors.toList());
     }
 
     @Nullable
     public RemoteInstance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
-        return mExistingRemoteInstances.getIfPresent(instanceKey);
+        TaskKey taskKey = instanceKey.mTaskKey;
+
+        if (TextUtils.isEmpty(taskKey.mRemoteTaskId))
+            return null;
+
+        RemoteTask remoteTask = mRemoteTasks.get(taskKey.mRemoteTaskId);
+        if (remoteTask == null)
+            return null;
+
+        return remoteTask.getExistingInstanceIfPresent(instanceKey.mScheduleKey);
     }
 
     @NonNull

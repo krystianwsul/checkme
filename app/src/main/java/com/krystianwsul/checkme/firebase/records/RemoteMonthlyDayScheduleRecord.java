@@ -25,12 +25,6 @@ public class RemoteMonthlyDayScheduleRecord extends RemoteScheduleRecord {
         return monthlyDayScheduleJson;
     }
 
-    @NonNull
-    @Override
-    public String getTaskId() {
-        return getMonthlyDayScheduleJson().getTaskId();
-    }
-
     @Override
     public long getStartTime() {
         return getMonthlyDayScheduleJson().getStartTime();

@@ -25,12 +25,6 @@ public class RemoteWeeklyScheduleRecord extends RemoteScheduleRecord {
         return weeklyScheduleJson;
     }
 
-    @NonNull
-    @Override
-    public String getTaskId() {
-        return getWeeklyScheduleJson().getTaskId();
-    }
-
     @Override
     public long getStartTime() {
         return getWeeklyScheduleJson().getStartTime();

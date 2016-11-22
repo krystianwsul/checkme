@@ -25,12 +25,6 @@ public class RemoteDailyScheduleRecord extends RemoteScheduleRecord {
         return dailyScheduleJson;
     }
 
-    @NonNull
-    @Override
-    public String getTaskId() {
-        return getDailyScheduleJson().getTaskId();
-    }
-
     @Override
     public long getStartTime() {
         return getDailyScheduleJson().getStartTime();

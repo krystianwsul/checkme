@@ -336,7 +336,7 @@ public class RemoteTask extends Task {
                         minute = singleScheduleData.TimePair.mHourMinute.getMinute();
                     }
 
-                    RemoteSingleScheduleRecord remoteSingleScheduleRecord = mRemoteTaskRecord.newRemoteSingleScheduleRecord(new ScheduleWrapper(new SingleScheduleJson(getId(), now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), remoteCustomTimeId, hour, minute)));
+                    RemoteSingleScheduleRecord remoteSingleScheduleRecord = mRemoteTaskRecord.newRemoteSingleScheduleRecord(new ScheduleWrapper(new SingleScheduleJson(now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), remoteCustomTimeId, hour, minute)));
 
                     mRemoteSchedules.add(new SingleSchedule(mDomainFactory, new RemoteSingleScheduleBridge(mDomainFactory, remoteSingleScheduleRecord)));
                     break;
@@ -361,7 +361,7 @@ public class RemoteTask extends Task {
                         minute = dailyScheduleData.TimePair.mHourMinute.getMinute();
                     }
 
-                    RemoteDailyScheduleRecord remoteDailyScheduleRecord = mRemoteTaskRecord.newRemoteDailyScheduleRecord(new ScheduleWrapper(new DailyScheduleJson(getId(), now.getLong(), null, remoteCustomTimeId, hour, minute)));
+                    RemoteDailyScheduleRecord remoteDailyScheduleRecord = mRemoteTaskRecord.newRemoteDailyScheduleRecord(new ScheduleWrapper(new DailyScheduleJson(now.getLong(), null, remoteCustomTimeId, hour, minute)));
 
                     mRemoteSchedules.add(new DailySchedule(mDomainFactory, new RemoteDailyScheduleBridge(mDomainFactory, remoteDailyScheduleRecord)));
                     break;
@@ -388,7 +388,7 @@ public class RemoteTask extends Task {
                         minute = weeklyScheduleData.TimePair.mHourMinute.getMinute();
                     }
 
-                    RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteTaskRecord.newRemoteWeeklyScheduleRecord(new ScheduleWrapper(new WeeklyScheduleJson(getId(), now.getLong(), null, dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
+                    RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteTaskRecord.newRemoteWeeklyScheduleRecord(new ScheduleWrapper(new WeeklyScheduleJson(now.getLong(), null, dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
 
                     mRemoteSchedules.add(new WeeklySchedule(mDomainFactory, new RemoteWeeklyScheduleBridge(mDomainFactory, remoteWeeklyScheduleRecord)));
                     break;
@@ -413,7 +413,7 @@ public class RemoteTask extends Task {
                         minute = monthlyDayScheduleData.TimePair.mHourMinute.getMinute();
                     }
 
-                    RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyDayScheduleRecord(new ScheduleWrapper(new MonthlyDayScheduleJson(getId(), now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, remoteCustomTimeId, hour, minute)));
+                    RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyDayScheduleRecord(new ScheduleWrapper(new MonthlyDayScheduleJson(now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, remoteCustomTimeId, hour, minute)));
 
                     mRemoteSchedules.add(new MonthlyDaySchedule(mDomainFactory, new RemoteMonthlyDayScheduleBridge(mDomainFactory, remoteMonthlyDayScheduleRecord)));
                     break;
@@ -438,7 +438,7 @@ public class RemoteTask extends Task {
                         minute = monthlyWeekScheduleData.TimePair.mHourMinute.getMinute();
                     }
 
-                    RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(new ScheduleWrapper(new MonthlyWeekScheduleJson(getId(), now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, remoteCustomTimeId, hour, minute)));
+                    RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(new ScheduleWrapper(new MonthlyWeekScheduleJson(now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, remoteCustomTimeId, hour, minute)));
 
                     mRemoteSchedules.add(new MonthlyWeekSchedule(mDomainFactory, new RemoteMonthlyWeekScheduleBridge(mDomainFactory, remoteMonthlyWeekScheduleRecord)));
                     break;

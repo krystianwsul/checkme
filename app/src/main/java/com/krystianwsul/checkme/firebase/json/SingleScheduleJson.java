@@ -1,10 +1,7 @@
 package com.krystianwsul.checkme.firebase.json;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
-import com.krystianwsul.checkme.utils.ScheduleType;
 
 import junit.framework.Assert;
 
@@ -24,8 +21,8 @@ public class SingleScheduleJson extends ScheduleJson {
 
     }
 
-    public SingleScheduleJson(@NonNull String taskId, long startTime, @Nullable Long endTime, int year, int month, int day, @Nullable String customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
-        super(taskId, startTime, endTime, ScheduleType.SINGLE.ordinal());
+    public SingleScheduleJson(long startTime, @Nullable Long endTime, int year, int month, int day, @Nullable String customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
+        super(startTime, endTime);
 
         Assert.assertTrue((hour == null) == (minute == null));
         Assert.assertTrue((hour == null) || TextUtils.isEmpty(customTimeId));

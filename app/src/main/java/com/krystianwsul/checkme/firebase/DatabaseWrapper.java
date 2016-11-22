@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 
 import junit.framework.Assert;
 
@@ -52,8 +54,16 @@ public class DatabaseWrapper {
     }
 
     @NonNull
-    public static String getRecordId() {
+    public static String getRootRecordId() {
         String id = sDatabaseReference.child(RECORDS_KEY).push().getKey();
+        Assert.assertTrue(!TextUtils.isEmpty(id));
+
+        return id;
+    }
+
+    @NonNull
+    public static String getScheduleRecordId(@NonNull String taskId) {
+        String id = sDatabaseReference.child(RECORDS_KEY + "/" + taskId + "/" + RemoteTaskRecord.TASK_JSON + "/" + RemoteScheduleRecord.SCHEDULES).push().getKey();
         Assert.assertTrue(!TextUtils.isEmpty(id));
 
         return id;

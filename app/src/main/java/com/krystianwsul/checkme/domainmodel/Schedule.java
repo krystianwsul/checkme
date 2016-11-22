@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.List;
-import java.util.Set;
 
 public abstract class Schedule {
     @NonNull
@@ -62,7 +61,7 @@ public abstract class Schedule {
     }
 
     @NonNull
-    public ScheduleType getType() {
+    ScheduleType getType() {
         return getScheduleBridge().getScheduleType();
     }
 
@@ -83,10 +82,6 @@ public abstract class Schedule {
     public void delete() {
         mDomainFactory.getTaskForce(getScheduleBridge().getRootTaskKey()).deleteSchedule(this);
         getScheduleBridge().delete();
-    }
-
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        getScheduleBridge().updateRecordOf(addedFriends, removedFriends);
     }
 
     @NonNull

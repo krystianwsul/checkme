@@ -1720,7 +1720,7 @@ public class DomainFactory {
         for (Pair<LocalTask, Collection<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
             Assert.assertTrue(pair != null);
 
-            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(pair.first, recordOf, pair.second);
+            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(pair.first, recordOf, pair.second, now);
             localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
         }
 
@@ -2432,6 +2432,5 @@ public class DomainFactory {
 
         final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();
         final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();
-        final List<RemoteInstance> mRemoteInstances = new ArrayList<>();
     }
 }

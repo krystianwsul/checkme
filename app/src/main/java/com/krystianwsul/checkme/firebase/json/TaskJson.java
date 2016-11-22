@@ -28,6 +28,9 @@ public class TaskJson {
     @Nullable
     private Map<String, InstanceJson> instances;
 
+    @Nullable
+    private Map<String, ScheduleWrapper> schedules;
+
     public TaskJson() {
 
     }
@@ -94,6 +97,14 @@ public class TaskJson {
             return instances;
     }
 
+    @NonNull
+    public Map<String, ScheduleWrapper> getSchedules() {
+        if (schedules == null)
+            return new HashMap<>();
+        else
+            return schedules;
+    }
+
     public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
@@ -118,5 +129,13 @@ public class TaskJson {
 
     public void setNote(@Nullable String note) {
         this.note = note;
+    }
+
+    public void setInstances(@NonNull Map<String, InstanceJson> instances) {
+        this.instances = instances;
+    }
+
+    public void setSchedules(@NonNull Map<String, ScheduleWrapper> schedules) {
+        this.schedules = schedules;
     }
 }

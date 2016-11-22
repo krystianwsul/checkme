@@ -3,15 +3,52 @@ package com.krystianwsul.checkme.firebase.records;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
+import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 
-abstract class RemoteScheduleRecord extends RootRemoteRecord {
-    RemoteScheduleRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
+public abstract class RemoteScheduleRecord extends RemoteRecord {
+    public static final String SCHEDULES = "schedules";
+
+    @NonNull
+    private final String mId;
+
+    @NonNull
+    private final RemoteTaskRecord mRemoteTaskRecord;
+
+    @NonNull
+    final ScheduleWrapper mScheduleWrapper;
+
+    RemoteScheduleRecord(@NonNull String id, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(false);
+
+        mId = id;
+        mRemoteTaskRecord = remoteTaskRecord;
+        mScheduleWrapper = scheduleWrapper;
     }
 
-    RemoteScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+    RemoteScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(true);
+
+        mId = DatabaseWrapper.getScheduleRecordId(remoteTaskRecord.getId());
+        mRemoteTaskRecord = remoteTaskRecord;
+        mScheduleWrapper = scheduleWrapper;
+    }
+
+    @NonNull
+    @Override
+    protected ScheduleWrapper getCreateObject() {
+        return mScheduleWrapper;
+    }
+
+    @NonNull
+    public String getId() {
+        return mId;
+    }
+
+    @NonNull
+    @Override
+    protected String getKey() {
+        return mRemoteTaskRecord.getId() + "/" + RemoteTaskRecord.TASK_JSON + "/schedules/" + mId;
     }
 
     public abstract long getStartTime();

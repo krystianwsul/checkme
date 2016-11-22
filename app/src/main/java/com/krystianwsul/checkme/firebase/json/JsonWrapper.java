@@ -19,11 +19,6 @@ public class JsonWrapper {
     public Map<String, Boolean> recordOf;
     public TaskJson taskJson;
     public TaskHierarchyJson taskHierarchyJson;
-    public SingleScheduleJson singleScheduleJson;
-    public DailyScheduleJson dailyScheduleJson;
-    public WeeklyScheduleJson weeklyScheduleJson;
-    public MonthlyDayScheduleJson monthlyDayScheduleJson;
-    public MonthlyWeekScheduleJson monthlyWeekScheduleJson;
     public CustomTimeJson customTimeJson;
 
     public JsonWrapper() {
@@ -55,51 +50,6 @@ public class JsonWrapper {
                 .collect(Collectors.toMap(friend -> friend, friend -> true));
 
         this.taskHierarchyJson = taskHierarchyJson;
-    }
-
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull SingleScheduleJson singleScheduleJson) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        this.recordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(friend -> friend, friend -> true));
-
-        this.singleScheduleJson = singleScheduleJson;
-    }
-
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull DailyScheduleJson dailyScheduleJson) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        this.recordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(friend -> friend, friend -> true));
-
-        this.dailyScheduleJson = dailyScheduleJson;
-    }
-
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull WeeklyScheduleJson weeklyScheduleJson) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        this.recordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(friend -> friend, friend -> true));
-
-        this.weeklyScheduleJson = weeklyScheduleJson;
-    }
-
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull MonthlyDayScheduleJson monthlyDayScheduleJson) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        this.recordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(friend -> friend, friend -> true));
-
-        this.monthlyDayScheduleJson = monthlyDayScheduleJson;
-    }
-
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull MonthlyWeekScheduleJson monthlyWeekScheduleJson) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        this.recordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(friend -> friend, friend -> true));
-
-        this.monthlyWeekScheduleJson = monthlyWeekScheduleJson;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull CustomTimeJson customTimeJsonJson) {

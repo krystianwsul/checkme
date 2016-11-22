@@ -30,7 +30,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
     @NonNull
     @Override
     protected String getKey() {
-        return mRemoteTaskRecord.getId() + "/taskJson/instances/" + scheduleKeyToString(getScheduleKey());
+        return mRemoteTaskRecord.getId() + "/" + RemoteTaskRecord.TASK_JSON + "/instances/" + scheduleKeyToString(getScheduleKey());
     }
 
     @NonNull
@@ -79,7 +79,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @NonNull
     @Override
-    protected Object getCreateObject() {
+    protected InstanceJson getCreateObject() {
         return mInstanceJson;
     }
 

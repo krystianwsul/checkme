@@ -11,8 +11,6 @@ import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
-import java.util.Set;
-
 class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge {
     @NonNull
     private final DomainFactory mDomainFactory;
@@ -87,14 +85,5 @@ class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge {
     @Override
     public void delete() {
         mRemoteMonthlyDayScheduleRecord.delete();
-    }
-
-    @Override
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        mRemoteMonthlyDayScheduleRecord.updateRecordOf(addedFriends, removedFriends);
-
-        CustomTimeKey customTimeKey = getCustomTimeKey();
-        if (customTimeKey != null)
-            mDomainFactory.getCustomTime(customTimeKey).updateRecordOf(addedFriends, removedFriends);
     }
 }

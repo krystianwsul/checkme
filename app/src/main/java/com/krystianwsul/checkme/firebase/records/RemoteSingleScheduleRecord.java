@@ -3,23 +3,23 @@ package com.krystianwsul.checkme.firebase.records;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
+import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
 
 import junit.framework.Assert;
 
 public class RemoteSingleScheduleRecord extends RemoteScheduleRecord {
-    RemoteSingleScheduleRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
+    RemoteSingleScheduleRecord(@NonNull String id, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(id, remoteTaskRecord, scheduleWrapper);
     }
 
-    RemoteSingleScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+    RemoteSingleScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(remoteTaskRecord, scheduleWrapper);
     }
 
     @NonNull
     private SingleScheduleJson getSingleScheduleJson() {
-        SingleScheduleJson singleScheduleJson = mJsonWrapper.singleScheduleJson;
+        SingleScheduleJson singleScheduleJson = mScheduleWrapper.singleScheduleJson;
         Assert.assertTrue(singleScheduleJson != null);
 
         return singleScheduleJson;
@@ -73,6 +73,6 @@ public class RemoteSingleScheduleRecord extends RemoteScheduleRecord {
         Assert.assertTrue(getEndTime() == null);
 
         getSingleScheduleJson().setEndTime(endTime);
-        addValue(getId() + "/singleScheduleJson/endTime", endTime);
+        addValue(getKey() + "/singleScheduleJson/endTime", endTime);
     }
 }

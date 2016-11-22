@@ -6,40 +6,23 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.firebase.database.DataSnapshot;
-import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
-import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
-import com.krystianwsul.checkme.domainmodel.SingleSchedule;
-import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson;
-import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
-import com.krystianwsul.checkme.firebase.json.MonthlyDayScheduleJson;
-import com.krystianwsul.checkme.firebase.json.MonthlyWeekScheduleJson;
-import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
-import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
-import com.krystianwsul.checkme.firebase.records.RemoteDailyScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteManager;
-import com.krystianwsul.checkme.firebase.records.RemoteMonthlyDayScheduleRecord;
-import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord;
-import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
-import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -80,9 +63,6 @@ public class RemoteFactory {
     private final TaskHierarchyContainer<String, RemoteTaskHierarchy> mRemoteTaskHierarchies = new TaskHierarchyContainer<>();
 
     @NonNull
-    private final Multimap<String, Schedule> mRemoteSchedules;
-
-    @NonNull
     private final Map<String, RemoteCustomTime> mRemoteCustomTimes;
 
     public RemoteFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserData userData) {
@@ -98,22 +78,6 @@ public class RemoteFactory {
         Stream.of(mRemoteManager.mRemoteTaskHierarchyRecords.values())
                 .map(remoteTaskHierarchyRecord -> new RemoteTaskHierarchy(domainFactory, remoteTaskHierarchyRecord))
                 .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
-
-        mRemoteSchedules = ArrayListMultimap.create();
-        for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteManager.mRemoteSingleScheduleRecords.values())
-            mRemoteSchedules.put(remoteSingleScheduleRecord.getTaskId(), new SingleSchedule(domainFactory, new RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)));
-
-        for (RemoteDailyScheduleRecord remoteDailyScheduleRecord : mRemoteManager.mRemoteDailyScheduleRecords.values())
-            mRemoteSchedules.put(remoteDailyScheduleRecord.getTaskId(), new DailySchedule(domainFactory, new RemoteDailyScheduleBridge(domainFactory, remoteDailyScheduleRecord)));
-
-        for (RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord : mRemoteManager.mRemoteWeeklyScheduleRecords.values())
-            mRemoteSchedules.put(remoteWeeklyScheduleRecord.getTaskId(), new WeeklySchedule(domainFactory, new RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)));
-
-        for (RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord : mRemoteManager.mRemoteMonthlyDayScheduleRecords.values())
-            mRemoteSchedules.put(remoteMonthlyDayScheduleRecord.getTaskId(), new MonthlyDaySchedule(domainFactory, new RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)));
-
-        for (RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord : mRemoteManager.mRemoteMonthlyWeekScheduleRecords.values())
-            mRemoteSchedules.put(remoteMonthlyWeekScheduleRecord.getTaskId(), new MonthlyWeekSchedule(domainFactory, new RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)));
 
         String userId = UserData.getKey(userData.email);
 
@@ -147,7 +111,7 @@ public class RemoteFactory {
     public RemoteTask createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull Collection<String> friends) {
         RemoteTask remoteTask = createRemoteTaskHelper(now, name, note, friends);
 
-        createSchedules(remoteTask.getRecordOf(), remoteTask.getId(), now, scheduleDatas);
+        remoteTask.createSchedules(now, scheduleDatas);
 
         return remoteTask;
     }
@@ -169,148 +133,6 @@ public class RemoteFactory {
         mRemoteTasks.put(remoteTask.getId(), remoteTask);
 
         return remoteTask;
-    }
-
-    void createSchedules(@NonNull Set<String> recordOf, @NonNull String taskId, @NonNull ExactTimeStamp now, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas) {
-        Assert.assertTrue(!TextUtils.isEmpty(taskId));
-
-        for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
-            Assert.assertTrue(scheduleData != null);
-
-            switch (scheduleData.getScheduleType()) {
-                case SINGLE: {
-                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
-
-                    Date date = singleScheduleData.Date;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (singleScheduleData.TimePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(singleScheduleData.TimePair.mHourMinute == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(singleScheduleData.TimePair.mCustomTimeKey, recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(singleScheduleData.TimePair.mHourMinute != null);
-
-                        remoteCustomTimeId = null;
-                        hour = singleScheduleData.TimePair.mHourMinute.getHour();
-                        minute = singleScheduleData.TimePair.mHourMinute.getMinute();
-                    }
-
-                    RemoteSingleScheduleRecord remoteSingleScheduleRecord = mRemoteManager.newRemoteSingleScheduleRecord(new JsonWrapper(recordOf, new SingleScheduleJson(taskId, now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(taskId, new SingleSchedule(mDomainFactory, new RemoteSingleScheduleBridge(mDomainFactory, remoteSingleScheduleRecord)));
-                    break;
-                }
-                case DAILY: {
-                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (dailyScheduleData.TimePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(dailyScheduleData.TimePair.mHourMinute == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(dailyScheduleData.TimePair.mCustomTimeKey, recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(dailyScheduleData.TimePair.mHourMinute != null);
-
-                        remoteCustomTimeId = null;
-                        hour = dailyScheduleData.TimePair.mHourMinute.getHour();
-                        minute = dailyScheduleData.TimePair.mHourMinute.getMinute();
-                    }
-
-                    RemoteDailyScheduleRecord remoteDailyScheduleRecord = mRemoteManager.newRemoteDailyScheduleRecord(new JsonWrapper(recordOf, new DailyScheduleJson(taskId, now.getLong(), null, remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(taskId, new DailySchedule(mDomainFactory, new RemoteDailyScheduleBridge(mDomainFactory, remoteDailyScheduleRecord)));
-                    break;
-                }
-                case WEEKLY: {
-                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
-
-                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (weeklyScheduleData.TimePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(weeklyScheduleData.TimePair.mHourMinute == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(weeklyScheduleData.TimePair.mCustomTimeKey, recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(weeklyScheduleData.TimePair.mHourMinute != null);
-
-                        remoteCustomTimeId = null;
-                        hour = weeklyScheduleData.TimePair.mHourMinute.getHour();
-                        minute = weeklyScheduleData.TimePair.mHourMinute.getMinute();
-                    }
-
-                    RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteManager.newRemoteWeeklyScheduleRecord(new JsonWrapper(recordOf, new WeeklyScheduleJson(taskId, now.getLong(), null, dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(taskId, new WeeklySchedule(mDomainFactory, new RemoteWeeklyScheduleBridge(mDomainFactory, remoteWeeklyScheduleRecord)));
-                    break;
-                }
-                case MONTHLY_DAY: {
-                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (monthlyDayScheduleData.TimePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(monthlyDayScheduleData.TimePair.mHourMinute == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(monthlyDayScheduleData.TimePair.mCustomTimeKey, recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(monthlyDayScheduleData.TimePair.mHourMinute != null);
-
-                        remoteCustomTimeId = null;
-                        hour = monthlyDayScheduleData.TimePair.mHourMinute.getHour();
-                        minute = monthlyDayScheduleData.TimePair.mHourMinute.getMinute();
-                    }
-
-                    RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = mRemoteManager.newRemoteMonthlyDayScheduleRecord(new JsonWrapper(recordOf, new MonthlyDayScheduleJson(taskId, now.getLong(), null, monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(taskId, new MonthlyDaySchedule(mDomainFactory, new RemoteMonthlyDayScheduleBridge(mDomainFactory, remoteMonthlyDayScheduleRecord)));
-                    break;
-                }
-                case MONTHLY_WEEK: {
-                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (monthlyWeekScheduleData.TimePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(monthlyWeekScheduleData.TimePair.mHourMinute == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(monthlyWeekScheduleData.TimePair.mCustomTimeKey, recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(monthlyWeekScheduleData.TimePair.mHourMinute != null);
-
-                        remoteCustomTimeId = null;
-                        hour = monthlyWeekScheduleData.TimePair.mHourMinute.getHour();
-                        minute = monthlyWeekScheduleData.TimePair.mHourMinute.getMinute();
-                    }
-
-                    RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = mRemoteManager.newRemoteMonthlyWeekScheduleRecord(new JsonWrapper(recordOf, new MonthlyWeekScheduleJson(taskId, now.getLong(), null, monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek.ordinal(), monthlyWeekScheduleData.mBeginningOfMonth, remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(taskId, new MonthlyWeekSchedule(mDomainFactory, new RemoteMonthlyWeekScheduleBridge(mDomainFactory, remoteMonthlyWeekScheduleRecord)));
-                    break;
-                }
-                default:
-                    throw new UnsupportedOperationException();
-            }
-        }
     }
 
     public void save() {
@@ -349,7 +171,7 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Set<String> recordOf, @NonNull Collection<LocalInstance> localInstances) {
+    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Set<String> recordOf, @NonNull Collection<LocalInstance> localInstances, @NonNull ExactTimeStamp now) {
         Long endTime = (localTask.getEndExactTimeStamp() != null ? localTask.getEndExactTimeStamp().getLong() : null);
         Assert.assertTrue(!recordOf.isEmpty());
 
@@ -385,143 +207,11 @@ public class RemoteFactory {
 
         mRemoteTasks.put(remoteTask.getId(), remoteTask);
 
-        for (Schedule schedule : localTask.getSchedules()) {
-            Assert.assertTrue(schedule != null);
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(localTask.getSchedules())
+                .map(Schedule::getScheduleData)
+                .collect(Collectors.toList());
 
-            switch (schedule.getType()) {
-                case SINGLE: {
-                    SingleSchedule singleSchedule = (SingleSchedule) schedule;
-
-                    Date date = singleSchedule.getDate();
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (singleSchedule.getCustomTimeKey() != null) {
-                        Assert.assertTrue(singleSchedule.getHourMinute() == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(singleSchedule.getCustomTimeKey(), recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(singleSchedule.getHourMinute() != null);
-
-                        remoteCustomTimeId = null;
-                        hour = singleSchedule.getHourMinute().getHour();
-                        minute = singleSchedule.getHourMinute().getMinute();
-                    }
-
-                    RemoteSingleScheduleRecord remoteSingleScheduleRecord = mRemoteManager.newRemoteSingleScheduleRecord(new JsonWrapper(recordOf, new SingleScheduleJson(remoteTask.getId(), singleSchedule.getStartTime(), singleSchedule.getEndTime(), date.getYear(), date.getMonth(), date.getDay(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(remoteTask.getId(), new SingleSchedule(mDomainFactory, new RemoteSingleScheduleBridge(mDomainFactory, remoteSingleScheduleRecord)));
-                    break;
-                }
-                case DAILY: {
-                    DailySchedule dailySchedule = (DailySchedule) schedule;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (dailySchedule.getCustomTimeKey() != null) {
-                        Assert.assertTrue(dailySchedule.getHourMinute() == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(dailySchedule.getCustomTimeKey(), recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(dailySchedule.getHourMinute() != null);
-
-                        remoteCustomTimeId = null;
-                        hour = dailySchedule.getHourMinute().getHour();
-                        minute = dailySchedule.getHourMinute().getMinute();
-                    }
-
-                    RemoteDailyScheduleRecord remoteDailyScheduleRecord = mRemoteManager.newRemoteDailyScheduleRecord(new JsonWrapper(recordOf, new DailyScheduleJson(remoteTask.getId(), dailySchedule.getStartTime(), dailySchedule.getEndTime(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(remoteTask.getId(), new DailySchedule(mDomainFactory, new RemoteDailyScheduleBridge(mDomainFactory, remoteDailyScheduleRecord)));
-                    break;
-                }
-                case WEEKLY: {
-                    WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
-
-                    DayOfWeek dayOfWeek = weeklySchedule.getDayOfWeek();
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (weeklySchedule.getCustomTimeKey() != null) {
-                        Assert.assertTrue(weeklySchedule.getHourMinute() == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(weeklySchedule.getCustomTimeKey(), recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(weeklySchedule.getHourMinute() != null);
-
-                        remoteCustomTimeId = null;
-                        hour = weeklySchedule.getHourMinute().getHour();
-                        minute = weeklySchedule.getHourMinute().getMinute();
-                    }
-
-                    RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteManager.newRemoteWeeklyScheduleRecord(new JsonWrapper(recordOf, new WeeklyScheduleJson(remoteTask.getId(), weeklySchedule.getStartTime(), weeklySchedule.getEndTime(), dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(remoteTask.getId(), new WeeklySchedule(mDomainFactory, new RemoteWeeklyScheduleBridge(mDomainFactory, remoteWeeklyScheduleRecord)));
-                    break;
-                }
-                case MONTHLY_DAY: {
-                    MonthlyDaySchedule monthlyDaySchedule = (MonthlyDaySchedule) schedule;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (monthlyDaySchedule.getCustomTimeKey() != null) {
-                        Assert.assertTrue(monthlyDaySchedule.getHourMinute() == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(monthlyDaySchedule.getCustomTimeKey(), recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(monthlyDaySchedule.getHourMinute() != null);
-
-                        remoteCustomTimeId = null;
-                        hour = monthlyDaySchedule.getHourMinute().getHour();
-                        minute = monthlyDaySchedule.getHourMinute().getMinute();
-                    }
-
-                    RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = mRemoteManager.newRemoteMonthlyDayScheduleRecord(new JsonWrapper(recordOf, new MonthlyDayScheduleJson(remoteTask.getId(), monthlyDaySchedule.getStartTime(), monthlyDaySchedule.getEndTime(), monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(remoteTask.getId(), new MonthlyDaySchedule(mDomainFactory, new RemoteMonthlyDayScheduleBridge(mDomainFactory, remoteMonthlyDayScheduleRecord)));
-                    break;
-                }
-                case MONTHLY_WEEK: {
-                    MonthlyWeekSchedule monthlyWeekSchedule = (MonthlyWeekSchedule) schedule;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (monthlyWeekSchedule.getCustomTimeKey() != null) {
-                        Assert.assertTrue(monthlyWeekSchedule.getHourMinute() == null);
-
-                        remoteCustomTimeId = getRemoteCustomTimeId(monthlyWeekSchedule.getCustomTimeKey(), recordOf);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(monthlyWeekSchedule.getHourMinute() != null);
-
-                        remoteCustomTimeId = null;
-                        hour = monthlyWeekSchedule.getHourMinute().getHour();
-                        minute = monthlyWeekSchedule.getHourMinute().getMinute();
-                    }
-
-                    RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = mRemoteManager.newRemoteMonthlyWeekScheduleRecord(new JsonWrapper(recordOf, new MonthlyWeekScheduleJson(remoteTask.getId(), monthlyWeekSchedule.getStartTime(), monthlyWeekSchedule.getEndTime(), monthlyWeekSchedule.getDayOfMonth(), monthlyWeekSchedule.getDayOfWeek().ordinal(), monthlyWeekSchedule.getBeginningOfMonth(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.put(remoteTask.getId(), new MonthlyWeekSchedule(mDomainFactory, new RemoteMonthlyWeekScheduleBridge(mDomainFactory, remoteMonthlyWeekScheduleRecord)));
-                    break;
-                }
-                default:
-                    throw new UnsupportedOperationException();
-            }
-        }
+        remoteTask.createSchedules(now, scheduleDatas);
 
         return remoteTask;
     }
@@ -597,7 +287,7 @@ public class RemoteFactory {
         return new InstanceJson(done, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleRemoteCustomTimeId, scheduleHour, scheduleMinute, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.getHierarchyTime());
     }
 
-    public void updateRecordOf(@NonNull RemoteTask startingRemoteTask, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+    void updateRecordOf(@NonNull RemoteTask startingRemoteTask, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         UpdateRecordOfData updateRecordOfData = new UpdateRecordOfData();
 
         updateRecordOfHelper(updateRecordOfData, startingRemoteTask);
@@ -641,15 +331,7 @@ public class RemoteFactory {
     }
 
     @NonNull
-    Collection<Schedule> getSchedules(@NonNull String taskId) {
-        if (mRemoteSchedules.containsKey(taskId))
-            return mRemoteSchedules.get(taskId);
-        else
-            return new ArrayList<>();
-    }
-
-    @NonNull
-    private String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey, @NonNull Set<String> recordOf) {
+    String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey, @NonNull Set<String> recordOf) {
         Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
         Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
 
@@ -691,13 +373,6 @@ public class RemoteFactory {
         Assert.assertTrue(mRemoteTasks.containsKey(remoteTask.getId()));
 
         mRemoteTasks.remove(remoteTask.getId());
-    }
-
-    void deleteSchedule(@NonNull RemoteTask remoteTask, @NonNull Schedule schedule) {
-        Assert.assertTrue(mRemoteSchedules.containsKey(remoteTask.getId()));
-        Assert.assertTrue(mRemoteSchedules.containsEntry(remoteTask.getId(), schedule));
-
-        mRemoteSchedules.remove(remoteTask.getId(), schedule);
     }
 
     void deleteTaskHierarchy(@NonNull RemoteTaskHierarchy remoteTasHierarchy) {

@@ -3,23 +3,23 @@ package com.krystianwsul.checkme.firebase.records;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.MonthlyDayScheduleJson;
+import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 
 import junit.framework.Assert;
 
 public class RemoteMonthlyDayScheduleRecord extends RemoteScheduleRecord {
-    RemoteMonthlyDayScheduleRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
+    RemoteMonthlyDayScheduleRecord(@NonNull String id, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(id, remoteTaskRecord, scheduleWrapper);
     }
 
-    RemoteMonthlyDayScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+    RemoteMonthlyDayScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(remoteTaskRecord, scheduleWrapper);
     }
 
     @NonNull
     private MonthlyDayScheduleJson getMonthlyDayScheduleJson() {
-        MonthlyDayScheduleJson monthlyDayScheduleJson = mJsonWrapper.monthlyDayScheduleJson;
+        MonthlyDayScheduleJson monthlyDayScheduleJson = mScheduleWrapper.monthlyDayScheduleJson;
         Assert.assertTrue(monthlyDayScheduleJson != null);
 
         return monthlyDayScheduleJson;
@@ -69,6 +69,6 @@ public class RemoteMonthlyDayScheduleRecord extends RemoteScheduleRecord {
         Assert.assertTrue(getEndTime() == null);
 
         getMonthlyDayScheduleJson().setEndTime(endTime);
-        addValue(getId() + "/monthlyDayScheduleJson/endTime", endTime);
+        addValue(getKey() + "/monthlyDayScheduleJson/endTime", endTime);
     }
 }

@@ -27,7 +27,7 @@ public abstract class RootRemoteRecord extends RemoteRecord {
     RootRemoteRecord(@NonNull JsonWrapper jsonWrapper) {
         super(true);
 
-        mId = DatabaseWrapper.getRecordId();
+        mId = DatabaseWrapper.getRootRecordId();
         mJsonWrapper = jsonWrapper;
     }
 
@@ -42,11 +42,6 @@ public abstract class RootRemoteRecord extends RemoteRecord {
     }
 
     @NonNull
-    public JsonWrapper getJsonWrapper() {
-        return mJsonWrapper;
-    }
-
-    @NonNull
     @Override
     protected String getKey() {
         return getId();
@@ -54,7 +49,7 @@ public abstract class RootRemoteRecord extends RemoteRecord {
 
     @NonNull
     @Override
-    protected Object getCreateObject() {
+    protected JsonWrapper getCreateObject() {
         return mJsonWrapper;
     }
 

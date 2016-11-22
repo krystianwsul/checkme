@@ -24,21 +24,6 @@ public class RemoteManager {
     public final Map<String, RemoteTaskHierarchyRecord> mRemoteTaskHierarchyRecords = new HashMap<>();
 
     @NonNull
-    public final Map<String, RemoteSingleScheduleRecord> mRemoteSingleScheduleRecords = new HashMap<>();
-
-    @NonNull
-    public final Map<String, RemoteDailyScheduleRecord> mRemoteDailyScheduleRecords = new HashMap<>();
-
-    @NonNull
-    public final Map<String, RemoteWeeklyScheduleRecord> mRemoteWeeklyScheduleRecords = new HashMap<>();
-
-    @NonNull
-    public final Map<String, RemoteMonthlyDayScheduleRecord> mRemoteMonthlyDayScheduleRecords = new HashMap<>();
-
-    @NonNull
-    public final Map<String, RemoteMonthlyWeekScheduleRecord> mRemoteMonthlyWeekScheduleRecords = new HashMap<>();
-
-    @NonNull
     public final Map<String, RemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
 
     public RemoteManager(@NonNull Iterable<DataSnapshot> children) {
@@ -53,53 +38,13 @@ public class RemoteManager {
 
             if (jsonWrapper.taskJson != null) {
                 Assert.assertTrue(jsonWrapper.taskHierarchyJson == null);
-                Assert.assertTrue(jsonWrapper.singleScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.dailyScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.weeklyScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteTaskRecords.put(key, new RemoteTaskRecord(key, jsonWrapper));
             } else if (jsonWrapper.taskHierarchyJson != null) {
-                Assert.assertTrue(jsonWrapper.singleScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.dailyScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.weeklyScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
                 Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
                 mRemoteTaskHierarchyRecords.put(key, new RemoteTaskHierarchyRecord(key, jsonWrapper));
-            } else if (jsonWrapper.singleScheduleJson != null) {
-                Assert.assertTrue(jsonWrapper.dailyScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.weeklyScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.customTimeJson == null);
-
-                mRemoteSingleScheduleRecords.put(key, new RemoteSingleScheduleRecord(key, jsonWrapper));
-            } else if (jsonWrapper.dailyScheduleJson != null) {
-                Assert.assertTrue(jsonWrapper.weeklyScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.customTimeJson == null);
-
-                mRemoteDailyScheduleRecords.put(key, new RemoteDailyScheduleRecord(key, jsonWrapper));
-            } else if (jsonWrapper.weeklyScheduleJson != null) {
-                Assert.assertTrue(jsonWrapper.monthlyDayScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.customTimeJson == null);
-
-                mRemoteWeeklyScheduleRecords.put(key, new RemoteWeeklyScheduleRecord(key, jsonWrapper));
-            } else if (jsonWrapper.monthlyDayScheduleJson != null) {
-                Assert.assertTrue(jsonWrapper.monthlyWeekScheduleJson == null);
-                Assert.assertTrue(jsonWrapper.customTimeJson == null);
-
-                mRemoteMonthlyDayScheduleRecords.put(key, new RemoteMonthlyDayScheduleRecord(key, jsonWrapper));
-            } else if (jsonWrapper.monthlyWeekScheduleJson != null) {
-                Assert.assertTrue(jsonWrapper.customTimeJson == null);
-
-                mRemoteMonthlyWeekScheduleRecords.put(key, new RemoteMonthlyWeekScheduleRecord(key, jsonWrapper));
             } else {
                 Assert.assertTrue(jsonWrapper.customTimeJson != null);
 
@@ -115,21 +60,6 @@ public class RemoteManager {
                 .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteTaskHierarchyRecords.values())
-                .forEach(remoteRecord -> remoteRecord.getValues(values));
-
-        Stream.of(mRemoteSingleScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.getValues(values));
-
-        Stream.of(mRemoteDailyScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.getValues(values));
-
-        Stream.of(mRemoteWeeklyScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.getValues(values));
-
-        Stream.of(mRemoteMonthlyDayScheduleRecords.values())
-                .forEach(remoteRecord -> remoteRecord.getValues(values));
-
-        Stream.of(mRemoteMonthlyWeekScheduleRecords.values())
                 .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteCustomTimeRecords.values())
@@ -163,51 +93,6 @@ public class RemoteManager {
 
         mRemoteTaskHierarchyRecords.put(remoteTaskHierarchyRecord.getId(), remoteTaskHierarchyRecord);
         return remoteTaskHierarchyRecord;
-    }
-
-    @NonNull
-    public RemoteSingleScheduleRecord newRemoteSingleScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        RemoteSingleScheduleRecord remoteSingleScheduleRecord = new RemoteSingleScheduleRecord(jsonWrapper);
-        Assert.assertTrue(!mRemoteSingleScheduleRecords.containsKey(remoteSingleScheduleRecord.getId()));
-
-        mRemoteSingleScheduleRecords.put(remoteSingleScheduleRecord.getId(), remoteSingleScheduleRecord);
-        return remoteSingleScheduleRecord;
-    }
-
-    @NonNull
-    public RemoteDailyScheduleRecord newRemoteDailyScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        RemoteDailyScheduleRecord remoteDailyScheduleRecord = new RemoteDailyScheduleRecord(jsonWrapper);
-        Assert.assertTrue(!mRemoteDailyScheduleRecords.containsKey(remoteDailyScheduleRecord.getId()));
-
-        mRemoteDailyScheduleRecords.put(remoteDailyScheduleRecord.getId(), remoteDailyScheduleRecord);
-        return remoteDailyScheduleRecord;
-    }
-
-    @NonNull
-    public RemoteWeeklyScheduleRecord newRemoteWeeklyScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = new RemoteWeeklyScheduleRecord(jsonWrapper);
-        Assert.assertTrue(!mRemoteWeeklyScheduleRecords.containsKey(remoteWeeklyScheduleRecord.getId()));
-
-        mRemoteWeeklyScheduleRecords.put(remoteWeeklyScheduleRecord.getId(), remoteWeeklyScheduleRecord);
-        return remoteWeeklyScheduleRecord;
-    }
-
-    @NonNull
-    public RemoteMonthlyDayScheduleRecord newRemoteMonthlyDayScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = new RemoteMonthlyDayScheduleRecord(jsonWrapper);
-        Assert.assertTrue(!mRemoteMonthlyDayScheduleRecords.containsKey(remoteMonthlyDayScheduleRecord.getId()));
-
-        mRemoteMonthlyDayScheduleRecords.put(remoteMonthlyDayScheduleRecord.getId(), remoteMonthlyDayScheduleRecord);
-        return remoteMonthlyDayScheduleRecord;
-    }
-
-    @NonNull
-    public RemoteMonthlyWeekScheduleRecord newRemoteMonthlyWeekScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = new RemoteMonthlyWeekScheduleRecord(jsonWrapper);
-        Assert.assertTrue(!mRemoteMonthlyWeekScheduleRecords.containsKey(remoteMonthlyWeekScheduleRecord.getId()));
-
-        mRemoteMonthlyWeekScheduleRecords.put(remoteMonthlyWeekScheduleRecord.getId(), remoteMonthlyWeekScheduleRecord);
-        return remoteMonthlyWeekScheduleRecord;
     }
 
     @NonNull

@@ -10,8 +10,6 @@ import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
-import java.util.Set;
-
 abstract class LocalScheduleBridge implements ScheduleBridge {
     @NonNull
     final ScheduleRecord mScheduleRecord;
@@ -49,10 +47,5 @@ abstract class LocalScheduleBridge implements ScheduleBridge {
         Assert.assertTrue(scheduleType != null);
 
         return scheduleType;
-    }
-
-    @Override
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        throw new UnsupportedOperationException();
     }
 }

@@ -3,23 +3,23 @@ package com.krystianwsul.checkme.firebase.records;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
+import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
 
 import junit.framework.Assert;
 
 public class RemoteWeeklyScheduleRecord extends RemoteScheduleRecord {
-    RemoteWeeklyScheduleRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
+    RemoteWeeklyScheduleRecord(@NonNull String id, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(id, remoteTaskRecord, scheduleWrapper);
     }
 
-    RemoteWeeklyScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+    RemoteWeeklyScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(remoteTaskRecord, scheduleWrapper);
     }
 
     @NonNull
     private WeeklyScheduleJson getWeeklyScheduleJson() {
-        WeeklyScheduleJson weeklyScheduleJson = mJsonWrapper.weeklyScheduleJson;
+        WeeklyScheduleJson weeklyScheduleJson = mScheduleWrapper.weeklyScheduleJson;
         Assert.assertTrue(weeklyScheduleJson != null);
 
         return weeklyScheduleJson;
@@ -65,6 +65,6 @@ public class RemoteWeeklyScheduleRecord extends RemoteScheduleRecord {
         Assert.assertTrue(getEndTime() == null);
 
         getWeeklyScheduleJson().setEndTime(endTime);
-        addValue(getId() + "/weeklyScheduleJson/endTime", endTime);
+        addValue(getKey() + "/weeklyScheduleJson/endTime", endTime);
     }
 }

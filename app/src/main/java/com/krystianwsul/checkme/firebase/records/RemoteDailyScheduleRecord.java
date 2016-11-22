@@ -4,22 +4,22 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
+import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 
 import junit.framework.Assert;
 
 public class RemoteDailyScheduleRecord extends RemoteScheduleRecord {
-    RemoteDailyScheduleRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
+    RemoteDailyScheduleRecord(@NonNull String id, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(id, remoteTaskRecord, scheduleWrapper);
     }
 
-    RemoteDailyScheduleRecord(@NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+    RemoteDailyScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
+        super(remoteTaskRecord, scheduleWrapper);
     }
 
     @NonNull
     private DailyScheduleJson getDailyScheduleJson() {
-        DailyScheduleJson dailyScheduleJson = mJsonWrapper.dailyScheduleJson;
+        DailyScheduleJson dailyScheduleJson = mScheduleWrapper.dailyScheduleJson;
         Assert.assertTrue(dailyScheduleJson != null);
 
         return dailyScheduleJson;
@@ -61,6 +61,6 @@ public class RemoteDailyScheduleRecord extends RemoteScheduleRecord {
         Assert.assertTrue(getEndTime() == null);
 
         getDailyScheduleJson().setEndTime(endTime);
-        addValue(getId() + "/dailyScheduleJson/endTime", endTime);
+        addValue(getKey() + "/dailyScheduleJson/endTime", endTime);
     }
 }

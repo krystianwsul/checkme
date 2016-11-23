@@ -611,4 +611,9 @@ public class LocalFactory {
     public Set<LocalTaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
         return mLocalTaskHierarchies.getByParentTaskKey(parentTaskKey);
     }
+
+    @NonNull
+    public String getUuid() {
+        return mPersistenceManager.getUuid();
+    }
 }

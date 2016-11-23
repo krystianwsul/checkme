@@ -51,6 +51,9 @@ public class PersistenceManger {
 
     final List<InstanceShownRecord> mInstanceShownRecords;
 
+    @NonNull
+    private final UuidRecord mUuidRecord;
+
     private int mCustomTimeMaxId;
     private int mTaskMaxId;
     private int mTaskHierarchyMaxId;
@@ -116,6 +119,8 @@ public class PersistenceManger {
         mInstanceShownRecords = InstanceShownRecord.getInstancesShownRecords(mSQLiteDatabase);
 
         mInstanceShownMaxId = InstanceShownRecord.getMaxId(mSQLiteDatabase);
+
+        mUuidRecord = UuidRecord.getUuidRecord(mSQLiteDatabase);
     }
 
     @SuppressLint("UseSparseArrays")
@@ -132,6 +137,7 @@ public class PersistenceManger {
         mMonthlyWeekScheduleRecords = new HashMap<>();
         mInstanceRecords = new ArrayList<>();
         mInstanceShownRecords = new ArrayList<>();
+        mUuidRecord = new UuidRecord(true, UuidRecord.newUuid());
 
         mCustomTimeMaxId = 0;
         mTaskMaxId = 0;
@@ -486,5 +492,10 @@ public class PersistenceManger {
 
         Stream.of(remove)
                 .forEach(InstanceShownRecord::delete);
+    }
+
+    @NonNull
+    public String getUuid() {
+        return mUuidRecord.getUuid();
     }
 }

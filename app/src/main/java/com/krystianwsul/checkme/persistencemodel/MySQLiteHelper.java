@@ -15,7 +15,7 @@ import java.util.List;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 17;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
@@ -49,6 +49,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         InstanceRecord.onCreate(sqLiteDatabase);
 
         InstanceShownRecord.onCreate(sqLiteDatabase);
+
+        UuidRecord.onCreate(sqLiteDatabase);
     }
 
     @Override
@@ -217,6 +219,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                 InstanceShownRecord.onCreate(sqLiteDatabase);
             else
                 InstanceShownRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+
+            UuidRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
             sqLiteDatabase.setTransactionSuccessful();
         } finally {

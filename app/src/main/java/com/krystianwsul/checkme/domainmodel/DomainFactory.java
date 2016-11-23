@@ -291,7 +291,7 @@ public class DomainFactory {
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
         Assert.assertTrue(mUserData != null);
 
-        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData);
+        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren());
 
         updateNotifications(context, new ArrayList<>(), ExactTimeStamp.getNow());
 

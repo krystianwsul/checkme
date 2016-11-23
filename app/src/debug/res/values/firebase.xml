@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="firebase_root">development</string>
+    <string name="firebase_root" translatable="false">development</string>
 </resources>

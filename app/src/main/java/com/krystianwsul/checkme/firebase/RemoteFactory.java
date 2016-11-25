@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteManager;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
-import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -51,6 +50,9 @@ public class RemoteFactory {
     private final DomainFactory mDomainFactory;
 
     @NonNull
+    private final UserData mUserData;
+
+    @NonNull
     private final RemoteManager mRemoteManager;
 
     @NonNull
@@ -62,8 +64,9 @@ public class RemoteFactory {
     @NonNull
     private final Map<String, RemoteCustomTime> mRemoteCustomTimes;
 
-    public RemoteFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children) {
+    public RemoteFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserData userData) {
         mDomainFactory = domainFactory;
+        mUserData = userData;
 
         mRemoteManager = new RemoteManager(children);
 
@@ -114,11 +117,8 @@ public class RemoteFactory {
     public RemoteTask createRemoteTaskHelper(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull Collection<String> friends) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
 
-        UserData userData = MainActivity.getUserData();
-        Assert.assertTrue(userData != null);
-
         Set<String> recordOf = new HashSet<>(friends);
-        recordOf.add(UserData.getKey(userData.email));
+        recordOf.add(UserData.getKey(mUserData.email));
 
         RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(recordOf, taskJson));
 
@@ -434,5 +434,10 @@ public class RemoteFactory {
     @NonNull
     public Set<RemoteTaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
         return mRemoteTaskHierarchies.getByParentTaskKey(parentTaskKey);
+    }
+
+    @NonNull
+    UserData getUserData() {
+        return mUserData;
     }
 }

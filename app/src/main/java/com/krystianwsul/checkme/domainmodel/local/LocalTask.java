@@ -11,8 +11,6 @@ import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
-import com.krystianwsul.checkme.firebase.UserData;
-import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.ScheduleKey;
@@ -157,11 +155,6 @@ public class LocalTask extends Task {
         if (friends.isEmpty()) {
             return this;
         } else {
-            UserData userData = MainActivity.getUserData();
-            Assert.assertTrue(userData != null);
-
-            friends.add(UserData.getKey(userData.email));
-
             return mDomainFactory.convertLocalToRemote(context, now, this, friends);
         }
     }

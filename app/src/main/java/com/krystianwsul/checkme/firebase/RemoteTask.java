@@ -30,7 +30,6 @@ import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord
 import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord;
-import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
@@ -203,8 +202,7 @@ public class RemoteTask extends Task {
     protected Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(mDomainFactory.getFriends() != null);
 
-        UserData userData = MainActivity.getUserData();
-        Assert.assertTrue(userData != null);
+        UserData userData = getRemoteFactory().getUserData();
 
         String myKey = UserData.getKey(userData.email);
         Assert.assertTrue(!friends.contains(myKey));

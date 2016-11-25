@@ -29,7 +29,6 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.FriendListLoader;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractFragment;
-import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 
@@ -353,6 +352,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         }
 
         void removeSelected() {
+            Assert.assertTrue(mUserData != null);
+
             List<UserDataWrapper> selectedUserDataWrappers = Stream.of(mUserDataWrappers)
                     .filter(customTimeWrapper -> customTimeWrapper.mSelected)
                     .collect(Collectors.toList());
@@ -365,10 +366,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
                 notifyItemRemoved(position);
             }
 
-            UserData userData = MainActivity.getUserData();
-            Assert.assertTrue(userData != null);
-
-            Stream.of(selectedUserDataWrappers).forEach(userDataWrapper -> DatabaseWrapper.removeFriend(userData, userDataWrapper.mUserData));
+            Stream.of(selectedUserDataWrappers).forEach(userDataWrapper -> DatabaseWrapper.removeFriend(mUserData, userDataWrapper.mUserData));
         }
 
         class FriendHolder extends RecyclerView.ViewHolder {

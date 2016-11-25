@@ -291,7 +291,7 @@ public class DomainFactory {
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
         Assert.assertTrue(mUserData != null);
 
-        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren());
+        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData);
 
         updateNotifications(context, new ArrayList<>(), ExactTimeStamp.getNow());
 
@@ -1709,6 +1709,8 @@ public class DomainFactory {
     public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull Set<String> recordOf) {
         Assert.assertTrue(mRemoteFactory != null);
         Assert.assertTrue(mUserData != null);
+
+        recordOf.add(UserData.getKey(mUserData.email));
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);

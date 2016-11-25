@@ -2035,11 +2035,11 @@ public class DomainFactory {
         Assert.assertTrue(Stream.of(irrelevantCustomTimes)
                 .noneMatch(LocalCustomTime::getCurrent));
 
-        Stream.of(irrelevantTasks)
-                .forEach(Task::delete);
-
         Stream.of(irrelevantExistingInstances)
                 .forEach(Instance::delete);
+
+        Stream.of(irrelevantTasks)
+                .forEach(Task::delete);
 
         Stream.of(irrelevantCustomTimes)
                 .forEach(LocalCustomTime::delete);

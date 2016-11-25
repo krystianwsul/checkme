@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -33,6 +32,6 @@ public class GroupNotificationDeleteService extends IntentService {
         ArrayList<InstanceKey> instanceKeys = intent.getParcelableArrayListExtra(INSTANCES_KEY);
         Assert.assertTrue(instanceKeys != null);
 
-        DomainFactory.getDomainFactory(this).setInstancesNotified(this, 0, instanceKeys);
+        TickService.doAfterFirebase(this, domainFactory -> domainFactory.setInstancesNotified(this, 0, instanceKeys));
     }
 }

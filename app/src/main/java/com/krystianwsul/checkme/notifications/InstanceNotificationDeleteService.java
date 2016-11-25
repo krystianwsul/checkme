@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -31,6 +30,6 @@ public class InstanceNotificationDeleteService extends IntentService {
         InstanceKey instanceKey = intent.getParcelableExtra(INSTANCE_KEY);
         Assert.assertTrue(instanceKey != null);
 
-        DomainFactory.getDomainFactory(this).setInstanceNotified(this, 0, instanceKey);
+        TickService.doAfterFirebase(this, domainFactory -> domainFactory.setInstanceNotified(this, 0, instanceKey));
     }
 }

@@ -101,6 +101,9 @@ public class DomainFactory {
     @Nullable
     private RemoteFactory mRemoteFactory;
 
+    @NonNull
+    private List<FirebaseListener> mFirebaseListeners = new ArrayList<>();
+
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
 
@@ -220,6 +223,8 @@ public class DomainFactory {
                 Assert.assertTrue(dataSnapshot != null);
 
                 setRemoteTaskRecords(context.getApplicationContext(), dataSnapshot);
+
+                notifyFirebaseListeners();
             }
 
             @Override
@@ -228,6 +233,8 @@ public class DomainFactory {
                 Log.e("asdf", "DomainFactory.mRecordListener.onCancelled", databaseError.toException());
 
                 MyCrashlytics.logException(databaseError.toException());
+
+                notifyFirebaseListeners();
             }
         };
         mRecordQuery.addValueEventListener(mRecordListener);
@@ -251,6 +258,13 @@ public class DomainFactory {
             }
         };
         mFriendQuery.addValueEventListener(mFriendListener);
+    }
+
+    private void notifyFirebaseListeners() {
+        Stream.of(mFirebaseListeners)
+                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+
+        mFirebaseListeners.clear();
     }
 
     public synchronized void clearUserData(@NonNull Context context) {
@@ -305,6 +319,16 @@ public class DomainFactory {
                 .collect(Collectors.toMap(userData -> UserData.getKey(userData.email), userData -> userData));
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+    }
+
+    public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+        if (mRemoteFactory != null) {
+            Assert.assertTrue(mFirebaseListeners.isEmpty());
+
+            firebaseListener.onFirebaseResult(this);
+        } else {
+            mFirebaseListeners.add(firebaseListener);
+        }
     }
 
     // gets
@@ -2435,5 +2459,9 @@ public class DomainFactory {
 
         final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();
         final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();
+    }
+
+    public interface FirebaseListener {
+        void onFirebaseResult(@NonNull DomainFactory domainFactory);
     }
 }

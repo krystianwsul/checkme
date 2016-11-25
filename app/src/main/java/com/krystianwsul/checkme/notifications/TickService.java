@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
@@ -63,6 +66,20 @@ public class TickService extends IntentService {
         List<TaskKey> taskKeys = intent.getParcelableArrayListExtra(TASK_KEYS_KEY);
         Assert.assertTrue(taskKeys != null);
 
-        DomainFactory.getDomainFactory(this).updateNotificationsTick(this, silent, registering, taskKeys);
+        doAfterFirebase(this, domainFactory -> domainFactory.updateNotificationsTick(this, silent, registering, taskKeys));
+    }
+
+    public static void doAfterFirebase(@NonNull Context context, @NonNull DomainFactory.FirebaseListener firebaseListener) {
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(context);
+
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            UserData userData = new UserData(firebaseUser);
+
+            domainFactory.addFirebaseListener(firebaseListener);
+            domainFactory.setUserData(context, userData);
+        } else {
+            firebaseListener.onFirebaseResult(domainFactory);
+        }
     }
 }

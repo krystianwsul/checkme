@@ -20,6 +20,11 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     }
 
     @Override
+    String getName() {
+        return "ShowGroupLoader, timeStamp: " + mTimeStamp;
+    }
+
+    @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getShowGroupData(getContext(), mTimeStamp);
     }

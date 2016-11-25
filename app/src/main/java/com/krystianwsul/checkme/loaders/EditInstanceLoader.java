@@ -28,6 +28,11 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     }
 
     @Override
+    String getName() {
+        return "EditInstanceLoader, instanceKey: " + mInstanceKey;
+    }
+
+    @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mInstanceKey);
     }

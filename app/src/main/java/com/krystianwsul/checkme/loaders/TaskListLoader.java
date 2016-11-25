@@ -23,6 +23,11 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     }
 
     @Override
+    String getName() {
+        return "TaskListLoader, taskKey: " + mTaskKey;
+    }
+
+    @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext(), mTaskKey);
     }

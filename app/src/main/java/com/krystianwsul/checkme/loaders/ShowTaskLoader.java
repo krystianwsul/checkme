@@ -20,13 +20,16 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
     }
 
     @Override
+    String getName() {
+        return "ShowTaskLoader, taskKey: " + mTaskKey;
+    }
+
+    @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getShowTaskData(mTaskKey, getContext());
     }
 
     public static class Data extends DomainLoader.Data {
-        public final boolean IsRootTask;
-
         @NonNull
         public final String Name;
 
@@ -36,10 +39,9 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
         @NonNull
         public final TaskKey mTaskKey;
 
-        public Data(boolean isRootTask, @NonNull String name, @Nullable String scheduleText, @NonNull TaskKey taskKey) {
+        public Data(@NonNull String name, @Nullable String scheduleText, @NonNull TaskKey taskKey) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
-            IsRootTask = isRootTask;
             Name = name;
             ScheduleText = scheduleText;
             mTaskKey = taskKey;
@@ -48,7 +50,6 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
         @Override
         public int hashCode() {
             int hashCode = 0;
-            hashCode += (IsRootTask ? 1 : 0);
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
@@ -69,9 +70,6 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
                 return false;
 
             Data data = (Data) object;
-
-            if (IsRootTask != data.IsRootTask)
-                return false;
 
             if (!Name.equals(data.Name))
                 return false;

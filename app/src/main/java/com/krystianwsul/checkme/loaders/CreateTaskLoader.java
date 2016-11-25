@@ -38,6 +38,11 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     }
 
     @Override
+    String getName() {
+        return "CreateTaskLoader, taskKey: " + mTaskKey + ", excludedTaskKeys: " + mExcludedTaskKeys;
+    }
+
+    @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getCreateTaskData(mTaskKey, getContext(), mExcludedTaskKeys);
     }

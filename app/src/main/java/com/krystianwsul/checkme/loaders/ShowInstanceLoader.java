@@ -21,6 +21,11 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
     }
 
     @Override
+    String getName() {
+        return "ShowInstanceLoader, instanceKey: " + mInstanceKey;
+    }
+
+    @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getShowInstanceData(getContext(), mInstanceKey);
     }

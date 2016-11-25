@@ -505,6 +505,7 @@ public class DomainFactory {
 
         dataWrapper.setInstanceDatas(instanceDatas);
 
+        Log.e("asdf", "getGroupListData returning " + data);
         return data;
     }
 
@@ -818,7 +819,7 @@ public class DomainFactory {
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        return new ShowTaskLoader.Data(task.isRootTask(now), task.getName(), task.getScheduleText(context, now), task.getTaskKey());
+        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), task.getTaskKey());
     }
 
     @NonNull

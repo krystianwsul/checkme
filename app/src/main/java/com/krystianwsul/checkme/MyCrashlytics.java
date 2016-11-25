@@ -2,6 +2,7 @@ package com.krystianwsul.checkme;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -31,6 +32,7 @@ public class MyCrashlytics {
         Assert.assertTrue(!TextUtils.isEmpty(message));
         Assert.assertTrue(sEnabled != null);
 
+        Log.e("asdf", "MyCrashLytics.log: " + message);
         if (sEnabled)
             Crashlytics.log(message);
     }
@@ -38,6 +40,7 @@ public class MyCrashlytics {
     public static void logException(@NonNull Throwable throwable) {
         Assert.assertTrue(sEnabled != null);
 
+        Log.e("asdf", "MyCrashLytics.logException", throwable);
         if (sEnabled)
             Crashlytics.logException(throwable);
     }

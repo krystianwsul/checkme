@@ -52,6 +52,11 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     }
 
     @Override
+    String getName() {
+        return "GroupListLoader, position: " + mPosition + ", timeRange: " + mTimeRange + ", timeStamp: " + mTimeStamp + ", instanceKey: " + mInstanceKey + ", instanceKeys: " + mInstanceKeys;
+    }
+
+    @Override
     public Data loadInBackground() {
         if (mPosition != null) {
             Assert.assertTrue(mTimeRange != null);

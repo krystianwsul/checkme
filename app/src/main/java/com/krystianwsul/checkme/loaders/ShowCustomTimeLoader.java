@@ -21,6 +21,11 @@ public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data
     }
 
     @Override
+    String getName() {
+        return "ShowCustomTimeLoader, customTimeId: " + mCustomTimeId;
+    }
+
+    @Override
     public Data loadInBackground() {
         return DomainFactory.getDomainFactory(getContext()).getShowCustomTimeData(mCustomTimeId);
     }

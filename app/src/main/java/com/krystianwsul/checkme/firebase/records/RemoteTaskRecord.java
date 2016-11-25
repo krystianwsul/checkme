@@ -229,8 +229,6 @@ public class RemoteTaskRecord extends RootRemoteRecord {
             if (taskJson.getInstances().isEmpty()) { // because of duplicate functionality when converting local task
                 taskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet())
                         .collect(Collectors.toMap(entry -> RemoteInstanceRecord.scheduleKeyToString(entry.getKey()), entry -> entry.getValue().getCreateObject())));
-            } else {
-                Assert.assertTrue(mRemoteInstanceRecords.isEmpty());
             }
 
             Map<String, ScheduleWrapper> scheduleWrappers = new HashMap<>();

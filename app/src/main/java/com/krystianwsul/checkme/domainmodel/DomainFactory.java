@@ -372,7 +372,7 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstanceLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null));
+        return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null), instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0);
     }
 
     @NonNull
@@ -895,8 +895,8 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void setInstanceAddHour(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceAddHour");
+    public synchronized void setInstanceAddHourService(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
+        MyCrashlytics.log("DomainFactory.setInstanceAddHourService");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
@@ -910,6 +910,26 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
         instance.setNotificationShown(false, now);
+
+        updateNotifications(context, new ArrayList<>(), now);
+
+        save(context, dataId);
+    }
+
+    public synchronized void setInstanceAddHourActivity(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
+        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        Instance instance = getInstance(instanceKey);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+        Calendar calendar = now.getCalendar();
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+
+        Date date = new Date(calendar);
+        HourMinute hourMinute = new HourMinute(calendar);
+
+        instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
 
         updateNotifications(context, new ArrayList<>(), now);
 

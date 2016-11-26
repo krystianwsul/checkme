@@ -53,6 +53,6 @@ public class InstanceHourService extends IntentService {
     }
 
     private void setInstanceAddHour(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {
-        domainFactory.setInstanceAddHour(this, 0, instanceKey);
+        domainFactory.setInstanceAddHourService(this, 0, instanceKey);
     }
 }

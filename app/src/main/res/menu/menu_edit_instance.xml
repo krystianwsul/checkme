@@ -3,6 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_edit_instance_hour"
+        android:title="@string/hour"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_plus_one_white_24dp"
+        app:showAsAction="always"
+        android:visible="false"/>
+    <item
         android:id="@+id/action_edit_instance_save"
         android:title="@string/save"
         android:orderInCategory="200"

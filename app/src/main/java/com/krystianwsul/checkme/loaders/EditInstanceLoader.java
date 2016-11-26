@@ -55,7 +55,9 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
 
         public final boolean mDone;
 
-        public Data(@NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair, @NonNull String name, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, boolean done) {
+        public final boolean mShowHour;
+
+        public Data(@NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair, @NonNull String name, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, boolean done, boolean showHour) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             InstanceKey = instanceKey;
@@ -64,11 +66,12 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
             Name = name;
             CustomTimeDatas = customTimeDatas;
             mDone = done;
+            mShowHour = showHour;
         }
 
         @Override
         public int hashCode() {
-            return (InstanceKey.hashCode() + InstanceDate.hashCode() + InstanceTimePair.hashCode() + Name.hashCode() + CustomTimeDatas.hashCode() + (mDone ? 1 : 0));
+            return (InstanceKey.hashCode() + InstanceDate.hashCode() + InstanceTimePair.hashCode() + Name.hashCode() + CustomTimeDatas.hashCode() + (mDone ? 1 : 0) + (mShowHour ? 1 : 0));
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -101,6 +104,9 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
                 return false;
 
             if (mDone != data.mDone)
+                return false;
+
+            if (mShowHour != data.mShowHour)
                 return false;
 
             return true;

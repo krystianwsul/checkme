@@ -126,12 +126,22 @@ public class EditInstanceActivity extends AbstractActivity implements LoaderMana
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.findItem(R.id.action_edit_instance_save).setVisible(mData != null);
+        menu.findItem(R.id.action_edit_instance_hour).setVisible(mData != null && mData.mShowHour);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_edit_instance_hour:
+                Assert.assertTrue(mData != null);
+                Assert.assertTrue(mData.mShowHour);
+
+                getSupportLoaderManager().destroyLoader(0);
+
+                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceAddHourActivity(this, mData.DataId, mData.InstanceKey);
+
+                finish();
             case R.id.action_edit_instance_save:
                 Assert.assertTrue(mDate != null);
                 Assert.assertTrue(mData != null);

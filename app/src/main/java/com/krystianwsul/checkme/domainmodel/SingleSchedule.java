@@ -63,13 +63,15 @@ public class SingleSchedule extends Schedule {
 
         ExactTimeStamp singleScheduleExactTimeStamp = getDateTime().getTimeStamp().toExactTimeStamp();
 
-        if (givenStartExactTimeStamp != null && givenStartExactTimeStamp.compareTo(singleScheduleExactTimeStamp) > 0) {
+        if (givenStartExactTimeStamp != null && givenStartExactTimeStamp.compareTo(singleScheduleExactTimeStamp) > 0)
             return instances;
-        }
 
-        if (givenExactEndTimeStamp.compareTo(singleScheduleExactTimeStamp) <= 0) {
+        if (givenExactEndTimeStamp.compareTo(singleScheduleExactTimeStamp) <= 0)
             return instances;
-        }
+
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
+        if (endExactTimeStamp != null && singleScheduleExactTimeStamp.compareTo(endExactTimeStamp) >= 0) // timezone hack
+            return instances;
 
         instances.add(getInstance(task));
 

@@ -658,4 +658,43 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour6.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.get(splitInstanceKey).Children.isEmpty());
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour6.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.size() == 1);
     }
+
+    @Test
+    public void testSingleScheduleChanged() {
+        // hour 0: check no instances
+        // hour 1: create task for hour 5
+        // hour 2: check one instance, hour 5
+        // hour 3: edit task, hour 6
+        // hour 4: check one instance, hour 6
+
+        PersistenceManger persistenceManger = new PersistenceManger();
+        DomainFactory domainFactory = new DomainFactory(persistenceManger);
+
+        Date date = new Date(2016, 1, 1);
+
+        HourMinute hour0 = new HourMinute(0, 0);
+        HourMinute hour1 = new HourMinute(1, 0);
+        HourMinute hour2 = new HourMinute(2, 0);
+        HourMinute hour3 = new HourMinute(3, 0);
+        HourMinute hour4 = new HourMinute(4, 0);
+        HourMinute hour5 = new HourMinute(5, 0);
+        HourMinute hour6 = new HourMinute(6, 0);
+
+        int dataId = 0;
+        int range = 0;
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour0.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.isEmpty());
+
+        CreateTaskLoader.SingleScheduleData firstScheduleData = new CreateTaskLoader.SingleScheduleData(date, new TimePair(hour5));
+        Task task = domainFactory.createScheduleRootTask(mContext, new ExactTimeStamp(date, hour1.toHourMilli()), dataId, "task", Collections.singletonList(firstScheduleData), null, new ArrayList<>());
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.keySet().iterator().next().mScheduleKey.ScheduleTimePair.mHourMinute.equals(hour5));
+
+        CreateTaskLoader.SingleScheduleData secondScheduleData = new CreateTaskLoader.SingleScheduleData(date, new TimePair(hour6));
+        domainFactory.updateScheduleTask(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), dataId, task.getTaskKey(), task.getName(), Collections.singletonList(secondScheduleData), task.getNote(), new ArrayList<>());
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.keySet().iterator().next().mScheduleKey.ScheduleTimePair.mHourMinute.equals(hour6));
+    }
 }

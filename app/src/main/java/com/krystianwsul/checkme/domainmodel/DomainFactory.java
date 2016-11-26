@@ -1025,15 +1025,9 @@ public class DomainFactory {
         createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, friendEntries);
     }
 
-    @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
-        MyCrashlytics.log("DomainFactory.updateScheduleTask");
-        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
+    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
@@ -1061,6 +1055,19 @@ public class DomainFactory {
         save(context, dataId);
 
         return task.getTaskKey();
+    }
+
+    @NonNull
+    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+        MyCrashlytics.log("DomainFactory.updateScheduleTask");
+        Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(!scheduleDatas.isEmpty());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, friendEntries);
     }
 
     public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {

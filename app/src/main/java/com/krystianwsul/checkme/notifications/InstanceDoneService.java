@@ -7,7 +7,10 @@ import android.content.Intent;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 
@@ -46,7 +49,7 @@ public class InstanceDoneService extends IntentService {
         notificationManager.cancel(notificationId);
 
         if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
-            GroupNotificationDeleteService.needsFirebase(this, domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
+            needsFirebase(this, domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
         } else {
             setInstanceNotificationDone(DomainFactory.getDomainFactory(this), instanceKey);
         }
@@ -54,5 +57,25 @@ public class InstanceDoneService extends IntentService {
 
     private void setInstanceNotificationDone(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {
         domainFactory.setInstanceNotificationDone(this, 0, instanceKey);
+    }
+
+    public static void needsFirebase(@NonNull Context context, @NonNull DomainFactory.FirebaseListener firebaseListener) {
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(context);
+
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            UserData userData = new UserData(firebaseUser);
+
+            domainFactory.setUserData(context, userData);
+            domainFactory.addFirebaseListener(firebaseListener);
+        } else {
+            throw new NeedsFirebaseException();
+        }
+    }
+
+    public static class NeedsFirebaseException extends RuntimeException {
+        NeedsFirebaseException() {
+            super();
+        }
     }
 }

@@ -44,6 +44,7 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -971,12 +972,8 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        for (InstanceKey instanceKey : instanceKeys) {
-            Instance instance = getInstance(instanceKey);
-
-            instance.setNotified(now);
-            instance.setNotificationShown(false, now);
-        }
+        for (InstanceKey instanceKey : instanceKeys)
+            setInstanceNotified(instanceKey, now);
 
         save(context, dataId);
     }
@@ -985,12 +982,7 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.setInstanceNotified");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
-        Instance instance = getInstance(instanceKey);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        instance.setNotified(now);
-        instance.setNotificationShown(false, now);
+        setInstanceNotified(instanceKey, ExactTimeStamp.getNow());
 
         save(context, dataId);
     }
@@ -2283,6 +2275,55 @@ public class DomainFactory {
 
     private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull Instance instance, @NonNull ExactTimeStamp now) {
         return (taskKeys.contains(instance.getTaskKey()) || Stream.of(instance.getChildInstances(now)).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
+    }
+
+    private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {
+        if (instanceKey.getType().equals(TaskKey.Type.LOCAL)) {
+            Instance instance = getInstance(instanceKey);
+
+            instance.setNotified(now);
+            instance.setNotificationShown(false, now);
+        } else {
+            TaskKey taskKey = instanceKey.mTaskKey;
+            String taskId = taskKey.mRemoteTaskId;
+            Assert.assertTrue(!TextUtils.isEmpty(taskId));
+
+            ScheduleKey scheduleKey = instanceKey.mScheduleKey;
+            Date scheduleDate = scheduleKey.ScheduleDate;
+
+            Stream<InstanceShownRecord> stream = Stream.of(mLocalFactory.getInstanceShownRecords())
+                    .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
+                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleDate.getYear())
+                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleDate.getMonth())
+                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDate.getDay());
+
+            List<InstanceShownRecord> matches;
+            if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
+
+                String customTimeId = scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId;
+                Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
+
+                matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
+                        .collect(Collectors.toList());
+            } else {
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute != null);
+
+                HourMinute hourMinute = scheduleKey.ScheduleTimePair.mHourMinute;
+
+                matches = stream.filter(instanceShownRecord -> Integer.valueOf(hourMinute.getHour()).equals(instanceShownRecord.getScheduleHour()))
+                        .filter(instanceShownRecord -> Integer.valueOf(hourMinute.getMinute()).equals(instanceShownRecord.getScheduleMinute()))
+                        .collect(Collectors.toList());
+            }
+
+            Assert.assertTrue(matches.size() == 1);
+
+            InstanceShownRecord instanceShownRecord = matches.get(0);
+            Assert.assertTrue(instanceShownRecord != null);
+
+            instanceShownRecord.setNotified(true);
+            instanceShownRecord.setNotificationShown(false);
+        }
     }
 
     static class Irrelevant {

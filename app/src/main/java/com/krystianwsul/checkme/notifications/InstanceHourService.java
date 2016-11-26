@@ -46,7 +46,7 @@ public class InstanceHourService extends IntentService {
         notificationManager.cancel(notificationId);
 
         if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
-            GroupNotificationDeleteService.needsFirebase(this, domainFactory -> setInstanceAddHour(domainFactory, instanceKey));
+            InstanceDoneService.needsFirebase(this, domainFactory -> setInstanceAddHour(domainFactory, instanceKey));
         } else {
             setInstanceAddHour(DomainFactory.getDomainFactory(this), instanceKey);
         }

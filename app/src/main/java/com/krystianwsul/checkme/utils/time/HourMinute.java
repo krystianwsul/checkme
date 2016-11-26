@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.utils.time;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -12,15 +13,33 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
     private final int mHour;
     private final int mMinute;
 
+    @NonNull
     public static HourMinute getNow() {
         return TimeStamp.getNow().getHourMinute();
     }
 
-    public static HourMinute getNextHour() {
-        Calendar calendar = Calendar.getInstance();
+    @NonNull
+    public static Pair<Date, HourMinute> getNextHour() {
+        return getNextHour(Date.today(), ExactTimeStamp.getNow());
+    }
+
+    @NonNull
+    public static Pair<Date, HourMinute> getNextHour(@NonNull Date date) {
+        return getNextHour(date, ExactTimeStamp.getNow());
+    }
+
+    @NonNull
+    static Pair<Date, HourMinute> getNextHour(@NonNull Date date, @NonNull ExactTimeStamp now) {
+        HourMinute hourMinute = now.toTimeStamp().getHourMinute();
+
+        Calendar calendar = date.getCalendar();
+        calendar.set(Calendar.HOUR_OF_DAY, hourMinute.getHour());
+        calendar.set(Calendar.MINUTE, hourMinute.getMinute());
+
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         calendar.set(Calendar.MINUTE, 0);
-        return new HourMinute(calendar);
+
+        return Pair.create(new Date(calendar), new HourMinute(calendar));
     }
 
     public HourMinute(int hour, int minute) {
@@ -28,7 +47,7 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
         mMinute = minute;
     }
 
-    public HourMinute(Calendar calendar) {
+    public HourMinute(@NonNull Calendar calendar) {
         mHour = calendar.get(Calendar.HOUR_OF_DAY);
         mMinute = calendar.get(Calendar.MINUTE);
     }

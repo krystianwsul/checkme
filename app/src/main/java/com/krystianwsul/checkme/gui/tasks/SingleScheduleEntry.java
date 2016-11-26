@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -32,14 +33,18 @@ class SingleScheduleEntry extends ScheduleEntry {
 
     SingleScheduleEntry(@Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
         if (scheduleHint == null) { // new for task
-            mDate = Date.today();
-            mTimePair = new TimePair(HourMinute.getNextHour());
+            Pair<Date, HourMinute> pair = HourMinute.getNextHour();
+
+            mDate = pair.first;
+            mTimePair = new TimePair(pair.second);
         } else if (scheduleHint.mTimePair != null) { // for instance group or instance join
             mDate = scheduleHint.mDate;
             mTimePair = scheduleHint.mTimePair.copy();
         } else { // for group root
-            mDate = scheduleHint.mDate;
-            mTimePair = new TimePair(HourMinute.getNextHour());
+            Pair<Date, HourMinute> pair = HourMinute.getNextHour(scheduleHint.mDate);
+
+            mDate = pair.first;
+            mTimePair = new TimePair(pair.second);
         }
     }
 

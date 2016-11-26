@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -47,6 +48,7 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
     private static final String DATE_KEY = "date";
     private static final String TIME_PAIR_PERSIST_KEY = "timePairPersist";
     private static final String INITIAL_HOUR_MINUTE_KEY = "initialHourMinute";
+    private static final String INITIAL_DATE_KEY = "initialDate";
 
     private static final String DATE_FRAGMENT_TAG = "dateFragment";
     private static final String TIME_FRAGMENT_TAG = "timeFragment";
@@ -111,6 +113,7 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = EditInstancesActivity.this::finish;
 
     private HourMinute mInitialHourMinute;
+    private Date mInitialDate;
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(instanceKeys != null);
@@ -216,6 +219,10 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
             Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
             mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
             Assert.assertTrue(mInitialHourMinute != null);
+
+            Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_DATE_KEY));
+            mInitialDate = mSavedInstanceState.getParcelable(INITIAL_DATE_KEY);
+            Assert.assertTrue(mInitialDate != null);
         }
 
         getSupportLoaderManager().initLoader(0, null, this);
@@ -263,6 +270,9 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
 
             Assert.assertTrue(mInitialHourMinute != null);
             outState.putParcelable(INITIAL_HOUR_MINUTE_KEY, mInitialHourMinute);
+
+            Assert.assertTrue(mInitialDate != null);
+            outState.putParcelable(INITIAL_DATE_KEY, mInitialDate);
         }
     }
 
@@ -288,19 +298,25 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
             Assert.assertTrue(mDate == null);
             Assert.assertTrue(mTimePairPersist == null);
             Assert.assertTrue(mInitialHourMinute == null);
+            Assert.assertTrue(mInitialDate == null);
             Assert.assertTrue(!mData.InstanceDatas.isEmpty());
 
             mFirst = false;
 
-            mDate = Stream.of(mData.InstanceDatas.values())
+            Date date = Stream.of(mData.InstanceDatas.values())
                     .map(instanceData -> instanceData.InstanceDate)
                     .sorted()
                     .findFirst().get();
             Assert.assertTrue(mDate != null);
 
-            mTimePairPersist = new TimePairPersist();
+            Pair<Date, HourMinute> nextHour = HourMinute.getNextHour(date);
+            mDate = nextHour.first;
 
-            mInitialHourMinute = mTimePairPersist.getHourMinute();
+            mTimePairPersist = new TimePairPersist(nextHour.second);
+
+            mInitialHourMinute = nextHour.second;
+
+            mInitialDate = mDate;
         }
 
         mActionBar.setTitle(Stream.of(mData.InstanceDatas.values())
@@ -428,23 +444,17 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         if (mData == null)
             return false;
 
-        Assert.assertTrue(!mData.InstanceDatas.isEmpty());
-
-        Date date = Stream.of(mData.InstanceDatas.values())
-                .map(instanceData -> instanceData.InstanceDate)
-                .sorted()
-                .findFirst().get();
-        Assert.assertTrue(date != null);
-
-        if (!date.equals(mDate))
-            return true;
-
         if (mTimePairPersist.getCustomTimeKey() != null)
             return true;
 
         Assert.assertTrue(mInitialHourMinute != null);
 
         if (!mTimePairPersist.getHourMinute().equals(mInitialHourMinute))
+            return true;
+
+        Assert.assertTrue(mInitialDate != null);
+
+        if (!mInitialDate.equals(mDate))
             return true;
 
         return false;

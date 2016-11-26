@@ -14,10 +14,10 @@ public class TimePairPersist implements Parcelable {
     private CustomTimeKey mCustomTimeKey;
 
     @NonNull
-    private HourMinute mHourMinute = HourMinute.getNextHour();
+    private HourMinute mHourMinute;
 
-    public TimePairPersist() {
-
+    public TimePairPersist(@NonNull HourMinute hourMinute) {
+        mHourMinute = hourMinute;
     }
 
     private TimePairPersist(@Nullable CustomTimeKey customTimeKey, @NonNull HourMinute hourMinute) {
@@ -27,8 +27,11 @@ public class TimePairPersist implements Parcelable {
 
     public TimePairPersist(@NonNull TimePair timePair) {
         mCustomTimeKey = timePair.mCustomTimeKey;
+
         if (timePair.mHourMinute != null)
             mHourMinute = timePair.mHourMinute;
+        else
+            mHourMinute = HourMinute.getNextHour().second;
     }
 
     public void setCustomTimeKey(@NonNull CustomTimeKey customTimeKey) {

@@ -53,7 +53,9 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
         @NonNull
         public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
 
-        public Data(@NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair, @NonNull String name, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas) {
+        public final boolean mDone;
+
+        public Data(@NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair, @NonNull String name, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, boolean done) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             InstanceKey = instanceKey;
@@ -61,13 +63,15 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
             InstanceTimePair = instanceTimePair;
             Name = name;
             CustomTimeDatas = customTimeDatas;
+            mDone = done;
         }
 
         @Override
         public int hashCode() {
-            return (InstanceKey.hashCode() + InstanceDate.hashCode() + InstanceTimePair.hashCode() + Name.hashCode() + CustomTimeDatas.hashCode());
+            return (InstanceKey.hashCode() + InstanceDate.hashCode() + InstanceTimePair.hashCode() + Name.hashCode() + CustomTimeDatas.hashCode() + (mDone ? 1 : 0));
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -81,7 +85,25 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
 
             Data data = (Data) object;
 
-            return (InstanceKey.equals(data.InstanceKey) && InstanceDate.equals(data.InstanceDate) && InstanceTimePair.equals(data.InstanceTimePair) && Name.equals(data.Name) && CustomTimeDatas.equals(data.CustomTimeDatas));
+            if (!InstanceKey.equals(data.InstanceKey))
+                return false;
+
+            if (!InstanceDate.equals(data.InstanceDate))
+                return false;
+
+            if (!InstanceTimePair.equals(data.InstanceTimePair))
+                return false;
+
+            if (!Name.equals(data.Name))
+                return false;
+
+            if (!CustomTimeDatas.equals(data.CustomTimeDatas))
+                return false;
+
+            if (mDone != data.mDone)
+                return false;
+
+            return true;
         }
     }
 

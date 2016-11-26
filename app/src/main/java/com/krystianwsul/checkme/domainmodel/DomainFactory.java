@@ -102,7 +102,7 @@ public class DomainFactory {
     private RemoteFactory mRemoteFactory;
 
     @NonNull
-    private List<FirebaseListener> mFirebaseListeners = new ArrayList<>();
+    private final List<FirebaseListener> mFirebaseListeners = new ArrayList<>();
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -360,7 +360,6 @@ public class DomainFactory {
 
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance.isRootInstance(now));
-        Assert.assertTrue(instance.getDone() == null);
 
         if (instance.getInstanceTimePair().mCustomTimeKey != null) {
             CustomTime customTime = getCustomTime(instance.getInstanceTimePair().mCustomTimeKey);
@@ -372,7 +371,7 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstanceLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas);
+        return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null));
     }
 
     @NonNull

@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -271,6 +272,12 @@ public class EditInstanceActivity extends AbstractActivity implements LoaderMana
     @Override
     public void onLoadFinished(Loader<EditInstanceLoader.Data> loader, final EditInstanceLoader.Data data) {
         mData = data;
+
+        if (data.mDone) {
+            Toast.makeText(this, R.string.instanceMarkedDone, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         mEditInstanceLayout.setVisibility(View.VISIBLE);
 

@@ -68,4 +68,5 @@
     <string name="userNotFound">Nie znaleziono użytkownika.</string>
     <string name="addFriend">Dodaj znajomych</string>
     <string name="friend_dialog_title">Wybierz znajomego</string>
+    <string name="instanceMarkedDone">To przypomnienie zostało oznaczone jako zrobione.</string>
 </resources>

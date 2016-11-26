@@ -71,6 +71,19 @@ public class TaskKey implements Parcelable, Serializable {
         return super.toString() + ": " + mLocalTaskId + ", " + mRemoteTaskId;
     }
 
+    @NonNull
+    public Type getType() {
+        if (mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(mRemoteTaskId));
+
+            return Type.LOCAL;
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(mRemoteTaskId));
+
+            return Type.REMOTE;
+        }
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -111,4 +124,8 @@ public class TaskKey implements Parcelable, Serializable {
             return new TaskKey[size];
         }
     };
+
+    public enum Type {
+        LOCAL, REMOTE
+    }
 }

@@ -3,12 +3,20 @@ package com.krystianwsul.checkme.notifications;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
+import com.annimon.stream.Stream;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GroupNotificationDeleteService extends IntentService {
     private final static String INSTANCES_KEY = "instanceKeys";
@@ -29,9 +37,38 @@ public class GroupNotificationDeleteService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        ArrayList<InstanceKey> instanceKeys = intent.getParcelableArrayListExtra(INSTANCES_KEY);
+        List<InstanceKey> instanceKeys = intent.getParcelableArrayListExtra(INSTANCES_KEY);
         Assert.assertTrue(instanceKeys != null);
+        Assert.assertTrue(!instanceKeys.isEmpty());
 
-        TickService.doAfterFirebase(this, domainFactory -> domainFactory.setInstancesNotified(this, 0, instanceKeys));
+        if (Stream.of(instanceKeys).anyMatch(instanceKey -> instanceKey.getType().equals(TaskKey.Type.REMOTE))) {
+            needsFirebase(this, domainFactory -> setInstancesNotified(domainFactory, instanceKeys)); // todo shouldn't actually need the remote data
+        } else {
+            setInstancesNotified(DomainFactory.getDomainFactory(this), instanceKeys);
+        }
+    }
+
+    private void setInstancesNotified(@NonNull DomainFactory domainFactory, @NonNull List<InstanceKey> instanceKeys) {
+        domainFactory.setInstancesNotified(this, 0, instanceKeys);
+    }
+
+    public static void needsFirebase(@NonNull Context context, @NonNull DomainFactory.FirebaseListener firebaseListener) {
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(context);
+
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            UserData userData = new UserData(firebaseUser);
+
+            domainFactory.setUserData(context, userData);
+            domainFactory.addFirebaseListener(firebaseListener);
+        } else {
+            throw new NeedsFirebaseException();
+        }
+    }
+
+    public static class NeedsFirebaseException extends RuntimeException {
+        NeedsFirebaseException() {
+            super();
+        }
     }
 }

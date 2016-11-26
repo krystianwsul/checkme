@@ -61,7 +61,11 @@ public class InstanceKey implements Parcelable, Serializable {
         return super.toString() + ": " + mTaskKey + ", " + mScheduleKey;
     }
 
-    @Override
+    @NonNull
+    public TaskKey.Type getType() {
+        return mTaskKey.getType();
+    }
+
     public int describeContents() {
         return 0;
     }

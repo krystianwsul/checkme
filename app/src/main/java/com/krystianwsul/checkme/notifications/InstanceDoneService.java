@@ -5,8 +5,11 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
@@ -42,6 +45,14 @@ public class InstanceDoneService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);
 
-        TickService.doAfterFirebase(this, domainFactory -> domainFactory.setInstanceNotificationDone(this, 0, instanceKey));
+        if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
+            GroupNotificationDeleteService.needsFirebase(this, domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
+        } else {
+            setInstanceNotificationDone(DomainFactory.getDomainFactory(this), instanceKey);
+        }
+    }
+
+    private void setInstanceNotificationDone(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {
+        domainFactory.setInstanceNotificationDone(this, 0, instanceKey);
     }
 }

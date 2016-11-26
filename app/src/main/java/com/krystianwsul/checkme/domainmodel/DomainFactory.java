@@ -984,7 +984,7 @@ public class DomainFactory {
         return instance.getDone();
     }
 
-    public synchronized void setInstancesNotified(@NonNull Context context, int dataId, @NonNull List<InstanceKey> instanceKeys) { // todo this should be a local operation
+    public synchronized void setInstancesNotified(@NonNull Context context, int dataId, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstancesNotified");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -998,7 +998,7 @@ public class DomainFactory {
         save(context, dataId);
     }
 
-    public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) { // todo this should be a local operation
+    public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotified");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 

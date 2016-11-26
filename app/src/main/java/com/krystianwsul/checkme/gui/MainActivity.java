@@ -355,7 +355,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                             showTab(Tab.INSTANCES);
                         }
                     } else {
-                        // todo block gui until sign in complete
+                        // todo add spinner to grouplistfragment padding
                         startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient), RC_SIGN_IN);
                     }
 

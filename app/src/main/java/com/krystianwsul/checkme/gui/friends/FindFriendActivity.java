@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -61,15 +62,7 @@ public class FindFriendActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search:
-                if (TextUtils.isEmpty(mFindFriendEmail.getText()))
-                    break;
-
-                mLoading = true;
-                mUserData = null;
-
-                updateLayout();
-
-                loadUser();
+                startSearch();
 
                 break;
             default:
@@ -93,6 +86,14 @@ public class FindFriendActivity extends AppCompatActivity {
 
         mFindFriendEmail = (EditText) findViewById(R.id.find_friend_email);
         Assert.assertTrue(mFindFriendEmail != null);
+
+        mFindFriendEmail.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                startSearch();
+                return true;
+            }
+            return false;
+        });
 
         mFindFriendUserLayout = (LinearLayout) findViewById(R.id.find_friend_user_layout);
         Assert.assertTrue(mFindFriendUserLayout != null);
@@ -252,5 +253,17 @@ public class FindFriendActivity extends AppCompatActivity {
 
         if (mUserData != null)
             outState.putParcelable(USER_KEY, mUserData);
+    }
+
+    private void startSearch() {
+        if (TextUtils.isEmpty(mFindFriendEmail.getText()))
+            return;
+
+        mLoading = true;
+        mUserData = null;
+
+        updateLayout();
+
+        loadUser();
     }
 }

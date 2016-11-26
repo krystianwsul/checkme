@@ -25,7 +25,8 @@
             android:inputType="textEmailAddress"
             android:textColor="@color/textPrimaryWhite"
             android:hint="@string/email_hint"
-            android:textColorHint="@color/textDisabledWhite">
+            android:textColorHint="@color/textDisabledWhite"
+            android:imeOptions="actionSearch">
 
             <requestFocus/>
 

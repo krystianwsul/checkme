@@ -169,7 +169,7 @@ public abstract class Task {
 
     @Nullable
     Task getParentTask(@NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(current(exactTimeStamp));
+        Assert.assertTrue(notDeleted(exactTimeStamp));
 
         return mDomainFactory.getParentTask(this, exactTimeStamp);
     }

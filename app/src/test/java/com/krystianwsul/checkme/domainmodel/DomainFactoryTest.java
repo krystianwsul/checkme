@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -540,5 +541,121 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(day2, hour18.toHourMilli()), range1, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(day2, hour18.toHourMilli()), range1, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.values().iterator().next().Children.size() == 1);
+    }
+
+    @Test
+    public void testChildAddedToInstanceInPast() {
+        PersistenceManger persistenceManger = new PersistenceManger();
+        DomainFactory domainFactory = new DomainFactory(persistenceManger);
+
+        // hour 0: check no instances
+        // hour 1: add parent for hour 3
+        // hour 2: check one instance, no children
+        // hour 3: tick, check one instance, no children
+        // hour 4: add child to parent
+        // hour 5: check one instance, one child
+
+        Date date = new Date(2016, 1, 1);
+
+        HourMinute hour0 = new HourMinute(0, 0);
+        HourMinute hour1 = new HourMinute(1, 0);
+        HourMinute hour2 = new HourMinute(2, 0);
+        HourMinute hour3 = new HourMinute(3, 0);
+        HourMinute hour4 = new HourMinute(4, 0);
+        HourMinute hour5 = new HourMinute(5, 0);
+
+        int dataId = 0;
+        int range = 0;
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour0.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.isEmpty());
+
+        CreateTaskLoader.SingleScheduleData scheduleData = new CreateTaskLoader.SingleScheduleData(date, new TimePair(hour3));
+        Task parentTask = domainFactory.createScheduleRootTask(mContext, new ExactTimeStamp(date, hour1.toHourMilli()), dataId, "parent", Collections.singletonList(scheduleData), null, new ArrayList<>());
+
+        InstanceKey parentInstanceKey;
+        {
+            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY);
+            Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 1);
+
+            parentInstanceKey = data.mDataWrapper.InstanceDatas.keySet().iterator().next();
+            Assert.assertTrue(data.mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.isEmpty());
+        }
+
+        domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), false, false, new ArrayList<>());
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.isEmpty());
+
+        domainFactory.createChildTask(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), dataId, parentTask.getTaskKey(), "child", null);
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour5.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour5.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.size() == 1);
+    }
+
+    @Test
+    public void testTaskAddedToParentKeepsOldRootInstance() {
+        // hour 0: check no instances
+        // hour 1: create task split for hour 2
+        // hour 2: notify, check one instance, no children
+        // hour 3: create task parent for hour 7
+        // hour 4: check two instances, no children
+        // hour 5: edit task split, set parent parent
+        // hour 6: check two instances, parent has one child
+
+        PersistenceManger persistenceManger = new PersistenceManger();
+        DomainFactory domainFactory = new DomainFactory(persistenceManger);
+
+        Date date = new Date(2016, 1, 1);
+
+        HourMinute hour0 = new HourMinute(0, 0);
+        HourMinute hour1 = new HourMinute(1, 0);
+        HourMinute hour2 = new HourMinute(2, 0);
+        HourMinute hour3 = new HourMinute(3, 0);
+        HourMinute hour4 = new HourMinute(4, 0);
+        HourMinute hour5 = new HourMinute(5, 0);
+        HourMinute hour6 = new HourMinute(6, 0);
+        HourMinute hour7 = new HourMinute(7, 0);
+
+        int dataId = 0;
+        int range = 0;
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour0.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.isEmpty());
+
+        CreateTaskLoader.SingleScheduleData splitScheduleData = new CreateTaskLoader.SingleScheduleData(date, new TimePair(hour2));
+        Task splitTask = domainFactory.createScheduleRootTask(mContext, new ExactTimeStamp(date, hour1.toHourMilli()), dataId, "split", Collections.singletonList(splitScheduleData), null, new ArrayList<>());
+
+        domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), false, false, new ArrayList<>());
+
+        InstanceKey splitInstanceKey;
+        {
+            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY);
+            Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 1);
+
+            splitInstanceKey = data.mDataWrapper.InstanceDatas.keySet().iterator().next();
+            Assert.assertTrue(data.mDataWrapper.InstanceDatas.get(splitInstanceKey).Children.isEmpty());
+        }
+
+        CreateTaskLoader.SingleScheduleData parentScheduleData = new CreateTaskLoader.SingleScheduleData(date, new TimePair(hour7));
+        Task parentTask = domainFactory.createScheduleRootTask(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), dataId, "parent", Collections.singletonList(parentScheduleData), null, new ArrayList<>());
+
+        InstanceKey parentInstanceKey;
+        {
+            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY);
+            Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 2);
+
+            parentInstanceKey = Stream.of(data.mDataWrapper.InstanceDatas.keySet())
+                    .filter(instanceKey -> !instanceKey.equals(splitInstanceKey))
+                    .findFirst()
+                    .get();
+
+            Assert.assertTrue(data.mDataWrapper.InstanceDatas.get(splitInstanceKey).Children.isEmpty());
+            Assert.assertTrue(data.mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.isEmpty());
+        }
+
+        domainFactory.updateChildTask(mContext, new ExactTimeStamp(date, hour5.toHourMilli()), dataId, splitTask.getTaskKey(), splitTask.getName(), parentTask.getTaskKey(), splitTask.getNote());
+
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour6.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 2);
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour6.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.get(splitInstanceKey).Children.isEmpty());
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour6.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.size() == 1);
     }
 }

@@ -1469,7 +1469,7 @@ public class DomainFactory {
     // internal
 
     @Nullable
-    Instance getExistingInstanceIfPresent(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
+    private Instance getExistingInstanceIfPresent(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
         InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
 
         return getExistingInstanceIfPresent(instanceKey);
@@ -1666,13 +1666,13 @@ public class DomainFactory {
 
     @Nullable
     Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(childTask.current(exactTimeStamp));
+        Assert.assertTrue(childTask.notDeleted(exactTimeStamp));
 
         TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
         if (parentTaskHierarchy == null) {
             return null;
         } else {
-            Assert.assertTrue(parentTaskHierarchy.current(exactTimeStamp));
+            Assert.assertTrue(parentTaskHierarchy.notDeleted(exactTimeStamp));
             Task parentTask = parentTaskHierarchy.getParentTask();
             Assert.assertTrue(parentTask.current(exactTimeStamp));
             return parentTask;
@@ -1806,19 +1806,39 @@ public class DomainFactory {
 
     @Nullable
     TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        Assert.assertTrue(childTask.current(exactTimeStamp));
+        if (childTask.current(exactTimeStamp)) {
+            Assert.assertTrue(childTask.notDeleted(exactTimeStamp));
 
-        TaskKey childTaskKey = childTask.getTaskKey();
+            TaskKey childTaskKey = childTask.getTaskKey();
 
-        List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchiesByChildTaskKey(childTaskKey))
-                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .collect(Collectors.toList());
+            List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchiesByChildTaskKey(childTaskKey))
+                    .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
+                    .collect(Collectors.toList());
 
-        if (taskHierarchies.isEmpty()) {
-            return null;
+            if (taskHierarchies.isEmpty()) {
+                return null;
+            } else {
+                Assert.assertTrue(taskHierarchies.size() == 1);
+                return taskHierarchies.get(0);
+            }
         } else {
-            Assert.assertTrue(taskHierarchies.size() == 1);
-            return taskHierarchies.get(0);
+            // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
+            // żeby można było dodawać child instances do past parent instance
+
+            Assert.assertTrue(childTask.notDeleted(exactTimeStamp));
+
+            TaskKey childTaskKey = childTask.getTaskKey();
+
+            List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchiesByChildTaskKey(childTaskKey))
+                    .filter(taskHierarchy -> taskHierarchy.getStartExactTimeStamp().equals(childTask.getStartExactTimeStamp()))
+                    .collect(Collectors.toList());
+
+            if (taskHierarchies.isEmpty()) {
+                return null;
+            } else {
+                Assert.assertTrue(taskHierarchies.size() == 1);
+                return taskHierarchies.get(0);
+            }
         }
     }
 

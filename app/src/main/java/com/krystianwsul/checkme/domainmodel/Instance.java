@@ -103,11 +103,12 @@ public abstract class Instance {
 
             TaskKey childTaskKey = taskHierarchy.getChildTaskKey();
 
-            Instance existingChildInstance = mDomainFactory.getExistingInstanceIfPresent(childTaskKey, scheduleDateTime);
-            if (existingChildInstance != null) {
-                childInstances.add(existingChildInstance);
-            } else if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.getChildTask().notDeleted(hierarchyExactTimeStamp)) {
-                childInstances.add(mDomainFactory.getInstance(childTaskKey, scheduleDateTime));
+            if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.getChildTask().notDeleted(hierarchyExactTimeStamp)) {
+                Instance childInstance = mDomainFactory.getInstance(childTaskKey, scheduleDateTime);
+
+                Instance parentInstance = childInstance.getParentInstance(now);
+                if (parentInstance != null && parentInstance.getInstanceKey().equals(getInstanceKey()))
+                    childInstances.add(childInstance);
             }
         }
 
@@ -139,7 +140,7 @@ public abstract class Instance {
     public abstract String getName();
 
     protected boolean isRootInstance(@NonNull ExactTimeStamp now) {
-        return getTask().isRootTask(getHierarchyExactTimeStamp(now));
+        return (getParentInstance(now) == null);
     }
 
     @NonNull

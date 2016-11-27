@@ -53,13 +53,15 @@ public class RemoteTaskRecord extends RootRemoteRecord {
 
     private void initialize() {
         for (Map.Entry<String, InstanceJson> entry : getTaskJson().getInstances().entrySet()) {
+            String key = entry.getKey();
+            Assert.assertTrue(!TextUtils.isEmpty(key));
+
+            ScheduleKey scheduleKey = RemoteInstanceRecord.stringToScheduleKey(key);
+
             InstanceJson instanceJson = entry.getValue();
             Assert.assertTrue(instanceJson != null);
 
-            RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(false, this, instanceJson);
-
-            ScheduleKey scheduleKey = remoteInstanceRecord.getScheduleKey();
-            Assert.assertTrue(entry.getKey().equals(RemoteInstanceRecord.scheduleKeyToString(scheduleKey)));
+            RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(false, this, instanceJson, scheduleKey);
 
             mRemoteInstanceRecords.put(scheduleKey, remoteInstanceRecord);
         }
@@ -282,8 +284,8 @@ public class RemoteTaskRecord extends RootRemoteRecord {
     }
 
     @NonNull
-    public RemoteInstanceRecord newRemoteInstanceRecord(@NonNull InstanceJson instanceJson) {
-        RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(true, this, instanceJson);
+    public RemoteInstanceRecord newRemoteInstanceRecord(@NonNull InstanceJson instanceJson, @NonNull ScheduleKey scheduleKey) {
+        RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(true, this, instanceJson, scheduleKey);
         Assert.assertTrue(!mRemoteInstanceRecords.containsKey(remoteInstanceRecord.getScheduleKey()));
 
         mRemoteInstanceRecords.put(remoteInstanceRecord.getScheduleKey(), remoteInstanceRecord);

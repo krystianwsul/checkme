@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
@@ -294,5 +295,54 @@ public class LocalInstance extends Instance {
         mDomainFactory.getLocalFactory().deleteInstance(this);
 
         mInstanceRecord.delete();
+    }
+
+    @Nullable
+    @Override
+    protected CustomTimeKey getScheduleCustomTimeKey() {
+        if (mInstanceRecord != null) {
+            Assert.assertTrue(mTaskId == null);
+            Assert.assertTrue(mScheduleDateTime == null);
+
+            Integer customTimeId = mInstanceRecord.getScheduleCustomTimeId();
+
+            if (customTimeId != null) {
+                return new CustomTimeKey(customTimeId);
+            } else {
+                return null;
+            }
+        } else {
+            Assert.assertTrue(mTaskId != null);
+            Assert.assertTrue(mScheduleDateTime != null);
+
+            return mScheduleDateTime.getTime().getTimePair().mCustomTimeKey;
+        }
+    }
+
+    @Nullable
+    @Override
+    protected HourMinute getScheduleHourMinute() {
+        if (mInstanceRecord != null) {
+            Assert.assertTrue(mTaskId == null);
+            Assert.assertTrue(mScheduleDateTime == null);
+
+            Integer hour = mInstanceRecord.getScheduleHour();
+            Integer minute = mInstanceRecord.getScheduleMinute();
+
+            if (hour == null) {
+                Assert.assertTrue(minute == null);
+
+                return null;
+            } else {
+                Assert.assertTrue(minute != null);
+
+                return new HourMinute(hour, minute);
+            }
+        } else {
+            Assert.assertTrue(mTaskId != null);
+            Assert.assertTrue(mScheduleDateTime != null);
+
+            return mScheduleDateTime.getTime().getTimePair().mHourMinute;
+        }
     }
 }

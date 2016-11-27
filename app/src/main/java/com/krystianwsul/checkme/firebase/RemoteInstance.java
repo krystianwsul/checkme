@@ -9,10 +9,12 @@ import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
@@ -316,5 +318,54 @@ public class RemoteInstance extends Instance {
     @Override
     public boolean getNotificationShown() {
         return (mInstanceShownRecord != null && mInstanceShownRecord.getNotificationShown());
+    }
+
+    @Nullable
+    @Override
+    protected CustomTimeKey getScheduleCustomTimeKey() {
+        if (mRemoteInstanceRecord != null) {
+            Assert.assertTrue(TextUtils.isEmpty(mTaskId));
+            Assert.assertTrue(mScheduleDateTime == null);
+
+            String customTimeId = mRemoteInstanceRecord.getScheduleCustomTimeId();
+
+            if (customTimeId != null) {
+                return mDomainFactory.getCustomTimeKey(customTimeId);
+            } else {
+                return null;
+            }
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(mTaskId));
+            Assert.assertTrue(mScheduleDateTime != null);
+
+            return mScheduleDateTime.getTime().getTimePair().mCustomTimeKey;
+        }
+    }
+
+    @Nullable
+    @Override
+    protected HourMinute getScheduleHourMinute() {
+        if (mRemoteInstanceRecord != null) {
+            Assert.assertTrue(TextUtils.isEmpty(mTaskId));
+            Assert.assertTrue(mScheduleDateTime == null);
+
+            Integer hour = mRemoteInstanceRecord.getScheduleHour();
+            Integer minute = mRemoteInstanceRecord.getScheduleMinute();
+
+            if (hour == null) {
+                Assert.assertTrue(minute == null);
+
+                return null;
+            } else {
+                Assert.assertTrue(minute != null);
+
+                return new HourMinute(hour, minute);
+            }
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(mTaskId));
+            Assert.assertTrue(mScheduleDateTime != null);
+
+            return mScheduleDateTime.getTime().getTimePair().mHourMinute;
+        }
     }
 }

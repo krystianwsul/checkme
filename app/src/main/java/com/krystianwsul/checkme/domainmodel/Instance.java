@@ -47,22 +47,10 @@ public abstract class Instance {
     protected abstract Date getScheduleDate();
 
     @Nullable
-    CustomTimeKey getScheduleCustomTimeKey() {
-        Time scheduleTime = getScheduleTime();
-        if (scheduleTime instanceof CustomTime)
-            return ((CustomTime) scheduleTime).getCustomTimeKey();
-        else
-            return null;
-    }
+    protected abstract CustomTimeKey getScheduleCustomTimeKey();
 
     @Nullable
-    private HourMinute getScheduleHourMinute() {
-        Time scheduleTime = getScheduleTime();
-        if (scheduleTime instanceof NormalTime)
-            return ((NormalTime) scheduleTime).getHourMinute();
-        else
-            return null;
-    }
+    protected abstract HourMinute getScheduleHourMinute();
 
     @NonNull
     protected abstract Time getScheduleTime();

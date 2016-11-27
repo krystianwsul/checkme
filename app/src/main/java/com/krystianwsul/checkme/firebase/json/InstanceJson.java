@@ -7,7 +7,7 @@ import junit.framework.Assert;
 public class InstanceJson {
     private Long done;
 
-    private int scheduleYear;
+    private int scheduleYear; // todo remove
     private int scheduleMonth;
     private int scheduleDay;
 
@@ -70,33 +70,6 @@ public class InstanceJson {
 
     public Long getDone() {
         return done;
-    }
-
-    public int getScheduleYear() {
-        return scheduleYear;
-    }
-
-    public int getScheduleMonth() {
-        return scheduleMonth;
-    }
-
-    public int getScheduleDay() {
-        return scheduleDay;
-    }
-
-    @Nullable
-    public String getScheduleCustomTimeId() {
-        return scheduleCustomTimeId;
-    }
-
-    @Nullable
-    public Integer getScheduleHour() {
-        return scheduleHour;
-    }
-
-    @Nullable
-    public Integer getScheduleMinute() {
-        return scheduleMinute;
     }
 
     @Nullable

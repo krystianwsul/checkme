@@ -13,18 +13,28 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class RemoteInstanceRecord extends RemoteRecord {
+    private static final Pattern sHourMinutePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$");
+    private static final Pattern sCustomTimePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$");
+
     @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
     @NonNull
     private final InstanceJson mInstanceJson;
 
-    RemoteInstanceRecord(boolean create, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull InstanceJson instanceJson) {
+    @NonNull
+    private final ScheduleKey mScheduleKey;
+
+    RemoteInstanceRecord(boolean create, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull InstanceJson instanceJson, @NonNull ScheduleKey scheduleKey) {
         super(create);
 
         mRemoteTaskRecord = remoteTaskRecord;
         mInstanceJson = instanceJson;
+        mScheduleKey = scheduleKey;
     }
 
     @NonNull
@@ -57,7 +67,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @NonNull
     ScheduleKey getScheduleKey() {
-        return getScheduleKey(this);
+        return mScheduleKey;
     }
 
     @NonNull
@@ -78,6 +88,33 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     @NonNull
+    static ScheduleKey stringToScheduleKey(@NonNull String key) {
+        Matcher hourMinuteMatcher = sHourMinutePattern.matcher(key);
+
+        if (hourMinuteMatcher.matches()) {
+            int year = Integer.valueOf(hourMinuteMatcher.group(1));
+            int month = Integer.valueOf(hourMinuteMatcher.group(2));
+            int day = Integer.valueOf(hourMinuteMatcher.group(3));
+            int hour = Integer.valueOf(hourMinuteMatcher.group(4));
+            int minute = Integer.valueOf(hourMinuteMatcher.group(5));
+
+            return new ScheduleKey(new Date(year, month, day), new TimePair(new HourMinute(hour, minute)));
+        } else {
+            Matcher customTimeMatcher = sCustomTimePattern.matcher(key);
+            Assert.assertTrue(customTimeMatcher.matches());
+
+            int year = Integer.valueOf(customTimeMatcher.group(1));
+            int month = Integer.valueOf(customTimeMatcher.group(2));
+            int day = Integer.valueOf(customTimeMatcher.group(3));
+
+            String customTimeId = customTimeMatcher.group(4);
+            Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
+
+            return new ScheduleKey(new Date(year, month, day), new TimePair(new CustomTimeKey(customTimeId)));
+        }
+    }
+
+    @NonNull
     @Override
     protected InstanceJson getCreateObject() {
         return mInstanceJson;
@@ -93,30 +130,47 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     public int getScheduleYear() {
-        return mInstanceJson.getScheduleYear();
+        return mScheduleKey.ScheduleDate.getYear();
     }
 
     public int getScheduleMonth() {
-        return mInstanceJson.getScheduleMonth();
+        return mScheduleKey.ScheduleDate.getMonth();
     }
 
     public int getScheduleDay() {
-        return mInstanceJson.getScheduleDay();
+        return mScheduleKey.ScheduleDate.getDay();
     }
 
     @Nullable
     public String getScheduleCustomTimeId() {
-        return mInstanceJson.getScheduleCustomTimeId();
+        CustomTimeKey customTimeKey = mScheduleKey.ScheduleTimePair.mCustomTimeKey;
+        if (customTimeKey != null) {
+            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
+
+            return customTimeKey.mRemoteCustomTimeId;
+        } else {
+            return null;
+        }
     }
 
     @Nullable
     public Integer getScheduleHour() {
-        return mInstanceJson.getScheduleHour();
+        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.mHourMinute;
+        if (hourMinute != null) {
+            return hourMinute.getHour();
+        } else {
+            return null;
+        }
     }
 
     @Nullable
     public Integer getScheduleMinute() {
-        return mInstanceJson.getScheduleMinute();
+        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.mHourMinute;
+        if (hourMinute != null) {
+            return hourMinute.getMinute();
+        } else {
+            return null;
+        }
     }
 
     @Nullable

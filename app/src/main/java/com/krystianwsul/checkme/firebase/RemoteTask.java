@@ -280,7 +280,9 @@ public class RemoteTask extends Task {
 
         InstanceJson instanceJson = new InstanceJson(null, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute, null, null, null, null, null, null, now.getLong());
 
-        RemoteInstanceRecord remoteInstanceRecord = mRemoteTaskRecord.newRemoteInstanceRecord(instanceJson);
+        ScheduleKey scheduleKey = new ScheduleKey(scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
+
+        RemoteInstanceRecord remoteInstanceRecord = mRemoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey);
 
         mExistingRemoteInstances.put(remoteInstance.getScheduleKey(), remoteInstance);
 

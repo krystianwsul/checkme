@@ -129,10 +129,10 @@ public class RemoteFactory {
         return remoteTask;
     }
 
-    public void save() {
+    public void save(boolean causedByRemote) {
         Assert.assertTrue(!mRemoteManager.isSaved());
 
-        mRemoteManager.save();
+        mRemoteManager.save(causedByRemote);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

@@ -181,14 +181,14 @@ public class DomainFactory {
     private void save(@NonNull Context context, int dataId) {
         ArrayList<Integer> dataIds = new ArrayList<>();
         dataIds.add(dataId);
-        save(context, dataIds);
+        save(context, dataIds, false);
     }
 
-    private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds) {
+    private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, boolean causedByRemote) {
         mLocalFactory.save(context);
 
         if (mRemoteFactory != null)
-            mRemoteFactory.save();
+            mRemoteFactory.save(causedByRemote);
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(dataIds);
     }
@@ -313,7 +313,7 @@ public class DomainFactory {
 
         updateNotifications(context, new ArrayList<>(), ExactTimeStamp.getNow());
 
-        ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+        save(context, new ArrayList<>(), true);
     }
 
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
@@ -1267,7 +1267,7 @@ public class DomainFactory {
 
         updateNotifications(context, new ArrayList<>(), now);
 
-        save(context, dataIds);
+        save(context, dataIds, false);
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {

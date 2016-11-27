@@ -2017,6 +2017,8 @@ public class DomainFactory {
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
         Map<Integer, CustomTimeRelevance> customTimeRelevances = Stream.of(mLocalFactory.getLocalCustomTimes()).collect(Collectors.toMap(LocalCustomTime::getId, CustomTimeRelevance::new));
 
+        // todo account for a custom time being used only in a remote task or instance
+
         Stream.of(tasks)
                 .filter(task -> task.current(now))
                 .filter(task -> task.isRootTask(now))

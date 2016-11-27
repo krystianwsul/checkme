@@ -113,11 +113,10 @@ public class RemoteManager {
     private RemoteProjectRecord getRemoteProjectRecord(@NonNull Set<String> recordOf, @NonNull String name, @NonNull ExactTimeStamp now) {
         List<RemoteProjectRecord> matches = Stream.of(mRemoteProjectRecords.values())
                 .filter(remoteProjectRecord -> remoteProjectRecord.getRecordOf().equals(recordOf))
+                .filter(remoteProjectRecord -> remoteProjectRecord.getEndTime() == null)
                 .collect(Collectors.toList());
 
         if (!matches.isEmpty()) {
-            Assert.assertTrue(matches.size() == 1);
-
             return matches.get(0);
         } else {
             ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>());

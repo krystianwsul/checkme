@@ -9,7 +9,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 
 import junit.framework.Assert;
@@ -87,10 +89,30 @@ public class DatabaseWrapper {
     }
 
     @NonNull
-    public static String getScheduleRecordId(@NonNull String taskId) {
+    public static String getScheduleRecordId(@NonNull String projectId, @NonNull String taskId) {
         Assert.assertTrue(sRootReference != null);
 
-        String id = sRootReference.child(RECORDS_KEY + "/" + taskId + "/" + RemoteTaskRecord.TASK_JSON + "/" + RemoteScheduleRecord.SCHEDULES).push().getKey();
+        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteTaskRecord.TASKS + "/" + RemoteScheduleRecord.SCHEDULES).push().getKey();
+        Assert.assertTrue(!TextUtils.isEmpty(id));
+
+        return id;
+    }
+
+    @NonNull
+    public static String getTaskRecordId(@NonNull String projectId) {
+        Assert.assertTrue(sRootReference != null);
+
+        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteTaskRecord.TASKS).push().getKey();
+        Assert.assertTrue(!TextUtils.isEmpty(id));
+
+        return id;
+    }
+
+    @NonNull
+    public static String getTaskHierarchyRecordId(@NonNull String projectId) {
+        Assert.assertTrue(sRootReference != null);
+
+        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteTaskHierarchyRecord.TASKHIERARCHIES).push().getKey();
         Assert.assertTrue(!TextUtils.isEmpty(id));
 
         return id;

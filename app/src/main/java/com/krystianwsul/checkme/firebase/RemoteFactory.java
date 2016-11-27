@@ -70,11 +70,11 @@ public class RemoteFactory {
 
         mRemoteManager = new RemoteManager(children);
 
-        mRemoteTasks = Stream.of(mRemoteManager.mRemoteTaskRecords.values())
+        mRemoteTasks = Stream.of(mRemoteManager.getRemoteTaskRecords())
                 .map(remoteTaskRecord -> new RemoteTask(domainFactory, remoteTaskRecord))
                 .collect(Collectors.toMap(RemoteTask::getId, remoteTask -> remoteTask));
 
-        Stream.of(mRemoteManager.mRemoteTaskHierarchyRecords.values())
+        Stream.of(mRemoteManager.getRemoteTaskHierarchyRecords())
                 .map(remoteTaskHierarchyRecord -> new RemoteTaskHierarchy(domainFactory, remoteTaskHierarchyRecord))
                 .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
 
@@ -114,13 +114,34 @@ public class RemoteFactory {
     }
 
     @NonNull
+    private String getProjectName(@NonNull Set<String> recordOf) {
+        Assert.assertTrue(mDomainFactory.getFriends() != null);
+
+        Map<String, UserData> lookup = new HashMap<>(mDomainFactory.getFriends());
+        lookup.put(UserData.getKey(mUserData.email), mUserData);
+
+        List<String> names = new ArrayList<>();
+        for (String key : recordOf) {
+            UserData userData = lookup.get(key);
+            Assert.assertTrue(userData != null); // todo what if one of the owners isn't a friend?
+
+            String first = userData.displayName.split(" ")[0];
+            Assert.assertTrue(!TextUtils.isEmpty(first));
+
+            names.add(first);
+        }
+
+        return TextUtils.join("/", names);
+    }
+
+    @NonNull
     public RemoteTask createRemoteTaskHelper(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull Collection<String> friends) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
 
         Set<String> recordOf = new HashSet<>(friends);
         recordOf.add(UserData.getKey(mUserData.email));
 
-        RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(recordOf, taskJson));
+        RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(recordOf, taskJson, getProjectName(recordOf), now);
 
         RemoteTask remoteTask = new RemoteTask(mDomainFactory, remoteTaskRecord);
         Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
@@ -143,7 +164,7 @@ public class RemoteFactory {
     @NonNull
     RemoteTask createChildTask(@NonNull RemoteTask parentTask, @NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
-        RemoteTaskRecord childTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(parentTask.getRecordOf(), taskJson));
+        RemoteTaskRecord childTaskRecord = mRemoteManager.newRemoteTaskRecord(parentTask.getRecordOf(), taskJson, getProjectName(parentTask.getRecordOf()), now);
 
         RemoteTask childTask = new RemoteTask(mDomainFactory, childTaskRecord);
         Assert.assertTrue(!mRemoteTasks.containsKey(childTask.getId()));
@@ -157,7 +178,7 @@ public class RemoteFactory {
 
     void createTaskHierarchy(@NonNull RemoteTask parentRemoteTask, @NonNull RemoteTask childRemoteTask, @NonNull ExactTimeStamp now) {
         TaskHierarchyJson taskHierarchyJson = new TaskHierarchyJson(parentRemoteTask.getId(), childRemoteTask.getId(), now.getLong(), null);
-        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(new JsonWrapper(parentRemoteTask.getRecordOf(), taskHierarchyJson));
+        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(parentRemoteTask.getRecordOf(), taskHierarchyJson, getProjectName(parentRemoteTask.getRecordOf()), now);
 
         RemoteTaskHierarchy remoteTaskHierarchy = new RemoteTaskHierarchy(mDomainFactory, remoteTaskHierarchyRecord);
 
@@ -194,7 +215,7 @@ public class RemoteFactory {
         }
 
         TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote(), instanceJsons);
-        RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(new JsonWrapper(recordOf, taskJson));
+        RemoteTaskRecord remoteTaskRecord = mRemoteManager.newRemoteTaskRecord(recordOf, taskJson, getProjectName(recordOf), now);
 
         RemoteTask remoteTask = new RemoteTask(mDomainFactory, remoteTaskRecord);
         Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
@@ -211,7 +232,7 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public RemoteTaskHierarchy copyLocalTaskHierarchy(@NonNull LocalTaskHierarchy localTaskHierarchy, @NonNull Set<String> recordOf, @NonNull String remoteParentTaskId, @NonNull String remoteChildTaskId) {
+    public RemoteTaskHierarchy copyLocalTaskHierarchy(@NonNull LocalTaskHierarchy localTaskHierarchy, @NonNull Set<String> recordOf, @NonNull String remoteParentTaskId, @NonNull String remoteChildTaskId, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(!TextUtils.isEmpty(remoteParentTaskId));
         Assert.assertTrue(!TextUtils.isEmpty(remoteChildTaskId));
         Assert.assertTrue(!recordOf.isEmpty());
@@ -219,7 +240,7 @@ public class RemoteFactory {
         Long endTime = (localTaskHierarchy.getEndExactTimeStamp() != null ? localTaskHierarchy.getEndExactTimeStamp().getLong() : null);
 
         TaskHierarchyJson taskHierarchyJson = new TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, localTaskHierarchy.getStartExactTimeStamp().getLong(), endTime);
-        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(new JsonWrapper(recordOf, taskHierarchyJson));
+        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteManager.newRemoteTaskHierarchyRecord(recordOf, taskHierarchyJson, getProjectName(recordOf), now);
 
         RemoteTaskHierarchy remoteTaskHierarchy = new RemoteTaskHierarchy(mDomainFactory, remoteTaskHierarchyRecord);
 
@@ -233,28 +254,6 @@ public class RemoteFactory {
         Assert.assertTrue(!recordOf.isEmpty());
 
         Long done = (localInstance.getDone() != null ? localInstance.getDone().getLong() : null);
-
-        Date scheduleDate = localInstance.getScheduleDate();
-        TimePair scheduleTimePair = localInstance.getScheduleTimePair();
-
-        String scheduleRemoteCustomTimeId;
-        Integer scheduleHour;
-        Integer scheduleMinute;
-        if (scheduleTimePair.mHourMinute != null) {
-            Assert.assertTrue(scheduleTimePair.mCustomTimeKey == null);
-
-            scheduleRemoteCustomTimeId = null;
-
-            scheduleHour = scheduleTimePair.mHourMinute.getHour();
-            scheduleMinute = scheduleTimePair.mHourMinute.getMinute();
-        } else {
-            Assert.assertTrue(scheduleTimePair.mCustomTimeKey != null);
-
-            scheduleRemoteCustomTimeId = getRemoteCustomTimeId(scheduleTimePair.mCustomTimeKey, recordOf);
-
-            scheduleHour = null;
-            scheduleMinute = null;
-        }
 
         Date instanceDate = localInstance.getInstanceDate();
         TimePair instanceTimePair = localInstance.getInstanceTimePair();
@@ -278,7 +277,7 @@ public class RemoteFactory {
             instanceMinute = null;
         }
 
-        return new InstanceJson(done, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), scheduleRemoteCustomTimeId, scheduleHour, scheduleMinute, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.getHierarchyTime());
+        return new InstanceJson(done, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.getHierarchyTime());
     }
 
     void updateRecordOf(@NonNull RemoteTask startingRemoteTask, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {

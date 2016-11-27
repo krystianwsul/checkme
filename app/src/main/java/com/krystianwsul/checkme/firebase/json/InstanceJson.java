@@ -7,15 +7,6 @@ import junit.framework.Assert;
 public class InstanceJson {
     private Long done;
 
-    private int scheduleYear; // todo remove
-    private int scheduleMonth;
-    private int scheduleDay;
-
-    private String scheduleCustomTimeId;
-
-    private Integer scheduleHour;
-    private Integer scheduleMinute;
-
     private Integer instanceYear;
     private Integer instanceMonth;
     private Integer instanceDay;
@@ -32,10 +23,7 @@ public class InstanceJson {
 
     }
 
-    public InstanceJson(@Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable String instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
-        Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
-        Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
-
+    public InstanceJson(@Nullable Long done, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable String instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
         Assert.assertTrue((instanceYear == null) == (instanceMonth == null));
         Assert.assertTrue((instanceYear == null) == (instanceDay == null));
         boolean hasInstanceDate = (instanceYear != null);
@@ -46,15 +34,6 @@ public class InstanceJson {
         Assert.assertTrue(hasInstanceDate == hasInstanceTime);
 
         this.done = done;
-
-        this.scheduleYear = scheduleYear;
-        this.scheduleMonth = scheduleMonth;
-        this.scheduleDay = scheduleDay;
-
-        this.scheduleCustomTimeId = scheduleCustomTimeId;
-
-        this.scheduleHour = scheduleHour;
-        this.scheduleMinute = scheduleMinute;
 
         this.instanceYear = instanceYear;
         this.instanceMonth = instanceMonth;

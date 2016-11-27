@@ -29,7 +29,7 @@ public abstract class RemoteScheduleRecord extends RemoteRecord {
     RemoteScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
         super(true);
 
-        mId = DatabaseWrapper.getScheduleRecordId(remoteTaskRecord.getId());
+        mId = DatabaseWrapper.getScheduleRecordId(remoteTaskRecord.getProjectId(), remoteTaskRecord.getId());
         mRemoteTaskRecord = remoteTaskRecord;
         mScheduleWrapper = scheduleWrapper;
     }
@@ -48,7 +48,7 @@ public abstract class RemoteScheduleRecord extends RemoteRecord {
     @NonNull
     @Override
     protected String getKey() {
-        return mRemoteTaskRecord.getId() + "/" + RemoteTaskRecord.TASK_JSON + "/schedules/" + mId;
+        return mRemoteTaskRecord.getKey() + "/" + SCHEDULES + "/" + mId;
     }
 
     public abstract long getStartTime();

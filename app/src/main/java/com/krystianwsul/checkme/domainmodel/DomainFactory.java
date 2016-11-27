@@ -1477,7 +1477,7 @@ public class DomainFactory {
     }
 
     public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
-        MyCrashlytics.log("DomainFactory.updateNotifications");
+        MyCrashlytics.log("DomainFactory.updateNotificationsTick");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1781,15 +1781,15 @@ public class DomainFactory {
             RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
             Assert.assertTrue(childRemoteTask != null);
 
-            RemoteTaskHierarchy remoteTaskHierarchy = mRemoteFactory.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId());
+            RemoteTaskHierarchy remoteTaskHierarchy = mRemoteFactory.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId(), now);
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 
         for (Pair<LocalTask, Collection<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
-            pair.first.delete();
-
             Stream.of(pair.second)
                     .forEach(LocalInstance::delete);
+
+            pair.first.delete();
         }
 
         Stream.of(localToRemoteConversion.mLocalTaskHierarchies)

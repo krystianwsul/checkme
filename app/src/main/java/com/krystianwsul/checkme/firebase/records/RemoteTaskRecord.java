@@ -7,8 +7,8 @@ import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
-import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
 import com.krystianwsul.checkme.utils.ScheduleKey;
@@ -17,9 +17,19 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-public class RemoteTaskRecord extends RootRemoteRecord {
-    public static final String TASK_JSON = "taskJson";
+public class RemoteTaskRecord extends RemoteRecord {
+    public static final String TASKS = "tasks";
+
+    @NonNull
+    private final String mId;
+
+    @NonNull
+    private final RemoteProjectRecord mRemoteProjectRecord;
+
+    @NonNull
+    private final TaskJson mTaskJson;
 
     @NonNull
     private final Map<ScheduleKey, RemoteInstanceRecord> mRemoteInstanceRecords = new HashMap<>();
@@ -39,20 +49,28 @@ public class RemoteTaskRecord extends RootRemoteRecord {
     @NonNull
     public final Map<String, RemoteMonthlyWeekScheduleRecord> mRemoteMonthlyWeekScheduleRecords = new HashMap<>();
 
-    RemoteTaskRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
+    RemoteTaskRecord(@NonNull String id, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskJson taskJson) {
+        super(false);
+
+        mId = id;
+        mRemoteProjectRecord = remoteProjectRecord;
+        mTaskJson = taskJson;
 
         initialize();
     }
 
-    RemoteTaskRecord(@NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+    RemoteTaskRecord(@NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskJson taskJson) {
+        super(true);
+
+        mId = DatabaseWrapper.getTaskRecordId(remoteProjectRecord.getId());
+        mRemoteProjectRecord = remoteProjectRecord;
+        mTaskJson = taskJson;
 
         initialize();
     }
 
     private void initialize() {
-        for (Map.Entry<String, InstanceJson> entry : getTaskJson().getInstances().entrySet()) {
+        for (Map.Entry<String, InstanceJson> entry : mTaskJson.getInstances().entrySet()) {
             String key = entry.getKey();
             Assert.assertTrue(!TextUtils.isEmpty(key));
 
@@ -66,7 +84,7 @@ public class RemoteTaskRecord extends RootRemoteRecord {
             mRemoteInstanceRecords.put(scheduleKey, remoteInstanceRecord);
         }
 
-        for (Map.Entry<String, ScheduleWrapper> entry : getTaskJson().getSchedules().entrySet()) {
+        for (Map.Entry<String, ScheduleWrapper> entry : mTaskJson.getSchedules().entrySet()) {
             ScheduleWrapper scheduleWrapper = entry.getValue();
             Assert.assertTrue(scheduleWrapper != null);
 
@@ -104,45 +122,83 @@ public class RemoteTaskRecord extends RootRemoteRecord {
     }
 
     @NonNull
-    private TaskJson getTaskJson() {
-        TaskJson taskJson = mJsonWrapper.taskJson;
-        Assert.assertTrue(taskJson != null);
+    @Override
+    protected TaskJson getCreateObject() {
+        if (!mCreate) { // because of duplicate functionality when converting local task
+            mTaskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet())
+                    .collect(Collectors.toMap(entry -> RemoteInstanceRecord.scheduleKeyToString(entry.getKey()), entry -> entry.getValue().getCreateObject())));
+        }
 
-        return taskJson;
+        Map<String, ScheduleWrapper> scheduleWrappers = new HashMap<>();
+
+        for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteSingleScheduleRecords.values())
+            scheduleWrappers.put(remoteSingleScheduleRecord.getId(), remoteSingleScheduleRecord.getCreateObject());
+
+        for (RemoteDailyScheduleRecord remoteDailyScheduleRecord : mRemoteDailyScheduleRecords.values())
+            scheduleWrappers.put(remoteDailyScheduleRecord.getId(), remoteDailyScheduleRecord.getCreateObject());
+
+        for (RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord : mRemoteWeeklyScheduleRecords.values())
+            scheduleWrappers.put(remoteWeeklyScheduleRecord.getId(), remoteWeeklyScheduleRecord.getCreateObject());
+
+        for (RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord : mRemoteMonthlyDayScheduleRecords.values())
+            scheduleWrappers.put(remoteMonthlyDayScheduleRecord.getId(), remoteMonthlyDayScheduleRecord.getCreateObject());
+
+        for (RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord : mRemoteMonthlyWeekScheduleRecords.values())
+            scheduleWrappers.put(remoteMonthlyWeekScheduleRecord.getId(), remoteMonthlyWeekScheduleRecord.getCreateObject());
+
+        mTaskJson.setSchedules(scheduleWrappers);
+
+        return mTaskJson;
+    }
+
+    @NonNull
+    public String getId() {
+        return mId;
+    }
+
+    @NonNull
+    @Override
+    protected String getKey() {
+        return mRemoteProjectRecord.getKey() + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + TASKS + "/" + mId;
+    }
+
+    @NonNull
+    String getProjectId() {
+        return mRemoteProjectRecord.getId();
     }
 
     @NonNull
     public String getName() {
-        return getTaskJson().getName();
+        return mTaskJson.getName();
     }
 
     public long getStartTime() {
-        return getTaskJson().getStartTime();
+        return mTaskJson.getStartTime();
     }
 
     @Nullable
     public Long getEndTime() {
-        return getTaskJson().getEndTime();
+        return mTaskJson.getEndTime();
     }
 
     @Nullable
     public String getNote() {
-        return getTaskJson().getNote();
+        return mTaskJson.getNote();
     }
 
     @Nullable
     public Integer getOldestVisibleYear() {
-        return getTaskJson().getOldestVisibleYear();
+        return mTaskJson.getOldestVisibleYear();
     }
 
     @Nullable
     public Integer getOldestVisibleMonth() {
-        return getTaskJson().getOldestVisibleMonth();
+        return mTaskJson.getOldestVisibleMonth();
     }
 
     @Nullable
     public Integer getOldestVisibleDay() {
-        return getTaskJson().getOldestVisibleDay();
+        return mTaskJson.getOldestVisibleDay();
     }
 
     @NonNull
@@ -153,32 +209,32 @@ public class RemoteTaskRecord extends RootRemoteRecord {
     public void setEndTime(long endTime) {
         Assert.assertTrue(getEndTime() == null);
 
-        getTaskJson().setEndTime(endTime);
-        addValue(getId() + "/" + TASK_JSON + "/endTime", endTime);
+        mTaskJson.setEndTime(endTime);
+        addValue(getKey() + "/endTime", endTime);
     }
 
     public void setOldestVisibleYear(int oldestVisibleYear) {
         if (getOldestVisibleYear() != null && getOldestVisibleYear().equals(oldestVisibleYear))
             return;
 
-        getTaskJson().setOldestVisibleYear(oldestVisibleYear);
-        addValue(getId() + "/" + TASK_JSON + "/oldestVisibleYear", oldestVisibleYear);
+        mTaskJson.setOldestVisibleYear(oldestVisibleYear);
+        addValue(getKey() + "/oldestVisibleYear", oldestVisibleYear);
     }
 
     public void setOldestVisibleMonth(int oldestVisibleMonth) {
         if (getOldestVisibleMonth() != null && getOldestVisibleMonth().equals(oldestVisibleMonth))
             return;
 
-        getTaskJson().setOldestVisibleMonth(oldestVisibleMonth);
-        addValue(getId() + "/" + TASK_JSON + "/oldestVisibleMonth", oldestVisibleMonth);
+        mTaskJson.setOldestVisibleMonth(oldestVisibleMonth);
+        addValue(getKey() + "/oldestVisibleMonth", oldestVisibleMonth);
     }
 
     public void setOldestVisibleDay(int oldestVisibleDay) {
         if (getOldestVisibleDay() != null && getOldestVisibleDay().equals(oldestVisibleDay))
             return;
 
-        getTaskJson().setOldestVisibleDay(oldestVisibleDay);
-        addValue(getId() + "/" + TASK_JSON + "/oldestVisibleDay", oldestVisibleDay);
+        mTaskJson.setOldestVisibleDay(oldestVisibleDay);
+        addValue(getKey() + "/oldestVisibleDay", oldestVisibleDay);
     }
 
     public void setName(@NonNull String name) {
@@ -187,8 +243,8 @@ public class RemoteTaskRecord extends RootRemoteRecord {
         if (getName().equals(name))
             return;
 
-        getTaskJson().setName(name);
-        addValue(getId() + "/" + TASK_JSON + "/name", name);
+        mTaskJson.setName(name);
+        addValue(getKey() + "/name", name);
     }
 
     public void setNote(@Nullable String note) {
@@ -200,8 +256,8 @@ public class RemoteTaskRecord extends RootRemoteRecord {
                 return;
         }
 
-        getTaskJson().setNote(note);
-        addValue(getId() + "/" + TASK_JSON + "/note", note);
+        mTaskJson.setNote(note);
+        addValue(getKey() + "/note", note);
     }
 
     @Override
@@ -211,7 +267,7 @@ public class RemoteTaskRecord extends RootRemoteRecord {
         Assert.assertTrue(!mUpdated);
 
         if (mDelete) {
-            Log.e("asdf", "RemoteRecord.getValues deleting " + this);
+            Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this);
 
             Assert.assertTrue(!mCreate);
             Assert.assertTrue(mUpdate != null);
@@ -219,45 +275,18 @@ public class RemoteTaskRecord extends RootRemoteRecord {
             mDeleted = true;
             values.put(getKey(), null);
         } else if (mCreate) {
-            Log.e("asdf", "RemoteRecord.getValues creating " + this);
+            Log.e("asdf", "RemoteTaskRecord.getValues creating " + this);
 
             Assert.assertTrue(mUpdate == null);
 
             mCreated = true;
-
-            JsonWrapper jsonWrapper = getCreateObject();
-            TaskJson taskJson = jsonWrapper.taskJson;
-
-            if (taskJson.getInstances().isEmpty()) { // because of duplicate functionality when converting local task
-                taskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet())
-                        .collect(Collectors.toMap(entry -> RemoteInstanceRecord.scheduleKeyToString(entry.getKey()), entry -> entry.getValue().getCreateObject())));
-            }
-
-            Map<String, ScheduleWrapper> scheduleWrappers = new HashMap<>();
-
-            for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteSingleScheduleRecords.values())
-                scheduleWrappers.put(remoteSingleScheduleRecord.getId(), remoteSingleScheduleRecord.getCreateObject());
-
-            for (RemoteDailyScheduleRecord remoteDailyScheduleRecord : mRemoteDailyScheduleRecords.values())
-                scheduleWrappers.put(remoteDailyScheduleRecord.getId(), remoteDailyScheduleRecord.getCreateObject());
-
-            for (RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord : mRemoteWeeklyScheduleRecords.values())
-                scheduleWrappers.put(remoteWeeklyScheduleRecord.getId(), remoteWeeklyScheduleRecord.getCreateObject());
-
-            for (RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord : mRemoteMonthlyDayScheduleRecords.values())
-                scheduleWrappers.put(remoteMonthlyDayScheduleRecord.getId(), remoteMonthlyDayScheduleRecord.getCreateObject());
-
-            for (RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord : mRemoteMonthlyWeekScheduleRecords.values())
-                scheduleWrappers.put(remoteMonthlyWeekScheduleRecord.getId(), remoteMonthlyWeekScheduleRecord.getCreateObject());
-
-            taskJson.setSchedules(scheduleWrappers);
 
             values.put(getKey(), getCreateObject());
         } else {
             Assert.assertTrue(mUpdate != null);
 
             if (!mUpdate.isEmpty()) {
-                Log.e("asdf", "RemoteRecord.getValues updating " + this);
+                Log.e("asdf", "RemoteTaskRecord.getValues updating " + this);
 
                 mUpdated = true;
                 values.putAll(mUpdate);
@@ -335,5 +364,14 @@ public class RemoteTaskRecord extends RootRemoteRecord {
 
         mRemoteMonthlyWeekScheduleRecords.put(remoteMonthlyWeekScheduleRecord.getId(), remoteMonthlyWeekScheduleRecord);
         return remoteMonthlyWeekScheduleRecord;
+    }
+
+    @NonNull
+    public Set<String> getRecordOf() { // todo remove once projects are in place
+        return mRemoteProjectRecord.getRecordOf();
+    }
+
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) { // todo remove once projects are in place
+        mRemoteProjectRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

@@ -31,14 +31,12 @@ import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMinute;
 
 import junit.framework.Assert;
 
@@ -255,30 +253,7 @@ public class RemoteTask extends Task {
 
     @NonNull
     RemoteInstanceRecord createRemoteInstanceRecord(@NonNull RemoteInstance remoteInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
-        String remoteCustomTimeId;
-        Integer hour;
-        Integer minute;
-
-        CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().mCustomTimeKey;
-        HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
-
-        if (customTimeKey != null) {
-            Assert.assertTrue(hourMinute == null);
-
-            remoteCustomTimeId = mDomainFactory.getRemoteCustomTimeId(customTimeKey);
-
-            hour = null;
-            minute = null;
-        } else {
-            Assert.assertTrue(hourMinute != null);
-
-            remoteCustomTimeId = null;
-
-            hour = hourMinute.getHour();
-            minute = hourMinute.getMinute();
-        }
-
-        InstanceJson instanceJson = new InstanceJson(null, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute, null, null, null, null, null, null, now.getLong());
+        InstanceJson instanceJson = new InstanceJson(null, null, null, null, null, null, null, now.getLong());
 
         ScheduleKey scheduleKey = new ScheduleKey(scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
 

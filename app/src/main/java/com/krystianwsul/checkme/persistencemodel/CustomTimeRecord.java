@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CustomTimeRecord extends Record {
     static final String TABLE_CUSTOM_TIMES = "customTimes";
@@ -80,69 +81,9 @@ public class CustomTimeRecord extends Record {
                 + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);");
     }
 
-    @SuppressWarnings("UnusedParameters")
-    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (oldVersion <= 8) {
-            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_CUSTOM_TIMES
-                    + " ADD COLUMN relevant INTEGER NOT NULL DEFAULT 1");
-
-            sqLiteDatabase.execSQL("CREATE INDEX customTimesIndexRelevant ON " + TABLE_CUSTOM_TIMES + "(relevant DESC)");
-        }
-
-        if (oldVersion < 16) {
-            sqLiteDatabase.delete(TABLE_CUSTOM_TIMES, "relevant = 0", null);
-
-            String columnList = COLUMN_ID
-                    + ", " + COLUMN_NAME
-                    + ", " + COLUMN_SUNDAY_HOUR
-                    + ", " + COLUMN_SUNDAY_MINUTE
-                    + ", " + COLUMN_MONDAY_HOUR
-                    + ", " + COLUMN_MONDAY_MINUTE
-                    + ", " + COLUMN_TUESDAY_HOUR
-                    + ", " + COLUMN_TUESDAY_MINUTE
-                    + ", " + COLUMN_WEDNESDAY_HOUR
-                    + ", " + COLUMN_WEDNESDAY_MINUTE
-                    + ", " + COLUMN_THURSDAY_HOUR
-                    + ", " + COLUMN_THURSDAY_MINUTE
-                    + ", " + COLUMN_FRIDAY_HOUR
-                    + ", " + COLUMN_FRIDAY_MINUTE
-                    + ", " + COLUMN_SATURDAY_HOUR
-                    + ", " + COLUMN_SATURDAY_MINUTE
-                    + ", " + COLUMN_CURRENT;
-
-            sqLiteDatabase.execSQL("DROP INDEX customTimesIndexRelevant");
-            sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t1_backup(" + columnList + ");");
-            sqLiteDatabase.execSQL("INSERT INTO t1_backup SELECT " + columnList + " FROM " + TABLE_CUSTOM_TIMES + ";");
-            sqLiteDatabase.execSQL("DROP TABLE " + TABLE_CUSTOM_TIMES + ";");
-            sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_CUSTOM_TIMES
-                            + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                            + COLUMN_NAME + " TEXT NOT NULL, "
-                            + COLUMN_SUNDAY_HOUR + " INTEGER NOT NULL, "
-                            + COLUMN_SUNDAY_MINUTE + " INTEGER NOT NULL, "
-                            + COLUMN_MONDAY_HOUR + " INTEGER NOT NULL, "
-                            + COLUMN_MONDAY_MINUTE + " INTEGER NOT NULL, "
-                            + COLUMN_TUESDAY_HOUR + " INTEGER NOT NULL, "
-                            + COLUMN_TUESDAY_MINUTE + " INTEGER NOT NULL, "
-                            + COLUMN_WEDNESDAY_HOUR + " INTEGER NOT NULL, "
-                            + COLUMN_WEDNESDAY_MINUTE + " INTEGER NOT NULL, "
-                            + COLUMN_THURSDAY_HOUR + " INTEGER NOT NULL, "
-                            + COLUMN_THURSDAY_MINUTE + " INTEGER NOT NULL, "
-                            + COLUMN_FRIDAY_HOUR + " INTEGER NOT NULL, "
-                            + COLUMN_FRIDAY_MINUTE + " INTEGER NOT NULL, "
-                            + COLUMN_SATURDAY_HOUR + " INTEGER NOT NULL, "
-                            + COLUMN_SATURDAY_MINUTE + " INTEGER NOT NULL, "
-                    + COLUMN_CURRENT + " INTEGER NOT NULL DEFAULT 1);");
-            sqLiteDatabase.execSQL("INSERT INTO " + TABLE_CUSTOM_TIMES + " SELECT * FROM t1_backup;");
-            sqLiteDatabase.execSQL("DROP TABLE t1_backup;");
-        }
-    }
-
-    static ArrayList<CustomTimeRecord> getCustomTimeRecords(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        ArrayList<CustomTimeRecord> customTimeRecords = new ArrayList<>();
+    @NonNull
+    static List<CustomTimeRecord> getCustomTimeRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
+        List<CustomTimeRecord> customTimeRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, null, null, null, null, null);
         cursor.moveToFirst();
@@ -155,9 +96,8 @@ public class CustomTimeRecord extends Record {
         return customTimeRecords;
     }
 
-    private static CustomTimeRecord cursorToCustomTimeRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static CustomTimeRecord cursorToCustomTimeRecord(@NonNull Cursor cursor) {
         int id = cursor.getInt(0);
         String name = cursor.getString(1);
         int sundayHour = cursor.getInt(2);
@@ -179,8 +119,7 @@ public class CustomTimeRecord extends Record {
         return new CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current);
     }
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase) {
         return getMaxId(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID);
     }
 

@@ -11,18 +11,18 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class InstanceShownRecord extends Record {
-    private static final String TABLE_INSTANCES_SHOWN = "instancesShown";
+    static final String TABLE_INSTANCES_SHOWN = "instancesShown";
 
-    private static final String COLUMN_ID = "_id";
-    private static final String COLUMN_TASK_ID = "taskId";
-    private static final String COLUMN_SCHEDULE_YEAR = "scheduleYear";
-    private static final String COLUMN_SCHEDULE_MONTH = "scheduleMonth";
-    private static final String COLUMN_SCHEDULE_DAY = "scheduleDay";
-    private static final String COLUMN_SCHEDULE_CUSTOM_TIME_ID = "scheduleCustomTimeId";
-    private static final String COLUMN_SCHEDULE_HOUR = "scheduleHour";
-    private static final String COLUMN_SCHEDULE_MINUTE = "scheduleMinute";
-    private static final String COLUMN_NOTIFIED = "notified";
-    private static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
+    static final String COLUMN_ID = "_id";
+    static final String COLUMN_TASK_ID = "taskId";
+    static final String COLUMN_SCHEDULE_YEAR = "scheduleYear";
+    static final String COLUMN_SCHEDULE_MONTH = "scheduleMonth";
+    static final String COLUMN_SCHEDULE_DAY = "scheduleDay";
+    static final String COLUMN_SCHEDULE_CUSTOM_TIME_ID = "scheduleCustomTimeId";
+    static final String COLUMN_SCHEDULE_HOUR = "scheduleHour";
+    static final String COLUMN_SCHEDULE_MINUTE = "scheduleMinute";
+    static final String COLUMN_NOTIFIED = "notified";
+    static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
 
     private final int mId;
     private final String mTaskId;
@@ -42,18 +42,20 @@ public class InstanceShownRecord extends Record {
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_INSTANCES_SHOWN
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + COLUMN_TASK_ID + " INTEGER NOT NULL REFERENCES " + TaskRecord.TABLE_TASKS + "(" + TaskRecord.COLUMN_ID + "), "
+                + COLUMN_TASK_ID + " TEXT NOT NULL, "
                 + COLUMN_SCHEDULE_YEAR + " INTEGER NOT NULL, "
                 + COLUMN_SCHEDULE_MONTH + " INTEGER NOT NULL, "
                 + COLUMN_SCHEDULE_DAY + " INTEGER NOT NULL, "
-                + COLUMN_SCHEDULE_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
+                + COLUMN_SCHEDULE_CUSTOM_TIME_ID + " TEXT, "
                 + COLUMN_SCHEDULE_HOUR + " INTEGER, "
                 + COLUMN_SCHEDULE_MINUTE + " INTEGER, "
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
-                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0);");
+                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0"
+                + ");");
     }
 
     @SuppressWarnings({"UnusedParameters", "EmptyMethod"})
+    @Deprecated
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
 
     }

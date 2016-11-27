@@ -36,6 +36,7 @@ class UuidRecord extends Record {
     }
 
     @SuppressWarnings("UnusedParameters")
+    @Deprecated
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Assert.assertTrue(sqLiteDatabase != null);
 

@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MonthlyDayScheduleRecord extends Record {
     private static final String TABLE_MONTHLY_DAY_SCHEDULES = "monthlyDaySchedules";
@@ -41,6 +42,7 @@ public class MonthlyDayScheduleRecord extends Record {
     }
 
     @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
+    @Deprecated
     public static void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (oldVersion <= 13)
             onCreate(sqLiteDatabase);
@@ -51,8 +53,8 @@ public class MonthlyDayScheduleRecord extends Record {
     }
 
     @NonNull
-    public static ArrayList<MonthlyDayScheduleRecord> getMonthlyDayScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
-        ArrayList<MonthlyDayScheduleRecord> monthlyDayScheduleRecords = new ArrayList<>();
+    static List<MonthlyDayScheduleRecord> getMonthlyDayScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
+        List<MonthlyDayScheduleRecord> monthlyDayScheduleRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_MONTHLY_DAY_SCHEDULES, null, null, null, null, null, null);
         cursor.moveToFirst();
@@ -99,7 +101,7 @@ public class MonthlyDayScheduleRecord extends Record {
         mMinute = minute;
     }
 
-    public int getScheduleId() {
+    int getScheduleId() {
         return mScheduleId;
     }
 

@@ -51,6 +51,7 @@ public class TaskRecord extends Record {
     }
 
     @SuppressWarnings("UnusedParameters")
+    @Deprecated
     static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (oldVersion <= 5) {
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS

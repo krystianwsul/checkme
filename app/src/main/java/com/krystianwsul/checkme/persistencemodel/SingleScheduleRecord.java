@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SingleScheduleRecord extends Record {
     private static final String TABLE_SINGLE_SCHEDULES = "singleSchedules";
@@ -43,6 +44,7 @@ public class SingleScheduleRecord extends Record {
     }
 
     @SuppressWarnings({"UnusedParameters", "EmptyMethod"})
+    @Deprecated
     public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (oldVersion < 16) {
             sqLiteDatabase.delete(TABLE_SINGLE_SCHEDULES, COLUMN_SCHEDULE_ID + " NOT IN (SELECT " + ScheduleRecord.COLUMN_ID + " FROM " + ScheduleRecord.TABLE_SCHEDULES + ")", null);
@@ -50,8 +52,8 @@ public class SingleScheduleRecord extends Record {
     }
 
     @NonNull
-    static ArrayList<SingleScheduleRecord> getSingleScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
-        ArrayList<SingleScheduleRecord> singleScheduleDateTimeRecords = new ArrayList<>();
+    static List<SingleScheduleRecord> getSingleScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
+        List<SingleScheduleRecord> singleScheduleDateTimeRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_SINGLE_SCHEDULES, null, null, null, null, null, null);
         cursor.moveToFirst();
@@ -64,9 +66,8 @@ public class SingleScheduleRecord extends Record {
         return singleScheduleDateTimeRecords;
     }
 
-    private static SingleScheduleRecord cursorToSingleScheduleRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static SingleScheduleRecord cursorToSingleScheduleRecord(@NonNull Cursor cursor) {
         int scheduleId = cursor.getInt(0);
         int year = cursor.getInt(1);
         int month = cursor.getInt(2);
@@ -101,7 +102,7 @@ public class SingleScheduleRecord extends Record {
         mMinute = minute;
     }
 
-    public int getScheduleId() {
+    int getScheduleId() {
         return mScheduleId;
     }
 

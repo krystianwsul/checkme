@@ -15,7 +15,7 @@ import java.util.List;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 17;
+    private static final int DATABASE_VERSION = 18;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
@@ -56,13 +56,12 @@ class MySQLiteHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Assert.assertTrue(sqLiteDatabase != null);
+        Assert.assertTrue(oldVersion >= 17);
 
         sqLiteDatabase.beginTransaction();
 
         try
         {
-            CustomTimeRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-
             TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
             TaskHierarchyRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
@@ -221,6 +220,37 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                 InstanceShownRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
             UuidRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
+
+            if (oldVersion < 18) {
+                String columns = InstanceShownRecord.COLUMN_ID + ", "
+                        + InstanceShownRecord.COLUMN_TASK_ID + ", "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_YEAR + ", "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_MONTH + ", "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_DAY + ", "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_CUSTOM_TIME_ID + ", "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_HOUR + ", "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_MINUTE + ", "
+                        + InstanceShownRecord.COLUMN_NOTIFIED + ", "
+                        + InstanceShownRecord.COLUMN_NOTIFICATION_SHOWN;
+
+                sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t2_backup(" + columns + ");");
+                sqLiteDatabase.execSQL("INSERT INTO t2_backup SELECT " + columns + " FROM " + InstanceShownRecord.TABLE_INSTANCES_SHOWN + ";");
+                sqLiteDatabase.execSQL("DROP TABLE " + InstanceShownRecord.TABLE_INSTANCES_SHOWN + ";");
+                sqLiteDatabase.execSQL("CREATE TABLE " + InstanceShownRecord.TABLE_INSTANCES_SHOWN
+                        + " (" + InstanceShownRecord.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + InstanceShownRecord.COLUMN_TASK_ID + " TEXT NOT NULL, "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_YEAR + " INTEGER NOT NULL, "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_MONTH + " INTEGER NOT NULL, "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_DAY + " INTEGER NOT NULL, "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_CUSTOM_TIME_ID + " TEXT, "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_HOUR + " INTEGER, "
+                        + InstanceShownRecord.COLUMN_SCHEDULE_MINUTE + " INTEGER, "
+                        + InstanceShownRecord.COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
+                        + InstanceShownRecord.COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0"
+                        + ");");
+                sqLiteDatabase.execSQL("INSERT INTO " + InstanceShownRecord.TABLE_INSTANCES_SHOWN + " SELECT * FROM t2_backup;");
+                sqLiteDatabase.execSQL("DROP TABLE t2_backup;");
+            }
 
             sqLiteDatabase.setTransactionSuccessful();
         } finally {

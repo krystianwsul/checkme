@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MonthlyWeekScheduleRecord extends Record {
     private static final String TABLE_MONTHLY_WEEK_SCHEDULES = "monthlyWeekSchedules";
@@ -44,6 +45,7 @@ public class MonthlyWeekScheduleRecord extends Record {
     }
 
     @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
+    @Deprecated
     public static void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (oldVersion <= 13)
             onCreate(sqLiteDatabase);
@@ -54,8 +56,8 @@ public class MonthlyWeekScheduleRecord extends Record {
     }
 
     @NonNull
-    static ArrayList<MonthlyWeekScheduleRecord> getMonthlyWeekScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
-        ArrayList<MonthlyWeekScheduleRecord> monthlyWeekScheduleRecords = new ArrayList<>();
+    static List<MonthlyWeekScheduleRecord> getMonthlyWeekScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
+        List<MonthlyWeekScheduleRecord> monthlyWeekScheduleRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_MONTHLY_WEEK_SCHEDULES, null, null, null, null, null, null);
         cursor.moveToFirst();
@@ -104,7 +106,7 @@ public class MonthlyWeekScheduleRecord extends Record {
         mMinute = minute;
     }
 
-    public int getScheduleId() {
+    int getScheduleId() {
         return mScheduleId;
     }
 

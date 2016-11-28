@@ -42,7 +42,7 @@ class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridge {
     @NonNull
     @Override
     public TaskKey getRootTaskKey() {
-        return new TaskKey(mRemoteMonthlyWeekScheduleRecord.getTaskId());
+        return new TaskKey(mRemoteMonthlyWeekScheduleRecord.getProjectId(), mRemoteMonthlyWeekScheduleRecord.getTaskId());
     }
 
     @NonNull

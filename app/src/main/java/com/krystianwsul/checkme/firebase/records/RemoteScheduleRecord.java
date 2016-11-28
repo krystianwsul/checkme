@@ -57,6 +57,11 @@ public abstract class RemoteScheduleRecord extends RemoteRecord {
     public abstract Long getEndTime();
 
     @NonNull
+    public String getProjectId() {
+        return mRemoteTaskRecord.getProjectId();
+    }
+
+    @NonNull
     public String getTaskId() {
         return mRemoteTaskRecord.getId();
     }

@@ -42,7 +42,7 @@ class RemoteDailyScheduleBridge implements DailyScheduleBridge {
     @NonNull
     @Override
     public TaskKey getRootTaskKey() {
-        return new TaskKey(mRemoteDailyScheduleRecord.getTaskId());
+        return new TaskKey(mRemoteDailyScheduleRecord.getProjectId(), mRemoteDailyScheduleRecord.getTaskId());
     }
 
     @NonNull

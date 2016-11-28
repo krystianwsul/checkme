@@ -43,13 +43,13 @@ public class RemoteTaskHierarchy extends TaskHierarchy {
     @NonNull
     @Override
     public TaskKey getParentTaskKey() {
-        return new TaskKey(mRemoteTaskHierarchyRecord.getParentTaskId());
+        return new TaskKey(mRemoteProject.getId(), mRemoteTaskHierarchyRecord.getParentTaskId());
     }
 
     @NonNull
     @Override
     public TaskKey getChildTaskKey() {
-        return new TaskKey(mRemoteTaskHierarchyRecord.getChildTaskId());
+        return new TaskKey(mRemoteProject.getId(), mRemoteTaskHierarchyRecord.getChildTaskId());
     }
 
     @Override

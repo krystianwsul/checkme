@@ -131,7 +131,7 @@ public class RemoteTask extends Task {
     @NonNull
     @Override
     public TaskKey getTaskKey() {
-        return new TaskKey(mRemoteTaskRecord.getId());
+        return new TaskKey(mRemoteProject.getId(), mRemoteTaskRecord.getId());
     }
 
     @NonNull

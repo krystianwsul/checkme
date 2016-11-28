@@ -1561,7 +1561,7 @@ public class DomainFactory {
 
             InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(taskKey.mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
 
-            RemoteProject remoteProject = mRemoteFactory.getTaskForce(taskKey.mRemoteTaskId).getRemoteProject();
+            RemoteProject remoteProject = mRemoteFactory.getTaskForce(taskKey).getRemoteProject();
 
             return new RemoteInstance(this, remoteProject, taskKey.mRemoteTaskId, scheduleDateTime, instanceShownRecord);
         }
@@ -1865,7 +1865,7 @@ public class DomainFactory {
             Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
             Assert.assertTrue(mRemoteFactory != null);
 
-            return mRemoteFactory.getTaskForce(taskKey.mRemoteTaskId);
+            return mRemoteFactory.getTaskForce(taskKey);
         }
     }
 
@@ -1879,7 +1879,7 @@ public class DomainFactory {
             Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
             Assert.assertTrue(mRemoteFactory != null);
 
-            return mRemoteFactory.getTaskIfPresent(taskKey.mRemoteTaskId);
+            return mRemoteFactory.getTaskIfPresent(taskKey);
         }
     }
 
@@ -2074,7 +2074,7 @@ public class DomainFactory {
         HashSet<TaskKey> taskKeys = new HashSet<>(Stream.of(mLocalFactory.getTaskIds()).map(TaskKey::new).collect(Collectors.toList()));
 
         if (mRemoteFactory != null)
-            taskKeys.addAll(Stream.of(mRemoteFactory.getTaskKeys()).map(TaskKey::new).collect(Collectors.toList()));
+            taskKeys.addAll(mRemoteFactory.getTaskKeys());
 
         return taskKeys;
     }
@@ -2126,7 +2126,7 @@ public class DomainFactory {
                 hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
             }
 
-            TaskKey taskKey = new TaskKey(instanceShownRecord.getTaskId());
+            TaskKey taskKey = new TaskKey(null, instanceShownRecord.getTaskId()); // todo project id
 
             InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, new TimePair(customTimeKey, hourMinute));
 

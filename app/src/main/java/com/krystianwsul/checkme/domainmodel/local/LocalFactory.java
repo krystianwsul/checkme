@@ -312,8 +312,8 @@ public class LocalFactory {
         mLocalCustomTimes.remove(localCustomTime.getId());
     }
 
-    public void deleteInstanceShownRecords(@NonNull Set<String> taskIds) {
-        mPersistenceManager.deleteInstanceShownRecords(taskIds);
+    public void deleteInstanceShownRecords(@NonNull Set<TaskKey> taskKeys) {
+        mPersistenceManager.deleteInstanceShownRecords(taskKeys);
     }
 
     @NonNull
@@ -476,11 +476,11 @@ public class LocalFactory {
 
         Stream.of(mLocalTaskHierarchies.getByParentTaskKey(taskKey))
                 .map(LocalTaskHierarchy::getChildTask)
-                .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) childTask, recordOf));
+                .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, childTask, recordOf));
 
         Stream.of(parentLocalTaskHierarchies)
                 .map(LocalTaskHierarchy::getParentTask)
-                .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, (LocalTask) parentTask, recordOf));
+                .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, parentTask, recordOf));
     }
 
     /*
@@ -603,12 +603,12 @@ public class LocalFactory {
     }
 
     @NonNull
-    public Set<LocalTaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+    Set<LocalTaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
         return mLocalTaskHierarchies.getByChildTaskKey(childTaskKey);
     }
 
     @NonNull
-    public Set<LocalTaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+    Set<LocalTaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
         return mLocalTaskHierarchies.getByParentTaskKey(parentTaskKey);
     }
 

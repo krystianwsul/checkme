@@ -78,7 +78,7 @@ class RemoteSingleScheduleBridge implements SingleScheduleBridge {
     @NonNull
     @Override
     public TaskKey getRootTaskKey() {
-        return new TaskKey(mRemoteSingleScheduleRecord.getTaskId());
+        return new TaskKey(mRemoteSingleScheduleRecord.getProjectId(), mRemoteSingleScheduleRecord.getTaskId());
     }
 
     @NonNull

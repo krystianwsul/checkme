@@ -231,7 +231,7 @@ public class RemoteFactory {
         if (TextUtils.isEmpty(taskKey.mRemoteTaskId))
             return null;
 
-        RemoteTask remoteTask = getRemoteProjectForce(taskKey.mRemoteTaskId).getRemoteTaskIfPresent(taskKey.mRemoteTaskId);
+        RemoteTask remoteTask = getRemoteProjectForce(taskKey).getRemoteTaskIfPresent(taskKey.mRemoteTaskId);
         if (remoteTask == null)
             return null;
 
@@ -239,56 +239,65 @@ public class RemoteFactory {
     }
 
     @NonNull
-    private RemoteProject getRemoteProjectForce(@NonNull String taskId) {
-        // todo project id
-
-        RemoteProject remoteProject = getRemoteProjectIfPresent(taskId);
+    private RemoteProject getRemoteProjectForce(@NonNull TaskKey taskKey) {
+        RemoteProject remoteProject = getRemoteProjectIfPresent(taskKey);
         Assert.assertTrue(remoteProject != null);
 
         return remoteProject;
     }
 
     @Nullable
-    private RemoteProject getRemoteProjectIfPresent(@NonNull String taskId) {
-        // todo project id
+    private RemoteProject getRemoteProjectIfPresent(@NonNull TaskKey taskKey) {
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
-        List<RemoteProject> matches = Stream.of(mRemoteProjects.values())
-                .filter(remoteProject -> remoteProject.getTaskKeys().contains(taskId))
-                .collect(Collectors.toList());
+        if (TextUtils.isEmpty(taskKey.mRemoteProjectId)) { // todo project id
+            List<RemoteProject> matches = Stream.of(mRemoteProjects.values())
+                    .filter(remoteProject -> remoteProject.getTaskIds().contains(taskKey.mRemoteTaskId))
+                    .collect(Collectors.toList());
 
-        if (matches.isEmpty()) {
-            return null;
+            if (matches.isEmpty()) {
+                return null;
+            } else {
+                Assert.assertTrue(matches.size() == 1);
+
+                return matches.get(0);
+            }
         } else {
-            Assert.assertTrue(matches.size() == 1);
-
-            return matches.get(0);
+            return mRemoteProjects.get(taskKey.mRemoteProjectId);
         }
     }
 
     @NonNull
-    public RemoteTask getTaskForce(@NonNull String taskId) {
-        Assert.assertTrue(!TextUtils.isEmpty(taskId));
+    public RemoteTask getTaskForce(@NonNull TaskKey taskKey) {
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
-        return getRemoteProjectForce(taskId).getRemoteTaskForce(taskId);
+        return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.mRemoteTaskId);
     }
 
     @Nullable
-    public RemoteTask getTaskIfPresent(@NonNull String taskId) {
-        Assert.assertTrue(!TextUtils.isEmpty(taskId));
+    public RemoteTask getTaskIfPresent(@NonNull TaskKey taskKey) {
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
-        RemoteProject remoteProject = getRemoteProjectIfPresent(taskId);
+        RemoteProject remoteProject = getRemoteProjectIfPresent(taskKey);
         if (remoteProject == null)
             return null;
 
-        return remoteProject.getRemoteTaskIfPresent(taskId);
+        return remoteProject.getRemoteTaskIfPresent(taskKey.mRemoteTaskId);
     }
 
     @NonNull
-    public Set<String> getTaskKeys() { // todo project id
-        Set<String> taskKeys = new HashSet<>();
+    public Set<TaskKey> getTaskKeys() {
+        Set<TaskKey> taskKeys = new HashSet<>();
 
-        Stream.of(mRemoteProjects.values())
-                .forEach(remoteProject -> taskKeys.addAll(remoteProject.getTaskKeys()));
+        for (RemoteProject remoteProject : mRemoteProjects.values()) {
+            Assert.assertTrue(remoteProject != null);
+
+            String projectId = remoteProject.getId();
+
+            taskKeys.addAll(Stream.of(remoteProject.getTaskIds())
+                    .map(taskId -> new TaskKey(projectId, taskId))
+                    .collect(Collectors.toList()));
+        }
 
         return taskKeys;
     }
@@ -304,7 +313,7 @@ public class RemoteFactory {
     Set<RemoteTaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
         Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.mRemoteTaskId));
 
-        return getRemoteProjectForce(childTaskKey.mRemoteTaskId).getTaskHierarchiesByChildTaskKey(childTaskKey);
+        return getRemoteProjectForce(childTaskKey).getTaskHierarchiesByChildTaskKey(childTaskKey);
     }
 
     @NonNull

@@ -226,7 +226,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    Set<String> getTaskKeys() {
+    Set<String> getTaskIds() {
         return mRemoteTasks.keySet();
     }
 

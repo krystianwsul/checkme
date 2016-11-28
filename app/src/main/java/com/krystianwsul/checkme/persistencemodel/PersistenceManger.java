@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.utils.ScheduleType;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -75,7 +76,6 @@ public class PersistenceManger {
         mSQLiteDatabase = MySQLiteHelper.getDatabase(context);
 
         mCustomTimeRecords = CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase);
-        Assert.assertTrue(mCustomTimeRecords != null);
 
         mCustomTimeMaxId = CustomTimeRecord.getMaxId(mSQLiteDatabase);
 
@@ -485,9 +485,13 @@ public class PersistenceManger {
         return instanceShownRecord;
     }
 
-    public void deleteInstanceShownRecords(@NonNull Set<String> taskIds) {
+    public void deleteInstanceShownRecords(@NonNull Set<TaskKey> taskKeys) {
         List<InstanceShownRecord> remove = Stream.of(mInstanceShownRecords)
-                .filterNot(instanceShownRecord -> taskIds.contains(instanceShownRecord.getTaskId()))
+                .filterNot(instanceShownRecord -> {
+                    // todo project id
+
+                    return Stream.of(taskKeys).anyMatch(taskKey -> instanceShownRecord.getTaskId().equals(taskKey.mRemoteTaskId));
+                })
                 .collect(Collectors.toList());
 
         Stream.of(remove)

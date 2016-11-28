@@ -2,7 +2,9 @@ package com.krystianwsul.checkme.utils;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Parcel;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
@@ -104,5 +106,22 @@ public class Utils {
         return Stream.of(userDatas)
                 .map(friend -> UserData.getKey(friend.email))
                 .collect(Collectors.toSet());
+    }
+
+    static void writeStringToParcel(@NonNull Parcel parcel, @Nullable String string) {
+        if (TextUtils.isEmpty(string)) {
+            parcel.writeInt(0);
+        } else {
+            parcel.writeInt(1);
+            parcel.writeString(string);
+        }
+    }
+
+    @Nullable
+    static String readStringFromParcel(@NonNull Parcel parcel) {
+        if (parcel.readInt() == 0)
+            return null;
+
+        return parcel.readString();
     }
 }

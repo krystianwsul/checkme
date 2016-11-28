@@ -119,7 +119,7 @@ public class RemoteInstance extends Instance {
     @NonNull
     @Override
     public TaskKey getTaskKey() {
-        return new TaskKey(getTaskId());
+        return getTask().getTaskKey();
     }
 
     @Nullable

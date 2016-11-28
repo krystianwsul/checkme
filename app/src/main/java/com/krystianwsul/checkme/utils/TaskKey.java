@@ -15,33 +15,46 @@ public class TaskKey implements Parcelable, Serializable {
     public final Integer mLocalTaskId;
 
     @Nullable
+    public final String mRemoteProjectId;
+
+    @Nullable
     public final String mRemoteTaskId;
 
     public TaskKey(int localTaskId) {
         mLocalTaskId = localTaskId;
+
+        mRemoteProjectId = null;
         mRemoteTaskId = null;
     }
 
-    public TaskKey(@NonNull String remoteTaskId) {
+    public TaskKey(@Nullable String remoteProjectId, @NonNull String remoteTaskId) { // todo project id not null
         Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
 
         mLocalTaskId = null;
+
+        mRemoteProjectId = remoteProjectId;
         mRemoteTaskId = remoteTaskId;
     }
 
     @Override
     public int hashCode() {
         if (mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(mRemoteProjectId));
             Assert.assertTrue(TextUtils.isEmpty(mRemoteTaskId));
 
             return mLocalTaskId;
         } else {
             Assert.assertTrue(!TextUtils.isEmpty(mRemoteTaskId));
 
-            return mRemoteTaskId.hashCode();
+            int hashCode = 0;
+            if (!TextUtils.isEmpty(mRemoteProjectId))
+                hashCode += mRemoteProjectId.hashCode();
+
+            return hashCode + mRemoteTaskId.hashCode();
         }
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     @Override
     public boolean equals(Object obj) {
         if (obj == null)
@@ -56,24 +69,35 @@ public class TaskKey implements Parcelable, Serializable {
         TaskKey taskKey = (TaskKey) obj;
 
         if (mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(mRemoteProjectId));
             Assert.assertTrue(TextUtils.isEmpty(mRemoteTaskId));
 
             return mLocalTaskId.equals(taskKey.mLocalTaskId);
         } else {
             Assert.assertTrue(!TextUtils.isEmpty(mRemoteTaskId));
 
-            return mRemoteTaskId.equals(taskKey.mRemoteTaskId);
+            if (TextUtils.isEmpty(mRemoteProjectId) != TextUtils.isEmpty(taskKey.mRemoteProjectId))
+                return false;
+
+            if (!TextUtils.isEmpty(mRemoteProjectId) && !mRemoteProjectId.equals(taskKey.mRemoteProjectId))
+                return false;
+
+            if (!mRemoteTaskId.equals(taskKey.mRemoteTaskId))
+                return false;
+
+            return true;
         }
     }
 
     @Override
     public String toString() {
-        return super.toString() + ": " + mLocalTaskId + ", " + mRemoteTaskId;
+        return super.toString() + ": " + mLocalTaskId + ", " + mRemoteProjectId + "/" + mRemoteTaskId;
     }
 
     @NonNull
     public Type getType() {
         if (mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(mRemoteProjectId));
             Assert.assertTrue(TextUtils.isEmpty(mRemoteTaskId));
 
             return Type.LOCAL;
@@ -100,6 +124,7 @@ public class TaskKey implements Parcelable, Serializable {
             Assert.assertTrue(!TextUtils.isEmpty(mRemoteTaskId));
 
             dest.writeInt(0);
+            Utils.writeStringToParcel(dest, mRemoteProjectId);
             dest.writeString(mRemoteTaskId);
         }
     }
@@ -112,10 +137,12 @@ public class TaskKey implements Parcelable, Serializable {
 
                 return new TaskKey(localTaskId);
             } else {
+                String remoteProjectId = Utils.readStringFromParcel(in);
+
                 String remoteTaskId = in.readString();
                 Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
 
-                return new TaskKey(remoteTaskId);
+                return new TaskKey(remoteProjectId, remoteTaskId);
             }
         }
 

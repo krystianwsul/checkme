@@ -253,7 +253,7 @@ public abstract class Task {
         for (Schedule schedule : getSchedules())
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp));
 
-        Set<? extends TaskHierarchy> taskHierarchies = mDomainFactory.getTaskHierarchiesByChildTaskKey(this.getTaskKey());
+        Set<? extends TaskHierarchy> taskHierarchies = getTaskHierarchiesByChildTaskKey(this.getTaskKey());
 
         instances.addAll(Stream.of(taskHierarchies)
                 .map(TaskHierarchy::getParentTask)
@@ -266,6 +266,12 @@ public abstract class Task {
 
         return instances;
     }
+
+    @NonNull
+    protected abstract Set<? extends TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey);
+
+    @NonNull
+    protected abstract Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey);
 
     public abstract void delete();
 

@@ -34,14 +34,10 @@ public abstract class TaskHierarchy {
     public abstract TaskKey getChildTaskKey();
 
     @NonNull
-    public Task getParentTask() {
-        return mDomainFactory.getTaskForce(getParentTaskKey());
-    }
+    public abstract Task getParentTask();
 
     @NonNull
-    public Task getChildTask() {
-        return mDomainFactory.getTaskForce(getChildTaskKey());
-    }
+    public abstract Task getChildTask();
 
     boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
         ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();

@@ -188,4 +188,16 @@ public class LocalTask extends Task {
     public Map<ScheduleKey, ? extends Instance> getExistingInstances() {
         return mDomainFactory.getLocalFactory().getExistingInstances(getTaskKey());
     }
+
+    @NonNull
+    @Override
+    protected Set<? extends TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+        return mDomainFactory.getLocalFactory().getTaskHierarchiesByChildTaskKey(childTaskKey);
+    }
+
+    @NonNull
+    @Override
+    protected Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+        return mDomainFactory.getLocalFactory().getTaskHierarchiesByParentTaskKey(parentTaskKey);
+    }
 }

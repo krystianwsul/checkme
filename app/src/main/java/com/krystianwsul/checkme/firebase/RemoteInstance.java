@@ -22,6 +22,9 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 import junit.framework.Assert;
 
 public class RemoteInstance extends Instance {
+    @NonNull
+    private final RemoteProject mRemoteProject;
+
     @Nullable
     private RemoteInstanceRecord mRemoteInstanceRecord;
 
@@ -34,20 +37,22 @@ public class RemoteInstance extends Instance {
     @Nullable
     private InstanceShownRecord mInstanceShownRecord;
 
-    RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteInstanceRecord remoteInstanceRecord, @Nullable InstanceShownRecord instanceShownRecord) {
+    RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteInstanceRecord remoteInstanceRecord, @Nullable InstanceShownRecord instanceShownRecord) {
         super(domainFactory);
 
+        mRemoteProject = remoteProject;
         mRemoteInstanceRecord = remoteInstanceRecord;
         mTaskId = null;
         mScheduleDateTime = null;
         mInstanceShownRecord = instanceShownRecord;
     }
 
-    public RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull String taskId, @NonNull DateTime scheduleDateTime, @Nullable InstanceShownRecord instanceShownRecord) {
+    public RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull String taskId, @NonNull DateTime scheduleDateTime, @Nullable InstanceShownRecord instanceShownRecord) {
         super(domainFactory);
 
         Assert.assertTrue(!TextUtils.isEmpty(taskId));
 
+        mRemoteProject = remoteProject;
         mRemoteInstanceRecord = null;
         mTaskId = taskId;
         mScheduleDateTime = scheduleDateTime;
@@ -229,7 +234,7 @@ public class RemoteInstance extends Instance {
     private void createInstanceShownRecord() {
         Assert.assertTrue(mInstanceShownRecord == null);
 
-        mInstanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(mDomainFactory, ((RemoteTask) getTask()).getId(), getScheduleDateTime());
+        mInstanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(mDomainFactory, getTaskId(), getScheduleDateTime());
     }
 
     @Override
@@ -310,7 +315,7 @@ public class RemoteInstance extends Instance {
         RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
         Assert.assertTrue(remoteFactory != null);
 
-        ((RemoteTask) getTask()).deleteInstance(this);
+        getTask().deleteInstance(this);
 
         mRemoteInstanceRecord.delete();
     }
@@ -367,5 +372,11 @@ public class RemoteInstance extends Instance {
 
             return mScheduleDateTime.getTime().getTimePair().mHourMinute;
         }
+    }
+
+    @NonNull
+    @Override
+    public RemoteTask getTask() {
+        return mRemoteProject.getRemoteTaskForce(getTaskId());
     }
 }

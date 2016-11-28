@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
+import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.UserData;
@@ -521,7 +522,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
-            Task task = getTaskForce(instance.getTaskKey());
+            Task task = instance.getTask();
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
@@ -597,7 +598,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
-            Task task = getTaskForce(instance.getTaskKey());
+            Task task = instance.getTask();
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
@@ -635,7 +636,7 @@ public class DomainFactory {
         GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
 
         for (Instance childInstance : instance.getChildInstances(now)) {
-            Task childTask = getTaskForce(childInstance.getTaskKey());
+            Task childTask = childInstance.getTask();
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
@@ -1532,6 +1533,7 @@ public class DomainFactory {
 
             return new LocalInstance(this, taskKey.mLocalTaskId, scheduleDateTime);
         } else {
+            Assert.assertTrue(mRemoteFactory != null);
             Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
             String remoteCustomTimeId;
@@ -1559,7 +1561,9 @@ public class DomainFactory {
 
             InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(taskKey.mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
 
-            return new RemoteInstance(this, taskKey.mRemoteTaskId, scheduleDateTime, instanceShownRecord);
+            RemoteProject remoteProject = mRemoteFactory.getTaskForce(taskKey.mRemoteTaskId).getRemoteProject();
+
+            return new RemoteInstance(this, remoteProject, taskKey.mRemoteTaskId, scheduleDateTime, instanceShownRecord);
         }
     }
 
@@ -1655,34 +1659,6 @@ public class DomainFactory {
         return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
     }
 
-    @NonNull
-    Set<? extends TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
-        if (childTaskKey.mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(childTaskKey.mRemoteTaskId));
-
-            return mLocalFactory.getTaskHierarchiesByChildTaskKey(childTaskKey);
-        } else {
-            Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.mRemoteTaskId));
-            Assert.assertTrue(mRemoteFactory != null);
-
-            return mRemoteFactory.getTaskHierarchiesByChildTaskKey(childTaskKey);
-        }
-    }
-
-    @NonNull
-    Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
-        if (parentTaskKey.mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
-
-            return mLocalFactory.getTaskHierarchiesByParentTaskKey(parentTaskKey);
-        } else {
-            Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
-            Assert.assertTrue(mRemoteFactory != null);
-
-            return mRemoteFactory.getTaskHierarchiesByParentTaskKey(parentTaskKey);
-        }
-    }
-
     @Nullable
     Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(childTask.notDeleted(exactTimeStamp));
@@ -1722,7 +1698,7 @@ public class DomainFactory {
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
 
         for (Instance childInstance : instance.getChildInstances(now)) {
-            Task childTask = getTaskForce(childInstance.getTaskKey());
+            Task childTask = childInstance.getTask();
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
@@ -1765,10 +1741,12 @@ public class DomainFactory {
                 .map(pair -> pair.first.getTaskKey())
                 .collect(Collectors.toList()));
 
+        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(recordOf, now);
+
         for (Pair<LocalTask, Collection<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
             Assert.assertTrue(pair != null);
 
-            RemoteTask remoteTask = mRemoteFactory.copyLocalTask(pair.first, recordOf, pair.second, now);
+            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, recordOf, pair.second, now);
             localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
         }
 
@@ -1781,7 +1759,7 @@ public class DomainFactory {
             RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
             Assert.assertTrue(childRemoteTask != null);
 
-            RemoteTaskHierarchy remoteTaskHierarchy = mRemoteFactory.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId(), now);
+            RemoteTaskHierarchy remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId(), now);
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 
@@ -1830,7 +1808,7 @@ public class DomainFactory {
 
             TaskKey childTaskKey = childTask.getTaskKey();
 
-            List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchiesByChildTaskKey(childTaskKey))
+            List<TaskHierarchy> taskHierarchies = Stream.of(childTask.getTaskHierarchiesByChildTaskKey(childTaskKey))
                     .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
                     .collect(Collectors.toList());
 
@@ -1848,7 +1826,7 @@ public class DomainFactory {
 
             TaskKey childTaskKey = childTask.getTaskKey();
 
-            List<TaskHierarchy> taskHierarchies = Stream.of(getTaskHierarchiesByChildTaskKey(childTaskKey))
+            List<TaskHierarchy> taskHierarchies = Stream.of(childTask.getTaskHierarchiesByChildTaskKey(childTaskKey))
                     .filter(taskHierarchy -> taskHierarchy.getStartExactTimeStamp().equals(childTask.getStartExactTimeStamp()))
                     .collect(Collectors.toList());
 
@@ -1864,7 +1842,7 @@ public class DomainFactory {
     @NonNull
     private Stream<Task> getTasks() {
         if (mRemoteFactory != null) {
-            return Stream.concat(Stream.of(mLocalFactory.getTasks()), Stream.of(mRemoteFactory.getTasks()));
+            return Stream.concat(Stream.of(mLocalFactory.getTasks()), mRemoteFactory.getTasks());
         } else {
             return Stream.of(mLocalFactory.getTasks());
         }
@@ -1912,7 +1890,7 @@ public class DomainFactory {
     List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
-        return Stream.of(getTaskHierarchiesByParentTaskKey(parentTask.getTaskKey()))
+        return Stream.of(parentTask.getTaskHierarchiesByParentTaskKey(parentTask.getTaskKey()))
                 .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
                 .map(TaskHierarchy::getChildTask)
                 .filter(childTask -> childTask.current(exactTimeStamp))
@@ -2383,13 +2361,13 @@ public class DomainFactory {
             TaskKey taskKey = mTask.getTaskKey();
 
             // mark parents relevant
-            Stream.of(getTaskHierarchiesByChildTaskKey(taskKey))
+            Stream.of(mTask.getTaskHierarchiesByChildTaskKey(taskKey))
                     .map(TaskHierarchy::getParentTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark children relevant
-            Stream.of(getTaskHierarchiesByParentTaskKey(taskKey))
+            Stream.of(mTask.getTaskHierarchiesByParentTaskKey(taskKey))
                     .map(TaskHierarchy::getChildTaskKey)
                     .map(taskRelevances::get)
                     .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));

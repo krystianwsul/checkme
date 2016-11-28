@@ -17,7 +17,6 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class RemoteTaskRecord extends RemoteRecord {
     public static final String TASKS = "tasks";
@@ -364,14 +363,5 @@ public class RemoteTaskRecord extends RemoteRecord {
 
         mRemoteMonthlyWeekScheduleRecords.put(remoteMonthlyWeekScheduleRecord.getId(), remoteMonthlyWeekScheduleRecord);
         return remoteMonthlyWeekScheduleRecord;
-    }
-
-    @NonNull
-    public Set<String> getRecordOf() { // todo remove once projects are in place
-        return mRemoteProjectRecord.getRecordOf();
-    }
-
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) { // todo remove once projects are in place
-        mRemoteProjectRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

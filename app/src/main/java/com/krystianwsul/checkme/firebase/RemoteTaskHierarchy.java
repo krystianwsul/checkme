@@ -11,15 +11,17 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.Set;
-
 public class RemoteTaskHierarchy extends TaskHierarchy {
+    @NonNull
+    private final RemoteProject mRemoteProject;
+
     @NonNull
     private final RemoteTaskHierarchyRecord mRemoteTaskHierarchyRecord;
 
-    RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
+    RemoteTaskHierarchy(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteTaskHierarchyRecord remoteTaskHierarchyRecord) {
         super(domainFactory);
 
+        mRemoteProject = remoteProject;
         mRemoteTaskHierarchyRecord = remoteTaskHierarchyRecord;
     }
 
@@ -62,16 +64,31 @@ public class RemoteTaskHierarchy extends TaskHierarchy {
         return mRemoteTaskHierarchyRecord.getId();
     }
 
-    void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        mRemoteTaskHierarchyRecord.updateRecordOf(addedFriends, removedFriends);
-    }
-
     public void delete() {
-        RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
-        Assert.assertTrue(remoteFactory != null);
-
-        remoteFactory.deleteTaskHierarchy(this);
+        mRemoteProject.deleteTaskHierarchy(this);
 
         mRemoteTaskHierarchyRecord.delete();
+    }
+
+    @NonNull
+    @Override
+    public RemoteTask getParentTask() {
+        return mRemoteProject.getRemoteTaskForce(getParentTaskId());
+    }
+
+    @NonNull
+    @Override
+    public RemoteTask getChildTask() {
+        return mRemoteProject.getRemoteTaskForce(getChildTaskId());
+    }
+
+    @NonNull
+    private String getParentTaskId() {
+        return mRemoteTaskHierarchyRecord.getParentTaskId();
+    }
+
+    @NonNull
+    private String getChildTaskId() {
+        return mRemoteTaskHierarchyRecord.getChildTaskId();
     }
 }

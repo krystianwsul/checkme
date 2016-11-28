@@ -72,4 +72,16 @@ public class LocalTaskHierarchy extends TaskHierarchy {
 
         mTaskHierarchyRecord.delete();
     }
+
+    @NonNull
+    @Override
+    public LocalTask getParentTask() {
+        return mDomainFactory.getLocalFactory().getTaskForce(getParentTaskId());
+    }
+
+    @NonNull
+    @Override
+    public LocalTask getChildTask() {
+        return mDomainFactory.getLocalFactory().getTaskForce(getChildTaskId());
+    }
 }

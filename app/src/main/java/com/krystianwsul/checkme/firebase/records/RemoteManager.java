@@ -10,8 +10,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.ProjectJson;
-import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
-import com.krystianwsul.checkme.firebase.json.TaskJson;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -28,7 +26,7 @@ public class RemoteManager {
     public final Map<String, RemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
 
     @NonNull
-    private final Map<String, RemoteProjectRecord> mRemoteProjectRecords = new HashMap<>();
+    public final Map<String, RemoteProjectRecord> mRemoteProjectRecords = new HashMap<>();
 
     public RemoteManager(@NonNull Iterable<DataSnapshot> children) {
         for (DataSnapshot child : children) {
@@ -78,20 +76,6 @@ public class RemoteManager {
     }
 
     @NonNull
-    public RemoteTaskRecord newRemoteTaskRecord(@NonNull Set<String> recordOf, @NonNull TaskJson taskJson, @NonNull String name, @NonNull ExactTimeStamp now) {
-        RemoteProjectRecord remoteProjectRecord = getRemoteProjectRecord(recordOf, name, now);
-
-        return remoteProjectRecord.newRemoteTaskRecord(taskJson);
-    }
-
-    @NonNull
-    public RemoteTaskHierarchyRecord newRemoteTaskHierarchyRecord(@NonNull Set<String> recordOf, @NonNull TaskHierarchyJson taskHierarchyJson, @NonNull String name, @NonNull ExactTimeStamp now) {
-        RemoteProjectRecord remoteProjectRecord = getRemoteProjectRecord(recordOf, name, now);
-
-        return remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson);
-    }
-
-    @NonNull
     public RemoteCustomTimeRecord newRemoteCustomTimeRecord(@NonNull JsonWrapper jsonWrapper) {
         RemoteCustomTimeRecord remoteCustomTimeRecord = new RemoteCustomTimeRecord(jsonWrapper);
         Assert.assertTrue(!mRemoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.getId()));
@@ -101,7 +85,7 @@ public class RemoteManager {
     }
 
     @NonNull
-    private RemoteProjectRecord newRemoteProjectRecord(@NonNull JsonWrapper jsonWrapper) {
+    public RemoteProjectRecord newRemoteProjectRecord(@NonNull JsonWrapper jsonWrapper) {
         RemoteProjectRecord remoteProjectRecord = new RemoteProjectRecord(jsonWrapper);
         Assert.assertTrue(!mRemoteProjectRecords.containsKey(remoteProjectRecord.getId()));
 

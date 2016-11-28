@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.firebase.json.MonthlyDayScheduleJson;
 import com.krystianwsul.checkme.firebase.json.MonthlyWeekScheduleJson;
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
+import com.krystianwsul.checkme.firebase.json.TaskJson;
 import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
 import com.krystianwsul.checkme.firebase.records.RemoteDailyScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
@@ -42,11 +43,15 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class RemoteTask extends Task {
+    @NonNull
+    private final RemoteProject mRemoteProject;
+
     @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
@@ -56,13 +61,14 @@ public class RemoteTask extends Task {
     @NonNull
     private final List<Schedule> mRemoteSchedules = new ArrayList<>();
 
-    RemoteTask(@NonNull DomainFactory domainFactory, @NonNull RemoteTaskRecord remoteTaskRecord) {
+    RemoteTask(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteTaskRecord remoteTaskRecord) {
         super(domainFactory);
 
+        mRemoteProject = remoteProject;
         mRemoteTaskRecord = remoteTaskRecord;
 
         mExistingRemoteInstances = Stream.of(mRemoteTaskRecord.getRemoteInstanceRecords().values())
-                .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute())))
+                .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, mRemoteProject, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute())))
                 .collect(Collectors.toMap(RemoteInstance::getScheduleKey, remoteInstance -> remoteInstance));
 
         for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteTaskRecord.mRemoteSingleScheduleRecords.values())
@@ -131,7 +137,7 @@ public class RemoteTask extends Task {
     @NonNull
     @Override
     public Set<String> getRecordOf() {
-        return mRemoteTaskRecord.getRecordOf();
+        return mRemoteProject.getRecordOf();
     }
 
     @Override
@@ -147,7 +153,13 @@ public class RemoteTask extends Task {
     @NonNull
     @Override
     public Task createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
-        return getRemoteFactory().createChildTask(this, now, name, note);
+        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
+
+        RemoteTask childTask = mRemoteProject.newRemoteTask(taskJson);
+
+        mRemoteProject.createTaskHierarchy(this, childTask, now);
+
+        return childTask;
     }
 
     @Nullable
@@ -183,7 +195,7 @@ public class RemoteTask extends Task {
         Stream.of(new ArrayList<>(getSchedules()))
                 .forEach(Schedule::delete);
 
-        getRemoteFactory().deleteTask(this);
+        mRemoteProject.deleteTask(this);
         mRemoteTaskRecord.delete();
     }
 
@@ -223,13 +235,9 @@ public class RemoteTask extends Task {
                 .collect(Collectors.toSet());
         Assert.assertTrue(!removedFriends.contains(myKey));
 
-        getRemoteFactory().updateRecordOf(this, addedFriends, removedFriends);
+        mRemoteProject.updateRecordOf(addedFriends, removedFriends);
 
         return this;
-    }
-
-    void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        mRemoteTaskRecord.updateRecordOf(addedFriends, removedFriends);
     }
 
     @Override
@@ -241,7 +249,7 @@ public class RemoteTask extends Task {
     public void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(childTask instanceof RemoteTask);
 
-        getRemoteFactory().createTaskHierarchy(this, (RemoteTask) childTask, now);
+        mRemoteProject.createTaskHierarchy(this, (RemoteTask) childTask, now);
     }
 
     @Override
@@ -422,5 +430,22 @@ public class RemoteTask extends Task {
                     throw new UnsupportedOperationException();
             }
         }
+    }
+
+    @NonNull
+    @Override
+    protected Set<? extends TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+        return mRemoteProject.getTaskHierarchiesByChildTaskKey(childTaskKey);
+    }
+
+    @NonNull
+    @Override
+    protected Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+        return mRemoteProject.getTaskHierarchiesByParentTaskKey(parentTaskKey);
+    }
+
+    @NonNull
+    public RemoteProject getRemoteProject() {
+        return mRemoteProject;
     }
 }

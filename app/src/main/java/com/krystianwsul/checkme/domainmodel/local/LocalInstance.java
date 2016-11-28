@@ -235,7 +235,7 @@ public class LocalInstance extends Instance {
     }
 
     private void createInstanceRecord(@NonNull ExactTimeStamp now) {
-        LocalTask localTask = (LocalTask) getTask();
+        LocalTask localTask = getTask();
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
@@ -344,5 +344,11 @@ public class LocalInstance extends Instance {
 
             return mScheduleDateTime.getTime().getTimePair().mHourMinute;
         }
+    }
+
+    @NonNull
+    @Override
+    public LocalTask getTask() {
+        return mDomainFactory.getLocalFactory().getTaskForce(getTaskId());
     }
 }

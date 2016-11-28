@@ -84,7 +84,7 @@ public abstract class Instance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        Set<? extends TaskHierarchy> taskHierarchies = mDomainFactory.getTaskHierarchiesByParentTaskKey(task.getTaskKey());
+        Set<? extends TaskHierarchy> taskHierarchies = getTask().getTaskHierarchiesByParentTaskKey(task.getTaskKey());
         HashSet<Instance> childInstances = new HashSet<>();
         for (TaskHierarchy taskHierarchy : taskHierarchies) {
             Assert.assertTrue(taskHierarchy != null);
@@ -132,9 +132,7 @@ public abstract class Instance {
     }
 
     @NonNull
-    public Task getTask() {
-        return mDomainFactory.getTaskForce(getTaskKey());
-    }
+    public abstract Task getTask();
 
     @NonNull
     public TimePair getInstanceTimePair() {

@@ -8,8 +8,6 @@ import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
 
 import junit.framework.Assert;
 
-import java.util.Set;
-
 public class RemoteTaskHierarchyRecord extends RemoteRecord {
     public static final String TASKHIERARCHIES = "taskHierarchies";
 
@@ -79,14 +77,5 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
 
         mTaskHierarchyJson.setEndTime(endTime);
         addValue(getKey() + "/endTime", endTime);
-    }
-
-    @NonNull
-    public Set<String> getRecordOf() { // todo remove once projects are in place
-        return mRemoteProjectRecord.getRecordOf();
-    }
-
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) { // todo remove once projects are in place
-        mRemoteProjectRecord.updateRecordOf(addedFriends, removedFriends);
     }
 }

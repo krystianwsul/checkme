@@ -100,12 +100,12 @@ public class RemoteProjectRecord extends RootRemoteRecord {
     }
 
     @NonNull
-    Map<String, RemoteTaskRecord> getRemoteTaskRecords() {
+    public Map<String, RemoteTaskRecord> getRemoteTaskRecords() {
         return mRemoteTaskRecords;
     }
 
     @NonNull
-    Map<String, RemoteTaskHierarchyRecord> getRemoteTaskHierarchyRecords() {
+    public Map<String, RemoteTaskHierarchyRecord> getRemoteTaskHierarchyRecords() {
         return mRemoteTaskHierarchyRecords;
     }
 
@@ -167,7 +167,7 @@ public class RemoteProjectRecord extends RootRemoteRecord {
     }
 
     @NonNull
-    RemoteTaskRecord newRemoteTaskRecord(@NonNull TaskJson taskJson) {
+    public RemoteTaskRecord newRemoteTaskRecord(@NonNull TaskJson taskJson) {
         RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(this, taskJson);
         Assert.assertTrue(!mRemoteTaskRecords.containsKey(remoteTaskRecord.getId()));
 
@@ -176,7 +176,7 @@ public class RemoteProjectRecord extends RootRemoteRecord {
     }
 
     @NonNull
-    RemoteTaskHierarchyRecord newRemoteTaskHierarchyRecord(@NonNull TaskHierarchyJson taskHierarchyJson) {
+    public RemoteTaskHierarchyRecord newRemoteTaskHierarchyRecord(@NonNull TaskHierarchyJson taskHierarchyJson) {
         RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = new RemoteTaskHierarchyRecord(this, taskHierarchyJson);
         Assert.assertTrue(!mRemoteTaskHierarchyRecords.containsKey(remoteTaskHierarchyRecord.getId()));
 

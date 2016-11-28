@@ -15,7 +15,7 @@ import java.util.List;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 18;
+    private static final int DATABASE_VERSION = 19;
 
     private static SQLiteDatabase sSQLiteDatabase;
 
@@ -214,11 +214,6 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
             InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
-            if (oldVersion <= 14)
-                InstanceShownRecord.onCreate(sqLiteDatabase);
-            else
-                InstanceShownRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-
             UuidRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
             if (oldVersion < 18) {
@@ -250,6 +245,11 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                         + ");");
                 sqLiteDatabase.execSQL("INSERT INTO " + InstanceShownRecord.TABLE_INSTANCES_SHOWN + " SELECT * FROM t2_backup;");
                 sqLiteDatabase.execSQL("DROP TABLE t2_backup;");
+            }
+
+            if (oldVersion < 19) {
+                sqLiteDatabase.execSQL("ALTER TABLE " + InstanceShownRecord.TABLE_INSTANCES_SHOWN
+                        + " ADD COLUMN " + InstanceShownRecord.COLUMN_PROJECT_ID + " TEXt");
             }
 
             sqLiteDatabase.setTransactionSuccessful();

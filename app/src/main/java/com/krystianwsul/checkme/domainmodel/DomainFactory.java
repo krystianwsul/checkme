@@ -2126,7 +2126,7 @@ public class DomainFactory {
                 hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
             }
 
-            TaskKey taskKey = new TaskKey(null, instanceShownRecord.getTaskId()); // todo project id
+            TaskKey taskKey = new TaskKey(instanceShownRecord.getProjectId(), instanceShownRecord.getTaskId());
 
             InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, new TimePair(customTimeKey, hourMinute));
 

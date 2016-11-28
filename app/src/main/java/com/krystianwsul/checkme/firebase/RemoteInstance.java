@@ -234,7 +234,7 @@ public class RemoteInstance extends Instance {
     private void createInstanceShownRecord() {
         Assert.assertTrue(mInstanceShownRecord == null);
 
-        mInstanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(mDomainFactory, getTaskId(), getScheduleDateTime());
+        mInstanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(mDomainFactory, getTaskId(), getScheduleDateTime(), getTask().getRemoteProject().getId());
     }
 
     @Override

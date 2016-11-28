@@ -23,6 +23,7 @@ public class InstanceShownRecord extends Record {
     static final String COLUMN_SCHEDULE_MINUTE = "scheduleMinute";
     static final String COLUMN_NOTIFIED = "notified";
     static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
+    static final String COLUMN_PROJECT_ID = "projectId";
 
     private final int mId;
     private final String mTaskId;
@@ -39,6 +40,9 @@ public class InstanceShownRecord extends Record {
     private boolean mNotified;
     private boolean mNotificationShown;
 
+    @Nullable // todo not null
+    private String mProjectId;
+
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_INSTANCES_SHOWN
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -50,14 +54,9 @@ public class InstanceShownRecord extends Record {
                 + COLUMN_SCHEDULE_HOUR + " INTEGER, "
                 + COLUMN_SCHEDULE_MINUTE + " INTEGER, "
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
-                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0"
+                + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
+                + COLUMN_TASK_ID + " TEXT" // todo not null
                 + ");");
-    }
-
-    @SuppressWarnings({"UnusedParameters", "EmptyMethod"})
-    @Deprecated
-    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-
     }
 
     @NonNull
@@ -91,11 +90,12 @@ public class InstanceShownRecord extends Record {
         Integer scheduleMinute = (cursor.isNull(7) ? null : cursor.getInt(7));
         boolean notified = (cursor.getInt(8) == 1);
         boolean notificationShown = (cursor.getInt(9) == 1);
+        String projectId = (cursor.isNull(10) ? null : cursor.getString(10)); // todo not null
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
 
-        return new InstanceShownRecord(true, id, taskId, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, notified, notificationShown);
+        return new InstanceShownRecord(true, id, taskId, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, notified, notificationShown, projectId);
     }
 
     static int getMaxId(SQLiteDatabase sqLiteDatabase) {
@@ -103,7 +103,7 @@ public class InstanceShownRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID);
     }
 
-    InstanceShownRecord(boolean created, int id, @NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, boolean notified, boolean notificationShown) {
+    InstanceShownRecord(boolean created, int id, @NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, boolean notified, boolean notificationShown, @Nullable String projectId) { // todo not null
         super(created);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
@@ -123,6 +123,8 @@ public class InstanceShownRecord extends Record {
 
         mNotified = notified;
         mNotificationShown = notificationShown;
+
+        mProjectId = projectId;
     }
 
     public int getId() {
@@ -169,6 +171,11 @@ public class InstanceShownRecord extends Record {
         return mNotificationShown;
     }
 
+    @Nullable
+    public String getProjectId() {
+        return mProjectId;
+    }
+
     public void setNotified(boolean notified) {
         mNotified = notified;
         mChanged = true;
@@ -177,6 +184,10 @@ public class InstanceShownRecord extends Record {
     public void setNotificationShown(boolean notificationShown) {
         mNotificationShown = notificationShown;
         mChanged = true;
+    }
+
+    public void setProjectId(@NonNull String projectId) {
+        mProjectId = projectId;
     }
 
     @Override
@@ -191,6 +202,7 @@ public class InstanceShownRecord extends Record {
         contentValues.put(COLUMN_SCHEDULE_MINUTE, mScheduleMinute);
         contentValues.put(COLUMN_NOTIFIED, mNotified ? 1 : 0);
         contentValues.put(COLUMN_NOTIFICATION_SHOWN, mNotificationShown ? 1 : 0);
+        contentValues.put(COLUMN_PROJECT_ID, mProjectId);
         return contentValues;
     }
 

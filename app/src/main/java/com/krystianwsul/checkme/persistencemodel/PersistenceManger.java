@@ -475,12 +475,12 @@ public class PersistenceManger {
     }
 
     @NonNull
-    public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull Date scheduleDate, @Nullable String remoteCustomTimeId, @Nullable Integer hour, @Nullable Integer minute) {
+    public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull Date scheduleDate, @Nullable String remoteCustomTimeId, @Nullable Integer hour, @Nullable Integer minute, @NonNull String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
 
         int id = ++mInstanceShownMaxId;
 
-        InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTaskId, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), remoteCustomTimeId, hour, minute, false, false);
+        InstanceShownRecord instanceShownRecord = new InstanceShownRecord(false, id, remoteTaskId, scheduleDate.getYear(), scheduleDate.getMonth(), scheduleDate.getDay(), remoteCustomTimeId, hour, minute, false, false, projectId);
         mInstanceShownRecords.add(instanceShownRecord);
         return instanceShownRecord;
     }
@@ -488,9 +488,11 @@ public class PersistenceManger {
     public void deleteInstanceShownRecords(@NonNull Set<TaskKey> taskKeys) {
         List<InstanceShownRecord> remove = Stream.of(mInstanceShownRecords)
                 .filterNot(instanceShownRecord -> {
-                    // todo project id
-
-                    return Stream.of(taskKeys).anyMatch(taskKey -> instanceShownRecord.getTaskId().equals(taskKey.mRemoteTaskId));
+                    if (TextUtils.isEmpty(instanceShownRecord.getProjectId())) { // todo project id
+                        return Stream.of(taskKeys).anyMatch(taskKey -> instanceShownRecord.getTaskId().equals(taskKey.mRemoteTaskId));
+                    } else {
+                        return Stream.of(taskKeys).anyMatch(taskKey -> (instanceShownRecord.getProjectId().equals(taskKey.mRemoteProjectId) && instanceShownRecord.getTaskId().equals(taskKey.mRemoteTaskId)));
+                    }
                 })
                 .collect(Collectors.toList());
 

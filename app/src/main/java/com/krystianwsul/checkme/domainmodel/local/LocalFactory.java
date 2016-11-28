@@ -267,7 +267,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public InstanceShownRecord createInstanceShownRecord(@NonNull DomainFactory domainFactory, @NonNull String remoteTaskId, @NonNull DateTime scheduleDateTime) {
+    public InstanceShownRecord createInstanceShownRecord(@NonNull DomainFactory domainFactory, @NonNull String remoteTaskId, @NonNull DateTime scheduleDateTime, @NonNull String projectId) {
         TimePair timePair = scheduleDateTime.getTime().getTimePair();
 
         String remoteCustomTimeId;
@@ -289,7 +289,7 @@ public class LocalFactory {
             minute = null;
         }
 
-        return mPersistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime.getDate(), remoteCustomTimeId, hour, minute);
+        return mPersistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime.getDate(), remoteCustomTimeId, hour, minute, projectId);
     }
 
     void deleteTask(@NonNull LocalTask localTask) {

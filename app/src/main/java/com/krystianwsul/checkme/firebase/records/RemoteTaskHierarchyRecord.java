@@ -21,7 +21,7 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
     private final TaskHierarchyJson mTaskHierarchyJson;
 
     RemoteTaskHierarchyRecord(@NonNull String id, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskHierarchyJson taskHierarchyJson) {
-        super(true);
+        super(false);
 
         mId = id;
         mRemoteProjectRecord = remoteProjectRecord;
@@ -29,7 +29,7 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
     }
 
     RemoteTaskHierarchyRecord(@NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskHierarchyJson taskHierarchyJson) {
-        super(false);
+        super(true);
 
         mId = DatabaseWrapper.getTaskHierarchyRecordId(remoteProjectRecord.getId());
         mRemoteProjectRecord = remoteProjectRecord;
@@ -50,7 +50,7 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
     @NonNull
     @Override
     protected String getKey() {
-        return mRemoteProjectRecord.getKey() + "/" + TASKHIERARCHIES + "/" + mId;
+        return mRemoteProjectRecord.getKey() + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + TASKHIERARCHIES + "/" + mId;
     }
 
     public long getStartTime() {

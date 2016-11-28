@@ -161,6 +161,7 @@ public class RemoteProjectRecord extends RootRemoteRecord {
             for (RemoteTaskRecord remoteTaskRecord : mRemoteTaskRecords.values())
                 remoteTaskRecord.getValues(values);
 
+            Log.e("asdf", "hierarchies: " + mRemoteTaskHierarchyRecords.size());
             for (RemoteTaskHierarchyRecord remoteTaskHierarchyRecord : mRemoteTaskHierarchyRecords.values())
                 remoteTaskHierarchyRecord.getValues(values);
         }

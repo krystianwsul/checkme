@@ -1770,9 +1770,6 @@ public class DomainFactory {
             pair.first.delete();
         }
 
-        Stream.of(localToRemoteConversion.mLocalTaskHierarchies)
-                .forEach(LocalTaskHierarchy::delete);
-
         RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(startingLocalTask.getId());
         Assert.assertTrue(remoteTask != null);
 

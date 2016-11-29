@@ -103,8 +103,11 @@ public class DomainFactory {
     @Nullable
     private RemoteFactory mRemoteFactory;
 
-    @NonNull
-    private final List<FirebaseListener> mFirebaseListeners = new ArrayList<>();
+    @Nullable
+    private FirebaseListener mNotTickFirebaseListener = null;
+
+    @Nullable
+    private FirebaseListener mFirebaseTickListener = null;
 
     public static synchronized DomainFactory getDomainFactory(Context context) {
         Assert.assertTrue(context != null);
@@ -228,8 +231,6 @@ public class DomainFactory {
                 Assert.assertTrue(dataSnapshot != null);
 
                 setRemoteTaskRecords(applicationContext, dataSnapshot);
-
-                notifyFirebaseListeners();
             }
 
             @Override
@@ -265,11 +266,12 @@ public class DomainFactory {
         mFriendQuery.addValueEventListener(mFriendListener);
     }
 
-    private void notifyFirebaseListeners() {
-        Stream.of(mFirebaseListeners)
-                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+    private synchronized void notifyFirebaseListeners() {
+        if (mNotTickFirebaseListener == null)
+            return;
 
-        mFirebaseListeners.clear();
+        mNotTickFirebaseListener.onFirebaseResult(this);
+        mNotTickFirebaseListener = null;
     }
 
     public synchronized void clearUserData(@NonNull Context context) {
@@ -312,9 +314,21 @@ public class DomainFactory {
 
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData);
 
-        updateNotifications(context, new ArrayList<>(), ExactTimeStamp.getNow());
+        if (mFirebaseTickListener != null) {
+            mFirebaseTickListener.onFirebaseResult(this);
+            mFirebaseTickListener = null;
 
-        save(context, new ArrayList<>(), true);
+            Assert.assertTrue(mNotTickFirebaseListener == null);
+        } else {
+            updateNotifications(context, false, false, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
+
+            if (mNotTickFirebaseListener == null) {
+                save(context, new ArrayList<>(), true);
+            } else {
+                mNotTickFirebaseListener.onFirebaseResult(this);
+                mNotTickFirebaseListener = null;
+            }
+        }
     }
 
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
@@ -326,13 +340,24 @@ public class DomainFactory {
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
 
-    public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+    public synchronized void setFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+        Assert.assertTrue(mNotTickFirebaseListener == null);
+
         if (mRemoteFactory != null) {
-            Assert.assertTrue(mFirebaseListeners.isEmpty());
+            firebaseListener.onFirebaseResult(this);
+        } else {
+            mNotTickFirebaseListener = firebaseListener;
+        }
+    }
+
+    public synchronized void setFirebaseTickListener(@NonNull FirebaseListener firebaseListener) {
+        Assert.assertTrue(mFirebaseTickListener == null);
+
+        if (mRemoteFactory != null && !mRemoteFactory.isSaved()) {
 
             firebaseListener.onFirebaseResult(this);
         } else {
-            mFirebaseListeners.add(firebaseListener);
+            mFirebaseTickListener = firebaseListener;
         }
     }
 

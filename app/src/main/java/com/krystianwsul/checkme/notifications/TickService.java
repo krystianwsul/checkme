@@ -66,20 +66,16 @@ public class TickService extends IntentService {
         List<TaskKey> taskKeys = intent.getParcelableArrayListExtra(TASK_KEYS_KEY);
         Assert.assertTrue(taskKeys != null);
 
-        redoIfFirebase(this, domainFactory -> domainFactory.updateNotificationsTick(this, silent, registering, taskKeys));
-    }
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
 
-    public static void redoIfFirebase(@NonNull Context context, @NonNull DomainFactory.FirebaseListener firebaseListener) {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(context);
-
-        firebaseListener.onFirebaseResult(domainFactory);
+        domainFactory.updateNotificationsTick(this, silent, registering, taskKeys);
 
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             UserData userData = new UserData(firebaseUser);
 
-            domainFactory.setUserData(context, userData);
-            domainFactory.addFirebaseListener(firebaseListener);
+            domainFactory.setUserData(this, userData);
+            domainFactory.setFirebaseTickListener(d -> d.updateNotificationsTick(this, silent, registering, taskKeys));
         }
     }
 }

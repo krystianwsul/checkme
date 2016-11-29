@@ -309,6 +309,7 @@ public class DomainFactory {
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
         Assert.assertTrue(mUserData != null);
 
+        boolean silent = (mRemoteFactory == null);
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData);
 
         if (mFirebaseTickListener != null) {
@@ -317,7 +318,7 @@ public class DomainFactory {
 
             Assert.assertTrue(mNotTickFirebaseListener == null);
         } else {
-            updateNotifications(context, false, false, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
+            updateNotifications(context, silent, false, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
 
             if (mNotTickFirebaseListener == null) {
                 save(context, new ArrayList<>(), true);

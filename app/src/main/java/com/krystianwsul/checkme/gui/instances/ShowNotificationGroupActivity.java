@@ -3,14 +3,18 @@ package com.krystianwsul.checkme.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractActivity;
+import com.krystianwsul.checkme.notifications.InstanceDoneService;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
@@ -23,9 +27,8 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
 
     private boolean mSelectAllVisible = false;
 
-    public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(instanceKeys != null);
+    @NonNull
+    public static Intent getIntent(@NonNull Context context, @NonNull ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         Intent intent = new Intent(context, ShowNotificationGroupActivity.class);
@@ -53,6 +56,14 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
+        if (Stream.of(instanceKeys).anyMatch(instanceKey -> instanceKey.getType() == TaskKey.Type.LOCAL)) {
+            init(instanceKeys);
+        } else {
+            InstanceDoneService.needsFirebase(this, domainFactory -> init(instanceKeys));
+        }
+    }
+
+    private void init(@NonNull ArrayList<InstanceKey> instanceKeys) {
         mGroupListFragment.setInstanceKeys(instanceKeys);
     }
 

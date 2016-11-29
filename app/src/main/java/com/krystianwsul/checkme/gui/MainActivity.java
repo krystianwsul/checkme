@@ -50,6 +50,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.friends.FriendListFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
+import com.krystianwsul.checkme.gui.projects.ProjectListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.notifications.TickService;
 
@@ -69,6 +70,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private enum Tab {
         INSTANCES,
         TASKS,
+        PROJECTS,
         CUSTOM_TIMES,
         FRIENDS,
         DEBUG
@@ -83,6 +85,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private ViewPager mDaysPager;
     private FrameLayout mMainTaskListFrame;
+    private FrameLayout mMainProjectListFrame;
     private FrameLayout mMainCustomTimesFrame;
     private FriendListFragment mFriendListFragment;
     private FrameLayout mMainDebugFrame;
@@ -257,6 +260,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
         Fragment taskListFragment = fragmentManager.findFragmentById(R.id.main_task_list_frame);
+        Fragment projectListFragment = fragmentManager.findFragmentById(R.id.main_project_frame);
         Fragment showCustomTimesFragment = fragmentManager.findFragmentById(R.id.main_custom_times_frame);
         Fragment debugFragment = fragmentManager.findFragmentById(R.id.main_debug_frame);
         Assert.assertTrue((taskListFragment == null) == (showCustomTimesFragment == null));
@@ -264,6 +268,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         if (taskListFragment == null)
             fragmentManager.beginTransaction()
                     .add(R.id.main_task_list_frame, TaskListFragment.getInstance())
+                    .add(R.id.main_project_frame, ProjectListFragment.newInstance())
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
                     .add(R.id.main_debug_frame, DebugFragment.newInstance())
                     .commit();
@@ -296,6 +301,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mMainTaskListFrame = (FrameLayout) findViewById(R.id.main_task_list_frame);
         Assert.assertTrue(mMainTaskListFrame != null);
 
+        mMainProjectListFrame = (FrameLayout) findViewById(R.id.main_project_frame);
+        Assert.assertTrue(mMainProjectListFrame != null);
+
         mMainCustomTimesFrame = (FrameLayout) findViewById(R.id.main_custom_times_frame);
         Assert.assertTrue(mMainCustomTimesFrame != null);
 
@@ -325,6 +333,19 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                     }
 
                     showTab(Tab.TASKS);
+
+                    break;
+                case R.id.main_drawer_projects:
+                    if (mDrawerTaskListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerTaskListener);
+                        mDrawerTaskListener = null;
+                    }
+                    if (mDrawerGroupListener != null) {
+                        mMainActivityDrawer.removeDrawerListener(mDrawerGroupListener);
+                        mDrawerGroupListener = null;
+                    }
+
+                    showTab(Tab.PROJECTS);
 
                     break;
                 case R.id.main_drawer_custom_times:
@@ -459,6 +480,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mActionBar.setTitle(null);
                 mDaysPager.setVisibility(View.VISIBLE);
                 mMainTaskListFrame.setVisibility(View.GONE);
+                mMainProjectListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION * density);
@@ -470,6 +492,19 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mActionBar.setTitle(getString(R.string.tasks));
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.VISIBLE);
+                mMainProjectListFrame.setVisibility(View.GONE);
+                mMainCustomTimesFrame.setVisibility(View.GONE);
+                mMainDebugFrame.setVisibility(View.GONE);
+                ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
+                mMainActivitySpinner.setVisibility(View.GONE);
+                mFriendListFragment.hide();
+
+                break;
+            case PROJECTS:
+                mActionBar.setTitle(getString(R.string.projects));
+                mDaysPager.setVisibility(View.GONE);
+                mMainTaskListFrame.setVisibility(View.GONE);
+                mMainProjectListFrame.setVisibility(View.VISIBLE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
@@ -481,6 +516,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mActionBar.setTitle(getString(R.string.times));
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
+                mMainProjectListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.VISIBLE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
@@ -494,6 +530,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mActionBar.setTitle(R.string.friends);
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
+                mMainProjectListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
@@ -505,6 +542,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mActionBar.setTitle("Debug");
                 mDaysPager.setVisibility(View.GONE);
                 mMainTaskListFrame.setVisibility(View.GONE);
+                mMainProjectListFrame.setVisibility(View.GONE);
                 mMainCustomTimesFrame.setVisibility(View.GONE);
                 mMainDebugFrame.setVisibility(View.VISIBLE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
@@ -722,12 +760,14 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             mNavHeaderEmail.setText(email);
 
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut);
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_projects).setEnabled(true);
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_friends).setEnabled(true);
         } else {
             mNavHeaderName.setText(null);
             mNavHeaderEmail.setText(null);
 
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn);
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_projects).setEnabled(true);
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_friends).setEnabled(false);
         }
     }

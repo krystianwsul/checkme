@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -19,6 +20,7 @@ import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
+import com.krystianwsul.checkme.notifications.InstanceDoneService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -39,16 +41,15 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
     private Integer mDataId;
     private ShowInstanceLoader.InstanceData mInstanceData;
 
-    public static Intent getIntent(Context context, InstanceKey instanceKey) {
-        Assert.assertTrue(context != null);
-        Assert.assertTrue(instanceKey != null);
-
+    @NonNull
+    public static Intent getIntent(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
         intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         return intent;
     }
 
-    public static Intent getNotificationIntent(Context context, InstanceKey instanceKey) {
+    @NonNull
+    public static Intent getNotificationIntent(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         Intent intent = new Intent(context, ShowInstanceActivity.class);
         intent.putExtra(INSTANCE_KEY, (Parcelable) instanceKey);
         intent.putExtra(SET_NOTIFIED_KEY, true);
@@ -204,6 +205,14 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
         Assert.assertTrue(mGroupListFragment != null);
 
+        if (mInstanceKey.getType() == TaskKey.Type.LOCAL) {
+            init();
+        } else {
+            InstanceDoneService.needsFirebase(this, domainFactory -> init());
+        }
+    }
+
+    private void init() {
         mGroupListFragment.setInstanceKey(mInstanceKey);
 
         getSupportLoaderManager().initLoader(0, null, this);

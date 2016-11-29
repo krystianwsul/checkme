@@ -12,13 +12,13 @@
             android:title="@string/tasks"
             android:icon="@drawable/ic_assignment_black_24dp"/>
         <item
-            android:id="@+id/main_drawer_custom_times"
-            android:title="@string/times"
-            android:icon="@drawable/ic_access_time_black_24dp"/>
-        <item
             android:id="@+id/main_drawer_projects"
             android:title="@string/projects"
             android:icon="@drawable/ic_group_work_black_24dp"/>
+        <item
+            android:id="@+id/main_drawer_custom_times"
+            android:title="@string/times"
+            android:icon="@drawable/ic_access_time_black_24dp"/>
         <item
             android:id="@+id/main_drawer_friends"
             android:title="@string/friends"

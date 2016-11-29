@@ -45,6 +45,11 @@ public class RemoteInstance extends Instance {
         mTaskId = null;
         mScheduleDateTime = null;
         mInstanceShownRecord = instanceShownRecord;
+
+        // opportunistic save
+        if (mInstanceShownRecord != null && TextUtils.isEmpty(mInstanceShownRecord.getProjectId())) {
+            mInstanceShownRecord.setProjectId(mRemoteProject.getId());
+        }
     }
 
     public RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull String taskId, @NonNull DateTime scheduleDateTime, @Nullable InstanceShownRecord instanceShownRecord) {
@@ -57,6 +62,11 @@ public class RemoteInstance extends Instance {
         mTaskId = taskId;
         mScheduleDateTime = scheduleDateTime;
         mInstanceShownRecord = instanceShownRecord;
+
+        // opportunistic save
+        if (mInstanceShownRecord != null && TextUtils.isEmpty(mInstanceShownRecord.getProjectId())) {
+            mInstanceShownRecord.setProjectId(mRemoteProject.getId());
+        }
     }
 
     @NonNull

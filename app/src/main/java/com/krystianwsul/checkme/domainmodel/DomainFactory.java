@@ -109,9 +109,8 @@ public class DomainFactory {
     @Nullable
     private FirebaseListener mFirebaseTickListener = null;
 
-    public static synchronized DomainFactory getDomainFactory(Context context) {
-        Assert.assertTrue(context != null);
-
+    @NonNull
+    public static synchronized DomainFactory getDomainFactory(@NonNull Context context) {
         if (sDomainFactory == null) {
             sStart = ExactTimeStamp.getNow();
 
@@ -127,13 +126,11 @@ public class DomainFactory {
         return sDomainFactory;
     }
 
-    private DomainFactory(Context context) {
+    private DomainFactory(@NonNull Context context) {
         mLocalFactory = LocalFactory.getInstance(context);
     }
 
-    DomainFactory(PersistenceManger persistenceManger) {
-        Assert.assertTrue(persistenceManger != null);
-
+    DomainFactory(@NonNull PersistenceManger persistenceManger) {
         mLocalFactory = new LocalFactory(persistenceManger);
     }
 

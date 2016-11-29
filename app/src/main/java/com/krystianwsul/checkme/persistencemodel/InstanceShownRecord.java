@@ -188,6 +188,7 @@ public class InstanceShownRecord extends Record {
 
     public void setProjectId(@NonNull String projectId) {
         mProjectId = projectId;
+        mChanged = true;
     }
 
     @Override

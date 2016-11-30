@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WeeklyScheduleRecord extends Record {
-    private static final String TABLE_WEEKLY_SCHEDULES = "weeklySchedules";
+    static final String TABLE_WEEKLY_SCHEDULES = "weeklySchedules";
 
     private static final String COLUMN_SCHEDULE_ID = "scheduleId";
     private static final String COLUMN_DAY_OF_WEEK = "dayOfWeek";

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MonthlyWeekScheduleRecord extends Record {
-    private static final String TABLE_MONTHLY_WEEK_SCHEDULES = "monthlyWeekSchedules";
+    static final String TABLE_MONTHLY_WEEK_SCHEDULES = "monthlyWeekSchedules";
 
     private static final String COLUMN_SCHEDULE_ID = "scheduleId";
     private static final String COLUMN_DAY_OF_MONTH = "dayOfMonth";

@@ -11,7 +11,7 @@ import junit.framework.Assert;
 import java.util.UUID;
 
 class UuidRecord extends Record {
-    private static final String TABLE_UUID = "uuid";
+    static final String TABLE_UUID = "uuid";
 
     private static final String COLUMN_UUID = "uuid";
 

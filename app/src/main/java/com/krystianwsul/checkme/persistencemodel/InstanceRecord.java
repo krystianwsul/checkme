@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InstanceRecord extends Record {
-    private static final String TABLE_INSTANCES = "instances";
+    static final String TABLE_INSTANCES = "instances";
 
     private static final String COLUMN_ID = "_id";
     private static final String COLUMN_TASK_ID = "taskId";

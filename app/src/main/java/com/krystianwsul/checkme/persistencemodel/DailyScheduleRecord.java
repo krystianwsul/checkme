@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DailyScheduleRecord extends Record {
-    private static final String TABLE_DAILY_SCHEDULES = "dailySchedules";
+    static final String TABLE_DAILY_SCHEDULES = "dailySchedules";
 
     private static final String COLUMN_SCHEDULE_ID = "scheduleId";
     private static final String COLUMN_CUSTOM_TIME_ID = "customTimeId";

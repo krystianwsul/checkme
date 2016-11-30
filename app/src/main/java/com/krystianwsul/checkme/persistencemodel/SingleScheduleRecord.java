@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SingleScheduleRecord extends Record {
-    private static final String TABLE_SINGLE_SCHEDULES = "singleSchedules";
+    static final String TABLE_SINGLE_SCHEDULES = "singleSchedules";
 
     private static final String COLUMN_SCHEDULE_ID = "scheduleId";
     private static final String COLUMN_YEAR = "year";

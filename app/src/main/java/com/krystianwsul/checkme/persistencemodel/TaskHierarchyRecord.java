@@ -10,7 +10,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 
 public class TaskHierarchyRecord extends Record {
-    private static final String TABLE_TASK_HIERARCHIES = "taskHierarchies";
+    static final String TABLE_TASK_HIERARCHIES = "taskHierarchies";
 
     private static final String COLUMN_ID = "_id";
     private static final String COLUMN_PARENT_TASK_ID = "parentTaskId";
@@ -33,14 +33,6 @@ public class TaskHierarchyRecord extends Record {
                 + COLUMN_CHILD_TASK_ID + " INTEGER NOT NULL REFERENCES " + TaskRecord.TABLE_TASKS + "(" + TaskRecord.COLUMN_ID + "), "
                 + COLUMN_START_TIME + " INTEGER NOT NULL, "
                 + COLUMN_END_TIME + " INTEGER);");
-    }
-
-    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
-    @Deprecated
-    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        if (oldVersion < 16) {
-            sqLiteDatabase.delete(TABLE_TASK_HIERARCHIES, COLUMN_CHILD_TASK_ID + " NOT IN (SELECT " + TaskRecord.COLUMN_ID + " FROM " + TaskRecord.TABLE_TASKS + ")", null);
-        }
     }
 
     static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {

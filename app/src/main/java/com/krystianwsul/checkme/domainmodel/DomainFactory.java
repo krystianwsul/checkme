@@ -1534,6 +1534,8 @@ public class DomainFactory {
 
     @NonNull
     public String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey) {
+        // todo I'm not sure why this would ever get called by something that doesn't have a customTimeKey
+        // already guaranteed to be remote
         if (!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId)) {
             Assert.assertTrue(customTimeKey.mLocalCustomTimeId == null);
 

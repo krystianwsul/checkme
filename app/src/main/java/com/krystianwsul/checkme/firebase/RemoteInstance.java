@@ -222,7 +222,7 @@ public class RemoteInstance extends Instance {
 
         if (timePair.mCustomTimeKey != null) {
             Assert.assertTrue(timePair.mHourMinute == null);
-            mRemoteInstanceRecord.setInstanceCustomTimeId(mDomainFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey));
+            mRemoteInstanceRecord.setInstanceCustomTimeId(getRemoteFactory().getRemoteCustomTimeId(timePair.mCustomTimeKey, getTask().getRecordOf()));
             mRemoteInstanceRecord.setInstanceHour(null);
             mRemoteInstanceRecord.setInstanceMinute(null);
         } else {
@@ -239,6 +239,14 @@ public class RemoteInstance extends Instance {
         Assert.assertTrue(mInstanceShownRecord != null);
 
         mInstanceShownRecord.setNotified(false);
+    }
+
+    @NonNull
+    private RemoteFactory getRemoteFactory() {
+        RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
+        Assert.assertTrue(remoteFactory != null);
+
+        return remoteFactory;
     }
 
     private void createInstanceShownRecord() {

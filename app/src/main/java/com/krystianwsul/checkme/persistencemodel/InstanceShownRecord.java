@@ -55,7 +55,7 @@ public class InstanceShownRecord extends Record {
                 + COLUMN_SCHEDULE_MINUTE + " INTEGER, "
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
                 + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
-                + COLUMN_TASK_ID + " TEXT" // todo not null
+                + COLUMN_PROJECT_ID + " TEXT" // todo not null
                 + ");");
     }
 

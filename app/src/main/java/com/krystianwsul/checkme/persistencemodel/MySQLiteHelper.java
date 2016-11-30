@@ -68,6 +68,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskRecord.TABLE_TASKS);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.TABLE_UUID);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeeklyScheduleRecord.TABLE_WEEKLY_SCHEDULES);
+
+                onCreate(sqLiteDatabase);
             } else {
                 TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
                 ScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);

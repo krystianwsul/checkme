@@ -38,7 +38,7 @@ public class DatabaseWrapper {
     public static void setUserData(@NonNull UserData userData) {
         Assert.assertTrue(sRootReference != null);
 
-        String key = UserData.getKey(userData.email);
+        String key = userData.getKey();
         sRootReference.child(USERS_KEY).child(key).child("userData").setValue(userData);
     }
 
@@ -51,8 +51,8 @@ public class DatabaseWrapper {
     public static void addFriend(@NonNull UserData userData, @NonNull UserData friendUserData) {
         Assert.assertTrue(sRootReference != null);
 
-        String myKey = UserData.getKey(userData.email);
-        String friendKey = UserData.getKey(friendUserData.email);
+        String myKey = userData.getKey();
+        String friendKey = friendUserData.getKey();
 
         sRootReference.child(USERS_KEY).child(friendKey).child("friendOf").child(myKey).setValue(true);
     }
@@ -60,8 +60,8 @@ public class DatabaseWrapper {
     public static void removeFriend(@NonNull UserData userData, @NonNull UserData friendUserData) {
         Assert.assertTrue(sRootReference != null);
 
-        String myKey = UserData.getKey(userData.email);
-        String friendKey = UserData.getKey(friendUserData.email);
+        String myKey = userData.getKey();
+        String friendKey = friendUserData.getKey();
 
         sRootReference.child(USERS_KEY).child(friendKey).child("friendOf").child(myKey).setValue(null);
     }
@@ -70,7 +70,7 @@ public class DatabaseWrapper {
     public static Query getFriendsQuery(@NonNull UserData userData) {
         Assert.assertTrue(sRootReference != null);
 
-        String key = UserData.getKey(userData.email);
+        String key = userData.getKey();
 
         Query query = sRootReference.child(USERS_KEY).orderByChild("friendOf/" + key).equalTo(true);
         Assert.assertTrue(query != null);
@@ -122,7 +122,7 @@ public class DatabaseWrapper {
     public static Query getTaskRecordsQuery(@NonNull UserData userData) {
         Assert.assertTrue(sRootReference != null);
 
-        String key = UserData.getKey(userData.email);
+        String key = userData.getKey();
 
         Query query = sRootReference.child(RECORDS_KEY).orderByChild("recordOf/" + key).equalTo(true);
         Assert.assertTrue(query != null);

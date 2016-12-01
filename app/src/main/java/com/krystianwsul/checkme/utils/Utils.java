@@ -104,7 +104,7 @@ public class Utils {
     @NonNull
     public static Set<String> userDatasToKeys(@NonNull Collection<UserData> userDatas) {
         return Stream.of(userDatas)
-                .map(friend -> UserData.getKey(friend.email))
+                .map(UserData::getKey)
                 .collect(Collectors.toSet());
     }
 

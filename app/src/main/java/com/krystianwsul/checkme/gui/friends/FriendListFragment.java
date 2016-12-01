@@ -323,8 +323,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
             UserDataWrapper userDataWrapper = mUserDataWrappers.get(position);
             Assert.assertTrue(userDataWrapper != null);
 
-            friendHolder.mFriendName.setText(userDataWrapper.mUserData.displayName);
-            friendHolder.mFriendEmail.setText(userDataWrapper.mUserData.email);
+            friendHolder.mFriendName.setText(userDataWrapper.mUserData.getDisplayName());
+            friendHolder.mFriendEmail.setText(userDataWrapper.mUserData.getEmail());
 
             if (userDataWrapper.mSelected)
                 friendHolder.mFriendRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
@@ -347,7 +347,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         ArrayList<String> getSelected() {
             return new ArrayList<>(Stream.of(mUserDataWrappers)
                     .filter(customTimeWrapper -> customTimeWrapper.mSelected)
-                    .map(customTimeWrapper -> customTimeWrapper.mUserData.email)
+                    .map(customTimeWrapper -> customTimeWrapper.mUserData.getEmail())
                     .collect(Collectors.toList()));
         }
 
@@ -420,7 +420,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
             if (selectedUserDataEmails != null) {
                 Assert.assertTrue(!selectedUserDataEmails.isEmpty());
 
-                mSelected = selectedUserDataEmails.contains(mUserData.email);
+                mSelected = selectedUserDataEmails.contains(mUserData.getEmail());
             }
         }
     }

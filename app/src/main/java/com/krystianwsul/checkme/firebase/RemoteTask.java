@@ -214,7 +214,7 @@ public class RemoteTask extends Task {
 
         UserData userData = getRemoteFactory().getUserData();
 
-        String myKey = UserData.getKey(userData.email);
+        String myKey = userData.getKey();
         Assert.assertTrue(!friends.contains(myKey));
 
         Set<String> allFriends = mDomainFactory.getFriends().keySet();

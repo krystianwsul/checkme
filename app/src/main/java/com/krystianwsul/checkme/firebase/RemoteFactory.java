@@ -100,14 +100,14 @@ public class RemoteFactory {
         Assert.assertTrue(mDomainFactory.getFriends() != null);
 
         Map<String, UserData> lookup = new HashMap<>(mDomainFactory.getFriends());
-        lookup.put(UserData.getKey(mUserData.email), mUserData);
+        lookup.put(mUserData.getKey(), mUserData);
 
         List<String> names = new ArrayList<>();
         for (String key : recordOf) {
             UserData userData = lookup.get(key);
             Assert.assertTrue(userData != null); // todo what if one of the owners isn't a friend?
 
-            String first = userData.displayName.split(" ")[0];
+            String first = userData.getDisplayName().split(" ")[0];
             Assert.assertTrue(!TextUtils.isEmpty(first));
 
             names.add(first);
@@ -121,7 +121,7 @@ public class RemoteFactory {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
 
         Set<String> recordOf = new HashSet<>(friends);
-        recordOf.add(UserData.getKey(mUserData.email));
+        recordOf.add(mUserData.getKey());
 
         return getRemoteProjectForce(recordOf, now).newRemoteTask(taskJson);
     }

@@ -3,11 +3,14 @@ package com.krystianwsul.checkme.firebase;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.krystianwsul.checkme.MyFirebaseInstanceIdService;
 
 import junit.framework.Assert;
 
@@ -15,8 +18,11 @@ import java.io.UnsupportedEncodingException;
 
 @IgnoreExtraProperties
 public class UserData implements Parcelable {
-    public String email;
-    public String displayName;
+    private String email;
+    private String displayName;
+
+    @Nullable
+    private String token;
 
     @SuppressWarnings("unused")
     public UserData() {
@@ -29,6 +35,8 @@ public class UserData implements Parcelable {
 
         displayName = firebaseUser.getDisplayName();
         Assert.assertTrue(!TextUtils.isEmpty(displayName));
+
+        token = MyFirebaseInstanceIdService.getToken();
     }
 
     private UserData(@NonNull String email, @NonNull String displayName) {
@@ -37,6 +45,25 @@ public class UserData implements Parcelable {
 
         this.email = email;
         this.displayName = displayName;
+    }
+
+    @NonNull
+    public String getEmail() {
+        Assert.assertTrue(!TextUtils.isEmpty(email));
+
+        return email;
+    }
+
+    @NonNull
+    public String getDisplayName() {
+        Assert.assertTrue(!TextUtils.isEmpty(displayName));
+
+        return displayName;
+    }
+
+    @Nullable
+    public String getToken() {
+        return token;
     }
 
     @NonNull
@@ -49,6 +76,12 @@ public class UserData implements Parcelable {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @NonNull
+    @Exclude
+    public String getKey() {
+        return getKey(getEmail());
     }
 
     @Override

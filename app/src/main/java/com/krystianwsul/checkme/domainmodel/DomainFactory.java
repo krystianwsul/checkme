@@ -333,7 +333,7 @@ public class DomainFactory {
         mFriends = Stream.of(dataSnapshot.getChildren())
                 .map(child -> child.child("userData"))
                 .map(userData -> userData.getValue(UserData.class))
-                .collect(Collectors.toMap(userData -> UserData.getKey(userData.email), userData -> userData));
+                .collect(Collectors.toMap(UserData::getKey, userData -> userData));
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
     }
@@ -841,7 +841,7 @@ public class DomainFactory {
                 Assert.assertTrue(mFriends != null);
 
                 friends = Stream.of(mFriends.values())
-                        .filter(userData -> task.getRecordOf().contains(UserData.getKey(userData.email)))
+                        .filter(userData -> task.getRecordOf().contains(userData.getKey()))
                         .collect(Collectors.toSet());
             }
 
@@ -1128,7 +1128,7 @@ public class DomainFactory {
             Assert.assertTrue(mRemoteFactory != null);
             Assert.assertTrue(mUserData != null);
 
-            mergedFriends.remove(UserData.getKey(mUserData.email));
+            mergedFriends.remove(mUserData.getKey());
 
             newParentTask = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, mergedFriends);
         } else {
@@ -1240,7 +1240,7 @@ public class DomainFactory {
         Set<String> mergedFriends = new HashSet<>(task.getRecordOf());
         mergedFriends.addAll(newParentTask.getRecordOf());
         if (mUserData != null) {
-            mergedFriends.remove(UserData.getKey(mUserData.email));
+            mergedFriends.remove(mUserData.getKey());
         } else {
             Assert.assertTrue(mergedFriends.isEmpty());
         }
@@ -1426,7 +1426,7 @@ public class DomainFactory {
             Assert.assertTrue(mRemoteFactory != null);
             Assert.assertTrue(mUserData != null);
 
-            mergedFriends.remove(UserData.getKey(mUserData.email));
+            mergedFriends.remove(mUserData.getKey());
 
             newParentTask = mRemoteFactory.createRemoteTaskHelper(now, name, note, mergedFriends);
         } else {
@@ -1757,7 +1757,7 @@ public class DomainFactory {
         Assert.assertTrue(mRemoteFactory != null);
         Assert.assertTrue(mUserData != null);
 
-        recordOf.add(UserData.getKey(mUserData.email));
+        recordOf.add(mUserData.getKey());
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);

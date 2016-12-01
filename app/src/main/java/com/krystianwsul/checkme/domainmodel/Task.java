@@ -9,6 +9,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
+import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -317,4 +318,12 @@ public abstract class Task {
 
     @NonNull
     public abstract Map<ScheduleKey, ? extends Instance> getExistingInstances();
+
+    public abstract boolean belongsToRemoteProject();
+
+    @Nullable
+    public abstract RemoteProject getRemoteNullableProject();
+
+    @NonNull
+    public abstract RemoteProject getRemoteNonNullProject();
 }

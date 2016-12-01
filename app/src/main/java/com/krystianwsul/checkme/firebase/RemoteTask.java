@@ -448,4 +448,21 @@ public class RemoteTask extends Task {
     public RemoteProject getRemoteProject() {
         return mRemoteProject;
     }
+
+    @Override
+    public boolean belongsToRemoteProject() {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public RemoteProject getRemoteNullableProject() {
+        return getRemoteProject();
+    }
+
+    @NonNull
+    @Override
+    public RemoteProject getRemoteNonNullProject() {
+        return getRemoteProject();
+    }
 }

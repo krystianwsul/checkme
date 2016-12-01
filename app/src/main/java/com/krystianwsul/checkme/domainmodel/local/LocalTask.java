@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
+import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.persistencemodel.TaskRecord;
 import com.krystianwsul.checkme.utils.ScheduleKey;
@@ -199,5 +200,22 @@ public class LocalTask extends Task {
     @Override
     protected Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
         return mDomainFactory.getLocalFactory().getTaskHierarchiesByParentTaskKey(parentTaskKey);
+    }
+
+    @Override
+    public boolean belongsToRemoteProject() {
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public RemoteProject getRemoteNullableProject() {
+        return null;
+    }
+
+    @NonNull
+    @Override
+    public RemoteProject getRemoteNonNullProject() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -896,7 +896,7 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getTask().getRecordOf());
 
         save(context, dataId);
     }
@@ -909,12 +909,16 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        Set<String> recordOf = new HashSet<>();
+
         for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey);
             instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
+
+            recordOf.addAll(instance.getTask().getRecordOf());
         }
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, recordOf);
 
         save(context, dataId);
     }
@@ -935,7 +939,7 @@ public class DomainFactory {
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
         instance.setNotificationShown(false, now);
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getTask().getRecordOf());
 
         save(context, dataId);
     }
@@ -955,7 +959,7 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getTask().getRecordOf());
 
         save(context, dataId);
     }
@@ -982,15 +986,19 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        Set<String> recordOf = new HashSet<>();
+
         Stream.of(instanceKeys).forEach(instanceKey -> {
             Assert.assertTrue(instanceKey != null);
 
             Instance instance = getInstance(instanceKey);
 
             instance.setDone(true, now);
+
+            recordOf.addAll(instance.getTask().getRecordOf());
         });
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, recordOf);
 
         save(context, dataId);
 
@@ -1037,15 +1045,17 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task task;
+        Set<String> userKeys = new HashSet<>();
         if (friendEntries.isEmpty()) {
             task = mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
+            userKeys = Utils.userDatasToKeys(friendEntries);
+            task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, userKeys);
         }
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, userKeys);
 
         save(context, dataId);
 
@@ -1061,6 +1071,7 @@ public class DomainFactory {
         createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, friendEntries);
     }
 
+    @NonNull
     TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
@@ -1086,7 +1097,7 @@ public class DomainFactory {
 
         task.updateSchedules(scheduleDatas, now);
 
-        updateNotifications(context, taskKeys, now);
+        updateNotificationsAndNotifyCloud(context, taskKeys, now, task.getRecordOf());
 
         save(context, dataId);
 
@@ -1149,7 +1160,7 @@ public class DomainFactory {
 
         joinTasks(newParentTask, joinTasks, now);
 
-        updateNotifications(context, taskKeys, now);
+        updateNotificationsAndNotifyCloud(context, taskKeys, now, newParentTask.getRecordOf());
 
         save(context, dataId);
     }
@@ -1162,7 +1173,7 @@ public class DomainFactory {
 
         Task childTask = parentTask.createChildTask(now, name, note);
 
-        updateNotifications(context, Collections.singletonList(parentTaskKey), now);
+        updateNotificationsAndNotifyCloud(context, Collections.singletonList(parentTaskKey), now, childTask.getRecordOf());
 
         save(context, dataId);
 
@@ -1217,7 +1228,7 @@ public class DomainFactory {
 
         joinTasks(childTask, joinTasks, now);
 
-        updateNotifications(context, taskKeys, now);
+        updateNotificationsAndNotifyCloud(context, taskKeys, now, childTask.getRecordOf());
 
         save(context, dataId);
     }
@@ -1269,7 +1280,7 @@ public class DomainFactory {
 
         newParentTask.addChild(task, now);
 
-        updateNotifications(context, taskKeys, now);
+        updateNotificationsAndNotifyCloud(context, taskKeys, now, task.getRecordOf());
 
         save(context, dataId);
 
@@ -1289,7 +1300,7 @@ public class DomainFactory {
 
         task.setEndExactTimeStamp(now);
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, task.getRecordOf());
 
         save(context, dataIds, false);
     }
@@ -1302,6 +1313,8 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
+        Set<String> userKeys = new HashSet<>();
+
         for (TaskKey taskKey : taskKeys) {
             Assert.assertTrue(taskKey != null);
 
@@ -1309,9 +1322,11 @@ public class DomainFactory {
             Assert.assertTrue(task.current(now));
 
             task.setEndExactTimeStamp(now);
+
+            userKeys.addAll(task.getRecordOf());
         }
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, userKeys);
 
         save(context, dataId);
     }
@@ -1386,7 +1401,7 @@ public class DomainFactory {
             task = mRemoteFactory.createRemoteTaskHelper(now, name, note, Utils.userDatasToKeys(friendEntries));
         }
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, task.getRecordOf());
 
         save(context, dataId);
 
@@ -1447,7 +1462,7 @@ public class DomainFactory {
 
         joinTasks(newParentTask, joinTasks, now);
 
-        updateNotifications(context, taskKeys, now);
+        updateNotificationsAndNotifyCloud(context, taskKeys, now, newParentTask.getRecordOf());
 
         save(context, dataId);
     }
@@ -1479,7 +1494,7 @@ public class DomainFactory {
         Stream.of(task.getCurrentSchedules(now))
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
-        updateNotifications(context, taskKeys, now);
+        updateNotificationsAndNotifyCloud(context, taskKeys, now, task.getRecordOf());
 
         save(context, dataId);
 
@@ -1998,7 +2013,7 @@ public class DomainFactory {
 
         instance.setDone(done, now);
 
-        updateNotifications(context, new ArrayList<>(), now);
+        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getTask().getRecordOf());
 
         save(context, dataId);
 
@@ -2088,6 +2103,22 @@ public class DomainFactory {
                 .forEach(LocalCustomTime::delete);
 
         return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
+    }
+
+    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull Set<String> userKeys) {
+        updateNotifications(context, taskKeys, now);
+
+        if (!userKeys.isEmpty()) {
+            Assert.assertTrue(mRemoteFactory != null);
+            Assert.assertTrue(mUserData != null);
+
+            HashSet<String> friends = new HashSet<>(userKeys);
+            friends.remove(mUserData.getKey());
+
+            if (!friends.isEmpty()) {
+                // todo notify
+            }
+        }
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {

@@ -306,8 +306,9 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
             Date date = Stream.of(mData.InstanceDatas.values())
                     .map(instanceData -> instanceData.InstanceDate)
                     .sorted()
-                    .findFirst().get();
-            Assert.assertTrue(mDate != null);
+                    .findFirst()
+                    .get();
+            Assert.assertTrue(date != null);
 
             Pair<Date, HourMinute> nextHour = HourMinute.getNextHour(date);
             mDate = nextHour.first;

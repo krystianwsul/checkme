@@ -6,7 +6,22 @@
 
 package com.krystianwsul.checkme.backend;
 
+import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.appengine.repackaged.com.google.gson.Gson;
+import com.google.common.base.Joiner;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,20 +29,60 @@ import javax.servlet.http.HttpServletResponse;
 
 public class NotificationServlet extends HttpServlet {
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        resp.setContentType("text/plain");
-        resp.getWriter().println("Please use the form to POST to this url");
-    }
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        List<String> projects = Arrays.asList(req.getParameterValues("projects"));
 
-    @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-        String name = req.getParameter("name");
-        resp.setContentType("text/plain");
-        if (name == null) {
-            resp.getWriter().println("Please enter a name");
+        resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
+        resp.getWriter().println();
+
+        GoogleCredential googleCred = GoogleCredential.fromStream(new FileInputStream("WEB-INF/check-me-add47-firebase-adminsdk-5hvuz-436ce98200.json"));
+        GoogleCredential scoped = googleCred.createScoped(
+                Arrays.asList(
+                        "https://www.googleapis.com/auth/firebase.database",
+                        "https://www.googleapis.com/auth/userinfo.email"
+                )
+        );
+
+        scoped.refreshToken();
+        String firebaseToken = scoped.getAccessToken();
+
+        resp.getWriter().println("firebase token: " + firebaseToken);
+        resp.getWriter().println();
+
+        Gson gson = new Gson();
+
+        for (String project : projects) {
+            URL recordOfUrl = new URL("https://check-me-add47.firebaseio.com/development/records/" + project + "/recordOf.json?access_token=" + firebaseToken);
+
+            resp.getWriter().println(recordOfUrl.toString());
+            resp.getWriter().println();
+
+            BufferedReader recordOfReader = new BufferedReader(new InputStreamReader(recordOfUrl.openStream()));
+            @SuppressWarnings("InstantiatingObjectToGetClassObject") Map<String, Boolean> recordOf = gson.fromJson(recordOfReader, new HashMap<String, Boolean>().getClass());
+            recordOfReader.close();
+
+            Set<String> userKeys = recordOf.keySet();
+
+            resp.getWriter().println("user keys: " + Joiner.on(", ").join(userKeys));
+
+            for (String userKey : userKeys) {
+                URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/development/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
+
+                resp.getWriter().println(tokenUrl.toString());
+                resp.getWriter().println();
+
+                BufferedReader tokenReader = new BufferedReader(new InputStreamReader(tokenUrl.openStream()));
+                String userToken = gson.fromJson(tokenReader, String.class);
+                tokenReader.close();
+
+                resp.getWriter().println("user token: " + userToken);
+                if (StringUtils.isEmpty(userToken)) {
+                    resp.getWriter().println("empty, skipping");
+                    resp.getWriter().println();
+                } else {
+                    resp.getWriter().println();
+                }
+            }
         }
-        resp.getWriter().println("Hello " + name);
     }
 }

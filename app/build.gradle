@@ -32,7 +32,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            zipAlignEnabled true
             versionNameSuffix "-debug"
         }
         proto {
@@ -75,8 +74,6 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:9.8.0'
     compile 'com.google.firebase:firebase-database:9.8.0'
     compile 'com.google.firebase:firebase-messaging:9.8.0'
-    compile 'com.android.volley:volley:1.0.0'
-
 }
 
 apply plugin: 'com.google.gms.google-services'

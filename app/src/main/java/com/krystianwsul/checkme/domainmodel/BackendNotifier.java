@@ -1,14 +1,10 @@
 package com.krystianwsul.checkme.domainmodel;
 
-import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
@@ -17,6 +13,10 @@ import com.krystianwsul.checkme.firebase.RemoteProject;
 
 import junit.framework.Assert;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
@@ -37,7 +37,7 @@ class BackendNotifier {
         return PREFIX + TextUtils.join("&", parameters);
     }
 
-    BackendNotifier(@NonNull Context context, @NonNull Set<RemoteProject> remoteProjects) {
+    BackendNotifier(@NonNull Set<RemoteProject> remoteProjects) {
         String root = DatabaseWrapper.getRoot();
 
         boolean production;
@@ -59,6 +59,33 @@ class BackendNotifier {
         String url = getUrl(projectIds, production);
         Assert.assertTrue(!TextUtils.isEmpty(url));
 
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+
+                    StringBuilder stringBuilder = new StringBuilder();
+
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        stringBuilder.append(inputLine);
+                        stringBuilder.append("\n");
+                    }
+                    in.close();
+
+                    Log.e("asdf", "BackendNotifier response: " + stringBuilder);
+                } catch (IOException e) {
+                    MyCrashlytics.logException(e);
+                }
+
+                return null;
+            }
+        };
+
+        asyncTask.execute();
+
+        /*
         RequestQueue queue = Volley.newRequestQueue(context.getApplicationContext());
 
         StringRequest stringRequest = new StringRequest(
@@ -69,5 +96,6 @@ class BackendNotifier {
         queue.add(stringRequest);
 
         Log.e("asdf", "BackendNotifier queued projects " + projectIds);
+        */
     }
 }

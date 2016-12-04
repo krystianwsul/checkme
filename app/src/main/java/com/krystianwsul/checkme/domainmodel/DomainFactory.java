@@ -2120,9 +2120,8 @@ public class DomainFactory {
     private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull Set<RemoteProject> remoteProjects) {
         updateNotifications(context, taskKeys, now);
 
-        if (!remoteProjects.isEmpty()) {
-            new BackendNotifier(context, remoteProjects);
-        }
+        if (!remoteProjects.isEmpty())
+            new BackendNotifier(remoteProjects);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {

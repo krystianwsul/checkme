@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class ShowCustomTimesLoader extends DomainLoader<ShowCustomTimesLoader.Data> {
     public ShowCustomTimesLoader(Context context) {
-        super(context);
+        super(context, false);
     }
 
     @Override

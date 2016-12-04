@@ -23,7 +23,7 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
     private final ArrayList<InstanceKey> mInstanceKeys;
 
     public EditInstancesLoader(@NonNull Context context, @NonNull ArrayList<InstanceKey> instanceKeys) {
-        super(context);
+        super(context, false);
 
         Assert.assertTrue(instanceKeys.size() > 1);
 

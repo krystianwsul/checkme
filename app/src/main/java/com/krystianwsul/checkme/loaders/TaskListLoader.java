@@ -18,7 +18,8 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     private final TaskKey mTaskKey;
 
     public TaskListLoader(@NonNull Context context, @Nullable TaskKey taskKey) {
-        super(context);
+        super(context, false);
+
         mTaskKey = taskKey;
     }
 

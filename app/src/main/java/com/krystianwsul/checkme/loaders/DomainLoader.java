@@ -4,8 +4,12 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.content.AsyncTaskLoader;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.ObserverHolder;
+import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.notifications.InstanceDoneService;
 
 import java.util.ArrayList;
 
@@ -13,8 +17,28 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     private D mData;
     private Observer mObserver;
 
-    DomainLoader(Context context) {
+    private final DomainFactory mDomainFactory;
+    private final boolean mNeedsFirebase;
+
+    private final DomainFactory.FirebaseListener mFirebaseListener = new DomainFactory.FirebaseListener() {
+        @Override
+        public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
+            if (isStarted())
+                forceLoad();
+        }
+
+        @NonNull
+        @Override
+        public String getSource() {
+            return getName();
+        }
+    };
+
+    DomainLoader(Context context, boolean needsFirebase) {
         super(context);
+
+        mDomainFactory = DomainFactory.getDomainFactory(getContext());
+        mNeedsFirebase = needsFirebase;
     }
 
     abstract String getName();
@@ -22,9 +46,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
 
     @Override
     public final D loadInBackground() {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
-
-        return loadDomain(domainFactory);
+        return loadDomain(mDomainFactory);
     }
 
     protected abstract D loadDomain(@NonNull DomainFactory domainFactory);
@@ -57,8 +79,21 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
             ObserverHolder.getObserverHolder().addDomainObserver(mObserver);
         }
 
-        if (takeContentChanged() || mData == null)
-            forceLoad();
+        if (takeContentChanged() || mData == null) {
+            if (!mNeedsFirebase) {
+                forceLoad();
+            } else {
+                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (firebaseUser != null) {
+                    UserData userData = new UserData(firebaseUser);
+
+                    mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                    mDomainFactory.setFirebaseListener(mFirebaseListener);
+                } else {
+                    throw new InstanceDoneService.NeedsFirebaseException();
+                }
+            }
+        }
     }
 
     @Override

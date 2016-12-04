@@ -14,7 +14,7 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     private final TimeStamp mTimeStamp;
 
     public ShowGroupLoader(@NonNull Context context, @NonNull TimeStamp timeStamp) {
-        super(context);
+        super(context, false);
 
         mTimeStamp = timeStamp;
     }

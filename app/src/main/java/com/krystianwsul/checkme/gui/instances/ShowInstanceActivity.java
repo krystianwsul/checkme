@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
-import com.krystianwsul.checkme.notifications.InstanceDoneService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -205,25 +204,6 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
         Assert.assertTrue(mGroupListFragment != null);
 
-        if (mInstanceKey.getType() == TaskKey.Type.LOCAL) {
-            init();
-        } else { // todo handle configuration change memory leak
-            InstanceDoneService.needsFirebase(this, new DomainFactory.FirebaseListener() {
-                @Override
-                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
-                    init();
-                }
-
-                @NonNull
-                @Override
-                public String getSource() {
-                    return "ShowInstanceActivity";
-                }
-            });
-        }
-    }
-
-    private void init() {
         mGroupListFragment.setInstanceKey(mInstanceKey);
 
         getSupportLoaderManager().initLoader(0, null, this);

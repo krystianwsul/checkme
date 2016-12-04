@@ -85,7 +85,7 @@ public class InstanceDoneService extends IntentService {
     }
 
     public static class NeedsFirebaseException extends RuntimeException {
-        NeedsFirebaseException() {
+        public NeedsFirebaseException() {
             super();
         }
     }

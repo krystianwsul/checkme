@@ -22,7 +22,7 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
 
     public EditInstanceLoader(@NonNull Context context, @NonNull InstanceKey instanceKey) {
-        super(context);
+        super(context, false);
 
         mInstanceKey = instanceKey;
     }

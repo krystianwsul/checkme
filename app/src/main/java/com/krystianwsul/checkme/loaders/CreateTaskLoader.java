@@ -31,7 +31,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     private final List<TaskKey> mExcludedTaskKeys;
 
     public CreateTaskLoader(@NonNull Context context, @Nullable TaskKey taskKey, @NonNull List<TaskKey> excludedTaskKeys) {
-        super(context);
+        super(context, false);
 
         mTaskKey = taskKey;
         mExcludedTaskKeys = excludedTaskKeys;

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
@@ -15,7 +16,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
 
     public ShowInstanceLoader(@NonNull Context context, @NonNull InstanceKey instanceKey) {
-        super(context);
+        super(context, instanceKey.getType() == TaskKey.Type.REMOTE);
 
         mInstanceKey = instanceKey;
     }

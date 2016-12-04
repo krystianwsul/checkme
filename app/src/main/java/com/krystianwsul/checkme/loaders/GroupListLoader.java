@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -39,7 +40,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     private final ArrayList<InstanceKey> mInstanceKeys;
 
     public GroupListLoader(@NonNull Context context, @Nullable TimeStamp timeStamp, @Nullable InstanceKey instanceKey, @Nullable ArrayList<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
-        super(context);
+        super(context, needsFirebase(instanceKey, instanceKeys));
 
         Assert.assertTrue((position == null) == (timeRange == null));
         Assert.assertTrue((position != null ? 1 : 0) + (timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
@@ -49,6 +50,21 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         mTimeStamp = timeStamp;
         mInstanceKey = instanceKey;
         mInstanceKeys = instanceKeys;
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private static boolean needsFirebase(@Nullable InstanceKey instanceKey, @Nullable List<InstanceKey> instanceKeys) {
+        if (instanceKey != null) {
+            Assert.assertTrue(instanceKeys == null);
+
+            return (instanceKey.getType() == TaskKey.Type.REMOTE);
+        } else if (instanceKeys != null) {
+            return Stream.of(instanceKeys)
+                    .map(InstanceKey::getType)
+                    .anyMatch(type -> type == TaskKey.Type.REMOTE);
+        } else {
+            return false;
+        }
     }
 
     @Override

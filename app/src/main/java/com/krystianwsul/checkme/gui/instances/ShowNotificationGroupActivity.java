@@ -59,7 +59,7 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
 
         if (Stream.of(instanceKeys).anyMatch(instanceKey -> instanceKey.getType() == TaskKey.Type.LOCAL)) {
             init(instanceKeys);
-        } else {
+        } else { // todo handle configuration change memory leak
             InstanceDoneService.needsFirebase(this, new DomainFactory.FirebaseListener() {
                 @Override
                 public void onFirebaseResult(@NonNull DomainFactory domainFactory) {

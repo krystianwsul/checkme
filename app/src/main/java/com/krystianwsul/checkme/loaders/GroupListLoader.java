@@ -57,7 +57,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     }
 
     @Override
-    public Data loadInBackground() {
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
         if (mPosition != null) {
             Assert.assertTrue(mTimeRange != null);
 
@@ -65,21 +65,21 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
+            return domainFactory.getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
         } else if (mTimeStamp != null) {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(mTimeStamp);
+            return domainFactory.getGroupListData(mTimeStamp);
         } else if (mInstanceKey != null) {
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(mInstanceKey);
+            return domainFactory.getGroupListData(mInstanceKey);
         } else {
             Assert.assertTrue(mInstanceKeys != null);
             Assert.assertTrue(!mInstanceKeys.isEmpty());
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mInstanceKeys);
+            return domainFactory.getGroupListData(getContext(), mInstanceKeys);
         }
     }
 

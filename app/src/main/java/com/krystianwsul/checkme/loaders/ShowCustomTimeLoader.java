@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -26,8 +27,8 @@ public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data
     }
 
     @Override
-    public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getShowCustomTimeData(mCustomTimeId);
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
+        return domainFactory.getShowCustomTimeData(mCustomTimeId);
     }
 
     public static class Data extends DomainLoader.Data {

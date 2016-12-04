@@ -33,8 +33,8 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     }
 
     @Override
-    public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mInstanceKey);
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
+        return domainFactory.getEditInstanceData(mInstanceKey);
     }
 
     public static class Data extends DomainLoader.Data {

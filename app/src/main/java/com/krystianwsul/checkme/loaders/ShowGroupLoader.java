@@ -25,8 +25,8 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     }
 
     @Override
-    public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getShowGroupData(getContext(), mTimeStamp);
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
+        return domainFactory.getShowGroupData(getContext(), mTimeStamp);
     }
 
     public static class Data extends DomainLoader.Data {

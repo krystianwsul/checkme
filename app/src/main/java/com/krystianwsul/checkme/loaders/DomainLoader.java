@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.content.AsyncTaskLoader;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.ObserverHolder;
 
 import java.util.ArrayList;
@@ -16,6 +18,16 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     }
 
     abstract String getName();
+
+
+    @Override
+    public final D loadInBackground() {
+        DomainFactory domainFactory = DomainFactory.getDomainFactory(getContext());
+
+        return loadDomain(domainFactory);
+    }
+
+    protected abstract D loadDomain(@NonNull DomainFactory domainFactory);
 
     // main thread
     @Override

@@ -207,7 +207,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         if (mInstanceKey.getType() == TaskKey.Type.LOCAL) {
             init();
-        } else {
+        } else { // todo handle configuration change memory leak
             InstanceDoneService.needsFirebase(this, new DomainFactory.FirebaseListener() {
                 @Override
                 public void onFirebaseResult(@NonNull DomainFactory domainFactory) {

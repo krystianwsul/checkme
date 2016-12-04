@@ -214,7 +214,7 @@ public class RemoteTask extends Task {
 
         UserData userData = getRemoteFactory().getUserData();
 
-        String myKey = UserData.getKey(userData.email);
+        String myKey = userData.getKey();
         Assert.assertTrue(!friends.contains(myKey));
 
         Set<String> allFriends = mDomainFactory.getFriends().keySet();
@@ -447,5 +447,22 @@ public class RemoteTask extends Task {
     @NonNull
     public RemoteProject getRemoteProject() {
         return mRemoteProject;
+    }
+
+    @Override
+    public boolean belongsToRemoteProject() {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public RemoteProject getRemoteNullableProject() {
+        return getRemoteProject();
+    }
+
+    @NonNull
+    @Override
+    public RemoteProject getRemoteNonNullProject() {
+        return getRemoteProject();
     }
 }

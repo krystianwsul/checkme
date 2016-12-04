@@ -420,7 +420,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         showTab(mVisibleTab);
 
-        TickService.startServiceRegister(this);
+        TickService.startServiceRegister(this, "MainActivity: TickService.startServiceRegister");
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))

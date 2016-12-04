@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
@@ -277,4 +278,12 @@ public abstract class Instance {
     public String toString() {
         return super.toString() + " " + getName() + " " + getScheduleDateTime().toString() + " " + getInstanceDateTime().toString();
     }
+
+    public abstract boolean belongsToRemoteProject();
+
+    @Nullable
+    public abstract RemoteProject getRemoteNullableProject();
+
+    @NonNull
+    public abstract RemoteProject getRemoteNonNullProject();
 }

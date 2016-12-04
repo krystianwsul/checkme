@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Instance;
+import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -350,5 +351,22 @@ public class LocalInstance extends Instance {
     @Override
     public LocalTask getTask() {
         return mDomainFactory.getLocalFactory().getTaskForce(getTaskId());
+    }
+
+    @Override
+    public boolean belongsToRemoteProject() {
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public RemoteProject getRemoteNullableProject() {
+        return null;
+    }
+
+    @NonNull
+    @Override
+    public RemoteProject getRemoteNonNullProject() {
+        throw new UnsupportedOperationException();
     }
 }

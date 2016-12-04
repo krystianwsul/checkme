@@ -397,4 +397,21 @@ public class RemoteInstance extends Instance {
     public RemoteTask getTask() {
         return mRemoteProject.getRemoteTaskForce(getTaskId());
     }
+
+    @Override
+    public boolean belongsToRemoteProject() {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public RemoteProject getRemoteNullableProject() {
+        return getTask().getRemoteProject();
+    }
+
+    @NonNull
+    @Override
+    public RemoteProject getRemoteNonNullProject() {
+        return getTask().getRemoteProject();
+    }
 }

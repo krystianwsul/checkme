@@ -54,7 +54,7 @@ public class DebugFragment extends AbstractFragment {
         Button debugTick = (Button) view.findViewById(R.id.debug_tick);
         Assert.assertTrue(debugTick != null);
 
-        debugTick.setOnClickListener(v -> TickService.startServiceDebug(getActivity()));
+        debugTick.setOnClickListener(v -> TickService.startServiceDebug(getActivity(), "DebugFragment: TickService.startServiceDebug"));
 
         TextView debugData = (TextView) view.findViewById(R.id.debug_data);
         Assert.assertTrue(debugData != null);

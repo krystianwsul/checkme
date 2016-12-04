@@ -1190,7 +1190,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 scheduleHolder.mScheduleLayout.setHint(null);
                 scheduleHolder.mScheduleLayout.setError(null);
 
-                scheduleHolder.mScheduleText.setText(friendEntry.displayName + " (" + friendEntry.email + ")");
+                scheduleHolder.mScheduleText.setText(friendEntry.getDisplayName() + " (" + friendEntry.getEmail() + ")");
 
                 scheduleHolder.mScheduleText.setEnabled(true);
 

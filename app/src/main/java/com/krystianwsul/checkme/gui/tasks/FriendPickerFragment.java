@@ -146,8 +146,8 @@ public class FriendPickerFragment extends AbstractDialogFragment {
             UserData userData = mUserDatas.get(position);
             Assert.assertTrue(userData != null);
 
-            friendHolder.mFriendName.setText(userData.displayName);
-            friendHolder.mFriendEmail.setText(userData.email);
+            friendHolder.mFriendName.setText(userData.getDisplayName());
+            friendHolder.mFriendEmail.setText(userData.getEmail());
 
             friendHolder.mFriendRow.setOnClickListener(v -> friendHolder.onRowClick());
         }

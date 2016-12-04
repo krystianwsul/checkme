@@ -11,6 +11,7 @@ import android.view.MenuItem;
 
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.notifications.InstanceDoneService;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -59,7 +60,18 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         if (Stream.of(instanceKeys).anyMatch(instanceKey -> instanceKey.getType() == TaskKey.Type.LOCAL)) {
             init(instanceKeys);
         } else {
-            InstanceDoneService.needsFirebase(this, domainFactory -> init(instanceKeys));
+            InstanceDoneService.needsFirebase(this, new DomainFactory.FirebaseListener() {
+                @Override
+                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
+                    init(instanceKeys);
+                }
+
+                @NonNull
+                @Override
+                public String getSource() {
+                    return "ShowNotificationGroupActivity";
+                }
+            });
         }
     }
 

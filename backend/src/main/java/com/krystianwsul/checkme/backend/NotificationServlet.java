@@ -16,6 +16,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -36,20 +37,25 @@ public class NotificationServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         List<String> projects = Arrays.asList(req.getParameterValues("projects"));
+        Assert.assertTrue(!projects.isEmpty());
 
         resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
         resp.getWriter().println();
 
         GoogleCredential googleCred = GoogleCredential.fromStream(new FileInputStream("WEB-INF/check-me-add47-firebase-adminsdk-5hvuz-436ce98200.json"));
+        Assert.assertTrue(googleCred != null);
+
         GoogleCredential scoped = googleCred.createScoped(
                 Arrays.asList(
                         "https://www.googleapis.com/auth/firebase.database",
                         "https://www.googleapis.com/auth/userinfo.email"
                 )
         );
+        Assert.assertTrue(scoped != null);
 
         scoped.refreshToken();
         String firebaseToken = scoped.getAccessToken();
+        Assert.assertTrue(!StringUtils.isEmpty(firebaseToken));
 
         resp.getWriter().println("firebase token: " + firebaseToken);
         resp.getWriter().println();
@@ -57,6 +63,8 @@ public class NotificationServlet extends HttpServlet {
         Gson gson = new Gson();
 
         for (String project : projects) {
+            Assert.assertTrue(!StringUtils.isEmpty(project));
+
             URL recordOfUrl = new URL("https://check-me-add47.firebaseio.com/development/records/" + project + "/recordOf.json?access_token=" + firebaseToken);
 
             resp.getWriter().println(recordOfUrl.toString());
@@ -71,6 +79,8 @@ public class NotificationServlet extends HttpServlet {
             resp.getWriter().println("user keys: " + Joiner.on(", ").join(userKeys));
 
             for (String userKey : userKeys) {
+                Assert.assertTrue(!StringUtils.isEmpty(userKey));
+
                 URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/development/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
 
                 resp.getWriter().println(tokenUrl.toString());

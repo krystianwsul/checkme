@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme;
 
-import android.support.annotation.NonNull;
-import android.text.TextUtils;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,11 +25,8 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         DatabaseWrapper.setUserData(userData);
     }
 
-    @NonNull
+    @Nullable
     public static String getToken() {
-        String token = FirebaseInstanceId.getInstance().getToken();
-        Assert.assertTrue(!TextUtils.isEmpty(token));
-
-        return token;
+        return FirebaseInstanceId.getInstance().getToken();
     }
 }

@@ -39,6 +39,14 @@ public class NotificationServlet extends HttpServlet {
         List<String> projects = Arrays.asList(req.getParameterValues("projects"));
         Assert.assertTrue(!projects.isEmpty());
 
+        String productionParam = req.getParameter("production");
+        boolean production = !StringUtils.isEmpty(productionParam);
+
+        resp.getWriter().println("production? " + production);
+        resp.getWriter().println();
+
+        String prefix = (production ? "production" : "development");
+
         resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
         resp.getWriter().println();
 
@@ -65,7 +73,7 @@ public class NotificationServlet extends HttpServlet {
         for (String project : projects) {
             Assert.assertTrue(!StringUtils.isEmpty(project));
 
-            URL recordOfUrl = new URL("https://check-me-add47.firebaseio.com/development/records/" + project + "/recordOf.json?access_token=" + firebaseToken);
+            URL recordOfUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/records/" + project + "/recordOf.json?access_token=" + firebaseToken);
 
             resp.getWriter().println(recordOfUrl.toString());
             resp.getWriter().println();
@@ -74,6 +82,9 @@ public class NotificationServlet extends HttpServlet {
             @SuppressWarnings("InstantiatingObjectToGetClassObject") Map<String, Boolean> recordOf = gson.fromJson(recordOfReader, new HashMap<String, Boolean>().getClass());
             recordOfReader.close();
 
+            if (recordOf == null)
+                throw new NoRecordOfException(recordOfUrl.toString());
+
             Set<String> userKeys = recordOf.keySet();
 
             resp.getWriter().println("user keys: " + Joiner.on(", ").join(userKeys));
@@ -81,7 +92,7 @@ public class NotificationServlet extends HttpServlet {
             for (String userKey : userKeys) {
                 Assert.assertTrue(!StringUtils.isEmpty(userKey));
 
-                URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/development/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
+                URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
 
                 resp.getWriter().println(tokenUrl.toString());
                 resp.getWriter().println();
@@ -131,6 +142,12 @@ public class NotificationServlet extends HttpServlet {
                     }
                 }
             }
+        }
+    }
+
+    private static class NoRecordOfException extends RuntimeException {
+        NoRecordOfException(String url) {
+            super("url: " + url);
         }
     }
 }

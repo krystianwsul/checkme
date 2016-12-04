@@ -23,15 +23,18 @@ public class DatabaseWrapper {
     private static final String RECORDS_KEY = "records";
 
     @Nullable
+    private static String sRoot;
+
+    @Nullable
     private static DatabaseReference sRootReference;
 
     public static void initialize(@NonNull OrganizatorApplication organizatorApplication) {
         Assert.assertTrue(sRootReference == null);
 
-        String root = organizatorApplication.getResources().getString(R.string.firebase_root);
-        Assert.assertTrue(!TextUtils.isEmpty(root));
+        sRoot = organizatorApplication.getResources().getString(R.string.firebase_root);
+        Assert.assertTrue(!TextUtils.isEmpty(sRoot));
 
-        sRootReference = FirebaseDatabase.getInstance().getReference().child(root);
+        sRootReference = FirebaseDatabase.getInstance().getReference().child(sRoot);
         Assert.assertTrue(sRootReference != null);
     }
 
@@ -134,5 +137,12 @@ public class DatabaseWrapper {
         Assert.assertTrue(sRootReference != null);
 
         sRootReference.child(RECORDS_KEY).updateChildren(values);
+    }
+
+    @NonNull
+    public static String getRoot() {
+        Assert.assertTrue(!TextUtils.isEmpty(sRoot));
+
+        return sRoot;
     }
 }

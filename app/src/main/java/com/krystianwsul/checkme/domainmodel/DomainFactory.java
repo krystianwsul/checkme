@@ -2120,7 +2120,7 @@ public class DomainFactory {
         updateNotifications(context, taskKeys, now);
 
         if (!remoteProjects.isEmpty()) {
-            // todo notify
+            new BackendNotifier(context, remoteProjects);
         }
     }
 

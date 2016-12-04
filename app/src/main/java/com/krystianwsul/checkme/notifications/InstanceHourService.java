@@ -46,7 +46,18 @@ public class InstanceHourService extends IntentService {
         notificationManager.cancel(notificationId);
 
         if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
-            InstanceDoneService.needsFirebase(this, domainFactory -> setInstanceAddHour(domainFactory, instanceKey));
+            InstanceDoneService.needsFirebase(this, new DomainFactory.FirebaseListener() {
+                @Override
+                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
+                    setInstanceAddHour(domainFactory, instanceKey);
+                }
+
+                @NonNull
+                @Override
+                public String getSource() {
+                    return "InstanceHourService";
+                }
+            });
         } else {
             setInstanceAddHour(DomainFactory.getDomainFactory(this), instanceKey);
         }

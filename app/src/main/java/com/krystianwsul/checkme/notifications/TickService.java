@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -22,31 +23,34 @@ public class TickService extends IntentService {
     private static final String SILENT_KEY = "silent";
     private static final String REGISTERING_KEY = "registering";
     private static final String TASK_KEYS_KEY = "taskKeys";
+    private static final String SOURCE_KEY = "source";
 
     public static final String TICK_PREFERENCES = "tickPreferences";
     public static final String LAST_TICK_KEY = "lastTick";
 
     // DON'T HOLD STATE IN STATIC VARIABLES
 
-    public static void startServiceRegister(@NonNull Context context) {
-        context.startService(getIntent(context, true, true, new ArrayList<>()));
+    public static void startServiceRegister(@NonNull Context context, @NonNull String source) {
+        context.startService(getIntent(context, true, true, new ArrayList<>(), source));
     }
 
-    public static void startServiceTimeChange(@NonNull Context context) {
-        context.startService(getIntent(context, true, false, new ArrayList<>()));
+    public static void startServiceTimeChange(@NonNull Context context, @NonNull String source) {
+        context.startService(getIntent(context, true, false, new ArrayList<>(), source));
     }
 
-    public static void startServiceDebug(@NonNull Context context) {
-        context.startService(getIntent(context, false, false, new ArrayList<>()));
+    public static void startServiceDebug(@NonNull Context context, @NonNull String source) {
+        context.startService(getIntent(context, false, false, new ArrayList<>(), source));
     }
 
-    public static Intent getIntent(@NonNull Context context, boolean silent, boolean registering, @NonNull ArrayList<TaskKey> taskKeys) {
+    public static Intent getIntent(@NonNull Context context, boolean silent, boolean registering, @NonNull ArrayList<TaskKey> taskKeys, @NonNull String source) {
         Assert.assertTrue(!registering || silent);
+        Assert.assertTrue(!TextUtils.isEmpty(source));
 
         Intent intent = new Intent(context, TickService.class);
         intent.putExtra(SILENT_KEY, silent);
         intent.putExtra(REGISTERING_KEY, registering);
         intent.putExtra(TASK_KEYS_KEY, taskKeys);
+        intent.putExtra(SOURCE_KEY, source);
         return intent;
     }
 
@@ -59,12 +63,16 @@ public class TickService extends IntentService {
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
         Assert.assertTrue(intent.hasExtra(REGISTERING_KEY));
         Assert.assertTrue(intent.hasExtra(TASK_KEYS_KEY));
+        Assert.assertTrue(intent.hasExtra(SOURCE_KEY));
 
         boolean silent = intent.getBooleanExtra(SILENT_KEY, false);
         boolean registering = intent.getBooleanExtra(REGISTERING_KEY, false);
 
         List<TaskKey> taskKeys = intent.getParcelableArrayListExtra(TASK_KEYS_KEY);
         Assert.assertTrue(taskKeys != null);
+
+        String source = intent.getStringExtra(SOURCE_KEY);
+        Assert.assertTrue(!TextUtils.isEmpty(source));
 
         DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
 
@@ -75,7 +83,18 @@ public class TickService extends IntentService {
             UserData userData = new UserData(firebaseUser);
 
             domainFactory.setUserData(this, userData);
-            domainFactory.setFirebaseTickListener(d -> d.updateNotificationsTick(this, silent, registering, taskKeys));
+            domainFactory.setFirebaseTickListener(new DomainFactory.FirebaseListener() {
+                @Override
+                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
+                    domainFactory.updateNotificationsTick(TickService.this, silent, registering, taskKeys);
+                }
+
+                @NonNull
+                @Override
+                public String getSource() {
+                    return source;
+                }
+            });
         }
     }
 }

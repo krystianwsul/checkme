@@ -49,7 +49,18 @@ public class InstanceDoneService extends IntentService {
         notificationManager.cancel(notificationId);
 
         if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
-            needsFirebase(this, domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
+            needsFirebase(this, new DomainFactory.FirebaseListener() {
+                @Override
+                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
+                    setInstanceNotificationDone(domainFactory, instanceKey);
+                }
+
+                @NonNull
+                @Override
+                public String getSource() {
+                    return "InstanceDoneService";
+                }
+            });
         } else {
             setInstanceNotificationDone(DomainFactory.getDomainFactory(this), instanceKey);
         }

@@ -208,7 +208,18 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         if (mInstanceKey.getType() == TaskKey.Type.LOCAL) {
             init();
         } else {
-            InstanceDoneService.needsFirebase(this, domainFactory -> init());
+            InstanceDoneService.needsFirebase(this, new DomainFactory.FirebaseListener() {
+                @Override
+                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
+                    init();
+                }
+
+                @NonNull
+                @Override
+                public String getSource() {
+                    return "ShowInstanceActivity";
+                }
+            });
         }
     }
 

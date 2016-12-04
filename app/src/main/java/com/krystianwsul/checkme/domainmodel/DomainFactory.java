@@ -339,7 +339,8 @@ public class DomainFactory {
     }
 
     public synchronized void setFirebaseListener(@NonNull FirebaseListener firebaseListener) {
-        Assert.assertTrue(mNotTickFirebaseListener == null);
+        if (mNotTickFirebaseListener != null)
+            throw new MultipleListenerException(mNotTickFirebaseListener.getSource(), firebaseListener.getSource());
 
         if (mRemoteFactory != null) {
             firebaseListener.onFirebaseResult(this);
@@ -2589,5 +2590,27 @@ public class DomainFactory {
 
     public interface FirebaseListener {
         void onFirebaseResult(@NonNull DomainFactory domainFactory);
+
+        @NonNull
+        String getSource();
+    }
+
+    public static class TickData {
+        @NonNull
+        final FirebaseListener mFirebaseListener;
+
+        @NonNull
+        final String mSource;
+
+        public TickData(@NonNull FirebaseListener firebaseListener, @NonNull String source) {
+            mFirebaseListener = firebaseListener;
+            mSource = source;
+        }
+    }
+
+    private static class MultipleListenerException extends RuntimeException {
+        MultipleListenerException(@NonNull String oldSource, @NonNull String newSource) {
+            super("old source: " + oldSource + ", new source: " + newSource);
+        }
     }
 }

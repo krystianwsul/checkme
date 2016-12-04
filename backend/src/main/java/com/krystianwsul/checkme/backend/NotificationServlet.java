@@ -10,25 +10,25 @@ import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oau
 import com.google.appengine.repackaged.com.google.gson.Gson;
 import com.google.common.base.Joiner;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,21 +97,38 @@ public class NotificationServlet extends HttpServlet {
                 } else {
                     resp.getWriter().println();
 
-                    HttpClient httpClient = HttpClientBuilder.create().build();
+                    URL fcmUrl = new URL("https://fcm.googleapis.com/fcm/send");
+                    URLConnection urlConnection = fcmUrl.openConnection();
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
 
-                    HttpPost httpPost = new HttpPost("https://fcm.googleapis.com/fcm/send");
-                    StringEntity params = new StringEntity(gson.toJson(new Notification(userToken)));
-                    httpPost.addHeader("Authorization", "key=AAAACS58vvk:APA91bGMSthxVrK-Tw9Kht63VM09uw2TBbCZLg6Y1utntVFLy4PGfjsvxm2QK830JGO_S87yvaxeDByMzWRqGBPXzqBpEMZPbWOUHDnYvSQXF_KllfCpcn17UBIKE9RPAXzhwkk3CqYEWvbxZCvl4L_MYodKHfhNMQ");
-                    httpPost.addHeader("Content-Type", "application/json");
-                    httpPost.setEntity(params);
+                    httpURLConnection.setRequestProperty("Authorization", "key=AAAACS58vvk:APA91bGMSthxVrK-Tw9Kht63VM09uw2TBbCZLg6Y1utntVFLy4PGfjsvxm2QK830JGO_S87yvaxeDByMzWRqGBPXzqBpEMZPbWOUHDnYvSQXF_KllfCpcn17UBIKE9RPAXzhwkk3CqYEWvbxZCvl4L_MYodKHfhNMQ");
+                    httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
-                    resp.getWriter().println("request: " + httpPost);
-                    resp.getWriter().println();
+                    httpURLConnection.setDoOutput(true);
+                    httpURLConnection.setRequestMethod("POST");
 
-                    HttpResponse response = httpClient.execute(httpPost);
+                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
+                    outputStreamWriter.write(gson.toJson(new Notification(userToken)));
+                    outputStreamWriter.close();
 
-                    resp.getWriter().println("response" + response);
-                    resp.getWriter().println();
+                    int respCode = httpURLConnection.getResponseCode();
+                    if (respCode == HttpsURLConnection.HTTP_OK) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                        String response = IOUtils.toString(reader);
+                        IOUtils.closeQuietly(reader);
+
+                        resp.getWriter().println("response: " + response);
+                        resp.getWriter().println();
+                    } else {
+                        resp.getWriter().println("error: " + httpURLConnection.getResponseCode() + " " + httpURLConnection.getResponseMessage());
+
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                        String response = IOUtils.toString(reader);
+                        IOUtils.closeQuietly(reader);
+
+                        resp.getWriter().println("response: " + response);
+                        resp.getWriter().println();
+                    }
                 }
             }
         }

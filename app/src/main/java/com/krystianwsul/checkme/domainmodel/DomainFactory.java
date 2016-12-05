@@ -861,9 +861,17 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        Set<UserData> friends = (mFriends != null ? new HashSet<>(mFriends.values()) : new HashSet<>());
+        Set<UserData> friends;
+        boolean connected;
+        if (mFriends != null) {
+            friends = new HashSet<>(mFriends.values());
+            connected = true;
+        } else {
+            friends = new HashSet<>();
+            connected = false;
+        }
 
-        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends);
+        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends, connected);
     }
 
     @NonNull

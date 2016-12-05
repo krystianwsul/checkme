@@ -33,7 +33,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
-import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -1215,7 +1214,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                 scheduleHolder.mScheduleText.setText(null);
 
-                scheduleHolder.mScheduleText.setEnabled(MainActivity.getUserData() != null);
+                scheduleHolder.mScheduleText.setEnabled(mData.mConnected);
 
                 scheduleHolder.mScheduleText.setOnClickListener(v -> {
                     Assert.assertTrue(mCreateTaskAdapter != null);

@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -31,7 +33,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     private final List<TaskKey> mExcludedTaskKeys;
 
     public CreateTaskLoader(@NonNull Context context, @Nullable TaskKey taskKey, @NonNull List<TaskKey> excludedTaskKeys) {
-        super(context, false);
+        super(context, needsFirebase(taskKey));
 
         mTaskKey = taskKey;
         mExcludedTaskKeys = excludedTaskKeys;
@@ -40,6 +42,19 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     @Override
     String getName() {
         return "CreateTaskLoader, taskKey: " + mTaskKey + ", excludedTaskKeys: " + mExcludedTaskKeys;
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private static boolean needsFirebase(@Nullable TaskKey taskKey) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (taskKey != null && taskKey.getType() == TaskKey.Type.REMOTE) {
+            Assert.assertTrue(firebaseUser != null);
+
+            return true;
+        } else {
+            return (firebaseUser != null); // todo add parameter to load, then attempt firebase
+        }
     }
 
     @Override
@@ -64,11 +79,16 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @NonNull
         public final Set<UserData> mFriends;
 
-        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends) {
+        public final boolean mConnected;
+
+        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends, boolean connected) {
+            Assert.assertTrue(connected || friends.isEmpty());
+
             TaskData = taskData;
             TaskTreeDatas = taskTreeDatas;
             CustomTimeDatas = customTimeDatas;
             mFriends = friends;
+            mConnected = connected;
         }
 
         @Override
@@ -79,6 +99,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             hash += TaskTreeDatas.hashCode();
             hash += CustomTimeDatas.hashCode();
             hash += mFriends.hashCode();
+            hash += (mConnected ? 1 : 0);
             return hash;
         }
 
@@ -109,6 +130,9 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if (!mFriends.equals(data.mFriends))
+                return false;
+
+            if (mConnected != data.mConnected)
                 return false;
 
             return true;

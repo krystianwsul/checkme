@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -44,16 +42,12 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         return "CreateTaskLoader, taskKey: " + mTaskKey + ", excludedTaskKeys: " + mExcludedTaskKeys;
     }
 
-    @SuppressWarnings("SimplifiableIfStatement")
-    private static boolean needsFirebase(@Nullable TaskKey taskKey) {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
+    @NonNull
+    private static FirebaseLevel needsFirebase(@Nullable TaskKey taskKey) {
         if (taskKey != null && taskKey.getType() == TaskKey.Type.REMOTE) {
-            Assert.assertTrue(firebaseUser != null);
-
-            return true;
+            return FirebaseLevel.NEED;
         } else {
-            return (firebaseUser != null); // todo add parameter to load, then attempt firebase
+            return FirebaseLevel.WANT;
         }
     }
 

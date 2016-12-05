@@ -16,7 +16,7 @@ public class ShowCustomTimeLoader extends DomainLoader<ShowCustomTimeLoader.Data
     private final int mCustomTimeId;
 
     public ShowCustomTimeLoader(Context context, int customTimeId) {
-        super(context, false);
+        super(context, FirebaseLevel.NOTHING);
 
         mCustomTimeId = customTimeId;
     }

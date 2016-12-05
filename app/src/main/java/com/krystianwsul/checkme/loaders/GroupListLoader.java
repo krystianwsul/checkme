@@ -53,17 +53,18 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
-    private static boolean needsFirebase(@Nullable InstanceKey instanceKey, @Nullable List<InstanceKey> instanceKeys) {
+    @NonNull
+    private static FirebaseLevel needsFirebase(@Nullable InstanceKey instanceKey, @Nullable List<InstanceKey> instanceKeys) {
         if (instanceKey != null) {
             Assert.assertTrue(instanceKeys == null);
 
-            return (instanceKey.getType() == TaskKey.Type.REMOTE);
+            return (instanceKey.getType() == TaskKey.Type.REMOTE ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
         } else if (instanceKeys != null) {
-            return Stream.of(instanceKeys)
+            return (Stream.of(instanceKeys)
                     .map(InstanceKey::getType)
-                    .anyMatch(type -> type == TaskKey.Type.REMOTE);
+                    .anyMatch(type -> type == TaskKey.Type.REMOTE) ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
         } else {
-            return false;
+            return FirebaseLevel.NOTHING;
         }
     }
 

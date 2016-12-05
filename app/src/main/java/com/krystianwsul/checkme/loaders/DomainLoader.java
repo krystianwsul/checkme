@@ -17,8 +17,11 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     private D mData;
     private Observer mObserver;
 
+    @NonNull
     private final DomainFactory mDomainFactory;
-    private final boolean mNeedsFirebase;
+
+    @NonNull
+    private final FirebaseLevel mFirebaseLevel;
 
     private final DomainFactory.FirebaseListener mFirebaseListener = new DomainFactory.FirebaseListener() {
         @Override
@@ -34,11 +37,11 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         }
     };
 
-    DomainLoader(Context context, boolean needsFirebase) {
+    DomainLoader(@NonNull Context context, @NonNull FirebaseLevel firebaseLevel) {
         super(context);
 
         mDomainFactory = DomainFactory.getDomainFactory(getContext());
-        mNeedsFirebase = needsFirebase;
+        mFirebaseLevel = firebaseLevel;
     }
 
     abstract String getName();
@@ -79,18 +82,37 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         }
 
         if (takeContentChanged() || mData == null) {
-            if (!mNeedsFirebase) {
-                forceLoad();
-            } else {
-                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                if (firebaseUser != null) {
-                    UserData userData = new UserData(firebaseUser);
-
-                    mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
-                    mDomainFactory.addFirebaseListener(mFirebaseListener);
-                } else {
-                    throw new InstanceDoneService.NeedsFirebaseException();
+            switch (mFirebaseLevel) {
+                case NOTHING: {
+                    forceLoad();
+                    break;
                 }
+                case WANT: {
+                    forceLoad();
+
+                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                    if (firebaseUser != null && !mDomainFactory.isConnected()) {
+                        UserData userData = new UserData(firebaseUser);
+
+                        mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                        mDomainFactory.addFirebaseListener(mFirebaseListener);
+                    }
+
+                    break;
+                }
+                case NEED: {
+                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                    if (firebaseUser != null) {
+                        UserData userData = new UserData(firebaseUser);
+
+                        mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                        mDomainFactory.addFirebaseListener(mFirebaseListener);
+                    } else {
+                        throw new InstanceDoneService.NeedsFirebaseException();
+                    }
+                }
+                default:
+                    throw new IndexOutOfBoundsException();
             }
         }
     }
@@ -136,5 +158,11 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         public Data() {
             DataId = getNextId();
         }
+    }
+
+    enum FirebaseLevel {
+        NOTHING,
+        WANT,
+        NEED
     }
 }

@@ -18,7 +18,7 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     private final TaskKey mTaskKey;
 
     public TaskListLoader(@NonNull Context context, @Nullable TaskKey taskKey) {
-        super(context, false);
+        super(context, FirebaseLevel.NOTHING);
 
         mTaskKey = taskKey;
     }

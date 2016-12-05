@@ -366,6 +366,10 @@ public class DomainFactory {
         }
     }
 
+    public synchronized boolean isConnected() {
+        return (mRemoteFactory != null);
+    }
+
     // gets
 
     @SuppressWarnings("EmptyMethod")

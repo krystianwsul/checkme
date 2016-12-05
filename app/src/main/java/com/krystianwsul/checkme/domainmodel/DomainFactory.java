@@ -242,7 +242,8 @@ public class DomainFactory {
 
                 MyCrashlytics.logException(databaseError.toException());
 
-                notifyFirebaseListeners();
+                mFirebaseTickListener = null;
+                mNotTickFirebaseListeners.clear();
             }
         };
         mRecordQuery.addValueEventListener(mRecordListener);
@@ -314,7 +315,7 @@ public class DomainFactory {
         Assert.assertTrue(mUserData != null);
 
         boolean silent = (mRemoteFactory == null);
-        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData);
+        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
 
         if (mFirebaseTickListener != null) {
             mFirebaseTickListener.onFirebaseResult(this);

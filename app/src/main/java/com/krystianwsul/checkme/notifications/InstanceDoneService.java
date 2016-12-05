@@ -78,7 +78,7 @@ public class InstanceDoneService extends IntentService {
             UserData userData = new UserData(firebaseUser);
 
             domainFactory.setUserData(context.getApplicationContext(), userData);
-            domainFactory.setFirebaseListener(firebaseListener);
+            domainFactory.addFirebaseListener(firebaseListener);
         } else {
             throw new NeedsFirebaseException();
         }

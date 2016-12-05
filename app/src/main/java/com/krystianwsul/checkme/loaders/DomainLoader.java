@@ -43,7 +43,6 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
 
     abstract String getName();
 
-
     @Override
     public final D loadInBackground() {
         return loadDomain(mDomainFactory);
@@ -88,7 +87,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                     UserData userData = new UserData(firebaseUser);
 
                     mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
-                    mDomainFactory.setFirebaseListener(mFirebaseListener);
+                    mDomainFactory.addFirebaseListener(mFirebaseListener);
                 } else {
                     throw new InstanceDoneService.NeedsFirebaseException();
                 }

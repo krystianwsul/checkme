@@ -357,7 +357,7 @@ public class DomainFactory {
     }
 
     public synchronized void setFirebaseTickListener(@NonNull FirebaseListener firebaseListener) {
-        Assert.assertTrue(mFirebaseTickListener == null);
+        Assert.assertTrue(mFirebaseTickListener == null); // todo log source
 
         if (mRemoteFactory != null && !mRemoteFactory.isSaved()) {
 
@@ -365,6 +365,10 @@ public class DomainFactory {
         } else {
             mFirebaseTickListener = firebaseListener;
         }
+    }
+
+    public synchronized boolean isConnected() {
+        return (mRemoteFactory != null);
     }
 
     // gets

@@ -97,6 +97,8 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
 
     @Override
     protected void onStopLoading() {
+        mDomainFactory.removeFirebaseListener(mFirebaseListener);
+
         cancelLoad();
     }
 

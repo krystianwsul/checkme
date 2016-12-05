@@ -355,6 +355,10 @@ public class DomainFactory {
         mNotTickFirebaseListeners.add(firebaseListener);
     }
 
+    public synchronized void removeFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+        mNotTickFirebaseListeners.remove(firebaseListener);
+    }
+
     public synchronized void setFirebaseTickListener(@NonNull FirebaseListener firebaseListener) {
         Assert.assertTrue(mFirebaseTickListener == null);
 

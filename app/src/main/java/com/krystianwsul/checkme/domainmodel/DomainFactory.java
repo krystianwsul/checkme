@@ -242,7 +242,8 @@ public class DomainFactory {
 
                 MyCrashlytics.logException(databaseError.toException());
 
-                notifyFirebaseListeners();
+                mFirebaseTickListener = null;
+                mNotTickFirebaseListeners.clear();
             }
         };
         mRecordQuery.addValueEventListener(mRecordListener);
@@ -314,7 +315,7 @@ public class DomainFactory {
         Assert.assertTrue(mUserData != null);
 
         boolean silent = (mRemoteFactory == null);
-        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData);
+        mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
 
         if (mFirebaseTickListener != null) {
             mFirebaseTickListener.onFirebaseResult(this);
@@ -348,6 +349,11 @@ public class DomainFactory {
     public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
         Assert.assertTrue(mRemoteFactory == null);
 
+        if (mFirebaseTickListener != null)
+            throw new MultipleListenerException(Collections.singletonList(mFirebaseTickListener), firebaseListener);
+        if (!mNotTickFirebaseListeners.isEmpty())
+            throw new MultipleListenerException(mNotTickFirebaseListeners, firebaseListener);
+
         mNotTickFirebaseListeners.add(firebaseListener);
     }
 
@@ -356,10 +362,12 @@ public class DomainFactory {
     }
 
     public synchronized void setFirebaseTickListener(@NonNull FirebaseListener firebaseListener) {
-        Assert.assertTrue(mFirebaseTickListener == null);
+        if (mFirebaseTickListener != null)
+            throw new MultipleListenerException(Collections.singletonList(mFirebaseTickListener), firebaseListener);
+        if (!mNotTickFirebaseListeners.isEmpty())
+            throw new MultipleListenerException(mNotTickFirebaseListeners, firebaseListener);
 
         if (mRemoteFactory != null && !mRemoteFactory.isSaved()) {
-
             firebaseListener.onFirebaseResult(this);
         } else {
             mFirebaseTickListener = firebaseListener;
@@ -2626,8 +2634,8 @@ public class DomainFactory {
     }
 
     private static class MultipleListenerException extends RuntimeException {
-        MultipleListenerException(@NonNull String oldSource, @NonNull String newSource) {
-            super("old source: " + oldSource + ", new source: " + newSource);
+        MultipleListenerException(@NonNull List<FirebaseListener> oldFirebaseListeners, @NonNull FirebaseListener newFirebaseListener) {
+            super("old sources: " + Stream.of(oldFirebaseListeners).map(FirebaseListener::getSource).collect(Collectors.joining(", ")) + "; new source: " + newFirebaseListener.getSource());
         }
     }
 }

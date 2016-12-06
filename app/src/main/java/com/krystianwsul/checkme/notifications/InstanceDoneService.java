@@ -73,14 +73,18 @@ public class InstanceDoneService extends IntentService {
     public static void needsFirebase(@NonNull Context context, @NonNull DomainFactory.FirebaseListener firebaseListener) {
         DomainFactory domainFactory = DomainFactory.getDomainFactory(context.getApplicationContext());
 
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            UserData userData = new UserData(firebaseUser);
-
-            domainFactory.setUserData(context.getApplicationContext(), userData);
-            domainFactory.addFirebaseListener(firebaseListener);
+        if (domainFactory.isConnected()) {
+            firebaseListener.onFirebaseResult(domainFactory);
         } else {
-            throw new NeedsFirebaseException();
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (firebaseUser != null) {
+                UserData userData = new UserData(firebaseUser);
+
+                domainFactory.setUserData(context.getApplicationContext(), userData);
+                domainFactory.addFirebaseListener(firebaseListener);
+            } else {
+                throw new NeedsFirebaseException();
+            }
         }
     }
 

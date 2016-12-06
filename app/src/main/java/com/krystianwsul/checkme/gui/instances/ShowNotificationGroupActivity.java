@@ -9,13 +9,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
-import com.krystianwsul.checkme.notifications.InstanceDoneService;
 import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
@@ -57,25 +53,6 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        if (Stream.of(instanceKeys).anyMatch(instanceKey -> instanceKey.getType() == TaskKey.Type.LOCAL)) {
-            init(instanceKeys);
-        } else {
-            InstanceDoneService.needsFirebase(this, new DomainFactory.FirebaseListener() {
-                @Override
-                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
-                    init(instanceKeys);
-                }
-
-                @NonNull
-                @Override
-                public String getSource() {
-                    return "ShowNotificationGroupActivity";
-                }
-            });
-        }
-    }
-
-    private void init(@NonNull ArrayList<InstanceKey> instanceKeys) {
         mGroupListFragment.setInstanceKeys(instanceKeys);
     }
 

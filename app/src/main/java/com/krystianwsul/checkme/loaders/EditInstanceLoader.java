@@ -22,7 +22,7 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
 
     public EditInstanceLoader(@NonNull Context context, @NonNull InstanceKey instanceKey) {
-        super(context);
+        super(context, false);
 
         mInstanceKey = instanceKey;
     }
@@ -33,8 +33,8 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     }
 
     @Override
-    public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getEditInstanceData(mInstanceKey);
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
+        return domainFactory.getEditInstanceData(mInstanceKey);
     }
 
     public static class Data extends DomainLoader.Data {

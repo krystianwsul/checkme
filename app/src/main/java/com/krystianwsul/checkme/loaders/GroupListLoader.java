@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -39,7 +40,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     private final ArrayList<InstanceKey> mInstanceKeys;
 
     public GroupListLoader(@NonNull Context context, @Nullable TimeStamp timeStamp, @Nullable InstanceKey instanceKey, @Nullable ArrayList<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
-        super(context);
+        super(context, needsFirebase(instanceKey, instanceKeys));
 
         Assert.assertTrue((position == null) == (timeRange == null));
         Assert.assertTrue((position != null ? 1 : 0) + (timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
@@ -51,13 +52,28 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         mInstanceKeys = instanceKeys;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
+    private static boolean needsFirebase(@Nullable InstanceKey instanceKey, @Nullable List<InstanceKey> instanceKeys) {
+        if (instanceKey != null) {
+            Assert.assertTrue(instanceKeys == null);
+
+            return (instanceKey.getType() == TaskKey.Type.REMOTE);
+        } else if (instanceKeys != null) {
+            return Stream.of(instanceKeys)
+                    .map(InstanceKey::getType)
+                    .anyMatch(type -> type == TaskKey.Type.REMOTE);
+        } else {
+            return false;
+        }
+    }
+
     @Override
     String getName() {
         return "GroupListLoader, position: " + mPosition + ", timeRange: " + mTimeRange + ", timeStamp: " + mTimeStamp + ", instanceKey: " + mInstanceKey + ", instanceKeys: " + mInstanceKeys;
     }
 
     @Override
-    public Data loadInBackground() {
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
         if (mPosition != null) {
             Assert.assertTrue(mTimeRange != null);
 
@@ -65,21 +81,21 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
+            return domainFactory.getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
         } else if (mTimeStamp != null) {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(mTimeStamp);
+            return domainFactory.getGroupListData(mTimeStamp);
         } else if (mInstanceKey != null) {
             Assert.assertTrue(mInstanceKeys == null);
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(mInstanceKey);
+            return domainFactory.getGroupListData(mInstanceKey);
         } else {
             Assert.assertTrue(mInstanceKeys != null);
             Assert.assertTrue(!mInstanceKeys.isEmpty());
 
-            return DomainFactory.getDomainFactory(getContext()).getGroupListData(getContext(), mInstanceKeys);
+            return domainFactory.getGroupListData(getContext(), mInstanceKeys);
         }
     }
 

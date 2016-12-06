@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 
 public class ShowCustomTimesLoader extends DomainLoader<ShowCustomTimesLoader.Data> {
     public ShowCustomTimesLoader(Context context) {
-        super(context);
+        super(context, false);
     }
 
     @Override
@@ -20,8 +21,8 @@ public class ShowCustomTimesLoader extends DomainLoader<ShowCustomTimesLoader.Da
     }
 
     @Override
-    public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getShowCustomTimesData();
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
+        return domainFactory.getShowCustomTimesData();
     }
 
     public static class Data extends DomainLoader.Data {

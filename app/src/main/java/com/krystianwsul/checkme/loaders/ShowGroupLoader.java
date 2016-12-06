@@ -14,7 +14,7 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     private final TimeStamp mTimeStamp;
 
     public ShowGroupLoader(@NonNull Context context, @NonNull TimeStamp timeStamp) {
-        super(context);
+        super(context, false);
 
         mTimeStamp = timeStamp;
     }
@@ -25,8 +25,8 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     }
 
     @Override
-    public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getShowGroupData(getContext(), mTimeStamp);
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
+        return domainFactory.getShowGroupData(getContext(), mTimeStamp);
     }
 
     public static class Data extends DomainLoader.Data {

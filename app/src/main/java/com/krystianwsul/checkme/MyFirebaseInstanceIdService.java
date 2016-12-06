@@ -10,15 +10,14 @@ import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 
-import junit.framework.Assert;
-
 public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
         Log.e("asdf", "onTokenRefresh " + getToken());
 
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        Assert.assertTrue(firebaseUser != null);
+        if (firebaseUser == null)
+            return;
 
         UserData userData = new UserData(firebaseUser);
 

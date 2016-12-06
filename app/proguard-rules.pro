@@ -25,3 +25,16 @@
 -dontwarn java.lang.invoke.*
 
 -keep class com.krystianwsul.** { *; }
+
+# guava
+
+-dontwarn javax.annotation.**
+-dontwarn javax.inject.**
+-dontwarn sun.misc.Unsafe
+
+-keep class com.google.j2objc.annotations.** { *; }
+-dontwarn   com.google.j2objc.annotations.**
+-keep class java.lang.ClassValue { *; }
+-dontwarn   java.lang.ClassValue
+-keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
+-dontwarn   org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement

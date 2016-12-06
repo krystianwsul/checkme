@@ -18,7 +18,8 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     private final TaskKey mTaskKey;
 
     public TaskListLoader(@NonNull Context context, @Nullable TaskKey taskKey) {
-        super(context);
+        super(context, false);
+
         mTaskKey = taskKey;
     }
 
@@ -28,8 +29,8 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     }
 
     @Override
-    public Data loadInBackground() {
-        return DomainFactory.getDomainFactory(getContext()).getTaskListData(getContext(), mTaskKey);
+    public Data loadDomain(@NonNull DomainFactory domainFactory) {
+        return domainFactory.getTaskListData(getContext(), mTaskKey);
     }
 
     public static class Data extends DomainLoader.Data {

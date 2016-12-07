@@ -52,10 +52,9 @@ public class InstanceHourService extends IntentService {
                     setInstanceAddHour(domainFactory, instanceKey);
                 }
 
-                @NonNull
                 @Override
-                public String getSource() {
-                    return "InstanceHourService";
+                public boolean isSetter() {
+                    return true;
                 }
             });
         } else {

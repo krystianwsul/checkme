@@ -34,10 +34,9 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                 forceLoad();
         }
 
-        @NonNull
         @Override
-        public String getSource() {
-            return getName();
+        public boolean isSetter() {
+            return false;
         }
     };
 
@@ -48,6 +47,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         mFirebaseLevel = firebaseLevel;
     }
 
+    @SuppressWarnings("unused")
     abstract String getName();
 
     @Override

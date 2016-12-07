@@ -55,10 +55,9 @@ public class InstanceDoneService extends IntentService {
                     setInstanceNotificationDone(domainFactory, instanceKey);
                 }
 
-                @NonNull
                 @Override
-                public String getSource() {
-                    return "InstanceDoneService";
+                public boolean isSetter() {
+                    return true;
                 }
             });
         } else {

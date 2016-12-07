@@ -269,13 +269,6 @@ public class DomainFactory {
         mFriendQuery.addValueEventListener(mFriendListener);
     }
 
-    private synchronized void notifyFirebaseListeners() {
-        Stream.of(mNotTickFirebaseListeners)
-                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
-
-        mNotTickFirebaseListeners.clear();
-    }
-
     public synchronized void clearUserData(@NonNull Context context) {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -331,11 +324,17 @@ public class DomainFactory {
                 mTickData = null;
             }
 
-            notifyFirebaseListeners();
+            boolean saveRemote = Stream.of(mNotTickFirebaseListeners)
+                    .anyMatch(FirebaseListener::isSetter);
+
+            Stream.of(mNotTickFirebaseListeners)
+                    .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+
+            mNotTickFirebaseListeners.clear();
 
             mSkipSave = false;
 
-            save(context, new ArrayList<>(), false); // todo add info to FirebaseListener about whether it's get or set
+            save(context, new ArrayList<>(), !saveRemote);
         }
     }
 
@@ -2631,8 +2630,7 @@ public class DomainFactory {
     public interface FirebaseListener {
         void onFirebaseResult(@NonNull DomainFactory domainFactory);
 
-        @NonNull
-        String getSource();
+        boolean isSetter();
     }
 
     private static class MultipleTickDataException extends RuntimeException {

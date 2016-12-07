@@ -46,6 +46,7 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:inputType="textNoSuggestions"
                         android:textSize="@dimen/textPrimary"
                         tools:ignore="LabelFor,TextFields"/>
 
@@ -74,6 +75,7 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:inputType="textNoSuggestions"
                         android:textSize="@dimen/textPrimary"
                         tools:ignore="LabelFor,TextFields"/>
 
@@ -150,6 +152,7 @@
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    android:inputType="textNoSuggestions"
                     android:textSize="@dimen/textPrimary"
                     tools:ignore="LabelFor,TextFields"/>
 
@@ -188,6 +191,7 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:inputType="textNoSuggestions"
                         android:textSize="@dimen/textPrimary"
                         tools:ignore="LabelFor,TextFields"/>
 
@@ -275,6 +279,7 @@
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    android:inputType="textNoSuggestions"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     tools:ignore="Deprecated,LabelFor,TextFields"/>

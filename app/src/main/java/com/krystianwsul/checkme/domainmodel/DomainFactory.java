@@ -335,7 +335,7 @@ public class DomainFactory {
 
             mSkipSave = false;
 
-            save(context, new ArrayList<>(), false);
+            save(context, new ArrayList<>(), false); // todo add info to FirebaseListener about whether it's get or set
         }
     }
 

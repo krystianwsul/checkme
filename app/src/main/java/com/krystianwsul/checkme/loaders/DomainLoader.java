@@ -102,7 +102,6 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                         UserData userData = new UserData(firebaseUser);
 
                         mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
-                        mDomainFactory.addFirebaseListener(mFirebaseListener);
                     }
 
                     break;

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -40,7 +41,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     private final ArrayList<InstanceKey> mInstanceKeys;
 
     public GroupListLoader(@NonNull Context context, @Nullable TimeStamp timeStamp, @Nullable InstanceKey instanceKey, @Nullable ArrayList<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
-        super(context, needsFirebase(instanceKey, instanceKeys));
+        super(context, needsFirebase(timeStamp, instanceKey, instanceKeys, position));
+
+        Log.e("asdf", "GroupListLoader needs firebase? " + needsFirebase(timeStamp, instanceKey, instanceKeys, position));
 
         Assert.assertTrue((position == null) == (timeRange == null));
         Assert.assertTrue((position != null ? 1 : 0) + (timeStamp != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
@@ -54,17 +57,28 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     @SuppressWarnings("SimplifiableIfStatement")
     @NonNull
-    private static FirebaseLevel needsFirebase(@Nullable InstanceKey instanceKey, @Nullable List<InstanceKey> instanceKeys) {
-        if (instanceKey != null) {
+    private static FirebaseLevel needsFirebase(@Nullable TimeStamp timeStamp, @Nullable InstanceKey instanceKey, @Nullable List<InstanceKey> instanceKeys, @Nullable Integer position) {
+        if (timeStamp != null) {
+            Assert.assertTrue(instanceKey == null);
             Assert.assertTrue(instanceKeys == null);
+            Assert.assertTrue(position == null);
+
+            return FirebaseLevel.WANT;
+        } else if (instanceKey != null) {
+            Assert.assertTrue(instanceKeys == null);
+            Assert.assertTrue(position == null);
 
             return (instanceKey.getType() == TaskKey.Type.REMOTE ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
         } else if (instanceKeys != null) {
+            Assert.assertTrue(position == null);
+
             return (Stream.of(instanceKeys)
                     .map(InstanceKey::getType)
                     .anyMatch(type -> type == TaskKey.Type.REMOTE) ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
         } else {
-            return FirebaseLevel.NOTHING;
+            Assert.assertTrue(position != null);
+
+            return FirebaseLevel.WANT;
         }
     }
 

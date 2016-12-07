@@ -92,6 +92,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
             switch (mFirebaseLevel) {
                 case NOTHING: {
                     forceLoad();
+
                     break;
                 }
                 case WANT: {
@@ -120,6 +121,8 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                         mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
                         mDomainFactory.addFirebaseListener(mFirebaseListener);
                     }
+
+                    break;
                 }
                 default:
                     throw new IndexOutOfBoundsException();

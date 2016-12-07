@@ -36,7 +36,8 @@
                     android:id="@+id/time_sunday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"/>
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
@@ -49,7 +50,8 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        tools:ignore="LabelFor,TextFields"
+                        android:inputType="textNoSuggestions"
+                        tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_sunday_time"
@@ -75,7 +77,8 @@
                     android:id="@+id/time_monday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"/>
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
@@ -88,7 +91,8 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        tools:ignore="LabelFor,TextFields"
+                        android:inputType="textNoSuggestions"
+                        tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_monday_time"
@@ -114,7 +118,8 @@
                     android:id="@+id/time_tuesday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"/>
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
@@ -127,7 +132,8 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        tools:ignore="LabelFor,TextFields"
+                        android:inputType="textNoSuggestions"
+                        tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_tuesday_time"
@@ -153,7 +159,8 @@
                     android:id="@+id/time_wednesday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"/>
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
@@ -166,7 +173,8 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        tools:ignore="LabelFor,TextFields"
+                        android:inputType="textNoSuggestions"
+                        tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_wednesday_time"
@@ -192,7 +200,8 @@
                     android:id="@+id/time_thursday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"/>
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
@@ -205,7 +214,8 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        tools:ignore="LabelFor,TextFields"
+                        android:inputType="textNoSuggestions"
+                        tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_thursday_time"
@@ -231,7 +241,8 @@
                     android:id="@+id/time_friday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"/>
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
@@ -244,7 +255,8 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        tools:ignore="LabelFor,TextFields"
+                        android:inputType="textNoSuggestions"
+                        tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_friday_time"
@@ -270,7 +282,8 @@
                     android:id="@+id/time_saturday_name"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"/>
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="wrap_content"
@@ -283,7 +296,8 @@
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        tools:ignore="LabelFor,TextFields"
+                        android:inputType="textNoSuggestions"
+                        tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_saturday_time"

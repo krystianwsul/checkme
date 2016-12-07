@@ -27,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -76,6 +77,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     private final static String EXPANSION_STATE_KEY = "expansionState";
     private final static String SELECTED_NODES_KEY = "selectedNodes";
 
+    private ProgressBar mGroupListProgress;
     private RecyclerView mGroupListRecycler;
     private TreeViewAdapter mTreeViewAdapter;
     private FloatingActionButton mFloatingActionButton;
@@ -89,8 +91,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
     private ExpansionState mExpansionState;
     private ArrayList<InstanceKey> mSelectedNodes;
-
-    private boolean mFirst = true;
 
     private GroupListLoader.Data mData;
 
@@ -555,6 +555,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
             }
         }
 
+        mGroupListProgress = (ProgressBar) view.findViewById(R.id.group_list_progress);
+        Assert.assertTrue(mGroupListProgress != null);
+
         mGroupListRecycler = (RecyclerView) view.findViewById(R.id.group_list_recycler);
         Assert.assertTrue(mGroupListRecycler != null);
 
@@ -677,6 +680,8 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
         if (data.mDataWrapper == null)
             return;
+
+        mGroupListProgress.setVisibility(View.GONE);
 
         if (mData != null) {
             Assert.assertTrue(mData.mDataWrapper != null);

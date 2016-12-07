@@ -44,18 +44,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 domainFactory.setUserData(this, userData);
 
-                domainFactory.setFirebaseTickListener(new DomainFactory.FirebaseListener() {
-                    @Override
-                    public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
-                        domainFactory.updateNotificationsTick(MyFirebaseMessagingService.this, false, false, new ArrayList<>());
-                    }
-
-                    @NonNull
-                    @Override
-                    public String getSource() {
-                        return "MyFirebaseMessagingService";
-                    }
-                });
+                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(false, false, new ArrayList<>(), "MyFirebaseMessagingService"));
             }
         } else {
             MyCrashlytics.logException(new UnknownMessageException(data));

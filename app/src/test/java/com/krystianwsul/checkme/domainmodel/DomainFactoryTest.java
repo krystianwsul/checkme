@@ -697,4 +697,18 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.keySet().iterator().next().mScheduleKey.ScheduleTimePair.mHourMinute.equals(hour6));
     }
+
+    @Test
+    public void testTickDatasCompatibleSilent() {
+        DomainFactory.TickData tickData = new DomainFactory.TickData(true, false, new ArrayList<>(), "asdf");
+
+        Assert.assertTrue(DomainFactory.tickDatasCompatible(tickData, tickData));
+    }
+
+    @Test
+    public void testTickDatasCompatibleNotSilent() {
+        DomainFactory.TickData tickData = new DomainFactory.TickData(false, false, new ArrayList<>(), "asdf");
+
+        Assert.assertTrue(!DomainFactory.tickDatasCompatible(tickData, tickData));
+    }
 }

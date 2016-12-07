@@ -107,7 +107,7 @@ public class DomainFactory {
     private final List<FirebaseListener> mNotTickFirebaseListeners = new ArrayList<>();
 
     @Nullable
-    private FirebaseListener mFirebaseTickListener = null;
+    private TickData mTickData = null;
 
     private boolean mSkipSave = false;
 
@@ -242,7 +242,7 @@ public class DomainFactory {
 
                 MyCrashlytics.logException(databaseError.toException());
 
-                mFirebaseTickListener = null;
+                mTickData = null;
                 mNotTickFirebaseListeners.clear();
             }
         };
@@ -317,18 +317,18 @@ public class DomainFactory {
         boolean silent = (mRemoteFactory == null);
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
 
-        if (mFirebaseTickListener == null && mNotTickFirebaseListeners.isEmpty()) {
+        if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
             updateNotifications(context, silent, false, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
 
             save(context, new ArrayList<>(), true);
         } else {
             mSkipSave = true;
 
-            if (mFirebaseTickListener == null) {
+            if (mTickData == null) {
                 updateNotifications(context, silent, false, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
             } else {
-                mFirebaseTickListener.onFirebaseResult(this);
-                mFirebaseTickListener = null;
+                updateNotificationsTick(context, mTickData.mSilent, mTickData.mRegistering, mTickData.mTaskKeys);
+                mTickData = null;
             }
 
             notifyFirebaseListeners();
@@ -358,15 +358,35 @@ public class DomainFactory {
         mNotTickFirebaseListeners.remove(firebaseListener);
     }
 
-    public synchronized void setFirebaseTickListener(@NonNull FirebaseListener firebaseListener) {
-        if (mFirebaseTickListener != null)
-            throw new MultipleListenerException(Collections.singletonList(mFirebaseTickListener), firebaseListener);
-
+    public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull TickData tickData) {
         if (mRemoteFactory != null && !mRemoteFactory.isSaved()) {
-            firebaseListener.onFirebaseResult(this);
+            Assert.assertTrue(mTickData == null);
+
+            updateNotificationsTick(context, tickData.mSilent, tickData.mRegistering, tickData.mTaskKeys);
         } else {
-            mFirebaseTickListener = firebaseListener;
+            if (mTickData != null) {
+                if (!tickDatasCompatible(mTickData, tickData))
+                    throw new MultipleTickDataException(mTickData, tickData);
+
+                // at this point I'm assuming that compatible implies identical
+            } else {
+                mTickData = tickData;
+            }
         }
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    static boolean tickDatasCompatible(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+        if (!oldTickData.mSilent || !newTickData.mSilent)
+            return false;
+
+        if (oldTickData.mRegistering || newTickData.mRegistering)
+            return false;
+
+        if (!oldTickData.mTaskKeys.isEmpty() || !newTickData.mTaskKeys.isEmpty())
+            return false;
+
+        return true;
     }
 
     public synchronized boolean isConnected() {
@@ -2615,22 +2635,29 @@ public class DomainFactory {
         String getSource();
     }
 
-    public static class TickData {
-        @NonNull
-        final FirebaseListener mFirebaseListener;
-
-        @NonNull
-        final String mSource;
-
-        public TickData(@NonNull FirebaseListener firebaseListener, @NonNull String source) {
-            mFirebaseListener = firebaseListener;
-            mSource = source;
+    private static class MultipleTickDataException extends RuntimeException {
+        MultipleTickDataException(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+            super("old source: " + oldTickData.mSource + "; new source: " + newTickData.mSource);
         }
     }
 
-    private static class MultipleListenerException extends RuntimeException {
-        MultipleListenerException(@NonNull List<FirebaseListener> oldFirebaseListeners, @NonNull FirebaseListener newFirebaseListener) {
-            super("old sources: " + Stream.of(oldFirebaseListeners).map(FirebaseListener::getSource).collect(Collectors.joining(", ")) + "; new source: " + newFirebaseListener.getSource());
+    public static class TickData {
+        private final boolean mSilent;
+        private final boolean mRegistering;
+
+        @NonNull
+        private final List<TaskKey> mTaskKeys;
+
+        @NonNull
+        private final String mSource;
+
+        public TickData(boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull String source) {
+            Assert.assertTrue(!TextUtils.isEmpty(source));
+
+            mSilent = silent;
+            mRegistering = registering;
+            mTaskKeys = taskKeys;
+            mSource = source;
         }
     }
 }

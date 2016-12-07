@@ -83,18 +83,8 @@ public class TickService extends IntentService {
             UserData userData = new UserData(firebaseUser);
 
             domainFactory.setUserData(this, userData);
-            domainFactory.setFirebaseTickListener(new DomainFactory.FirebaseListener() {
-                @Override
-                public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
-                    domainFactory.updateNotificationsTick(TickService.this, silent, registering, taskKeys);
-                }
 
-                @NonNull
-                @Override
-                public String getSource() {
-                    return source;
-                }
-            });
+            domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(silent, registering, taskKeys, source));
         }
     }
 }

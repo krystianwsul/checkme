@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TickService extends IntentService {
-    public static final int MAX_NOTIFICATIONS = 4;
+    public static final int MAX_NOTIFICATIONS = 3;
 
     private static final String SILENT_KEY = "silent";
     private static final String TASK_KEYS_KEY = "taskKeys";

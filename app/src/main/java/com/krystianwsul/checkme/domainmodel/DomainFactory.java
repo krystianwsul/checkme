@@ -2250,6 +2250,8 @@ public class DomainFactory {
             showInstance.setNotificationShown(true, now);
         }
 
+        Log.e("asdf", "updateNotifications summary:\nregistering: " + registering + "\nnotification: " + notificationInstances.size() + "\nshown: " + shownInstanceKeys.size() + "\nshow: " + showInstanceKeys.size() + "\nhide: " + hideInstanceKeys.size());
+
         Set<TaskKey> allTaskKeys = getTaskKeys();
 
         for (InstanceKey hideInstanceKey : hideInstanceKeys) {

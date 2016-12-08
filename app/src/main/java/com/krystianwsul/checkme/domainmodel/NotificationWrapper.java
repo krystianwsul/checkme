@@ -230,7 +230,7 @@ abstract class NotificationWrapper {
 
         @Override
         public void setAlarm(@NonNull Context context, @NonNull TimeStamp nextAlarm) {
-            Intent nextIntent = TickService.getIntent(context, false, false, new ArrayList<>(), "NotificationWrapper: TickService.getIntent");
+            Intent nextIntent = TickService.getIntent(context, false, new ArrayList<>(), "NotificationWrapper: TickService.getIntent");
 
             PendingIntent pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             Assert.assertTrue(pendingIntent != null);

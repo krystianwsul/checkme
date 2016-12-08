@@ -25,19 +25,11 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     @NonNull
     private final FirebaseLevel mFirebaseLevel;
 
-    private final DomainFactory.FirebaseListener mFirebaseListener = new DomainFactory.FirebaseListener() {
-        @Override
-        public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
-            Assert.assertTrue(domainFactory.isConnected());
+    private final DomainFactory.FirebaseListener mFirebaseListener = domainFactory -> {
+        Assert.assertTrue(domainFactory.isConnected());
 
-            if (isStarted())
-                forceLoad();
-        }
-
-        @Override
-        public boolean isSetter() {
-            return false;
-        }
+        if (isStarted())
+            forceLoad();
     };
 
     DomainLoader(@NonNull Context context, @NonNull FirebaseLevel firebaseLevel) {

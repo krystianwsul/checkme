@@ -324,9 +324,6 @@ public class DomainFactory {
                 mTickData = null;
             }
 
-            boolean saveRemote = Stream.of(mNotTickFirebaseListeners)
-                    .anyMatch(FirebaseListener::isSetter);
-
             Stream.of(mNotTickFirebaseListeners)
                     .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
 
@@ -334,7 +331,7 @@ public class DomainFactory {
 
             mSkipSave = false;
 
-            save(context, new ArrayList<>(), !saveRemote);
+            save(context, new ArrayList<>(), false);
         }
     }
 
@@ -2629,8 +2626,6 @@ public class DomainFactory {
 
     public interface FirebaseListener {
         void onFirebaseResult(@NonNull DomainFactory domainFactory);
-
-        boolean isSetter();
     }
 
     private static class MultipleTickDataException extends RuntimeException {

@@ -4,20 +4,15 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
-import com.krystianwsul.checkme.firebase.json.ProjectJson;
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class RemoteManager {
     private boolean mSaved = false;
@@ -91,35 +86,5 @@ public class RemoteManager {
 
         mRemoteProjectRecords.put(remoteProjectRecord.getId(), remoteProjectRecord);
         return remoteProjectRecord;
-    }
-
-    @NonNull
-    private RemoteProjectRecord getRemoteProjectRecord(@NonNull Set<String> recordOf, @NonNull String name, @NonNull ExactTimeStamp now) {
-        List<RemoteProjectRecord> matches = Stream.of(mRemoteProjectRecords.values())
-                .filter(remoteProjectRecord -> remoteProjectRecord.getRecordOf().equals(recordOf))
-                .filter(remoteProjectRecord -> remoteProjectRecord.getEndTime() == null)
-                .collect(Collectors.toList());
-
-        if (!matches.isEmpty()) {
-            return matches.get(0);
-        } else {
-            ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>());
-
-            return newRemoteProjectRecord(new JsonWrapper(recordOf, projectJson));
-        }
-    }
-
-    @NonNull
-    public List<RemoteTaskRecord> getRemoteTaskRecords() {
-        return Stream.of(mRemoteProjectRecords.values())
-                .flatMap(remoteProjectRecord -> Stream.of(remoteProjectRecord.getRemoteTaskRecords().values()))
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    public List<RemoteTaskHierarchyRecord> getRemoteTaskHierarchyRecords() {
-        return Stream.of(mRemoteProjectRecords.values())
-                .flatMap(remoteProjectRecord -> Stream.of(remoteProjectRecord.getRemoteTaskHierarchyRecords().values()))
-                .collect(Collectors.toList());
     }
 }

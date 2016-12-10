@@ -70,4 +70,5 @@
     <string name="friend_dialog_title">Pick a friend</string>
     <string name="instanceMarkedDone">This reminder has been marked as done.</string>
     <string name="projects">Projects</string>
+    <string name="projects_empty">Add a project by clicking the plus at the bottom.</string>
 </resources>

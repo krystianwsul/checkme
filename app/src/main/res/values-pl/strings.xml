@@ -70,4 +70,5 @@
     <string name="friend_dialog_title">Wybierz znajomego</string>
     <string name="instanceMarkedDone">To przypomnienie zostało oznaczone jako zrobione.</string>
     <string name="projects">Projekty</string>
+    <string name="projects_empty">Dodaj projekt klikając w plusa na dole.</string>
 </resources>

@@ -320,4 +320,9 @@ public class RemoteFactory {
     UserData getUserData() {
         return mUserData;
     }
+
+    @NonNull
+    public Collection<RemoteProject> getRemoteProjects() {
+        return mRemoteProjects.values();
+    }
 }

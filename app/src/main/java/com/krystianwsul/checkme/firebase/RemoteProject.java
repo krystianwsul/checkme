@@ -66,6 +66,11 @@ public class RemoteProject {
     }
 
     @NonNull
+    public String getName() {
+        return mRemoteProjectRecord.getName();
+    }
+
+    @NonNull
     Set<String> getRecordOf() {
         return mRemoteProjectRecord.getRecordOf();
     }
@@ -189,7 +194,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    public RemoteTaskHierarchy copyLocalTaskHierarchy(@NonNull LocalTaskHierarchy localTaskHierarchy, @NonNull Set<String> recordOf, @NonNull String remoteParentTaskId, @NonNull String remoteChildTaskId, @NonNull ExactTimeStamp now) {
+    public RemoteTaskHierarchy copyLocalTaskHierarchy(@NonNull LocalTaskHierarchy localTaskHierarchy, @NonNull Set<String> recordOf, @NonNull String remoteParentTaskId, @NonNull String remoteChildTaskId) {
         Assert.assertTrue(!TextUtils.isEmpty(remoteParentTaskId));
         Assert.assertTrue(!TextUtils.isEmpty(remoteChildTaskId));
         Assert.assertTrue(!recordOf.isEmpty());

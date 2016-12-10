@@ -35,6 +35,7 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.GroupListLoader;
+import com.krystianwsul.checkme.loaders.ProjectListLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
@@ -71,6 +72,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
@@ -913,6 +915,20 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         return getTaskListData(now, context, taskKey);
+    }
+
+    @NonNull
+    public synchronized ProjectListLoader.Data getProjectListData() {
+        fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getProjectListData");
+
+        Assert.assertTrue(mRemoteFactory != null);
+
+        TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteFactory.getRemoteProjects())
+                .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> new ProjectListLoader.ProjectData(remoteProject.getName()), TreeMap::new));
+
+        return new ProjectListLoader.Data(projectDatas);
     }
 
     // sets
@@ -1796,7 +1812,7 @@ public class DomainFactory {
             RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
             Assert.assertTrue(childRemoteTask != null);
 
-            RemoteTaskHierarchy remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId(), now);
+            RemoteTaskHierarchy remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId());
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 

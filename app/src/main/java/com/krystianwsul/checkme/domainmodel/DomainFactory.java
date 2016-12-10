@@ -1571,12 +1571,18 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
 
+            MyCrashlytics.logException(new RemoteCustomTimeException());
+
             LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(customTimeKey.mLocalCustomTimeId);
 
             Assert.assertTrue(localCustomTime.hasRemoteRecord());
 
             return localCustomTime.getRemoteId();
         }
+    }
+
+    private static class RemoteCustomTimeException extends Exception {
+
     }
 
     @NonNull

@@ -44,17 +44,6 @@ public class MonthlyWeekScheduleRecord extends Record {
                 + COLUMN_MINUTE + " INTEGER);");
     }
 
-    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
-    @Deprecated
-    public static void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        if (oldVersion <= 13)
-            onCreate(sqLiteDatabase);
-
-        if (oldVersion < 16) {
-            sqLiteDatabase.delete(TABLE_MONTHLY_WEEK_SCHEDULES, COLUMN_SCHEDULE_ID + " NOT IN (SELECT " + ScheduleRecord.COLUMN_ID + " FROM " + ScheduleRecord.TABLE_SCHEDULES + ")", null);
-        }
-    }
-
     @NonNull
     static List<MonthlyWeekScheduleRecord> getMonthlyWeekScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
         List<MonthlyWeekScheduleRecord> monthlyWeekScheduleRecords = new ArrayList<>();
@@ -134,6 +123,7 @@ public class MonthlyWeekScheduleRecord extends Record {
         return mMinute;
     }
 
+    @NonNull
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
@@ -11,16 +12,17 @@ class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
     private static final int DATABASE_VERSION = 19;
 
+    @Nullable
     private static SQLiteDatabase sSQLiteDatabase;
 
     @NonNull
-    static SQLiteDatabase getDatabase(Context applicationContext) {
+    static SQLiteDatabase getDatabase(@NonNull Context applicationContext) {
         if (sSQLiteDatabase == null)
             sSQLiteDatabase = new MySQLiteHelper(applicationContext).getWritableDatabase();
         return sSQLiteDatabase;
     }
 
-    private MySQLiteHelper(Context context) {
+    private MySQLiteHelper(@NonNull Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -72,16 +74,8 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                 onCreate(sqLiteDatabase);
             } else {
                 TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-                ScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-                SingleScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-                DailyScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-                WeeklyScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-                MonthlyDayScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-                MonthlyWeekScheduleRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
                 InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-
-                UuidRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
 
                 if (oldVersion < 18) {
                     String columns = InstanceShownRecord.COLUMN_ID + ", "

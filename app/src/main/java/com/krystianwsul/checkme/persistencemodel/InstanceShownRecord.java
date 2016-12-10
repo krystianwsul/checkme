@@ -5,6 +5,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+
+import com.krystianwsul.checkme.MyCrashlytics;
 
 import junit.framework.Assert;
 
@@ -77,9 +80,8 @@ public class InstanceShownRecord extends Record {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static InstanceShownRecord cursorToInstanceShownRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static InstanceShownRecord cursorToInstanceShownRecord(@NonNull Cursor cursor) {
         int id = cursor.getInt(0);
         String taskId = cursor.getString(1);
         int scheduleYear = cursor.getInt(2);
@@ -98,8 +100,7 @@ public class InstanceShownRecord extends Record {
         return new InstanceShownRecord(true, id, taskId, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, notified, notificationShown, projectId);
     }
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase) {
         return getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID);
     }
 
@@ -125,6 +126,13 @@ public class InstanceShownRecord extends Record {
         mNotificationShown = notificationShown;
 
         mProjectId = projectId;
+
+        if (TextUtils.isEmpty(mProjectId))
+            MyCrashlytics.logException(new NullProjectIdException());
+    }
+
+    private static class NullProjectIdException extends Exception {
+
     }
 
     public int getId() {
@@ -191,6 +199,7 @@ public class InstanceShownRecord extends Record {
         mChanged = true;
     }
 
+    @NonNull
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();

@@ -43,14 +43,6 @@ public class SingleScheduleRecord extends Record {
                 + COLUMN_MINUTE + " INTEGER);");
     }
 
-    @SuppressWarnings({"UnusedParameters", "EmptyMethod"})
-    @Deprecated
-    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        if (oldVersion < 16) {
-            sqLiteDatabase.delete(TABLE_SINGLE_SCHEDULES, COLUMN_SCHEDULE_ID + " NOT IN (SELECT " + ScheduleRecord.COLUMN_ID + " FROM " + ScheduleRecord.TABLE_SCHEDULES + ")", null);
-        }
-    }
-
     @NonNull
     static List<SingleScheduleRecord> getSingleScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
         List<SingleScheduleRecord> singleScheduleDateTimeRecords = new ArrayList<>();
@@ -130,6 +122,7 @@ public class SingleScheduleRecord extends Record {
         return mMinute;
     }
 
+    @NonNull
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();

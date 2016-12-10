@@ -112,6 +112,7 @@ public class TaskHierarchyRecord extends Record {
         mChanged = true;
     }
 
+    @NonNull
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();

@@ -35,14 +35,6 @@ public class ScheduleRecord extends Record {
                 + COLUMN_TYPE + " INTEGER NOT NULL);");
     }
 
-    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
-    @Deprecated
-    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        if (oldVersion < 16) {
-            sqLiteDatabase.delete(TABLE_SCHEDULES, COLUMN_ROOT_TASK_ID + " NOT IN (SELECT " + TaskRecord.COLUMN_ID + " FROM " + TaskRecord.TABLE_TASKS + ")", null);
-        }
-    }
-
     @NonNull
     static ArrayList<ScheduleRecord> getScheduleRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
         ArrayList<ScheduleRecord> scheduleRecords = new ArrayList<>();
@@ -58,9 +50,8 @@ public class ScheduleRecord extends Record {
         return scheduleRecords;
     }
 
-    static ScheduleRecord cursorToScheduleRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static ScheduleRecord cursorToScheduleRecord(@NonNull Cursor cursor) {
         int id = cursor.getInt(0);
         int taskId = cursor.getInt(1);
         long startTime = cursor.getLong(2);
@@ -72,8 +63,7 @@ public class ScheduleRecord extends Record {
         return new ScheduleRecord(true, id, taskId, startTime, endTime, type);
     }
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase) {
         return getMaxId(sqLiteDatabase, TABLE_SCHEDULES, COLUMN_ID);
     }
 
@@ -119,6 +109,7 @@ public class ScheduleRecord extends Record {
         mChanged = true;
     }
 
+    @NonNull
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();

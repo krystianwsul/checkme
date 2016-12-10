@@ -15,6 +15,7 @@ class UuidRecord extends Record {
 
     private static final String COLUMN_UUID = "uuid";
 
+    @NonNull
     private final String mUuid;
 
     @NonNull
@@ -25,9 +26,7 @@ class UuidRecord extends Record {
         return uuid;
     }
 
-    public static void onCreate(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
+    public static void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_UUID
                 + " (" + COLUMN_UUID + " TEXT NOT NULL);");
 
@@ -35,19 +34,8 @@ class UuidRecord extends Record {
         uuidRecord.getInsertCommand().execute(sqLiteDatabase);
     }
 
-    @SuppressWarnings("UnusedParameters")
-    @Deprecated
-    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-        if (oldVersion <= 16) {
-            onCreate(sqLiteDatabase);
-        }
-    }
-
-    static UuidRecord getUuidRecord(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
+    @NonNull
+    static UuidRecord getUuidRecord(@NonNull SQLiteDatabase sqLiteDatabase) {
         Cursor cursor = sqLiteDatabase.query(TABLE_UUID, null, null, null, null, null, null);
         cursor.moveToFirst();
 
@@ -58,15 +46,15 @@ class UuidRecord extends Record {
         return uuidRecord;
     }
 
-    private static UuidRecord cursorToCustomTimeRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static UuidRecord cursorToCustomTimeRecord(@NonNull Cursor cursor) {
         String uuid = cursor.getString(0);
+        Assert.assertTrue(!TextUtils.isEmpty(uuid));
 
         return new UuidRecord(true, uuid);
     }
 
-    UuidRecord(boolean created, String uuid) {
+    UuidRecord(boolean created, @NonNull String uuid) {
         super(created);
 
         Assert.assertTrue(!TextUtils.isEmpty(uuid));
@@ -74,10 +62,12 @@ class UuidRecord extends Record {
         mUuid = uuid;
     }
 
+    @NonNull
     String getUuid() {
         return mUuid;
     }
 
+    @NonNull
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();

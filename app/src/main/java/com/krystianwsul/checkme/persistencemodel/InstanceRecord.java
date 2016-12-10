@@ -110,7 +110,7 @@ public class InstanceRecord extends Record {
 
     @SuppressWarnings("UnusedParameters")
     @Deprecated
-    public static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+    static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         if (oldVersion <= 5) {
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_INSTANCES
                     + " ADD COLUMN relevant INTEGER NOT NULL DEFAULT 1");
@@ -508,6 +508,7 @@ public class InstanceRecord extends Record {
         mChanged = true;
     }
 
+    @NonNull
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();

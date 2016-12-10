@@ -13,20 +13,9 @@ abstract class Record {
     boolean mChanged = false;
     private boolean mDeleted = false;
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase, String tableName, String idColumn) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase, @NonNull String tableName, @NonNull String idColumn) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
         Assert.assertTrue(!TextUtils.isEmpty(idColumn));
-
-        /*
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT MAX(" + idColumn + ") FROM " + tableName, null);
-        Assert.assertTrue(cursor.getColumnCount() == 1);
-        cursor.moveToFirst();
-
-        int max = (cursor.isNull(0) ? 0 : cursor.getInt(0));
-
-        cursor.close();
-        */
 
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT seq FROM SQLITE_SEQUENCE WHERE name='" + tableName + "'", null);
         cursor.moveToFirst();
@@ -43,13 +32,15 @@ abstract class Record {
         return max;
     }
 
+    @NonNull
     abstract ContentValues getContentValues();
 
     Record(boolean created) {
         mCreated = created;
     }
 
-    InsertCommand getInsertCommand(String tableName) {
+    @NonNull
+    InsertCommand getInsertCommand(@NonNull String tableName) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
 
         Assert.assertTrue(!mCreated);
@@ -60,7 +51,8 @@ abstract class Record {
         return new InsertCommand(tableName, getContentValues());
     }
 
-    UpdateCommand getUpdateCommand(String tableName, String idColumn, int id) {
+    @NonNull
+    UpdateCommand getUpdateCommand(@NonNull String tableName, @NonNull String idColumn, int id) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
         Assert.assertTrue(!TextUtils.isEmpty(idColumn));
 

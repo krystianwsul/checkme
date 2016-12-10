@@ -361,25 +361,23 @@ public class DomainFactory {
             updateNotificationsTick(context, tickData.mSilent, tickData.mTaskKeys);
         } else {
             if (mTickData != null) {
-                if (!tickDatasCompatible(mTickData, tickData))
-                    throw new MultipleTickDataException(mTickData, tickData);
-
-                // at this point I'm assuming that compatible implies identical
+                mTickData = mergeTickDatas(mTickData, tickData);
             } else {
                 mTickData = tickData;
             }
         }
     }
 
-    @SuppressWarnings("RedundantIfStatement")
-    static boolean tickDatasCompatible(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
-        if (!oldTickData.mSilent || !newTickData.mSilent)
-            return false;
+    @NonNull
+    static TickData mergeTickDatas(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+        boolean silent = (oldTickData.mSilent && newTickData.mSilent);
 
         if (!oldTickData.mTaskKeys.isEmpty() || !newTickData.mTaskKeys.isEmpty())
-            return false;
+            throw new IncompatibleTickDataException(oldTickData, newTickData);
 
-        return true;
+        String source = "merged (" + oldTickData + ", " + newTickData + ")";
+
+        return new TickData(silent, new ArrayList<>(), source);
     }
 
     public synchronized boolean isConnected() {
@@ -2611,14 +2609,14 @@ public class DomainFactory {
         void onFirebaseResult(@NonNull DomainFactory domainFactory);
     }
 
-    private static class MultipleTickDataException extends RuntimeException {
-        MultipleTickDataException(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+    static class IncompatibleTickDataException extends RuntimeException {
+        IncompatibleTickDataException(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
             super("old source: " + oldTickData.mSource + "; new source: " + newTickData.mSource);
         }
     }
 
     public static class TickData {
-        private final boolean mSilent;
+        final boolean mSilent;
 
         @NonNull
         private final List<TaskKey> mTaskKeys;

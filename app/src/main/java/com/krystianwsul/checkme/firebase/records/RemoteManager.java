@@ -103,7 +103,7 @@ public class RemoteManager {
         if (!matches.isEmpty()) {
             return matches.get(0);
         } else {
-            ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>());
+            ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>());
 
             return newRemoteProjectRecord(new JsonWrapper(recordOf, projectJson));
         }

@@ -136,7 +136,7 @@ public class RemoteFactory {
         if (!matches.isEmpty()) {
             return matches.get(0);
         } else {
-            ProjectJson projectJson = new ProjectJson(getProjectName(recordOf), now.getLong(), null, new HashMap<>(), new HashMap<>());
+            ProjectJson projectJson = new ProjectJson(getProjectName(recordOf), now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>());
 
             RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(new JsonWrapper(recordOf, projectJson));
 

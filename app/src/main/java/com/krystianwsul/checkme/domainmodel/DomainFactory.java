@@ -2317,7 +2317,6 @@ public class DomainFactory {
                     }
 
                     Stream.of(notificationInstances.values())
-                            .filter(instance -> updateInstance(taskKeys, instance, now)) // todo to chyba można usunąć
                             .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
                             .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, false));
                 }

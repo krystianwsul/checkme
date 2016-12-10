@@ -107,7 +107,7 @@ public class DomainFactory {
     private final List<FirebaseListener> mNotTickFirebaseListeners = new ArrayList<>();
 
     @Nullable
-    private FirebaseListener mFirebaseTickListener = null;
+    private TickData mTickData = null;
 
     private boolean mSkipSave = false;
 
@@ -242,7 +242,7 @@ public class DomainFactory {
 
                 MyCrashlytics.logException(databaseError.toException());
 
-                mFirebaseTickListener = null;
+                mTickData = null;
                 mNotTickFirebaseListeners.clear();
             }
         };
@@ -267,13 +267,6 @@ public class DomainFactory {
             }
         };
         mFriendQuery.addValueEventListener(mFriendListener);
-    }
-
-    private synchronized void notifyFirebaseListeners() {
-        Stream.of(mNotTickFirebaseListeners)
-                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
-
-        mNotTickFirebaseListeners.clear();
     }
 
     public synchronized void clearUserData(@NonNull Context context) {
@@ -317,23 +310,28 @@ public class DomainFactory {
         boolean silent = (mRemoteFactory == null);
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
 
-        if (mFirebaseTickListener != null) {
-            mFirebaseTickListener.onFirebaseResult(this);
-            mFirebaseTickListener = null;
+        if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
+            updateNotifications(context, silent, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
 
-            Assert.assertTrue(mNotTickFirebaseListeners.isEmpty());
+            save(context, new ArrayList<>(), true);
         } else {
-            updateNotifications(context, silent, false, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
+            mSkipSave = true;
 
-            if (mNotTickFirebaseListeners.isEmpty()) {
-                save(context, new ArrayList<>(), true);
+            if (mTickData == null) {
+                updateNotifications(context, silent, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
             } else {
-                mSkipSave = true;
-                notifyFirebaseListeners();
-                mSkipSave = false;
-
-                save(context, new ArrayList<>(), false);
+                updateNotificationsTick(context, mTickData.mSilent, mTickData.mTaskKeys);
+                mTickData = null;
             }
+
+            Stream.of(mNotTickFirebaseListeners)
+                    .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+
+            mNotTickFirebaseListeners.clear();
+
+            mSkipSave = false;
+
+            save(context, new ArrayList<>(), false);
         }
     }
 
@@ -349,11 +347,6 @@ public class DomainFactory {
     public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
         Assert.assertTrue(mRemoteFactory == null);
 
-        if (mFirebaseTickListener != null)
-            throw new MultipleListenerException(Collections.singletonList(mFirebaseTickListener), firebaseListener);
-        if (!mNotTickFirebaseListeners.isEmpty())
-            throw new MultipleListenerException(mNotTickFirebaseListeners, firebaseListener);
-
         mNotTickFirebaseListeners.add(firebaseListener);
     }
 
@@ -361,17 +354,32 @@ public class DomainFactory {
         mNotTickFirebaseListeners.remove(firebaseListener);
     }
 
-    public synchronized void setFirebaseTickListener(@NonNull FirebaseListener firebaseListener) {
-        if (mFirebaseTickListener != null)
-            throw new MultipleListenerException(Collections.singletonList(mFirebaseTickListener), firebaseListener);
-        if (!mNotTickFirebaseListeners.isEmpty())
-            throw new MultipleListenerException(mNotTickFirebaseListeners, firebaseListener);
-
+    public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull TickData tickData) {
         if (mRemoteFactory != null && !mRemoteFactory.isSaved()) {
-            firebaseListener.onFirebaseResult(this);
+            Assert.assertTrue(mTickData == null);
+
+            updateNotificationsTick(context, tickData.mSilent, tickData.mTaskKeys);
         } else {
-            mFirebaseTickListener = firebaseListener;
+            if (mTickData != null) {
+                if (!tickDatasCompatible(mTickData, tickData))
+                    throw new MultipleTickDataException(mTickData, tickData);
+
+                // at this point I'm assuming that compatible implies identical
+            } else {
+                mTickData = tickData;
+            }
         }
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    static boolean tickDatasCompatible(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+        if (!oldTickData.mSilent || !newTickData.mSilent)
+            return false;
+
+        if (!oldTickData.mTaskKeys.isEmpty() || !newTickData.mTaskKeys.isEmpty())
+            return false;
+
+        return true;
     }
 
     public synchronized boolean isConnected() {
@@ -873,9 +881,17 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        Set<UserData> friends = (mFriends != null ? new HashSet<>(mFriends.values()) : new HashSet<>());
+        Set<UserData> friends;
+        boolean connected;
+        if (mFriends != null) {
+            friends = new HashSet<>(mFriends.values());
+            connected = true;
+        } else {
+            friends = new HashSet<>();
+            connected = false;
+        }
 
-        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends);
+        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends, connected);
     }
 
     @NonNull
@@ -1524,8 +1540,8 @@ public class DomainFactory {
     }
 
     @NonNull
-    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
-        updateNotifications(context, silent, registering, taskKeys, now, new ArrayList<>());
+    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, boolean silent, @NonNull List<TaskKey> taskKeys) {
+        updateNotifications(context, silent, taskKeys, now, new ArrayList<>());
 
         Irrelevant irrelevant = setIrrelevant(now);
 
@@ -1537,13 +1553,13 @@ public class DomainFactory {
         return irrelevant;
     }
 
-    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
+    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent, @NonNull List<TaskKey> taskKeys) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        updateNotificationsTick(context, now, silent, registering, taskKeys);
+        updateNotificationsTick(context, now, silent, taskKeys);
     }
 
     // internal
@@ -1799,7 +1815,7 @@ public class DomainFactory {
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
 
-        updateNotifications(context, true, false, new ArrayList<>(), now, Stream.of(localToRemoteConversion.mLocalTasks.values())
+        updateNotifications(context, true, new ArrayList<>(), now, Stream.of(localToRemoteConversion.mLocalTasks.values())
                 .map(pair -> pair.first.getTaskKey())
                 .collect(Collectors.toList()));
 
@@ -2143,7 +2159,7 @@ public class DomainFactory {
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
-        updateNotifications(context, true, false, taskKeys, now, new ArrayList<>());
+        updateNotifications(context, true, taskKeys, now, new ArrayList<>());
     }
 
     @NonNull
@@ -2156,7 +2172,7 @@ public class DomainFactory {
         return taskKeys;
     }
 
-    private void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
+    private void updateNotifications(@NonNull Context context, boolean silent, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
         if (!silent) {
             SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
             Assert.assertTrue(sharedPreferences != null);
@@ -2244,79 +2260,65 @@ public class DomainFactory {
             }
         }
 
-        if (registering) {
-            Assert.assertTrue(silent);
+        if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
+            if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
+                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
+                } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
+                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
+                }
+            } else { // instances shown
+                for (InstanceKey shownInstanceKey : shownInstanceKeys) {
+                    if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
+                        Instance shownInstance = getInstance(shownInstanceKey);
 
-            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
-            } else { // show instances
+                        NotificationWrapper.getInstance().cancel(context, shownInstance.getNotificationId());
+                    } else {
+                        Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
+
+                        int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
+
+                        NotificationWrapper.getInstance().cancel(context, notificationId);
+                    }
+                }
+
+                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
+            }
+        } else { // show instances
+            if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                NotificationWrapper.getInstance().cancel(context, 0);
+
                 for (Instance instance : notificationInstances.values()) {
                     Assert.assertTrue(instance != null);
 
-                    NotificationWrapper.getInstance().notifyInstance(context, instance, true, now);
+                    NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
                 }
-            }
-        } else {
-            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
-                    } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
-                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
+            } else { // instances shown
+                for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                    if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                        Instance instance = getInstance(hideInstanceKey);
+
+                        NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                    } else {
+                        Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
+
+                        int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
+
+                        NotificationWrapper.getInstance().cancel(context, notificationId);
                     }
-                } else { // instances shown
-                    for (InstanceKey shownInstanceKey : shownInstanceKeys) {
-                        if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
-                            Instance shownInstance = getInstance(shownInstanceKey);
-
-                            NotificationWrapper.getInstance().cancel(context, shownInstance.getNotificationId());
-                        } else {
-                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
-
-                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
-
-                            NotificationWrapper.getInstance().cancel(context, notificationId);
-                        }
-                    }
-
-                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
                 }
-            } else { // show instances
-                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    NotificationWrapper.getInstance().cancel(context, 0);
 
-                    for (Instance instance : notificationInstances.values()) {
-                        Assert.assertTrue(instance != null);
+                for (InstanceKey showInstanceKey : showInstanceKeys) {
+                    Instance instance = notificationInstances.get(showInstanceKey);
+                    Assert.assertTrue(instance != null);
 
-                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
-                    }
-                } else { // instances shown
-                    for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                        if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
-                            Instance instance = getInstance(hideInstanceKey);
-
-                            NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
-                        } else {
-                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
-
-                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
-
-                            NotificationWrapper.getInstance().cancel(context, notificationId);
-                        }
-                    }
-
-                    for (InstanceKey showInstanceKey : showInstanceKeys) {
-                        Instance instance = notificationInstances.get(showInstanceKey);
-                        Assert.assertTrue(instance != null);
-
-                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
-                    }
-
-                    Stream.of(notificationInstances.values())
-                            .filter(instance -> updateInstance(taskKeys, instance, now))
-                            .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                            .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now));
+                    NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
                 }
+
+                Stream.of(notificationInstances.values())
+                        .filter(instance -> updateInstance(taskKeys, instance, now))
+                        .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
+                        .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now));
             }
         }
 
@@ -2607,27 +2609,29 @@ public class DomainFactory {
 
     public interface FirebaseListener {
         void onFirebaseResult(@NonNull DomainFactory domainFactory);
-
-        @NonNull
-        String getSource();
     }
 
-    public static class TickData {
-        @NonNull
-        final FirebaseListener mFirebaseListener;
-
-        @NonNull
-        final String mSource;
-
-        public TickData(@NonNull FirebaseListener firebaseListener, @NonNull String source) {
-            mFirebaseListener = firebaseListener;
-            mSource = source;
+    private static class MultipleTickDataException extends RuntimeException {
+        MultipleTickDataException(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+            super("old source: " + oldTickData.mSource + "; new source: " + newTickData.mSource);
         }
     }
 
-    private static class MultipleListenerException extends RuntimeException {
-        MultipleListenerException(@NonNull List<FirebaseListener> oldFirebaseListeners, @NonNull FirebaseListener newFirebaseListener) {
-            super("old sources: " + Stream.of(oldFirebaseListeners).map(FirebaseListener::getSource).collect(Collectors.joining(", ")) + "; new source: " + newFirebaseListener.getSource());
+    public static class TickData {
+        private final boolean mSilent;
+
+        @NonNull
+        private final List<TaskKey> mTaskKeys;
+
+        @NonNull
+        private final String mSource;
+
+        public TickData(boolean silent, @NonNull List<TaskKey> taskKeys, @NonNull String source) {
+            Assert.assertTrue(!TextUtils.isEmpty(source));
+
+            mSilent = silent;
+            mTaskKeys = taskKeys;
+            mSource = source;
         }
     }
 }

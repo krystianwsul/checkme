@@ -18,9 +18,18 @@ public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
     private final TaskKey mTaskKey;
 
     public TaskListLoader(@NonNull Context context, @Nullable TaskKey taskKey) {
-        super(context, false);
+        super(context, needsFirebase(taskKey));
 
         mTaskKey = taskKey;
+    }
+
+    @NonNull
+    private static FirebaseLevel needsFirebase(@Nullable TaskKey taskKey) {
+        if (taskKey != null && taskKey.getType() == TaskKey.Type.REMOTE) {
+            return FirebaseLevel.NEED;
+        } else {
+            return FirebaseLevel.WANT;
+        }
     }
 
     @Override

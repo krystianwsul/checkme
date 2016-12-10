@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -22,7 +23,7 @@ public class EditInstanceLoader extends DomainLoader<EditInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
 
     public EditInstanceLoader(@NonNull Context context, @NonNull InstanceKey instanceKey) {
-        super(context, false);
+        super(context, instanceKey.getType() == TaskKey.Type.REMOTE ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
 
         mInstanceKey = instanceKey;
     }

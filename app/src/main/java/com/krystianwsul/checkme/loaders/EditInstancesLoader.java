@@ -4,9 +4,11 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -15,6 +17,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -23,11 +26,18 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
     private final ArrayList<InstanceKey> mInstanceKeys;
 
     public EditInstancesLoader(@NonNull Context context, @NonNull ArrayList<InstanceKey> instanceKeys) {
-        super(context, false);
+        super(context, needsFirebase(instanceKeys));
 
         Assert.assertTrue(instanceKeys.size() > 1);
 
         mInstanceKeys = instanceKeys;
+    }
+
+    @NonNull
+    private static FirebaseLevel needsFirebase(@NonNull List<InstanceKey> instanceKeys) {
+        return (Stream.of(instanceKeys)
+                .map(InstanceKey::getType)
+                .anyMatch(type -> type == TaskKey.Type.REMOTE) ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
     }
 
     @Override

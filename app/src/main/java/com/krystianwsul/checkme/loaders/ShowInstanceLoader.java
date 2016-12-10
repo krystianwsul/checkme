@@ -16,7 +16,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
     private final InstanceKey mInstanceKey;
 
     public ShowInstanceLoader(@NonNull Context context, @NonNull InstanceKey instanceKey) {
-        super(context, instanceKey.getType() == TaskKey.Type.REMOTE);
+        super(context, instanceKey.getType() == TaskKey.Type.REMOTE ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
 
         mInstanceKey = instanceKey;
     }

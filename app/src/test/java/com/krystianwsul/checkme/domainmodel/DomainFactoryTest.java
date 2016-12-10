@@ -483,7 +483,7 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.values().iterator().next().Children.values().iterator().next().Exists);
 
         {
-            DomainFactory.Irrelevant irrelevant = domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(day1, hour12.toHourMilli()), false, false, new ArrayList<>());
+            DomainFactory.Irrelevant irrelevant = domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(day1, hour12.toHourMilli()), false, new ArrayList<>());
             Assert.assertTrue(irrelevant.mTasks.isEmpty());
             Assert.assertTrue(irrelevant.mInstances.isEmpty());
         }
@@ -532,7 +532,7 @@ public class DomainFactoryTest {
         }
 
         {
-            DomainFactory.Irrelevant irrelevant = domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(day2, hour16.toHourMilli()), false, false, new ArrayList<>());
+            DomainFactory.Irrelevant irrelevant = domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(day2, hour16.toHourMilli()), false, new ArrayList<>());
             Assert.assertTrue(irrelevant.mTasks.isEmpty());
             Assert.assertTrue(irrelevant.mInstances.size() == 2);
         }
@@ -581,7 +581,7 @@ public class DomainFactoryTest {
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.isEmpty());
         }
 
-        domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), false, false, new ArrayList<>());
+        domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), false, new ArrayList<>());
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.get(parentInstanceKey).Children.isEmpty());
@@ -624,7 +624,7 @@ public class DomainFactoryTest {
         CreateTaskLoader.SingleScheduleData splitScheduleData = new CreateTaskLoader.SingleScheduleData(date, new TimePair(hour2));
         Task splitTask = domainFactory.createScheduleRootTask(mContext, new ExactTimeStamp(date, hour1.toHourMilli()), dataId, "split", Collections.singletonList(splitScheduleData), null, new ArrayList<>());
 
-        domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), false, false, new ArrayList<>());
+        domainFactory.updateNotificationsTick(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), false, new ArrayList<>());
 
         InstanceKey splitInstanceKey;
         {
@@ -696,5 +696,19 @@ public class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.keySet().iterator().next().mScheduleKey.ScheduleTimePair.mHourMinute.equals(hour6));
+    }
+
+    @Test
+    public void testTickDatasCompatibleSilent() {
+        DomainFactory.TickData tickData = new DomainFactory.TickData(true, new ArrayList<>(), "asdf");
+
+        Assert.assertTrue(DomainFactory.tickDatasCompatible(tickData, tickData));
+    }
+
+    @Test
+    public void testTickDatasCompatibleNotSilent() {
+        DomainFactory.TickData tickData = new DomainFactory.TickData(false, new ArrayList<>(), "asdf");
+
+        Assert.assertTrue(!DomainFactory.tickDatasCompatible(tickData, tickData));
     }
 }

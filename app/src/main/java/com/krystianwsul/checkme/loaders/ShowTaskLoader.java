@@ -14,7 +14,7 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
     private final TaskKey mTaskKey;
 
     public ShowTaskLoader(@NonNull Context context, @NonNull TaskKey taskKey) {
-        super(context, false);
+        super(context, taskKey.getType() == TaskKey.Type.REMOTE ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
 
         mTaskKey = taskKey;
     }

@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
 import junit.framework.Assert;
 
 public class RemoteTaskHierarchyRecord extends RemoteRecord {
-    public static final String TASKHIERARCHIES = "taskHierarchies";
+    public static final String TASK_HIERARCHIES = "taskHierarchies";
 
     @NonNull
     private final String mId;
@@ -50,7 +50,7 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
     @NonNull
     @Override
     protected String getKey() {
-        return mRemoteProjectRecord.getKey() + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + TASKHIERARCHIES + "/" + mId;
+        return mRemoteProjectRecord.getKey() + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + TASK_HIERARCHIES + "/" + mId;
     }
 
     public long getStartTime() {

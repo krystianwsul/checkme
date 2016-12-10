@@ -24,11 +24,14 @@ public class ProjectJson {
     @Nullable
     private Map<String, TaskHierarchyJson> taskHierarchies;
 
+    @Nullable
+    private Map<String, CustomTimeJson> customTimes;
+
     public ProjectJson() {
 
     }
 
-    public ProjectJson(@NonNull String name, long startTime, @Nullable Long endTime, @NonNull Map<String, TaskJson> tasks, @NonNull Map<String, TaskHierarchyJson> taskHierarchies) {
+    public ProjectJson(@NonNull String name, long startTime, @Nullable Long endTime, @NonNull Map<String, TaskJson> tasks, @NonNull Map<String, TaskHierarchyJson> taskHierarchies, @NonNull Map<String, CustomTimeJson> customTimes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
@@ -38,6 +41,7 @@ public class ProjectJson {
 
         this.tasks = tasks;
         this.taskHierarchies = taskHierarchies;
+        this.customTimes = customTimes;
     }
 
     @NonNull
@@ -71,6 +75,14 @@ public class ProjectJson {
             return taskHierarchies;
     }
 
+    @NonNull
+    public Map<String, CustomTimeJson> getCustomTimes() {
+        if (customTimes == null)
+            return new HashMap<>();
+        else
+            return customTimes;
+    }
+
     public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
@@ -87,5 +99,9 @@ public class ProjectJson {
 
     public void setTaskHierarchies(@NonNull Map<String, TaskHierarchyJson> taskHierarchies) {
         this.taskHierarchies = taskHierarchies;
+    }
+
+    public void setCustomTimes(@NonNull Map<String, CustomTimeJson> customTimes) {
+        this.customTimes = customTimes;
     }
 }

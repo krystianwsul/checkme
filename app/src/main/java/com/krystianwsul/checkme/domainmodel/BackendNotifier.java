@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
 
@@ -75,6 +76,8 @@ class BackendNotifier {
                     in.close();
 
                     Log.e("asdf", "BackendNotifier response: " + stringBuilder);
+                } catch (UnknownHostException e) {
+                    Log.e("asdf", "BackendNotifier exception", e);
                 } catch (IOException e) {
                     MyCrashlytics.logException(e);
                 }

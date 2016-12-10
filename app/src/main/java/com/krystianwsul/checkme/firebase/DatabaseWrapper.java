@@ -95,7 +95,7 @@ public class DatabaseWrapper {
     public static String getScheduleRecordId(@NonNull String projectId, @NonNull String taskId) {
         Assert.assertTrue(sRootReference != null);
 
-        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteTaskRecord.TASKS + "/" + RemoteScheduleRecord.SCHEDULES).push().getKey();
+        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteTaskRecord.TASKS + "/" + taskId + "/" + RemoteScheduleRecord.SCHEDULES).push().getKey();
         Assert.assertTrue(!TextUtils.isEmpty(id));
 
         return id;

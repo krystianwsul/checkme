@@ -251,8 +251,6 @@ public class LocalCustomTime implements CustomTime {
     }
 
     void clearRemoteRecord() {
-        Assert.assertTrue(hasRemoteRecord());
-
         mRemoteCustomTimeRecord = null;
     }
 

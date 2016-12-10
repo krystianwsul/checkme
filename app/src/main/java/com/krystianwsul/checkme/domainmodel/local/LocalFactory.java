@@ -530,7 +530,6 @@ public class LocalFactory {
 
     public void clearRemoteCustomTimeRecords() {
         Stream.of(mLocalCustomTimes.values())
-                .filter(LocalCustomTime::hasRemoteRecord)
                 .forEach(LocalCustomTime::clearRemoteRecord);
     }
 

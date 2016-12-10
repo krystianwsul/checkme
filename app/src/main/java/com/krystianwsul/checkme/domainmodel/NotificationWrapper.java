@@ -225,10 +225,12 @@ abstract class NotificationWrapper {
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Assert.assertTrue(alarmManager != null);
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-            } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+            } else {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
             }
         }
 

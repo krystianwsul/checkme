@@ -699,16 +699,30 @@ public class DomainFactoryTest {
     }
 
     @Test
-    public void testTickDatasCompatibleSilent() {
-        DomainFactory.TickData tickData = new DomainFactory.TickData(true, new ArrayList<>(), "asdf");
+    public void testMergeTickDatasSilent() {
+        DomainFactory.TickData oldTickData = new DomainFactory.TickData(true, new ArrayList<>(), "asdf");
+        DomainFactory.TickData newTickData = new DomainFactory.TickData(true, new ArrayList<>(), "asdf");
 
-        Assert.assertTrue(DomainFactory.tickDatasCompatible(tickData, tickData));
+        DomainFactory.TickData mergedTickData = DomainFactory.mergeTickDatas(oldTickData, newTickData);
+
+        Assert.assertTrue(mergedTickData.mSilent);
     }
 
     @Test
-    public void testTickDatasCompatibleNotSilent() {
-        DomainFactory.TickData tickData = new DomainFactory.TickData(false, new ArrayList<>(), "asdf");
+    public void testMergeTickDatasNotSilent() {
+        DomainFactory.TickData oldTickData = new DomainFactory.TickData(true, new ArrayList<>(), "asdf");
+        DomainFactory.TickData newTickData = new DomainFactory.TickData(false, new ArrayList<>(), "asdf");
 
-        Assert.assertTrue(!DomainFactory.tickDatasCompatible(tickData, tickData));
+        DomainFactory.TickData mergedTickData = DomainFactory.mergeTickDatas(oldTickData, newTickData);
+
+        Assert.assertTrue(!mergedTickData.mSilent);
+    }
+
+    @Test(expected = DomainFactory.IncompatibleTickDataException.class)
+    public void testMergeTickDatasNotEmptyTasks() {
+        DomainFactory.TickData oldTickData = new DomainFactory.TickData(true, new ArrayList<>(), "asdf");
+        DomainFactory.TickData newTickData = new DomainFactory.TickData(false, Collections.singletonList(new TaskKey(0)), "asdf");
+
+        DomainFactory.TickData mergedTickData = DomainFactory.mergeTickDatas(oldTickData, newTickData);
     }
 }

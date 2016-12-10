@@ -92,34 +92,4 @@ public class RemoteManager {
         mRemoteProjectRecords.put(remoteProjectRecord.getId(), remoteProjectRecord);
         return remoteProjectRecord;
     }
-
-    @NonNull
-    private RemoteProjectRecord getRemoteProjectRecord(@NonNull Set<String> recordOf, @NonNull String name, @NonNull ExactTimeStamp now) {
-        List<RemoteProjectRecord> matches = Stream.of(mRemoteProjectRecords.values())
-                .filter(remoteProjectRecord -> remoteProjectRecord.getRecordOf().equals(recordOf))
-                .filter(remoteProjectRecord -> remoteProjectRecord.getEndTime() == null)
-                .collect(Collectors.toList());
-
-        if (!matches.isEmpty()) {
-            return matches.get(0);
-        } else {
-            ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>());
-
-            return newRemoteProjectRecord(new JsonWrapper(recordOf, projectJson));
-        }
-    }
-
-    @NonNull
-    public List<RemoteTaskRecord> getRemoteTaskRecords() {
-        return Stream.of(mRemoteProjectRecords.values())
-                .flatMap(remoteProjectRecord -> Stream.of(remoteProjectRecord.getRemoteTaskRecords().values()))
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    public List<RemoteTaskHierarchyRecord> getRemoteTaskHierarchyRecords() {
-        return Stream.of(mRemoteProjectRecords.values())
-                .flatMap(remoteProjectRecord -> Stream.of(remoteProjectRecord.getRemoteTaskHierarchyRecords().values()))
-                .collect(Collectors.toList());
-    }
 }

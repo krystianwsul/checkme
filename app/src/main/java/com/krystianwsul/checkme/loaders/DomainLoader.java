@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.loaders;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -20,39 +19,32 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     private D mData;
     private Observer mObserver;
 
+    @NonNull
     private final DomainFactory mDomainFactory;
-    private final boolean mNeedsFirebase;
 
-    private final DomainFactory.FirebaseListener mFirebaseListener = new DomainFactory.FirebaseListener() {
-        @Override
-        public void onFirebaseResult(@NonNull DomainFactory domainFactory) {
-            Assert.assertTrue(domainFactory.isConnected());
+    @NonNull
+    private final FirebaseLevel mFirebaseLevel;
 
-            if (isStarted()) {
-                Log.e("asdf", "forceLoad b " + getName());
-                forceLoad();
-            }
-        }
+    private final DomainFactory.FirebaseListener mFirebaseListener = domainFactory -> {
+        Assert.assertTrue(domainFactory.isConnected());
 
-        @NonNull
-        @Override
-        public String getSource() {
-            return getName();
-        }
+        if (isStarted())
+            forceLoad();
     };
 
-    DomainLoader(Context context, boolean needsFirebase) {
+    DomainLoader(@NonNull Context context, @NonNull FirebaseLevel firebaseLevel) {
         super(context);
 
         mDomainFactory = DomainFactory.getDomainFactory(getContext());
-        mNeedsFirebase = needsFirebase;
+        mFirebaseLevel = firebaseLevel;
     }
 
+    @SuppressWarnings("unused")
     abstract String getName();
 
     @Override
     public final D loadInBackground() {
-        if (mNeedsFirebase && !mDomainFactory.isConnected())
+        if (mFirebaseLevel == FirebaseLevel.NEED && !mDomainFactory.isConnected())
             return null;
 
         return loadDomain(mDomainFactory);
@@ -89,26 +81,42 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         }
 
         if (takeContentChanged() || mData == null) {
-            Log.e("asdf", "needs firebase? " + mNeedsFirebase + " " + getName());
-
-            if (!mNeedsFirebase) {
-                Log.e("asdf", "forceLoad a " + getName());
-                forceLoad();
-            } else {
-                if (mDomainFactory.isConnected()) {
-                    Log.e("asdf", "forceLoad c " + getName());
+            switch (mFirebaseLevel) {
+                case NOTHING: {
                     forceLoad();
-                } else {
+
+                    break;
+                }
+                case WANT: {
+                    forceLoad();
+
                     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                    if (firebaseUser != null) {
+                    if (firebaseUser != null && !mDomainFactory.isConnected()) {
+                        UserData userData = new UserData(firebaseUser);
+
+                        mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                    }
+
+                    break;
+                }
+                case NEED: {
+                    if (mDomainFactory.isConnected()) {
+                        forceLoad();
+                    } else {
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        if (firebaseUser == null)
+                            throw new InstanceDoneService.NeedsFirebaseException();
+
                         UserData userData = new UserData(firebaseUser);
 
                         mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
                         mDomainFactory.addFirebaseListener(mFirebaseListener);
-                    } else {
-                        throw new InstanceDoneService.NeedsFirebaseException();
                     }
+
+                    break;
                 }
+                default:
+                    throw new IndexOutOfBoundsException();
             }
         }
     }
@@ -154,5 +162,11 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         public Data() {
             DataId = getNextId();
         }
+    }
+
+    enum FirebaseLevel {
+        NOTHING,
+        WANT,
+        NEED
     }
 }

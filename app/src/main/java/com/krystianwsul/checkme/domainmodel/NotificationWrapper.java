@@ -11,8 +11,9 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -52,9 +53,9 @@ abstract class NotificationWrapper {
 
     public abstract void cancel(@NonNull Context context, int id);
 
-    public abstract void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now);
+    public abstract void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
 
-    public abstract void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now);
+    public abstract void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
 
     public abstract void setAlarm(@NonNull Context context, @NonNull TimeStamp nextAlarm);
 
@@ -68,7 +69,9 @@ abstract class NotificationWrapper {
         }
 
         @Override
-        public void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
+        public void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            Log.e("asdf", "notifyInstance");
+
             Task task = instance.getTask();
             int notificationId = instance.getNotificationId();
             InstanceKey instanceKey = instance.getInstanceKey();
@@ -89,26 +92,13 @@ abstract class NotificationWrapper {
             PendingIntent pendingHourIntent = PendingIntent.getService(context, notificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             actions.add(new NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, context.getString(R.string.hour), pendingHourIntent).build());
 
-            List<Instance> childInstances = instance.getChildInstances(now);
+            List<String> childNames = getChildNames(instance, now);
 
             String text;
             NotificationCompat.Style style;
-            if (!childInstances.isEmpty()) {
-                Stream<Instance> notDone = Stream.of(childInstances)
-                        .filter(childInstance -> childInstance.getDone() == null)
-                        .sortBy(childInstance -> childInstance.getTask().getStartExactTimeStamp());
-
-                //noinspection ConstantConditions
-                Stream<Instance> done = Stream.of(childInstances)
-                        .filter(childInstance -> childInstance.getDone() != null)
-                        .sortBy(childInstance -> -childInstance.getDone().getLong());
-
-                List<String> children = Stream.concat(notDone, done)
-                        .map(Instance::getName)
-                        .collect(Collectors.toList());
-
-                text = TextUtils.join(", ", children);
-                style = getInboxStyle(context, children);
+            if (!childNames.isEmpty()) {
+                text = TextUtils.join(", ", childNames);
+                style = getInboxStyle(context, childNames, false);
             } else if (!TextUtils.isEmpty(task.getNote())) {
                 text = task.getNote();
 
@@ -121,11 +111,46 @@ abstract class NotificationWrapper {
                 style = null;
             }
 
-            notify(context, instance.getName(), text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.getInstanceDateTime().getTimeStamp().getLong(), style, true);
+            notify(context, instance.getName(), text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.getInstanceDateTime().getTimeStamp().getLong(), style, true, nougat, false, instance.getInstanceDateTime().getTimeStamp().getLong().toString());
         }
 
         @NonNull
-        private NotificationCompat.InboxStyle getInboxStyle(@NonNull Context context, @NonNull List<String> lines) {
+        private String getInstanceText(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
+            List<String> childNames = getChildNames(instance, now);
+
+            if (!childNames.isEmpty()) {
+                return " (" + TextUtils.join(", ", childNames) + ")";
+            } else {
+                String note = instance.getTask().getNote();
+
+                if (!TextUtils.isEmpty(note)) {
+                    return " (" + note + ")";
+                } else {
+                    return "";
+                }
+            }
+        }
+
+        @NonNull
+        private List<String> getChildNames(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
+            List<Instance> childInstances = instance.getChildInstances(now);
+
+            Stream<Instance> notDone = Stream.of(childInstances)
+                    .filter(childInstance -> childInstance.getDone() == null)
+                    .sortBy(childInstance -> childInstance.getTask().getStartExactTimeStamp());
+
+            //noinspection ConstantConditions
+            Stream<Instance> done = Stream.of(childInstances)
+                    .filter(childInstance -> childInstance.getDone() != null)
+                    .sortBy(childInstance -> -childInstance.getDone().getLong());
+
+            return Stream.concat(notDone, done)
+                    .map(Instance::getName)
+                    .collect(Collectors.toList());
+        }
+
+        @NonNull
+        private NotificationCompat.InboxStyle getInboxStyle(@NonNull Context context, @NonNull List<String> lines, boolean nougatGroup) {
             Assert.assertTrue(!lines.isEmpty());
 
             int max = 5;
@@ -138,24 +163,26 @@ abstract class NotificationWrapper {
 
             int extraCount = lines.size() - max;
 
-            if (extraCount > 0)
+            if (extraCount > 0 && !nougatGroup) {
                 inboxStyle.setSummaryText("+" + extraCount + " " + context.getString(R.string.more));
+            }
 
             return inboxStyle;
         }
 
-        private void notify(@NonNull Context context, @NonNull String title, @Nullable String text, int notificationId, @NonNull PendingIntent deleteIntent, @NonNull PendingIntent contentIntent, boolean silent, @NonNull List<NotificationCompat.Action> actions, @Nullable Long when, @Nullable NotificationCompat.Style style, boolean autoCancel) {
+        private void notify(@NonNull Context context, @NonNull String title, @Nullable String text, int notificationId, @NonNull PendingIntent deleteIntent, @NonNull PendingIntent contentIntent, boolean silent, @NonNull List<NotificationCompat.Action> actions, @Nullable Long when, @Nullable NotificationCompat.Style style, boolean autoCancel, boolean nougat, boolean summary, @NonNull String sortKey) {
             Assert.assertTrue(!TextUtils.isEmpty(title));
 
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-            NotificationCompat.Builder builder = (new NotificationCompat.Builder(context))
+            NotificationCompat.Builder builder = (NotificationCompat.Builder) new NotificationCompat.Builder(context)
                     .setContentTitle(title)
                     .setSmallIcon(R.drawable.ikona_bez)
                     .setDeleteIntent(deleteIntent)
                     .setContentIntent(contentIntent)
                     .setCategory(NotificationCompat.CATEGORY_ALARM)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH);
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setSortKey(sortKey);
 
             if (!TextUtils.isEmpty(text))
                 builder.setContentText(text);
@@ -177,6 +204,14 @@ abstract class NotificationWrapper {
             if (autoCancel)
                 builder.setAutoCancel(true);
 
+            if (nougat) {
+                builder.setGroup(TickService.GROUP_KEY);
+
+                if (summary) {
+                    builder.setGroupSummary(true);
+                }
+            }
+
             Notification notification = builder.build();
 
             if (!silent)
@@ -190,16 +225,18 @@ abstract class NotificationWrapper {
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Assert.assertTrue(alarmManager != null);
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-            } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+            } else {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
             }
         }
 
         @Override
-        public void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now) {
-            Assert.assertTrue(instances.size() > TickService.MAX_NOTIFICATIONS);
+        public void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            Log.e("asdf", "notifyGroup nougat? " + nougat);
 
             ArrayList<String> names = new ArrayList<>();
             ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
@@ -222,15 +259,15 @@ abstract class NotificationWrapper {
 
                         return lhs.getTask().getStartExactTimeStamp().compareTo(rhs.getTask().getStartExactTimeStamp());
                     })
-                    .map(notificationInstanceData -> notificationInstanceData.getName() + " (" + notificationInstanceData.getDisplayText(context, now) + ")")
-                    .collect(Collectors.toList()));
+                    .map(instance -> instance.getName() + getInstanceText(instance, now))
+                    .collect(Collectors.toList()), nougat);
 
-            notify(context, instances.size() + " " + context.getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, new ArrayList<>(), null, inboxStyle, false);
+            notify(context, instances.size() + " " + context.getString(R.string.multiple_reminders), TextUtils.join(", ", names), 0, pendingDeleteIntent, pendingContentIntent, silent, new ArrayList<>(), null, inboxStyle, false, nougat, true, "0");
         }
 
         @Override
         public void setAlarm(@NonNull Context context, @NonNull TimeStamp nextAlarm) {
-            Intent nextIntent = TickService.getIntent(context, false, false, new ArrayList<>(), "NotificationWrapper: TickService.getIntent");
+            Intent nextIntent = TickService.getIntent(context, false, "NotificationWrapper: TickService.getIntent");
 
             PendingIntent pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             Assert.assertTrue(pendingIntent != null);

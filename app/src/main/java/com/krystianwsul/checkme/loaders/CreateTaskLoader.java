@@ -31,7 +31,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     private final List<TaskKey> mExcludedTaskKeys;
 
     public CreateTaskLoader(@NonNull Context context, @Nullable TaskKey taskKey, @NonNull List<TaskKey> excludedTaskKeys) {
-        super(context, false);
+        super(context, needsFirebase(taskKey));
 
         mTaskKey = taskKey;
         mExcludedTaskKeys = excludedTaskKeys;
@@ -40,6 +40,15 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     @Override
     String getName() {
         return "CreateTaskLoader, taskKey: " + mTaskKey + ", excludedTaskKeys: " + mExcludedTaskKeys;
+    }
+
+    @NonNull
+    private static FirebaseLevel needsFirebase(@Nullable TaskKey taskKey) {
+        if (taskKey != null && taskKey.getType() == TaskKey.Type.REMOTE) {
+            return FirebaseLevel.NEED;
+        } else {
+            return FirebaseLevel.WANT;
+        }
     }
 
     @Override
@@ -64,11 +73,16 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @NonNull
         public final Set<UserData> mFriends;
 
-        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends) {
+        public final boolean mConnected;
+
+        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends, boolean connected) {
+            Assert.assertTrue(connected || friends.isEmpty());
+
             TaskData = taskData;
             TaskTreeDatas = taskTreeDatas;
             CustomTimeDatas = customTimeDatas;
             mFriends = friends;
+            mConnected = connected;
         }
 
         @Override
@@ -79,6 +93,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             hash += TaskTreeDatas.hashCode();
             hash += CustomTimeDatas.hashCode();
             hash += mFriends.hashCode();
+            hash += (mConnected ? 1 : 0);
             return hash;
         }
 
@@ -109,6 +124,9 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if (!mFriends.equals(data.mFriends))
+                return false;
+
+            if (mConnected != data.mConnected)
                 return false;
 
             return true;

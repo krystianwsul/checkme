@@ -33,7 +33,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
-import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -1105,14 +1104,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             switch (viewType) {
                 case TYPE_SCHEDULE: {
                     View scheduleRow = getLayoutInflater().inflate(R.layout.row_schedule, parent, false);
+                    Assert.assertTrue(scheduleRow != null);
 
-                    TextInputLayout scheduleLayout = (TextInputLayout) scheduleRow.findViewById(R.id.schedule_layout);
-                    Assert.assertTrue(scheduleLayout != null);
-
-                    EditText scheduleTime = (EditText) scheduleRow.findViewById(R.id.schedule_text);
-                    Assert.assertTrue(scheduleTime != null);
-
-                    return new ScheduleHolder(scheduleRow, scheduleLayout, scheduleTime);
+                    return new ScheduleHolder(scheduleRow);
                 }
                 case TYPE_NOTE: {
                     View noteRow = getLayoutInflater().inflate(R.layout.row_note, parent, false);
@@ -1131,6 +1125,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         public void onBindViewHolder(final Holder holder, int position) {
             if (position == 0) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
+
+                scheduleHolder.mScheduleMargin.setVisibility(View.VISIBLE);
 
                 scheduleHolder.mScheduleLayout.setHint(getString(R.string.parentTask));
                 scheduleHolder.mScheduleLayout.setError(null);
@@ -1153,6 +1149,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 ScheduleEntry scheduleEntry = mScheduleEntries.get(position - 1);
                 Assert.assertTrue(scheduleEntry != null);
 
+                scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
+
                 scheduleHolder.mScheduleLayout.setHint(null);
                 scheduleHolder.mScheduleLayout.setError(scheduleEntry.mError);
 
@@ -1163,6 +1161,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
             } else if (position == 1 + mScheduleEntries.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
+
+                scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
 
                 scheduleHolder.mScheduleLayout.setHint(getString(R.string.addReminder));
                 scheduleHolder.mScheduleLayout.setError(null);
@@ -1187,6 +1187,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 UserData friendEntry = mFriendEntries.get(position - 1 - mScheduleEntries.size() - 1);
                 Assert.assertTrue(friendEntry != null);
 
+                scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
+
                 scheduleHolder.mScheduleLayout.setHint(null);
                 scheduleHolder.mScheduleLayout.setError(null);
 
@@ -1210,12 +1212,14 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
+                scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
+
                 scheduleHolder.mScheduleLayout.setHint(getString(R.string.addFriend));
                 scheduleHolder.mScheduleLayout.setError(null);
 
                 scheduleHolder.mScheduleText.setText(null);
 
-                scheduleHolder.mScheduleText.setEnabled(MainActivity.getUserData() != null);
+                scheduleHolder.mScheduleText.setEnabled(mData.mConnected);
 
                 scheduleHolder.mScheduleText.setOnClickListener(v -> {
                     Assert.assertTrue(mCreateTaskAdapter != null);
@@ -1291,14 +1295,21 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         }
 
         class ScheduleHolder extends Holder {
+            final View mScheduleMargin;
             final TextInputLayout mScheduleLayout;
             final EditText mScheduleText;
 
-            ScheduleHolder(@NonNull View scheduleRow, @NonNull TextInputLayout scheduleLayout, @NonNull EditText scheduleText) {
+            ScheduleHolder(@NonNull View scheduleRow) {
                 super(scheduleRow);
 
-                mScheduleLayout = scheduleLayout;
-                mScheduleText = scheduleText;
+                mScheduleMargin = scheduleRow.findViewById(R.id.schedule_margin);
+                Assert.assertTrue(mScheduleMargin != null);
+
+                mScheduleLayout = (TextInputLayout) scheduleRow.findViewById(R.id.schedule_layout);
+                Assert.assertTrue(mScheduleLayout != null);
+
+                mScheduleText = (EditText) scheduleRow.findViewById(R.id.schedule_text);
+                Assert.assertTrue(mScheduleText != null);
             }
 
             void onTextClick() {

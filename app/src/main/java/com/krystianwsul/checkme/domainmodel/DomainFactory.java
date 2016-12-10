@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -107,7 +108,7 @@ public class DomainFactory {
     private final List<FirebaseListener> mNotTickFirebaseListeners = new ArrayList<>();
 
     @Nullable
-    private FirebaseListener mFirebaseTickListener = null;
+    private TickData mTickData = null;
 
     private boolean mSkipSave = false;
 
@@ -242,7 +243,7 @@ public class DomainFactory {
 
                 MyCrashlytics.logException(databaseError.toException());
 
-                mFirebaseTickListener = null;
+                mTickData = null;
                 mNotTickFirebaseListeners.clear();
             }
         };
@@ -267,13 +268,6 @@ public class DomainFactory {
             }
         };
         mFriendQuery.addValueEventListener(mFriendListener);
-    }
-
-    private synchronized void notifyFirebaseListeners() {
-        Stream.of(mNotTickFirebaseListeners)
-                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
-
-        mNotTickFirebaseListeners.clear();
     }
 
     public synchronized void clearUserData(@NonNull Context context) {
@@ -305,7 +299,7 @@ public class DomainFactory {
             mFriendQuery = null;
             mFriendListener = null;
 
-            updateNotifications(context, new ArrayList<>(), now);
+            updateNotifications(context, now);
 
             ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
         }
@@ -317,23 +311,28 @@ public class DomainFactory {
         boolean silent = (mRemoteFactory == null);
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
 
-        if (mFirebaseTickListener != null) {
-            mFirebaseTickListener.onFirebaseResult(this);
-            mFirebaseTickListener = null;
+        if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
+            updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
 
-            Assert.assertTrue(mNotTickFirebaseListeners.isEmpty());
+            save(context, new ArrayList<>(), true);
         } else {
-            updateNotifications(context, silent, false, new ArrayList<>(), ExactTimeStamp.getNow(), new ArrayList<>());
+            mSkipSave = true;
 
-            if (mNotTickFirebaseListeners.isEmpty()) {
-                save(context, new ArrayList<>(), true);
+            if (mTickData == null) {
+                updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
             } else {
-                mSkipSave = true;
-                notifyFirebaseListeners();
-                mSkipSave = false;
-
-                save(context, new ArrayList<>(), false);
+                updateNotificationsTick(context, mTickData.mSilent);
+                mTickData = null;
             }
+
+            Stream.of(mNotTickFirebaseListeners)
+                    .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+
+            mNotTickFirebaseListeners.clear();
+
+            mSkipSave = false;
+
+            save(context, new ArrayList<>(), false);
         }
     }
 
@@ -349,11 +348,6 @@ public class DomainFactory {
     public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
         Assert.assertTrue(mRemoteFactory == null);
 
-        if (mFirebaseTickListener != null)
-            throw new MultipleListenerException(Collections.singletonList(mFirebaseTickListener), firebaseListener);
-        if (!mNotTickFirebaseListeners.isEmpty())
-            throw new MultipleListenerException(mNotTickFirebaseListeners, firebaseListener);
-
         mNotTickFirebaseListeners.add(firebaseListener);
     }
 
@@ -361,17 +355,27 @@ public class DomainFactory {
         mNotTickFirebaseListeners.remove(firebaseListener);
     }
 
-    public synchronized void setFirebaseTickListener(@NonNull FirebaseListener firebaseListener) {
-        if (mFirebaseTickListener != null)
-            throw new MultipleListenerException(Collections.singletonList(mFirebaseTickListener), firebaseListener);
-        if (!mNotTickFirebaseListeners.isEmpty())
-            throw new MultipleListenerException(mNotTickFirebaseListeners, firebaseListener);
-
+    public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull TickData tickData) {
         if (mRemoteFactory != null && !mRemoteFactory.isSaved()) {
-            firebaseListener.onFirebaseResult(this);
+            Assert.assertTrue(mTickData == null);
+
+            updateNotificationsTick(context, tickData.mSilent);
         } else {
-            mFirebaseTickListener = firebaseListener;
+            if (mTickData != null) {
+                mTickData = mergeTickDatas(mTickData, tickData);
+            } else {
+                mTickData = tickData;
+            }
         }
+    }
+
+    @NonNull
+    static TickData mergeTickDatas(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+        boolean silent = (oldTickData.mSilent && newTickData.mSilent);
+
+        String source = "merged (" + oldTickData + ", " + newTickData + ")";
+
+        return new TickData(silent, source);
     }
 
     public synchronized boolean isConnected() {
@@ -873,9 +877,17 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        Set<UserData> friends = (mFriends != null ? new HashSet<>(mFriends.values()) : new HashSet<>());
+        Set<UserData> friends;
+        boolean connected;
+        if (mFriends != null) {
+            friends = new HashSet<>(mFriends.values());
+            connected = true;
+        } else {
+            friends = new HashSet<>();
+            connected = false;
+        }
 
-        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends);
+        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends, connected);
     }
 
     @NonNull
@@ -915,7 +927,7 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
 
         save(context, dataId);
     }
@@ -940,7 +952,7 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, remoteProjects);
+        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
 
         save(context, dataId);
     }
@@ -961,7 +973,7 @@ public class DomainFactory {
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
         instance.setNotificationShown(false, now);
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
 
         save(context, dataId);
     }
@@ -981,7 +993,7 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
 
         save(context, dataId);
     }
@@ -1020,7 +1032,7 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, remoteProjects);
+        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
 
         save(context, dataId);
 
@@ -1075,7 +1087,7 @@ public class DomainFactory {
             task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
         }
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, task.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
         save(context, dataId);
 
@@ -1101,9 +1113,6 @@ public class DomainFactory {
 
         task = task.updateFriends(Utils.userDatasToKeys(friendEntries), context, now);
 
-        List<TaskKey> taskKeys = new ArrayList<>();
-        taskKeys.add(task.getTaskKey());
-
         task.setName(name, note);
 
         if (!task.isRootTask(now)) {
@@ -1111,13 +1120,11 @@ public class DomainFactory {
             Assert.assertTrue(taskHierarchy != null);
 
             taskHierarchy.setEndExactTimeStamp(now);
-
-            taskKeys.add(taskHierarchy.getParentTaskKey());
         }
 
         task.updateSchedules(scheduleDatas, now);
 
-        updateNotificationsAndNotifyCloud(context, taskKeys, now, task.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
         save(context, dataId);
 
@@ -1172,15 +1179,9 @@ public class DomainFactory {
                 .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
                 .collect(Collectors.toList());
 
-        List<TaskKey> taskKeys = Stream.of(joinTasks)
-                .map(task -> task.getParentTask(now))
-                .filter(parentTask -> parentTask != null)
-                .map(Task::getTaskKey)
-                .collect(Collectors.toList());
-
         joinTasks(newParentTask, joinTasks, now);
 
-        updateNotificationsAndNotifyCloud(context, taskKeys, now, newParentTask.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, newParentTask.getRemoteNullableProject());
 
         save(context, dataId);
     }
@@ -1193,7 +1194,7 @@ public class DomainFactory {
 
         Task childTask = parentTask.createChildTask(now, name, note);
 
-        updateNotificationsAndNotifyCloud(context, Collections.singletonList(parentTaskKey), now, childTask.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, childTask.getRemoteNullableProject());
 
         save(context, dataId);
 
@@ -1236,19 +1237,11 @@ public class DomainFactory {
                 .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
                 .collect(Collectors.toList());
 
-        List<TaskKey> taskKeys = Stream.of(joinTasks)
-                .map(task -> task.getParentTask(now))
-                .filter(joinParentTask -> joinParentTask != null)
-                .map(Task::getTaskKey)
-                .collect(Collectors.toList());
-
-        taskKeys.add(parentTask.getTaskKey());
-
         Task childTask = parentTask.createChildTask(now, name, note);
 
         joinTasks(childTask, joinTasks, now);
 
-        updateNotificationsAndNotifyCloud(context, taskKeys, now, childTask.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, childTask.getRemoteNullableProject());
 
         save(context, dataId);
     }
@@ -1259,8 +1252,6 @@ public class DomainFactory {
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        List<TaskKey> taskKeys = new ArrayList<>();
 
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
@@ -1279,11 +1270,7 @@ public class DomainFactory {
         task = task.updateFriends(new HashSet<>(mergedFriends), context, now);
         newParentTask = newParentTask.updateFriends(mergedFriends, context, now);
 
-        taskKeys.add(task.getTaskKey());
-
         task.setName(name, note);
-
-        taskKeys.add(newParentTask.getTaskKey());
 
         Task oldParentTask = task.getParentTask(now);
         if (oldParentTask == null) {
@@ -1294,13 +1281,11 @@ public class DomainFactory {
             Assert.assertTrue(oldTaskHierarchy != null);
 
             oldTaskHierarchy.setEndExactTimeStamp(now);
-
-            taskKeys.add(oldTaskHierarchy.getParentTaskKey());
         }
 
         newParentTask.addChild(task, now);
 
-        updateNotificationsAndNotifyCloud(context, taskKeys, now, task.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
         save(context, dataId);
 
@@ -1320,7 +1305,7 @@ public class DomainFactory {
 
         task.setEndExactTimeStamp(now);
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, task.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
         save(context, dataIds, false);
     }
@@ -1348,7 +1333,7 @@ public class DomainFactory {
                 .map(Task::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, remoteProjects);
+        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
 
         save(context, dataId);
     }
@@ -1423,7 +1408,7 @@ public class DomainFactory {
             task = mRemoteFactory.createRemoteTaskHelper(now, name, note, Utils.userDatasToKeys(friendEntries));
         }
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, task.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
         save(context, dataId);
 
@@ -1476,15 +1461,9 @@ public class DomainFactory {
                 .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
                 .collect(Collectors.toList());
 
-        List<TaskKey> taskKeys = Stream.of(joinTasks)
-                .map(task -> task.getParentTask(now))
-                .filter(parentTask -> parentTask != null)
-                .map(Task::getTaskKey)
-                .collect(Collectors.toList());
-
         joinTasks(newParentTask, joinTasks, now);
 
-        updateNotificationsAndNotifyCloud(context, taskKeys, now, newParentTask.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, newParentTask.getRemoteNullableProject());
 
         save(context, dataId);
     }
@@ -1505,18 +1484,14 @@ public class DomainFactory {
 
         task.setName(name, note);
 
-        List<TaskKey> taskKeys = new ArrayList<>();
-
         TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
-        if (taskHierarchy != null) {
+        if (taskHierarchy != null)
             taskHierarchy.setEndExactTimeStamp(now);
-            taskKeys.add(taskHierarchy.getParentTaskKey());
-        }
 
         Stream.of(task.getCurrentSchedules(now))
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
-        updateNotificationsAndNotifyCloud(context, taskKeys, now, task.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
         save(context, dataId);
 
@@ -1524,8 +1499,8 @@ public class DomainFactory {
     }
 
     @NonNull
-    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
-        updateNotifications(context, silent, registering, taskKeys, now, new ArrayList<>());
+    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, boolean silent) {
+        updateNotifications(context, silent, now, new ArrayList<>());
 
         Irrelevant irrelevant = setIrrelevant(now);
 
@@ -1537,13 +1512,13 @@ public class DomainFactory {
         return irrelevant;
     }
 
-    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys) {
+    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        updateNotificationsTick(context, now, silent, registering, taskKeys);
+        updateNotificationsTick(context, now, silent);
     }
 
     // internal
@@ -1799,7 +1774,7 @@ public class DomainFactory {
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
 
-        updateNotifications(context, true, false, new ArrayList<>(), now, Stream.of(localToRemoteConversion.mLocalTasks.values())
+        updateNotifications(context, true, now, Stream.of(localToRemoteConversion.mLocalTasks.values())
                 .map(pair -> pair.first.getTaskKey())
                 .collect(Collectors.toList()));
 
@@ -2035,7 +2010,7 @@ public class DomainFactory {
 
         instance.setDone(done, now);
 
-        updateNotificationsAndNotifyCloud(context, new ArrayList<>(), now, instance.getRemoteNullableProject());
+        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
 
         save(context, dataId);
 
@@ -2127,23 +2102,23 @@ public class DomainFactory {
         return new Irrelevant(irrelevantCustomTimes, irrelevantTasks, irrelevantExistingInstances);
     }
 
-    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @Nullable RemoteProject remoteProject) {
+    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull ExactTimeStamp now, @Nullable RemoteProject remoteProject) {
         Set<RemoteProject> remoteProjects = new HashSet<>();
         if (remoteProject != null)
             remoteProjects.add(remoteProject);
 
-        updateNotificationsAndNotifyCloud(context, taskKeys, now, remoteProjects);
+        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
     }
 
-    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull Set<RemoteProject> remoteProjects) {
-        updateNotifications(context, taskKeys, now);
+    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull Set<RemoteProject> remoteProjects) {
+        updateNotifications(context, now);
 
         if (!remoteProjects.isEmpty())
             new BackendNotifier(remoteProjects);
     }
 
-    private void updateNotifications(@NonNull Context context, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now) {
-        updateNotifications(context, true, false, taskKeys, now, new ArrayList<>());
+    private void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {
+        updateNotifications(context, true, now, new ArrayList<>());
     }
 
     @NonNull
@@ -2156,7 +2131,7 @@ public class DomainFactory {
         return taskKeys;
     }
 
-    private void updateNotifications(@NonNull Context context, boolean silent, boolean registering, @NonNull List<TaskKey> taskKeys, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
+    private void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
         if (!silent) {
             SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
             Assert.assertTrue(sharedPreferences != null);
@@ -2244,25 +2219,14 @@ public class DomainFactory {
             }
         }
 
-        if (registering) {
-            Assert.assertTrue(silent);
-
-            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
-            } else { // show instances
-                for (Instance instance : notificationInstances.values()) {
-                    Assert.assertTrue(instance != null);
-
-                    NotificationWrapper.getInstance().notifyInstance(context, instance, true, now);
-                }
-            }
-        } else {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            Log.e("asdaf", "old algorithm");
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
-                    } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
-                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
+                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now, false);
+                    } else {
+                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, false);
                     }
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
@@ -2279,7 +2243,7 @@ public class DomainFactory {
                         }
                     }
 
-                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
+                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now, false);
                 }
             } else { // show instances
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
@@ -2288,7 +2252,7 @@ public class DomainFactory {
                     for (Instance instance : notificationInstances.values()) {
                         Assert.assertTrue(instance != null);
 
-                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
+                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, false);
                     }
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
@@ -2309,15 +2273,46 @@ public class DomainFactory {
                         Instance instance = notificationInstances.get(showInstanceKey);
                         Assert.assertTrue(instance != null);
 
-                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
+                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, false);
                     }
 
                     Stream.of(notificationInstances.values())
-                            .filter(instance -> updateInstance(taskKeys, instance, now))
                             .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                            .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now));
+                            .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, false));
                 }
             }
+        } else {
+            Log.e("asdaf", "new algorithm");
+            if (notificationInstances.isEmpty()) {
+                NotificationWrapper.getInstance().cancel(context, 0);
+            } else {
+                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, true);
+            }
+
+            for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                    Instance instance = getInstance(hideInstanceKey);
+
+                    NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                } else {
+                    Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
+
+                    int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
+
+                    NotificationWrapper.getInstance().cancel(context, notificationId);
+                }
+            }
+
+            for (InstanceKey showInstanceKey : showInstanceKeys) {
+                Instance instance = notificationInstances.get(showInstanceKey);
+                Assert.assertTrue(instance != null);
+
+                NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, true);
+            }
+
+            Stream.of(notificationInstances.values())
+                    .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
+                    .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, true));
         }
 
         Optional<TimeStamp> minInstancesTimeStamp = Stream.of(getExistingInstances())
@@ -2345,10 +2340,6 @@ public class DomainFactory {
 
             NotificationWrapper.getInstance().setAlarm(context, nextAlarm);
         }
-    }
-
-    private boolean updateInstance(@NonNull List<TaskKey> taskKeys, @NonNull Instance instance, @NonNull ExactTimeStamp now) {
-        return (taskKeys.contains(instance.getTaskKey()) || Stream.of(instance.getChildInstances(now)).anyMatch(childInstance -> taskKeys.contains(childInstance.getTaskKey())));
     }
 
     private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {
@@ -2607,27 +2598,19 @@ public class DomainFactory {
 
     public interface FirebaseListener {
         void onFirebaseResult(@NonNull DomainFactory domainFactory);
-
-        @NonNull
-        String getSource();
     }
 
     public static class TickData {
-        @NonNull
-        final FirebaseListener mFirebaseListener;
+        final boolean mSilent;
 
         @NonNull
-        final String mSource;
+        private final String mSource;
 
-        public TickData(@NonNull FirebaseListener firebaseListener, @NonNull String source) {
-            mFirebaseListener = firebaseListener;
+        public TickData(boolean silent, @NonNull String source) {
+            Assert.assertTrue(!TextUtils.isEmpty(source));
+
+            mSilent = silent;
             mSource = source;
-        }
-    }
-
-    private static class MultipleListenerException extends RuntimeException {
-        MultipleListenerException(@NonNull List<FirebaseListener> oldFirebaseListeners, @NonNull FirebaseListener newFirebaseListener) {
-            super("old sources: " + Stream.of(oldFirebaseListeners).map(FirebaseListener::getSource).collect(Collectors.joining(", ")) + "; new source: " + newFirebaseListener.getSource());
         }
     }
 }

@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.firebase.UserData;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
@@ -44,7 +43,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 domainFactory.setUserData(this, userData);
 
-                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(false, new ArrayList<>(), "MyFirebaseMessagingService"));
+                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(false, "MyFirebaseMessagingService"));
             }
         } else {
             MyCrashlytics.logException(new UnknownMessageException(data));

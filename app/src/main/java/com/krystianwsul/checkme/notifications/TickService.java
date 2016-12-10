@@ -19,6 +19,7 @@ import java.util.List;
 
 public class TickService extends IntentService {
     public static final int MAX_NOTIFICATIONS = 3;
+    public static final String GROUP_KEY = "group";
 
     private static final String SILENT_KEY = "silent";
     private static final String TASK_KEYS_KEY = "taskKeys";

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -2260,66 +2261,101 @@ public class DomainFactory {
             }
         }
 
-        if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-            if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
-                } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
-                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now);
-                }
-            } else { // instances shown
-                for (InstanceKey shownInstanceKey : shownInstanceKeys) {
-                    if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
-                        Instance shownInstance = getInstance(shownInstanceKey);
-
-                        NotificationWrapper.getInstance().cancel(context, shownInstance.getNotificationId());
-                    } else {
-                        Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
-
-                        int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
-
-                        NotificationWrapper.getInstance().cancel(context, notificationId);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            Log.e("asdaf", "old algorithm");
+            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
+                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
+                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now, false);
+                    } else if (Stream.of(notificationInstances.values()).anyMatch(instance -> updateInstance(taskKeys, instance, now))) {
+                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, false);
                     }
-                }
+                } else { // instances shown
+                    for (InstanceKey shownInstanceKey : shownInstanceKeys) {
+                        if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
+                            Instance shownInstance = getInstance(shownInstanceKey);
 
-                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now);
+                            NotificationWrapper.getInstance().cancel(context, shownInstance.getNotificationId());
+                        } else {
+                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
+
+                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
+
+                            NotificationWrapper.getInstance().cancel(context, notificationId);
+                        }
+                    }
+
+                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now, false);
+                }
+            } else { // show instances
+                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                    NotificationWrapper.getInstance().cancel(context, 0);
+
+                    for (Instance instance : notificationInstances.values()) {
+                        Assert.assertTrue(instance != null);
+
+                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, false);
+                    }
+                } else { // instances shown
+                    for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                        if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                            Instance instance = getInstance(hideInstanceKey);
+
+                            NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                        } else {
+                            Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
+
+                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
+
+                            NotificationWrapper.getInstance().cancel(context, notificationId);
+                        }
+                    }
+
+                    for (InstanceKey showInstanceKey : showInstanceKeys) {
+                        Instance instance = notificationInstances.get(showInstanceKey);
+                        Assert.assertTrue(instance != null);
+
+                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, false);
+                    }
+
+                    Stream.of(notificationInstances.values())
+                            .filter(instance -> updateInstance(taskKeys, instance, now)) // todo to chyba można usunąć
+                            .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
+                            .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, false));
+                }
             }
-        } else { // show instances
-            if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+        } else {
+            Log.e("asdaf", "new algorithm");
+            if (notificationInstances.isEmpty()) {
                 NotificationWrapper.getInstance().cancel(context, 0);
-
-                for (Instance instance : notificationInstances.values()) {
-                    Assert.assertTrue(instance != null);
-
-                    NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
-                }
-            } else { // instances shown
-                for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                    if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
-                        Instance instance = getInstance(hideInstanceKey);
-
-                        NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
-                    } else {
-                        Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
-
-                        int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
-
-                        NotificationWrapper.getInstance().cancel(context, notificationId);
-                    }
-                }
-
-                for (InstanceKey showInstanceKey : showInstanceKeys) {
-                    Instance instance = notificationInstances.get(showInstanceKey);
-                    Assert.assertTrue(instance != null);
-
-                    NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now);
-                }
-
-                Stream.of(notificationInstances.values())
-                        .filter(instance -> updateInstance(taskKeys, instance, now))
-                        .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                        .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now));
+            } else {
+                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, true);
             }
+
+            for (InstanceKey hideInstanceKey : hideInstanceKeys) {
+                if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                    Instance instance = getInstance(hideInstanceKey);
+
+                    NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                } else {
+                    Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
+
+                    int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
+
+                    NotificationWrapper.getInstance().cancel(context, notificationId);
+                }
+            }
+
+            for (InstanceKey showInstanceKey : showInstanceKeys) {
+                Instance instance = notificationInstances.get(showInstanceKey);
+                Assert.assertTrue(instance != null);
+
+                NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, true);
+            }
+
+            Stream.of(notificationInstances.values())
+                    .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
+                    .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, true));
         }
 
         Optional<TimeStamp> minInstancesTimeStamp = Stream.of(getExistingInstances())

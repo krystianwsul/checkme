@@ -263,15 +263,23 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         Fragment projectListFragment = fragmentManager.findFragmentById(R.id.main_project_frame);
         Fragment showCustomTimesFragment = fragmentManager.findFragmentById(R.id.main_custom_times_frame);
         Fragment debugFragment = fragmentManager.findFragmentById(R.id.main_debug_frame);
-        Assert.assertTrue((taskListFragment == null) == (showCustomTimesFragment == null));
-        Assert.assertTrue((taskListFragment == null) == (debugFragment == null));
-        if (taskListFragment == null)
+
+        if (taskListFragment == null) {
+            Assert.assertTrue(showCustomTimesFragment == null);
+            Assert.assertTrue(debugFragment == null);
+            Assert.assertTrue(projectListFragment == null);
+
             fragmentManager.beginTransaction()
                     .add(R.id.main_task_list_frame, TaskListFragment.getInstance())
                     .add(R.id.main_project_frame, ProjectListFragment.newInstance())
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
                     .add(R.id.main_debug_frame, DebugFragment.newInstance())
                     .commit();
+        } else {
+            Assert.assertTrue(showCustomTimesFragment != null);
+            Assert.assertTrue(debugFragment != null);
+            Assert.assertTrue(projectListFragment != null);
+        }
 
         mFriendListFragment = (FriendListFragment) fragmentManager.findFragmentById(R.id.main_friend_list_fragment);
         Assert.assertTrue(mFriendListFragment != null);
@@ -408,6 +416,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         Assert.assertTrue(headerView != null);
 
         headerView.setOnLongClickListener(v -> {
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_projects).setVisible(true);
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_debug).setVisible(true);
             return true;
         });

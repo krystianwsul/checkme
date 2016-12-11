@@ -8,6 +8,7 @@ import android.util.Log;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.json.CustomTimeJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.ProjectJson;
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
@@ -26,6 +27,9 @@ public class RemoteProjectRecord extends RootRemoteRecord {
 
     @NonNull
     private final Map<String, RemoteTaskHierarchyRecord> mRemoteTaskHierarchyRecords = new HashMap<>();
+
+    @NonNull
+    private final Map<String, NewRemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
 
     RemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(id, jsonWrapper);
@@ -59,6 +63,16 @@ public class RemoteProjectRecord extends RootRemoteRecord {
 
             mRemoteTaskHierarchyRecords.put(id, new RemoteTaskHierarchyRecord(id, this, taskHierarchyJson));
         }
+
+        for (Map.Entry<String, CustomTimeJson> entry : getProjectJson().getCustomTimes().entrySet()) {
+            String id = entry.getKey();
+            Assert.assertTrue(!TextUtils.isEmpty(id));
+
+            CustomTimeJson customTimeJson = entry.getValue();
+            Assert.assertTrue(customTimeJson != null);
+
+            mRemoteCustomTimeRecords.put(id, new NewRemoteCustomTimeRecord(id, this, customTimeJson));
+        }
     }
 
     @NonNull
@@ -74,6 +88,9 @@ public class RemoteProjectRecord extends RootRemoteRecord {
 
         projectJson.setTaskHierarchies(Stream.of(mRemoteTaskHierarchyRecords.values())
                 .collect(Collectors.toMap(RemoteTaskHierarchyRecord::getId, RemoteTaskHierarchyRecord::getCreateObject)));
+
+        projectJson.setCustomTimes(Stream.of(mRemoteCustomTimeRecords.values())
+                .collect(Collectors.toMap(NewRemoteCustomTimeRecord::getId, NewRemoteCustomTimeRecord::getCreateObject)));
 
         return jsonWrapper;
     }
@@ -108,6 +125,11 @@ public class RemoteProjectRecord extends RootRemoteRecord {
     @NonNull
     public Map<String, RemoteTaskHierarchyRecord> getRemoteTaskHierarchyRecords() {
         return mRemoteTaskHierarchyRecords;
+    }
+
+    @NonNull
+    public Map<String, NewRemoteCustomTimeRecord> getRemoteCustomTimeRecords() {
+        return mRemoteCustomTimeRecords;
     }
 
     public void setEndTime(long endTime) {
@@ -164,6 +186,9 @@ public class RemoteProjectRecord extends RootRemoteRecord {
 
             for (RemoteTaskHierarchyRecord remoteTaskHierarchyRecord : mRemoteTaskHierarchyRecords.values())
                 remoteTaskHierarchyRecord.getValues(values);
+
+            for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values())
+                remoteCustomTimeRecord.getValues(values);
         }
     }
 
@@ -183,5 +208,14 @@ public class RemoteProjectRecord extends RootRemoteRecord {
 
         mRemoteTaskHierarchyRecords.put(remoteTaskHierarchyRecord.getId(), remoteTaskHierarchyRecord);
         return remoteTaskHierarchyRecord;
+    }
+
+    @NonNull
+    public NewRemoteCustomTimeRecord newRemoteCustomTimeRecord(@NonNull CustomTimeJson customTimeJson) {
+        NewRemoteCustomTimeRecord remoteCustomTimeRecord = new NewRemoteCustomTimeRecord(this, customTimeJson);
+        Assert.assertTrue(!mRemoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.getId()));
+
+        mRemoteCustomTimeRecords.put(remoteCustomTimeRecord.getId(), remoteCustomTimeRecord);
+        return remoteCustomTimeRecord;
     }
 }

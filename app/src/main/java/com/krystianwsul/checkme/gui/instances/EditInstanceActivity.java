@@ -139,7 +139,7 @@ public class EditInstanceActivity extends AbstractActivity implements LoaderMana
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceAddHourActivity(this, mData.DataId, mData.InstanceKey);
+                DomainFactory.getDomainFactory(this).setInstanceAddHourActivity(this, mData.DataId, mData.InstanceKey);
 
                 finish();
             case R.id.action_edit_instance_save:
@@ -151,7 +151,7 @@ public class EditInstanceActivity extends AbstractActivity implements LoaderMana
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory(EditInstanceActivity.this).setInstanceDateTime(this, mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
+                DomainFactory.getDomainFactory(this).setInstanceDateTime(this, mData.DataId, mData.InstanceKey, mDate, mTimePairPersist.getTimePair());
 
                 finish();
                 break;

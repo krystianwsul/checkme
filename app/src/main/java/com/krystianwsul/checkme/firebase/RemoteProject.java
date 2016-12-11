@@ -8,12 +8,14 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Schedule;
+import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
+import com.krystianwsul.checkme.firebase.records.NewRemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
@@ -47,6 +49,9 @@ public class RemoteProject {
     @NonNull
     private final TaskHierarchyContainer<String, RemoteTaskHierarchy> mRemoteTaskHierarchies = new TaskHierarchyContainer<>();
 
+    @NonNull
+    private final Map<String, NewRemoteCustomTime> mRemoteCustomTimes = new HashMap<>();
+
     RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord) {
         mDomainFactory = domainFactory;
         mRemoteProjectRecord = remoteProjectRecord;
@@ -58,6 +63,23 @@ public class RemoteProject {
         Stream.of(mRemoteProjectRecord.getRemoteTaskHierarchyRecords().values())
                 .map(remoteTaskHierarchyRecord -> new RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord))
                 .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
+
+        for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteProjectRecord.getRemoteCustomTimeRecords().values()) {
+            Assert.assertTrue(remoteCustomTimeRecord != null);
+
+            if (remoteCustomTimeRecord.getOwnerId().equals(domainFactory.getLocalFactory().getUuid()) && domainFactory.getLocalFactory().hasLocalCustomTime(remoteCustomTimeRecord.getLocalId())) {
+                LocalCustomTime localCustomTime = domainFactory.getLocalFactory().getLocalCustomTime(remoteCustomTimeRecord.getLocalId());
+
+                localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord);
+            } else {
+                NewRemoteCustomTime remoteCustomTime = new NewRemoteCustomTime(domainFactory, this, remoteCustomTimeRecord);
+
+                Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
+                Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
+
+                mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId, remoteCustomTime);
+            }
+        }
     }
 
     @NonNull

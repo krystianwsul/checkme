@@ -303,6 +303,7 @@ public class LocalCustomTime implements CustomTime {
 
     public void addRemoteCustomTimeRecord(@NonNull NewRemoteCustomTimeRecord remoteCustomTimeRecord) {
         Assert.assertTrue(remoteCustomTimeRecord.getLocalId() == mCustomTimeRecord.getId());
+        Assert.assertTrue(!mRemoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.getProjectId()));
 
         mRemoteCustomTimeRecords.put(remoteCustomTimeRecord.getProjectId(), remoteCustomTimeRecord);
 

@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -99,6 +100,25 @@ public class DailySchedule extends RepeatingSchedule {
         }
     }
 
+    @NonNull
+    private TimePair getTimePair() {
+        CustomTimeKey customTimeKey = mDailyScheduleBridge.getCustomTimeKey();
+        Integer hour = mDailyScheduleBridge.getHour();
+        Integer minute = mDailyScheduleBridge.getMinute();
+
+        if (customTimeKey != null) {
+            Assert.assertTrue(hour == null);
+            Assert.assertTrue(minute == null);
+
+            return new TimePair(customTimeKey);
+        } else {
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+
+            return new TimePair(new HourMinute(hour, minute));
+        }
+    }
+
     @Override
     public CustomTimeKey getCustomTimeKey() {
         return mDailyScheduleBridge.getCustomTimeKey();
@@ -122,6 +142,6 @@ public class DailySchedule extends RepeatingSchedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.DailyScheduleData(getTime().getTimePair());
+        return new CreateTaskLoader.DailyScheduleData(getTimePair());
     }
 }

@@ -796,9 +796,10 @@ public class DomainFactory {
 
                                 scheduleDatas.add(singleSchedule.getScheduleData());
 
-                                CustomTime weeklyCustomTime = singleSchedule.getTime().getPair().first;
-                                if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
+                                CustomTimeKey customTimeKey = singleSchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+
                                 break;
                             }
                             case DAILY: {
@@ -806,9 +807,9 @@ public class DomainFactory {
 
                                 scheduleDatas.add(dailySchedule.getScheduleData());
 
-                                CustomTime dailyCustomTime = dailySchedule.getTime().getPair().first;
-                                if (dailyCustomTime != null)
-                                    customTimes.put(dailyCustomTime.getCustomTimeKey(), dailyCustomTime);
+                                CustomTimeKey customTimeKey = dailySchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
 
                                 break;
                             }
@@ -817,9 +818,9 @@ public class DomainFactory {
 
                                 scheduleDatas.add(weeklySchedule.getScheduleData());
 
-                                CustomTime weeklyCustomTime = weeklySchedule.getTime().getPair().first;
-                                if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
+                                CustomTimeKey customTimeKey = weeklySchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
 
                                 break;
                             }
@@ -828,9 +829,9 @@ public class DomainFactory {
 
                                 scheduleDatas.add(monthlyDaySchedule.getScheduleData());
 
-                                CustomTime weeklyCustomTime = monthlyDaySchedule.getTime().getPair().first;
-                                if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
+                                CustomTimeKey customTimeKey = monthlyDaySchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
 
                                 break;
                             }
@@ -1638,6 +1639,17 @@ public class DomainFactory {
     }
 
     @NonNull
+    public Instance getInstance(@NonNull InstanceKey instanceKey) {
+        Instance instance = getExistingInstanceIfPresent(instanceKey);
+        if (instance != null)
+            return instance;
+
+        DateTime dateTime = getDateTime(instanceKey.mScheduleKey.ScheduleDate, instanceKey.mScheduleKey.ScheduleTimePair);
+
+        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
+    }
+
+    @NonNull
     List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
@@ -1705,17 +1717,6 @@ public class DomainFactory {
     @NonNull
     private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
         return new DateTime(date, getTime(timePair));
-    }
-
-    @NonNull
-    private Instance getInstance(@NonNull InstanceKey instanceKey) {
-        Instance instance = getExistingInstanceIfPresent(instanceKey);
-        if (instance != null)
-            return instance;
-
-        DateTime dateTime = getDateTime(instanceKey.mScheduleKey.ScheduleDate, instanceKey.mScheduleKey.ScheduleTimePair);
-
-        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
     }
 
     @Nullable

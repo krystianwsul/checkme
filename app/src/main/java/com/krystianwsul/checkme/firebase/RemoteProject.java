@@ -278,4 +278,19 @@ public class RemoteProject {
 
         return mRemoteTaskHierarchies.getByParentTaskKey(parentTaskKey);
     }
+
+    @NonNull
+    NewRemoteCustomTime getRemoteCustomTime(@NonNull String remoteCustomTimeId) {
+        Assert.assertTrue(mRemoteCustomTimes.containsKey(remoteCustomTimeId));
+
+        NewRemoteCustomTime remoteCustomTime = mRemoteCustomTimes.get(remoteCustomTimeId);
+        Assert.assertTrue(remoteCustomTime != null);
+
+        return remoteCustomTime;
+    }
+
+    @NonNull
+    Collection<NewRemoteCustomTime> getRemoteCustomTimes() {
+        return mRemoteCustomTimes.values();
+    }
 }

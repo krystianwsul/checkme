@@ -203,8 +203,30 @@ public class RemoteFactory {
     }
 
     @NonNull
+    public NewRemoteCustomTime getRemoteCustomTime(@NonNull String remoteProjectId, @NonNull String remoteCustomTimeId) {
+        Assert.assertTrue(!TextUtils.isEmpty(remoteProjectId));
+        Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTimeId));
+
+        Assert.assertTrue(mRemoteProjects.containsKey(remoteProjectId));
+
+        RemoteProject remoteProject = mRemoteProjects.get(remoteProjectId);
+        Assert.assertTrue(remoteProject != null);
+
+        return remoteProject.getRemoteCustomTime(remoteCustomTimeId);
+    }
+
+    @NonNull
     public Collection<RemoteCustomTime> getRemoteCustomTimes() {
         return mRemoteCustomTimes.values();
+    }
+
+    @NonNull
+    public List<NewRemoteCustomTime> getNewRemoteCustomTimes() {
+        return Stream.of(mRemoteProjects.values())
+                .map(RemoteProject::getRemoteCustomTimes)
+                .map(Stream::of)
+                .flatMap(stream -> stream)
+                .collect(Collectors.toList());
     }
 
     public int getInstanceCount() {

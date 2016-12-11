@@ -7,8 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.krystianwsul.checkme.MyCrashlytics;
-
 import junit.framework.Assert;
 
 import java.util.ArrayList;
@@ -43,7 +41,7 @@ public class InstanceShownRecord extends Record {
     private boolean mNotified;
     private boolean mNotificationShown;
 
-    @Nullable // todo not null
+    @NonNull
     private String mProjectId;
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
@@ -58,7 +56,7 @@ public class InstanceShownRecord extends Record {
                 + COLUMN_SCHEDULE_MINUTE + " INTEGER, "
                 + COLUMN_NOTIFIED + " INTEGER NOT NULL DEFAULT 0, "
                 + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
-                + COLUMN_PROJECT_ID + " TEXT" // todo not null
+                + COLUMN_PROJECT_ID + " TEXT NOT NULL"
                 + ");");
     }
 
@@ -92,7 +90,7 @@ public class InstanceShownRecord extends Record {
         Integer scheduleMinute = (cursor.isNull(7) ? null : cursor.getInt(7));
         boolean notified = (cursor.getInt(8) == 1);
         boolean notificationShown = (cursor.getInt(9) == 1);
-        String projectId = (cursor.isNull(10) ? null : cursor.getString(10)); // todo not null
+        String projectId = cursor.getString(10);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
@@ -104,11 +102,12 @@ public class InstanceShownRecord extends Record {
         return getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID);
     }
 
-    InstanceShownRecord(boolean created, int id, @NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, boolean notified, boolean notificationShown, @Nullable String projectId) { // todo not null
+    InstanceShownRecord(boolean created, int id, @NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, boolean notified, boolean notificationShown, @NonNull String projectId) {
         super(created);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
         Assert.assertTrue((scheduleHour == null) != (scheduleCustomTimeId == null));
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
 
         mId = id;
         mTaskId = taskId;
@@ -126,13 +125,6 @@ public class InstanceShownRecord extends Record {
         mNotificationShown = notificationShown;
 
         mProjectId = projectId;
-
-        if (TextUtils.isEmpty(mProjectId))
-            MyCrashlytics.logException(new NullProjectIdException());
-    }
-
-    private static class NullProjectIdException extends Exception {
-
     }
 
     public int getId() {
@@ -179,7 +171,7 @@ public class InstanceShownRecord extends Record {
         return mNotificationShown;
     }
 
-    @Nullable
+    @NonNull
     public String getProjectId() {
         return mProjectId;
     }

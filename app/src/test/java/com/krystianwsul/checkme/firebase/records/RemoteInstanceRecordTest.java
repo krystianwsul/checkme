@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.records;
 
 import android.text.TextUtils;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -13,6 +14,8 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -24,6 +27,9 @@ import static org.mockito.Matchers.any;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TextUtils.class})
 public class RemoteInstanceRecordTest {
+    @Mock
+    private DomainFactory mDomainFactory;
+
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(TextUtils.class);
@@ -35,6 +41,24 @@ public class RemoteInstanceRecordTest {
                 return !(a != null && a.length() > 0);
             }
         });
+
+        Mockito.when(mDomainFactory.getCustomTimeKey(any(String.class))).thenAnswer(new Answer<CustomTimeKey>() {
+            @Override
+            public CustomTimeKey answer(InvocationOnMock invocation) {
+                String remoteCustomTimeId = (String) invocation.getArguments()[0];
+
+                return new CustomTimeKey(remoteCustomTimeId);
+            }
+        });
+
+        Mockito.when(mDomainFactory.getRemoteCustomTimeId(any(CustomTimeKey.class))).thenAnswer(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) {
+                CustomTimeKey customTimeKey = (CustomTimeKey) invocation.getArguments()[0];
+
+                return customTimeKey.mRemoteCustomTimeId;
+            }
+        });
     }
 
     @Test
@@ -43,7 +67,7 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-26-9-47";
 
-        Assert.assertTrue(RemoteInstanceRecord.scheduleKeyToString(scheduleKey).equals(key));
+        Assert.assertTrue(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, scheduleKey).equals(key));
     }
 
     @Test
@@ -52,7 +76,9 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-27--KX_IHXkMcoAqwTBfN_k";
 
-        Assert.assertTrue(RemoteInstanceRecord.scheduleKeyToString(scheduleKey).equals(key));
+        String otherKey = RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, scheduleKey);
+
+        Assert.assertTrue(otherKey.equals(key));
     }
 
     @Test
@@ -61,7 +87,7 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-26-9-47";
 
-        Assert.assertTrue(RemoteInstanceRecord.stringToScheduleKey(key).equals(scheduleKey));
+        Assert.assertTrue(RemoteInstanceRecord.stringToScheduleKey(mDomainFactory, key).equals(scheduleKey));
     }
 
     @Test
@@ -70,6 +96,6 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-27--KX_IHXkMcoAqwTBfN_k";
 
-        Assert.assertTrue(RemoteInstanceRecord.stringToScheduleKey(key).equals(scheduleKey));
+        Assert.assertTrue(RemoteInstanceRecord.stringToScheduleKey(mDomainFactory, key).equals(scheduleKey));
     }
 }

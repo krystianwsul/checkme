@@ -796,9 +796,10 @@ public class DomainFactory {
 
                                 scheduleDatas.add(singleSchedule.getScheduleData());
 
-                                CustomTime weeklyCustomTime = singleSchedule.getTime().getPair().first;
-                                if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
+                                CustomTimeKey customTimeKey = singleSchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+
                                 break;
                             }
                             case DAILY: {
@@ -806,9 +807,9 @@ public class DomainFactory {
 
                                 scheduleDatas.add(dailySchedule.getScheduleData());
 
-                                CustomTime dailyCustomTime = dailySchedule.getTime().getPair().first;
-                                if (dailyCustomTime != null)
-                                    customTimes.put(dailyCustomTime.getCustomTimeKey(), dailyCustomTime);
+                                CustomTimeKey customTimeKey = dailySchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
 
                                 break;
                             }
@@ -817,9 +818,9 @@ public class DomainFactory {
 
                                 scheduleDatas.add(weeklySchedule.getScheduleData());
 
-                                CustomTime weeklyCustomTime = weeklySchedule.getTime().getPair().first;
-                                if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
+                                CustomTimeKey customTimeKey = weeklySchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
 
                                 break;
                             }
@@ -828,9 +829,9 @@ public class DomainFactory {
 
                                 scheduleDatas.add(monthlyDaySchedule.getScheduleData());
 
-                                CustomTime weeklyCustomTime = monthlyDaySchedule.getTime().getPair().first;
-                                if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
+                                CustomTimeKey customTimeKey = monthlyDaySchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
 
                                 break;
                             }
@@ -1562,8 +1563,6 @@ public class DomainFactory {
 
     @NonNull
     public String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey) {
-        // todo I'm not sure why this would ever get called by something that doesn't have a customTimeKey
-        // already guaranteed to be remote
         if (!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId)) {
             Assert.assertTrue(customTimeKey.mLocalCustomTimeId == null);
 
@@ -1571,18 +1570,12 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
 
-            MyCrashlytics.logException(new RemoteCustomTimeException());
-
             LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(customTimeKey.mLocalCustomTimeId);
 
             Assert.assertTrue(localCustomTime.hasRemoteRecord());
 
             return localCustomTime.getRemoteId();
         }
-    }
-
-    private static class RemoteCustomTimeException extends Exception {
-
     }
 
     @NonNull
@@ -1635,6 +1628,17 @@ public class DomainFactory {
         } else {
             return generateInstance(taskKey, scheduleDateTime);
         }
+    }
+
+    @NonNull
+    public Instance getInstance(@NonNull InstanceKey instanceKey) {
+        Instance instance = getExistingInstanceIfPresent(instanceKey);
+        if (instance != null)
+            return instance;
+
+        DateTime dateTime = getDateTime(instanceKey.mScheduleKey.ScheduleDate, instanceKey.mScheduleKey.ScheduleTimePair);
+
+        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
     }
 
     @NonNull
@@ -1705,17 +1709,6 @@ public class DomainFactory {
     @NonNull
     private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
         return new DateTime(date, getTime(timePair));
-    }
-
-    @NonNull
-    private Instance getInstance(@NonNull InstanceKey instanceKey) {
-        Instance instance = getExistingInstanceIfPresent(instanceKey);
-        if (instance != null)
-            return instance;
-
-        DateTime dateTime = getDateTime(instanceKey.mScheduleKey.ScheduleDate, instanceKey.mScheduleKey.ScheduleTimePair);
-
-        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
     }
 
     @Nullable
@@ -2388,8 +2381,7 @@ public class DomainFactory {
             if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
                 Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
 
-                String customTimeId = scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId;
-                Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
+                String customTimeId = getRemoteCustomTimeId(scheduleKey.ScheduleTimePair.mCustomTimeKey);
 
                 matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
                         .collect(Collectors.toList());

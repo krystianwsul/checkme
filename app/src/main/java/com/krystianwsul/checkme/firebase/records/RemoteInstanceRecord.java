@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
@@ -21,6 +22,9 @@ public class RemoteInstanceRecord extends RemoteRecord {
     private static final Pattern sCustomTimePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$");
 
     @NonNull
+    private final DomainFactory mDomainFactory;
+
+    @NonNull
     private final RemoteTaskRecord mRemoteTaskRecord;
 
     @NonNull
@@ -29,9 +33,10 @@ public class RemoteInstanceRecord extends RemoteRecord {
     @NonNull
     private final ScheduleKey mScheduleKey;
 
-    RemoteInstanceRecord(boolean create, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull InstanceJson instanceJson, @NonNull ScheduleKey scheduleKey) {
+    RemoteInstanceRecord(boolean create, @NonNull DomainFactory domainFactory, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull InstanceJson instanceJson, @NonNull ScheduleKey scheduleKey) {
         super(create);
 
+        mDomainFactory = domainFactory;
         mRemoteTaskRecord = remoteTaskRecord;
         mInstanceJson = instanceJson;
         mScheduleKey = scheduleKey;
@@ -40,29 +45,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
     @NonNull
     @Override
     protected String getKey() {
-        return mRemoteTaskRecord.getKey() + "/instances/" + scheduleKeyToString(getScheduleKey());
-    }
-
-    @NonNull
-    private static ScheduleKey getScheduleKey(@NonNull RemoteInstanceRecord remoteInstanceRecord) {
-        Date scheduleDate = new Date(remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay());
-
-        String scheduleCustomTimeId = remoteInstanceRecord.getScheduleCustomTimeId();
-
-        TimePair scheduleTimePair;
-        if (!TextUtils.isEmpty(scheduleCustomTimeId)) {
-            Assert.assertTrue(remoteInstanceRecord.getScheduleHour() == null);
-            Assert.assertTrue(remoteInstanceRecord.getScheduleMinute() == null);
-
-            scheduleTimePair = new TimePair(new CustomTimeKey(scheduleCustomTimeId));
-        } else {
-            Assert.assertTrue(remoteInstanceRecord.getScheduleHour() != null);
-            Assert.assertTrue(remoteInstanceRecord.getScheduleMinute() != null);
-
-            scheduleTimePair = new TimePair(new HourMinute(remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute()));
-        }
-
-        return new ScheduleKey(scheduleDate, scheduleTimePair);
+        return mRemoteTaskRecord.getKey() + "/instances/" + scheduleKeyToString(mDomainFactory, getScheduleKey());
     }
 
     @NonNull
@@ -71,13 +54,12 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     @NonNull
-    public static String scheduleKeyToString(@NonNull ScheduleKey scheduleKey) {
+    public static String scheduleKeyToString(@NonNull DomainFactory domainFactory, @NonNull ScheduleKey scheduleKey) {
         String key = scheduleKey.ScheduleDate.getYear() + "-" + scheduleKey.ScheduleDate.getMonth() + "-" + scheduleKey.ScheduleDate.getDay();
         if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
             Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
-            Assert.assertTrue(!TextUtils.isEmpty(scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId));
 
-            key += "-" + scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId;
+            key += "-" + domainFactory.getRemoteCustomTimeId(scheduleKey.ScheduleTimePair.mCustomTimeKey);
         } else {
             Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute != null);
 
@@ -88,7 +70,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     @NonNull
-    static ScheduleKey stringToScheduleKey(@NonNull String key) {
+    static ScheduleKey stringToScheduleKey(@NonNull DomainFactory domainFactory, @NonNull String key) {
         Matcher hourMinuteMatcher = sHourMinutePattern.matcher(key);
 
         if (hourMinuteMatcher.matches()) {
@@ -110,7 +92,9 @@ public class RemoteInstanceRecord extends RemoteRecord {
             String customTimeId = customTimeMatcher.group(4);
             Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
 
-            return new ScheduleKey(new Date(year, month, day), new TimePair(new CustomTimeKey(customTimeId)));
+            CustomTimeKey customTimeKey = domainFactory.getCustomTimeKey(customTimeId);
+
+            return new ScheduleKey(new Date(year, month, day), new TimePair(customTimeKey));
         }
     }
 
@@ -145,9 +129,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
     public String getScheduleCustomTimeId() {
         CustomTimeKey customTimeKey = mScheduleKey.ScheduleTimePair.mCustomTimeKey;
         if (customTimeKey != null) {
-            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
-
-            return customTimeKey.mRemoteCustomTimeId;
+            return mDomainFactory.getRemoteCustomTimeId(customTimeKey);
         } else {
             return null;
         }

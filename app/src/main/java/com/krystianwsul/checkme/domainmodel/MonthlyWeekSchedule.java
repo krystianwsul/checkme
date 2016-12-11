@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -113,6 +114,25 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
         }
     }
 
+    @NonNull
+    private TimePair getTimePair() {
+        CustomTimeKey customTimeKey = mMonthlyWeekScheduleBridge.getCustomTimeKey();
+        Integer hour = mMonthlyWeekScheduleBridge.getHour();
+        Integer minute = mMonthlyWeekScheduleBridge.getMinute();
+
+        if (customTimeKey != null) {
+            Assert.assertTrue(hour == null);
+            Assert.assertTrue(minute == null);
+
+            return new TimePair(customTimeKey);
+        } else {
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+
+            return new TimePair(new HourMinute(hour, minute));
+        }
+    }
+
     public int getDayOfMonth() {
         return mMonthlyWeekScheduleBridge.getDayOfMonth();
     }
@@ -157,6 +177,6 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.MonthlyWeekScheduleData(getDayOfMonth(), getDayOfWeek(), getBeginningOfMonth(), getTime().getTimePair());
+        return new CreateTaskLoader.MonthlyWeekScheduleData(getDayOfMonth(), getDayOfWeek(), getBeginningOfMonth(), getTimePair());
     }
 }

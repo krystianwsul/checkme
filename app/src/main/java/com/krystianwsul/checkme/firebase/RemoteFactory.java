@@ -54,7 +54,7 @@ public class RemoteFactory {
         mDomainFactory = domainFactory;
         mUserData = userData;
 
-        mRemoteManager = new RemoteManager(children);
+        mRemoteManager = new RemoteManager(domainFactory, children);
 
         mRemoteCustomTimes = new HashMap<>();
 
@@ -138,7 +138,7 @@ public class RemoteFactory {
         } else {
             ProjectJson projectJson = new ProjectJson(getProjectName(recordOf), now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>());
 
-            RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(new JsonWrapper(recordOf, projectJson));
+            RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
 
             RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord);
 
@@ -248,23 +248,10 @@ public class RemoteFactory {
 
     @Nullable
     private RemoteProject getRemoteProjectIfPresent(@NonNull TaskKey taskKey) {
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteProjectId));
         Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
 
-        if (TextUtils.isEmpty(taskKey.mRemoteProjectId)) { // todo project id
-            List<RemoteProject> matches = Stream.of(mRemoteProjects.values())
-                    .filter(remoteProject -> remoteProject.getTaskIds().contains(taskKey.mRemoteTaskId))
-                    .collect(Collectors.toList());
-
-            if (matches.isEmpty()) {
-                return null;
-            } else {
-                Assert.assertTrue(matches.size() == 1);
-
-                return matches.get(0);
-            }
-        } else {
-            return mRemoteProjects.get(taskKey.mRemoteProjectId);
-        }
+        return mRemoteProjects.get(taskKey.mRemoteProjectId);
     }
 
     @NonNull

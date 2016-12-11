@@ -265,7 +265,7 @@ public class RemoteTask extends Task {
 
         ScheduleKey scheduleKey = new ScheduleKey(scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
 
-        RemoteInstanceRecord remoteInstanceRecord = mRemoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey);
+        RemoteInstanceRecord remoteInstanceRecord = mRemoteTaskRecord.newRemoteInstanceRecord(mDomainFactory, instanceJson, scheduleKey);
 
         mExistingRemoteInstances.put(remoteInstance.getScheduleKey(), remoteInstance);
 

@@ -487,13 +487,7 @@ public class PersistenceManger {
 
     public void deleteInstanceShownRecords(@NonNull Set<TaskKey> taskKeys) {
         List<InstanceShownRecord> remove = Stream.of(mInstanceShownRecords)
-                .filterNot(instanceShownRecord -> {
-                    if (TextUtils.isEmpty(instanceShownRecord.getProjectId())) { // todo project id
-                        return Stream.of(taskKeys).anyMatch(taskKey -> instanceShownRecord.getTaskId().equals(taskKey.mRemoteTaskId));
-                    } else {
-                        return Stream.of(taskKeys).anyMatch(taskKey -> (instanceShownRecord.getProjectId().equals(taskKey.mRemoteProjectId) && instanceShownRecord.getTaskId().equals(taskKey.mRemoteTaskId)));
-                    }
-                })
+                .filterNot(instanceShownRecord -> Stream.of(taskKeys).anyMatch(taskKey -> (instanceShownRecord.getProjectId().equals(taskKey.mRemoteProjectId) && instanceShownRecord.getTaskId().equals(taskKey.mRemoteTaskId))))
                 .collect(Collectors.toList());
 
         Stream.of(remove)

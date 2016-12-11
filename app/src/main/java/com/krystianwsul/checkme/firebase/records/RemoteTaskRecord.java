@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
@@ -20,6 +21,9 @@ import java.util.Map;
 
 public class RemoteTaskRecord extends RemoteRecord {
     public static final String TASKS = "tasks";
+
+    @NonNull
+    private final DomainFactory mDomainFactory;
 
     @NonNull
     private final String mId;
@@ -48,9 +52,10 @@ public class RemoteTaskRecord extends RemoteRecord {
     @NonNull
     public final Map<String, RemoteMonthlyWeekScheduleRecord> mRemoteMonthlyWeekScheduleRecords = new HashMap<>();
 
-    RemoteTaskRecord(@NonNull String id, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskJson taskJson) {
+    RemoteTaskRecord(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskJson taskJson) {
         super(false);
 
+        mDomainFactory = domainFactory;
         mId = id;
         mRemoteProjectRecord = remoteProjectRecord;
         mTaskJson = taskJson;
@@ -58,9 +63,10 @@ public class RemoteTaskRecord extends RemoteRecord {
         initialize();
     }
 
-    RemoteTaskRecord(@NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskJson taskJson) {
+    RemoteTaskRecord(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskJson taskJson) {
         super(true);
 
+        mDomainFactory = domainFactory;
         mId = DatabaseWrapper.getTaskRecordId(remoteProjectRecord.getId());
         mRemoteProjectRecord = remoteProjectRecord;
         mTaskJson = taskJson;
@@ -73,12 +79,12 @@ public class RemoteTaskRecord extends RemoteRecord {
             String key = entry.getKey();
             Assert.assertTrue(!TextUtils.isEmpty(key));
 
-            ScheduleKey scheduleKey = RemoteInstanceRecord.stringToScheduleKey(key);
+            ScheduleKey scheduleKey = RemoteInstanceRecord.stringToScheduleKey(mDomainFactory, key);
 
             InstanceJson instanceJson = entry.getValue();
             Assert.assertTrue(instanceJson != null);
 
-            RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(false, this, instanceJson, scheduleKey);
+            RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(false, mDomainFactory, this, instanceJson, scheduleKey);
 
             mRemoteInstanceRecords.put(scheduleKey, remoteInstanceRecord);
         }
@@ -125,7 +131,7 @@ public class RemoteTaskRecord extends RemoteRecord {
     protected TaskJson getCreateObject() {
         if (!mCreate) { // because of duplicate functionality when converting local task
             mTaskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet())
-                    .collect(Collectors.toMap(entry -> RemoteInstanceRecord.scheduleKeyToString(entry.getKey()), entry -> entry.getValue().getCreateObject())));
+                    .collect(Collectors.toMap(entry -> RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, entry.getKey()), entry -> entry.getValue().getCreateObject())));
         }
 
         Map<String, ScheduleWrapper> scheduleWrappers = new HashMap<>();
@@ -312,8 +318,8 @@ public class RemoteTaskRecord extends RemoteRecord {
     }
 
     @NonNull
-    public RemoteInstanceRecord newRemoteInstanceRecord(@NonNull InstanceJson instanceJson, @NonNull ScheduleKey scheduleKey) {
-        RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(true, this, instanceJson, scheduleKey);
+    public RemoteInstanceRecord newRemoteInstanceRecord(@NonNull DomainFactory domainFactory, @NonNull InstanceJson instanceJson, @NonNull ScheduleKey scheduleKey) {
+        RemoteInstanceRecord remoteInstanceRecord = new RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey);
         Assert.assertTrue(!mRemoteInstanceRecords.containsKey(remoteInstanceRecord.getScheduleKey()));
 
         mRemoteInstanceRecords.put(remoteInstanceRecord.getScheduleKey(), remoteInstanceRecord);

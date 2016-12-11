@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -98,6 +99,25 @@ public class WeeklySchedule extends RepeatingSchedule {
     }
 
     @NonNull
+    private TimePair getTimePair() {
+        CustomTimeKey customTimeKey = mWeeklyScheduleBridge.getCustomTimeKey();
+        Integer hour = mWeeklyScheduleBridge.getHour();
+        Integer minute = mWeeklyScheduleBridge.getMinute();
+
+        if (customTimeKey != null) {
+            Assert.assertTrue(hour == null);
+            Assert.assertTrue(minute == null);
+
+            return new TimePair(customTimeKey);
+        } else {
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+
+            return new TimePair(new HourMinute(hour, minute));
+        }
+    }
+
+    @NonNull
     public DayOfWeek getDayOfWeek() {
         DayOfWeek dayOfWeek = DayOfWeek.values()[mWeeklyScheduleBridge.getDayOfWeek()];
         Assert.assertTrue(dayOfWeek != null);
@@ -128,6 +148,6 @@ public class WeeklySchedule extends RepeatingSchedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.WeeklyScheduleData(getDayOfWeek(), getTime().getTimePair());
+        return new CreateTaskLoader.WeeklyScheduleData(getDayOfWeek(), getTimePair());
     }
 }

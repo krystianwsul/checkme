@@ -6,12 +6,14 @@ import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
+import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -43,7 +45,9 @@ public class SingleSchedule extends Schedule {
 
     @NonNull
     private Instance getInstance(@NonNull Task task) {
-        return mDomainFactory.getInstance(task.getTaskKey(), getDateTime());
+        InstanceKey instanceKey = new InstanceKey(task.getTaskKey(), getDate(), getTimePair());
+
+        return mDomainFactory.getInstance(instanceKey);
     }
 
     @Nullable
@@ -93,6 +97,25 @@ public class SingleSchedule extends Schedule {
     }
 
     @NonNull
+    private TimePair getTimePair() {
+        CustomTimeKey customTimeKey = mSingleScheduleBridge.getCustomTimeKey();
+        Integer hour = mSingleScheduleBridge.getHour();
+        Integer minute = mSingleScheduleBridge.getMinute();
+
+        if (customTimeKey != null) {
+            Assert.assertTrue(hour == null);
+            Assert.assertTrue(minute == null);
+
+            return new TimePair(customTimeKey);
+        } else {
+            Assert.assertTrue(hour != null);
+            Assert.assertTrue(minute != null);
+
+            return new TimePair(new HourMinute(hour, minute));
+        }
+    }
+
+    @NonNull
     public Date getDate() {
         return new Date(mSingleScheduleBridge.getYear(), mSingleScheduleBridge.getMonth(), mSingleScheduleBridge.getDay());
     }
@@ -133,6 +156,6 @@ public class SingleSchedule extends Schedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.SingleScheduleData(getDate(), getTime().getTimePair());
+        return new CreateTaskLoader.SingleScheduleData(getDate(), getTimePair());
     }
 }

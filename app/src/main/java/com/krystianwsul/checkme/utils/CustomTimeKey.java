@@ -22,7 +22,7 @@ public class CustomTimeKey implements Parcelable, Serializable {
         mRemoteCustomTimeId = null;
     }
 
-    public CustomTimeKey(@NonNull String remoteCustomTimeId) {
+    public CustomTimeKey(@NonNull String remoteCustomTimeId) { // only if local custom time doesn't exist
         Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTimeId));
 
         mLocalCustomTimeId = null;

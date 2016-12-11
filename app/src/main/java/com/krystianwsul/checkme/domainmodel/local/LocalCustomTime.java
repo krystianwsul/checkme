@@ -5,8 +5,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.records.NewRemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -16,6 +18,8 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -28,6 +32,9 @@ public class LocalCustomTime implements CustomTime {
 
     @Nullable
     private RemoteCustomTimeRecord mRemoteCustomTimeRecord;
+
+    @NonNull
+    private final Map<String, NewRemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
 
     LocalCustomTime(@NonNull DomainFactory domainFactory, @NonNull CustomTimeRecord customTimeRecord) {
         mDomainFactory = domainFactory;
@@ -46,6 +53,9 @@ public class LocalCustomTime implements CustomTime {
 
         if (mRemoteCustomTimeRecord != null)
             mRemoteCustomTimeRecord.setName(name);
+
+        for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values())
+            remoteCustomTimeRecord.setName(name);
     }
 
     @NonNull
@@ -90,6 +100,12 @@ public class LocalCustomTime implements CustomTime {
                     mRemoteCustomTimeRecord.setSundayHour(hourMinute.getHour());
                     mRemoteCustomTimeRecord.setSundayMinute(hourMinute.getMinute());
                 }
+
+                for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values()) {
+                    remoteCustomTimeRecord.setSundayHour(hourMinute.getHour());
+                    remoteCustomTimeRecord.setSundayMinute(hourMinute.getMinute());
+                }
+
                 break;
             case MONDAY:
                 mCustomTimeRecord.setMondayHour(hourMinute.getHour());
@@ -99,6 +115,12 @@ public class LocalCustomTime implements CustomTime {
                     mRemoteCustomTimeRecord.setMondayHour(hourMinute.getHour());
                     mRemoteCustomTimeRecord.setMondayMinute(hourMinute.getMinute());
                 }
+
+                for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values()) {
+                    remoteCustomTimeRecord.setMondayHour(hourMinute.getHour());
+                    remoteCustomTimeRecord.setMondayMinute(hourMinute.getMinute());
+                }
+
                 break;
             case TUESDAY:
                 mCustomTimeRecord.setTuesdayHour(hourMinute.getHour());
@@ -108,6 +130,12 @@ public class LocalCustomTime implements CustomTime {
                     mRemoteCustomTimeRecord.setTuesdayHour(hourMinute.getHour());
                     mRemoteCustomTimeRecord.setTuesdayMinute(hourMinute.getMinute());
                 }
+
+                for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values()) {
+                    remoteCustomTimeRecord.setTuesdayHour(hourMinute.getHour());
+                    remoteCustomTimeRecord.setTuesdayMinute(hourMinute.getMinute());
+                }
+
                 break;
             case WEDNESDAY:
                 mCustomTimeRecord.setWednesdayHour(hourMinute.getHour());
@@ -117,6 +145,12 @@ public class LocalCustomTime implements CustomTime {
                     mRemoteCustomTimeRecord.setWednesdayHour(hourMinute.getHour());
                     mRemoteCustomTimeRecord.setWednesdayMinute(hourMinute.getMinute());
                 }
+
+                for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values()) {
+                    remoteCustomTimeRecord.setWednesdayHour(hourMinute.getHour());
+                    remoteCustomTimeRecord.setWednesdayMinute(hourMinute.getMinute());
+                }
+
                 break;
             case THURSDAY:
                 mCustomTimeRecord.setThursdayHour(hourMinute.getHour());
@@ -126,6 +160,12 @@ public class LocalCustomTime implements CustomTime {
                     mRemoteCustomTimeRecord.setThursdayHour(hourMinute.getHour());
                     mRemoteCustomTimeRecord.setThursdayMinute(hourMinute.getMinute());
                 }
+
+                for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values()) {
+                    remoteCustomTimeRecord.setThursdayHour(hourMinute.getHour());
+                    remoteCustomTimeRecord.setThursdayMinute(hourMinute.getMinute());
+                }
+
                 break;
             case FRIDAY:
                 mCustomTimeRecord.setFridayHour(hourMinute.getHour());
@@ -135,6 +175,12 @@ public class LocalCustomTime implements CustomTime {
                     mRemoteCustomTimeRecord.setFridayHour(hourMinute.getHour());
                     mRemoteCustomTimeRecord.setFridayMinute(hourMinute.getMinute());
                 }
+
+                for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values()) {
+                    remoteCustomTimeRecord.setFridayHour(hourMinute.getHour());
+                    remoteCustomTimeRecord.setFridayMinute(hourMinute.getMinute());
+                }
+
                 break;
             case SATURDAY:
                 mCustomTimeRecord.setSaturdayHour(hourMinute.getHour());
@@ -144,6 +190,12 @@ public class LocalCustomTime implements CustomTime {
                     mRemoteCustomTimeRecord.setSaturdayHour(hourMinute.getHour());
                     mRemoteCustomTimeRecord.setSaturdayMinute(hourMinute.getMinute());
                 }
+
+                for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values()) {
+                    remoteCustomTimeRecord.setSaturdayHour(hourMinute.getHour());
+                    remoteCustomTimeRecord.setSaturdayMinute(hourMinute.getMinute());
+                }
+
                 break;
             default:
                 throw new IllegalArgumentException("invalid day: " + dayOfWeek);
@@ -186,6 +238,9 @@ public class LocalCustomTime implements CustomTime {
 
         if (mRemoteCustomTimeRecord != null)
             mRemoteCustomTimeRecord.delete();
+
+        Stream.of(mRemoteCustomTimeRecords.values())
+                .forEach(NewRemoteCustomTimeRecord::delete);
     }
 
     @NonNull
@@ -246,12 +301,72 @@ public class LocalCustomTime implements CustomTime {
             mRemoteCustomTimeRecord.setSaturdayMinute(mCustomTimeRecord.getSaturdayMinute());
     }
 
+    public void addRemoteCustomTimeRecord(@NonNull NewRemoteCustomTimeRecord remoteCustomTimeRecord) {
+        Assert.assertTrue(remoteCustomTimeRecord.getLocalId() == mCustomTimeRecord.getId());
+
+        mRemoteCustomTimeRecords.put(remoteCustomTimeRecord.getProjectId(), remoteCustomTimeRecord);
+
+        // bez zapisywania na razie, dopiero przy następnej okazji
+        if (!remoteCustomTimeRecord.getName().equals(mCustomTimeRecord.getName()))
+            remoteCustomTimeRecord.setName(mCustomTimeRecord.getName());
+
+        if (remoteCustomTimeRecord.getSundayHour() != mCustomTimeRecord.getSundayHour())
+            remoteCustomTimeRecord.setSundayHour(mCustomTimeRecord.getSundayHour());
+
+        if (remoteCustomTimeRecord.getSundayMinute() != mCustomTimeRecord.getSundayMinute())
+            remoteCustomTimeRecord.setSundayMinute(mCustomTimeRecord.getSundayMinute());
+
+        if (remoteCustomTimeRecord.getMondayHour() != mCustomTimeRecord.getMondayHour())
+            remoteCustomTimeRecord.setMondayHour(mCustomTimeRecord.getMondayHour());
+
+        if (remoteCustomTimeRecord.getMondayMinute() != mCustomTimeRecord.getMondayMinute())
+            remoteCustomTimeRecord.setMondayMinute(mCustomTimeRecord.getMondayMinute());
+
+        if (remoteCustomTimeRecord.getTuesdayHour() != mCustomTimeRecord.getTuesdayHour())
+            remoteCustomTimeRecord.setTuesdayHour(mCustomTimeRecord.getTuesdayHour());
+
+        if (remoteCustomTimeRecord.getTuesdayMinute() != mCustomTimeRecord.getTuesdayMinute())
+            remoteCustomTimeRecord.setTuesdayMinute(mCustomTimeRecord.getTuesdayMinute());
+
+        if (remoteCustomTimeRecord.getWednesdayHour() != mCustomTimeRecord.getWednesdayHour())
+            remoteCustomTimeRecord.setWednesdayHour(mCustomTimeRecord.getWednesdayHour());
+
+        if (remoteCustomTimeRecord.getWednesdayMinute() != mCustomTimeRecord.getWednesdayMinute())
+            remoteCustomTimeRecord.setWednesdayMinute(mCustomTimeRecord.getWednesdayMinute());
+
+        if (remoteCustomTimeRecord.getThursdayHour() != mCustomTimeRecord.getThursdayHour())
+            remoteCustomTimeRecord.setThursdayHour(mCustomTimeRecord.getThursdayHour());
+
+        if (remoteCustomTimeRecord.getThursdayMinute() != mCustomTimeRecord.getThursdayMinute())
+            remoteCustomTimeRecord.setThursdayMinute(mCustomTimeRecord.getThursdayMinute());
+
+        if (remoteCustomTimeRecord.getFridayHour() != mCustomTimeRecord.getFridayHour())
+            remoteCustomTimeRecord.setFridayHour(mCustomTimeRecord.getFridayHour());
+
+        if (remoteCustomTimeRecord.getFridayMinute() != mCustomTimeRecord.getFridayMinute())
+            remoteCustomTimeRecord.setFridayMinute(mCustomTimeRecord.getFridayMinute());
+
+        if (remoteCustomTimeRecord.getSaturdayHour() != mCustomTimeRecord.getSaturdayHour())
+            remoteCustomTimeRecord.setSaturdayHour(mCustomTimeRecord.getSaturdayHour());
+
+        if (remoteCustomTimeRecord.getSaturdayMinute() != mCustomTimeRecord.getSaturdayMinute())
+            remoteCustomTimeRecord.setSaturdayMinute(mCustomTimeRecord.getSaturdayMinute());
+    }
+
     public boolean hasRemoteRecord() {
         return (mRemoteCustomTimeRecord != null);
     }
 
-    void clearRemoteRecord() {
+    public boolean hasRemoteRecord(@NonNull String projectId) {
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
+
+        return mRemoteCustomTimeRecords.containsKey(projectId);
+    }
+
+    void clearRemoteRecords() {
         mRemoteCustomTimeRecord = null;
+
+        mRemoteCustomTimeRecords.clear();
     }
 
     @NonNull
@@ -261,8 +376,19 @@ public class LocalCustomTime implements CustomTime {
         return mRemoteCustomTimeRecord.getId();
     }
 
+    @NonNull
+    public String getRemoteId(@NonNull String projectId) {
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
+        Assert.assertTrue(mRemoteCustomTimeRecords.containsKey(projectId));
+
+        NewRemoteCustomTimeRecord remoteCustomTimeRecord = mRemoteCustomTimeRecords.get(projectId);
+        Assert.assertTrue(remoteCustomTimeRecord != null);
+
+        return remoteCustomTimeRecord.getId();
+    }
+
     @Override
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {// todo customtime remove
         Assert.assertTrue(mRemoteCustomTimeRecord != null);
 
         mRemoteCustomTimeRecord.updateRecordOf(addedFriends, removedFriends);

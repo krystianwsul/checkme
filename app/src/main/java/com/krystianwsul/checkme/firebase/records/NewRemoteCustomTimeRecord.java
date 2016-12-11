@@ -123,6 +123,11 @@ public class NewRemoteCustomTimeRecord extends RemoteRecord {
         return mCustomTimeJson.getSaturdayMinute();
     }
 
+    @NonNull
+    public String getProjectId() {
+        return mRemoteProjectRecord.getId();
+    }
+
     public void setName(@NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 

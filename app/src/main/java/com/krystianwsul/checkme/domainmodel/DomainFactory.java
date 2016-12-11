@@ -1563,8 +1563,6 @@ public class DomainFactory {
 
     @NonNull
     public String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey) {
-        // todo I'm not sure why this would ever get called by something that doesn't have a customTimeKey
-        // already guaranteed to be remote
         if (!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId)) {
             Assert.assertTrue(customTimeKey.mLocalCustomTimeId == null);
 
@@ -1572,18 +1570,12 @@ public class DomainFactory {
         } else {
             Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
 
-            MyCrashlytics.logException(new RemoteCustomTimeException());
-
             LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(customTimeKey.mLocalCustomTimeId);
 
             Assert.assertTrue(localCustomTime.hasRemoteRecord());
 
             return localCustomTime.getRemoteId();
         }
-    }
-
-    private static class RemoteCustomTimeException extends Exception {
-
     }
 
     @NonNull
@@ -2389,8 +2381,7 @@ public class DomainFactory {
             if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
                 Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
 
-                String customTimeId = scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId;
-                Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
+                String customTimeId = getRemoteCustomTimeId(scheduleKey.ScheduleTimePair.mCustomTimeKey);
 
                 matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
                         .collect(Collectors.toList());

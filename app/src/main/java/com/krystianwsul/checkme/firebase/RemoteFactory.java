@@ -54,7 +54,7 @@ public class RemoteFactory {
         mDomainFactory = domainFactory;
         mUserData = userData;
 
-        mRemoteManager = new RemoteManager(children);
+        mRemoteManager = new RemoteManager(domainFactory, children);
 
         mRemoteCustomTimes = new HashMap<>();
 
@@ -138,7 +138,7 @@ public class RemoteFactory {
         } else {
             ProjectJson projectJson = new ProjectJson(getProjectName(recordOf), now.getLong(), null, new HashMap<>(), new HashMap<>());
 
-            RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(new JsonWrapper(recordOf, projectJson));
+            RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
 
             RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord);
 

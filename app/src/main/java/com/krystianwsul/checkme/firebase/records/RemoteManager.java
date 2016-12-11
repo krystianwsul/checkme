@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.annimon.stream.Stream;
 import com.google.firebase.database.DataSnapshot;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 
@@ -23,7 +24,7 @@ public class RemoteManager {
     @NonNull
     public final Map<String, RemoteProjectRecord> mRemoteProjectRecords = new HashMap<>();
 
-    public RemoteManager(@NonNull Iterable<DataSnapshot> children) {
+    public RemoteManager(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children) {
         for (DataSnapshot child : children) {
             Assert.assertTrue(child != null);
 
@@ -36,7 +37,7 @@ public class RemoteManager {
             if (jsonWrapper.projectJson != null) {
                 Assert.assertTrue(jsonWrapper.customTimeJson == null);
 
-                RemoteProjectRecord remoteProjectRecord = new RemoteProjectRecord(key, jsonWrapper);
+                RemoteProjectRecord remoteProjectRecord = new RemoteProjectRecord(domainFactory, key, jsonWrapper);
 
                 mRemoteProjectRecords.put(key, remoteProjectRecord);
             } else {
@@ -80,8 +81,8 @@ public class RemoteManager {
     }
 
     @NonNull
-    public RemoteProjectRecord newRemoteProjectRecord(@NonNull JsonWrapper jsonWrapper) {
-        RemoteProjectRecord remoteProjectRecord = new RemoteProjectRecord(jsonWrapper);
+    public RemoteProjectRecord newRemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull JsonWrapper jsonWrapper) {
+        RemoteProjectRecord remoteProjectRecord = new RemoteProjectRecord(domainFactory, jsonWrapper);
         Assert.assertTrue(!mRemoteProjectRecords.containsKey(remoteProjectRecord.getId()));
 
         mRemoteProjectRecords.put(remoteProjectRecord.getId(), remoteProjectRecord);

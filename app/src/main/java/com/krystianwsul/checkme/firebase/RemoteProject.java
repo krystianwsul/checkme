@@ -85,7 +85,7 @@ public class RemoteProject {
 
     @NonNull
     RemoteTask newRemoteTask(@NonNull TaskJson taskJson) {
-        RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(taskJson);
+        RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(mDomainFactory, taskJson);
 
         RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord);
         Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
@@ -129,11 +129,11 @@ public class RemoteProject {
             InstanceJson instanceJson = getInstanceJson(localInstance, recordOf);
             ScheduleKey scheduleKey = localInstance.getScheduleKey();
 
-            instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(scheduleKey), instanceJson);
+            instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, scheduleKey), instanceJson);
         }
 
         TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote(), instanceJsons);
-        RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(taskJson);
+        RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(mDomainFactory, taskJson);
 
         RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord);
         Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));

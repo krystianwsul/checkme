@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.ProjectJson;
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
@@ -26,19 +27,19 @@ public class RemoteProjectRecord extends RootRemoteRecord {
     @NonNull
     private final Map<String, RemoteTaskHierarchyRecord> mRemoteTaskHierarchyRecords = new HashMap<>();
 
-    RemoteProjectRecord(@NonNull String id, @NonNull JsonWrapper jsonWrapper) {
+    RemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(id, jsonWrapper);
 
-        initialize();
+        initialize(domainFactory);
     }
 
-    RemoteProjectRecord(@NonNull JsonWrapper jsonWrapper) {
+    RemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull JsonWrapper jsonWrapper) {
         super(jsonWrapper);
 
-        initialize();
+        initialize(domainFactory);
     }
 
-    private void initialize() {
+    private void initialize(@NonNull DomainFactory domainFactory) {
         for (Map.Entry<String, TaskJson> entry : getProjectJson().getTasks().entrySet()) {
             String id = entry.getKey();
             Assert.assertTrue(!TextUtils.isEmpty(id));
@@ -46,7 +47,7 @@ public class RemoteProjectRecord extends RootRemoteRecord {
             TaskJson taskJson = entry.getValue();
             Assert.assertTrue(taskJson != null);
 
-            mRemoteTaskRecords.put(id, new RemoteTaskRecord(id, this, taskJson));
+            mRemoteTaskRecords.put(id, new RemoteTaskRecord(domainFactory, id, this, taskJson));
         }
 
         for (Map.Entry<String, TaskHierarchyJson> entry : getProjectJson().getTaskHierarchies().entrySet()) {
@@ -167,8 +168,8 @@ public class RemoteProjectRecord extends RootRemoteRecord {
     }
 
     @NonNull
-    public RemoteTaskRecord newRemoteTaskRecord(@NonNull TaskJson taskJson) {
-        RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(this, taskJson);
+    public RemoteTaskRecord newRemoteTaskRecord(@NonNull DomainFactory domainFactory, @NonNull TaskJson taskJson) {
+        RemoteTaskRecord remoteTaskRecord = new RemoteTaskRecord(domainFactory, this, taskJson);
         Assert.assertTrue(!mRemoteTaskRecords.containsKey(remoteTaskRecord.getId()));
 
         mRemoteTaskRecords.put(remoteTaskRecord.getId(), remoteTaskRecord);

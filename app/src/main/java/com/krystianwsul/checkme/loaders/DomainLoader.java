@@ -47,6 +47,9 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
         if (mFirebaseLevel == FirebaseLevel.NEED && !mDomainFactory.isConnected())
             return null;
 
+        if (mFirebaseLevel == FirebaseLevel.FRIEND && !(mDomainFactory.isConnected() && mDomainFactory.hasFriends()))
+            return null;
+
         return loadDomain(mDomainFactory);
     }
 
@@ -115,6 +118,22 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
 
                     break;
                 }
+                case FRIEND: {
+                    if (mDomainFactory.isConnected() && mDomainFactory.hasFriends()) {
+                        forceLoad();
+                    } else {
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        if (firebaseUser == null)
+                            throw new InstanceDoneService.NeedsFirebaseException();
+
+                        UserData userData = new UserData(firebaseUser);
+
+                        mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                        mDomainFactory.addFriendFirebaseListener(mFirebaseListener);
+                    }
+
+                    break;
+                }
                 default:
                     throw new IndexOutOfBoundsException();
             }
@@ -167,6 +186,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     enum FirebaseLevel {
         NOTHING,
         WANT,
-        NEED
+        NEED,
+        FRIEND
     }
 }

@@ -12,7 +12,7 @@ import java.util.TreeMap;
 
 public class ProjectListLoader extends DomainLoader<ProjectListLoader.Data> {
     public ProjectListLoader(Context context) {
-        super(context, FirebaseLevel.NEED);
+        super(context, FirebaseLevel.FRIEND);
     }
 
     @Override
@@ -59,15 +59,20 @@ public class ProjectListLoader extends DomainLoader<ProjectListLoader.Data> {
         @NonNull
         public final String mName;
 
-        public ProjectData(@NonNull String name) {
+        @NonNull
+        public final String mUsers;
+
+        public ProjectData(@NonNull String name, @NonNull String users) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(!TextUtils.isEmpty(users));
 
             mName = name;
+            mUsers = users;
         }
 
         @Override
         public int hashCode() {
-            return mName.hashCode();
+            return (mName.hashCode() + mUsers.hashCode());
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -85,6 +90,9 @@ public class ProjectListLoader extends DomainLoader<ProjectListLoader.Data> {
             ProjectData data = (ProjectData) object;
 
             if (!mName.equals(data.mName))
+                return false;
+
+            if (!mUsers.equals(data.mUsers))
                 return false;
 
             return true;

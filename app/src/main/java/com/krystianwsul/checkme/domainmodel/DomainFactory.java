@@ -109,6 +109,9 @@ public class DomainFactory {
     @NonNull
     private final List<FirebaseListener> mNotTickFirebaseListeners = new ArrayList<>();
 
+    @NonNull
+    private final List<FirebaseListener> mFriendFirebaseListeners = new ArrayList<>();
+
     @Nullable
     private TickData mTickData = null;
 
@@ -247,6 +250,7 @@ public class DomainFactory {
 
                 mTickData = null;
                 mNotTickFirebaseListeners.clear();
+                mFriendFirebaseListeners.clear();
             }
         };
         mRecordQuery.addValueEventListener(mRecordListener);
@@ -313,6 +317,8 @@ public class DomainFactory {
         boolean silent = (mRemoteFactory == null);
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
 
+        tryNotifyFriendListeners(); // assuming they're all getters
+
         if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
             updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
 
@@ -329,13 +335,24 @@ public class DomainFactory {
 
             Stream.of(mNotTickFirebaseListeners)
                     .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
-
             mNotTickFirebaseListeners.clear();
 
             mSkipSave = false;
 
             save(context, new ArrayList<>(), false);
         }
+    }
+
+    private void tryNotifyFriendListeners() {
+        if (mRemoteFactory == null)
+            return;
+
+        if (mFriends == null)
+            return;
+
+        Stream.of(mFriendFirebaseListeners)
+                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+        mFriendFirebaseListeners.clear();
     }
 
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
@@ -345,12 +362,21 @@ public class DomainFactory {
                 .collect(Collectors.toMap(UserData::getKey, userData -> userData));
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+
+        tryNotifyFriendListeners();
     }
 
     public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
         Assert.assertTrue(mRemoteFactory == null);
 
         mNotTickFirebaseListeners.add(firebaseListener);
+    }
+
+    public synchronized void addFriendFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+        Assert.assertTrue(mRemoteFactory == null);
+        Assert.assertTrue(mFriends == null);
+
+        mFriendFirebaseListeners.add(firebaseListener);
     }
 
     public synchronized void removeFirebaseListener(@NonNull FirebaseListener firebaseListener) {
@@ -382,6 +408,10 @@ public class DomainFactory {
 
     public synchronized boolean isConnected() {
         return (mRemoteFactory != null);
+    }
+
+    public synchronized boolean hasFriends() {
+        return (mFriends != null);
     }
 
     // gets
@@ -925,9 +955,22 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.getProjectListData");
 
         Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mFriends != null);
 
         TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteFactory.getRemoteProjects())
-                .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> new ProjectListLoader.ProjectData(remoteProject.getName()), TreeMap::new));
+                .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
+                    List<UserData> userDatas = Stream.of(remoteProject.getRecordOf())
+                            .filter(mFriends::containsKey)
+                            .map(mFriends::get)
+                            .collect(Collectors.toList());
+                    userDatas.add(mUserData);
+
+                    String users = Stream.of(userDatas)
+                            .map(UserData::getDisplayName)
+                            .collect(Collectors.joining(", "));
+
+                    return new ProjectListLoader.ProjectData(remoteProject.getName(), users);
+                }, TreeMap::new));
 
         return new ProjectListLoader.Data(projectDatas);
     }
@@ -2235,7 +2278,6 @@ public class DomainFactory {
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            Log.e("asdaf", "old algorithm");
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
@@ -2297,7 +2339,6 @@ public class DomainFactory {
                 }
             }
         } else {
-            Log.e("asdaf", "new algorithm");
             if (notificationInstances.isEmpty()) {
                 NotificationWrapper.getInstance().cancel(context, 0);
             } else {

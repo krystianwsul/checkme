@@ -50,6 +50,15 @@ public class RemoteInstanceRecordTest {
                 return new CustomTimeKey(remoteCustomTimeId);
             }
         });
+
+        Mockito.when(mDomainFactory.getRemoteCustomTimeId(any(CustomTimeKey.class))).thenAnswer(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) {
+                CustomTimeKey customTimeKey = (CustomTimeKey) invocation.getArguments()[0];
+
+                return customTimeKey.mRemoteCustomTimeId;
+            }
+        });
     }
 
     @Test
@@ -67,7 +76,9 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-27--KX_IHXkMcoAqwTBfN_k";
 
-        Assert.assertTrue(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, scheduleKey).equals(key));
+        String otherKey = RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, scheduleKey);
+
+        Assert.assertTrue(otherKey.equals(key));
     }
 
     @Test

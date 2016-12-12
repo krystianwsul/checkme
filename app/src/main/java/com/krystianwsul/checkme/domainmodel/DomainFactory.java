@@ -1070,6 +1070,8 @@ public class DomainFactory {
         instance.setNotificationShown(false, now);
         instance.setNotified(now);
 
+        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
+
         save(context, dataId);
     }
 

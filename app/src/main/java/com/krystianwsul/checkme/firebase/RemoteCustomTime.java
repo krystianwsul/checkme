@@ -11,18 +11,21 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 
-import java.util.Set;
 import java.util.TreeMap;
 
-public class RemoteCustomTime implements CustomTime {
+class RemoteCustomTime implements CustomTime {
     @NonNull
     private final DomainFactory mDomainFactory;
 
     @NonNull
+    private final RemoteProject mRemoteProject;
+
+    @NonNull
     private final RemoteCustomTimeRecord mRemoteCustomTimeRecord;
 
-    RemoteCustomTime(@NonNull DomainFactory domainFactory, @NonNull RemoteCustomTimeRecord remoteCustomTimeRecord) {
+    RemoteCustomTime(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteCustomTimeRecord remoteCustomTimeRecord) {
         mDomainFactory = domainFactory;
+        mRemoteProject = remoteProject;
         mRemoteCustomTimeRecord = remoteCustomTimeRecord;
     }
 
@@ -83,17 +86,12 @@ public class RemoteCustomTime implements CustomTime {
     @NonNull
     @Override
     public TimePair getTimePair() {
-        return new TimePair(new CustomTimeKey(mRemoteCustomTimeRecord.getId()), null);
+        return new TimePair(new CustomTimeKey(mRemoteProject.getId(), mRemoteCustomTimeRecord.getId()), null);
     }
 
     @NonNull
     @Override
     public CustomTimeKey getCustomTimeKey() {
-        return mDomainFactory.getCustomTimeKey(getId());
-    }
-
-    @Override
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        mRemoteCustomTimeRecord.updateRecordOf(addedFriends, removedFriends);
+        return mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), getId());
     }
 }

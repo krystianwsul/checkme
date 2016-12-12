@@ -9,7 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.firebase.records.NewRemoteCustomTimeRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
@@ -126,7 +126,7 @@ public class DatabaseWrapper {
     public static String getCustomTimeRecordId(@NonNull String projectId) {
         Assert.assertTrue(sRootReference != null);
 
-        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + NewRemoteCustomTimeRecord.CUSTOM_TIMES).push().getKey();
+        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteCustomTimeRecord.CUSTOM_TIMES).push().getKey();
         Assert.assertTrue(!TextUtils.isEmpty(id));
 
         return id;

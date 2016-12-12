@@ -42,7 +42,7 @@ class RemoteSingleScheduleBridge implements SingleScheduleBridge {
     @Override
     public CustomTimeKey getCustomTimeKey() {
         if (!TextUtils.isEmpty(mRemoteSingleScheduleRecord.getCustomTimeId()))
-            return mDomainFactory.getCustomTimeKey(mRemoteSingleScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTimeKey(mRemoteSingleScheduleRecord.getProjectId(), mRemoteSingleScheduleRecord.getCustomTimeId());
         else
             return null;
     }

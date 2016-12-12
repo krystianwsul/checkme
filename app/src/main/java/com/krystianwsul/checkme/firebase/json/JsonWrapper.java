@@ -15,20 +15,10 @@ import java.util.Set;
 @IgnoreExtraProperties
 public class JsonWrapper {
     public Map<String, Boolean> recordOf;
-    public CustomTimeJson customTimeJson;
     public ProjectJson projectJson;
 
     public JsonWrapper() {
 
-    }
-
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull CustomTimeJson customTimeJsonJson) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        this.recordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(friend -> friend, friend -> true));
-
-        this.customTimeJson = customTimeJsonJson;
     }
 
     public JsonWrapper(@NonNull Set<String> recordOf, @NonNull ProjectJson projectJson) {

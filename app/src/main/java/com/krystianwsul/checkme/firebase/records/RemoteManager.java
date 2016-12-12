@@ -4,27 +4,19 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
-import com.krystianwsul.checkme.firebase.json.ProjectJson;
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class RemoteManager {
     private boolean mSaved = false;
-
-    @NonNull
-    public final Map<String, RemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
 
     @NonNull
     public final Map<String, RemoteProjectRecord> mRemoteProjectRecords = new HashMap<>();
@@ -39,25 +31,14 @@ public class RemoteManager {
             JsonWrapper jsonWrapper = child.getValue(JsonWrapper.class);
             Assert.assertTrue(jsonWrapper != null);
 
-            if (jsonWrapper.projectJson != null) {
-                Assert.assertTrue(jsonWrapper.customTimeJson == null);
+            RemoteProjectRecord remoteProjectRecord = new RemoteProjectRecord(domainFactory, key, jsonWrapper);
 
-                RemoteProjectRecord remoteProjectRecord = new RemoteProjectRecord(domainFactory, key, jsonWrapper);
-
-                mRemoteProjectRecords.put(key, remoteProjectRecord);
-            } else {
-                Assert.assertTrue(jsonWrapper.customTimeJson != null);
-
-                mRemoteCustomTimeRecords.put(key, new RemoteCustomTimeRecord(key, jsonWrapper));
-            }
+            mRemoteProjectRecords.put(key, remoteProjectRecord);
         }
     }
 
     public void save(boolean causedByRemote) {
         Map<String, Object> values = new HashMap<>();
-
-        Stream.of(mRemoteCustomTimeRecords.values())
-                .forEach(remoteRecord -> remoteRecord.getValues(values));
 
         Stream.of(mRemoteProjectRecords.values())
                 .forEach(remoteRecord -> remoteRecord.getValues(values));
@@ -74,15 +55,6 @@ public class RemoteManager {
 
     public boolean isSaved() {
         return mSaved;
-    }
-
-    @NonNull
-    public RemoteCustomTimeRecord newRemoteCustomTimeRecord(@NonNull JsonWrapper jsonWrapper) {
-        RemoteCustomTimeRecord remoteCustomTimeRecord = new RemoteCustomTimeRecord(jsonWrapper);
-        Assert.assertTrue(!mRemoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.getId()));
-
-        mRemoteCustomTimeRecords.put(remoteCustomTimeRecord.getId(), remoteCustomTimeRecord);
-        return remoteCustomTimeRecord;
     }
 
     @NonNull

@@ -230,13 +230,14 @@ public class LocalFactory {
     }
 
     @Nullable
-    public InstanceShownRecord getInstanceShownRecord(@NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute) {
+    public InstanceShownRecord getInstanceShownRecord(@NonNull String projectId, @NonNull String taskId, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable String scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute) {
         List<InstanceShownRecord> matches;
         if (scheduleCustomTimeId != null) {
             Assert.assertTrue(scheduleHour == null);
             Assert.assertTrue(scheduleMinute == null);
 
             matches = Stream.of(mPersistenceManager.getInstanceShownRecords())
+                    .filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId))
                     .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleYear)
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleMonth)
@@ -248,6 +249,7 @@ public class LocalFactory {
             Assert.assertTrue(scheduleMinute != null);
 
             matches = Stream.of(mPersistenceManager.getInstanceShownRecords())
+                    .filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId))
                     .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleYear)
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleMonth)
@@ -283,7 +285,7 @@ public class LocalFactory {
         } else {
             Assert.assertTrue(timePair.mCustomTimeKey != null);
 
-            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey);
+            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(projectId, timePair.mCustomTimeKey);
 
             hour = null;
             minute = null;
@@ -541,9 +543,9 @@ public class LocalFactory {
     }
 
     @Nullable
-    public LocalCustomTime getLocalCustomTime(@NonNull String remoteCustomTimeId) {
+    public LocalCustomTime getLocalCustomTime(@NonNull String remoteProjectId, @NonNull String remoteCustomTimeId) {
         List<LocalCustomTime> matches = Stream.of(mLocalCustomTimes.values())
-                .filter(localCustomTime -> localCustomTime.hasRemoteRecord() && localCustomTime.getRemoteId().equals(remoteCustomTimeId))
+                .filter(localCustomTime -> localCustomTime.hasRemoteRecord(remoteProjectId) && localCustomTime.getRemoteId(remoteProjectId).equals(remoteCustomTimeId))
                 .collect(Collectors.toList());
 
         if (matches.isEmpty()) {

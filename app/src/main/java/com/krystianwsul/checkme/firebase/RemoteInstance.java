@@ -104,7 +104,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(customTimeId));
+                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), customTimeId));
             } else {
                 return new NormalTime(hour, minute);
             }
@@ -179,7 +179,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue((mRemoteInstanceRecord.getInstanceHour() == null) || (mRemoteInstanceRecord.getInstanceCustomTimeId() == null));
 
             if (mRemoteInstanceRecord.getInstanceCustomTimeId() != null) {
-                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(mRemoteInstanceRecord.getInstanceCustomTimeId()));
+                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), mRemoteInstanceRecord.getInstanceCustomTimeId()));
             } else if (mRemoteInstanceRecord.getInstanceHour() != null) {
                 return new NormalTime(mRemoteInstanceRecord.getInstanceHour(), mRemoteInstanceRecord.getInstanceMinute());
             } else {
@@ -212,7 +212,7 @@ public class RemoteInstance extends Instance {
 
         if (timePair.mCustomTimeKey != null) {
             Assert.assertTrue(timePair.mHourMinute == null);
-            mRemoteInstanceRecord.setInstanceCustomTimeId(getRemoteFactory().getRemoteCustomTimeId(timePair.mCustomTimeKey, getTask().getRecordOf()));
+            mRemoteInstanceRecord.setInstanceCustomTimeId(getRemoteFactory().getRemoteCustomTimeId(timePair.mCustomTimeKey, mRemoteProject));
             mRemoteInstanceRecord.setInstanceHour(null);
             mRemoteInstanceRecord.setInstanceMinute(null);
         } else {
@@ -343,7 +343,7 @@ public class RemoteInstance extends Instance {
             String customTimeId = mRemoteInstanceRecord.getScheduleCustomTimeId();
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTimeKey(customTimeId);
+                return mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), customTimeId);
             } else {
                 return null;
             }

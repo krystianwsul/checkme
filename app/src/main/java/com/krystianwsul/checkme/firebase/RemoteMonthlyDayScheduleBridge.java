@@ -65,7 +65,7 @@ class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge {
     @Override
     public CustomTimeKey getCustomTimeKey() {
         if (!TextUtils.isEmpty(mRemoteMonthlyDayScheduleRecord.getCustomTimeId()))
-            return mDomainFactory.getCustomTimeKey(mRemoteMonthlyDayScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTimeKey(mRemoteMonthlyDayScheduleRecord.getProjectId(), mRemoteMonthlyDayScheduleRecord.getCustomTimeId());
         else
             return null;
     }

@@ -45,9 +45,6 @@ public class RemoteFactory {
     private final RemoteManager mRemoteManager;
 
     @NonNull
-    private final Map<String, RemoteCustomTime> mRemoteCustomTimes;
-
-    @NonNull
     private final Map<String, RemoteProject> mRemoteProjects;
 
     public RemoteFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserData userData) {
@@ -55,31 +52,6 @@ public class RemoteFactory {
         mUserData = userData;
 
         mRemoteManager = new RemoteManager(domainFactory, children);
-
-        mRemoteCustomTimes = new HashMap<>();
-
-        for (RemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteManager.mRemoteCustomTimeRecords.values()) {
-            Assert.assertTrue(remoteCustomTimeRecord != null);
-
-            if (remoteCustomTimeRecord.getOwnerId().equals(domainFactory.getLocalFactory().getUuid())) {
-                if (domainFactory.getLocalFactory().hasLocalCustomTime(remoteCustomTimeRecord.getLocalId())) {
-                    LocalCustomTime localCustomTime = domainFactory.getLocalFactory().getLocalCustomTime(remoteCustomTimeRecord.getLocalId());
-
-                    localCustomTime.setRemoteCustomTimeRecord(remoteCustomTimeRecord);
-                } else {
-                    // Albo jakiś syf, albo localCustomTime został usunięty gdy nie było połączenia.
-
-                    remoteCustomTimeRecord.delete(); // faktyczne usunięcie nastąpi przy następnym zapisywaniu czegoś innego
-                }
-            } else {
-                RemoteCustomTime remoteCustomTime = new RemoteCustomTime(domainFactory, remoteCustomTimeRecord);
-
-                Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
-                Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
-
-                mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId, remoteCustomTime);
-            }
-        }
 
         mRemoteProjects = Stream.of(mRemoteManager.mRemoteProjectRecords.values())
                 .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord))
@@ -169,7 +141,17 @@ public class RemoteFactory {
     }
 
     @NonNull
-    String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey, @NonNull Set<String> recordOf) {
+    String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey, @NonNull Set<String> recordOf, @NonNull ExactTimeStamp now) {
+        Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
+        Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
+
+        RemoteProject remoteProject = getRemoteProjectForce(recordOf, now);
+
+        return getRemoteCustomTimeId(customTimeKey, remoteProject);
+    }
+
+    @NonNull
+    String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey, @NonNull RemoteProject remoteProject) {
         Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
         Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
 
@@ -177,33 +159,19 @@ public class RemoteFactory {
 
         LocalCustomTime localCustomTime = mDomainFactory.getLocalFactory().getLocalCustomTime(localCustomTimeId);
 
-        if (!localCustomTime.hasRemoteRecord()) {
+        if (!localCustomTime.hasRemoteRecord(remoteProject.getId())) {
             CustomTimeJson customTimeJson = new CustomTimeJson(mDomainFactory.getLocalFactory().getUuid(), localCustomTime.getId(), localCustomTime.getName(), localCustomTime.getHourMinute(DayOfWeek.SUNDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.SUNDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.MONDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.MONDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.TUESDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.TUESDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.THURSDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.THURSDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.FRIDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.FRIDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.SATURDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.SATURDAY).getMinute());
-            JsonWrapper jsonWrapper = new JsonWrapper(recordOf, customTimeJson);
 
-            RemoteCustomTimeRecord remoteCustomTimeRecord = mRemoteManager.newRemoteCustomTimeRecord(jsonWrapper);
+            RemoteCustomTimeRecord customTimeRecord = remoteProject.newRemoteCustomTimeRecord(customTimeJson);
 
-            localCustomTime.setRemoteCustomTimeRecord(remoteCustomTimeRecord);
-        } else {
-            localCustomTime.updateRecordOf(recordOf, new HashSet<>());
+            localCustomTime.addRemoteCustomTimeRecord(customTimeRecord);
         }
 
-        return localCustomTime.getRemoteId();
+        return localCustomTime.getRemoteId(remoteProject.getId());
     }
 
     @NonNull
-    public RemoteCustomTime getRemoteCustomTime(@NonNull String remoteCustomTimeId) {
-        Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTimeId));
-        Assert.assertTrue(mRemoteCustomTimes.containsKey(remoteCustomTimeId));
-
-        RemoteCustomTime remoteCustomTime = mRemoteCustomTimes.get(remoteCustomTimeId);
-        Assert.assertTrue(remoteCustomTime != null);
-
-        return remoteCustomTime;
-    }
-
-    @NonNull
-    public NewRemoteCustomTime getRemoteCustomTime(@NonNull String remoteProjectId, @NonNull String remoteCustomTimeId) {
+    public RemoteCustomTime getRemoteCustomTime(@NonNull String remoteProjectId, @NonNull String remoteCustomTimeId) {
         Assert.assertTrue(!TextUtils.isEmpty(remoteProjectId));
         Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTimeId));
 
@@ -216,12 +184,7 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public Collection<RemoteCustomTime> getRemoteCustomTimes() {
-        return mRemoteCustomTimes.values();
-    }
-
-    @NonNull
-    public List<NewRemoteCustomTime> getNewRemoteCustomTimes() {
+    public List<RemoteCustomTime> getRemoteCustomTimes() {
         return Stream.of(mRemoteProjects.values())
                 .map(RemoteProject::getRemoteCustomTimes)
                 .map(Stream::of)

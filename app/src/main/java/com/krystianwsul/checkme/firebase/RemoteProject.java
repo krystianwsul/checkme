@@ -12,10 +12,11 @@ import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
+import com.krystianwsul.checkme.firebase.json.CustomTimeJson;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
-import com.krystianwsul.checkme.firebase.records.NewRemoteCustomTimeRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
@@ -50,11 +51,28 @@ public class RemoteProject {
     private final TaskHierarchyContainer<String, RemoteTaskHierarchy> mRemoteTaskHierarchies = new TaskHierarchyContainer<>();
 
     @NonNull
-    private final Map<String, NewRemoteCustomTime> mRemoteCustomTimes = new HashMap<>();
+    private final Map<String, RemoteCustomTime> mRemoteCustomTimes = new HashMap<>();
 
     RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord) {
         mDomainFactory = domainFactory;
         mRemoteProjectRecord = remoteProjectRecord;
+
+        for (RemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteProjectRecord.getRemoteCustomTimeRecords().values()) {
+            Assert.assertTrue(remoteCustomTimeRecord != null);
+
+            if (remoteCustomTimeRecord.getOwnerId().equals(domainFactory.getLocalFactory().getUuid()) && domainFactory.getLocalFactory().hasLocalCustomTime(remoteCustomTimeRecord.getLocalId())) {
+                LocalCustomTime localCustomTime = domainFactory.getLocalFactory().getLocalCustomTime(remoteCustomTimeRecord.getLocalId());
+
+                localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord);
+            } else {
+                RemoteCustomTime remoteCustomTime = new RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord);
+
+                Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
+                Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
+
+                mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId, remoteCustomTime);
+            }
+        }
 
         mRemoteTasks = Stream.of(mRemoteProjectRecord.getRemoteTaskRecords().values())
                 .map(remoteTaskRecord -> new RemoteTask(domainFactory, this, remoteTaskRecord))
@@ -63,23 +81,6 @@ public class RemoteProject {
         Stream.of(mRemoteProjectRecord.getRemoteTaskHierarchyRecords().values())
                 .map(remoteTaskHierarchyRecord -> new RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord))
                 .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
-
-        for (NewRemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteProjectRecord.getRemoteCustomTimeRecords().values()) {
-            Assert.assertTrue(remoteCustomTimeRecord != null);
-
-            if (remoteCustomTimeRecord.getOwnerId().equals(domainFactory.getLocalFactory().getUuid()) && domainFactory.getLocalFactory().hasLocalCustomTime(remoteCustomTimeRecord.getLocalId())) {
-                LocalCustomTime localCustomTime = domainFactory.getLocalFactory().getLocalCustomTime(remoteCustomTimeRecord.getLocalId());
-
-                localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord);
-            } else {
-                NewRemoteCustomTime remoteCustomTime = new NewRemoteCustomTime(domainFactory, this, remoteCustomTimeRecord);
-
-                Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
-                Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
-
-                mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId, remoteCustomTime);
-            }
-        }
     }
 
     @NonNull
@@ -148,10 +149,10 @@ public class RemoteProject {
         for (LocalInstance localInstance : localInstances) {
             Assert.assertTrue(localInstance.getTaskId() == localTask.getId());
 
-            InstanceJson instanceJson = getInstanceJson(localInstance, recordOf);
+            InstanceJson instanceJson = getInstanceJson(localInstance, recordOf, now);
             ScheduleKey scheduleKey = localInstance.getScheduleKey();
 
-            instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, scheduleKey), instanceJson);
+            instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), scheduleKey), instanceJson);
         }
 
         TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote(), instanceJsons);
@@ -172,7 +173,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    private InstanceJson getInstanceJson(@NonNull LocalInstance localInstance, @NonNull Set<String> recordOf) {
+    private InstanceJson getInstanceJson(@NonNull LocalInstance localInstance, @NonNull Set<String> recordOf, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(!recordOf.isEmpty());
 
         Long done = (localInstance.getDone() != null ? localInstance.getDone().getLong() : null);
@@ -193,7 +194,7 @@ public class RemoteProject {
         } else {
             Assert.assertTrue(instanceTimePair.mCustomTimeKey != null);
 
-            instanceRemoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(instanceTimePair.mCustomTimeKey, recordOf);
+            instanceRemoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(instanceTimePair.mCustomTimeKey, recordOf, now);
 
             instanceHour = null;
             instanceMinute = null;
@@ -280,17 +281,22 @@ public class RemoteProject {
     }
 
     @NonNull
-    NewRemoteCustomTime getRemoteCustomTime(@NonNull String remoteCustomTimeId) {
+    RemoteCustomTime getRemoteCustomTime(@NonNull String remoteCustomTimeId) {
         Assert.assertTrue(mRemoteCustomTimes.containsKey(remoteCustomTimeId));
 
-        NewRemoteCustomTime remoteCustomTime = mRemoteCustomTimes.get(remoteCustomTimeId);
+        RemoteCustomTime remoteCustomTime = mRemoteCustomTimes.get(remoteCustomTimeId);
         Assert.assertTrue(remoteCustomTime != null);
 
         return remoteCustomTime;
     }
 
     @NonNull
-    Collection<NewRemoteCustomTime> getRemoteCustomTimes() {
+    Collection<RemoteCustomTime> getRemoteCustomTimes() {
         return mRemoteCustomTimes.values();
+    }
+
+    @NonNull
+    RemoteCustomTimeRecord newRemoteCustomTimeRecord(@NonNull CustomTimeJson customTimeJson) {
+        return mRemoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson);
     }
 }

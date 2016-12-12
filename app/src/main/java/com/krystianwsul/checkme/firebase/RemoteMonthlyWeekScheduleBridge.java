@@ -70,7 +70,7 @@ class RemoteMonthlyWeekScheduleBridge implements MonthlyWeekScheduleBridge {
     @Override
     public CustomTimeKey getCustomTimeKey() {
         if (!TextUtils.isEmpty(mRemoteMonthlyWeekScheduleRecord.getCustomTimeId()))
-            return mDomainFactory.getCustomTimeKey(mRemoteMonthlyWeekScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTimeKey(mRemoteMonthlyWeekScheduleRecord.getProjectId(), mRemoteMonthlyWeekScheduleRecord.getCustomTimeId());
         else
             return null;
     }

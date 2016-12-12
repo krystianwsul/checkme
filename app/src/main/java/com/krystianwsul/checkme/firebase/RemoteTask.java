@@ -68,7 +68,7 @@ public class RemoteTask extends Task {
         mRemoteTaskRecord = remoteTaskRecord;
 
         mExistingRemoteInstances = Stream.of(mRemoteTaskRecord.getRemoteInstanceRecords().values())
-                .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, mRemoteProject, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute())))
+                .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, mRemoteProject, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(mRemoteProject.getId(), remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute())))
                 .collect(Collectors.toMap(RemoteInstance::getScheduleKey, remoteInstance -> remoteInstance));
 
         for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteTaskRecord.mRemoteSingleScheduleRecords.values())
@@ -308,7 +308,7 @@ public class RemoteTask extends Task {
                     if (singleScheduleData.TimePair.mCustomTimeKey != null) {
                         Assert.assertTrue(singleScheduleData.TimePair.mHourMinute == null);
 
-                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(singleScheduleData.TimePair.mCustomTimeKey, getRecordOf());
+                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(singleScheduleData.TimePair.mCustomTimeKey, mRemoteProject);
                         hour = null;
                         minute = null;
                     } else {
@@ -333,7 +333,7 @@ public class RemoteTask extends Task {
                     if (dailyScheduleData.TimePair.mCustomTimeKey != null) {
                         Assert.assertTrue(dailyScheduleData.TimePair.mHourMinute == null);
 
-                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(dailyScheduleData.TimePair.mCustomTimeKey, getRecordOf());
+                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(dailyScheduleData.TimePair.mCustomTimeKey, mRemoteProject);
                         hour = null;
                         minute = null;
                     } else {
@@ -360,7 +360,7 @@ public class RemoteTask extends Task {
                     if (weeklyScheduleData.TimePair.mCustomTimeKey != null) {
                         Assert.assertTrue(weeklyScheduleData.TimePair.mHourMinute == null);
 
-                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(weeklyScheduleData.TimePair.mCustomTimeKey, getRecordOf());
+                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(weeklyScheduleData.TimePair.mCustomTimeKey, mRemoteProject);
                         hour = null;
                         minute = null;
                     } else {
@@ -385,7 +385,7 @@ public class RemoteTask extends Task {
                     if (monthlyDayScheduleData.TimePair.mCustomTimeKey != null) {
                         Assert.assertTrue(monthlyDayScheduleData.TimePair.mHourMinute == null);
 
-                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(monthlyDayScheduleData.TimePair.mCustomTimeKey, getRecordOf());
+                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(monthlyDayScheduleData.TimePair.mCustomTimeKey, mRemoteProject);
                         hour = null;
                         minute = null;
                     } else {
@@ -410,7 +410,7 @@ public class RemoteTask extends Task {
                     if (monthlyWeekScheduleData.TimePair.mCustomTimeKey != null) {
                         Assert.assertTrue(monthlyWeekScheduleData.TimePair.mHourMinute == null);
 
-                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(monthlyWeekScheduleData.TimePair.mCustomTimeKey, getRecordOf());
+                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(monthlyWeekScheduleData.TimePair.mCustomTimeKey, mRemoteProject);
                         hour = null;
                         minute = null;
                     } else {

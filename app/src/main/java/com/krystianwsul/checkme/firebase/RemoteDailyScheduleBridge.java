@@ -55,7 +55,7 @@ class RemoteDailyScheduleBridge implements DailyScheduleBridge {
     @Override
     public CustomTimeKey getCustomTimeKey() {
         if (!TextUtils.isEmpty(mRemoteDailyScheduleRecord.getCustomTimeId()))
-            return mDomainFactory.getCustomTimeKey(mRemoteDailyScheduleRecord.getCustomTimeId());
+            return mDomainFactory.getCustomTimeKey(mRemoteDailyScheduleRecord.getProjectId(), mRemoteDailyScheduleRecord.getCustomTimeId());
         else
             return null;
     }

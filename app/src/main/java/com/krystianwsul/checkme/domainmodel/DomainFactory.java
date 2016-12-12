@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -64,6 +65,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -108,6 +110,9 @@ public class DomainFactory {
 
     @NonNull
     private final List<FirebaseListener> mNotTickFirebaseListeners = new ArrayList<>();
+
+    @NonNull
+    private final List<FirebaseListener> mFriendFirebaseListeners = new ArrayList<>();
 
     @Nullable
     private TickData mTickData = null;
@@ -247,6 +252,7 @@ public class DomainFactory {
 
                 mTickData = null;
                 mNotTickFirebaseListeners.clear();
+                mFriendFirebaseListeners.clear();
             }
         };
         mRecordQuery.addValueEventListener(mRecordListener);
@@ -313,6 +319,8 @@ public class DomainFactory {
         boolean silent = (mRemoteFactory == null);
         mRemoteFactory = new RemoteFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
 
+        tryNotifyFriendListeners(); // assuming they're all getters
+
         if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
             updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
 
@@ -329,13 +337,24 @@ public class DomainFactory {
 
             Stream.of(mNotTickFirebaseListeners)
                     .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
-
             mNotTickFirebaseListeners.clear();
 
             mSkipSave = false;
 
             save(context, new ArrayList<>(), false);
         }
+    }
+
+    private void tryNotifyFriendListeners() {
+        if (mRemoteFactory == null)
+            return;
+
+        if (mFriends == null)
+            return;
+
+        Stream.of(mFriendFirebaseListeners)
+                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+        mFriendFirebaseListeners.clear();
     }
 
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
@@ -345,12 +364,21 @@ public class DomainFactory {
                 .collect(Collectors.toMap(UserData::getKey, userData -> userData));
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+
+        tryNotifyFriendListeners();
     }
 
     public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
         Assert.assertTrue(mRemoteFactory == null);
 
         mNotTickFirebaseListeners.add(firebaseListener);
+    }
+
+    public synchronized void addFriendFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+        Assert.assertTrue(mRemoteFactory == null);
+        Assert.assertTrue(mFriends == null);
+
+        mFriendFirebaseListeners.add(firebaseListener);
     }
 
     public synchronized void removeFirebaseListener(@NonNull FirebaseListener firebaseListener) {
@@ -382,6 +410,10 @@ public class DomainFactory {
 
     public synchronized boolean isConnected() {
         return (mRemoteFactory != null);
+    }
+
+    public synchronized boolean hasFriends() {
+        return (mFriends != null);
     }
 
     // gets
@@ -925,9 +957,22 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.getProjectListData");
 
         Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mFriends != null);
 
         TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteFactory.getRemoteProjects())
-                .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> new ProjectListLoader.ProjectData(remoteProject.getName()), TreeMap::new));
+                .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
+                    List<UserData> userDatas = Stream.of(remoteProject.getRecordOf())
+                            .filter(mFriends::containsKey)
+                            .map(mFriends::get)
+                            .collect(Collectors.toList());
+                    userDatas.add(mUserData);
+
+                    String users = Stream.of(userDatas)
+                            .map(UserData::getDisplayName)
+                            .collect(Collectors.joining(", "));
+
+                    return new ProjectListLoader.ProjectData(remoteProject.getName(), users);
+                }, TreeMap::new));
 
         return new ProjectListLoader.Data(projectDatas);
     }
@@ -1026,6 +1071,8 @@ public class DomainFactory {
         instance.setDone(true, now);
         instance.setNotificationShown(false, now);
         instance.setNotified(now);
+
+        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
 
         save(context, dataId);
     }
@@ -2147,14 +2194,21 @@ public class DomainFactory {
     }
 
     private void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
-        if (!silent) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
-            Assert.assertTrue(sharedPreferences != null);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+        Assert.assertTrue(sharedPreferences != null);
 
-            sharedPreferences.edit()
-                    .putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong())
-                    .apply();
-        }
+        String tickLog = sharedPreferences.getString(TickService.TICK_LOG, "");
+        List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
+        List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 9, 0), tickLogArr.size()));
+        tickLogArrTrimmed.add(now.toString() + " silent? " + silent);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(TickService.TICK_LOG, TextUtils.join("\n", tickLogArrTrimmed));
+
+        if (!silent)
+            editor.putLong(TickService.LAST_TICK_KEY, now.getLong());
+
+        editor.apply();
 
         List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 
@@ -2235,7 +2289,6 @@ public class DomainFactory {
         }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            Log.e("asdaf", "old algorithm");
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
@@ -2248,13 +2301,13 @@ public class DomainFactory {
                         if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
                             Instance shownInstance = getInstance(shownInstanceKey);
 
-                            NotificationWrapper.getInstance().cancel(context, shownInstance.getNotificationId());
+                            NotificationWrapper.getInstance().cancelNotification(context, shownInstance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
 
-                            NotificationWrapper.getInstance().cancel(context, notificationId);
+                            NotificationWrapper.getInstance().cancelNotification(context, notificationId);
                         }
                     }
 
@@ -2262,7 +2315,7 @@ public class DomainFactory {
                 }
             } else { // show instances
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    NotificationWrapper.getInstance().cancel(context, 0);
+                    NotificationWrapper.getInstance().cancelNotification(context, 0);
 
                     for (Instance instance : notificationInstances.values()) {
                         Assert.assertTrue(instance != null);
@@ -2274,13 +2327,13 @@ public class DomainFactory {
                         if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                             Instance instance = getInstance(hideInstanceKey);
 
-                            NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                            NotificationWrapper.getInstance().cancelNotification(context, instance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
-                            NotificationWrapper.getInstance().cancel(context, notificationId);
+                            NotificationWrapper.getInstance().cancelNotification(context, notificationId);
                         }
                     }
 
@@ -2297,9 +2350,8 @@ public class DomainFactory {
                 }
             }
         } else {
-            Log.e("asdaf", "new algorithm");
             if (notificationInstances.isEmpty()) {
-                NotificationWrapper.getInstance().cancel(context, 0);
+                NotificationWrapper.getInstance().cancelNotification(context, 0);
             } else {
                 NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, true);
             }
@@ -2308,13 +2360,13 @@ public class DomainFactory {
                 if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                     Instance instance = getInstance(hideInstanceKey);
 
-                    NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                    NotificationWrapper.getInstance().cancelNotification(context, instance.getNotificationId());
                 } else {
                     Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
                     int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
-                    NotificationWrapper.getInstance().cancel(context, notificationId);
+                    NotificationWrapper.getInstance().cancelNotification(context, notificationId);
                 }
             }
 
@@ -2350,10 +2402,13 @@ public class DomainFactory {
         if (minSchedulesTimeStamp.isPresent() && (nextAlarm == null || nextAlarm.compareTo(minSchedulesTimeStamp.get()) > 0))
             nextAlarm = minSchedulesTimeStamp.get();
 
+        PendingIntent pendingIntent = NotificationWrapper.getInstance().getPendingIntent(context);
+        NotificationWrapper.getInstance().cancelAlarm(context, pendingIntent);
+
         if (nextAlarm != null) {
             Assert.assertTrue(nextAlarm.toExactTimeStamp().compareTo(now) > 0);
 
-            NotificationWrapper.getInstance().setAlarm(context, nextAlarm);
+            NotificationWrapper.getInstance().setAlarm(context, pendingIntent, nextAlarm);
         }
     }
 

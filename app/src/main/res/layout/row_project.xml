@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -16,4 +17,13 @@
         android:textSize="16sp"
         android:textColor="@color/textPrimary"/>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/project_users"
+        android:singleLine="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/textSecondary"
+        tools:ignore="Deprecated"/>
+
+</LinearLayout>

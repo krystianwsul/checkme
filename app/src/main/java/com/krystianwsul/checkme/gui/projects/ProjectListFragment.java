@@ -121,6 +121,8 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             Assert.assertTrue(projectData != null);
 
             holder.mProjectName.setText(projectData.mName);
+
+            holder.mProjectUsers.setText(projectData.mUsers);
         }
 
         @Override
@@ -132,11 +134,17 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             @NonNull
             final TextView mProjectName;
 
+            @NonNull
+            final TextView mProjectUsers;
+
             Holder(View itemView) {
                 super(itemView);
 
                 mProjectName = (TextView) itemView.findViewById(R.id.project_name);
                 Assert.assertTrue(mProjectName != null);
+
+                mProjectUsers = (TextView) itemView.findViewById(R.id.project_users);
+                Assert.assertTrue(mProjectUsers != null);
             }
         }
     }

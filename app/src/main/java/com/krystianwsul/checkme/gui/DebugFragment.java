@@ -67,11 +67,14 @@ public class DebugFragment extends AbstractFragment {
 
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
             long lastTick = sharedPreferences.getLong(TickService.LAST_TICK_KEY, -1);
+            String tickLog = sharedPreferences.getString(TickService.TICK_LOG, "");
 
             ExactTimeStamp lastTickExactTimeStamp = new ExactTimeStamp(lastTick);
 
             stringBuilder.append("last beeping tick: ");
             stringBuilder.append(lastTickExactTimeStamp.toString());
+            stringBuilder.append("\ntick log:\n");
+            stringBuilder.append(tickLog);
 
             DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
 

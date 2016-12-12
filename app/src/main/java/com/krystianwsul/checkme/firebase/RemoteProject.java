@@ -93,7 +93,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    Set<String> getRecordOf() {
+    public Set<String> getRecordOf() {
         return mRemoteProjectRecord.getRecordOf();
     }
 

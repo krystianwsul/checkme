@@ -22,6 +22,7 @@ public class TickService extends IntentService {
 
     public static final String TICK_PREFERENCES = "tickPreferences";
     public static final String LAST_TICK_KEY = "lastTick";
+    public static final String TICK_LOG = "tickLog";
 
     // DON'T HOLD STATE IN STATIC VARIABLES
 

@@ -73,7 +73,7 @@ public class DomainFactoryTest {
     public static void setUpStatic() {
         NotificationWrapper.setInstance(new NotificationWrapper() {
             @Override
-            public void cancel(@NonNull Context context, int id) {
+            public void cancelNotification(@NonNull Context context, int id) {
 
             }
 
@@ -88,7 +88,18 @@ public class DomainFactoryTest {
             }
 
             @Override
-            public void setAlarm(@NonNull Context context, @NonNull TimeStamp nextAlarm) {
+            public void setAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm) {
+
+            }
+
+            @NonNull
+            @Override
+            public PendingIntent getPendingIntent(@NonNull Context context) {
+                return null;
+            }
+
+            @Override
+            public void cancelAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent) {
 
             }
         });

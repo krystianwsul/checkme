@@ -51,17 +51,22 @@ abstract class NotificationWrapper {
         sInstance = notificationWrapper;
     }
 
-    public abstract void cancel(@NonNull Context context, int id);
+    public abstract void cancelNotification(@NonNull Context context, int id);
 
     public abstract void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
 
     public abstract void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
 
-    public abstract void setAlarm(@NonNull Context context, @NonNull TimeStamp nextAlarm);
+    public abstract void setAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm);
+
+    @NonNull
+    public abstract PendingIntent getPendingIntent(@NonNull Context context);
+
+    public abstract void cancelAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent);
 
     private static class NotificationWrapperImpl extends NotificationWrapper {
         @Override
-        public void cancel(@NonNull Context context, int id) {
+        public void cancelNotification(@NonNull Context context, int id) {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             Assert.assertTrue(notificationManager != null);
 
@@ -266,13 +271,27 @@ abstract class NotificationWrapper {
         }
 
         @Override
-        public void setAlarm(@NonNull Context context, @NonNull TimeStamp nextAlarm) {
+        public void setAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm) {
+            setExact(context, nextAlarm.getLong(), pendingIntent);
+        }
+
+        @NonNull
+        @Override
+        public PendingIntent getPendingIntent(@NonNull Context context) {
             Intent nextIntent = TickService.getIntent(context, false, "NotificationWrapper: TickService.getIntent");
 
             PendingIntent pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             Assert.assertTrue(pendingIntent != null);
 
-            setExact(context, nextAlarm.getLong(), pendingIntent);
+            return pendingIntent;
+        }
+
+        @Override
+        public void cancelAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent) {
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Assert.assertTrue(alarmManager != null);
+
+            alarmManager.cancel(pendingIntent);
         }
     }
 }

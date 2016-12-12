@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -2292,13 +2293,13 @@ public class DomainFactory {
                         if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
                             Instance shownInstance = getInstance(shownInstanceKey);
 
-                            NotificationWrapper.getInstance().cancel(context, shownInstance.getNotificationId());
+                            NotificationWrapper.getInstance().cancelNotification(context, shownInstance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
 
-                            NotificationWrapper.getInstance().cancel(context, notificationId);
+                            NotificationWrapper.getInstance().cancelNotification(context, notificationId);
                         }
                     }
 
@@ -2306,7 +2307,7 @@ public class DomainFactory {
                 }
             } else { // show instances
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    NotificationWrapper.getInstance().cancel(context, 0);
+                    NotificationWrapper.getInstance().cancelNotification(context, 0);
 
                     for (Instance instance : notificationInstances.values()) {
                         Assert.assertTrue(instance != null);
@@ -2318,13 +2319,13 @@ public class DomainFactory {
                         if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                             Instance instance = getInstance(hideInstanceKey);
 
-                            NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                            NotificationWrapper.getInstance().cancelNotification(context, instance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
-                            NotificationWrapper.getInstance().cancel(context, notificationId);
+                            NotificationWrapper.getInstance().cancelNotification(context, notificationId);
                         }
                     }
 
@@ -2342,7 +2343,7 @@ public class DomainFactory {
             }
         } else {
             if (notificationInstances.isEmpty()) {
-                NotificationWrapper.getInstance().cancel(context, 0);
+                NotificationWrapper.getInstance().cancelNotification(context, 0);
             } else {
                 NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, true);
             }
@@ -2351,13 +2352,13 @@ public class DomainFactory {
                 if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                     Instance instance = getInstance(hideInstanceKey);
 
-                    NotificationWrapper.getInstance().cancel(context, instance.getNotificationId());
+                    NotificationWrapper.getInstance().cancelNotification(context, instance.getNotificationId());
                 } else {
                     Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
                     int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
-                    NotificationWrapper.getInstance().cancel(context, notificationId);
+                    NotificationWrapper.getInstance().cancelNotification(context, notificationId);
                 }
             }
 
@@ -2393,10 +2394,13 @@ public class DomainFactory {
         if (minSchedulesTimeStamp.isPresent() && (nextAlarm == null || nextAlarm.compareTo(minSchedulesTimeStamp.get()) > 0))
             nextAlarm = minSchedulesTimeStamp.get();
 
+        PendingIntent pendingIntent = NotificationWrapper.getInstance().getPendingIntent(context);
+        NotificationWrapper.getInstance().cancelAlarm(context, pendingIntent);
+
         if (nextAlarm != null) {
             Assert.assertTrue(nextAlarm.toExactTimeStamp().compareTo(now) > 0);
 
-            NotificationWrapper.getInstance().setAlarm(context, nextAlarm);
+            NotificationWrapper.getInstance().setAlarm(context, pendingIntent, nextAlarm);
         }
     }
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -43,6 +44,11 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        Assert.assertTrue(actionBar != null);
+
+        actionBar.setTitle(null);
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
         Assert.assertTrue(mGroupListFragment != null);

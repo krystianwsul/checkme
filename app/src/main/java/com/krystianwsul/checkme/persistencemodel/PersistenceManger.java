@@ -477,6 +477,7 @@ public class PersistenceManger {
     @NonNull
     public InstanceShownRecord createInstanceShownRecord(@NonNull String remoteTaskId, @NonNull Date scheduleDate, @Nullable String remoteCustomTimeId, @Nullable Integer hour, @Nullable Integer minute, @NonNull String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId));
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
 
         int id = ++mInstanceShownMaxId;
 

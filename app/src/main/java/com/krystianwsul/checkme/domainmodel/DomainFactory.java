@@ -65,6 +65,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -2193,14 +2194,21 @@ public class DomainFactory {
     }
 
     private void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
-        if (!silent) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
-            Assert.assertTrue(sharedPreferences != null);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+        Assert.assertTrue(sharedPreferences != null);
 
-            sharedPreferences.edit()
-                    .putLong(TickService.LAST_TICK_KEY, ExactTimeStamp.getNow().getLong())
-                    .apply();
-        }
+        String tickLog = sharedPreferences.getString(TickService.TICK_LOG, "");
+        List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
+        List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 9, 0), tickLogArr.size()));
+        tickLogArrTrimmed.add(now.toString() + " silent? " + silent);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(TickService.TICK_LOG, TextUtils.join("\n", tickLogArrTrimmed));
+
+        if (!silent)
+            editor.putLong(TickService.LAST_TICK_KEY, now.getLong());
+
+        editor.apply();
 
         List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 

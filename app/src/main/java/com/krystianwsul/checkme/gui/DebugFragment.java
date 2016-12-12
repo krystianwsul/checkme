@@ -73,7 +73,7 @@ public class DebugFragment extends AbstractFragment {
 
             stringBuilder.append("last beeping tick: ");
             stringBuilder.append(lastTickExactTimeStamp.toString());
-            stringBuilder.append("tick log:\n");
+            stringBuilder.append("\ntick log:\n");
             stringBuilder.append(tickLog);
 
             DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());

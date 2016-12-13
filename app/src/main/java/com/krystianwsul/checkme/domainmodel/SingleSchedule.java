@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -48,7 +47,6 @@ public class SingleSchedule extends Schedule {
     private Instance getInstance(@NonNull Task task) {
         InstanceKey instanceKey = new InstanceKey(task.getTaskKey(), getDate(), getTimePair());
 
-        Log.e("asdf", "getInstance " + task.getName() + " " + instanceKey);
         return mDomainFactory.getInstance(instanceKey);
     }
 

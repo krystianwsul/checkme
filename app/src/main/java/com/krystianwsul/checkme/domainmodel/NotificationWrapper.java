@@ -13,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -75,8 +74,6 @@ abstract class NotificationWrapper {
 
         @Override
         public void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
-            Log.e("asdf", "notifyInstance");
-
             Task task = instance.getTask();
             int notificationId = instance.getNotificationId();
             InstanceKey instanceKey = instance.getInstanceKey();
@@ -241,8 +238,6 @@ abstract class NotificationWrapper {
 
         @Override
         public void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
-            Log.e("asdf", "notifyGroup nougat? " + nougat);
-
             ArrayList<String> names = new ArrayList<>();
             ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
             for (Instance instance : instances) {

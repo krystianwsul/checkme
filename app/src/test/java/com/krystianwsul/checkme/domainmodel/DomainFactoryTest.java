@@ -186,7 +186,7 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli);
 
         DomainFactory.Irrelevant irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp);
-        Assert.assertTrue(irrelevantBefore.mCustomTimes.isEmpty());
+        Assert.assertTrue(irrelevantBefore.mLocalCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantBefore.mTasks.isEmpty());
         Assert.assertTrue(irrelevantBefore.mInstances.isEmpty());
 
@@ -201,7 +201,7 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMilli);
 
         DomainFactory.Irrelevant irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp);
-        Assert.assertTrue(irrelevantAfter.mCustomTimes.isEmpty());
+        Assert.assertTrue(irrelevantAfter.mLocalCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 1);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 1);
 
@@ -293,7 +293,7 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayBeforeExactTimeStamp = new ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli);
 
         DomainFactory.Irrelevant irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp);
-        Assert.assertTrue(irrelevantBefore.mCustomTimes.isEmpty());
+        Assert.assertTrue(irrelevantBefore.mLocalCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantBefore.mTasks.isEmpty());
         Assert.assertTrue(irrelevantBefore.mInstances.isEmpty());
 
@@ -309,7 +309,7 @@ public class DomainFactoryTest {
         ExactTimeStamp nextDayAfterExactTimeStamp = new ExactTimeStamp(nextDayAfterDate, nextDayAfterHourMilli);
 
         DomainFactory.Irrelevant irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp);
-        Assert.assertTrue(irrelevantAfter.mCustomTimes.isEmpty());
+        Assert.assertTrue(irrelevantAfter.mLocalCustomTimes.isEmpty());
         Assert.assertTrue(irrelevantAfter.mTasks.size() == 4);
         Assert.assertTrue(irrelevantAfter.mInstances.size() == 3);
 

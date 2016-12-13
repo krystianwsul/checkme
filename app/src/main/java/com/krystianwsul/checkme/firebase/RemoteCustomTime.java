@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import java.util.TreeMap;
 
-class RemoteCustomTime implements CustomTime {
+public class RemoteCustomTime implements CustomTime {
     @NonNull
     private final DomainFactory mDomainFactory;
 
@@ -93,5 +93,16 @@ class RemoteCustomTime implements CustomTime {
     @Override
     public CustomTimeKey getCustomTimeKey() {
         return mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), getId());
+    }
+
+    @NonNull
+    public String getProjectId() {
+        return mRemoteProject.getId();
+    }
+
+    public void delete() {
+        mRemoteProject.deleteCustomTime(this);
+
+        mRemoteCustomTimeRecord.delete();
     }
 }

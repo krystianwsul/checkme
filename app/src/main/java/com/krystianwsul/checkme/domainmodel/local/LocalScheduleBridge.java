@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.domainmodel.ScheduleBridge;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
@@ -47,5 +48,11 @@ abstract class LocalScheduleBridge implements ScheduleBridge {
         Assert.assertTrue(scheduleType != null);
 
         return scheduleType;
+    }
+
+    @Nullable
+    @Override
+    public Pair<String, String> getRemoteCustomTimeKey() {
+        return null;
     }
 }

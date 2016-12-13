@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -80,5 +81,15 @@ class RemoteWeeklyScheduleBridge implements WeeklyScheduleBridge {
     @Override
     public void delete() {
         mRemoteWeeklyScheduleRecord.delete();
+    }
+
+    @Nullable
+    @Override
+    public Pair<String, String> getRemoteCustomTimeKey() {
+        if (TextUtils.isEmpty(mRemoteWeeklyScheduleRecord.getCustomTimeId())) {
+            return null;
+        } else {
+            return Pair.create(mRemoteWeeklyScheduleRecord.getProjectId(), mRemoteWeeklyScheduleRecord.getCustomTimeId());
+        }
     }
 }

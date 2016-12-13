@@ -60,17 +60,17 @@ public class RemoteProject {
         for (RemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteProjectRecord.getRemoteCustomTimeRecords().values()) {
             Assert.assertTrue(remoteCustomTimeRecord != null);
 
+            RemoteCustomTime remoteCustomTime = new RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord);
+
+            Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
+            Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
+
+            mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId, remoteCustomTime);
+
             if (remoteCustomTimeRecord.getOwnerId().equals(domainFactory.getLocalFactory().getUuid()) && domainFactory.getLocalFactory().hasLocalCustomTime(remoteCustomTimeRecord.getLocalId())) {
                 LocalCustomTime localCustomTime = domainFactory.getLocalFactory().getLocalCustomTime(remoteCustomTimeRecord.getLocalId());
 
                 localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord);
-            } else {
-                RemoteCustomTime remoteCustomTime = new RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord);
-
-                Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
-                Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
-
-                mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId, remoteCustomTime);
             }
         }
 
@@ -298,5 +298,11 @@ public class RemoteProject {
     @NonNull
     RemoteCustomTimeRecord newRemoteCustomTimeRecord(@NonNull CustomTimeJson customTimeJson) {
         return mRemoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson);
+    }
+
+    void deleteCustomTime(@NonNull RemoteCustomTime remoteCustomTime) {
+        Assert.assertTrue(mRemoteCustomTimes.containsKey(remoteCustomTime.getId()));
+
+        mRemoteCustomTimes.remove(remoteCustomTime.getId());
     }
 }

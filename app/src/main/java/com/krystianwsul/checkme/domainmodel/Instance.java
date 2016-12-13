@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -286,4 +287,7 @@ public abstract class Instance {
 
     @NonNull
     public abstract RemoteProject getRemoteNonNullProject();
+
+    @Nullable
+    protected abstract Pair<String, String> getRemoteCustomTimeKey();
 }

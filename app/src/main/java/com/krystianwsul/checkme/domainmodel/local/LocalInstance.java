@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -368,5 +369,11 @@ public class LocalInstance extends Instance {
     @Override
     public RemoteProject getRemoteNonNullProject() {
         throw new UnsupportedOperationException();
+    }
+
+    @Nullable
+    @Override
+    protected Pair<String, String> getRemoteCustomTimeKey() {
+        return null;
     }
 }

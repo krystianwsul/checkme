@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -403,5 +404,18 @@ public class RemoteInstance extends Instance {
     @Override
     public RemoteProject getRemoteNonNullProject() {
         return getTask().getRemoteProject();
+    }
+
+    @Nullable
+    @Override
+    protected Pair<String, String> getRemoteCustomTimeKey() {
+        if (mRemoteInstanceRecord != null) {
+            if (TextUtils.isEmpty(mRemoteInstanceRecord.getInstanceCustomTimeId()))
+                return null;
+            else
+                return Pair.create(mRemoteProject.getId(), mRemoteInstanceRecord.getInstanceCustomTimeId());
+        } else {
+            return null; // scenario already covered by task/schedule relevance
+        }
     }
 }

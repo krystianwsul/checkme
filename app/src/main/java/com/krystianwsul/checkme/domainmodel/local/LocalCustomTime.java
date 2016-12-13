@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
@@ -191,9 +190,6 @@ public class LocalCustomTime implements CustomTime {
         mDomainFactory.getLocalFactory().deleteCustomTime(this);
 
         mCustomTimeRecord.delete();
-
-        Stream.of(mRemoteCustomTimeRecords.values())
-                .forEach(RemoteCustomTimeRecord::delete);
     }
 
     @NonNull

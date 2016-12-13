@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -86,4 +87,9 @@ public abstract class Schedule {
 
     @NonNull
     public abstract CreateTaskLoader.ScheduleData getScheduleData();
+
+    @Nullable
+    Pair<String, String> getRemoteCustomTimeKey() {
+        return getScheduleBridge().getRemoteCustomTimeKey();
+    }
 }

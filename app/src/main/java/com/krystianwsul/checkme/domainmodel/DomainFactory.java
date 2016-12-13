@@ -2575,12 +2575,11 @@ public class DomainFactory {
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark custom times relevant
-            if (mTask.current(now))
-                Stream.of(mTask.getCurrentSchedules(now))
-                        .map(Schedule::getCustomTimeKey)
-                        .filter(customTimeKey -> customTimeKey != null && customTimeKey.mLocalCustomTimeId != null)
-                        .map(customTimeKey -> customTimeRelevances.get(customTimeKey.mLocalCustomTimeId))
-                        .forEach(LocalCustomTimeRelevance::setRelevant);
+            Stream.of(mTask.getSchedules())
+                    .map(Schedule::getCustomTimeKey)
+                    .filter(customTimeKey -> customTimeKey != null && customTimeKey.mLocalCustomTimeId != null)
+                    .map(customTimeKey -> customTimeRelevances.get(customTimeKey.mLocalCustomTimeId))
+                    .forEach(LocalCustomTimeRelevance::setRelevant);
         }
 
         boolean getRelevant() {
@@ -2594,12 +2593,11 @@ public class DomainFactory {
         void setRemoteCustomTimeRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull ExactTimeStamp now) {
             Assert.assertTrue(mRelevant);
 
-            if (mTask.current(now))
-                Stream.of(mTask.getCurrentSchedules(now))
-                        .map(Schedule::getRemoteCustomTimeKey)
-                        .filter(pair -> pair != null)
-                        .map(remoteCustomTimeRelevances::get)
-                        .forEach(RemoteCustomTimeRelevance::setRelevant);
+            Stream.of(mTask.getSchedules())
+                    .map(Schedule::getRemoteCustomTimeKey)
+                    .filter(pair -> pair != null)
+                    .map(remoteCustomTimeRelevances::get)
+                    .forEach(RemoteCustomTimeRelevance::setRelevant);
         }
     }
 

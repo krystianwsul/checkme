@@ -2235,22 +2235,6 @@ public class DomainFactory {
     }
 
     private void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
-        Assert.assertTrue(sharedPreferences != null);
-
-        String tickLog = sharedPreferences.getString(TickService.TICK_LOG, "");
-        List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
-        List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 9, 0), tickLogArr.size()));
-        tickLogArrTrimmed.add(now.toString() + " silent? " + silent);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(TickService.TICK_LOG, TextUtils.join("\n", tickLogArrTrimmed));
-
-        if (!silent)
-            editor.putLong(TickService.LAST_TICK_KEY, now.getLong());
-
-        editor.apply();
-
         List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
 
         Map<InstanceKey, Instance> notificationInstances = Stream.of(rootInstances)
@@ -2329,6 +2313,8 @@ public class DomainFactory {
             }
         }
 
+        String message = "";
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
@@ -2392,11 +2378,14 @@ public class DomainFactory {
             }
         } else {
             if (notificationInstances.isEmpty()) {
+                message += ", hg";
                 NotificationWrapper.getInstance().cancelNotification(context, 0);
             } else {
+                message += ", sg";
                 NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, true);
             }
 
+            message += ", hiding " + hideInstanceKeys.size();
             for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                 if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                     Instance instance = getInstance(hideInstanceKey);
@@ -2411,6 +2400,7 @@ public class DomainFactory {
                 }
             }
 
+            message += ", s " + showInstanceKeys.size();
             for (InstanceKey showInstanceKey : showInstanceKeys) {
                 Instance instance = notificationInstances.get(showInstanceKey);
                 Assert.assertTrue(instance != null);
@@ -2418,10 +2408,30 @@ public class DomainFactory {
                 NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, true);
             }
 
-            Stream.of(notificationInstances.values())
+            List<Instance> updateInstances = Stream.of(notificationInstances.values())
                     .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
+                    .collect(Collectors.toList());
+
+            message += ", u " + updateInstances.size();
+            Stream.of(updateInstances)
                     .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, true));
         }
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+        Assert.assertTrue(sharedPreferences != null);
+
+        String tickLog = sharedPreferences.getString(TickService.TICK_LOG, "");
+        List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
+        List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 9, 0), tickLogArr.size()));
+        tickLogArrTrimmed.add(now.toString() + " s? " + (silent ? "t" : "f") + message);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(TickService.TICK_LOG, TextUtils.join("\n", tickLogArrTrimmed));
+
+        if (!silent)
+            editor.putLong(TickService.LAST_TICK_KEY, now.getLong());
+
+        editor.apply();
 
         Optional<TimeStamp> minInstancesTimeStamp = Stream.of(getExistingInstances())
                 .map(existingInstance -> existingInstance.getInstanceDateTime().getTimeStamp())

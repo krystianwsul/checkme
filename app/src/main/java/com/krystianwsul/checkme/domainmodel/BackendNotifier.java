@@ -10,6 +10,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteProject;
+import com.krystianwsul.checkme.firebase.UserData;
 
 import junit.framework.Assert;
 
@@ -25,8 +26,9 @@ class BackendNotifier {
     private static final String PREFIX = "http://check-me-add47.appspot.com/notify?";
 
     @NonNull
-    static String getUrl(@NonNull Set<String> projects, boolean production) {
+    static String getUrl(@NonNull Set<String> projects, boolean production, @NonNull String sender) {
         Assert.assertTrue(!projects.isEmpty());
+        Assert.assertTrue(!TextUtils.isEmpty(sender));
 
         List<String> parameters = Stream.of(projects)
                 .map(project -> "projects=" + project)
@@ -35,10 +37,12 @@ class BackendNotifier {
         if (production)
             parameters.add("production=1");
 
+        parameters.add("sender=" + sender);
+
         return PREFIX + TextUtils.join("&", parameters);
     }
 
-    BackendNotifier(@NonNull Set<RemoteProject> remoteProjects) {
+    BackendNotifier(@NonNull Set<RemoteProject> remoteProjects, @NonNull UserData userData) {
         String root = DatabaseWrapper.getRoot();
 
         boolean production;
@@ -57,7 +61,7 @@ class BackendNotifier {
                 .map(RemoteProject::getId)
                 .collect(Collectors.toSet());
 
-        String url = getUrl(projectIds, production);
+        String url = getUrl(projectIds, production, userData.getKey());
         Assert.assertTrue(!TextUtils.isEmpty(url));
 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {

@@ -52,9 +52,9 @@ public class BackendNotifierTest {
     @Test
     public void testOneProjectDevelopment() {
         Set<String> projects = new TreeSet<>(Collections.singletonList("-KXvJTar2cCxxrGCtN_w"));
-        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w";
+        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, false);
+        String url = BackendNotifier.getUrl(projects, false, "asdf");
 
         Assert.assertTrue(correctUrl.equals(url));
     }
@@ -62,9 +62,9 @@ public class BackendNotifierTest {
     @Test
     public void testOneProjectProduction() {
         Set<String> projects = new TreeSet<>(Collections.singletonList("-KXvJTar2cCxxrGCtN_w"));
-        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&production=1";
+        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&production=1&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, true);
+        String url = BackendNotifier.getUrl(projects, true, "asdf");
 
         Assert.assertTrue(correctUrl.equals(url));
     }
@@ -72,9 +72,9 @@ public class BackendNotifierTest {
     @Test
     public void testTwoProjectsDevelopment() {
         Set<String> projects = new TreeSet<>(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"));
-        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf";
+        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, false);
+        String url = BackendNotifier.getUrl(projects, false, "asdf");
 
         Assert.assertTrue(correctUrl.equals(url));
     }
@@ -82,9 +82,9 @@ public class BackendNotifierTest {
     @Test
     public void testTwoProjectsProduction() {
         Set<String> projects = new TreeSet<>(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"));
-        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&production=1";
+        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&production=1&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, true);
+        String url = BackendNotifier.getUrl(projects, true, "asdf");
 
         Assert.assertTrue(correctUrl.equals(url));
     }

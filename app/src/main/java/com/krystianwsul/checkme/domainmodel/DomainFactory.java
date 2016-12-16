@@ -2213,8 +2213,11 @@ public class DomainFactory {
     private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull Set<RemoteProject> remoteProjects) {
         updateNotifications(context, now);
 
-        if (!remoteProjects.isEmpty())
-            new BackendNotifier(remoteProjects);
+        if (!remoteProjects.isEmpty()) {
+            Assert.assertTrue(mUserData != null);
+
+            new BackendNotifier(remoteProjects, mUserData);
+        }
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {

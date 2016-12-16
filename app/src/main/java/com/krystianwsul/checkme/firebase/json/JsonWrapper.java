@@ -14,14 +14,14 @@ import java.util.Set;
 @SuppressWarnings({"unused", "WeakerAccess"})
 @IgnoreExtraProperties
 public class JsonWrapper {
-    public Map<String, Boolean> recordOf;
+    public Map<String, Object> recordOf;
     public ProjectJson projectJson;
 
     public JsonWrapper() {
 
     }
 
-    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull ProjectJson projectJson) {
+    public JsonWrapper(@NonNull Set<String> recordOf, @NonNull ProjectJson projectJson) {// todo userdata
         Assert.assertTrue(!recordOf.isEmpty());
 
         this.recordOf = Stream.of(recordOf)
@@ -30,7 +30,17 @@ public class JsonWrapper {
         this.projectJson = projectJson;
     }
 
-    public void setRecordOf(@NonNull Map<String, Boolean> recordOf) {
-        this.recordOf = recordOf;
+    public void updateRecordOf(@NonNull Set<String> add, @NonNull Set<String> remove) { // todo userdata
+        Assert.assertTrue(Stream.of(add).noneMatch(remove::contains));
+        Assert.assertTrue(Stream.of(add).noneMatch(recordOf::containsKey));
+
+        Assert.assertTrue(Stream.of(remove).noneMatch(add::contains));
+        Assert.assertTrue(Stream.of(remove).allMatch(recordOf::containsKey));
+
+        for (String key : remove)
+            recordOf.remove(key);
+
+        for (String key : add)
+            recordOf.put(key, true);
     }
 }

@@ -2,15 +2,12 @@ package com.krystianwsul.checkme.firebase.records;
 
 import android.support.annotation.NonNull;
 
-import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 
 import junit.framework.Assert;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class RootRemoteRecord extends RemoteRecord {
@@ -57,19 +54,14 @@ public abstract class RootRemoteRecord extends RemoteRecord {
         Assert.assertTrue(Stream.of(addedFriends)
                 .noneMatch(removedFriends::contains));
 
-        HashSet<String> recordOf = new HashSet<>(getRecordOf());
-        recordOf.addAll(addedFriends);
-        recordOf.removeAll(removedFriends);
+        mJsonWrapper.updateRecordOf(addedFriends, removedFriends);
 
-        setRecordOf(recordOf);
-    }
+        for (String addedFriend : addedFriends) {
+            addValue(getId() + "/recordOf/" + addedFriend, true);
+        }
 
-    private void setRecordOf(@NonNull Set<String> recordOf) {
-        Map<String, Boolean> mapRecordOf = Stream.of(recordOf)
-                .collect(Collectors.toMap(key -> key, key -> true));
-
-        mJsonWrapper.setRecordOf(mapRecordOf);
-
-        addValue(getId() + "/recordOf", mapRecordOf);
+        for (String removedFriend : removedFriends) {
+            addValue(getId() + "/recordOf/" + removedFriend, null);
+        }
     }
 }

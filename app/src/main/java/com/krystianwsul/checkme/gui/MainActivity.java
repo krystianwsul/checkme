@@ -776,7 +776,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             mNavHeaderEmail.setText(null);
 
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn);
-            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_projects).setEnabled(true);
+            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_projects).setEnabled(false);
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_friends).setEnabled(false);
         }
     }

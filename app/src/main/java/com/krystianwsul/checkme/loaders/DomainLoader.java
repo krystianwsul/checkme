@@ -123,13 +123,12 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                         forceLoad();
                     } else {
                         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                        if (firebaseUser == null)
-                            throw new InstanceDoneService.NeedsFirebaseException();
+                        if (firebaseUser != null) {
+                            UserData userData = new UserData(firebaseUser);
 
-                        UserData userData = new UserData(firebaseUser);
-
-                        mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
-                        mDomainFactory.addFriendFirebaseListener(mFirebaseListener);
+                            mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                            mDomainFactory.addFriendFirebaseListener(mFirebaseListener);
+                        }
                     }
 
                     break;

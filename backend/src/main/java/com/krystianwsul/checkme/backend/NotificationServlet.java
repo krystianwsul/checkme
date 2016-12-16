@@ -47,6 +47,10 @@ public class NotificationServlet extends HttpServlet {
 
         String prefix = (production ? "production" : "development");
 
+        String sender = req.getParameter("sender");
+        resp.getWriter().println("sender: " + sender);
+        resp.getWriter().println();
+
         resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
         resp.getWriter().println();
 
@@ -87,7 +91,12 @@ public class NotificationServlet extends HttpServlet {
 
             Set<String> userKeys = recordOf.keySet();
 
-            resp.getWriter().println("user keys: " + Joiner.on(", ").join(userKeys));
+            resp.getWriter().println("user keys before removing sender: " + Joiner.on(", ").join(userKeys));
+
+            if (!StringUtils.isEmpty(sender))
+                userKeys.remove(sender);
+
+            resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(userKeys));
 
             for (String userKey : userKeys) {
                 Assert.assertTrue(!StringUtils.isEmpty(userKey));

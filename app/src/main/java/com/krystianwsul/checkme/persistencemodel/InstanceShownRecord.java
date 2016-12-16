@@ -64,8 +64,6 @@ public class InstanceShownRecord extends Record {
     static ArrayList<InstanceShownRecord> getInstancesShownRecords(SQLiteDatabase sqLiteDatabase) {
         Assert.assertTrue(sqLiteDatabase != null);
 
-        sqLiteDatabase.delete(TABLE_INSTANCES_SHOWN, COLUMN_PROJECT_ID + " IS NULL OR " + COLUMN_PROJECT_ID + " = ''", null); // todo remove this line in the next version
-
         ArrayList<InstanceShownRecord> instancesShownRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES_SHOWN, null, null, null, null, null, null);

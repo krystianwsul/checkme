@@ -27,12 +27,11 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractDialogFragment;
-import com.krystianwsul.checkme.gui.MyCalendarFragment;
+import com.krystianwsul.checkme.gui.DatePickerDialogFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
@@ -140,6 +139,13 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
 
             updateFields();
         }
+    };
+
+    private final DatePickerDialogFragment.Listener mDatePickerDialogFragmentListener = date -> {
+        Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
+
+        mScheduleDialogData.mDate = date;
+        updateFields();
     };
 
     @NonNull
@@ -361,27 +367,19 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
         if (timePickerDialogFragment != null)
             timePickerDialogFragment.setListener(mTimePickerDialogFragmentListener);
 
-        final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = (dialog, year, monthOfYear, dayOfMonth) -> {
-            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
-
-            mScheduleDialogData.mDate = new Date(year, monthOfYear + 1, dayOfMonth);
-            updateFields();
-        };
-
         mScheduleDialogDate.setOnClickListener(v -> {
             Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
 
-            MyCalendarFragment calendarDatePickerDialogFragment = new MyCalendarFragment();
-            calendarDatePickerDialogFragment.setDate(mScheduleDialogData.mDate);
-            calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
-            calendarDatePickerDialogFragment.show(getChildFragmentManager(), DATE_FRAGMENT_TAG);
+            DatePickerDialogFragment datePickerDialogFragment = DatePickerDialogFragment.newInstance(mScheduleDialogData.mDate);
+            datePickerDialogFragment.setListener(mDatePickerDialogFragmentListener);
+            datePickerDialogFragment.show(getChildFragmentManager(), DATE_FRAGMENT_TAG);
         });
 
-        CalendarDatePickerDialogFragment calendarDatePickerDialogFragment = (CalendarDatePickerDialogFragment) getChildFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
-        if (calendarDatePickerDialogFragment != null) {
+        DatePickerDialogFragment datePickerDialogFragment = (DatePickerDialogFragment) getChildFragmentManager().findFragmentByTag(DATE_FRAGMENT_TAG);
+        if (datePickerDialogFragment != null) {
             Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);
 
-            calendarDatePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+            datePickerDialogFragment.setListener(mDatePickerDialogFragmentListener);
         }
 
         mBroadcastReceiver = new BroadcastReceiver() {

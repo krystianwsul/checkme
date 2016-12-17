@@ -30,11 +30,11 @@ import com.annimon.stream.Stream;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
-import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractDialogFragment;
 import com.krystianwsul.checkme.gui.MyCalendarFragment;
 import com.krystianwsul.checkme.gui.TimeDialogFragment;
+import com.krystianwsul.checkme.gui.TimePickerDialogFragment;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -113,10 +113,9 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
         public void onOtherSelected() {
             Assert.assertTrue(mCustomTimeDatas != null);
 
-            RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
-            radialTimePickerDialogFragment.setStartTime(mScheduleDialogData.mTimePairPersist.getHourMinute().getHour(), mScheduleDialogData.mTimePairPersist.getHourMinute().getMinute());
-            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
-            radialTimePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
+            TimePickerDialogFragment timePickerDialogFragment = TimePickerDialogFragment.newInstance(mScheduleDialogData.mTimePairPersist.getHourMinute());
+            timePickerDialogFragment.setListener(mTimePickerDialogFragmentListener);
+            timePickerDialogFragment.show(getChildFragmentManager(), TIME_PICKER_TAG);
         }
 
         @Override
@@ -125,10 +124,10 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
         }
     };
 
-    private final RadialTimePickerDialogFragment.OnTimeSetListener mOnTimeSetListener = (dialog, hourOfDay, minute) -> {
+    private final TimePickerDialogFragment.Listener mTimePickerDialogFragmentListener = hourMinute -> {
         Assert.assertTrue(mCustomTimeDatas != null);
 
-        mScheduleDialogData.mTimePairPersist.setHourMinute(new HourMinute(hourOfDay, minute));
+        mScheduleDialogData.mTimePairPersist.setHourMinute(hourMinute);
         updateFields();
     };
 
@@ -358,9 +357,9 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
         if (timeDialogFragment != null)
             timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
 
-        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
-        if (radialTimePickerDialogFragment != null)
-            radialTimePickerDialogFragment.setOnTimeSetListener(mOnTimeSetListener);
+        TimePickerDialogFragment timePickerDialogFragment = (TimePickerDialogFragment) getChildFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
+        if (timePickerDialogFragment != null)
+            timePickerDialogFragment.setListener(mTimePickerDialogFragmentListener);
 
         final CalendarDatePickerDialogFragment.OnDateSetListener onDateSetListener = (dialog, year, monthOfYear, dayOfMonth) -> {
             Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE);

@@ -18,11 +18,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
+import com.krystianwsul.checkme.gui.TimePickerDialogFragment;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -68,6 +68,17 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = ShowCustomTimeActivity.this::finish;
 
     private LinearLayout mShowCustomTimeContainer;
+
+    private final TimePickerDialogFragment.Listener mTimePickerDialogFragmentListener = hourMinute -> {
+        Assert.assertTrue(mEditedDayOfWeek != null);
+        Assert.assertTrue(mTimeViews.containsKey(mEditedDayOfWeek));
+        Assert.assertTrue(mHourMinutes.containsKey(mEditedDayOfWeek));
+
+        mHourMinutes.put(mEditedDayOfWeek, hourMinute);
+        mTimeViews.get(mEditedDayOfWeek).setText(hourMinute.toString());
+
+        mEditedDayOfWeek = null;
+    };
 
     public static Intent getEditIntent(int customTimeId, Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
@@ -271,18 +282,6 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
         mToolbarLayout.setVisibility(View.VISIBLE);
         mShowCustomTimeContainer.setVisibility(View.VISIBLE);
 
-        final RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener = (dialog, hourOfDay, minute) -> {
-            Assert.assertTrue(mEditedDayOfWeek != null);
-            Assert.assertTrue(mTimeViews.containsKey(mEditedDayOfWeek));
-            Assert.assertTrue(mHourMinutes.containsKey(mEditedDayOfWeek));
-
-            HourMinute hourMinute = new HourMinute(hourOfDay, minute);
-            mHourMinutes.put(mEditedDayOfWeek, hourMinute);
-            mTimeViews.get(mEditedDayOfWeek).setText(hourMinute.toString());
-
-            mEditedDayOfWeek = null;
-        };
-
         for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
             TextView timeView = mTimeViews.get(dayOfWeek);
             Assert.assertTrue(timeView != null);
@@ -298,16 +297,15 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
 
                 HourMinute currHourMinute = mHourMinutes.get(finalDayOfWeek);
 
-                RadialTimePickerDialogFragment radialTimePickerDialogFragment = new RadialTimePickerDialogFragment();
-                radialTimePickerDialogFragment.setStartTime(currHourMinute.getHour(), currHourMinute.getMinute());
-                radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
-                radialTimePickerDialogFragment.show(getSupportFragmentManager(), TIME_PICKER_TAG);
+                TimePickerDialogFragment timePickerDialogFragment = TimePickerDialogFragment.newInstance(currHourMinute);
+                timePickerDialogFragment.setListener(mTimePickerDialogFragmentListener);
+                timePickerDialogFragment.show(getSupportFragmentManager(), TIME_PICKER_TAG);
             });
         }
 
-        RadialTimePickerDialogFragment radialTimePickerDialogFragment = (RadialTimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
-        if (radialTimePickerDialogFragment != null)
-            radialTimePickerDialogFragment.setOnTimeSetListener(onTimeSetListener);
+        TimePickerDialogFragment timePickerDialogFragment = (TimePickerDialogFragment) getSupportFragmentManager().findFragmentByTag(TIME_PICKER_TAG);
+        if (timePickerDialogFragment != null)
+            timePickerDialogFragment.setListener(mTimePickerDialogFragmentListener);
 
         mToolbarEditText.addTextChangedListener(new TextWatcher() {
             private boolean mSkip = (mSavedInstanceState != null);

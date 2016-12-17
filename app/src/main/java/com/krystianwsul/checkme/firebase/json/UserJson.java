@@ -6,7 +6,7 @@ import android.text.TextUtils;
 
 import junit.framework.Assert;
 
-public class RecordOfJson {
+public class UserJson {
     @Nullable
     private String email;
 
@@ -17,11 +17,11 @@ public class RecordOfJson {
     private String token;
 
     @SuppressWarnings("unused")
-    public RecordOfJson() {
+    public UserJson() {
 
     }
 
-    public RecordOfJson(@NonNull String email, @NonNull String name, @NonNull String token) {
+    public UserJson(@NonNull String email, @NonNull String name, @NonNull String token) {
         Assert.assertTrue(!TextUtils.isEmpty(email));
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!TextUtils.isEmpty(token));
@@ -50,12 +50,6 @@ public class RecordOfJson {
         Assert.assertTrue(!TextUtils.isEmpty(token));
 
         return token;
-    }
-
-    public void setEmail(@NonNull String email) {
-        Assert.assertTrue(!TextUtils.isEmpty(email));
-
-        this.email = email;
     }
 
     public void setName(@NonNull String name) {

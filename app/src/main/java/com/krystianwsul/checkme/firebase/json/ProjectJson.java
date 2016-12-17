@@ -27,11 +27,14 @@ public class ProjectJson {
     @Nullable
     private Map<String, CustomTimeJson> customTimes;
 
+    @Nullable
+    private Map<String, UserJson> users;
+
     public ProjectJson() {
 
     }
 
-    public ProjectJson(@NonNull String name, long startTime, @Nullable Long endTime, @NonNull Map<String, TaskJson> tasks, @NonNull Map<String, TaskHierarchyJson> taskHierarchies, @NonNull Map<String, CustomTimeJson> customTimes) {
+    public ProjectJson(@NonNull String name, long startTime, @Nullable Long endTime, @NonNull Map<String, TaskJson> tasks, @NonNull Map<String, TaskHierarchyJson> taskHierarchies, @NonNull Map<String, CustomTimeJson> customTimes, @NonNull Map<String, UserJson> users) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
 
@@ -42,6 +45,7 @@ public class ProjectJson {
         this.tasks = tasks;
         this.taskHierarchies = taskHierarchies;
         this.customTimes = customTimes;
+        this.users = users;
     }
 
     @NonNull
@@ -83,6 +87,14 @@ public class ProjectJson {
             return customTimes;
     }
 
+    @NonNull
+    public Map<String, UserJson> getUsers() {
+        if (users == null)
+            return new HashMap<>();
+        else
+            return users;
+    }
+
     public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
@@ -103,5 +115,9 @@ public class ProjectJson {
 
     public void setCustomTimes(@NonNull Map<String, CustomTimeJson> customTimes) {
         this.customTimes = customTimes;
+    }
+
+    public void setUsers(@NonNull Map<String, UserJson> users) {
+        this.users = users;
     }
 }

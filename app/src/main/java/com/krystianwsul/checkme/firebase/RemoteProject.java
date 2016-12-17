@@ -90,7 +90,7 @@ public class RemoteProject {
                 .map(remoteUserRecord -> new RemoteUser(domainFactory, this, remoteUserRecord))
                 .forEach(remoteUser -> mRemoteUsers.put(remoteUser.getId(), remoteUser));
 
-        if (!mRemoteUsers.containsKey(userData.getKey()))
+        if (!mRemoteUsers.containsKey(userData.getKey()))  // todo user
             addUserData(userData);
     }
 
@@ -247,6 +247,8 @@ public class RemoteProject {
 
     void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         mRemoteProjectRecord.updateRecordOf(addedFriends, removedFriends);
+
+        // todo user
 
         Map<String, UserData> friends = mDomainFactory.getFriends();
         Assert.assertTrue(friends != null);

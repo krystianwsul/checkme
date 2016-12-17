@@ -25,8 +25,7 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.firebase.DatabaseWrapper;
-import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
@@ -41,7 +40,6 @@ import java.util.List;
 public class UserListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<UserListLoader.Data> {
     private static final String PROJECT_ID_KEY = "projectId";
 
-    private static final String USER_DATA_KEY = "userData";
     private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
 
     private RelativeLayout mFriendListLayout;
@@ -117,9 +115,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         }
     };
 
-    @Nullable
-    private UserData mUserData = null;
-
     @NonNull
     public static UserListFragment newFriendInstance() {
         UserListFragment userListFragment = new UserListFragment();
@@ -194,17 +189,10 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         mEmptyText = (TextView) mFriendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(USER_DATA_KEY)) {
-                mUserData = savedInstanceState.getParcelable(USER_DATA_KEY);
-                Assert.assertTrue(mUserData != null);
-            }
-
-            if (savedInstanceState.containsKey(SELECTED_USER_DATA_EMAILS_KEY)) {
-                mSelectedUserDataEmails = savedInstanceState.getStringArrayList(SELECTED_USER_DATA_EMAILS_KEY);
-                Assert.assertTrue(mSelectedUserDataEmails != null);
-                Assert.assertTrue(!mSelectedUserDataEmails.isEmpty());
-            }
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_USER_DATA_EMAILS_KEY)) {
+            mSelectedUserDataEmails = savedInstanceState.getStringArrayList(SELECTED_USER_DATA_EMAILS_KEY);
+            Assert.assertTrue(mSelectedUserDataEmails != null);
+            Assert.assertTrue(!mSelectedUserDataEmails.isEmpty());
         }
 
         getLoaderManager().initLoader(0, null, this);
@@ -212,7 +200,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
     @Override
     public Loader<UserListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new UserListLoader(getActivity(), null);
+        return new UserListLoader(getActivity(), mProjectId);
     }
 
     @Override
@@ -251,22 +239,11 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mUserData != null)
-            outState.putParcelable(USER_DATA_KEY, mUserData);
-
         if (mFriendListAdapter != null) {
             ArrayList<String> selectedUserDataEmails = mFriendListAdapter.getSelected();
             if (!selectedUserDataEmails.isEmpty())
                 outState.putStringArrayList(SELECTED_USER_DATA_EMAILS_KEY, selectedUserDataEmails);
         }
-    }
-
-    public void show(@NonNull UserData userData) {
-        mUserData = userData;
-    }
-
-    public void hide() {
-        mUserData = null;
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
@@ -345,8 +322,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         }
 
         void removeSelected() {
-            Assert.assertTrue(mUserData != null);
-
             List<UserDataWrapper> selectedUserDataWrappers = Stream.of(mUserDataWrappers)
                     .filter(customTimeWrapper -> customTimeWrapper.mSelected)
                     .collect(Collectors.toList());
@@ -359,7 +334,10 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                 notifyItemRemoved(position);
             }
 
-            Stream.of(selectedUserDataWrappers).forEach(userDataWrapper -> DatabaseWrapper.removeFriend(mUserData, userDataWrapper.mUserListData.mKey)); // todo move to domain factory
+            DomainFactory.getDomainFactory(getActivity())
+                    .removeFriends(Stream.of(selectedUserDataWrappers)
+                            .map(userDataWrapper -> userDataWrapper.mUserListData.mKey)
+                            .collect(Collectors.toSet()));
         }
 
         class FriendHolder extends RecyclerView.ViewHolder {

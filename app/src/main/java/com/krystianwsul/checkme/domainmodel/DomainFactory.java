@@ -1609,6 +1609,20 @@ public class DomainFactory {
         updateNotificationsTick(context, now, silent);
     }
 
+    public synchronized void removeFriends(@NonNull Set<String> keys) {
+        MyCrashlytics.log("DomainFactory.removeFriends");
+        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mFriends != null);
+
+        Stream.of(keys).forEach(key -> {
+            Assert.assertTrue(mFriends.containsKey(key));
+            mFriends.remove(key);
+
+            DatabaseWrapper.removeFriend(mUserData, key);
+        });
+    }
+
     // internal
 
     @Nullable

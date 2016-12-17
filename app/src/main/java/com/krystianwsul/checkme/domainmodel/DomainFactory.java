@@ -68,7 +68,6 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1847,7 +1846,7 @@ public class DomainFactory {
         recordOf.add(mUserData.getKey());
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
-        mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask, recordOf);
+        mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask);
 
         updateNotifications(context, true, now, Stream.of(localToRemoteConversion.mLocalTasks.values())
                 .map(pair -> pair.first.getTaskKey())
@@ -1855,7 +1854,7 @@ public class DomainFactory {
 
         RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(recordOf, now);
 
-        for (Pair<LocalTask, Collection<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
             Assert.assertTrue(pair != null);
 
             RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, recordOf, pair.second, now);
@@ -1875,7 +1874,7 @@ public class DomainFactory {
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 
-        for (Pair<LocalTask, Collection<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
             Stream.of(pair.second)
                     .forEach(LocalInstance::delete);
 
@@ -2179,7 +2178,7 @@ public class DomainFactory {
 
             Stream.of(taskRelevances.values())
                     .filter(TaskRelevance::getRelevant)
-                    .forEach(taskRelevance -> taskRelevance.setRemoteCustomTimeRelevant(remoteCustomTimeRelevances, now));
+                    .forEach(taskRelevance -> taskRelevance.setRemoteCustomTimeRelevant(remoteCustomTimeRelevances));
 
             Stream.of(instanceRelevances.values())
                     .filter(InstanceRelevance::getRelevant)
@@ -2603,7 +2602,7 @@ public class DomainFactory {
             return mTask;
         }
 
-        void setRemoteCustomTimeRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull ExactTimeStamp now) {
+        void setRemoteCustomTimeRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances) {
             Assert.assertTrue(mRelevant);
 
             Stream.of(mTask.getSchedules())
@@ -2758,7 +2757,7 @@ public class DomainFactory {
     }
 
     public static class LocalToRemoteConversion {
-        public final Map<Integer, Pair<LocalTask, Collection<LocalInstance>>> mLocalTasks = new HashMap<>();
+        public final Map<Integer, Pair<LocalTask, List<LocalInstance>>> mLocalTasks = new HashMap<>();
         public final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();
 
         final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();

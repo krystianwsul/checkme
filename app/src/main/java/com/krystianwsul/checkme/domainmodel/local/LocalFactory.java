@@ -464,13 +464,13 @@ public class LocalFactory {
         return mLocalTasks.values();
     }
 
-    public void convertLocalToRemoteHelper(@NonNull DomainFactory.LocalToRemoteConversion localToRemoteConversion, @NonNull LocalTask localTask, @NonNull Set<String> recordOf) {
+    public void convertLocalToRemoteHelper(@NonNull DomainFactory.LocalToRemoteConversion localToRemoteConversion, @NonNull LocalTask localTask) {
         if (localToRemoteConversion.mLocalTasks.containsKey(localTask.getId()))
             return;
 
         TaskKey taskKey = localTask.getTaskKey();
 
-        localToRemoteConversion.mLocalTasks.put(localTask.getId(), Pair.create(localTask, mExistingLocalInstances.get(taskKey).values()));
+        localToRemoteConversion.mLocalTasks.put(localTask.getId(), Pair.create(localTask, new ArrayList<>(mExistingLocalInstances.get(taskKey).values())));
 
         Set<LocalTaskHierarchy> parentLocalTaskHierarchies = mLocalTaskHierarchies.getByChildTaskKey(taskKey);
 
@@ -478,19 +478,12 @@ public class LocalFactory {
 
         Stream.of(mLocalTaskHierarchies.getByParentTaskKey(taskKey))
                 .map(LocalTaskHierarchy::getChildTask)
-                .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, childTask, recordOf));
+                .forEach(childTask -> convertLocalToRemoteHelper(localToRemoteConversion, childTask));
 
         Stream.of(parentLocalTaskHierarchies)
                 .map(LocalTaskHierarchy::getParentTask)
-                .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, parentTask, recordOf));
+                .forEach(parentTask -> convertLocalToRemoteHelper(localToRemoteConversion, parentTask));
     }
-
-    /*
-    @NonNull
-    public Collection<LocalTaskHierarchy> getTaskHierarchies() {
-        return mLocalTaskHierarchies.values();
-    }
-    */
 
     @NonNull
     public LocalCustomTime createLocalCustomTime(@NonNull DomainFactory domainFactory, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {

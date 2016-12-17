@@ -8,6 +8,7 @@ import android.util.Log;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.ProjectJson;
@@ -18,9 +19,13 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-public class RemoteProjectRecord extends RootRemoteRecord {
+public class RemoteProjectRecord extends RemoteRecord {
     public static final String PROJECT_JSON = "projectJson";
+
+    private final String mId;
+    private final JsonWrapper mJsonWrapper;
 
     @NonNull
     private final Map<String, RemoteTaskRecord> mRemoteTaskRecords = new HashMap<>();
@@ -32,13 +37,19 @@ public class RemoteProjectRecord extends RootRemoteRecord {
     private final Map<String, RemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
 
     RemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull JsonWrapper jsonWrapper) {
-        super(id, jsonWrapper);
+        super(false);
+
+        mId = id;
+        mJsonWrapper = jsonWrapper;
 
         initialize(domainFactory);
     }
 
     RemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull JsonWrapper jsonWrapper) {
-        super(jsonWrapper);
+        super(true);
+
+        mId = DatabaseWrapper.getRootRecordId();
+        mJsonWrapper = jsonWrapper;
 
         initialize(domainFactory);
     }
@@ -75,12 +86,42 @@ public class RemoteProjectRecord extends RootRemoteRecord {
         }
     }
 
+
+    @NonNull
+    public String getId() {
+        return mId;
+    }
+
+    @NonNull
+    public Set<String> getRecordOf() {
+        return mJsonWrapper.recordOf.keySet();
+    }
+
+    @NonNull
+    @Override
+    protected String getKey() {
+        return getId();
+    }
+
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        Assert.assertTrue(Stream.of(addedFriends)
+                .noneMatch(removedFriends::contains));
+
+        mJsonWrapper.updateRecordOf(addedFriends, removedFriends);
+
+        for (String addedFriend : addedFriends) {
+            addValue(getId() + "/recordOf/" + addedFriend, true);
+        }
+
+        for (String removedFriend : removedFriends) {
+            addValue(getId() + "/recordOf/" + removedFriend, null);
+        }
+    }
+
     @NonNull
     @Override
     protected JsonWrapper getCreateObject() {
-        JsonWrapper jsonWrapper = super.getCreateObject();
-
-        ProjectJson projectJson = jsonWrapper.projectJson;
+        ProjectJson projectJson = mJsonWrapper.projectJson;
         Assert.assertTrue(projectJson != null);
 
         projectJson.setTasks(Stream.of(mRemoteTaskRecords.values())
@@ -92,7 +133,7 @@ public class RemoteProjectRecord extends RootRemoteRecord {
         projectJson.setCustomTimes(Stream.of(mRemoteCustomTimeRecords.values())
                 .collect(Collectors.toMap(RemoteCustomTimeRecord::getId, RemoteCustomTimeRecord::getCreateObject)));
 
-        return jsonWrapper;
+        return mJsonWrapper;
     }
 
     @NonNull

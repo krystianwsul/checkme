@@ -68,12 +68,12 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:visibility="gone"/>
 
-        <fragment
-            android:id="@+id/main_friend_list_fragment"
-            android:name="com.krystianwsul.checkme.gui.friends.UserListFragment"
+        <FrameLayout
+            android:id="@+id/main_friend_list_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:visibility="gone"/>
 
         <FrameLayout
             android:id="@+id/main_project_frame"

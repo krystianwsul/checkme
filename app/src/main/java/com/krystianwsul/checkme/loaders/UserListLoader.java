@@ -23,7 +23,7 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
 
     @Override
     String getName() {
-        return "ProjectListLoader";
+        return "UserListLoader";
     }
 
     @Override

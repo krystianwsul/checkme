@@ -87,7 +87,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private FrameLayout mMainTaskListFrame;
     private FrameLayout mMainProjectListFrame;
     private FrameLayout mMainCustomTimesFrame;
-    private UserListFragment mUserListFragment;
+    private FrameLayout mMainFriendListFrame;
     private FrameLayout mMainDebugFrame;
 
     private DrawerLayout mMainActivityDrawer;
@@ -261,6 +261,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         Fragment taskListFragment = fragmentManager.findFragmentById(R.id.main_task_list_frame);
         Fragment projectListFragment = fragmentManager.findFragmentById(R.id.main_project_frame);
+        Fragment userListFragment = fragmentManager.findFragmentById(R.id.main_friend_list_frame);
         Fragment showCustomTimesFragment = fragmentManager.findFragmentById(R.id.main_custom_times_frame);
         Fragment debugFragment = fragmentManager.findFragmentById(R.id.main_debug_frame);
 
@@ -268,10 +269,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(showCustomTimesFragment == null);
             Assert.assertTrue(debugFragment == null);
             Assert.assertTrue(projectListFragment == null);
+            Assert.assertTrue(userListFragment == null);
 
             fragmentManager.beginTransaction()
                     .add(R.id.main_task_list_frame, TaskListFragment.getInstance())
                     .add(R.id.main_project_frame, ProjectListFragment.newInstance())
+                    .add(R.id.main_friend_list_frame, UserListFragment.newFriendInstance())
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
                     .add(R.id.main_debug_frame, DebugFragment.newInstance())
                     .commit();
@@ -280,9 +283,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(debugFragment != null);
             Assert.assertTrue(projectListFragment != null);
         }
-
-        mUserListFragment = (UserListFragment) fragmentManager.findFragmentById(R.id.main_friend_list_fragment);
-        Assert.assertTrue(mUserListFragment != null);
 
         mDaysPager = (ViewPager) findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);
@@ -314,6 +314,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         mMainCustomTimesFrame = (FrameLayout) findViewById(R.id.main_custom_times_frame);
         Assert.assertTrue(mMainCustomTimesFrame != null);
+
+        mMainFriendListFrame = (FrameLayout) findViewById(R.id.main_friend_list_frame);
+        Assert.assertTrue(mMainFriendListFrame != null);
 
         mMainDebugFrame = (FrameLayout) findViewById(R.id.main_debug_frame);
         Assert.assertTrue(mMainDebugFrame != null);
@@ -494,7 +497,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, INSTANCES_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
-                mUserListFragment.hide();
+                mMainFriendListFrame.setVisibility(View.GONE);
 
                 break;
             case TASKS:
@@ -506,7 +509,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
-                mUserListFragment.hide();
+                mMainFriendListFrame.setVisibility(View.GONE);
 
                 break;
             case PROJECTS:
@@ -518,7 +521,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
-                mUserListFragment.hide();
+                mMainFriendListFrame.setVisibility(View.GONE);
 
                 break;
             case CUSTOM_TIMES:
@@ -530,7 +533,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
-                mUserListFragment.hide();
+                mMainFriendListFrame.setVisibility(View.GONE);
 
                 break;
             case FRIENDS:
@@ -544,7 +547,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.GONE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
-                mUserListFragment.show(sUserData);
+                mMainFriendListFrame.setVisibility(View.VISIBLE);
 
                 break;
             case DEBUG:
@@ -556,7 +559,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainDebugFrame.setVisibility(View.VISIBLE);
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
-                mUserListFragment.hide();
+                mMainFriendListFrame.setVisibility(View.GONE);
 
                 break;
             default:

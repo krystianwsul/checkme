@@ -13,6 +13,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,15 +39,19 @@ import java.util.Collection;
 import java.util.List;
 
 public class UserListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<UserListLoader.Data> {
+    private static final String PROJECT_ID_KEY = "projectId";
+
     private static final String USER_DATA_KEY = "userData";
     private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
-    private static final String ERROR_KEY = "error";
 
     private RelativeLayout mFriendListLayout;
     private ProgressBar mFriendListProgress;
     private RecyclerView mFriendListRecycler;
     private FloatingActionButton mFriendListFab;
     private TextView mEmptyText;
+
+    @Nullable
+    private String mProjectId;
 
     private FriendListAdapter mFriendListAdapter;
 
@@ -115,7 +120,29 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     @Nullable
     private UserData mUserData = null;
 
-    private boolean mError = false;
+    @NonNull
+    public static UserListFragment newFriendInstance() {
+        UserListFragment userListFragment = new UserListFragment();
+
+        Bundle args = new Bundle();
+        args.putString(PROJECT_ID_KEY, null);
+        userListFragment.setArguments(args);
+
+        return userListFragment;
+    }
+
+    @NonNull
+    public static UserListFragment newProjectInstance(@NonNull String projectId) {
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
+
+        UserListFragment userListFragment = new UserListFragment();
+
+        Bundle args = new Bundle();
+        args.putString(PROJECT_ID_KEY, null);
+        userListFragment.setArguments(args);
+
+        return userListFragment;
+    }
 
     public UserListFragment() {
 
@@ -126,6 +153,17 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         super.onAttach(context);
 
         Assert.assertTrue(context instanceof ShowCustomTimesFragment.CustomTimesListListener);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle args = getArguments();
+        Assert.assertTrue(args != null);
+        Assert.assertTrue(args.containsKey(PROJECT_ID_KEY));
+
+        mProjectId = args.getString(PROJECT_ID_KEY);
     }
 
     @Override
@@ -157,9 +195,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null) {
-            Assert.assertTrue(savedInstanceState.containsKey(ERROR_KEY));
-            mError = savedInstanceState.getBoolean(ERROR_KEY);
-
             if (savedInstanceState.containsKey(USER_DATA_KEY)) {
                 mUserData = savedInstanceState.getParcelable(USER_DATA_KEY);
                 Assert.assertTrue(mUserData != null);
@@ -172,20 +207,16 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             }
         }
 
-        updateVisibility();
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
     public Loader<UserListLoader.Data> onCreateLoader(int id, Bundle args) {
-        Assert.assertTrue(mUserData != null);
-
         return new UserListLoader(getActivity(), null);
     }
 
     @Override
     public void onLoadFinished(Loader<UserListLoader.Data> loader, @NonNull UserListLoader.Data data) {
-        mError = false;
-
         if (mFriendListAdapter != null) {
             ArrayList<String> selectedUserDataKeys = mFriendListAdapter.getSelected();
             if (selectedUserDataKeys.isEmpty())
@@ -220,8 +251,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putBoolean(ERROR_KEY, mError);
-
         if (mUserData != null)
             outState.putParcelable(USER_DATA_KEY, mUserData);
 
@@ -234,34 +263,10 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
     public void show(@NonNull UserData userData) {
         mUserData = userData;
-        mError = false;
-
-        updateVisibility();
     }
 
     public void hide() {
         mUserData = null;
-
-        updateVisibility();
-    }
-
-    private void updateVisibility() {
-        if (mFriendListLayout == null)
-            return;
-
-        if (mUserData == null) {
-            mFriendListLayout.setVisibility(View.GONE);
-
-            getLoaderManager().destroyLoader(0);
-        } else {
-            mFriendListLayout.setVisibility(View.VISIBLE);
-            mFriendListProgress.setVisibility(View.VISIBLE);
-            mFriendListRecycler.setVisibility(View.GONE);
-            mEmptyText.setVisibility(View.GONE);
-            mFriendListFab.setVisibility(View.GONE);
-
-            getLoaderManager().initLoader(0, null, this);
-        }
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {

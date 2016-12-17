@@ -1362,14 +1362,16 @@ public class DomainFactory {
         if (oldParentTask == null) {
             Stream.of(task.getCurrentSchedules(now))
                     .forEach(schedule -> schedule.setEndExactTimeStamp(now));
+
+            newParentTask.addChild(task, now);
         } else if (oldParentTask != newParentTask) {
             TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(task, now);
             Assert.assertTrue(oldTaskHierarchy != null);
 
             oldTaskHierarchy.setEndExactTimeStamp(now);
-        }
 
-        newParentTask.addChild(task, now);
+            newParentTask.addChild(task, now);
+        }
 
         updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 

@@ -37,7 +37,7 @@ public class RemoteManager {
         }
     }
 
-    public void save(boolean causedByRemote) {
+    public void save() {
         Map<String, Object> values = new HashMap<>();
 
         Stream.of(mRemoteProjectRecords.values())
@@ -46,8 +46,6 @@ public class RemoteManager {
         Log.e("asdf", "RemoteManager.save values: " + values);
 
         if (!values.isEmpty()) {
-            Assert.assertTrue(!causedByRemote); // to prevent an infinite loop
-
             mSaved = true;
             DatabaseWrapper.updateRecords(values);
         }

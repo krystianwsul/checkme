@@ -54,7 +54,7 @@ public class RemoteFactory {
         mRemoteManager = new RemoteManager(domainFactory, children);
 
         mRemoteProjects = Stream.of(mRemoteManager.mRemoteProjectRecords.values())
-                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord))
+                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserData))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> remoteProject));
     }
 
@@ -108,11 +108,11 @@ public class RemoteFactory {
         if (!matches.isEmpty()) {
             return matches.get(0);
         } else {
-            ProjectJson projectJson = new ProjectJson(getProjectName(recordOf), now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>());
+            ProjectJson projectJson = new ProjectJson(getProjectName(recordOf), now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 
             RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
 
-            RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord);
+            RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserData);
 
             Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
 
@@ -122,10 +122,10 @@ public class RemoteFactory {
         }
     }
 
-    public void save(boolean causedByRemote) {
+    public void save() {
         Assert.assertTrue(!mRemoteManager.isSaved());
 
-        mRemoteManager.save(causedByRemote);
+        mRemoteManager.save();
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

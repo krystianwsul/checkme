@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteUserRecord;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
@@ -53,7 +54,10 @@ public class RemoteProject {
     @NonNull
     private final Map<String, RemoteCustomTime> mRemoteCustomTimes = new HashMap<>();
 
-    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord) {
+    @NonNull
+    private final Map<String, RemoteUser> mRemoteUsers = new HashMap<>();
+
+    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserData userData) {
         mDomainFactory = domainFactory;
         mRemoteProjectRecord = remoteProjectRecord;
 
@@ -81,6 +85,13 @@ public class RemoteProject {
         Stream.of(mRemoteProjectRecord.getRemoteTaskHierarchyRecords().values())
                 .map(remoteTaskHierarchyRecord -> new RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord))
                 .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
+
+        Stream.of(mRemoteProjectRecord.getRemoteUserRecords().values())
+                .map(remoteUserRecord -> new RemoteUser(domainFactory, this, remoteUserRecord))
+                .forEach(remoteUser -> mRemoteUsers.put(remoteUser.getId(), remoteUser));
+
+        if (!mRemoteUsers.containsKey(userData.getKey()))
+            addUserData(userData);
     }
 
     @NonNull
@@ -236,6 +247,40 @@ public class RemoteProject {
 
     void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         mRemoteProjectRecord.updateRecordOf(addedFriends, removedFriends);
+
+        Map<String, UserData> friends = mDomainFactory.getFriends();
+        Assert.assertTrue(friends != null);
+
+        for (String addedFriend : addedFriends) {
+            Assert.assertTrue(!mRemoteUsers.containsKey(addedFriend));
+
+            if (friends.containsKey(addedFriend)) {
+                UserData userData = friends.get(addedFriend);
+                Assert.assertTrue(userData != null);
+
+                addUserData(userData);
+            }
+        }
+
+        for (String removedFriend : removedFriends) {
+            if (mRemoteUsers.containsKey(removedFriend)) {
+                RemoteUser remoteUser = mRemoteUsers.get(removedFriend);
+                Assert.assertTrue(remoteUser != null);
+
+                remoteUser.delete();
+            }
+        }
+    }
+
+    private void addUserData(@NonNull UserData userData) {
+        String id = userData.getKey();
+
+        Assert.assertTrue(!mRemoteUsers.containsKey(id));
+
+        RemoteUserRecord remoteUserRecord = mRemoteProjectRecord.newRemoteUserRecord(userData.toUserJson());
+        RemoteUser remoteUser = new RemoteUser(mDomainFactory, this, remoteUserRecord);
+
+        mRemoteUsers.put(id, remoteUser);
     }
 
     void deleteTask(@NonNull RemoteTask remoteTask) {
@@ -304,5 +349,12 @@ public class RemoteProject {
         Assert.assertTrue(mRemoteCustomTimes.containsKey(remoteCustomTime.getId()));
 
         mRemoteCustomTimes.remove(remoteCustomTime.getId());
+    }
+
+    void deleteUser(@NonNull RemoteUser remoteUser) {
+        String id = remoteUser.getId();
+        Assert.assertTrue(mRemoteUsers.containsKey(id));
+
+        mRemoteUsers.remove(id);
     }
 }

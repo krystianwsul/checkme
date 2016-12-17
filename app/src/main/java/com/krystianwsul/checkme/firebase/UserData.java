@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.krystianwsul.checkme.MyFirebaseInstanceIdService;
-import com.krystianwsul.checkme.utils.Utils;
+import com.krystianwsul.checkme.firebase.json.UserJson;
 
 import junit.framework.Assert;
 
@@ -19,7 +19,10 @@ import java.io.UnsupportedEncodingException;
 
 @IgnoreExtraProperties
 public class UserData implements Parcelable {
+    @Nullable
     private String email;
+
+    @Nullable
     private String displayName;
 
     @Nullable
@@ -40,9 +43,10 @@ public class UserData implements Parcelable {
         token = MyFirebaseInstanceIdService.getToken();
     }
 
-    private UserData(@NonNull String email, @NonNull String displayName, @Nullable String token) {
+    private UserData(@NonNull String email, @NonNull String displayName, @NonNull String token) {
         Assert.assertTrue(!TextUtils.isEmpty(email));
         Assert.assertTrue(!TextUtils.isEmpty(displayName));
+        Assert.assertTrue(!TextUtils.isEmpty(token));
 
         this.email = email;
         this.displayName = displayName;
@@ -63,8 +67,10 @@ public class UserData implements Parcelable {
         return displayName;
     }
 
-    @Nullable
-    public String getToken() {
+    @NonNull
+    private String getToken() {
+        Assert.assertTrue(!TextUtils.isEmpty(token));
+
         return token;
     }
 
@@ -86,12 +92,17 @@ public class UserData implements Parcelable {
         return getKey(getEmail());
     }
 
+    @NonNull
+    @Exclude
+    UserJson toUserJson() {
+        return new UserJson(getEmail(), getDisplayName(), getToken());
+    }
+
     @Override
     public int hashCode() {
-        int hash = email.hashCode();
-        hash += displayName.hashCode();
-        if (!TextUtils.isEmpty(token))
-            hash += token.hashCode();
+        int hash = getEmail().hashCode();
+        hash += getDisplayName().hashCode();
+        hash += getToken().hashCode();
         return hash;
     }
 
@@ -109,16 +120,13 @@ public class UserData implements Parcelable {
 
         UserData userData = (UserData) obj;
 
-        if (!email.equals(userData.email))
+        if (!getEmail().equals(userData.getEmail()))
             return false;
 
-        if (!displayName.equals(userData.displayName))
+        if (!getDisplayName().equals(userData.getDisplayName()))
             return false;
 
-        if (TextUtils.isEmpty(token) != TextUtils.isEmpty(userData.token))
-            return false;
-
-        if (!TextUtils.isEmpty(token) && !token.equals(userData.token))
+        if (!getToken().equals(userData.getToken()))
             return false;
 
         return true;
@@ -128,7 +136,7 @@ public class UserData implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(email);
         dest.writeString(displayName);
-        Utils.writeStringToParcel(dest, token);
+        dest.writeString(token);
     }
 
     @Override
@@ -145,7 +153,8 @@ public class UserData implements Parcelable {
             String displayName = in.readString();
             Assert.assertTrue(!TextUtils.isEmpty(displayName));
 
-            String token = Utils.readStringFromParcel(in);
+            String token = in.readString();
+            Assert.assertTrue(!TextUtils.isEmpty(token));
 
             return new UserData(email, displayName, token);
         }

@@ -193,17 +193,17 @@ public class DomainFactory {
     private void save(@NonNull Context context, int dataId) {
         ArrayList<Integer> dataIds = new ArrayList<>();
         dataIds.add(dataId);
-        save(context, dataIds, false);
+        save(context, dataIds);
     }
 
-    private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, boolean causedByRemote) {
+    private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds) {
         if (mSkipSave)
             return;
 
         mLocalFactory.save(context);
 
         if (mRemoteFactory != null)
-            mRemoteFactory.save(causedByRemote);
+            mRemoteFactory.save();
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(dataIds);
     }
@@ -327,7 +327,7 @@ public class DomainFactory {
         if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
             updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
 
-            save(context, new ArrayList<>(), true);
+            save(context, new ArrayList<>());
         } else {
             mSkipSave = true;
 
@@ -344,7 +344,7 @@ public class DomainFactory {
 
             mSkipSave = false;
 
-            save(context, new ArrayList<>(), false);
+            save(context, new ArrayList<>());
         }
     }
 
@@ -1395,7 +1395,7 @@ public class DomainFactory {
 
         updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
-        save(context, dataIds, false);
+        save(context, dataIds);
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {

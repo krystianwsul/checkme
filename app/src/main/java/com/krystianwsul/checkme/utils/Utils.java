@@ -108,7 +108,7 @@ public class Utils {
                 .collect(Collectors.toSet());
     }
 
-    static void writeStringToParcel(@NonNull Parcel parcel, @Nullable String string) {
+    public static void writeStringToParcel(@NonNull Parcel parcel, @Nullable String string) {
         if (TextUtils.isEmpty(string)) {
             parcel.writeInt(0);
         } else {
@@ -118,7 +118,7 @@ public class Utils {
     }
 
     @Nullable
-    static String readStringFromParcel(@NonNull Parcel parcel) {
+    public static String readStringFromParcel(@NonNull Parcel parcel) {
         if (parcel.readInt() == 0)
             return null;
 

@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -20,7 +19,6 @@ import junit.framework.Assert;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
@@ -71,11 +69,11 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
 
         @NonNull
-        public final Set<UserData> mFriends;
+        public final Map<String, UserData> mFriends;
 
         public final boolean mConnected;
 
-        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Set<UserData> friends, boolean connected) {
+        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Map<String, UserData> friends, boolean connected) {
             Assert.assertTrue(connected || friends.isEmpty());
 
             TaskData = taskData;
@@ -147,9 +145,9 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final String mNote;
 
         @NonNull
-        public final Set<UserData> mFriends;
+        public final Map<String, UserData> mFriends;
 
-        public TaskData(@NonNull String name, @Nullable TaskKey parentTaskKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @NonNull Set<UserData> friends) {
+        public TaskData(@NonNull String name, @Nullable TaskKey parentTaskKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @NonNull Map<String, UserData> friends) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue((parentTaskKey == null) || (scheduleDatas == null));
 
@@ -215,6 +213,58 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if (!mFriends.equals(taskData.mFriends))
+                return false;
+
+            return true;
+        }
+    }
+
+    public static class UserData {
+        @NonNull
+        public final String mId;
+
+        @NonNull
+        public final String mName;
+
+        @NonNull
+        public final String mEmail;
+
+        public UserData(@NonNull String id, @NonNull String name, @NonNull String email) {
+            Assert.assertTrue(!TextUtils.isEmpty(id));
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(!TextUtils.isEmpty(email));
+
+            mId = id;
+            mName = name;
+            mEmail = email;
+        }
+
+        @Override
+        public int hashCode() {
+            return (mId.hashCode() + mName.hashCode() + mEmail.hashCode());
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null)
+                return false;
+
+            if (obj == this)
+                return true;
+
+            if (!(obj instanceof UserData))
+                return false;
+
+            UserData userData = (UserData) obj;
+
+            if (!mId.equals(userData.mId))
+                return false;
+
+            if (!mName.equals(userData.mName))
+                return false;
+
+            if (!mEmail.equals(userData.mEmail))
                 return false;
 
             return true;

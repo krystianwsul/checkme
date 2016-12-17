@@ -17,12 +17,11 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractDialogFragment;
+import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FriendPickerFragment extends AbstractDialogFragment {
@@ -32,15 +31,14 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     private ProgressBar mFriendPickerProgress;
     private RecyclerView mFriendPickerRecycler;
 
-    private List<UserData> mUserDatas;
+    private List<CreateTaskLoader.UserData> mUserDatas;
 
     @NonNull
-    public static FriendPickerFragment newInstance(boolean showDelete, @NonNull ArrayList<UserData> userDatas) {
+    public static FriendPickerFragment newInstance(boolean showDelete) {
         FriendPickerFragment parentPickerFragment = new FriendPickerFragment();
 
         Bundle args = new Bundle();
         args.putBoolean(SHOW_DELETE_KEY, showDelete);
-        args.putParcelableArrayList(USER_DATAS_KEY, userDatas);
         parentPickerFragment.setArguments(args);
 
         return parentPickerFragment;
@@ -73,9 +71,6 @@ public class FriendPickerFragment extends AbstractDialogFragment {
 
         boolean showDelete = args.getBoolean(SHOW_DELETE_KEY);
 
-        mUserDatas = args.getParcelableArrayList(USER_DATAS_KEY);
-        Assert.assertTrue(mUserDatas != null);
-
         if (showDelete)
             builder.neutralText(R.string.delete)
                     .onNeutral((dialog, which) -> ((Listener) getActivity()).onFriendDeleted());
@@ -103,6 +98,18 @@ public class FriendPickerFragment extends AbstractDialogFragment {
         mFriendPickerProgress.setVisibility(View.GONE);
         mFriendPickerRecycler.setVisibility(View.VISIBLE);
 
+        if (mUserDatas != null)
+            initialize();
+    }
+
+    public void initialize(@NonNull List<CreateTaskLoader.UserData> userDatas) {
+        mUserDatas = userDatas;
+
+        if (getActivity() != null)
+            initialize();
+    }
+
+    private void initialize() {
         mFriendPickerRecycler.setAdapter(new FriendListAdapter());
     }
 
@@ -114,7 +121,7 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     }
 
     public interface Listener {
-        void onFriendSelected(@NonNull UserData userData);
+        void onFriendSelected(@NonNull String friendId);
 
         void onFriendDeleted();
 
@@ -143,11 +150,11 @@ public class FriendPickerFragment extends AbstractDialogFragment {
 
         @Override
         public void onBindViewHolder(final FriendListAdapter.FriendHolder friendHolder, int position) {
-            UserData userData = mUserDatas.get(position);
+            CreateTaskLoader.UserData userData = mUserDatas.get(position);
             Assert.assertTrue(userData != null);
 
-            friendHolder.mFriendName.setText(userData.getDisplayName());
-            friendHolder.mFriendEmail.setText(userData.getEmail());
+            friendHolder.mFriendName.setText(userData.mName);
+            friendHolder.mFriendEmail.setText(userData.mEmail);
 
             friendHolder.mFriendRow.setOnClickListener(v -> friendHolder.onRowClick());
         }
@@ -166,12 +173,12 @@ public class FriendPickerFragment extends AbstractDialogFragment {
             }
 
             void onRowClick() {
-                UserData userData = mUserDatas.get(getAdapterPosition());
+                CreateTaskLoader.UserData userData = mUserDatas.get(getAdapterPosition());
                 Assert.assertTrue(userData != null);
 
                 dismiss();
 
-                ((Listener) getActivity()).onFriendSelected(userData);
+                ((Listener) getActivity()).onFriendSelected(userData.mId);
             }
         }
     }

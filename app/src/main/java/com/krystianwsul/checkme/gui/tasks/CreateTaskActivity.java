@@ -30,7 +30,6 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -45,7 +44,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +68,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     private static final String FRIEND_PICKER_DIALOG_TAG = "friendPickerDialog";
     private static final String FRIEND_POSITION_KEY = "friendPickerPosition";
-    private static final String FRIEND_ENTRIES_KEY = "friendEntries";
+    private static final String FRIEND_IDS_KEY = "friendIds";
 
     private Bundle mSavedInstanceState;
 
@@ -202,7 +200,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         }
     };
 
-    private List<UserData> mFriendEntries;
+    @Nullable
+    private List<String> mFriendIds;
 
     @NonNull
     public static Intent getCreateIntent(@NonNull Context context) {
@@ -282,6 +281,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             case R.id.action_create_task_save:
                 Assert.assertTrue(mData != null);
                 Assert.assertTrue(mToolbarEditText != null);
+                Assert.assertTrue(mFriendIds != null);
 
                 if (updateError())
                     break;
@@ -297,9 +297,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
-                        Assert.assertTrue(mFriendEntries != null);
+                        Assert.assertTrue(mFriendIds != null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskKey, name, getScheduleDatas(), mNote, mFriendEntries);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskKey, name, getScheduleDatas(), mNote, mFriendIds);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -311,14 +311,14 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskKeys.size() > 1);
 
-                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData.DataId, name, getScheduleDatas(), mTaskKeys, mNote, mFriendEntries);
+                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData.DataId, name, getScheduleDatas(), mTaskKeys, mNote, mFriendIds);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
-                        Assert.assertTrue(mFriendEntries != null);
+                        Assert.assertTrue(mFriendIds != null);
 
-                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote, mFriendEntries);
+                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote, mFriendIds);
 
                         finish();
                     }
@@ -357,7 +357,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskKey, name, mNote, mFriendEntries);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskKey, name, mNote, mFriendIds);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -368,13 +368,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else if (mTaskKeys != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskKeys, mNote, mFriendEntries);
+                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskKeys, mNote, mFriendIds);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote, mFriendEntries);
+                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote, mFriendIds);
 
                         finish();
                     }
@@ -455,10 +455,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             mScheduleEntries = savedInstanceState.getParcelableArrayList(SCHEDULE_ENTRIES_KEY);
             Assert.assertTrue(mScheduleEntries != null);
 
-            Assert.assertTrue(savedInstanceState.containsKey(FRIEND_ENTRIES_KEY));
+            Assert.assertTrue(savedInstanceState.containsKey(FRIEND_IDS_KEY));
 
-            mFriendEntries = savedInstanceState.getParcelableArrayList(FRIEND_ENTRIES_KEY);
-            Assert.assertTrue(mFriendEntries != null);
+            mFriendIds = savedInstanceState.getStringArrayList(FRIEND_IDS_KEY);
+            Assert.assertTrue(mFriendIds != null);
 
             if (savedInstanceState.containsKey(HOUR_MINUTE_PICKER_POSITION_KEY)) {
                 mHourMinutePickerPosition = savedInstanceState.getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1);
@@ -491,10 +491,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         if (mData != null) {
             Assert.assertTrue(mCreateTaskAdapter != null);
             Assert.assertTrue(mScheduleEntries != null);
-            Assert.assertTrue(mFriendEntries != null);
+            Assert.assertTrue(mFriendIds != null);
 
             outState.putParcelableArrayList(SCHEDULE_ENTRIES_KEY, new ArrayList<>(mScheduleEntries));
-            outState.putParcelableArrayList(FRIEND_ENTRIES_KEY, new ArrayList<>(mFriendEntries));
+            outState.putStringArrayList(FRIEND_IDS_KEY, new ArrayList<>(mFriendIds));
 
             if (mHourMinutePickerPosition != null) {
                 Assert.assertTrue(mHourMinutePickerPosition > 0);
@@ -627,7 +627,6 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             mFirst = false;
 
             mScheduleEntries = new ArrayList<>();
-            mFriendEntries = new ArrayList<>();
 
             if (mData.TaskData != null) {
                 if (mData.TaskData.ScheduleDatas != null) {
@@ -658,7 +657,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                             .collect(Collectors.toList());
                 }
 
-                mFriendEntries = new ArrayList<>(mData.TaskData.mFriends);
+                mFriendIds = new ArrayList<>(mData.TaskData.mFriends.keySet());
             } else {
                 if (mParentTaskKeyHint == null)
                     mScheduleEntries.add(firstScheduleEntry());
@@ -683,6 +682,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         }
 
         Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+
+        FriendPickerFragment friendPickerFragment = (FriendPickerFragment) getSupportFragmentManager().findFragmentByTag(FRIEND_PICKER_DIALOG_TAG);
+        if (friendPickerFragment != null)
+            friendPickerFragment.initialize(getFriendPickerData());
     }
 
     @Override
@@ -799,7 +802,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         if (mTaskKey != null) {
             Assert.assertTrue(mData.TaskData != null);
 
-            if (!mData.TaskData.mFriends.equals(new HashSet<>(mFriendEntries)))
+            if (!mData.TaskData.mFriends.keySet().equals(mFriendIds))
                 return true;
         } else {
             if (hasValueFriends())
@@ -915,7 +918,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     private boolean hasValueFriends() {
-        return !mFriendEntries.isEmpty();
+        Assert.assertTrue(mFriendIds != null);
+
+        return !mFriendIds.isEmpty();
     }
 
     private ScheduleEntry firstScheduleEntry() {
@@ -962,14 +967,16 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     private void clearSchedulesFriends() {
+        Assert.assertTrue(mFriendIds != null);
+
         int scheduleCount = mScheduleEntries.size();
 
         mScheduleEntries = new ArrayList<>();
         mCreateTaskAdapter.notifyItemRangeRemoved(1, scheduleCount);
 
-        int friendCount = mFriendEntries.size();
+        int friendCount = mFriendIds.size();
 
-        mFriendEntries = new ArrayList<>();
+        mFriendIds = new ArrayList<>();
         mCreateTaskAdapter.notifyItemRangeRemoved(1 + 1, friendCount);
     }
 
@@ -979,18 +986,31 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         mScheduleTimes.removeOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
     }
 
-    @Override
-    public void onFriendSelected(@NonNull UserData userData) {
+    @NonNull
+    private List<CreateTaskLoader.UserData> getFriendPickerData() {
         Assert.assertTrue(mData != null);
+        Assert.assertTrue(mFriendIds != null);
+
+        return Stream.of(mData.mFriends.values())
+                .filterNot(friend -> mFriendIds.contains(friend.mId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void onFriendSelected(@NonNull String friendId) {
+        Assert.assertTrue(!TextUtils.isEmpty(friendId));
+
+        Assert.assertTrue(mData != null);
+        Assert.assertTrue(mFriendIds != null);
 
         if (mFriendPosition == null) {
             clearParent();
 
-            mCreateTaskAdapter.addFriendEntry(userData);
+            mCreateTaskAdapter.addFriendEntry(friendId);
         } else {
             Assert.assertTrue(mFriendPosition >= 0);
 
-            mFriendEntries.set(mFriendPosition, userData);
+            mFriendIds.set(mFriendPosition, friendId);
 
             mCreateTaskAdapter.notifyItemChanged(1 + mScheduleEntries.size() + 1 + mFriendPosition);
 
@@ -1003,8 +1023,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         Assert.assertTrue(mFriendPosition != null);
         Assert.assertTrue(mFriendPosition >= 0);
         Assert.assertTrue(mData != null);
+        Assert.assertTrue(mFriendIds != null);
 
-        mFriendEntries.remove(mFriendPosition.intValue());
+        mFriendIds.remove(mFriendPosition.intValue());
 
         mCreateTaskAdapter.notifyItemRemoved(1 + mScheduleEntries.size() + 1 + mFriendPosition);
 
@@ -1123,6 +1144,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         @Override
         public void onBindViewHolder(final Holder holder, int position) {
+            Assert.assertTrue(mFriendIds != null);
+
             if (position == 0) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
@@ -1179,20 +1202,32 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                     scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
                 });
-            } else if (position < 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
+            } else if (position < 1 + mScheduleEntries.size() + 1 + mFriendIds.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 int friendPosition = position - 1 - mScheduleEntries.size() - 1;
 
-                UserData friendEntry = mFriendEntries.get(position - 1 - mScheduleEntries.size() - 1);
-                Assert.assertTrue(friendEntry != null);
+                String friendId = mFriendIds.get(position - 1 - mScheduleEntries.size() - 1);
+                Assert.assertTrue(!TextUtils.isEmpty(friendId));
+
+                CreateTaskLoader.UserData userData;
+                if (mData.mFriends.containsKey(friendId)) {
+                    userData = mData.mFriends.get(friendId);
+                    Assert.assertTrue(userData != null);
+                } else {
+                    Assert.assertTrue(mData.TaskData != null);
+                    Assert.assertTrue(mData.TaskData.mFriends.containsKey(friendId));
+
+                    userData = mData.TaskData.mFriends.get(friendId);
+                    Assert.assertTrue(userData != null);
+                }
 
                 scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
 
                 scheduleHolder.mScheduleLayout.setHint(null);
                 scheduleHolder.mScheduleLayout.setError(null);
 
-                scheduleHolder.mScheduleText.setText(friendEntry.getDisplayName() + " (" + friendEntry.getEmail() + ")");
+                scheduleHolder.mScheduleText.setText(userData.mName + " (" + userData.mEmail + ")");
 
                 scheduleHolder.mScheduleText.setEnabled(true);
 
@@ -1202,14 +1237,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                     mFriendPosition = friendPosition;
 
-                    ArrayList<UserData> userDatas = Stream.of(mData.mFriends)
-                            .filterNot(mFriendEntries::contains)
-                            .collect(Collectors.toCollection(ArrayList::new));
-
-                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(true, userDatas);
+                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(true);
+                    friendPickerFragment.initialize(getFriendPickerData());
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
-            } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
+            } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendIds.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
@@ -1225,15 +1257,12 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     Assert.assertTrue(mCreateTaskAdapter != null);
                     Assert.assertTrue(mFriendPosition == null);
 
-                    ArrayList<UserData> userDatas = Stream.of(mData.mFriends)
-                            .filterNot(mFriendEntries::contains)
-                            .collect(Collectors.toCollection(ArrayList::new));
-
-                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false, userDatas);
+                    FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
+                    friendPickerFragment.initialize(getFriendPickerData());
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
             } else {
-                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size() + 1);
+                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1 + mFriendIds.size() + 1);
 
                 NoteHolder noteHolder = (NoteHolder) holder;
 
@@ -1248,23 +1277,27 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         @Override
         public int getItemCount() {
-            return (1 + mScheduleEntries.size() + 1 + mFriendEntries.size() + 1 + 1);
+            Assert.assertTrue(mFriendIds != null);
+
+            return (1 + mScheduleEntries.size() + 1 + mFriendIds.size() + 1 + 1);
         }
 
         @Override
         public int getItemViewType(int position) {
+            Assert.assertTrue(mFriendIds != null);
+
             if (position == 0) {
                 return TYPE_SCHEDULE;
             } else if (position < 1 + mScheduleEntries.size()) {
                 return TYPE_SCHEDULE;
             } else if (position == 1 + mScheduleEntries.size()) {
                 return TYPE_SCHEDULE;
-            } else if (position < 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
+            } else if (position < 1 + mScheduleEntries.size() + 1 + mFriendIds.size()) {
                 return TYPE_SCHEDULE;
-            } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size()) {
+            } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendIds.size()) {
                 return TYPE_SCHEDULE;
             } else {
-                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1 + mFriendEntries.size() + 1);
+                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1 + mFriendIds.size() + 1);
 
                 return TYPE_NOTE;
             }
@@ -1279,12 +1312,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             notifyItemInserted(position);
         }
 
-        void addFriendEntry(UserData friendEntry) {
-            Assert.assertTrue(friendEntry != null);
+        void addFriendEntry(@NonNull String friendId) {
+            Assert.assertTrue(!TextUtils.isEmpty(friendId));
+            Assert.assertTrue(mFriendIds != null);
 
-            int position = 1 + mScheduleEntries.size() + 1 + mFriendEntries.size();
+            int position = 1 + mScheduleEntries.size() + 1 + mFriendIds.size();
 
-            mFriendEntries.add(friendEntry);
+            mFriendIds.add(friendId);
             notifyItemInserted(position);
         }
 

@@ -52,7 +52,6 @@ import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskKey;
-import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -895,15 +894,16 @@ public class DomainFactory {
                 parentTaskKey = parentTask.getTaskKey();
             }
 
-            Set<UserData> friends;
+            Map<String, CreateTaskLoader.UserData> friends;
             if (task.getRecordOf().isEmpty() || (parentTaskKey != null)) {
-                friends = new HashSet<>();
+                friends = new HashMap<>();
             } else {
                 Assert.assertTrue(mFriends != null);
 
                 friends = Stream.of(mFriends.values())
                         .filter(userData -> task.getRecordOf().contains(userData.getKey()))
-                        .collect(Collectors.toSet());
+                        .map(userData -> new CreateTaskLoader.UserData(userData.getKey(), userData.getDisplayName(), userData.getEmail()))
+                        .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
             }
 
             taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskKey, scheduleDatas, task.getNote(), friends);
@@ -915,13 +915,15 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        Set<UserData> friends;
+        Map<String, CreateTaskLoader.UserData> friends;
         boolean connected;
         if (mFriends != null) {
-            friends = new HashSet<>(mFriends.values());
+            friends = Stream.of(mFriends.values())
+                    .map(userData -> new CreateTaskLoader.UserData(userData.getKey(), userData.getDisplayName(), userData.getEmail()))
+                    .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
             connected = true;
         } else {
-            friends = new HashSet<>();
+            friends = new HashMap<>();
             connected = false;
         }
 
@@ -1160,17 +1162,17 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task task;
-        if (friendEntries.isEmpty()) {
+        if (friendIds.isEmpty()) {
             task = mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, Utils.userDatasToKeys(friendEntries));
+            task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, friendIds);
         }
 
         updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
@@ -1180,24 +1182,24 @@ public class DomainFactory {
         return task;
     }
 
-    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, friendEntries);
+        createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, friendIds);
     }
 
     @NonNull
-    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        task = task.updateFriends(Utils.userDatasToKeys(friendEntries), context, now);
+        task = task.updateFriends(new HashSet<>(friendIds), context, now);
 
         task.setName(name, note);
 
@@ -1218,7 +1220,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1227,10 +1229,10 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, friendEntries);
+        return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, friendIds);
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1238,7 +1240,7 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskKeys.size() > 1);
 
-        Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
+        Set<String> mergedFriends = new HashSet<>(friendIds);
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTaskForce)
@@ -1484,16 +1486,16 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task task;
-        if (friendEntries.isEmpty()) {
+        if (friendIds.isEmpty()) {
             task = mLocalFactory.createLocalTaskHelper(this, name, now, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            task = mRemoteFactory.createRemoteTaskHelper(now, name, note, Utils.userDatasToKeys(friendEntries));
+            task = mRemoteFactory.createRemoteTaskHelper(now, name, note, friendIds);
         }
 
         updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
@@ -1503,16 +1505,16 @@ public class DomainFactory {
         return task;
     }
 
-    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) {
         MyCrashlytics.log("DomainFactory.createRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createRootTask(context, now, dataId, name, note, friendEntries);
+        createRootTask(context, now, dataId, name, note, friendIds);
     }
 
-    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {
         MyCrashlytics.log("DomainFactory.createJoinRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1521,8 +1523,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-
-        Set<String> mergedFriends = new HashSet<>(Utils.userDatasToKeys(friendEntries));
+        Set<String> mergedFriends = new HashSet<>(friendIds);
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTaskForce)
@@ -1557,7 +1558,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @NonNull List<UserData> friendEntries) {
+    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) {
         MyCrashlytics.log("DomainFactory.updateRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1568,7 +1569,7 @@ public class DomainFactory {
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        task = task.updateFriends(Utils.userDatasToKeys(friendEntries), context, now);
+        task = task.updateFriends(new HashSet<>(friendIds), context, now);
 
         task.setName(name, note);
 

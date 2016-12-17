@@ -44,6 +44,7 @@ import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
+import com.krystianwsul.checkme.loaders.UserListLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
@@ -977,6 +978,25 @@ public class DomainFactory {
                 }, TreeMap::new));
 
         return new ProjectListLoader.Data(projectDatas);
+    }
+
+    @NonNull
+    public synchronized UserListLoader.Data getUserListData(@Nullable String projectId) {
+        fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getUserListData");
+
+        Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mFriends != null);
+
+        if (!TextUtils.isEmpty(projectId))
+            throw new UnsupportedOperationException(); // todo user list
+
+        Set<UserListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
+                .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                .collect(Collectors.toSet());
+
+        return new UserListLoader.Data(userListDatas);
     }
 
     // sets

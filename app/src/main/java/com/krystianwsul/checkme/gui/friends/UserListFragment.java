@@ -20,24 +20,24 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
-import com.krystianwsul.checkme.firebase.FriendListLoader;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
+import com.krystianwsul.checkme.loaders.UserListLoader;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class FriendListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<List<UserData>> {
+public class UserListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<UserListLoader.Data> {
     private static final String USER_DATA_KEY = "userData";
     private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
     private static final String ERROR_KEY = "error";
@@ -117,7 +117,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
     private boolean mError = false;
 
-    public FriendListFragment() {
+    public UserListFragment() {
 
     }
 
@@ -176,56 +176,44 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     }
 
     @Override
-    public Loader<List<UserData>> onCreateLoader(int id, Bundle args) {
+    public Loader<UserListLoader.Data> onCreateLoader(int id, Bundle args) {
         Assert.assertTrue(mUserData != null);
 
-        return new FriendListLoader(getActivity(), mUserData);
+        return new UserListLoader(getActivity(), null);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<UserData>> loader, @Nullable List<UserData> userDatas) {
-        if (userDatas == null) {
-            mFriendListProgress.setVisibility(View.GONE);
+    public void onLoadFinished(Loader<UserListLoader.Data> loader, @NonNull UserListLoader.Data data) {
+        mError = false;
+
+        if (mFriendListAdapter != null) {
+            ArrayList<String> selectedUserDataKeys = mFriendListAdapter.getSelected();
+            if (selectedUserDataKeys.isEmpty())
+                mSelectedUserDataEmails = null;
+            else
+                mSelectedUserDataEmails = selectedUserDataKeys;
+        }
+
+        mFriendListAdapter = new FriendListAdapter(data.mUserListDatas, mSelectedUserDataEmails);
+        mFriendListRecycler.setAdapter(mFriendListAdapter);
+
+        mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
+
+        mFriendListProgress.setVisibility(View.GONE);
+        mFriendListFab.setVisibility(View.VISIBLE);
+
+        if (data.mUserListDatas.isEmpty()) {
             mFriendListRecycler.setVisibility(View.GONE);
-            mEmptyText.setVisibility(View.GONE);
-            mFriendListFab.setVisibility(View.GONE);
-
-            if (!mError) {
-                mError = true;
-                Toast.makeText(getActivity(), R.string.connectionError, Toast.LENGTH_SHORT).show();
-            }
+            mEmptyText.setVisibility(View.VISIBLE);
+            mEmptyText.setText(R.string.friends_empty);
         } else {
-            mError = false;
-
-            if (mFriendListAdapter != null) {
-                ArrayList<String> selectedUserDataKeys = mFriendListAdapter.getSelected();
-                if (selectedUserDataKeys.isEmpty())
-                    mSelectedUserDataEmails = null;
-                else
-                    mSelectedUserDataEmails = selectedUserDataKeys;
-            }
-
-            mFriendListAdapter = new FriendListAdapter(userDatas, mSelectedUserDataEmails);
-            mFriendListRecycler.setAdapter(mFriendListAdapter);
-
-            mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
-
-            mFriendListProgress.setVisibility(View.GONE);
-            mFriendListFab.setVisibility(View.VISIBLE);
-
-            if (userDatas.isEmpty()) {
-                mFriendListRecycler.setVisibility(View.GONE);
-                mEmptyText.setVisibility(View.VISIBLE);
-                mEmptyText.setText(R.string.friends_empty);
-            } else {
-                mFriendListRecycler.setVisibility(View.VISIBLE);
-                mEmptyText.setVisibility(View.GONE);
-            }
+            mFriendListRecycler.setVisibility(View.VISIBLE);
+            mEmptyText.setVisibility(View.GONE);
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<List<UserData>> loader) {
+    public void onLoaderReset(Loader<UserListLoader.Data> loader) {
     }
 
     @Override
@@ -278,14 +266,14 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
         @NonNull
-        private final List<UserData> mUserDatas;
+        private final List<UserListLoader.UserListData> mUserListDatas;
 
         @NonNull
         private final List<UserDataWrapper> mUserDataWrappers;
 
-        FriendListAdapter(@NonNull List<UserData> userDatas, @Nullable ArrayList<String> selectedUserDataEmails) {
-            mUserDatas = userDatas;
-            mUserDataWrappers = Stream.of(mUserDatas)
+        FriendListAdapter(@NonNull Collection<UserListLoader.UserListData> userListDatas, @Nullable ArrayList<String> selectedUserDataEmails) {
+            mUserListDatas = new ArrayList<>(userListDatas);
+            mUserDataWrappers = Stream.of(mUserListDatas)
                     .map(userData -> new UserDataWrapper(userData, selectedUserDataEmails))
                     .collect(Collectors.toList());
         }
@@ -323,8 +311,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
             UserDataWrapper userDataWrapper = mUserDataWrappers.get(position);
             Assert.assertTrue(userDataWrapper != null);
 
-            friendHolder.mFriendName.setText(userDataWrapper.mUserData.getDisplayName());
-            friendHolder.mFriendEmail.setText(userDataWrapper.mUserData.getEmail());
+            friendHolder.mFriendName.setText(userDataWrapper.mUserListData.mName);
+            friendHolder.mFriendEmail.setText(userDataWrapper.mUserListData.mEmail);
 
             if (userDataWrapper.mSelected)
                 friendHolder.mFriendRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
@@ -347,7 +335,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         ArrayList<String> getSelected() {
             return new ArrayList<>(Stream.of(mUserDataWrappers)
                     .filter(customTimeWrapper -> customTimeWrapper.mSelected)
-                    .map(customTimeWrapper -> customTimeWrapper.mUserData.getEmail())
+                    .map(customTimeWrapper -> customTimeWrapper.mUserListData.mEmail)
                     .collect(Collectors.toList()));
         }
 
@@ -359,14 +347,14 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
                     .collect(Collectors.toList());
 
             for (UserDataWrapper userDataWrapper : selectedUserDataWrappers) {
-                mUserDatas.remove(userDataWrapper.mUserData);
+                mUserListDatas.remove(userDataWrapper.mUserListData);
 
                 int position = mUserDataWrappers.indexOf(userDataWrapper);
                 mUserDataWrappers.remove(position);
                 notifyItemRemoved(position);
             }
 
-            Stream.of(selectedUserDataWrappers).forEach(userDataWrapper -> DatabaseWrapper.removeFriend(mUserData, userDataWrapper.mUserData));
+            Stream.of(selectedUserDataWrappers).forEach(userDataWrapper -> DatabaseWrapper.removeFriend(mUserData, userDataWrapper.mUserListData.mKey)); // todo move to domain factory
         }
 
         class FriendHolder extends RecyclerView.ViewHolder {
@@ -385,8 +373,6 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
             void onRowClick() {
                 UserDataWrapper userDataWrapper = mUserDataWrappers.get(getAdapterPosition());
                 Assert.assertTrue(userDataWrapper != null);
-
-                //mShowCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(userDataWrapper.mUserData.Id, mShowCustomTimesFragment.getActivity()));
             }
 
             void onLongClick() {
@@ -410,17 +396,17 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
     private static class UserDataWrapper {
         @NonNull
-        final UserData mUserData;
+        final UserListLoader.UserListData mUserListData;
 
         boolean mSelected = false;
 
-        UserDataWrapper(@NonNull UserData userData, @Nullable ArrayList<String> selectedUserDataEmails) {
-            mUserData = userData;
+        UserDataWrapper(@NonNull UserListLoader.UserListData userListData, @Nullable ArrayList<String> selectedUserDataEmails) {
+            mUserListData = userListData;
 
             if (selectedUserDataEmails != null) {
                 Assert.assertTrue(!selectedUserDataEmails.isEmpty());
 
-                mSelected = selectedUserDataEmails.contains(mUserData.getEmail());
+                mSelected = selectedUserDataEmails.contains(mUserListData.mEmail);
             }
         }
     }

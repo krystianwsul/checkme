@@ -60,7 +60,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener {
+public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, UserListFragment.Listener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
@@ -92,12 +92,20 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private DrawerLayout mMainActivityDrawer;
 
+    @Nullable
     private DrawerLayout.DrawerListener mDrawerTaskListener;
 
+    @Nullable
     private DrawerLayout.DrawerListener mDrawerGroupListener;
+
+    @Nullable
     private ViewPager.OnPageChangeListener mOnPageChangeListener;
 
+    @Nullable
     private DrawerLayout.DrawerListener mDrawerCustomTimesListener;
+
+    @Nullable
+    private DrawerLayout.DrawerListener mDrawerUsersListener;
 
     private Tab mVisibleTab = Tab.INSTANCES;
     private boolean mIgnoreFirst = false;
@@ -713,6 +721,44 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         mMainActivityDrawer.removeDrawerListener(mDrawerCustomTimesListener);
         mDrawerCustomTimesListener = null;
+    }
+
+    @Override
+    public void onCreateUsersActionMode(@NonNull ActionMode actionMode) {
+        Assert.assertTrue(mDrawerUsersListener == null);
+
+        mDrawerUsersListener = new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (newState == DrawerLayout.STATE_DRAGGING) {
+                    actionMode.finish();
+                }
+            }
+        };
+        mMainActivityDrawer.addDrawerListener(mDrawerUsersListener);
+    }
+
+    @Override
+    public void onDestroyUsersActionMode() {
+        Assert.assertTrue(mDrawerUsersListener != null);
+
+        mMainActivityDrawer.removeDrawerListener(mDrawerUsersListener);
+        mDrawerUsersListener = null;
     }
 
     @Override

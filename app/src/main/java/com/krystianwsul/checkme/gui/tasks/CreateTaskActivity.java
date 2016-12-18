@@ -307,7 +307,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_create_task, menu);
+        getMenuInflater().inflate(R.menu.menu_save, menu);
         return true;
     }
 
@@ -315,7 +315,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     public boolean onPrepareOptionsMenu(Menu menu) {
         Assert.assertTrue(mToolbarEditText != null);
 
-        menu.findItem(R.id.action_create_task_save).setVisible(mData != null);
+        menu.findItem(R.id.action_save).setVisible(mData != null);
 
         return true;
     }
@@ -325,7 +325,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
 
         switch (item.getItemId()) {
-            case R.id.action_create_task_save:
+            case R.id.action_save:
                 Assert.assertTrue(mData != null);
                 Assert.assertTrue(mToolbarEditText != null);
                 Assert.assertTrue(mFriendIds != null);

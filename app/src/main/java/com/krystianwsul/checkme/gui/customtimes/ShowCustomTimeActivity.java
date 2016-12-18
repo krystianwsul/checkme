@@ -94,7 +94,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_custom_time, menu);
+        getMenuInflater().inflate(R.menu.menu_save, menu);
         return true;
     }
 
@@ -102,7 +102,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     public boolean onPrepareOptionsMenu(Menu menu) {
         Assert.assertTrue(mToolbarEditText != null);
 
-        menu.findItem(R.id.action_custom_time_save).setVisible((mCustomTimeId == null) || (mData != null));
+        menu.findItem(R.id.action_save).setVisible((mCustomTimeId == null) || (mData != null));
 
         return true;
     }
@@ -110,7 +110,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_custom_time_save:
+            case R.id.action_save:
                 Assert.assertTrue(!mHourMinutes.isEmpty());
 
                 updateError();

@@ -4,6 +4,8 @@ package com.krystianwsul.checkme.gui.friends;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.google.common.collect.Sets;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
@@ -36,13 +39,15 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class UserListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<UserListLoader.Data> {
     private static final String PROJECT_ID_KEY = "projectId";
 
-    private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
+    private static final String SAVE_STATE_KEY = "saveState";
 
     private static final String FRIEND_PICKER_TAG = "friendPicker";
 
@@ -56,10 +61,11 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
     private FriendListAdapter mFriendListAdapter;
 
-    private ArrayList<String> mSelectedUserDataEmails;
-
     @Nullable
     private UserListLoader.Data mData;
+
+    @Nullable
+    private SaveState mSaveState;
 
     private final SelectionCallback mSelectionCallback = new SelectionCallback() {
         @Override
@@ -206,10 +212,14 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         mEmptyText = (TextView) friendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_USER_DATA_EMAILS_KEY)) {
-            mSelectedUserDataEmails = savedInstanceState.getStringArrayList(SELECTED_USER_DATA_EMAILS_KEY);
-            Assert.assertTrue(mSelectedUserDataEmails != null);
-            Assert.assertTrue(!mSelectedUserDataEmails.isEmpty());
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVE_STATE_KEY)) {
+            mSaveState = savedInstanceState.getParcelable(SAVE_STATE_KEY);
+            Assert.assertTrue(mSaveState != null);
+
+            if (TextUtils.isEmpty(mProjectId)) {
+                Assert.assertTrue(mSaveState.mAddedIds.isEmpty());
+                Assert.assertTrue(mSaveState.mRemovedIds.isEmpty());
+            }
         }
 
         getLoaderManager().initLoader(0, null, this);
@@ -232,14 +242,15 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             @Override
             public void onFriendSelected(@NonNull String friendId) {
                 Assert.assertTrue(mData.mFriendDatas.containsKey(friendId));
-                Assert.assertTrue(userIds.contains(friendId));
+                Assert.assertTrue(Stream.of(mFriendListAdapter.mUserDataWrappers)
+                        .noneMatch(userDataWrapper -> userDataWrapper.mUserListData.mId.equals(friendId)));
 
                 UserListLoader.UserListData friendData = mData.mFriendDatas.get(friendId);
                 Assert.assertTrue(friendData != null);
 
                 int position = mFriendListAdapter.getItemCount();
 
-                mFriendListAdapter.mUserDataWrappers.add(new UserDataWrapper(friendData, null));
+                mFriendListAdapter.mUserDataWrappers.add(new UserDataWrapper(friendData, new HashSet<>()));
                 mFriendListAdapter.notifyItemChanged(position);
             }
 
@@ -271,15 +282,12 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         else
             Assert.assertTrue(data.mFriendDatas != null);
 
-        if (mFriendListAdapter != null) {
-            ArrayList<String> selectedUserDataKeys = mFriendListAdapter.getSelected();
-            if (selectedUserDataKeys.isEmpty())
-                mSelectedUserDataEmails = null;
-            else
-                mSelectedUserDataEmails = selectedUserDataKeys;
-        }
+        if (mFriendListAdapter != null)
+            mSaveState = mFriendListAdapter.getSaveState();
+        else if (mSaveState == null)
+            mSaveState = new SaveState(new HashSet<>(), new HashSet<>(), new HashSet<>());
 
-        mFriendListAdapter = new FriendListAdapter(data.mUserListDatas, mSelectedUserDataEmails);
+        mFriendListAdapter = new FriendListAdapter(data.mUserListDatas, mSaveState);
         mFriendListRecycler.setAdapter(mFriendListAdapter);
 
         mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
@@ -311,11 +319,8 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mFriendListAdapter != null) {
-            ArrayList<String> selectedUserDataEmails = mFriendListAdapter.getSelected();
-            if (!selectedUserDataEmails.isEmpty())
-                outState.putStringArrayList(SELECTED_USER_DATA_EMAILS_KEY, selectedUserDataEmails);
-        }
+        if (mFriendListAdapter != null)
+            outState.putParcelable(SAVE_STATE_KEY, mFriendListAdapter.getSaveState());
     }
 
     private void updateSelectAll() {
@@ -332,9 +337,26 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         @NonNull
         private final List<UserDataWrapper> mUserDataWrappers;
 
-        FriendListAdapter(@NonNull Collection<UserListLoader.UserListData> userListDatas, @Nullable ArrayList<String> selectedUserDataEmails) {
-            mUserDataWrappers = Stream.of(userListDatas)
-                    .map(userData -> new UserDataWrapper(userData, selectedUserDataEmails))
+        FriendListAdapter(@NonNull Collection<UserListLoader.UserListData> userListDatas, @NonNull SaveState saveState) {
+            Assert.assertTrue(mData != null);
+
+            Map<String, UserListLoader.UserListData> userListMap = Stream.of(userListDatas)
+                    .collect(Collectors.toMap(userListData -> userListData.mId, userListData -> userListData));
+
+            Stream.of(saveState.mRemovedIds)
+                    .forEach(userListMap::remove);
+
+            if (!saveState.mAddedIds.isEmpty()) {
+                Assert.assertTrue(mData.mFriendDatas != null);
+
+                userListMap.putAll(Stream.of(mData.mFriendDatas.values())
+                        .filter(friendData -> saveState.mAddedIds.contains(friendData.mId))
+                        .collect(Collectors.toMap(userListData -> userListData.mId, userListData -> userListData)));
+            }
+
+            mUserDataWrappers = Stream.of(userListMap.values())
+                    .sorted((lhs, rhs) -> lhs.mId.compareTo(rhs.mId))
+                    .map(userListData -> new UserDataWrapper(userListData, saveState.mSelectedIds))
                     .collect(Collectors.toList());
         }
 
@@ -410,10 +432,12 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                 notifyItemRemoved(position);
             }
 
-            DomainFactory.getDomainFactory(getActivity())
-                    .removeFriends(Stream.of(selectedUserDataWrappers)
-                            .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
-                            .collect(Collectors.toSet()));
+            if (TextUtils.isEmpty(mProjectId)) {
+                DomainFactory.getDomainFactory(getActivity())
+                        .removeFriends(Stream.of(selectedUserDataWrappers)
+                                .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                                .collect(Collectors.toSet()));
+            }
         }
 
         public void selectAll() {
@@ -422,6 +446,34 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             Stream.of(mUserDataWrappers)
                     .filter(customTimeWrapper -> !customTimeWrapper.mSelected)
                     .forEach(UserDataWrapper::toggleSelect);
+        }
+
+        @NonNull
+        SaveState getSaveState() {
+            Assert.assertTrue(mData != null);
+
+            Set<String> oldUserIds = Stream.of(mData.mUserListDatas)
+                    .map(userListData -> userListData.mId)
+                    .collect(Collectors.toSet());
+
+            Set<String> newUserIds = Stream.of(mUserDataWrappers)
+                    .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                    .collect(Collectors.toSet());
+
+            Set<String> addedIds = Sets.difference(newUserIds, oldUserIds);
+            Set<String> removedIds = Sets.difference(oldUserIds, newUserIds);
+
+            if (TextUtils.isEmpty(mProjectId)) {
+                Assert.assertTrue(addedIds.isEmpty());
+                Assert.assertTrue(removedIds.isEmpty());
+            }
+
+            Set<String> selectedIds = Stream.of(mUserDataWrappers)
+                    .filter(userDataWrapper -> userDataWrapper.mSelected)
+                    .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                    .collect(Collectors.toSet());
+
+            return new SaveState(addedIds, removedIds, selectedIds);
         }
 
         class FriendHolder extends RecyclerView.ViewHolder {
@@ -459,14 +511,10 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
         boolean mSelected = false;
 
-        UserDataWrapper(@NonNull UserListLoader.UserListData userListData, @Nullable ArrayList<String> selectedUserDataEmails) {
+        UserDataWrapper(@NonNull UserListLoader.UserListData userListData, @NonNull Set<String> selectedIds) {
             mUserListData = userListData;
 
-            if (selectedUserDataEmails != null) {
-                Assert.assertTrue(!selectedUserDataEmails.isEmpty());
-
-                mSelected = selectedUserDataEmails.contains(mUserListData.mEmail);
-            }
+            mSelected = selectedIds.contains(mUserListData.mId);
         }
 
         void toggleSelect() {
@@ -491,5 +539,55 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         void onDestroyUserActionMode();
 
         void setUserSelectAllVisibility(boolean selectAllVisible);
+    }
+
+    static class SaveState implements Parcelable {
+        @NonNull
+        final Set<String> mAddedIds;
+
+        @NonNull
+        final Set<String> mRemovedIds;
+
+        @NonNull
+        final Set<String> mSelectedIds;
+
+        SaveState(@NonNull Set<String> addedIds, @NonNull Set<String> removedIds, @NonNull Set<String> selectedIds) {
+            mAddedIds = addedIds;
+            mRemovedIds = removedIds;
+            mSelectedIds = selectedIds;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeStringList(new ArrayList<>(mAddedIds));
+            dest.writeStringList(new ArrayList<>(mRemovedIds));
+            dest.writeStringList(new ArrayList<>(mSelectedIds));
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<SaveState> CREATOR = new Creator<SaveState>() {
+            @Override
+            public SaveState createFromParcel(Parcel in) {
+                List<String> addedIds = in.createStringArrayList();
+                Assert.assertTrue(addedIds != null);
+
+                List<String> removedIds = in.createStringArrayList();
+                Assert.assertTrue(removedIds != null);
+
+                List<String> selectedIds = in.createStringArrayList();
+                Assert.assertTrue(selectedIds != null);
+
+                return new SaveState(new HashSet<>(addedIds), new HashSet<>(removedIds), new HashSet<>(selectedIds));
+            }
+
+            @Override
+            public SaveState[] newArray(int size) {
+                return new SaveState[size];
+            }
+        };
     }
 }

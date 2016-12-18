@@ -41,6 +41,7 @@ public class UserData implements Parcelable {
         Assert.assertTrue(!TextUtils.isEmpty(displayName));
 
         token = MyFirebaseInstanceIdService.getToken();
+        Assert.assertTrue(!TextUtils.isEmpty(token));
     }
 
     private UserData(@NonNull String email, @NonNull String displayName, @NonNull String token) {
@@ -67,8 +68,9 @@ public class UserData implements Parcelable {
         return displayName;
     }
 
+    @SuppressWarnings("WeakerAccess")
     @NonNull
-    private String getToken() {
+    public String getToken() {
         Assert.assertTrue(!TextUtils.isEmpty(token));
 
         return token;

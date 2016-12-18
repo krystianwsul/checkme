@@ -121,6 +121,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private final Map<Integer, Boolean> mGroupSelectAllVisible = new ArrayMap<>();
     private boolean mTaskSelectAllVisible = false;
     private boolean mCustomTimesSelectAllVisible = false;
+    private boolean mUserSelectAllVisible = false;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -169,6 +170,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             menu.findItem(R.id.action_select_all).setVisible(mTaskSelectAllVisible);
         } else if (mVisibleTab == Tab.CUSTOM_TIMES) {
             menu.findItem(R.id.action_select_all).setVisible(mCustomTimesSelectAllVisible);
+        } else if (mVisibleTab == Tab.FRIENDS) {
+            menu.findItem(R.id.action_select_all).setVisible(mUserSelectAllVisible);
         } else {
             menu.findItem(R.id.action_select_all).setVisible(false);
         }
@@ -202,6 +205,14 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 Assert.assertTrue(showCustomTimesFragment != null);
 
                 showCustomTimesFragment.selectAll();
+
+                break;
+            }
+            case FRIENDS: {
+                UserListFragment userListFragment = (UserListFragment) getSupportFragmentManager().findFragmentById(R.id.main_friend_list_frame);
+                Assert.assertTrue(userListFragment != null);
+
+                userListFragment.selectAll();
 
                 break;
             }
@@ -784,6 +795,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         mMainActivityDrawer.removeDrawerListener(mDrawerUsersListener);
         mDrawerUsersListener = null;
+    }
+
+    @Override
+    public void setUserSelectAllVisibility(boolean selectAllVisible) {
+        mUserSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
     }
 
     @Override

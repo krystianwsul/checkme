@@ -380,7 +380,6 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     public interface CustomTimesListListener {
         void onCreateCustomTimesActionMode(ActionMode actionMode);
         void onDestroyCustomTimesActionMode();
-
         void setCustomTimesSelectAllVisibility(boolean selectAllVisible);
     }
 }

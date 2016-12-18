@@ -70,6 +70,9 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             switch (menuItem.getItemId()) {
                 case R.id.action_custom_times_delete:
                     mFriendListAdapter.removeSelected();
+
+                    updateSelectAll();
+
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -229,6 +232,8 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             mFriendListRecycler.setVisibility(View.VISIBLE);
             mEmptyText.setVisibility(View.GONE);
         }
+
+        updateSelectAll();
     }
 
     @Override
@@ -244,6 +249,16 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             if (!selectedUserDataEmails.isEmpty())
                 outState.putStringArrayList(SELECTED_USER_DATA_EMAILS_KEY, selectedUserDataEmails);
         }
+    }
+
+    private void updateSelectAll() {
+        Assert.assertTrue(mFriendListAdapter != null);
+
+        ((Listener) getActivity()).setUserSelectAllVisibility(mFriendListAdapter.getItemCount() != 0);
+    }
+
+    public void selectAll() {
+        mFriendListAdapter.selectAll();
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
@@ -340,6 +355,14 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                             .collect(Collectors.toSet()));
         }
 
+        public void selectAll() {
+            Assert.assertTrue(!mSelectionCallback.hasActionMode());
+
+            Stream.of(mUserDataWrappers)
+                    .filter(customTimeWrapper -> !customTimeWrapper.mSelected)
+                    .forEach(UserDataWrapper::toggleSelect);
+        }
+
         class FriendHolder extends RecyclerView.ViewHolder {
             final View mFriendRow;
             final TextView mFriendName;
@@ -364,20 +387,12 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                 UserDataWrapper userDataWrapper = mUserDataWrappers.get(position);
                 Assert.assertTrue(userDataWrapper != null);
 
-                userDataWrapper.mSelected = !userDataWrapper.mSelected;
-
-                if (userDataWrapper.mSelected) {
-                    mSelectionCallback.incrementSelected();
-                } else {
-                    mSelectionCallback.decrementSelected();
-                }
-
-                notifyItemChanged(position);
+                userDataWrapper.toggleSelect();
             }
         }
     }
 
-    private static class UserDataWrapper {
+    private class UserDataWrapper {
         @NonNull
         final UserListLoader.UserListData mUserListData;
 
@@ -392,11 +407,27 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                 mSelected = selectedUserDataEmails.contains(mUserListData.mEmail);
             }
         }
+
+        void toggleSelect() {
+            mSelected = !mSelected;
+
+            if (mSelected) {
+                mSelectionCallback.incrementSelected();
+            } else {
+                mSelectionCallback.decrementSelected();
+            }
+
+            int position = mFriendListAdapter.mUserDataWrappers.indexOf(this);
+            Assert.assertTrue(position >= 0);
+
+            mFriendListAdapter.notifyItemChanged(position);
+        }
     }
 
     public interface Listener {
         void onCreateUsersActionMode(@NonNull ActionMode actionMode);
-
         void onDestroyUsersActionMode();
+
+        void setUserSelectAllVisibility(boolean selectAllVisible);
     }
 }

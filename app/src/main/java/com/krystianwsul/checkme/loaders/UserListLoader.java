@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
+import java.util.Map;
 import java.util.Set;
 
 public class UserListLoader extends DomainLoader<UserListLoader.Data> {
@@ -36,9 +37,9 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
         public final Set<UserListData> mUserListDatas;
 
         @Nullable
-        public final Set<UserListData> mFriendDatas;
+        public final Map<String, UserListData> mFriendDatas;
 
-        public Data(@NonNull Set<UserListData> userListDatas, @Nullable Set<UserListData> friendDatas) {
+        public Data(@NonNull Set<UserListData> userListDatas, @Nullable Map<String, UserListData> friendDatas) {
             mUserListDatas = userListDatas;
             mFriendDatas = friendDatas;
         }

@@ -1003,9 +1003,9 @@ public class DomainFactory {
                     .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
                     .collect(Collectors.toSet());
 
-            Set<UserListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
+            Map<String, UserListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
                     .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
 
             return new UserListLoader.Data(userListDatas, friendDatas);
         }

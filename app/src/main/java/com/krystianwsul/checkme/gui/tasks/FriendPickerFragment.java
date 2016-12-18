@@ -198,7 +198,7 @@ public class FriendPickerFragment extends AbstractDialogFragment {
         @NonNull
         final String mEmail;
 
-        FriendData(@NonNull String id, @NonNull String name, @NonNull String email) {
+        public FriendData(@NonNull String id, @NonNull String name, @NonNull String email) {
             Assert.assertTrue(!TextUtils.isEmpty(id));
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(!TextUtils.isEmpty(email));

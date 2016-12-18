@@ -7,8 +7,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.notifications.InstanceDoneService;
 
 public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     @Override
@@ -21,7 +21,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
         UserData userData = new UserData(firebaseUser);
 
-        DatabaseWrapper.setUserData(userData);
+        InstanceDoneService.needsFirebase(this, domainFactory -> domainFactory.updateUserData(this, userData));
     }
 
     @Nullable

@@ -1,9 +1,11 @@
 package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.records.RemoteUserRecord;
+
+import junit.framework.Assert;
 
 public class RemoteUser {
     @NonNull
@@ -12,7 +14,7 @@ public class RemoteUser {
     @NonNull
     private final RemoteUserRecord mRemoteUserRecord;
 
-    RemoteUser(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteUserRecord remoteUserRecord) {
+    RemoteUser(@NonNull RemoteProject remoteProject, @NonNull RemoteUserRecord remoteUserRecord) {
         mRemoteProject = remoteProject;
         mRemoteUserRecord = remoteUserRecord;
     }
@@ -38,8 +40,15 @@ public class RemoteUser {
         return mRemoteUserRecord.getEmail();
     }
 
-    @NonNull
-    public String getToken() {
-        return mRemoteUserRecord.getToken();
+    public void setName(@NonNull String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        mRemoteUserRecord.setName(name);
+    }
+
+    void setToken(@NonNull String token) {
+        Assert.assertTrue(!TextUtils.isEmpty(token));
+
+        mRemoteUserRecord.setToken(token);
     }
 }

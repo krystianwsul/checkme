@@ -87,11 +87,10 @@ public class RemoteProject {
                 .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
 
         Stream.of(mRemoteProjectRecord.getRemoteUserRecords().values())
-                .map(remoteUserRecord -> new RemoteUser(domainFactory, this, remoteUserRecord))
+                .map(remoteUserRecord -> new RemoteUser(this, remoteUserRecord))
                 .forEach(remoteUser -> mRemoteUsers.put(remoteUser.getId(), remoteUser));
 
-        if (!mRemoteUsers.containsKey(userData.getKey()))  // todo user
-            addUserData(userData);
+        updateUserData(userData);
     }
 
     @NonNull
@@ -280,7 +279,7 @@ public class RemoteProject {
         Assert.assertTrue(!mRemoteUsers.containsKey(id));
 
         RemoteUserRecord remoteUserRecord = mRemoteProjectRecord.newRemoteUserRecord(userData.toUserJson());
-        RemoteUser remoteUser = new RemoteUser(mDomainFactory, this, remoteUserRecord);
+        RemoteUser remoteUser = new RemoteUser(this, remoteUserRecord);
 
         mRemoteUsers.put(id, remoteUser);
     }
@@ -363,5 +362,16 @@ public class RemoteProject {
     @NonNull
     public Collection<RemoteUser> getUsers() {
         return mRemoteUsers.values();
+    }
+
+    void updateUserData(@NonNull UserData userData) {
+        String key = userData.getKey();
+        Assert.assertTrue(mRemoteUsers.containsKey(key));
+
+        RemoteUser remoteUser = mRemoteUsers.get(key);
+        Assert.assertTrue(remoteUser != null);
+
+        remoteUser.setName(userData.getDisplayName());
+        remoteUser.setToken(userData.getToken());
     }
 }

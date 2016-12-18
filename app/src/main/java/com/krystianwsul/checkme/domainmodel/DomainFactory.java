@@ -1624,6 +1624,22 @@ public class DomainFactory {
         });
     }
 
+    public synchronized void updateUserData(@NonNull Context context, @NonNull UserData userData) {
+        MyCrashlytics.log("DomainFactory.updateUserData");
+        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mRemoteFactory != null);
+
+        if (mUserData.equals(userData))
+            return;
+
+        mUserData = userData;
+        DatabaseWrapper.setUserData(userData);
+
+        mRemoteFactory.updateUserData(userData);
+
+        save(context, 0);
+    }
+
     // internal
 
     @Nullable

@@ -297,4 +297,9 @@ public class RemoteFactory {
     public Collection<RemoteProject> getRemoteProjects() {
         return mRemoteProjects.values();
     }
+
+    public void updateUserData(@NonNull UserData userData) {
+        Stream.of(mRemoteProjects.values())
+                .forEach(remoteProject -> remoteProject.updateUserData(userData));
+    }
 }

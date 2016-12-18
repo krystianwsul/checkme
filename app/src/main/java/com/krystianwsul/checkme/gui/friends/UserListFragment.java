@@ -11,6 +11,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -28,7 +29,6 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.loaders.UserListLoader;
 
 import junit.framework.Assert;
@@ -84,7 +84,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
             mFriendListFab.setVisibility(View.GONE);
 
-            ((ShowCustomTimesFragment.CustomTimesListListener) getActivity()).onCreateCustomTimesActionMode(mActionMode);
+            ((Listener) getActivity()).onCreateUsersActionMode(mActionMode);
         }
 
         @Override
@@ -101,7 +101,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         protected void onLastRemoved() {
             mFriendListFab.setVisibility(View.VISIBLE);
 
-            ((ShowCustomTimesFragment.CustomTimesListListener) getActivity()).onDestroyCustomTimesActionMode();
+            ((Listener) getActivity()).onDestroyUsersActionMode();
         }
 
         @Override
@@ -147,7 +147,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        Assert.assertTrue(context instanceof ShowCustomTimesFragment.CustomTimesListListener);
+        Assert.assertTrue(context instanceof Listener);
     }
 
     @Override
@@ -267,10 +267,10 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
         void unselect() {
             Stream.of(mUserDataWrappers)
-                    .filter(customTimeWrapper -> customTimeWrapper.mSelected)
-                    .forEach(customTimeWrapper -> {
-                        customTimeWrapper.mSelected = false;
-                        notifyItemChanged(mUserDataWrappers.indexOf(customTimeWrapper));
+                    .filter(userDataWrapper -> userDataWrapper.mSelected)
+                    .forEach(userDataWrapper -> {
+                        userDataWrapper.mSelected = false;
+                        notifyItemChanged(mUserDataWrappers.indexOf(userDataWrapper));
                     });
         }
 
@@ -316,14 +316,14 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
         ArrayList<String> getSelected() {
             return new ArrayList<>(Stream.of(mUserDataWrappers)
-                    .filter(customTimeWrapper -> customTimeWrapper.mSelected)
-                    .map(customTimeWrapper -> customTimeWrapper.mUserListData.mEmail)
+                    .filter(userDataWrapper -> userDataWrapper.mSelected)
+                    .map(userDataWrapper -> userDataWrapper.mUserListData.mEmail)
                     .collect(Collectors.toList()));
         }
 
         void removeSelected() {
             List<UserDataWrapper> selectedUserDataWrappers = Stream.of(mUserDataWrappers)
-                    .filter(customTimeWrapper -> customTimeWrapper.mSelected)
+                    .filter(userDataWrapper -> userDataWrapper.mSelected)
                     .collect(Collectors.toList());
 
             for (UserDataWrapper userDataWrapper : selectedUserDataWrappers) {
@@ -392,5 +392,11 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                 mSelected = selectedUserDataEmails.contains(mUserListData.mEmail);
             }
         }
+    }
+
+    public interface Listener {
+        void onCreateUsersActionMode(@NonNull ActionMode actionMode);
+
+        void onDestroyUsersActionMode();
     }
 }

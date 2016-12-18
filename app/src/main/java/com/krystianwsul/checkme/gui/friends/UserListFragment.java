@@ -38,6 +38,7 @@ import com.krystianwsul.checkme.loaders.UserListLoader;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -331,6 +332,38 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
     public void selectAll() {
         mFriendListAdapter.selectAll();
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean dataChanged() {
+        Assert.assertTrue(!TextUtils.isEmpty(mProjectId));
+
+        if (mData == null)
+            return false;
+
+        SaveState saveState = mFriendListAdapter.getSaveState();
+
+        if (!saveState.mAddedIds.isEmpty())
+            return true;
+
+        if (!saveState.mRemovedIds.isEmpty())
+            return true;
+
+        return false;
+    }
+
+    public void destroyLoader() {
+        getLoaderManager().destroyLoader(0);
+    }
+
+    public void save(int dataId) {
+        Assert.assertTrue(!TextUtils.isEmpty(mProjectId));
+        Assert.assertTrue(mData != null);
+        Assert.assertTrue(mFriendListAdapter != null);
+
+        SaveState saveState = mFriendListAdapter.getSaveState();
+
+        DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), Arrays.asList(mData.DataId, dataId), mProjectId, saveState.mAddedIds, saveState.mRemovedIds);
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {

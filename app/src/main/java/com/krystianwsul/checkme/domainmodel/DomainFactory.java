@@ -197,7 +197,7 @@ public class DomainFactory {
         save(context, dataIds);
     }
 
-    private void save(@NonNull Context context, @NonNull ArrayList<Integer> dataIds) {
+    private void save(@NonNull Context context, @NonNull List<Integer> dataIds) {
         if (mSkipSave)
             return;
 
@@ -1661,6 +1661,23 @@ public class DomainFactory {
         mRemoteFactory.updateUserData(userData);
 
         save(context, 0);
+    }
+
+    public synchronized void updateProject(@NonNull Context context, List<Integer> dataIds, @NonNull String projectId, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+        MyCrashlytics.log("DomainFactory.updateProject");
+
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
+        Assert.assertTrue(mRemoteFactory != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+
+        remoteProject.updateRecordOf(addedFriends, removedFriends);
+
+        updateNotificationsAndNotifyCloud(context, now, remoteProject);
+
+        save(context, dataIds);
     }
 
     // internal

@@ -244,7 +244,7 @@ public class RemoteProject {
         return remoteTaskHierarchy;
     }
 
-    void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         mRemoteProjectRecord.updateRecordOf(addedFriends, removedFriends);
 
         // todo user

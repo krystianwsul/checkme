@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.notifications.InstanceDoneService;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTaskLoader<D> {
     private D mData;
@@ -160,7 +160,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     }
 
     public class Observer {
-        public void onDomainChanged(ArrayList<Integer> dataIds) {
+        public void onDomainChanged(@NonNull List<Integer> dataIds) {
             if (mData != null && dataIds.contains(mData.DataId))
                 return;
 

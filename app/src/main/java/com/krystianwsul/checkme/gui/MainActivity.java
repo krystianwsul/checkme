@@ -120,6 +120,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
     private final Map<Integer, Boolean> mGroupSelectAllVisible = new ArrayMap<>();
     private boolean mTaskSelectAllVisible = false;
+    private boolean mCustomTimesSelectAllVisible = false;
+    private boolean mUserSelectAllVisible = false;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -166,6 +168,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             menu.findItem(R.id.action_select_all).setVisible(visible);
         } else if (mVisibleTab == Tab.TASKS) {
             menu.findItem(R.id.action_select_all).setVisible(mTaskSelectAllVisible);
+        } else if (mVisibleTab == Tab.CUSTOM_TIMES) {
+            menu.findItem(R.id.action_select_all).setVisible(mCustomTimesSelectAllVisible);
+        } else if (mVisibleTab == Tab.FRIENDS) {
+            menu.findItem(R.id.action_select_all).setVisible(mUserSelectAllVisible);
         } else {
             menu.findItem(R.id.action_select_all).setVisible(false);
         }
@@ -177,18 +183,41 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     public boolean onOptionsItemSelected(MenuItem item) {
         Assert.assertTrue(item.getItemId() == R.id.action_select_all);
 
-        if (mVisibleTab == Tab.INSTANCES) {
-            MyFragmentStatePagerAdapter myFragmentStatePagerAdapter = (MyFragmentStatePagerAdapter) mDaysPager.getAdapter();
-            Assert.assertTrue(myFragmentStatePagerAdapter != null);
+        switch (mVisibleTab) {
+            case INSTANCES: {
+                MyFragmentStatePagerAdapter myFragmentStatePagerAdapter = (MyFragmentStatePagerAdapter) mDaysPager.getAdapter();
+                Assert.assertTrue(myFragmentStatePagerAdapter != null);
 
-            myFragmentStatePagerAdapter.getCurrentItem().selectAll();
-        } else {
-            Assert.assertTrue(mVisibleTab == Tab.TASKS);
+                myFragmentStatePagerAdapter.getCurrentItem().selectAll();
 
-            TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.main_task_list_frame);
-            Assert.assertTrue(taskListFragment != null);
+                break;
+            }
+            case TASKS: {
+                TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.main_task_list_frame);
+                Assert.assertTrue(taskListFragment != null);
 
-            taskListFragment.selectAll();
+                taskListFragment.selectAll();
+
+                break;
+            }
+            case CUSTOM_TIMES: {
+                ShowCustomTimesFragment showCustomTimesFragment = (ShowCustomTimesFragment) getSupportFragmentManager().findFragmentById(R.id.main_custom_times_frame);
+                Assert.assertTrue(showCustomTimesFragment != null);
+
+                showCustomTimesFragment.selectAll();
+
+                break;
+            }
+            case FRIENDS: {
+                UserListFragment userListFragment = (UserListFragment) getSupportFragmentManager().findFragmentById(R.id.main_friend_list_frame);
+                Assert.assertTrue(userListFragment != null);
+
+                userListFragment.selectAll();
+
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException();
         }
 
         return true;
@@ -724,6 +753,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     }
 
     @Override
+    public void setCustomTimesSelectAllVisibility(boolean selectAllVisible) {
+        mCustomTimesSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
     public void onCreateUsersActionMode(@NonNull ActionMode actionMode) {
         Assert.assertTrue(mDrawerUsersListener == null);
 
@@ -759,6 +795,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         mMainActivityDrawer.removeDrawerListener(mDrawerUsersListener);
         mDrawerUsersListener = null;
+    }
+
+    @Override
+    public void setUserSelectAllVisibility(boolean selectAllVisible) {
+        mUserSelectAllVisible = selectAllVisible;
+
+        invalidateOptionsMenu();
     }
 
     @Override

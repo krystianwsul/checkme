@@ -500,7 +500,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     public interface TaskListListener {
         void onCreateTaskActionMode(ActionMode actionMode);
         void onDestroyTaskActionMode();
-
         void setTaskSelectAllVisibility(boolean selectAllVisible);
     }
 

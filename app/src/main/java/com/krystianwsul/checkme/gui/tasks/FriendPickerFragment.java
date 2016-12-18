@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.gui.tasks;
 
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,7 +30,10 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     private ProgressBar mFriendPickerProgress;
     private RecyclerView mFriendPickerRecycler;
 
+    @Nullable
     private List<CreateTaskLoader.UserData> mUserDatas;
+
+    private Listener mListener;
 
     @NonNull
     public static FriendPickerFragment newInstance(boolean showDelete) {
@@ -45,13 +48,6 @@ public class FriendPickerFragment extends AbstractDialogFragment {
 
     public FriendPickerFragment() {
 
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        Assert.assertTrue(context instanceof Listener);
     }
 
     @NonNull
@@ -71,7 +67,7 @@ public class FriendPickerFragment extends AbstractDialogFragment {
 
         if (showDelete)
             builder.neutralText(R.string.delete)
-                    .onNeutral((dialog, which) -> ((Listener) getActivity()).onFriendDeleted());
+                    .onNeutral((dialog, which) -> mListener.onFriendDeleted());
 
         MaterialDialog materialDialog = builder.build();
 
@@ -100,14 +96,19 @@ public class FriendPickerFragment extends AbstractDialogFragment {
             initialize();
     }
 
-    public void initialize(@NonNull List<CreateTaskLoader.UserData> userDatas) {
+    public void initialize(@NonNull List<CreateTaskLoader.UserData> userDatas, @NonNull Listener listener) {
         mUserDatas = userDatas;
+        mListener = listener;
 
         if (getActivity() != null)
             initialize();
     }
 
     private void initialize() {
+        Assert.assertTrue(getActivity() != null);
+        Assert.assertTrue(mUserDatas != null);
+        Assert.assertTrue(mListener != null);
+
         mFriendPickerRecycler.setAdapter(new FriendListAdapter());
     }
 
@@ -115,7 +116,7 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
 
-        ((Listener) getActivity()).onFriendCancel();
+        mListener.onFriendCancel();
     }
 
     public interface Listener {
@@ -129,6 +130,8 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
         @Override
         public int getItemCount() {
+            Assert.assertTrue(mUserDatas != null);
+
             return mUserDatas.size();
         }
 
@@ -148,6 +151,8 @@ public class FriendPickerFragment extends AbstractDialogFragment {
 
         @Override
         public void onBindViewHolder(final FriendListAdapter.FriendHolder friendHolder, int position) {
+            Assert.assertTrue(mUserDatas != null);
+
             CreateTaskLoader.UserData userData = mUserDatas.get(position);
             Assert.assertTrue(userData != null);
 
@@ -171,12 +176,14 @@ public class FriendPickerFragment extends AbstractDialogFragment {
             }
 
             void onRowClick() {
+                Assert.assertTrue(mUserDatas != null);
+
                 CreateTaskLoader.UserData userData = mUserDatas.get(getAdapterPosition());
                 Assert.assertTrue(userData != null);
 
                 dismiss();
 
-                ((Listener) getActivity()).onFriendSelected(userData.mId);
+                mListener.onFriendSelected(userData.mId);
             }
         }
     }

@@ -48,7 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public class CreateTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data>, FriendPickerFragment.Listener {
+public class CreateTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
     private static final String DISCARD_TAG = "discard";
 
     private static final String TASK_KEY_KEY = "taskKey";
@@ -204,7 +204,53 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     @Nullable
     private List<String> mFriendIds;
 
-    @NonNull
+    private final FriendPickerFragment.Listener mFriendPickerFragmentListener = new FriendPickerFragment.Listener() {
+        @Override
+        public void onFriendSelected(@NonNull String friendId) {
+            Assert.assertTrue(!TextUtils.isEmpty(friendId));
+
+            Assert.assertTrue(mData != null);
+            Assert.assertTrue(mFriendIds != null);
+
+            if (mFriendPosition == null) {
+                clearParent();
+
+                mCreateTaskAdapter.addFriendEntry(friendId);
+            } else {
+                Assert.assertTrue(mFriendPosition >= 0);
+
+                mFriendIds.set(mFriendPosition, friendId);
+
+                mCreateTaskAdapter.notifyItemChanged(1 + mScheduleEntries.size() + 1 + mFriendPosition);
+
+                mFriendPosition = null;
+            }
+        }
+
+        @Override
+        public void onFriendDeleted() {
+            Assert.assertTrue(mFriendPosition != null);
+            Assert.assertTrue(mFriendPosition >= 0);
+            Assert.assertTrue(mData != null);
+            Assert.assertTrue(mFriendIds != null);
+
+            mFriendIds.remove(mFriendPosition.intValue());
+
+            mCreateTaskAdapter.notifyItemRemoved(1 + mScheduleEntries.size() + 1 + mFriendPosition);
+
+            mFriendPosition = null;
+        }
+
+        @Override
+        public void onFriendCancel() {
+            if (mFriendPosition != null) {
+                Assert.assertTrue(mFriendPosition >= 0);
+
+                mFriendPosition = null;
+            }
+        }
+    };
+
     public static Intent getCreateIntent(@NonNull Context context) {
         return new Intent(context, CreateTaskActivity.class);
     }
@@ -686,7 +732,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         FriendPickerFragment friendPickerFragment = (FriendPickerFragment) getSupportFragmentManager().findFragmentByTag(FRIEND_PICKER_DIALOG_TAG);
         if (friendPickerFragment != null)
-            friendPickerFragment.initialize(getFriendPickerData());
+            friendPickerFragment.initialize(getFriendPickerData(), mFriendPickerFragmentListener);
     }
 
     @Override
@@ -998,51 +1044,6 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public void onFriendSelected(@NonNull String friendId) {
-        Assert.assertTrue(!TextUtils.isEmpty(friendId));
-
-        Assert.assertTrue(mData != null);
-        Assert.assertTrue(mFriendIds != null);
-
-        if (mFriendPosition == null) {
-            clearParent();
-
-            mCreateTaskAdapter.addFriendEntry(friendId);
-        } else {
-            Assert.assertTrue(mFriendPosition >= 0);
-
-            mFriendIds.set(mFriendPosition, friendId);
-
-            mCreateTaskAdapter.notifyItemChanged(1 + mScheduleEntries.size() + 1 + mFriendPosition);
-
-            mFriendPosition = null;
-        }
-    }
-
-    @Override
-    public void onFriendDeleted() {
-        Assert.assertTrue(mFriendPosition != null);
-        Assert.assertTrue(mFriendPosition >= 0);
-        Assert.assertTrue(mData != null);
-        Assert.assertTrue(mFriendIds != null);
-
-        mFriendIds.remove(mFriendPosition.intValue());
-
-        mCreateTaskAdapter.notifyItemRemoved(1 + mScheduleEntries.size() + 1 + mFriendPosition);
-
-        mFriendPosition = null;
-    }
-
-    @Override
-    public void onFriendCancel() {
-        if (mFriendPosition != null) {
-            Assert.assertTrue(mFriendPosition >= 0);
-
-            mFriendPosition = null;
-        }
-    }
-
     public static class ScheduleHint implements Parcelable {
         @NonNull
         final Date mDate;
@@ -1240,7 +1241,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     mFriendPosition = friendPosition;
 
                     FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(true);
-                    friendPickerFragment.initialize(getFriendPickerData());
+                    friendPickerFragment.initialize(getFriendPickerData(), mFriendPickerFragmentListener);
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
             } else if (position == 1 + mScheduleEntries.size() + 1 + mFriendIds.size()) {
@@ -1260,7 +1261,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     Assert.assertTrue(mFriendPosition == null);
 
                     FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
-                    friendPickerFragment.initialize(getFriendPickerData());
+                    friendPickerFragment.initialize(getFriendPickerData(), mFriendPickerFragmentListener);
                     friendPickerFragment.show(getSupportFragmentManager(), FRIEND_PICKER_DIALOG_TAG);
                 });
             } else {

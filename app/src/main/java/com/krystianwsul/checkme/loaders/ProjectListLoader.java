@@ -12,7 +12,7 @@ import java.util.TreeMap;
 
 public class ProjectListLoader extends DomainLoader<ProjectListLoader.Data> {
     public ProjectListLoader(Context context) {
-        super(context, FirebaseLevel.FRIEND);
+        super(context, FirebaseLevel.NEED);
     }
 
     @Override

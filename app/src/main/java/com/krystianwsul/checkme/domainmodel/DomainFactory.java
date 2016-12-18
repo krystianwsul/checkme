@@ -31,6 +31,7 @@ import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
+import com.krystianwsul.checkme.firebase.RemoteUser;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -963,18 +964,11 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.getProjectListData");
 
         Assert.assertTrue(mRemoteFactory != null);
-        Assert.assertTrue(mFriends != null);
 
         TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteFactory.getRemoteProjects())
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
-                    List<UserData> userDatas = Stream.of(remoteProject.getRecordOf())
-                            .filter(mFriends::containsKey)
-                            .map(mFriends::get)
-                            .collect(Collectors.toList());
-                    userDatas.add(mUserData);
-
-                    String users = Stream.of(userDatas)
-                            .map(UserData::getDisplayName)
+                    String users = Stream.of(remoteProject.getUsers())
+                            .map(RemoteUser::getName)
                             .collect(Collectors.joining(", "));
 
                     return new ProjectListLoader.ProjectData(remoteProject.getName(), users);

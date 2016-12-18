@@ -302,4 +302,15 @@ public class RemoteFactory {
         Stream.of(mRemoteProjects.values())
                 .forEach(remoteProject -> remoteProject.updateUserData(userData));
     }
+
+    @NonNull
+    public RemoteProject getRemoteProjectForce(@NonNull String projectId) {
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
+        Assert.assertTrue(mRemoteProjects.containsKey(projectId));
+
+        RemoteProject remoteProject = mRemoteProjects.get(projectId);
+        Assert.assertTrue(remoteProject != null);
+
+        return remoteProject;
+    }
 }

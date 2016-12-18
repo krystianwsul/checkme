@@ -42,6 +42,7 @@ import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
+import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
 import com.krystianwsul.checkme.loaders.UserListLoader;
@@ -999,6 +1000,19 @@ public class DomainFactory {
                 .collect(Collectors.toSet());
 
         return new UserListLoader.Data(userListDatas);
+    }
+
+    @NonNull
+    public synchronized ShowProjectLoader.Data getShowProjectData(@NonNull String projectId) {
+        fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getShowProjectData");
+
+        Assert.assertTrue(mRemoteFactory != null);
+
+        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+
+        return new ShowProjectLoader.Data(remoteProject.getName());
     }
 
     // sets

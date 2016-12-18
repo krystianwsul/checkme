@@ -41,7 +41,7 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_group);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.show_group_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);

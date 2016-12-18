@@ -173,7 +173,7 @@ public class EditInstanceActivity extends AbstractActivity implements LoaderMana
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_instance);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.edit_instance_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);

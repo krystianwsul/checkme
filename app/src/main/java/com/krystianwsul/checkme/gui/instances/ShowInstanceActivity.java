@@ -183,7 +183,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_instance);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.show_instance_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);

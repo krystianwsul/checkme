@@ -51,7 +51,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.show_task_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);

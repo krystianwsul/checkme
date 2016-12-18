@@ -58,6 +58,9 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
             switch (menuItem.getItemId()) {
                 case R.id.action_custom_times_delete:
                     mCustomTimesAdapter.removeSelected();
+
+                    updateSelectAll();
+
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -184,6 +187,8 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
             mShowTimesList.setVisibility(View.VISIBLE);
             mEmptyText.setVisibility(View.GONE);
         }
+
+        updateSelectAll();
     }
 
     @Override
@@ -201,7 +206,17 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         }
     }
 
-    public static class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
+    private void updateSelectAll() {
+        Assert.assertTrue(mCustomTimesAdapter != null);
+
+        ((CustomTimesListListener) getActivity()).setCustomTimesSelectAllVisibility(mCustomTimesAdapter.getItemCount() != 0);
+    }
+
+    public void selectAll() {
+        mCustomTimesAdapter.selectAll();
+    }
+
+    public class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
         private final int mDataId;
         private final List<CustomTimeWrapper> mCustomTimeWrappers;
 
@@ -229,6 +244,14 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
                         customTimeWrapper.mSelected = false;
                         notifyItemChanged(mCustomTimeWrappers.indexOf(customTimeWrapper));
                     });
+        }
+
+        public void selectAll() {
+            Assert.assertTrue(!mSelectionCallback.hasActionMode());
+
+            Stream.of(mCustomTimeWrappers)
+                    .filter(customTimeWrapper -> !customTimeWrapper.mSelected)
+                    .forEach(CustomTimeWrapper::toggleSelect);
         }
 
         @Override
@@ -317,20 +340,12 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
                 CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
                 Assert.assertTrue(customTimeWrapper != null);
 
-                customTimeWrapper.mSelected = !customTimeWrapper.mSelected;
-
-                if (customTimeWrapper.mSelected) {
-                    mShowCustomTimesFragment.mSelectionCallback.incrementSelected();
-                } else {
-                    mShowCustomTimesFragment.mSelectionCallback.decrementSelected();
-                }
-
-                notifyItemChanged(position);
+                customTimeWrapper.toggleSelect();
             }
         }
     }
 
-    private static class CustomTimeWrapper {
+    private class CustomTimeWrapper {
         final ShowCustomTimesLoader.CustomTimeData mCustomTimeData;
         boolean mSelected = false;
 
@@ -345,10 +360,27 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
                 mSelected = selectedCustomTimeIds.contains(mCustomTimeData.Id);
             }
         }
+
+        void toggleSelect() {
+            mSelected = !mSelected;
+
+            if (mSelected) {
+                mSelectionCallback.incrementSelected();
+            } else {
+                mSelectionCallback.decrementSelected();
+            }
+
+            int position = mCustomTimesAdapter.mCustomTimeWrappers.indexOf(this);
+            Assert.assertTrue(position >= 0);
+
+            mCustomTimesAdapter.notifyItemChanged(position);
+        }
     }
 
     public interface CustomTimesListListener {
         void onCreateCustomTimesActionMode(ActionMode actionMode);
         void onDestroyCustomTimesActionMode();
+
+        void setCustomTimesSelectAllVisibility(boolean selectAllVisible);
     }
 }

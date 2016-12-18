@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractDialogFragment;
-import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 
 import junit.framework.Assert;
 
@@ -31,7 +31,7 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     private RecyclerView mFriendPickerRecycler;
 
     @Nullable
-    private List<CreateTaskLoader.UserData> mUserDatas;
+    private List<FriendData> mFriendDatas;
 
     private Listener mListener;
 
@@ -92,12 +92,12 @@ public class FriendPickerFragment extends AbstractDialogFragment {
         mFriendPickerProgress.setVisibility(View.GONE);
         mFriendPickerRecycler.setVisibility(View.VISIBLE);
 
-        if (mUserDatas != null)
+        if (mFriendDatas != null)
             initialize();
     }
 
-    public void initialize(@NonNull List<CreateTaskLoader.UserData> userDatas, @NonNull Listener listener) {
-        mUserDatas = userDatas;
+    public void initialize(@NonNull List<FriendData> friendDatas, @NonNull Listener listener) {
+        mFriendDatas = friendDatas;
         mListener = listener;
 
         if (getActivity() != null)
@@ -106,7 +106,7 @@ public class FriendPickerFragment extends AbstractDialogFragment {
 
     private void initialize() {
         Assert.assertTrue(getActivity() != null);
-        Assert.assertTrue(mUserDatas != null);
+        Assert.assertTrue(mFriendDatas != null);
         Assert.assertTrue(mListener != null);
 
         mFriendPickerRecycler.setAdapter(new FriendListAdapter());
@@ -130,9 +130,9 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
         @Override
         public int getItemCount() {
-            Assert.assertTrue(mUserDatas != null);
+            Assert.assertTrue(mFriendDatas != null);
 
-            return mUserDatas.size();
+            return mFriendDatas.size();
         }
 
         @Override
@@ -151,13 +151,13 @@ public class FriendPickerFragment extends AbstractDialogFragment {
 
         @Override
         public void onBindViewHolder(final FriendListAdapter.FriendHolder friendHolder, int position) {
-            Assert.assertTrue(mUserDatas != null);
+            Assert.assertTrue(mFriendDatas != null);
 
-            CreateTaskLoader.UserData userData = mUserDatas.get(position);
-            Assert.assertTrue(userData != null);
+            FriendData friendData = mFriendDatas.get(position);
+            Assert.assertTrue(friendData != null);
 
-            friendHolder.mFriendName.setText(userData.mName);
-            friendHolder.mFriendEmail.setText(userData.mEmail);
+            friendHolder.mFriendName.setText(friendData.mName);
+            friendHolder.mFriendEmail.setText(friendData.mEmail);
 
             friendHolder.mFriendRow.setOnClickListener(v -> friendHolder.onRowClick());
         }
@@ -176,15 +176,36 @@ public class FriendPickerFragment extends AbstractDialogFragment {
             }
 
             void onRowClick() {
-                Assert.assertTrue(mUserDatas != null);
+                Assert.assertTrue(mFriendDatas != null);
 
-                CreateTaskLoader.UserData userData = mUserDatas.get(getAdapterPosition());
-                Assert.assertTrue(userData != null);
+                FriendData friendData = mFriendDatas.get(getAdapterPosition());
+                Assert.assertTrue(friendData != null);
 
                 dismiss();
 
-                mListener.onFriendSelected(userData.mId);
+                mListener.onFriendSelected(friendData.mId);
             }
+        }
+    }
+
+    public static class FriendData {
+        @NonNull
+        final String mId;
+
+        @NonNull
+        final String mName;
+
+        @NonNull
+        final String mEmail;
+
+        FriendData(@NonNull String id, @NonNull String name, @NonNull String email) {
+            Assert.assertTrue(!TextUtils.isEmpty(id));
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(!TextUtils.isEmpty(email));
+
+            mId = id;
+            mName = name;
+            mEmail = email;
         }
     }
 }

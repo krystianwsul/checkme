@@ -1035,12 +1035,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     @NonNull
-    private List<CreateTaskLoader.UserData> getFriendPickerData() {
+    private List<FriendPickerFragment.FriendData> getFriendPickerData() {
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mFriendIds != null);
 
         return Stream.of(mData.mFriends.values())
                 .filterNot(friend -> mFriendIds.contains(friend.mId))
+                .map(friend -> new FriendPickerFragment.FriendData(friend.mId, friend.mName, friend.mEmail))
                 .collect(Collectors.toList());
     }
 

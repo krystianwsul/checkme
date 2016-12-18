@@ -1220,7 +1220,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) { // todo friends vs recordOf
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1232,7 +1232,7 @@ public class DomainFactory {
         return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, friendIds);
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) { // todo friends vs recordOf
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1298,7 +1298,7 @@ public class DomainFactory {
         createChildTask(context, now, dataId, parentTaskKey, name, note);
     }
 
-    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
+    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) { // todo friends vs recordOf
         MyCrashlytics.log("DomainFactory.createJoinChildTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1335,7 +1335,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
+    public synchronized TaskKey updateChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) { // todo friends vs recordOf
         MyCrashlytics.log("DomainFactory.updateChildTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1514,7 +1514,7 @@ public class DomainFactory {
         createRootTask(context, now, dataId, name, note, friendIds);
     }
 
-    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) { // todo friends vs recordOf
         MyCrashlytics.log("DomainFactory.createJoinRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1558,7 +1558,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) { // todo friends vs recordOf
         MyCrashlytics.log("DomainFactory.updateRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 

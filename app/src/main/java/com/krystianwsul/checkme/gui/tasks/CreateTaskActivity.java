@@ -298,7 +298,6 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
-                        Assert.assertTrue(mFriendIds != null);
 
                         TaskKey taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskKey, name, getScheduleDatas(), mNote, mFriendIds);
 
@@ -317,7 +316,6 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
-                        Assert.assertTrue(mFriendIds != null);
 
                         DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote, mFriendIds);
 

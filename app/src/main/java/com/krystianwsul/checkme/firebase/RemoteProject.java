@@ -359,4 +359,9 @@ public class RemoteProject {
 
         mRemoteUsers.remove(id);
     }
+
+    @NonNull
+    public Collection<RemoteUser> getUsers() {
+        return mRemoteUsers.values();
+    }
 }

@@ -898,11 +898,11 @@ public class DomainFactory {
             if (task.getRecordOf().isEmpty() || (parentTaskKey != null)) {
                 friends = new HashMap<>();
             } else {
-                Assert.assertTrue(mFriends != null);
+                Assert.assertTrue(mUserData != null);
 
-                friends = Stream.of(mFriends.values())
-                        .filter(userData -> task.getRecordOf().contains(userData.getKey()))
-                        .map(userData -> new CreateTaskLoader.UserData(userData.getKey(), userData.getDisplayName(), userData.getEmail()))
+                friends = Stream.of(task.getRemoteNonNullProject().getUsers())
+                        .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
+                        .map(remoteUser -> new CreateTaskLoader.UserData(remoteUser.getId(), remoteUser.getName(), remoteUser.getEmail()))
                         .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
             }
 

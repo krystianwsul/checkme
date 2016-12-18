@@ -26,7 +26,6 @@ import java.util.List;
 
 public class FriendPickerFragment extends AbstractDialogFragment {
     private static final String SHOW_DELETE_KEY = "showDelete";
-    private static final String USER_DATAS_KEY = "userDatas";
 
     private ProgressBar mFriendPickerProgress;
     private RecyclerView mFriendPickerRecycler;
@@ -67,7 +66,6 @@ public class FriendPickerFragment extends AbstractDialogFragment {
         Bundle args = getArguments();
         Assert.assertTrue(args != null);
         Assert.assertTrue(args.containsKey(SHOW_DELETE_KEY));
-        Assert.assertTrue(args.containsKey(USER_DATAS_KEY));
 
         boolean showDelete = args.getBoolean(SHOW_DELETE_KEY);
 

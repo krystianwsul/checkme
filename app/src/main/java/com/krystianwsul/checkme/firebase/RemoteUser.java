@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.records.RemoteUserRecord;
 
-class RemoteUser {
+public class RemoteUser {
     @NonNull
     private final RemoteProject mRemoteProject;
 

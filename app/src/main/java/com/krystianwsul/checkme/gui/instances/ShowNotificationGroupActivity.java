@@ -40,7 +40,7 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_group);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.show_notification_group_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);

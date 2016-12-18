@@ -874,9 +874,9 @@ public class DomainFactory {
 
                                 scheduleDatas.add(monthlyWeekSchedule.getScheduleData());
 
-                                CustomTime weeklyCustomTime = monthlyWeekSchedule.getTime().getPair().first;
-                                if (weeklyCustomTime != null)
-                                    customTimes.put(weeklyCustomTime.getCustomTimeKey(), weeklyCustomTime);
+                                CustomTimeKey customTimeKey = monthlyWeekSchedule.getCustomTimeKey();
+                                if (customTimeKey != null)
+                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
 
                                 break;
                             }

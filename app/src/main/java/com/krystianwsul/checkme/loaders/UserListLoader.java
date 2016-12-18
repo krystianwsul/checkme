@@ -35,13 +35,20 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
         @NonNull
         public final Set<UserListData> mUserListDatas;
 
-        public Data(@NonNull Set<UserListData> userListDatas) {
+        @Nullable
+        public final Set<UserListData> mFriendDatas;
+
+        public Data(@NonNull Set<UserListData> userListDatas, @Nullable Set<UserListData> friendDatas) {
             mUserListDatas = userListDatas;
+            mFriendDatas = friendDatas;
         }
 
         @Override
         public int hashCode() {
-            return mUserListDatas.hashCode();
+            int hash = mUserListDatas.hashCode();
+            if (mFriendDatas != null)
+                hash += mFriendDatas.hashCode();
+            return hash;
         }
 
         @Override
@@ -57,7 +64,18 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
 
             Data data = (Data) object;
 
-            return mUserListDatas.equals(data.mUserListDatas);
+            if (!mUserListDatas.equals(data.mUserListDatas))
+                return false;
+
+            if (mFriendDatas == null) {
+                if (data.mFriendDatas != null)
+                    return false;
+            } else {
+                if (!mFriendDatas.equals(data.mFriendDatas))
+                    return false;
+            }
+
+            return true;
         }
     }
 

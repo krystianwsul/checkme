@@ -206,7 +206,14 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     }
 
     @Override
-    public void onLoadFinished(Loader<UserListLoader.Data> loader, @NonNull UserListLoader.Data data) {
+    public void onLoadFinished(Loader<UserListLoader.Data> loader, UserListLoader.Data data) {
+        Assert.assertTrue(data != null);
+
+        if (TextUtils.isEmpty(mProjectId))
+            Assert.assertTrue(data.mFriendDatas == null);
+        else
+            Assert.assertTrue(data.mFriendDatas != null);
+
         if (mFriendListAdapter != null) {
             ArrayList<String> selectedUserDataKeys = mFriendListAdapter.getSelected();
             if (selectedUserDataKeys.isEmpty())

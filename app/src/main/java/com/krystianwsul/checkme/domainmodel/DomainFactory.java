@@ -990,10 +990,11 @@ public class DomainFactory {
                     .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
                     .collect(Collectors.toSet());
 
-            return new UserListLoader.Data(userListDatas);
+            return new UserListLoader.Data(userListDatas, null);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
             Assert.assertTrue(mUserData != null);
+            Assert.assertTrue(mFriends != null);
 
             RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
 
@@ -1002,7 +1003,11 @@ public class DomainFactory {
                     .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
                     .collect(Collectors.toSet());
 
-            return new UserListLoader.Data(userListDatas);
+            Set<UserListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
+                    .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                    .collect(Collectors.toSet());
+
+            return new UserListLoader.Data(userListDatas, friendDatas);
         }
     }
 

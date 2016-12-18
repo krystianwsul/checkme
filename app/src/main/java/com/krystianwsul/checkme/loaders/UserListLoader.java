@@ -69,7 +69,7 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
         public final String mEmail;
 
         @NonNull
-        public final String mKey;
+        public final String mId;
 
         public UserListData(@NonNull String name, @NonNull String email, @NonNull String key) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -78,12 +78,12 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
 
             mName = name;
             mEmail = email;
-            mKey = key;
+            mId = key;
         }
 
         @Override
         public int hashCode() {
-            return (mName.hashCode() + mEmail.hashCode() + mKey.hashCode());
+            return (mName.hashCode() + mEmail.hashCode() + mId.hashCode());
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -106,7 +106,7 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
             if (!mEmail.equals(userListData.mEmail))
                 return false;
 
-            if (!mKey.equals(userListData.mKey))
+            if (!mId.equals(userListData.mId))
                 return false;
 
             return true;

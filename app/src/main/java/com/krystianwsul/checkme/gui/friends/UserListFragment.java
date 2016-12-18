@@ -42,7 +42,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
     private static final String SELECTED_USER_DATA_EMAILS_KEY = "selectedUserDataEmails";
 
-    private RelativeLayout mFriendListLayout;
     private ProgressBar mFriendListProgress;
     private RecyclerView mFriendListRecycler;
     private FloatingActionButton mFriendListFab;
@@ -87,7 +86,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
             mFriendListFab.setVisibility(View.GONE);
 
-            ((Listener) getActivity()).onCreateUsersActionMode(mActionMode);
+            ((Listener) getActivity()).onCreateUserActionMode(mActionMode);
         }
 
         @Override
@@ -104,7 +103,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         protected void onLastRemoved() {
             mFriendListFab.setVisibility(View.VISIBLE);
 
-            ((Listener) getActivity()).onDestroyUsersActionMode();
+            ((Listener) getActivity()).onDestroyUserActionMode();
         }
 
         @Override
@@ -136,7 +135,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         UserListFragment userListFragment = new UserListFragment();
 
         Bundle args = new Bundle();
-        args.putString(PROJECT_ID_KEY, null);
+        args.putString(PROJECT_ID_KEY, projectId);
         userListFragment.setArguments(args);
 
         return userListFragment;
@@ -173,23 +172,23 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mFriendListLayout = (RelativeLayout) getView();
-        Assert.assertTrue(mFriendListLayout != null);
+        RelativeLayout friendListLayout = (RelativeLayout) getView();
+        Assert.assertTrue(friendListLayout != null);
 
-        mFriendListProgress = (ProgressBar) mFriendListLayout.findViewById(R.id.friend_list_progress);
+        mFriendListProgress = (ProgressBar) friendListLayout.findViewById(R.id.friend_list_progress);
         Assert.assertTrue(mFriendListProgress != null);
 
-        mFriendListRecycler = (RecyclerView) mFriendListLayout.findViewById(R.id.friend_list_recycler);
+        mFriendListRecycler = (RecyclerView) friendListLayout.findViewById(R.id.friend_list_recycler);
         Assert.assertTrue(mFriendListRecycler != null);
 
         mFriendListRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mFriendListFab = (FloatingActionButton) mFriendListLayout.findViewById(R.id.friend_list_fab);
+        mFriendListFab = (FloatingActionButton) friendListLayout.findViewById(R.id.friend_list_fab);
         Assert.assertTrue(mFriendListFab != null);
 
         mFriendListFab.setOnClickListener(v -> startActivity(FindFriendActivity.newIntent(getActivity())));
 
-        mEmptyText = (TextView) mFriendListLayout.findViewById(R.id.empty_text);
+        mEmptyText = (TextView) friendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_USER_DATA_EMAILS_KEY)) {
@@ -351,7 +350,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
             DomainFactory.getDomainFactory(getActivity())
                     .removeFriends(Stream.of(selectedUserDataWrappers)
-                            .map(userDataWrapper -> userDataWrapper.mUserListData.mKey)
+                            .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
                             .collect(Collectors.toSet()));
         }
 
@@ -425,8 +424,9 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     }
 
     public interface Listener {
-        void onCreateUsersActionMode(@NonNull ActionMode actionMode);
-        void onDestroyUsersActionMode();
+        void onCreateUserActionMode(@NonNull ActionMode actionMode);
+
+        void onDestroyUserActionMode();
 
         void setUserSelectAllVisibility(boolean selectAllVisible);
     }

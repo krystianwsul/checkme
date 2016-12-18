@@ -123,6 +123,8 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             holder.mProjectName.setText(projectData.mName);
 
             holder.mProjectUsers.setText(projectData.mUsers);
+
+            holder.itemView.setOnClickListener(v -> mContext.startActivity(ShowProjectActivity.newIntent(mContext, projectData.mId)));
         }
 
         @Override

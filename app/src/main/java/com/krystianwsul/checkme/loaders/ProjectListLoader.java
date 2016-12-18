@@ -57,22 +57,27 @@ public class ProjectListLoader extends DomainLoader<ProjectListLoader.Data> {
 
     public static class ProjectData {
         @NonNull
+        public final String mId;
+
+        @NonNull
         public final String mName;
 
         @NonNull
         public final String mUsers;
 
-        public ProjectData(@NonNull String name, @NonNull String users) {
+        public ProjectData(@NonNull String id, @NonNull String name, @NonNull String users) {
+            Assert.assertTrue(!TextUtils.isEmpty(id));
             Assert.assertTrue(!TextUtils.isEmpty(name));
             Assert.assertTrue(!TextUtils.isEmpty(users));
 
+            mId = id;
             mName = name;
             mUsers = users;
         }
 
         @Override
         public int hashCode() {
-            return (mName.hashCode() + mUsers.hashCode());
+            return (mId.hashCode() + mName.hashCode() + mUsers.hashCode());
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -87,12 +92,15 @@ public class ProjectListLoader extends DomainLoader<ProjectListLoader.Data> {
             if (!(object instanceof ProjectData))
                 return false;
 
-            ProjectData data = (ProjectData) object;
+            ProjectData projectData = (ProjectData) object;
 
-            if (!mName.equals(data.mName))
+            if (!mId.equals(projectData.mId))
                 return false;
 
-            if (!mUsers.equals(data.mUsers))
+            if (!mName.equals(projectData.mName))
+                return false;
+
+            if (!mUsers.equals(projectData.mUsers))
                 return false;
 
             return true;

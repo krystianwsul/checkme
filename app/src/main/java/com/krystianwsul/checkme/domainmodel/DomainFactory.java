@@ -971,7 +971,7 @@ public class DomainFactory {
                             .map(RemoteUser::getName)
                             .collect(Collectors.joining(", "));
 
-                    return new ProjectListLoader.ProjectData(remoteProject.getName(), users);
+                    return new ProjectListLoader.ProjectData(remoteProject.getId(), remoteProject.getName(), users);
                 }, TreeMap::new));
 
         return new ProjectListLoader.Data(projectDatas);
@@ -983,17 +983,27 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getUserListData");
 
-        Assert.assertTrue(mRemoteFactory != null);
-        Assert.assertTrue(mFriends != null);
+        if (TextUtils.isEmpty(projectId)) {
+            Assert.assertTrue(mFriends != null);
 
-        if (!TextUtils.isEmpty(projectId))
-            throw new UnsupportedOperationException(); // todo user list
+            Set<UserListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
+                    .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                    .collect(Collectors.toSet());
 
-        Set<UserListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
-                .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
-                .collect(Collectors.toSet());
+            return new UserListLoader.Data(userListDatas);
+        } else {
+            Assert.assertTrue(mRemoteFactory != null);
+            Assert.assertTrue(mUserData != null);
 
-        return new UserListLoader.Data(userListDatas);
+            RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+
+            Set<UserListLoader.UserListData> userListDatas = Stream.of(remoteProject.getUsers())
+                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
+                    .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
+                    .collect(Collectors.toSet());
+
+            return new UserListLoader.Data(userListDatas);
+        }
     }
 
     @NonNull

@@ -760,7 +760,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     }
 
     @Override
-    public void onCreateUsersActionMode(@NonNull ActionMode actionMode) {
+    public void onCreateUserActionMode(@NonNull ActionMode actionMode) {
         Assert.assertTrue(mDrawerUsersListener == null);
 
         mDrawerUsersListener = new DrawerLayout.DrawerListener() {
@@ -790,7 +790,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     }
 
     @Override
-    public void onDestroyUsersActionMode() {
+    public void onDestroyUserActionMode() {
         Assert.assertTrue(mDrawerUsersListener != null);
 
         mMainActivityDrawer.removeDrawerListener(mDrawerUsersListener);

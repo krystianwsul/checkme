@@ -352,10 +352,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         return false;
     }
 
-    public void destroyLoader() {
-        getLoaderManager().destroyLoader(0);
-    }
-
     public void save(int dataId) {
         Assert.assertTrue(!TextUtils.isEmpty(mProjectId));
         Assert.assertTrue(mData != null);

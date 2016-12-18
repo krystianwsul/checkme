@@ -660,6 +660,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             } else {
                 if (mParentTaskKeyHint == null)
                     mScheduleEntries.add(firstScheduleEntry());
+
+                mFriendIds = new ArrayList<>();
             }
         }
 

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
@@ -34,7 +35,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-abstract class NotificationWrapper {
+public abstract class NotificationWrapper {
+    @Nullable
     private static NotificationWrapper sInstance;
 
     @NonNull
@@ -57,6 +59,8 @@ abstract class NotificationWrapper {
     public abstract void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
 
     public abstract void setAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm);
+
+    public abstract void cleanGroup(@NonNull Context context);
 
     @NonNull
     public abstract PendingIntent getPendingIntent(@NonNull Context context);
@@ -287,6 +291,24 @@ abstract class NotificationWrapper {
             Assert.assertTrue(alarmManager != null);
 
             alarmManager.cancel(pendingIntent);
+        }
+
+        @Override
+        public void cleanGroup(@NonNull Context context) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+                return;
+
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            Assert.assertTrue(notificationManager != null);
+
+            StatusBarNotification[] statusBarNotifications = notificationManager.getActiveNotifications();
+            if (statusBarNotifications.length > 1)
+                return;
+
+            Assert.assertTrue(statusBarNotifications.length == 1);
+            Assert.assertTrue(statusBarNotifications[0].getId() == 0);
+
+            cancelNotification(context, 0);
         }
     }
 }

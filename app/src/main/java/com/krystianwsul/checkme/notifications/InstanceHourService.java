@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.notifications;
 
 import android.app.IntentService;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.NotificationWrapper;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 
@@ -42,10 +42,9 @@ public class InstanceHourService extends IntentService {
         int notificationId = intent.getIntExtra(NOTIFICATION_ID_KEY, -1);
         Assert.assertTrue(notificationId != -1);
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(notificationId);
-
-        InstanceDoneService.hideGroup(notificationManager);
+        NotificationWrapper notificationWrapper = NotificationWrapper.getInstance();
+        notificationWrapper.cancelNotification(this, notificationId);
+        notificationWrapper.cleanGroup(this);
 
         if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
             InstanceDoneService.needsFirebase(this, domainFactory -> setInstanceAddHour(domainFactory, instanceKey));

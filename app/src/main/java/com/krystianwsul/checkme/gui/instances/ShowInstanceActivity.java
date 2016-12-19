@@ -16,6 +16,7 @@ import android.view.MenuItem;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.NotificationWrapper;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
@@ -207,6 +208,8 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         mGroupListFragment.setInstanceKey(mInstanceKey);
 
         getSupportLoaderManager().initLoader(0, null, this);
+
+        NotificationWrapper.getInstance().cleanGroup(this);
     }
 
     @Override

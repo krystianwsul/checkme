@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -55,7 +56,7 @@ import static org.mockito.Matchers.anyString;
 
 @SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TextUtils.class, android.util.Log.class, Context.class, ContentValues.class})
+@PrepareForTest(value = {TextUtils.class, Log.class, Context.class, ContentValues.class, SystemClock.class})
 public class DomainFactoryTest {
     @Mock
     private Context mContext;
@@ -124,6 +125,7 @@ public class DomainFactoryTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(TextUtils.class);
         PowerMockito.mockStatic(Log.class);
+        PowerMockito.mockStatic(SystemClock.class);
 
         PowerMockito.when(TextUtils.isEmpty(any(CharSequence.class))).thenAnswer(new Answer<Boolean>() {
             @Override
@@ -133,10 +135,27 @@ public class DomainFactoryTest {
             }
         });
 
+        PowerMockito.when(TextUtils.split(anyString(), anyString())).thenReturn(new String[]{});
+
+        PowerMockito.when(SystemClock.elapsedRealtime()).thenAnswer(new Answer<Long>() {
+            private long mCounter = 0;
+
+            @Override
+            public Long answer(InvocationOnMock invocation) throws Throwable {
+                return mCounter++;
+            }
+        });
+
         Mockito.when(mContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mSharedPreferences);
 
-        Mockito.when(mSharedPreferences.edit()).thenReturn(mEditor);
+        Mockito.when(mSharedPreferences.getString(anyString(), anyString())).thenAnswer(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                return (String) invocation.getArguments()[1];
+            }
+        });
 
+        Mockito.when(mSharedPreferences.edit()).thenReturn(mEditor);
         Mockito.when(mEditor.putLong(anyString(), anyLong())).thenReturn(mEditor);
     }
 

@@ -4,7 +4,9 @@ import android.app.IntentService;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Parcelable;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,11 +50,27 @@ public class InstanceDoneService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);
 
+        hideGroup(notificationManager);
+
         if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
             needsFirebase(this, domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
         } else {
             setInstanceNotificationDone(DomainFactory.getDomainFactory(this), instanceKey);
         }
+    }
+
+    static void hideGroup(@NonNull NotificationManager notificationManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+            return;
+
+        StatusBarNotification[] statusBarNotifications = notificationManager.getActiveNotifications();
+        if (statusBarNotifications.length > 1)
+            return;
+
+        Assert.assertTrue(statusBarNotifications.length == 1);
+        Assert.assertTrue(statusBarNotifications[0].getId() == 0);
+
+        notificationManager.cancel(0);
     }
 
     private void setInstanceNotificationDone(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {

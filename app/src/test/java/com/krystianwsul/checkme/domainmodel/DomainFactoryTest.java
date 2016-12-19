@@ -102,6 +102,11 @@ public class DomainFactoryTest {
             public void cancelAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent) {
 
             }
+
+            @Override
+            public void cleanGroup(@NonNull Context context) {
+
+            }
         });
 
         SaveService.Factory.setInstance(new SaveService.Factory() {

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -120,6 +121,8 @@ public class DomainFactory {
     private TickData mTickData = null;
 
     private boolean mSkipSave = false;
+
+    private final Map<InstanceKey, Long> mLastNotificationBeeps = new HashMap<>();
 
     @NonNull
     public static synchronized DomainFactory getDomainFactory(@NonNull Context context) {
@@ -2439,7 +2442,7 @@ public class DomainFactory {
                     for (Instance instance : notificationInstances.values()) {
                         Assert.assertTrue(instance != null);
 
-                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, false);
+                        notifyInstance(context, instance, silent, now, false);
                     }
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
@@ -2460,12 +2463,12 @@ public class DomainFactory {
                         Instance instance = notificationInstances.get(showInstanceKey);
                         Assert.assertTrue(instance != null);
 
-                        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, false);
+                        notifyInstance(context, instance, silent, now, false);
                     }
 
                     Stream.of(notificationInstances.values())
                             .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                            .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, false));
+                            .forEach(instance -> updateInstance(context, instance, now, false));
                 }
             }
         } else {
@@ -2497,7 +2500,7 @@ public class DomainFactory {
                 Instance instance = notificationInstances.get(showInstanceKey);
                 Assert.assertTrue(instance != null);
 
-                NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, true);
+                notifyInstance(context, instance, silent, now, true);
             }
 
             List<Instance> updateInstances = Stream.of(notificationInstances.values())
@@ -2506,7 +2509,7 @@ public class DomainFactory {
 
             message += ", u " + updateInstances.size();
             Stream.of(updateInstances)
-                    .forEach(instance -> NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, true));
+                    .forEach(instance -> updateInstance(context, instance, now, true));
         }
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
@@ -2553,6 +2556,33 @@ public class DomainFactory {
 
             NotificationWrapper.getInstance().setAlarm(context, pendingIntent, nextAlarm);
         }
+    }
+
+    private void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, nougat);
+
+        if (!silent)
+            mLastNotificationBeeps.put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
+    }
+
+    private void updateInstance(@NonNull Context context, @NonNull Instance instance, @NonNull ExactTimeStamp now, boolean nougat) {
+        InstanceKey instanceKey = instance.getInstanceKey();
+
+        long realtime = SystemClock.elapsedRealtime();
+
+        if (mLastNotificationBeeps.containsKey(instanceKey)) {
+            long then = mLastNotificationBeeps.get(instanceKey);
+
+            Assert.assertTrue(realtime > then);
+
+            if (realtime - then < 5000) {
+                Log.e("asdf", "skipping notification update for " + instance.getName());
+
+                return;
+            }
+        }
+
+        NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, nougat);
     }
 
     private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {

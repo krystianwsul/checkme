@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +30,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     private ProgressBar mProjectListProgress;
     private TextView mEmptyText;
     private RecyclerView mProjectListRecycler;
+    private FloatingActionButton mProjectListFab;
 
     @NonNull
     public static ProjectListFragment newInstance() {
@@ -51,6 +53,9 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
         mProjectListRecycler = (RecyclerView) view.findViewById(R.id.projectListRecycler);
         Assert.assertTrue(mProjectListRecycler != null);
+
+        mProjectListFab = (FloatingActionButton) view.findViewById(R.id.projectListFab);
+        Assert.assertTrue(mProjectListFab != null);
 
         return view;
     }
@@ -84,6 +89,8 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         }
 
         mProjectListRecycler.setAdapter(new ProjectListAdapter(getActivity(), data.mProjectDatas));
+
+        mProjectListFab.setVisibility(View.VISIBLE);
     }
 
     @Override

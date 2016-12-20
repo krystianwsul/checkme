@@ -1,12 +1,14 @@
 package com.krystianwsul.checkme.firebase.records;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 
 public class RemoteUserRecord extends RemoteRecord {
-    public static final String USERS = "users";
+    private static final String USERS = "users";
 
     @NonNull
     private final RemoteProjectRecord mRemoteProjectRecord;
@@ -48,7 +50,7 @@ public class RemoteUserRecord extends RemoteRecord {
         return mUserJson.getEmail();
     }
 
-    @NonNull
+    @Nullable
     public String getToken() {
         return mUserJson.getToken();
     }
@@ -61,8 +63,11 @@ public class RemoteUserRecord extends RemoteRecord {
         addValue(getKey() + "/name", name);
     }
 
-    public void setToken(@NonNull String token) {
-        if (getToken().equals(token))
+    public void setToken(@Nullable String token) {
+        if (TextUtils.isEmpty(getToken()) && TextUtils.isEmpty(token))
+            return;
+
+        if (!TextUtils.isEmpty(getToken()) && getToken().equals(token))
             return;
 
         mUserJson.setToken(token);

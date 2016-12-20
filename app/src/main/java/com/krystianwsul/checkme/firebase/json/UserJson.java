@@ -21,10 +21,9 @@ public class UserJson {
 
     }
 
-    public UserJson(@NonNull String email, @NonNull String name, @NonNull String token) {
+    public UserJson(@NonNull String email, @NonNull String name, @Nullable String token) {
         Assert.assertTrue(!TextUtils.isEmpty(email));
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(!TextUtils.isEmpty(token));
 
         this.email = email;
         this.name = name;
@@ -45,10 +44,8 @@ public class UserJson {
         return name;
     }
 
-    @NonNull
+    @Nullable
     public String getToken() {
-        Assert.assertTrue(!TextUtils.isEmpty(token));
-
         return token;
     }
 
@@ -58,9 +55,7 @@ public class UserJson {
         this.name = name;
     }
 
-    public void setToken(@NonNull String token) {
-        Assert.assertTrue(!TextUtils.isEmpty(token));
-
+    public void setToken(@Nullable String token) {
         this.token = token;
     }
 }

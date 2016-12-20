@@ -12,6 +12,7 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.krystianwsul.checkme.MyFirebaseInstanceIdService;
 import com.krystianwsul.checkme.firebase.json.UserJson;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -41,13 +42,11 @@ public class UserData implements Parcelable {
         Assert.assertTrue(!TextUtils.isEmpty(displayName));
 
         token = MyFirebaseInstanceIdService.getToken();
-        Assert.assertTrue(!TextUtils.isEmpty(token));
     }
 
-    private UserData(@NonNull String email, @NonNull String displayName, @NonNull String token) {
+    private UserData(@NonNull String email, @NonNull String displayName, @Nullable String token) {
         Assert.assertTrue(!TextUtils.isEmpty(email));
         Assert.assertTrue(!TextUtils.isEmpty(displayName));
-        Assert.assertTrue(!TextUtils.isEmpty(token));
 
         this.email = email;
         this.displayName = displayName;
@@ -69,10 +68,8 @@ public class UserData implements Parcelable {
     }
 
     @SuppressWarnings("WeakerAccess")
-    @NonNull
+    @Nullable
     public String getToken() {
-        Assert.assertTrue(!TextUtils.isEmpty(token));
-
         return token;
     }
 
@@ -97,14 +94,15 @@ public class UserData implements Parcelable {
     @NonNull
     @Exclude
     UserJson toUserJson() {
-        return new UserJson(getEmail(), getDisplayName(), getToken());
+        return new UserJson(getEmail(), getDisplayName(), token);
     }
 
     @Override
     public int hashCode() {
         int hash = getEmail().hashCode();
         hash += getDisplayName().hashCode();
-        hash += getToken().hashCode();
+        if (!TextUtils.isEmpty(token))
+            hash += token.hashCode();
         return hash;
     }
 
@@ -128,7 +126,10 @@ public class UserData implements Parcelable {
         if (!getDisplayName().equals(userData.getDisplayName()))
             return false;
 
-        if (!getToken().equals(userData.getToken()))
+        if (TextUtils.isEmpty(token) != TextUtils.isEmpty(userData.token))
+            return false;
+
+        if (!TextUtils.isEmpty(token) && !token.equals(userData.getToken()))
             return false;
 
         return true;
@@ -138,7 +139,7 @@ public class UserData implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(email);
         dest.writeString(displayName);
-        dest.writeString(token);
+        Utils.writeStringToParcel(dest, token);
     }
 
     @Override
@@ -155,8 +156,7 @@ public class UserData implements Parcelable {
             String displayName = in.readString();
             Assert.assertTrue(!TextUtils.isEmpty(displayName));
 
-            String token = in.readString();
-            Assert.assertTrue(!TextUtils.isEmpty(token));
+            String token = Utils.readStringFromParcel(in);
 
             return new UserData(email, displayName, token);
         }

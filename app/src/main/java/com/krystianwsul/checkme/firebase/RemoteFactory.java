@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.firebase.json.CustomTimeJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.ProjectJson;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
+import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteManager;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
@@ -108,18 +109,48 @@ public class RemoteFactory {
         if (!matches.isEmpty()) {
             return matches.get(0);
         } else {
-            ProjectJson projectJson = new ProjectJson(getProjectName(recordOf), now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
-
-            RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
-
-            RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserData);
-
-            Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
-
-            mRemoteProjects.put(remoteProject.getId(), remoteProject);
-
-            return remoteProject;
+            return createRemoteProject(getProjectName(recordOf), now, recordOf);
         }
+    }
+
+    @NonNull
+    public RemoteProject createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        Map<String, UserData> friends = mDomainFactory.getFriends();
+        Assert.assertTrue(friends != null);
+
+        Set<UserData> userDatas = new HashSet<>();
+        for (String id : recordOf) {
+            Assert.assertTrue(!TextUtils.isEmpty(id));
+
+            if (id.equals(mUserData.getKey()))
+                continue;
+
+            Assert.assertTrue(friends.containsKey(id));
+            UserData userData = friends.get(id);
+            Assert.assertTrue(userData != null);
+
+            userDatas.add(userData);
+        }
+
+        userDatas.add(mUserData);
+
+        Map<String, UserJson> userJsons = Stream.of(userDatas)
+                .map(UserData::toUserJson)
+                .collect(Collectors.toMap(userJson -> UserData.getKey(userJson.getEmail()), userJson -> userJson));
+
+        ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), userJsons);
+
+        RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
+
+        RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserData);
+
+        Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
+
+        mRemoteProjects.put(remoteProject.getId(), remoteProject);
+
+        return remoteProject;
     }
 
     public void save() {

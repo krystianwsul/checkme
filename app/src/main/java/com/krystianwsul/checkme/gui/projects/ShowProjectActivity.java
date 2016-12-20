@@ -31,6 +31,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
     private static final String DISCARD_TAG = "discard";
 
+    @Nullable
     private String mProjectId;
 
     private TextInputLayout mToolbarLayout;
@@ -51,6 +52,10 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         Intent intent = new Intent(context, ShowProjectActivity.class);
         intent.putExtra(PROJECT_ID_KEY, projectId);
         return intent;
+    }
+
+    public static Intent newIntent(@NonNull Context context) {
+        return new Intent(context, ShowProjectActivity.class);
     }
 
     @Override
@@ -116,15 +121,43 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
 
-        Intent intent = getIntent();
-        Assert.assertTrue(intent.hasExtra(PROJECT_ID_KEY));
+        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+            private boolean mSkip = true;
 
-        mProjectId = intent.getStringExtra(PROJECT_ID_KEY);
-        Assert.assertTrue(mProjectId != null);
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mSkip) {
+                    mSkip = false;
+                    return;
+                }
+
+                updateError();
+            }
+        });
+
+        Intent intent = getIntent();
+        if (intent.hasExtra(PROJECT_ID_KEY)) {
+            mProjectId = intent.getStringExtra(PROJECT_ID_KEY);
+            Assert.assertTrue(!TextUtils.isEmpty(mProjectId));
+        }
 
         mUserListFragment = (UserListFragment) getSupportFragmentManager().findFragmentById(R.id.show_project_frame);
         if (mUserListFragment == null) {
-            mUserListFragment = UserListFragment.newInstance(mProjectId);
+            if (!TextUtils.isEmpty(mProjectId))
+                mUserListFragment = UserListFragment.newInstance(mProjectId);
+            else
+                mUserListFragment = UserListFragment.newInstance();
+
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.show_project_frame, mUserListFragment)
@@ -148,30 +181,6 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         Assert.assertTrue(data != null);
 
         mData = data;
-
-        mToolbarEditText.addTextChangedListener(new TextWatcher() {
-            private boolean mSkip = (mSavedInstanceState != null);
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (mSkip) {
-                    mSkip = false;
-                    return;
-                }
-
-                updateError();
-            }
-        });
 
         if (mSavedInstanceState == null) {
             mToolbarEditText.setText(data.mName);
@@ -213,7 +222,10 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         if (mData == null)
             return false;
 
-        if (!mToolbarEditText.getText().toString().equals(mData.mName))
+        if (TextUtils.isEmpty(mToolbarEditText.getText()) != TextUtils.isEmpty(mData.mName))
+            return true;
+
+        if (!TextUtils.isEmpty(mToolbarEditText.getText()) && !mToolbarEditText.getText().toString().equals(mData.mName))
             return true;
 
         return mUserListFragment.dataChanged();

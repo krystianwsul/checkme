@@ -982,7 +982,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized UserListLoader.Data getUserListData(@NonNull String projectId) {
+    public synchronized UserListLoader.Data getUserListData(@Nullable String projectId) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getUserListData");
@@ -991,12 +991,17 @@ public class DomainFactory {
         Assert.assertTrue(mUserData != null);
         Assert.assertTrue(mFriends != null);
 
-        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+        Set<UserListLoader.UserListData> userListDatas;
+        if (!TextUtils.isEmpty(projectId)) {
+            RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
 
-        Set<UserListLoader.UserListData> userListDatas = Stream.of(remoteProject.getUsers())
-                .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
-                .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
-                .collect(Collectors.toSet());
+            userListDatas = Stream.of(remoteProject.getUsers())
+                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
+                    .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
+                    .collect(Collectors.toSet());
+        } else {
+            userListDatas = new HashSet<>();
+        }
 
         Map<String, UserListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
                 .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
@@ -1021,16 +1026,20 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowProjectLoader.Data getShowProjectData(@NonNull String projectId) {
+    public synchronized ShowProjectLoader.Data getShowProjectData(@Nullable String projectId) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getShowProjectData");
 
         Assert.assertTrue(mRemoteFactory != null);
 
-        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+        if (!TextUtils.isEmpty(projectId)) {
+            RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
 
-        return new ShowProjectLoader.Data(remoteProject.getName());
+            return new ShowProjectLoader.Data(remoteProject.getName());
+        } else {
+            return new ShowProjectLoader.Data(null);
+        }
     }
 
     // sets
@@ -1687,6 +1696,26 @@ public class DomainFactory {
         remoteProject.updateRecordOf(addedFriends, removedFriends);
 
         updateNotificationsAndNotifyCloud(context, now, remoteProject);
+
+        save(context, dataIds);
+    }
+
+    public synchronized void createProject(@NonNull Context context, List<Integer> dataIds, @NonNull String name, @NonNull Set<String> friends) {
+        MyCrashlytics.log("DomainFactory.createProject");
+
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+        Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mUserData != null);
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        Set<String> recordOf = new HashSet<>(friends);
+
+        String key = mUserData.getKey();
+        Assert.assertTrue(!recordOf.contains(key));
+        recordOf.add(key);
+
+        mRemoteFactory.createRemoteProject(name, now, recordOf);
 
         save(context, dataIds);
     }

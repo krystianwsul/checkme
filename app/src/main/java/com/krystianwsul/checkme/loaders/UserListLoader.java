@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -12,10 +13,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class UserListLoader extends DomainLoader<UserListLoader.Data> {
-    @NonNull
+    @Nullable
     private final String mProjectId;
 
-    public UserListLoader(@NonNull Context context, @NonNull String projectId) {
+    public UserListLoader(@NonNull Context context, @Nullable String projectId) {
         super(context, FirebaseLevel.FRIEND);
 
         mProjectId = projectId;

@@ -37,6 +37,7 @@ public class ProjectJson {
     public ProjectJson(@NonNull String name, long startTime, @Nullable Long endTime, @NonNull Map<String, TaskJson> tasks, @NonNull Map<String, TaskHierarchyJson> taskHierarchies, @NonNull Map<String, CustomTimeJson> customTimes, @NonNull Map<String, UserJson> users) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(endTime == null || startTime <= endTime);
+        Assert.assertTrue(!users.isEmpty());
 
         this.name = name;
         this.startTime = startTime;

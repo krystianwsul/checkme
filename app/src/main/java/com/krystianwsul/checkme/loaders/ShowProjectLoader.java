@@ -2,20 +2,18 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
-import junit.framework.Assert;
-
 public class ShowProjectLoader extends DomainLoader<ShowProjectLoader.Data> {
-    @NonNull
+    @Nullable
     private final String mProjectId;
 
-    public ShowProjectLoader(@NonNull Context context, @NonNull String projectId) {
+    public ShowProjectLoader(@NonNull Context context, @Nullable String projectId) {
         super(context, FirebaseLevel.NEED);
 
-        Assert.assertTrue(!TextUtils.isEmpty(projectId));
         mProjectId = projectId;
     }
 
@@ -30,18 +28,19 @@ public class ShowProjectLoader extends DomainLoader<ShowProjectLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
-        @NonNull
+        @Nullable
         public final String mName;
 
-        public Data(@NonNull String name) {
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-
+        public Data(@Nullable String name) {
             mName = name;
         }
 
         @Override
         public int hashCode() {
-            return mName.hashCode();
+            int hash = 0;
+            if (!TextUtils.isEmpty(mName))
+                hash += mName.hashCode();
+            return hash;
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -58,7 +57,10 @@ public class ShowProjectLoader extends DomainLoader<ShowProjectLoader.Data> {
 
             Data data = (Data) object;
 
-            if (!mName.equals(data.mName))
+            if (TextUtils.isEmpty(mName) != TextUtils.isEmpty(data.mName))
+                return false;
+
+            if (!TextUtils.isEmpty(mName) && !mName.equals(data.mName))
                 return false;
 
             return true;

@@ -91,6 +91,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         mProjectListRecycler.setAdapter(new ProjectListAdapter(getActivity(), data.mProjectDatas));
 
         mProjectListFab.setVisibility(View.VISIBLE);
+        mProjectListFab.setOnClickListener(v -> startActivity(ShowProjectActivity.newIntent(getActivity())));
     }
 
     @Override

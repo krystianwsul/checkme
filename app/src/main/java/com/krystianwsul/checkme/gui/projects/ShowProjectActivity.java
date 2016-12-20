@@ -11,7 +11,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -147,6 +149,30 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         Assert.assertTrue(data != null);
 
         mData = data;
+
+        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+            private boolean mSkip = (mSavedInstanceState != null);
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (mSkip) {
+                    mSkip = false;
+                    return;
+                }
+
+                updateError();
+            }
+        });
 
         if (mSavedInstanceState == null) {
             mToolbarEditText.setText(data.mName);

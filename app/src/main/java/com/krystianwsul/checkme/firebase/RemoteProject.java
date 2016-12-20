@@ -374,4 +374,10 @@ public class RemoteProject {
         remoteUser.setName(userData.getDisplayName());
         remoteUser.setToken(userData.getToken());
     }
+
+    public void setName(@NonNull String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
+
+        mRemoteProjectRecord.setName(name);
+    }
 }

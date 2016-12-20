@@ -1666,16 +1666,18 @@ public class DomainFactory {
         save(context, 0);
     }
 
-    public synchronized void updateProject(@NonNull Context context, List<Integer> dataIds, @NonNull String projectId, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+    public synchronized void updateProject(@NonNull Context context, List<Integer> dataIds, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         MyCrashlytics.log("DomainFactory.updateProject");
 
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
+        Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(mRemoteFactory != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
 
+        remoteProject.setName(name);
         remoteProject.updateRecordOf(addedFriends, removedFriends);
 
         updateNotificationsAndNotifyCloud(context, now, remoteProject);

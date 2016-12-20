@@ -449,6 +449,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         ActionBar actionBar = getSupportActionBar();
         Assert.assertTrue(actionBar != null);
 
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+
         mSavedInstanceState = savedInstanceState;
 
         mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -12,6 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractActivity;
@@ -28,11 +32,15 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
     private String mProjectId;
 
-    private ActionBar mActionBar;
+    private TextInputLayout mToolbarLayout;
+    private EditText mToolbarEditText;
 
     private ShowProjectLoader.Data mData;
 
     private UserListFragment mUserListFragment;
+
+    @Nullable
+    private Bundle mSavedInstanceState;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = this::finish;
 
@@ -62,7 +70,10 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
             case R.id.action_save: {
                 Assert.assertTrue(mData != null);
 
-                mUserListFragment.save(mData.DataId);
+                if (updateError())
+                    break;
+
+                mUserListFragment.save(mData.DataId, mToolbarEditText.getText().toString());
 
                 finish();
 
@@ -85,18 +96,24 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_project);
 
+        mSavedInstanceState = savedInstanceState;
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
 
-        mActionBar = getSupportActionBar();
-        Assert.assertTrue(mActionBar != null);
+        ActionBar actionBar = getSupportActionBar();
+        Assert.assertTrue(actionBar != null);
 
-        mActionBar.setTitle(null);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
-        mActionBar.setDisplayHomeAsUpEnabled(true);
-        mActionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
+        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
+        Assert.assertTrue(mToolbarLayout != null);
+
+        mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
+        Assert.assertTrue(mToolbarEditText != null);
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(PROJECT_ID_KEY));
@@ -131,7 +148,14 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
         mData = data;
 
-        mActionBar.setTitle(data.mName);
+        if (mSavedInstanceState == null) {
+            mToolbarEditText.setText(data.mName);
+        } else {
+            mSavedInstanceState = null;
+        }
+
+        mToolbarLayout.setVisibility(View.VISIBLE);
+        mToolbarLayout.setHintAnimationEnabled(true);
 
         invalidateOptionsMenu();
     }
@@ -163,7 +187,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
     }
 
     private boolean tryClose() {
-        if (mUserListFragment.dataChanged()) {
+        if (dataChanged()) {
             DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
             discardDialogFragment.show(getSupportFragmentManager(), DISCARD_TAG);
@@ -171,6 +195,33 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
             return false;
         } else {
             return true;
+        }
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean dataChanged() {
+        if (mData == null)
+            return false;
+
+        if (!mToolbarEditText.getText().toString().equals(mData.mName))
+            return true;
+
+        return mUserListFragment.dataChanged();
+    }
+
+    private boolean updateError() {
+        Assert.assertTrue(mData != null);
+        Assert.assertTrue(mToolbarEditText != null);
+        Assert.assertTrue(mToolbarLayout != null);
+
+        if (TextUtils.isEmpty(mToolbarEditText.getText())) {
+            mToolbarLayout.setError(getString(R.string.nameError));
+
+            return true;
+        } else {
+            mToolbarLayout.setError(null);
+
+            return false;
         }
     }
 }

@@ -352,14 +352,15 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         return false;
     }
 
-    public void save(int dataId) {
+    public void save(int dataId, @NonNull String name) {
+        Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!TextUtils.isEmpty(mProjectId));
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mFriendListAdapter != null);
 
         SaveState saveState = mFriendListAdapter.getSaveState();
 
-        DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), Arrays.asList(mData.DataId, dataId), mProjectId, saveState.mAddedIds, saveState.mRemovedIds);
+        DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), Arrays.asList(mData.DataId, dataId), mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {

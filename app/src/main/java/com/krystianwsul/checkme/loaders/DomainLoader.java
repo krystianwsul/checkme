@@ -9,7 +9,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.ObserverHolder;
 import com.krystianwsul.checkme.firebase.UserData;
-import com.krystianwsul.checkme.notifications.InstanceDoneService;
 
 import junit.framework.Assert;
 
@@ -108,7 +107,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                     } else {
                         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                         if (firebaseUser == null)
-                            throw new InstanceDoneService.NeedsFirebaseException();
+                            return;
 
                         UserData userData = new UserData(firebaseUser);
 

@@ -302,10 +302,9 @@ public abstract class NotificationWrapper {
             Assert.assertTrue(notificationManager != null);
 
             StatusBarNotification[] statusBarNotifications = notificationManager.getActiveNotifications();
-            if (statusBarNotifications.length > 1)
+            if (statusBarNotifications.length != 1)
                 return;
 
-            Assert.assertTrue(statusBarNotifications.length == 1);
             Assert.assertTrue(statusBarNotifications[0].getId() == 0);
 
             cancelNotification(context, 0);

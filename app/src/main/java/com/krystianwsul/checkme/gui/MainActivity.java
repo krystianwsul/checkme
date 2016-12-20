@@ -311,7 +311,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             fragmentManager.beginTransaction()
                     .add(R.id.main_task_list_frame, TaskListFragment.getInstance())
                     .add(R.id.main_project_frame, ProjectListFragment.newInstance())
-                    .add(R.id.main_friend_list_frame, FriendListFragment.newFriendInstance())
+                    .add(R.id.main_friend_list_frame, FriendListFragment.newInstance())
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
                     .add(R.id.main_debug_frame, DebugFragment.newInstance())
                     .commit();

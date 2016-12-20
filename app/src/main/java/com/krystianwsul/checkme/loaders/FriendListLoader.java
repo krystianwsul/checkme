@@ -2,24 +2,17 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
 
-import java.util.Map;
 import java.util.Set;
 
 public class FriendListLoader extends DomainLoader<FriendListLoader.Data> {
-    @Nullable
-    private final String mProjectId;
-
-    public FriendListLoader(@NonNull Context context, @Nullable String projectId) {
+    public FriendListLoader(@NonNull Context context) {
         super(context, FirebaseLevel.FRIEND);
-
-        mProjectId = projectId;
     }
 
     @Override
@@ -29,29 +22,23 @@ public class FriendListLoader extends DomainLoader<FriendListLoader.Data> {
 
     @Override
     public Data loadDomain(@NonNull DomainFactory domainFactory) {
-        return domainFactory.getFriendListData(mProjectId);
+        return domainFactory.getFriendListData();
     }
 
     public static class Data extends DomainLoader.Data {
         @NonNull
         public final Set<UserListData> mUserListDatas;
 
-        @Nullable
-        public final Map<String, UserListData> mFriendDatas;
-
-        public Data(@NonNull Set<UserListData> userListDatas, @Nullable Map<String, UserListData> friendDatas) {
+        public Data(@NonNull Set<UserListData> userListDatas) {
             mUserListDatas = userListDatas;
-            mFriendDatas = friendDatas;
         }
 
         @Override
         public int hashCode() {
-            int hash = mUserListDatas.hashCode();
-            if (mFriendDatas != null)
-                hash += mFriendDatas.hashCode();
-            return hash;
+            return mUserListDatas.hashCode();
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -67,14 +54,6 @@ public class FriendListLoader extends DomainLoader<FriendListLoader.Data> {
 
             if (!mUserListDatas.equals(data.mUserListDatas))
                 return false;
-
-            if (mFriendDatas == null) {
-                if (data.mFriendDatas != null)
-                    return false;
-            } else {
-                if (!mFriendDatas.equals(data.mFriendDatas))
-                    return false;
-            }
 
             return true;
         }

@@ -1016,37 +1016,18 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized FriendListLoader.Data getFriendListData(@Nullable String projectId) {
+    public synchronized FriendListLoader.Data getFriendListData() {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getFriendListData");
 
-        if (TextUtils.isEmpty(projectId)) {
-            Assert.assertTrue(mFriends != null);
+        Assert.assertTrue(mFriends != null);
 
-            Set<FriendListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
-                    .map(userData -> new FriendListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
-                    .collect(Collectors.toSet());
+        Set<FriendListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
+                .map(userData -> new FriendListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                .collect(Collectors.toSet());
 
-            return new FriendListLoader.Data(userListDatas, null);
-        } else {
-            Assert.assertTrue(mRemoteFactory != null);
-            Assert.assertTrue(mUserData != null);
-            Assert.assertTrue(mFriends != null);
-
-            RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
-
-            Set<FriendListLoader.UserListData> userListDatas = Stream.of(remoteProject.getUsers())
-                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
-                    .map(remoteUser -> new FriendListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
-                    .collect(Collectors.toSet());
-
-            Map<String, FriendListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
-                    .map(userData -> new FriendListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
-                    .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
-
-            return new FriendListLoader.Data(userListDatas, friendDatas);
-        }
+        return new FriendListLoader.Data(userListDatas);
     }
 
     @NonNull

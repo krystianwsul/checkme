@@ -338,7 +338,7 @@ public class DomainFactory {
             if (mTickData == null) {
                 updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
             } else {
-                updateNotificationsTick(context, mTickData.mSilent);
+                updateNotificationsTick(context, mTickData.mSilent, mTickData.mSource);
                 mTickData = null;
             }
 
@@ -396,7 +396,7 @@ public class DomainFactory {
         if (mRemoteFactory != null && !mRemoteFactory.isSaved()) {
             Assert.assertTrue(mTickData == null);
 
-            updateNotificationsTick(context, tickData.mSilent);
+            updateNotificationsTick(context, tickData.mSilent, tickData.mSource);
         } else {
             if (mTickData != null) {
                 mTickData = mergeTickDatas(mTickData, tickData);
@@ -1627,8 +1627,8 @@ public class DomainFactory {
         return irrelevant;
     }
 
-    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent) {
-        MyCrashlytics.log("DomainFactory.updateNotificationsTick");
+    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent, @NonNull String source) {
+        MyCrashlytics.log("DomainFactory.updateNotificationsTick source: " + source);
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();

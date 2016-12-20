@@ -63,15 +63,17 @@ public class TickService extends IntentService {
 
         DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
 
-        domainFactory.updateNotificationsTick(this, silent);
+        domainFactory.updateNotificationsTick(this, silent, source);
 
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            UserData userData = new UserData(firebaseUser);
+        if (!domainFactory.isConnected()) {
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (firebaseUser != null) {
+                UserData userData = new UserData(firebaseUser);
 
-            domainFactory.setUserData(this, userData);
+                domainFactory.setUserData(this, userData);
 
-            domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(silent, source));
+                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(silent, source));
+            }
         }
     }
 }

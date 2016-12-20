@@ -47,7 +47,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
-import com.krystianwsul.checkme.gui.friends.UserListFragment;
+import com.krystianwsul.checkme.gui.friends.FriendListFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment;
@@ -60,7 +60,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, UserListFragment.Listener {
+public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, FriendListFragment.Listener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
@@ -209,10 +209,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 break;
             }
             case FRIENDS: {
-                UserListFragment userListFragment = (UserListFragment) getSupportFragmentManager().findFragmentById(R.id.main_friend_list_frame);
-                Assert.assertTrue(userListFragment != null);
+                FriendListFragment friendListFragment = (FriendListFragment) getSupportFragmentManager().findFragmentById(R.id.main_friend_list_frame);
+                Assert.assertTrue(friendListFragment != null);
 
-                userListFragment.selectAll();
+                friendListFragment.selectAll();
 
                 break;
             }
@@ -311,7 +311,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             fragmentManager.beginTransaction()
                     .add(R.id.main_task_list_frame, TaskListFragment.getInstance())
                     .add(R.id.main_project_frame, ProjectListFragment.newInstance())
-                    .add(R.id.main_friend_list_frame, UserListFragment.newFriendInstance())
+                    .add(R.id.main_friend_list_frame, FriendListFragment.newFriendInstance())
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
                     .add(R.id.main_debug_frame, DebugFragment.newInstance())
                     .commit();

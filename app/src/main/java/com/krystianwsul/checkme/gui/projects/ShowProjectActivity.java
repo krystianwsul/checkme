@@ -9,7 +9,6 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -27,7 +26,7 @@ import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 
 import junit.framework.Assert;
 
-public class ShowProjectActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowProjectLoader.Data>, UserListFragment.Listener {
+public class ShowProjectActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowProjectLoader.Data> {
     private static final String PROJECT_ID_KEY = "projectId";
 
     private static final String DISCARD_TAG = "discard";
@@ -125,7 +124,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
         mUserListFragment = (UserListFragment) getSupportFragmentManager().findFragmentById(R.id.show_project_frame);
         if (mUserListFragment == null) {
-            mUserListFragment = UserListFragment.newProjectInstance(mProjectId);
+            mUserListFragment = UserListFragment.newInstance(mProjectId);
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.show_project_frame, mUserListFragment)
@@ -188,21 +187,6 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
     @Override
     public void onLoaderReset(Loader<ShowProjectLoader.Data> loader) {
-
-    }
-
-    @Override
-    public void onCreateUserActionMode(@NonNull ActionMode actionMode) {
-
-    }
-
-    @Override
-    public void onDestroyUserActionMode() {
-
-    }
-
-    @Override
-    public void setUserSelectAllVisibility(boolean selectAllVisible) {
 
     }
 

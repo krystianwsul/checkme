@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -13,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class UserListLoader extends DomainLoader<UserListLoader.Data> {
-    @Nullable
+    @NonNull
     private final String mProjectId;
 
-    public UserListLoader(@NonNull Context context, @Nullable String projectId) {
+    public UserListLoader(@NonNull Context context, @NonNull String projectId) {
         super(context, FirebaseLevel.FRIEND);
 
         mProjectId = projectId;
@@ -36,10 +35,10 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
         @NonNull
         public final Set<UserListData> mUserListDatas;
 
-        @Nullable
+        @NonNull
         public final Map<String, UserListData> mFriendDatas;
 
-        public Data(@NonNull Set<UserListData> userListDatas, @Nullable Map<String, UserListData> friendDatas) {
+        public Data(@NonNull Set<UserListData> userListDatas, @NonNull Map<String, UserListData> friendDatas) {
             mUserListDatas = userListDatas;
             mFriendDatas = friendDatas;
         }
@@ -47,11 +46,11 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
         @Override
         public int hashCode() {
             int hash = mUserListDatas.hashCode();
-            if (mFriendDatas != null)
-                hash += mFriendDatas.hashCode();
+            hash += mFriendDatas.hashCode();
             return hash;
         }
 
+        @SuppressWarnings("RedundantIfStatement")
         @Override
         public boolean equals(Object object) {
             if (object == null)
@@ -68,13 +67,8 @@ public class UserListLoader extends DomainLoader<UserListLoader.Data> {
             if (!mUserListDatas.equals(data.mUserListDatas))
                 return false;
 
-            if (mFriendDatas == null) {
-                if (data.mFriendDatas != null)
-                    return false;
-            } else {
-                if (!mFriendDatas.equals(data.mFriendDatas))
-                    return false;
-            }
+            if (!mFriendDatas.equals(data.mFriendDatas))
+                return false;
 
             return true;
         }

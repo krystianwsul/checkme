@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.friends;
 
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -13,7 +12,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -57,7 +55,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     private FloatingActionButton mFriendListFab;
     private TextView mEmptyText;
 
-    @Nullable
     private String mProjectId;
 
     private FriendListAdapter mFriendListAdapter;
@@ -84,8 +81,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                 case R.id.action_custom_times_delete:
                     mFriendListAdapter.removeSelected();
 
-                    updateSelectAll();
-
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -99,8 +94,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             mActionMode.getMenuInflater().inflate(R.menu.menu_custom_times, mActionMode.getMenu());
 
             mFriendListFab.setVisibility(View.GONE);
-
-            ((Listener) getActivity()).onCreateUserActionMode(mActionMode);
         }
 
         @Override
@@ -116,8 +109,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         @Override
         protected void onLastRemoved() {
             mFriendListFab.setVisibility(View.VISIBLE);
-
-            ((Listener) getActivity()).onDestroyUserActionMode();
         }
 
         @Override
@@ -132,18 +123,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     };
 
     @NonNull
-    public static UserListFragment newFriendInstance() {
-        UserListFragment userListFragment = new UserListFragment();
-
-        Bundle args = new Bundle();
-        args.putString(PROJECT_ID_KEY, null);
-        userListFragment.setArguments(args);
-
-        return userListFragment;
-    }
-
-    @NonNull
-    public static UserListFragment newProjectInstance(@NonNull String projectId) {
+    public static UserListFragment newInstance(@NonNull String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
 
         UserListFragment userListFragment = new UserListFragment();
@@ -160,13 +140,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        Assert.assertTrue(context instanceof Listener);
-    }
-
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -175,6 +148,7 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         Assert.assertTrue(args.containsKey(PROJECT_ID_KEY));
 
         mProjectId = args.getString(PROJECT_ID_KEY);
+        Assert.assertTrue(!TextUtils.isEmpty(mProjectId));
     }
 
     @Override
@@ -200,15 +174,11 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         mFriendListFab = (FloatingActionButton) friendListLayout.findViewById(R.id.friend_list_fab);
         Assert.assertTrue(mFriendListFab != null);
 
-        if (TextUtils.isEmpty(mProjectId)) {
-            mFriendListFab.setOnClickListener(v -> startActivity(FindFriendActivity.newIntent(getActivity())));
-        } else {
-            mFriendListFab.setOnClickListener(v -> {
-                FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
-                initializeFriendPickerFragment(friendPickerFragment);
-                friendPickerFragment.show(getChildFragmentManager(), FRIEND_PICKER_TAG);
-            });
-        }
+        mFriendListFab.setOnClickListener(v -> {
+            FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
+            initializeFriendPickerFragment(friendPickerFragment);
+            friendPickerFragment.show(getChildFragmentManager(), FRIEND_PICKER_TAG);
+        });
 
         mEmptyText = (TextView) friendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
@@ -216,11 +186,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVE_STATE_KEY)) {
             mSaveState = savedInstanceState.getParcelable(SAVE_STATE_KEY);
             Assert.assertTrue(mSaveState != null);
-
-            if (TextUtils.isEmpty(mProjectId)) {
-                Assert.assertTrue(mSaveState.mAddedIds.isEmpty());
-                Assert.assertTrue(mSaveState.mRemovedIds.isEmpty());
-            }
         }
 
         getLoaderManager().initLoader(0, null, this);
@@ -228,7 +193,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
     private void initializeFriendPickerFragment(@NonNull FriendPickerFragment friendPickerFragment) {
         Assert.assertTrue(mData != null);
-        Assert.assertTrue(mData.mFriendDatas != null);
 
         Set<String> userIds = Stream.of(mFriendListAdapter.mUserDataWrappers)
                 .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
@@ -278,11 +242,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
         mData = data;
 
-        if (TextUtils.isEmpty(mProjectId))
-            Assert.assertTrue(data.mFriendDatas == null);
-        else
-            Assert.assertTrue(data.mFriendDatas != null);
-
         if (mFriendListAdapter != null)
             mSaveState = mFriendListAdapter.getSaveState();
         else if (mSaveState == null)
@@ -305,8 +264,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
             mEmptyText.setVisibility(View.GONE);
         }
 
-        updateSelectAll();
-
         FriendPickerFragment friendPickerFragment = (FriendPickerFragment) getChildFragmentManager().findFragmentByTag(FRIEND_PICKER_TAG);
         if (friendPickerFragment != null)
             initializeFriendPickerFragment(friendPickerFragment);
@@ -322,16 +279,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
         if (mFriendListAdapter != null)
             outState.putParcelable(SAVE_STATE_KEY, mFriendListAdapter.getSaveState());
-    }
-
-    private void updateSelectAll() {
-        Assert.assertTrue(mFriendListAdapter != null);
-
-        ((Listener) getActivity()).setUserSelectAllVisibility(mFriendListAdapter.getItemCount() != 0);
-    }
-
-    public void selectAll() {
-        mFriendListAdapter.selectAll();
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -377,8 +324,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                     .forEach(userListMap::remove);
 
             if (!saveState.mAddedIds.isEmpty()) {
-                Assert.assertTrue(mData.mFriendDatas != null);
-
                 userListMap.putAll(Stream.of(mData.mFriendDatas.values())
                         .filter(friendData -> saveState.mAddedIds.contains(friendData.mId))
                         .collect(Collectors.toMap(userListData -> userListData.mId, userListData -> userListData)));
@@ -461,21 +406,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
                 mUserDataWrappers.remove(position);
                 notifyItemRemoved(position);
             }
-
-            if (TextUtils.isEmpty(mProjectId)) {
-                DomainFactory.getDomainFactory(getActivity())
-                        .removeFriends(Stream.of(selectedUserDataWrappers)
-                                .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
-                                .collect(Collectors.toSet()));
-            }
-        }
-
-        public void selectAll() {
-            Assert.assertTrue(!mSelectionCallback.hasActionMode());
-
-            Stream.of(mUserDataWrappers)
-                    .filter(customTimeWrapper -> !customTimeWrapper.mSelected)
-                    .forEach(UserDataWrapper::toggleSelect);
         }
 
         @NonNull
@@ -492,11 +422,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
             Set<String> addedIds = Sets.difference(newUserIds, oldUserIds);
             Set<String> removedIds = Sets.difference(oldUserIds, newUserIds);
-
-            if (TextUtils.isEmpty(mProjectId)) {
-                Assert.assertTrue(addedIds.isEmpty());
-                Assert.assertTrue(removedIds.isEmpty());
-            }
 
             Set<String> selectedIds = Stream.of(mUserDataWrappers)
                     .filter(userDataWrapper -> userDataWrapper.mSelected)
@@ -561,14 +486,6 @@ public class UserListFragment extends AbstractFragment implements LoaderManager.
 
             mFriendListAdapter.notifyItemChanged(position);
         }
-    }
-
-    public interface Listener {
-        void onCreateUserActionMode(@NonNull ActionMode actionMode);
-
-        void onDestroyUserActionMode();
-
-        void setUserSelectAllVisibility(boolean selectAllVisible);
     }
 
     static class SaveState implements Parcelable {

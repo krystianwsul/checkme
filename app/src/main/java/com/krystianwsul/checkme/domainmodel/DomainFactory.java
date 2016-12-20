@@ -982,37 +982,27 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized UserListLoader.Data getUserListData(@Nullable String projectId) {
+    public synchronized UserListLoader.Data getUserListData(@NonNull String projectId) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getUserListData");
 
-        if (TextUtils.isEmpty(projectId)) {
-            Assert.assertTrue(mFriends != null);
+        Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mFriends != null);
 
-            Set<UserListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
-                    .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
-                    .collect(Collectors.toSet());
+        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
 
-            return new UserListLoader.Data(userListDatas, null);
-        } else {
-            Assert.assertTrue(mRemoteFactory != null);
-            Assert.assertTrue(mUserData != null);
-            Assert.assertTrue(mFriends != null);
+        Set<UserListLoader.UserListData> userListDatas = Stream.of(remoteProject.getUsers())
+                .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
+                .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
+                .collect(Collectors.toSet());
 
-            RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+        Map<String, UserListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
+                .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
 
-            Set<UserListLoader.UserListData> userListDatas = Stream.of(remoteProject.getUsers())
-                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
-                    .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
-                    .collect(Collectors.toSet());
-
-            Map<String, UserListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
-                    .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
-                    .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
-
-            return new UserListLoader.Data(userListDatas, friendDatas);
-        }
+        return new UserListLoader.Data(userListDatas, friendDatas);
     }
 
     @NonNull

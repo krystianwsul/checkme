@@ -209,7 +209,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         getSupportLoaderManager().initLoader(0, null, this);
 
-        NotificationWrapper.getInstance().cleanGroup(this);
+        NotificationWrapper.getInstance().cleanGroup(this, null);
     }
 
     @Override

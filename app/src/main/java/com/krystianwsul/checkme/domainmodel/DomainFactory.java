@@ -821,7 +821,15 @@ public class DomainFactory {
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
 
-                parentKey = null; // todo parent picker
+                if (task instanceof RemoteTask) {
+                    RemoteTask remoteTask = (RemoteTask) task;
+
+                    parentKey = new CreateTaskLoader.ProjectParentKey(remoteTask.getRemoteProject().getId());
+                } else {
+                    Assert.assertTrue(task instanceof LocalTask);
+
+                    parentKey = null;
+                }
 
                 if (!schedules.isEmpty()) {
                     scheduleDatas = new ArrayList<>();

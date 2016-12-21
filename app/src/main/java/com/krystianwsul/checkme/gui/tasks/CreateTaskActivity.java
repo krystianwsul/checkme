@@ -322,7 +322,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+        Assert.assertTrue(!hasValueParentTask() || !hasValueSchedule());
 
         switch (item.getItemId()) {
             case R.id.action_save:
@@ -339,7 +339,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 getSupportLoaderManager().destroyLoader(0);
 
                 if (hasValueSchedule()) {
-                    Assert.assertTrue(!hasValueParent());
+                    Assert.assertTrue(!hasValueParentTask());
+
+                    String projectId = null;
+                    if (hasValueParentInGeneral())
+                        projectId = ((CreateTaskLoader.ProjectParentKey) mParent.mParentKey).mProjectId;
+
+                    // todo parent project
 
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
@@ -367,11 +373,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                         finish();
                     }
-                } else if (hasValueParent()) {
+                } else if (hasValueParentTask()) {
                     Assert.assertTrue(mParent != null);
                     Assert.assertTrue(!hasValueFriends());
 
-                    TaskKey parentTaskKey = ((CreateTaskLoader.TaskParentKey) mParent.mParentKey).mTaskKey; // todo parent picker
+                    TaskKey parentTaskKey = ((CreateTaskLoader.TaskParentKey) mParent.mParentKey).mTaskKey;
 
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
@@ -400,6 +406,12 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         finish();
                     }
                 } else {  // no reminder
+                    String projectId = null;
+                    if (hasValueParentInGeneral())
+                        projectId = ((CreateTaskLoader.ProjectParentKey) mParent.mParentKey).mProjectId;
+
+                    // todo parent project
+
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
@@ -730,7 +742,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             linearLayoutManager.scrollToPosition(notePosition);
         }
 
-        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+        Assert.assertTrue(!hasValueParentTask() || !hasValueSchedule());
 
         FriendPickerFragment friendPickerFragment = (FriendPickerFragment) getSupportFragmentManager().findFragmentByTag(FRIEND_PICKER_DIALOG_TAG);
         if (friendPickerFragment != null)
@@ -749,7 +761,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     private boolean tryClose() {
-        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
+        Assert.assertTrue(!hasValueParentTask() || !hasValueSchedule());
 
         if (dataChanged()) {
             DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
@@ -846,8 +858,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             return false;
 
         Assert.assertTrue(mFriendIds != null);
-        Assert.assertTrue(!hasValueParent() || !hasValueSchedule());
-        Assert.assertTrue(!hasValueParent() || !hasValueFriends());
+        Assert.assertTrue(!hasValueParentTask() || !hasValueSchedule());
 
         if (mTaskKey != null) {
             Assert.assertTrue(mData.TaskData != null);
@@ -869,7 +880,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 return true;
 
             if (mData.TaskData.mParentKey != null) {
-                if (!hasValueParent())
+                if (!hasValueParentInGeneral())
                     return true;
 
                 if (!mParent.mParentKey.equals(mData.TaskData.mParentKey))
@@ -885,7 +896,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                 return false;
             } else {
-                if (hasValueParent() || hasValueSchedule())
+                if (hasValueParentInGeneral() || hasValueSchedule())
                     return true;
 
                 return false;
@@ -897,7 +908,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             if (mParentTaskKeyHint != null) {
                 Assert.assertTrue(mScheduleHint == null);
 
-                if (!hasValueParent())
+                if (!hasValueParentTask())
                     return true;
 
                 if (mParent == null || !mParent.mParentKey.equals(mParentTaskKeyHint))
@@ -959,8 +970,12 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         scheduleHolder.mScheduleText.setText(mParent != null ? mParent.Name : null);
     }
 
-    private boolean hasValueParent() {
+    private boolean hasValueParentInGeneral() {
         return (mParent != null);
+    }
+
+    private boolean hasValueParentTask() {
+        return (mParent != null && mParent.mParentKey.getType() == CreateTaskLoader.ParentType.TASK);
     }
 
     private boolean hasValueSchedule() {

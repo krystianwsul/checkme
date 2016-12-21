@@ -151,7 +151,6 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         public TaskData(@NonNull String name, @Nullable ParentKey parentKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @NonNull Map<String, UserData> friends) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue((parentKey == null) || (scheduleDatas == null));
 
             Name = name;
             mParentKey = parentKey;
@@ -641,7 +640,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
     public static class ProjectParentKey implements ParentKey {
         @NonNull
-        private final String mProjectId;
+        public final String mProjectId;
 
         public ProjectParentKey(@NonNull String projectId) {
             Assert.assertTrue(!TextUtils.isEmpty(projectId));
@@ -767,6 +766,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         };
     }
 
+    @SuppressWarnings("WeakerAccess")
     public interface SortKey extends Comparable<SortKey> {
 
     }

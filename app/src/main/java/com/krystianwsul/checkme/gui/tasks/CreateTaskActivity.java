@@ -103,7 +103,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     private final ParentPickerFragment.Listener mParentFragmentListener = new ParentPickerFragment.Listener() {
         @Override
         public void onTaskSelected(@NonNull CreateTaskLoader.ParentTreeData parentTreeData) {
-            clearSchedulesFriends();
+            if (parentTreeData.mParentKey.getType() == CreateTaskLoader.ParentType.TASK)
+                clearSchedulesFriends();
 
             mParent = parentTreeData;
 
@@ -955,6 +956,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     private void clearParent() {
         Assert.assertTrue(mCreateTaskAdapter != null);
+
+        if (mParent == null || mParent.mParentKey.getType() == CreateTaskLoader.ParentType.PROJECT)
+            return;
 
         mParent = null;
 

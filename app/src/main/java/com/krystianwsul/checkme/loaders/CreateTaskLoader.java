@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -63,7 +65,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final TaskData TaskData;
 
         @NonNull
-        public final Map<TaskKey, TaskTreeData> TaskTreeDatas;
+        public final Map<ParentKey, ParentTreeData> mParentTreeDatas;
 
         @NonNull
         public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
@@ -73,11 +75,11 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         public final boolean mConnected;
 
-        public Data(@Nullable TaskData taskData, @NonNull Map<TaskKey, TaskTreeData> taskTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Map<String, UserData> friends, boolean connected) {
+        public Data(@Nullable TaskData taskData, @NonNull Map<ParentKey, ParentTreeData> parentTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Map<String, UserData> friends, boolean connected) {
             Assert.assertTrue(connected || friends.isEmpty());
 
             TaskData = taskData;
-            TaskTreeDatas = taskTreeDatas;
+            mParentTreeDatas = parentTreeDatas;
             CustomTimeDatas = customTimeDatas;
             mFriends = friends;
             mConnected = connected;
@@ -88,7 +90,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             int hash = 0;
             if (TaskData != null)
                 hash += TaskData.hashCode();
-            hash += TaskTreeDatas.hashCode();
+            hash += mParentTreeDatas.hashCode();
             hash += CustomTimeDatas.hashCode();
             hash += mFriends.hashCode();
             hash += (mConnected ? 1 : 0);
@@ -115,7 +117,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if ((TaskData != null) && !TaskData.equals(data.TaskData))
                 return false;
 
-            if (!TaskTreeDatas.equals(data.TaskTreeDatas))
+            if (!mParentTreeDatas.equals(data.mParentTreeDatas))
                 return false;
 
             if (!CustomTimeDatas.equals(data.CustomTimeDatas))
@@ -136,7 +138,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final String Name;
 
         @Nullable
-        public final TaskKey mParentTaskKey;
+        public final ParentKey mParentKey;
 
         @Nullable
         public final List<ScheduleData> ScheduleDatas;
@@ -147,12 +149,12 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @NonNull
         public final Map<String, UserData> mFriends;
 
-        public TaskData(@NonNull String name, @Nullable TaskKey parentTaskKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @NonNull Map<String, UserData> friends) {
+        public TaskData(@NonNull String name, @Nullable ParentKey parentKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @NonNull Map<String, UserData> friends) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue((parentTaskKey == null) || (scheduleDatas == null));
+            Assert.assertTrue((parentKey == null) || (scheduleDatas == null));
 
             Name = name;
-            mParentTaskKey = parentTaskKey;
+            mParentKey = parentKey;
             ScheduleDatas = scheduleDatas;
             mNote = note;
             mFriends = friends;
@@ -162,10 +164,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public int hashCode() {
             int hash = 0;
             hash += Name.hashCode();
-            if (mParentTaskKey != null) {
+            if (mParentKey != null) {
                 Assert.assertTrue(ScheduleDatas == null);
 
-                hash += mParentTaskKey.hashCode();
+                hash += mParentKey.hashCode();
             } else {
                 Assert.assertTrue(ScheduleDatas != null);
 
@@ -194,10 +196,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if (!Name.equals(taskData.Name))
                 return false;
 
-            if ((mParentTaskKey == null) != (taskData.mParentTaskKey == null))
+            if ((mParentKey == null) != (taskData.mParentKey == null))
                 return false;
 
-            if ((mParentTaskKey != null) && !mParentTaskKey.equals(taskData.mParentTaskKey))
+            if ((mParentKey != null) && !mParentKey.equals(taskData.mParentKey))
                 return false;
 
             if ((ScheduleDatas == null) != (taskData.ScheduleDatas == null))
@@ -271,15 +273,15 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         }
     }
 
-    public static class TaskTreeData {
+    public static class ParentTreeData {
         @NonNull
         public final String Name;
 
         @NonNull
-        public final Map<TaskKey, TaskTreeData> TaskDatas;
+        public final Map<ParentKey, ParentTreeData> mParentTreeDatas;
 
         @NonNull
-        public final TaskKey mTaskKey;
+        public final ParentKey mParentKey;
 
         public final String ScheduleText;
 
@@ -287,25 +289,25 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final String mNote;
 
         @NonNull
-        public final ExactTimeStamp mStartExactTimeStamp;
+        public final SortKey mSortKey;
 
-        public TaskTreeData(@NonNull String name, @NonNull Map<TaskKey, TaskTreeData> taskDatas, @NonNull TaskKey taskKey, @Nullable String scheduleText, @Nullable String note, @NonNull ExactTimeStamp startExactTimeStamp) {
+        public ParentTreeData(@NonNull String name, @NonNull Map<ParentKey, ParentTreeData> parentTreeDatas, @NonNull ParentKey parentKey, @Nullable String scheduleText, @Nullable String note, @NonNull SortKey sortKey) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;
-            TaskDatas = taskDatas;
-            mTaskKey = taskKey;
+            mParentTreeDatas = parentTreeDatas;
+            mParentKey = parentKey;
             ScheduleText = scheduleText;
             mNote = note;
-            mStartExactTimeStamp = startExactTimeStamp;
+            mSortKey = sortKey;
         }
 
         @Override
         public int hashCode() {
             int hash = 0;
             hash += Name.hashCode();
-            hash += TaskDatas.hashCode();
-            hash += mTaskKey.hashCode();
+            hash += mParentTreeDatas.hashCode();
+            hash += mParentKey.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hash += ScheduleText.hashCode();
             if (!TextUtils.isEmpty(mNote))
@@ -322,30 +324,30 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if (object == this)
                 return true;
 
-            if (!(object instanceof TaskTreeData))
+            if (!(object instanceof ParentTreeData))
                 return false;
 
-            TaskTreeData taskTreeData = (TaskTreeData) object;
+            ParentTreeData parentTreeData = (ParentTreeData) object;
 
-            if (!Name.equals(taskTreeData.Name))
+            if (!Name.equals(parentTreeData.Name))
                 return false;
 
-            if (!TaskDatas.equals(taskTreeData.TaskDatas))
+            if (!mParentTreeDatas.equals(parentTreeData.mParentTreeDatas))
                 return false;
 
-            if (!mTaskKey.equals(taskTreeData.mTaskKey))
+            if (!mParentKey.equals(parentTreeData.mParentKey))
                 return false;
 
-            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(taskTreeData.ScheduleText))
+            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(parentTreeData.ScheduleText))
                 return false;
 
-            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(taskTreeData.ScheduleText))
+            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(parentTreeData.ScheduleText))
                 return false;
 
-            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(taskTreeData.mNote))
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(parentTreeData.mNote))
                 return false;
 
-            if (!TextUtils.isEmpty(mNote) && !mNote.equals(taskTreeData.mNote))
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(parentTreeData.mNote))
                 return false;
 
             return true;
@@ -625,6 +627,237 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @Override
         public ScheduleType getScheduleType() {
             return ScheduleType.MONTHLY_WEEK;
+        }
+    }
+
+    public interface ParentKey extends Parcelable {
+        @NonNull
+        ParentType getType();
+    }
+
+    public enum ParentType {
+        PROJECT, TASK
+    }
+
+    public static class ProjectParentKey implements ParentKey {
+        @NonNull
+        private final String mProjectId;
+
+        public ProjectParentKey(@NonNull String projectId) {
+            Assert.assertTrue(!TextUtils.isEmpty(projectId));
+
+            mProjectId = projectId;
+        }
+
+        @NonNull
+        @Override
+        public ParentType getType() {
+            return ParentType.PROJECT;
+        }
+
+        @Override
+        public int hashCode() {
+            return mProjectId.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null)
+                return false;
+
+            if (obj == this)
+                return true;
+
+            if (!(obj instanceof ProjectParentKey))
+                return false;
+
+            ProjectParentKey projectParentKey = (ProjectParentKey) obj;
+
+            return mProjectId.equals(projectParentKey.mProjectId);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(mProjectId);
+        }
+
+        public static final Parcelable.Creator<ProjectParentKey> CREATOR = new Creator<ProjectParentKey>() {
+            @Override
+            public ProjectParentKey createFromParcel(Parcel in) {
+                String projectId = in.readString();
+                Assert.assertTrue(!TextUtils.isEmpty(projectId));
+
+                return new ProjectParentKey(projectId);
+            }
+
+            @Override
+            public ProjectParentKey[] newArray(int size) {
+                return new ProjectParentKey[size];
+            }
+        };
+    }
+
+    public static class TaskParentKey implements ParentKey {
+        @NonNull
+        public final TaskKey mTaskKey;
+
+        public TaskParentKey(@NonNull TaskKey taskKey) {
+            mTaskKey = taskKey;
+        }
+
+        @NonNull
+        @Override
+        public ParentType getType() {
+            return ParentType.TASK;
+        }
+
+        @Override
+        public int hashCode() {
+            return mTaskKey.hashCode();
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null)
+                return false;
+
+            if (obj == this)
+                return true;
+
+            if (!(obj instanceof TaskParentKey))
+                return false;
+
+            TaskParentKey taskParentKey = (TaskParentKey) obj;
+
+            if (!mTaskKey.equals(taskParentKey.mTaskKey))
+                return false;
+
+            return true;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(mTaskKey, 0);
+        }
+
+        public static final Parcelable.Creator<TaskParentKey> CREATOR = new Creator<TaskParentKey>() {
+            @Override
+            public TaskParentKey createFromParcel(Parcel in) {
+                TaskKey taskKey = in.readParcelable(TaskKey.class.getClassLoader());
+                Assert.assertTrue(taskKey != null);
+
+                return new TaskParentKey(taskKey);
+            }
+
+            @Override
+            public TaskParentKey[] newArray(int size) {
+                return new TaskParentKey[size];
+            }
+        };
+    }
+
+    public interface SortKey extends Comparable<SortKey> {
+
+    }
+
+    public static class ProjectSortKey implements SortKey {
+        @NonNull
+        private final String mProjectId;
+
+        public ProjectSortKey(@NonNull String projectId) {
+            Assert.assertTrue(!TextUtils.isEmpty(projectId));
+
+            mProjectId = projectId;
+        }
+
+        @Override
+        public int hashCode() {
+            return mProjectId.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null)
+                return false;
+
+            if (obj == this)
+                return true;
+
+            if (!(obj instanceof ProjectSortKey))
+                return false;
+
+            ProjectSortKey projectSortKey = (ProjectSortKey) obj;
+
+            return mProjectId.equals(projectSortKey.mProjectId);
+        }
+
+        @Override
+        public int compareTo(@NonNull SortKey sortKey) {
+            if (sortKey instanceof TaskSortKey)
+                return -1;
+
+            Assert.assertTrue(sortKey instanceof ProjectSortKey);
+
+            ProjectSortKey projectSortKey = (ProjectSortKey) sortKey;
+
+            return mProjectId.compareTo(projectSortKey.mProjectId);
+        }
+    }
+
+    public static class TaskSortKey implements SortKey {
+        @NonNull
+        private final ExactTimeStamp mStartExactTimeStamp;
+
+        public TaskSortKey(@NonNull ExactTimeStamp startExactTimeStamp) {
+            mStartExactTimeStamp = startExactTimeStamp;
+        }
+
+        @Override
+        public int hashCode() {
+            return mStartExactTimeStamp.hashCode();
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null)
+                return false;
+
+            if (obj == this)
+                return true;
+
+            if (!(obj instanceof TaskSortKey))
+                return false;
+
+            TaskSortKey taskSortKey = (TaskSortKey) obj;
+
+            if (!mStartExactTimeStamp.equals(taskSortKey.mStartExactTimeStamp))
+                return false;
+
+            return true;
+        }
+
+        @Override
+        public int compareTo(@NonNull SortKey sortKey) {
+            if (sortKey instanceof ProjectSortKey)
+                return 1;
+
+            Assert.assertTrue(sortKey instanceof TaskSortKey);
+
+            TaskSortKey taskSortKey = (TaskSortKey) sortKey;
+
+            return taskSortKey.mStartExactTimeStamp.compareTo(taskSortKey.mStartExactTimeStamp);
         }
     }
 }

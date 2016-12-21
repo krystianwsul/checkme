@@ -88,7 +88,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     private CreateTaskLoader.Data mData;
 
-    private CreateTaskLoader.TaskTreeData mParent;
+    private CreateTaskLoader.ParentTreeData mParent;
 
     private RecyclerView mScheduleTimes;
     private CreateTaskAdapter mCreateTaskAdapter;
@@ -102,10 +102,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     private final ParentPickerFragment.Listener mParentFragmentListener = new ParentPickerFragment.Listener() {
         @Override
-        public void onTaskSelected(@NonNull CreateTaskLoader.TaskTreeData taskTreeData) {
+        public void onTaskSelected(@NonNull CreateTaskLoader.ParentTreeData parentTreeData) {
             clearSchedulesFriends();
 
-            mParent = taskTreeData;
+            mParent = parentTreeData;
 
             updateParentView();
         }
@@ -371,11 +371,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     Assert.assertTrue(mParent != null);
                     Assert.assertTrue(!hasValueFriends());
 
+                    TaskKey parentTaskKey = ((CreateTaskLoader.TaskParentKey) mParent.mParentKey).mTaskKey; // todo parent picker
+
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, ExactTimeStamp.getNow(), mData.DataId, mTaskKey, name, mParent.mTaskKey, mNote);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, ExactTimeStamp.getNow(), mData.DataId, mTaskKey, name, parentTaskKey, mNote);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -387,13 +389,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskKeys.size() > 1);
 
-                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, mParent.mTaskKey, name, mTaskKeys, mNote);
+                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, parentTaskKey, name, mTaskKeys, mNote);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, mParent.mTaskKey, name, mNote);
+                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, parentTaskKey, name, mNote);
 
                         finish();
                     }
@@ -554,7 +556,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             }
 
             if (mParent != null) {
-                outState.putParcelable(PARENT_KEY_KEY, mParent.mTaskKey);
+                outState.putParcelable(PARENT_KEY_KEY, mParent.mParentKey);
             }
 
             if (!TextUtils.isEmpty(mNote))
@@ -629,7 +631,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(SCHEDULE_ENTRIES_KEY)) {
             if (mSavedInstanceState.containsKey(PARENT_KEY_KEY)) {
-                TaskKey parentKey = mSavedInstanceState.getParcelable(PARENT_KEY_KEY);
+                CreateTaskLoader.ParentKey parentKey = mSavedInstanceState.getParcelable(PARENT_KEY_KEY);
                 Assert.assertTrue(parentKey != null);
 
                 mParent = findTaskData(parentKey);
@@ -644,16 +646,16 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
             mNoteHasFocus = mSavedInstanceState.getBoolean(NOTE_HAS_FOCUS_KEY);
         } else {
-            if (mData.TaskData != null && mData.TaskData.mParentTaskKey != null) {
+            if (mData.TaskData != null && mData.TaskData.mParentKey != null) {
                 Assert.assertTrue(mParentTaskKeyHint == null);
                 Assert.assertTrue(mTaskKeys == null);
                 Assert.assertTrue(mTaskKey != null);
 
-                mParent = findTaskData(mData.TaskData.mParentTaskKey);
+                mParent = findTaskData(mData.TaskData.mParentKey);
             } else if (mParentTaskKeyHint != null) {
                 Assert.assertTrue(mTaskKey == null);
 
-                mParent = findTaskData(mParentTaskKeyHint);
+                mParent = findTaskData(new CreateTaskLoader.TaskParentKey(mParentTaskKeyHint));
             }
 
             if (mData.TaskData != null)
@@ -662,7 +664,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         ParentPickerFragment parentPickerFragment = (ParentPickerFragment) getSupportFragmentManager().findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG);
         if (parentPickerFragment != null)
-            parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
+            parentPickerFragment.initialize(mData.mParentTreeDatas, mParentFragmentListener);
 
         invalidateOptionsMenu();
 
@@ -866,11 +868,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             if (!mToolbarEditText.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
-            if (mData.TaskData.mParentTaskKey != null) {
+            if (mData.TaskData.mParentKey != null) {
                 if (!hasValueParent())
                     return true;
 
-                if (!mParent.mTaskKey.equals(mData.TaskData.mParentTaskKey))
+                if (!mParent.mParentKey.equals(mData.TaskData.mParentKey))
                     return true;
 
                 return false;
@@ -898,7 +900,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 if (!hasValueParent())
                     return true;
 
-                if (mParent == null || !mParent.mTaskKey.equals(mParentTaskKeyHint))
+                if (mParent == null || !mParent.mParentKey.equals(mParentTaskKeyHint))
                     return true;
 
                 return false;
@@ -915,26 +917,26 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     @NonNull
-    private CreateTaskLoader.TaskTreeData findTaskData(@NonNull TaskKey taskKey) {
+    private CreateTaskLoader.ParentTreeData findTaskData(@NonNull CreateTaskLoader.ParentKey parentKey) {
         Assert.assertTrue(mData != null);
 
-        List<CreateTaskLoader.TaskTreeData> taskTreeDatas = findTaskDataHelper(mData.TaskTreeDatas, taskKey)
+        List<CreateTaskLoader.ParentTreeData> parentTreeDatas = findTaskDataHelper(mData.mParentTreeDatas, parentKey)
                 .collect(Collectors.toList());
 
-        Assert.assertTrue(taskTreeDatas.size() == 1);
-        return taskTreeDatas.get(0);
+        Assert.assertTrue(parentTreeDatas.size() == 1);
+        return parentTreeDatas.get(0);
     }
 
     @NonNull
-    private Stream<CreateTaskLoader.TaskTreeData> findTaskDataHelper(@NonNull Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas, @NonNull TaskKey taskKey) {
-        if (taskDatas.containsKey(taskKey)) {
-            List<CreateTaskLoader.TaskTreeData> ret = new ArrayList<>();
-            ret.add(taskDatas.get(taskKey));
+    private Stream<CreateTaskLoader.ParentTreeData> findTaskDataHelper(@NonNull Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> taskDatas, @NonNull CreateTaskLoader.ParentKey parentKey) {
+        if (taskDatas.containsKey(parentKey)) {
+            List<CreateTaskLoader.ParentTreeData> ret = new ArrayList<>();
+            ret.add(taskDatas.get(parentKey));
             return Stream.of(ret);
         }
 
         return Stream.of(taskDatas.values())
-                .map(taskData -> findTaskDataHelper(taskData.TaskDatas, taskKey))
+                .map(taskData -> findTaskDataHelper(taskData.mParentTreeDatas, parentKey))
                 .flatMap(stream -> stream);
     }
 
@@ -1168,7 +1170,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 scheduleHolder.mScheduleText.setOnClickListener(v -> {
                     ParentPickerFragment parentPickerFragment = ParentPickerFragment.newInstance(mParent != null);
                     parentPickerFragment.show(getSupportFragmentManager(), PARENT_PICKER_FRAGMENT_TAG);
-                    parentPickerFragment.initialize(mData.TaskTreeDatas, mParentFragmentListener);
+                    parentPickerFragment.initialize(mData.mParentTreeDatas, mParentFragmentListener);
                 });
             } else if (position < 1 + mScheduleEntries.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;

@@ -29,7 +29,6 @@ import com.krystianwsul.checkme.gui.tree.TreeNode;
 import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
 import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
@@ -44,11 +43,11 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
     private RecyclerView mRecyclerView;
 
-    private Map<TaskKey, CreateTaskLoader.TaskTreeData> mTaskDatas;
+    private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> mTaskDatas;
     private Listener mListener;
 
     private TreeViewAdapter mTreeViewAdapter;
-    private List<TaskKey> mExpandedTaskKeys;
+    private List<CreateTaskLoader.ParentKey> mExpandedParentKeys;
 
     public static ParentPickerFragment newInstance(boolean showDelete) {
         ParentPickerFragment parentPickerFragment = new ParentPickerFragment();
@@ -69,9 +68,9 @@ public class ParentPickerFragment extends AbstractDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(EXPANDED_TASK_KEYS_KEY)) {
-                mExpandedTaskKeys = savedInstanceState.getParcelableArrayList(EXPANDED_TASK_KEYS_KEY);
-                Assert.assertTrue(mExpandedTaskKeys != null);
-                Assert.assertTrue(!mExpandedTaskKeys.isEmpty());
+                mExpandedParentKeys = savedInstanceState.getParcelableArrayList(EXPANDED_TASK_KEYS_KEY);
+                Assert.assertTrue(mExpandedParentKeys != null);
+                Assert.assertTrue(!mExpandedParentKeys.isEmpty());
             }
         }
 
@@ -98,7 +97,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
         return materialDialog;
     }
 
-    public void initialize(@NonNull Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas, @NonNull Listener listener) {
+    public void initialize(@NonNull Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> taskDatas, @NonNull Listener listener) {
         mTaskDatas = taskDatas;
         mListener = listener;
         if (getActivity() != null)
@@ -121,16 +120,16 @@ public class ParentPickerFragment extends AbstractDialogFragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         if (mTreeViewAdapter != null) {
-            List<TaskKey> expanded = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskKeys();
+            List<CreateTaskLoader.ParentKey> expanded = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedParentKeys();
 
             if (expanded.isEmpty()) {
-                mExpandedTaskKeys = null;
+                mExpandedParentKeys = null;
             } else {
-                mExpandedTaskKeys = expanded;
+                mExpandedParentKeys = expanded;
             }
         }
 
-        mTreeViewAdapter = TaskAdapter.getAdapter(this, mTaskDatas, mExpandedTaskKeys);
+        mTreeViewAdapter = TaskAdapter.getAdapter(this, mTaskDatas, mExpandedParentKeys);
 
         mRecyclerView.setAdapter(mTreeViewAdapter.getAdapter());
     }
@@ -140,10 +139,10 @@ public class ParentPickerFragment extends AbstractDialogFragment {
         super.onSaveInstanceState(outState);
 
         if (mTreeViewAdapter != null) {
-            ArrayList<TaskKey> expandedTaskKeys = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedTaskKeys();
+            ArrayList<CreateTaskLoader.ParentKey> expandedParentKeys = ((TaskAdapter) mTreeViewAdapter.getTreeModelAdapter()).getExpandedParentKeys();
 
-            if (!expandedTaskKeys.isEmpty())
-                outState.putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, expandedTaskKeys);
+            if (!expandedParentKeys.isEmpty())
+                outState.putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, expandedParentKeys);
         }
     }
 
@@ -156,12 +155,12 @@ public class ParentPickerFragment extends AbstractDialogFragment {
         private TreeViewAdapter mTreeViewAdapter;
 
         @NonNull
-        static TreeViewAdapter getAdapter(@NonNull ParentPickerFragment parentPickerFragment, @NonNull Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas, @Nullable List<TaskKey> expandedTaskKeys) {
+        static TreeViewAdapter getAdapter(@NonNull ParentPickerFragment parentPickerFragment, @NonNull Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> taskDatas, @Nullable List<CreateTaskLoader.ParentKey> expandedParentKeys) {
             TaskAdapter taskAdapter = new TaskAdapter(parentPickerFragment);
 
             float density = parentPickerFragment.getResources().getDisplayMetrics().density;
 
-            return taskAdapter.initialize(density, taskDatas, expandedTaskKeys);
+            return taskAdapter.initialize(density, taskDatas, expandedParentKeys);
         }
 
         private TaskAdapter(@NonNull ParentPickerFragment parentPickerFragment) {
@@ -169,7 +168,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
         }
 
         @NonNull
-        private TreeViewAdapter initialize(float density, @NonNull Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas, @Nullable List<TaskKey> expandedTaskKeys) {
+        private TreeViewAdapter initialize(float density, @NonNull Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> taskDatas, @Nullable List<CreateTaskLoader.ParentKey> expandedParentKeys) {
             mTreeViewAdapter = new TreeViewAdapter(false, this);
 
             TreeNodeCollection treeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
@@ -180,10 +179,10 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
             List<TreeNode> treeNodes = new ArrayList<>();
 
-            for (CreateTaskLoader.TaskTreeData taskTreeData : taskDatas.values()) {
-                TaskWrapper taskWrapper = new TaskWrapper(density, 0, this, taskTreeData);
+            for (CreateTaskLoader.ParentTreeData parentTreeData : taskDatas.values()) {
+                TaskWrapper taskWrapper = new TaskWrapper(density, 0, this, parentTreeData);
 
-                treeNodes.add(taskWrapper.initialize(treeNodeCollection, expandedTaskKeys));
+                treeNodes.add(taskWrapper.initialize(treeNodeCollection, expandedParentKeys));
 
                 mTaskWrappers.add(taskWrapper);
             }
@@ -252,9 +251,9 @@ public class ParentPickerFragment extends AbstractDialogFragment {
         }
 
         @NonNull
-        ArrayList<TaskKey> getExpandedTaskKeys() {
+        ArrayList<CreateTaskLoader.ParentKey> getExpandedParentKeys() {
             return Stream.of(mTaskWrappers)
-                    .flatMap(TaskWrapper::getExpandedTaskKeys)
+                    .flatMap(TaskWrapper::getExpandedParentKeys)
                     .collect(Collectors.toCollection(ArrayList::new));
         }
 
@@ -262,7 +261,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             @NonNull
             private final TaskParent mTaskParent;
 
-            final CreateTaskLoader.TaskTreeData mTaskTreeData;
+            final CreateTaskLoader.ParentTreeData mParentTreeData;
 
             private TreeNode mTreeNode;
 
@@ -271,19 +270,19 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             private final float mDensity;
             private final int mIndentation;
 
-            TaskWrapper(float density, int indentation, @NonNull TaskParent taskParent, @NonNull CreateTaskLoader.TaskTreeData taskTreeData) {
+            TaskWrapper(float density, int indentation, @NonNull TaskParent taskParent, @NonNull CreateTaskLoader.ParentTreeData parentTreeData) {
                 mDensity = density;
                 mIndentation = indentation;
                 mTaskParent = taskParent;
-                mTaskTreeData = taskTreeData;
+                mParentTreeData = parentTreeData;
             }
 
             @NonNull
-            TreeNode initialize(@NonNull NodeContainer nodeContainer, @Nullable List<TaskKey> expandedTaskKeys) {
+            TreeNode initialize(@NonNull NodeContainer nodeContainer, @Nullable List<CreateTaskLoader.ParentKey> expandedParentKeys) {
                 boolean expanded = false;
-                if (expandedTaskKeys != null) {
-                    Assert.assertTrue(!expandedTaskKeys.isEmpty());
-                    expanded = expandedTaskKeys.contains(mTaskTreeData.mTaskKey);
+                if (expandedParentKeys != null) {
+                    Assert.assertTrue(!expandedParentKeys.isEmpty());
+                    expanded = expandedParentKeys.contains(mParentTreeData.mParentKey);
                 }
 
                 mTreeNode = new TreeNode(this, nodeContainer, expanded, false);
@@ -292,10 +291,10 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 List<TreeNode> treeNodes = new ArrayList<>();
 
-                for (CreateTaskLoader.TaskTreeData taskTreeData : mTaskTreeData.TaskDatas.values()) {
-                    TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, this, taskTreeData);
+                for (CreateTaskLoader.ParentTreeData parentTreeData : mParentTreeData.mParentTreeDatas.values()) {
+                    TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, this, parentTreeData);
 
-                    treeNodes.add(taskWrapper.initialize(mTreeNode, expandedTaskKeys));
+                    treeNodes.add(taskWrapper.initialize(mTreeNode, expandedParentKeys));
 
                     mTaskWrappers.add(taskWrapper);
                 }
@@ -346,7 +345,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 taskHolder.mTaskRowContainer.setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
 
-                if (mTaskTreeData.TaskDatas.isEmpty())
+                if (mParentTreeData.mParentTreeDatas.isEmpty())
                     taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
                 else {
                     taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
@@ -359,29 +358,29 @@ public class ParentPickerFragment extends AbstractDialogFragment {
                     taskHolder.mTaskRowImg.setOnClickListener(treeNode.getExpandListener());
                 }
 
-                taskHolder.mTaskRowName.setText(mTaskTreeData.Name);
+                taskHolder.mTaskRowName.setText(mParentTreeData.Name);
 
-                if (TextUtils.isEmpty(mTaskTreeData.ScheduleText)) {
+                if (TextUtils.isEmpty(mParentTreeData.ScheduleText)) {
                     taskHolder.mTaskRowDetails.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowDetails.setVisibility(View.VISIBLE);
-                    taskHolder.mTaskRowDetails.setText(mTaskTreeData.ScheduleText);
+                    taskHolder.mTaskRowDetails.setText(mParentTreeData.ScheduleText);
                 }
 
-                if ((mTaskTreeData.TaskDatas.isEmpty() || treeNode.expanded()) && TextUtils.isEmpty(mTaskTreeData.mNote)) {
+                if ((mParentTreeData.mParentTreeDatas.isEmpty() || treeNode.expanded()) && TextUtils.isEmpty(mParentTreeData.mNote)) {
                     taskHolder.mTaskRowChildren.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
 
                     String text;
-                    if (!mTaskTreeData.TaskDatas.isEmpty() && !treeNode.expanded()) {
-                        text = Stream.of(mTaskTreeData.TaskDatas.values())
+                    if (!mParentTreeData.mParentTreeDatas.isEmpty() && !treeNode.expanded()) {
+                        text = Stream.of(mParentTreeData.mParentTreeDatas.values())
                                 .map(taskData -> taskData.Name)
                                 .collect(Collectors.joining(", "));
                     } else {
-                        Assert.assertTrue(!TextUtils.isEmpty(mTaskTreeData.mNote));
+                        Assert.assertTrue(!TextUtils.isEmpty(mParentTreeData.mNote));
 
-                        text = mTaskTreeData.mNote;
+                        text = mParentTreeData.mNote;
                     }
 
                     Assert.assertTrue(!TextUtils.isEmpty(text));
@@ -410,7 +409,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 parentPickerFragment.dismiss();
 
-                parentPickerFragment.mListener.onTaskSelected(mTaskTreeData);
+                parentPickerFragment.mListener.onTaskSelected(mParentTreeData);
             }
 
             @Override
@@ -430,7 +429,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
             @Override
             public int compareTo(@NonNull ModelNode another) {
-                int comparison = mTaskTreeData.mStartExactTimeStamp.compareTo(((TaskWrapper) another).mTaskTreeData.mStartExactTimeStamp);
+                int comparison = mParentTreeData.mSortKey.compareTo(((TaskWrapper) another).mParentTreeData.mSortKey);
                 if (mIndentation == 0)
                     comparison = -comparison;
 
@@ -438,20 +437,20 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             }
 
             @NonNull
-            Stream<TaskKey> getExpandedTaskKeys() {
-                List<TaskKey> expandedTaskKeys = new ArrayList<>();
+            Stream<CreateTaskLoader.ParentKey> getExpandedParentKeys() {
+                List<CreateTaskLoader.ParentKey> expandedParentKeys = new ArrayList<>();
 
                 TreeNode treeNode = getTreeNode();
 
                 if (treeNode.expanded()) {
-                    expandedTaskKeys.add(mTaskTreeData.mTaskKey);
+                    expandedParentKeys.add(mParentTreeData.mParentKey);
 
-                    expandedTaskKeys.addAll(Stream.of(mTaskWrappers)
-                            .flatMap(TaskWrapper::getExpandedTaskKeys)
+                    expandedParentKeys.addAll(Stream.of(mTaskWrappers)
+                            .flatMap(TaskWrapper::getExpandedParentKeys)
                             .collect(Collectors.toList()));
                 }
 
-                return Stream.of(expandedTaskKeys);
+                return Stream.of(expandedParentKeys);
             }
         }
 
@@ -483,7 +482,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
     }
 
     public interface Listener {
-        void onTaskSelected(@NonNull CreateTaskLoader.TaskTreeData taskTreeData);
+        void onTaskSelected(@NonNull CreateTaskLoader.ParentTreeData parentTreeData);
 
         void onTaskDeleted();
     }

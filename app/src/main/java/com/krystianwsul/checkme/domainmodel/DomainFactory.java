@@ -815,13 +815,13 @@ public class DomainFactory {
         if (taskKey != null) {
             Task task = getTaskForce(taskKey);
 
-            TaskKey parentTaskKey;
+            CreateTaskLoader.ParentKey parentKey;
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
 
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
 
-                parentTaskKey = null;
+                parentKey = null; // todo parent picker
 
                 if (!schedules.isEmpty()) {
                     scheduleDatas = new ArrayList<>();
@@ -897,11 +897,11 @@ public class DomainFactory {
                 Task parentTask = task.getParentTask(now);
                 Assert.assertTrue(parentTask != null);
 
-                parentTaskKey = parentTask.getTaskKey();
+                parentKey = new CreateTaskLoader.TaskParentKey(parentTask.getTaskKey());
             }
 
             Map<String, CreateTaskLoader.UserData> friends;
-            if (task.getRecordOf().isEmpty() || (parentTaskKey != null)) {
+            if (task.getRecordOf().isEmpty() || (parentKey != null)) {
                 friends = new HashMap<>();
             } else {
                 Assert.assertTrue(mUserData != null);
@@ -912,10 +912,10 @@ public class DomainFactory {
                         .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
             }
 
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentTaskKey, scheduleDatas, task.getNote(), friends);
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentKey, scheduleDatas, task.getNote(), friends);
         }
 
-        Map<TaskKey, CreateTaskLoader.TaskTreeData> taskDatas = getTaskDatas(context, now, excludedTaskKeys);
+        Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
 
         @SuppressLint("UseSparseArrays") HashMap<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes.values())
@@ -933,7 +933,7 @@ public class DomainFactory {
             connected = false;
         }
 
-        return new CreateTaskLoader.Data(taskData, taskDatas, customTimeDatas, friends, connected);
+        return new CreateTaskLoader.Data(taskData, parentTreeDatas, customTimeDatas, friends, connected);
     }
 
     @NonNull
@@ -1955,20 +1955,20 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Map<TaskKey, CreateTaskLoader.TaskTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
+    private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
         return Stream.of(parentTask.getChildTasks(now))
                 .filterNot(childTask -> excludedTaskKeys.contains(childTask.getTaskKey()))
-                .collect(Collectors.toMap(Task::getTaskKey, childTask -> new CreateTaskLoader.TaskTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), childTask.getTaskKey(), childTask.getScheduleText(context, now), childTask.getNote(), childTask.getStartExactTimeStamp())));
+                .collect(Collectors.toMap(childTask -> new CreateTaskLoader.TaskParentKey(childTask.getTaskKey()), childTask -> new CreateTaskLoader.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskLoader.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskLoader.TaskSortKey(childTask.getStartExactTimeStamp()))));
     }
 
     @NonNull
-    private Map<TaskKey, CreateTaskLoader.TaskTreeData> getTaskDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
+    private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getParentTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
         return getTasks()
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
-                .collect(Collectors.toMap(Task::getTaskKey, task -> new CreateTaskLoader.TaskTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), task.getTaskKey(), task.getScheduleText(context, now), task.getNote(), task.getStartExactTimeStamp())));
+                .collect(Collectors.toMap(task -> new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.TaskSortKey(task.getStartExactTimeStamp()))));
     }
 
     @NonNull

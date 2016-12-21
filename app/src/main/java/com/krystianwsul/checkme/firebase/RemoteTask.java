@@ -465,4 +465,12 @@ public class RemoteTask extends Task {
     public RemoteProject getRemoteNonNullProject() {
         return getRemoteProject();
     }
+
+    @NonNull
+    @Override
+    public RemoteTask updateProject(@NonNull Context context, @NonNull ExactTimeStamp now, @Nullable String projectId) {
+        Assert.assertTrue(TextUtils.isEmpty(projectId));
+
+        return this;
+    }
 }

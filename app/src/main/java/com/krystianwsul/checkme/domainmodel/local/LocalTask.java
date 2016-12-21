@@ -218,4 +218,14 @@ public class LocalTask extends Task {
     public RemoteProject getRemoteNonNullProject() {
         throw new UnsupportedOperationException();
     }
+
+    @NonNull
+    @Override
+    public Task updateProject(@NonNull Context context, @NonNull ExactTimeStamp now, @Nullable String projectId) {
+        if (TextUtils.isEmpty(projectId)) {
+            return this;
+        } else {
+            return mDomainFactory.convertLocalToRemote(context, now, this, projectId);
+        }
+    }
 }

@@ -1244,14 +1244,14 @@ public class DomainFactory {
     }
 
     @NonNull
-    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
+    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        task = task.updateFriends(new HashSet<>(friendIds), context, now);
+        task = task.updateProject(context, now, projectId);
 
         task.setName(name, note);
 
@@ -1272,7 +1272,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1281,7 +1281,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, friendIds);
+        return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, projectId);
     }
 
     public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {
@@ -2040,6 +2040,55 @@ public class DomainFactory {
             Assert.assertTrue(childRemoteTask != null);
 
             RemoteTaskHierarchy remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId());
+            localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
+        }
+
+        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+            Stream.of(pair.second)
+                    .forEach(LocalInstance::delete);
+
+            pair.first.delete();
+        }
+
+        RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(startingLocalTask.getId());
+        Assert.assertTrue(remoteTask != null);
+
+        return remoteTask;
+    }
+
+    @NonNull
+    public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull String projectId) {
+        Assert.assertTrue(!TextUtils.isEmpty(projectId));
+
+        Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mUserData != null);
+
+        LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
+        mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask);
+
+        updateNotifications(context, true, now, Stream.of(localToRemoteConversion.mLocalTasks.values())
+                .map(pair -> pair.first.getTaskKey())
+                .collect(Collectors.toList()));
+
+        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+
+        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+            Assert.assertTrue(pair != null);
+
+            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, pair.second, now);
+            localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
+        }
+
+        for (LocalTaskHierarchy localTaskHierarchy : localToRemoteConversion.mLocalTaskHierarchies) {
+            Assert.assertTrue(localTaskHierarchy != null);
+
+            RemoteTask parentRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getParentTaskId());
+            Assert.assertTrue(parentRemoteTask != null);
+
+            RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
+            Assert.assertTrue(childRemoteTask != null);
+
+            RemoteTaskHierarchy remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, parentRemoteTask.getId(), childRemoteTask.getId());
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 

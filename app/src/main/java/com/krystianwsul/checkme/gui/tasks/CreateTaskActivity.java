@@ -346,13 +346,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     if (hasValueParentInGeneral())
                         projectId = ((CreateTaskLoader.ProjectParentKey) mParent.mParentKey).mProjectId;
 
-                    // todo parent project
-
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskKey, name, getScheduleDatas(), mNote, mFriendIds);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskKey, name, getScheduleDatas(), mNote, projectId);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -364,12 +362,14 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskKeys.size() > 1);
 
+                        // todo parent project
                         DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData.DataId, name, getScheduleDatas(), mTaskKeys, mNote, mFriendIds);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
+                        // todo parent project
                         DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote, mFriendIds);
 
                         finish();

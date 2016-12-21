@@ -728,7 +728,7 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.keySet().iterator().next().mScheduleKey.ScheduleTimePair.mHourMinute.equals(hour5));
 
         CreateTaskLoader.SingleScheduleData secondScheduleData = new CreateTaskLoader.SingleScheduleData(date, new TimePair(hour6));
-        domainFactory.updateScheduleTask(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), dataId, task.getTaskKey(), task.getName(), Collections.singletonList(secondScheduleData), task.getNote(), new ArrayList<>());
+        domainFactory.updateScheduleTask(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), dataId, task.getTaskKey(), task.getName(), Collections.singletonList(secondScheduleData), task.getNote(), null);
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.keySet().iterator().next().mScheduleKey.ScheduleTimePair.mHourMinute.equals(hour6));

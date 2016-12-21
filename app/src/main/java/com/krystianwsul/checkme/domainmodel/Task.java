@@ -46,8 +46,9 @@ public abstract class Task {
     @NonNull
     public abstract String getName();
 
+    @SuppressWarnings("WeakerAccess")
     @Nullable
-    public String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
+    protected String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         List<Schedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
@@ -127,7 +128,8 @@ public abstract class Task {
                 .collect(Collectors.toList());
     }
 
-    public boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    @SuppressWarnings("WeakerAccess")
+    protected boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return (getParentTask(exactTimeStamp) == null);
@@ -326,4 +328,7 @@ public abstract class Task {
 
     @NonNull
     public abstract RemoteProject getRemoteNonNullProject();
+
+    @NonNull
+    public abstract Task updateProject(@NonNull Context context, @NonNull ExactTimeStamp now, @Nullable String projectId);
 }

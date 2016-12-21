@@ -183,6 +183,51 @@ public class RemoteProject {
     }
 
     @NonNull
+    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Collection<LocalInstance> localInstances, @NonNull ExactTimeStamp now) {
+        Long endTime = (localTask.getEndExactTimeStamp() != null ? localTask.getEndExactTimeStamp().getLong() : null);
+
+        Date oldestVisible = localTask.getOldestVisible();
+        Integer oldestVisibleYear;
+        Integer oldestVisibleMonth;
+        Integer oldestVisibleDay;
+        if (oldestVisible != null) {
+            oldestVisibleYear = oldestVisible.getYear();
+            oldestVisibleMonth = oldestVisible.getMonth();
+            oldestVisibleDay = oldestVisible.getDay();
+        } else {
+            oldestVisibleYear = null;
+            oldestVisibleMonth = null;
+            oldestVisibleDay = null;
+        }
+
+        Map<String, InstanceJson> instanceJsons = new HashMap<>();
+        for (LocalInstance localInstance : localInstances) {
+            Assert.assertTrue(localInstance.getTaskId() == localTask.getId());
+
+            InstanceJson instanceJson = getInstanceJson(localInstance, getRecordOf(), now);
+            ScheduleKey scheduleKey = localInstance.getScheduleKey();
+
+            instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), scheduleKey), instanceJson);
+        }
+
+        TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote(), instanceJsons);
+        RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(mDomainFactory, taskJson);
+
+        RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord);
+        Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
+
+        mRemoteTasks.put(remoteTask.getId(), remoteTask);
+
+        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(localTask.getSchedules())
+                .map(Schedule::getScheduleData)
+                .collect(Collectors.toList());
+
+        remoteTask.createSchedules(now, scheduleDatas);
+
+        return remoteTask;
+    }
+
+    @NonNull
     private InstanceJson getInstanceJson(@NonNull LocalInstance localInstance, @NonNull Set<String> recordOf, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(!recordOf.isEmpty());
 
@@ -231,6 +276,23 @@ public class RemoteProject {
         Assert.assertTrue(!TextUtils.isEmpty(remoteParentTaskId));
         Assert.assertTrue(!TextUtils.isEmpty(remoteChildTaskId));
         Assert.assertTrue(!recordOf.isEmpty());
+
+        Long endTime = (localTaskHierarchy.getEndExactTimeStamp() != null ? localTaskHierarchy.getEndExactTimeStamp().getLong() : null);
+
+        TaskHierarchyJson taskHierarchyJson = new TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, localTaskHierarchy.getStartExactTimeStamp().getLong(), endTime);
+        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson);
+
+        RemoteTaskHierarchy remoteTaskHierarchy = new RemoteTaskHierarchy(mDomainFactory, this, remoteTaskHierarchyRecord);
+
+        mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy);
+
+        return remoteTaskHierarchy;
+    }
+
+    @NonNull
+    public RemoteTaskHierarchy copyLocalTaskHierarchy(@NonNull LocalTaskHierarchy localTaskHierarchy, @NonNull String remoteParentTaskId, @NonNull String remoteChildTaskId) {
+        Assert.assertTrue(!TextUtils.isEmpty(remoteParentTaskId));
+        Assert.assertTrue(!TextUtils.isEmpty(remoteChildTaskId));
 
         Long endTime = (localTaskHierarchy.getEndExactTimeStamp() != null ? localTaskHierarchy.getEndExactTimeStamp().getLong() : null);
 

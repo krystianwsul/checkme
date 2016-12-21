@@ -805,7 +805,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @Override
         public int compareTo(@NonNull SortKey sortKey) {
             if (sortKey instanceof TaskSortKey)
-                return -1;
+                return 1;
 
             Assert.assertTrue(sortKey instanceof ProjectSortKey);
 
@@ -851,7 +851,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @Override
         public int compareTo(@NonNull SortKey sortKey) {
             if (sortKey instanceof ProjectSortKey)
-                return 1;
+                return -1;
 
             Assert.assertTrue(sortKey instanceof TaskSortKey);
 

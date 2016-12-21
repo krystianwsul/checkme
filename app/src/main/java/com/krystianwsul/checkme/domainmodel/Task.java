@@ -47,7 +47,7 @@ public abstract class Task {
     public abstract String getName();
 
     @Nullable
-    String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
+    public String getScheduleText(@NonNull Context context, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         List<Schedule> currentSchedules = getCurrentSchedules(exactTimeStamp);
@@ -127,7 +127,7 @@ public abstract class Task {
                 .collect(Collectors.toList());
     }
 
-    boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
+    public boolean isRootTask(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
         return (getParentTask(exactTimeStamp) == null);

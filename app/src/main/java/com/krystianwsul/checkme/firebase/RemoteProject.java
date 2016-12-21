@@ -222,7 +222,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    Collection<RemoteTask> getRemoteTasks() {
+    public Collection<RemoteTask> getRemoteTasks() {
         return mRemoteTasks.values();
     }
 

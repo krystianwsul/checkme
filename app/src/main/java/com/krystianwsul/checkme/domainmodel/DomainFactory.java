@@ -1963,7 +1963,32 @@ public class DomainFactory {
 
     @NonNull
     private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getParentTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
-        return getTasks()
+        Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> parentTreeDatas = new HashMap<>();
+
+        parentTreeDatas.putAll(Stream.of(mLocalFactory.getTasks())
+                .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
+                .filter(task -> task.current(now))
+                .filter(task -> task.isVisible(now))
+                .filter(task -> task.isRootTask(now))
+                .collect(Collectors.toMap(task -> new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.TaskSortKey(task.getStartExactTimeStamp())))));
+
+        if (mRemoteFactory != null) {
+            parentTreeDatas.putAll(Stream.of(mRemoteFactory.getRemoteProjects())
+                    .collect(Collectors.toMap(remoteProject -> new CreateTaskLoader.ProjectParentKey(remoteProject.getId()), remoteProject -> {
+                        String users = Stream.of(remoteProject.getUsers())
+                                .map(RemoteUser::getName)
+                                .collect(Collectors.joining(", "));
+
+                        return new CreateTaskLoader.ParentTreeData(remoteProject.getName(), getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys), new CreateTaskLoader.ProjectParentKey(remoteProject.getId()), users, null, new CreateTaskLoader.ProjectSortKey(remoteProject.getId()));
+                    })));
+        }
+
+        return parentTreeDatas;
+    }
+
+    @NonNull
+    private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getProjectTaskTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull RemoteProject remoteProject, @NonNull List<TaskKey> excludedTaskKeys) {
+        return Stream.of(remoteProject.getRemoteTasks())
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))

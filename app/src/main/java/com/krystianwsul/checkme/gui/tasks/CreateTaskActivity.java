@@ -857,6 +857,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         if (mData == null)
             return false;
 
+        // todo parent picker modified note didn't get checked
+
         Assert.assertTrue(mFriendIds != null);
         Assert.assertTrue(!hasValueParentTask() || !hasValueSchedule());
 

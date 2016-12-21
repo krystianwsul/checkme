@@ -812,6 +812,7 @@ public class DomainFactory {
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
         CreateTaskLoader.TaskData taskData = null;
+        Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> parentTreeDatas;
         if (taskKey != null) {
             Task task = getTaskForce(taskKey);
 
@@ -821,15 +822,7 @@ public class DomainFactory {
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
 
-                if (task instanceof RemoteTask) {
-                    RemoteTask remoteTask = (RemoteTask) task;
-
-                    parentKey = new CreateTaskLoader.ProjectParentKey(remoteTask.getRemoteProject().getId());
-                } else {
-                    Assert.assertTrue(task instanceof LocalTask);
-
-                    parentKey = null;
-                }
+                parentKey = null;
 
                 if (!schedules.isEmpty()) {
                     scheduleDatas = new ArrayList<>();
@@ -921,9 +914,19 @@ public class DomainFactory {
             }
 
             taskData = new CreateTaskLoader.TaskData(task.getName(), parentKey, scheduleDatas, task.getNote(), friends);
-        }
 
-        Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
+            if (task instanceof RemoteTask) {
+                RemoteTask remoteTask = (RemoteTask) task;
+
+                parentTreeDatas = getProjectTaskTreeDatas(context, now, remoteTask.getRemoteProject(), excludedTaskKeys);
+            } else {
+                Assert.assertTrue(task instanceof LocalTask);
+
+                parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
+            }
+        } else {
+            parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
+        }
 
         @SuppressLint("UseSparseArrays") HashMap<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes.values())

@@ -150,11 +150,18 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         @Override
         protected void onSecondAdded() {
-            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(true);
-            mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(false);
-
             List<TreeNode> selectedNodes = mTreeViewAdapter.getSelectedNodes();
             Assert.assertTrue(!selectedNodes.isEmpty());
+
+            long projectIdCount = Stream.of(selectedNodes)
+                    .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mChildTaskData.mTaskKey.mRemoteProjectId)
+                    .distinct()
+                    .count();
+
+            Assert.assertTrue(projectIdCount > 0);
+
+            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(projectIdCount == 1);
+            mActionMode.getMenu().findItem(R.id.action_task_edit).setVisible(false);
 
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
 
@@ -165,6 +172,15 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         protected void onOtherAdded() {
             List<TreeNode> selectedNodes = mTreeViewAdapter.getSelectedNodes();
             Assert.assertTrue(!selectedNodes.isEmpty());
+
+            long projectIdCount = Stream.of(selectedNodes)
+                    .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mChildTaskData.mTaskKey.mRemoteProjectId)
+                    .distinct()
+                    .count();
+
+            Assert.assertTrue(projectIdCount > 0);
+
+            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(projectIdCount == 1);
 
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
         }
@@ -190,6 +206,15 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         protected void onOtherRemoved() {
             List<TreeNode> selectedNodes = mTreeViewAdapter.getSelectedNodes();
             Assert.assertTrue(selectedNodes.size() > 1);
+
+            long projectIdCount = Stream.of(selectedNodes)
+                    .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()).mChildTaskData.mTaskKey.mRemoteProjectId)
+                    .distinct()
+                    .count();
+
+            Assert.assertTrue(projectIdCount > 0);
+
+            mActionMode.getMenu().findItem(R.id.action_task_join).setVisible(projectIdCount == 1);
 
             mActionMode.getMenu().findItem(R.id.action_task_delete).setVisible(!containsLoop(selectedNodes));
         }

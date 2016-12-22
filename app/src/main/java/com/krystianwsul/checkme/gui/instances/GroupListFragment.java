@@ -400,7 +400,14 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 menu.findItem(R.id.action_group_add_task).setVisible(false);
 
                 if (Stream.of(instanceDatas).allMatch(instanceData -> instanceData.TaskCurrent)) {
-                    menu.findItem(R.id.action_group_join).setVisible(true);
+                    long projectIdCount = Stream.of(instanceDatas)
+                            .map(instanceData -> instanceData.InstanceKey.mTaskKey.mRemoteProjectId)
+                            .distinct()
+                            .count();
+
+                    Assert.assertTrue(projectIdCount > 0);
+
+                    menu.findItem(R.id.action_group_join).setVisible(projectIdCount == 1);
                     menu.findItem(R.id.action_group_delete_task).setVisible(!containsLoop(instanceDatas));
                 } else {
                     menu.findItem(R.id.action_group_join).setVisible(false);

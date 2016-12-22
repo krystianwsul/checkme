@@ -27,19 +27,19 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     @Nullable
     private final TaskKey mTaskKey;
 
-    @NonNull
-    private final List<TaskKey> mExcludedTaskKeys;
+    @Nullable
+    private final List<TaskKey> mJoinTaskKeys;
 
-    public CreateTaskLoader(@NonNull Context context, @Nullable TaskKey taskKey, @NonNull List<TaskKey> excludedTaskKeys) {
+    public CreateTaskLoader(@NonNull Context context, @Nullable TaskKey taskKey, @Nullable List<TaskKey> joinTaskKeys) {
         super(context, needsFirebase(taskKey));
 
         mTaskKey = taskKey;
-        mExcludedTaskKeys = excludedTaskKeys;
+        mJoinTaskKeys = joinTaskKeys;
     }
 
     @Override
     String getName() {
-        return "CreateTaskLoader, taskKey: " + mTaskKey + ", excludedTaskKeys: " + mExcludedTaskKeys;
+        return "CreateTaskLoader, taskKey: " + mTaskKey + ", excludedTaskKeys: " + mJoinTaskKeys;
     }
 
     @NonNull
@@ -53,7 +53,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
     @Override
     public Data loadDomain(@NonNull DomainFactory domainFactory) {
-        return domainFactory.getCreateTaskData(mTaskKey, getContext(), mExcludedTaskKeys);
+        return domainFactory.getCreateTaskData(mTaskKey, getContext(), mJoinTaskKeys);
     }
 
     public interface ScheduleData {

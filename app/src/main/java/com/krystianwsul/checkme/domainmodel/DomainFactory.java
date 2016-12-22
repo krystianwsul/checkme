@@ -801,15 +801,23 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized CreateTaskLoader.Data getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
+    public synchronized CreateTaskLoader.Data getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getCreateTaskData");
+
+        Assert.assertTrue(taskKey == null || joinTaskKeys == null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Map<CustomTimeKey, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
+
+        List<TaskKey> excludedTaskKeys = new ArrayList<>();
+        if (taskKey != null)
+            excludedTaskKeys.add(taskKey);
+        else if (joinTaskKeys != null)
+            excludedTaskKeys.addAll(joinTaskKeys);
 
         CreateTaskLoader.TaskData taskData = null;
         Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> parentTreeDatas;
@@ -925,7 +933,29 @@ public class DomainFactory {
                 parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
             }
         } else {
-            parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
+            String projectId = null;
+            if (joinTaskKeys != null) {
+                Assert.assertTrue(joinTaskKeys.size() > 1);
+
+                List<String> projectIds = Stream.of(joinTaskKeys)
+                        .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+                        .distinct()
+                        .collect(Collectors.toList());
+
+                Assert.assertTrue(projectIds.size() == 1);
+
+                projectId = projectIds.get(0);
+            }
+
+            if (!TextUtils.isEmpty(projectId)) {
+                Assert.assertTrue(mRemoteFactory != null);
+
+                RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
+
+                parentTreeDatas = getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys);
+            } else {
+                parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
+            }
         }
 
         @SuppressLint("UseSparseArrays") HashMap<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();

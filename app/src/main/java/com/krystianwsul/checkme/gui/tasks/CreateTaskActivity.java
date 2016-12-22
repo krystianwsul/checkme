@@ -579,18 +579,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     @Override
     public Loader<CreateTaskLoader.Data> onCreateLoader(int id, Bundle args) {
-        List<TaskKey> excludedTaskKeys = new ArrayList<>();
-
-        if (mTaskKey != null) {
-            Assert.assertTrue(mTaskKeys == null);
-            Assert.assertTrue(mParentTaskKeyHint == null);
-
-            excludedTaskKeys.add(mTaskKey);
-        } else if (mTaskKeys != null) {
-            excludedTaskKeys.addAll(mTaskKeys);
-        }
-
-        return new CreateTaskLoader(this, mTaskKey, excludedTaskKeys);
+        return new CreateTaskLoader(this, mTaskKey, mTaskKeys);
     }
 
     @Override

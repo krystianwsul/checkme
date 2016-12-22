@@ -411,13 +411,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     if (hasValueParentInGeneral())
                         projectId = ((CreateTaskLoader.ProjectParentKey) mParent.mParentKey).mProjectId;
 
-                    // todo parent project
-
                     if (mTaskKey != null) {
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskKey, name, mNote, mFriendIds);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskKey, name, mNote, projectId);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -428,12 +426,14 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else if (mTaskKeys != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
+                        // todo parent project
                         DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskKeys, mNote, mFriendIds);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
+                        // todo parent project
                         DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote, mFriendIds);
 
                         finish();

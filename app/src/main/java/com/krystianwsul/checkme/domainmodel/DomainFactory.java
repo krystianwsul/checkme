@@ -1610,7 +1610,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.updateRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1621,7 +1621,7 @@ public class DomainFactory {
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        task = task.updateFriends(new HashSet<>(friendIds), context, now);
+        task = task.updateProject(context, now, projectId);
 
         task.setName(name, note);
 

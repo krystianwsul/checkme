@@ -1214,17 +1214,17 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
+    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
         Task task;
-        if (friendIds.isEmpty()) {
+        if (TextUtils.isEmpty(projectId)) {
             task = mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, friendIds);
+            task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, projectId);
         }
 
         updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
@@ -1234,13 +1234,13 @@ public class DomainFactory {
         return task;
     }
 
-    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, friendIds);
+        createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, projectId);
     }
 
     @NonNull
@@ -1538,16 +1538,16 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) {
+    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task task;
-        if (friendIds.isEmpty()) {
+        if (TextUtils.isEmpty(projectId)) {
             task = mLocalFactory.createLocalTaskHelper(this, name, now, note);
         } else {
             Assert.assertTrue(mRemoteFactory != null);
 
-            task = mRemoteFactory.createRemoteTaskHelper(now, name, note, friendIds);
+            task = mRemoteFactory.createRemoteTaskHelper(now, name, note, projectId);
         }
 
         updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
@@ -1557,13 +1557,13 @@ public class DomainFactory {
         return task;
     }
 
-    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createRootTask(context, now, dataId, name, note, friendIds);
+        createRootTask(context, now, dataId, name, note, projectId);
     }
 
     public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {

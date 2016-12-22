@@ -69,6 +69,15 @@ public class RemoteFactory {
     }
 
     @NonNull
+    public RemoteTask createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull String projectId) {
+        RemoteTask remoteTask = createRemoteTaskHelper(now, name, note, projectId);
+
+        remoteTask.createSchedules(now, scheduleDatas);
+
+        return remoteTask;
+    }
+
+    @NonNull
     private String getProjectName(@NonNull Set<String> recordOf) {
         Assert.assertTrue(mDomainFactory.getFriends() != null);
 
@@ -97,6 +106,13 @@ public class RemoteFactory {
         recordOf.add(mUserData.getKey());
 
         return getRemoteProjectForce(recordOf, now).newRemoteTask(taskJson);
+    }
+
+    @NonNull
+    public RemoteTask createRemoteTaskHelper(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull String projectId) {
+        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
+
+        return getRemoteProjectForce(projectId).newRemoteTask(taskJson);
     }
 
     @NonNull

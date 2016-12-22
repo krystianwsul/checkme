@@ -369,8 +369,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        // todo parent project
-                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote, mFriendIds);
+                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote, projectId);
 
                         finish();
                     }
@@ -433,8 +432,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        // todo parent project
-                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote, mFriendIds);
+                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote, projectId);
 
                         finish();
                     }

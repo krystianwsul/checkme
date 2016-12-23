@@ -1356,7 +1356,7 @@ public class DomainFactory {
         }
 
         joinTasks = Stream.of(joinTasks)
-                .map(joinTask -> joinTask.updateProject(context, now, finalProjectId))
+                .map(joinTask -> joinTask.updateProject(context, now, projectId))
                 .collect(Collectors.toList());
 
         joinTasks(newParentTask, joinTasks, now);
@@ -1649,7 +1649,7 @@ public class DomainFactory {
         }
 
         joinTasks = Stream.of(joinTasks)
-                .map(joinTask -> joinTask.updateProject(context, now, finalProjectId))
+                .map(joinTask -> joinTask.updateProject(context, now, projectId))
                 .collect(Collectors.toList());
 
         joinTasks(newParentTask, joinTasks, now);

@@ -909,19 +909,7 @@ public class DomainFactory {
                 parentKey = new CreateTaskLoader.TaskParentKey(parentTask.getTaskKey());
             }
 
-            Map<String, CreateTaskLoader.UserData> friends;
-            if (task.getRecordOf().isEmpty() || (parentKey != null)) {
-                friends = new HashMap<>();
-            } else {
-                Assert.assertTrue(mUserData != null);
-
-                friends = Stream.of(task.getRemoteNonNullProject().getUsers())
-                        .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
-                        .map(remoteUser -> new CreateTaskLoader.UserData(remoteUser.getId(), remoteUser.getName(), remoteUser.getEmail()))
-                        .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
-            }
-
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentKey, scheduleDatas, task.getNote(), friends);
+            taskData = new CreateTaskLoader.TaskData(task.getName(), parentKey, scheduleDatas, task.getNote());
 
             if (task instanceof RemoteTask) {
                 RemoteTask remoteTask = (RemoteTask) task;
@@ -962,19 +950,7 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        Map<String, CreateTaskLoader.UserData> friends;
-        boolean connected;
-        if (mFriends != null) {
-            friends = Stream.of(mFriends.values())
-                    .map(userData -> new CreateTaskLoader.UserData(userData.getKey(), userData.getDisplayName(), userData.getEmail()))
-                    .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
-            connected = true;
-        } else {
-            friends = new HashMap<>();
-            connected = false;
-        }
-
-        return new CreateTaskLoader.Data(taskData, parentTreeDatas, customTimeDatas, friends, connected);
+        return new CreateTaskLoader.Data(taskData, parentTreeDatas, customTimeDatas);
     }
 
     @NonNull

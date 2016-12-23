@@ -70,19 +70,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @NonNull
         public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
 
-        @NonNull
-        public final Map<String, UserData> mFriends;
-
-        public final boolean mConnected;
-
-        public Data(@Nullable TaskData taskData, @NonNull Map<ParentKey, ParentTreeData> parentTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, @NonNull Map<String, UserData> friends, boolean connected) {
-            Assert.assertTrue(connected || friends.isEmpty());
-
+        public Data(@Nullable TaskData taskData, @NonNull Map<ParentKey, ParentTreeData> parentTreeDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas) {
             TaskData = taskData;
             mParentTreeDatas = parentTreeDatas;
             CustomTimeDatas = customTimeDatas;
-            mFriends = friends;
-            mConnected = connected;
         }
 
         @Override
@@ -92,8 +83,6 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 hash += TaskData.hashCode();
             hash += mParentTreeDatas.hashCode();
             hash += CustomTimeDatas.hashCode();
-            hash += mFriends.hashCode();
-            hash += (mConnected ? 1 : 0);
             return hash;
         }
 
@@ -123,12 +112,6 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if (!CustomTimeDatas.equals(data.CustomTimeDatas))
                 return false;
 
-            if (!mFriends.equals(data.mFriends))
-                return false;
-
-            if (mConnected != data.mConnected)
-                return false;
-
             return true;
         }
     }
@@ -146,17 +129,13 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @Nullable
         public final String mNote;
 
-        @NonNull
-        public final Map<String, UserData> mFriends;
-
-        public TaskData(@NonNull String name, @Nullable ParentKey parentKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @NonNull Map<String, UserData> friends) {
+        public TaskData(@NonNull String name, @Nullable ParentKey parentKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;
             mParentKey = parentKey;
             ScheduleDatas = scheduleDatas;
             mNote = note;
-            mFriends = friends;
         }
 
         @Override
@@ -174,7 +153,6 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             }
             if (!TextUtils.isEmpty(mNote))
                 hash += mNote.hashCode();
-            hash += mFriends.hashCode();
             return hash;
         }
 
@@ -211,61 +189,6 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
                 return false;
 
             if (!TextUtils.isEmpty(mNote) && !mNote.equals(taskData.mNote))
-                return false;
-
-            if (!mFriends.equals(taskData.mFriends))
-                return false;
-
-            return true;
-        }
-    }
-
-    public static class UserData {
-        @NonNull
-        public final String mId;
-
-        @NonNull
-        public final String mName;
-
-        @NonNull
-        public final String mEmail;
-
-        public UserData(@NonNull String id, @NonNull String name, @NonNull String email) {
-            Assert.assertTrue(!TextUtils.isEmpty(id));
-            Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(!TextUtils.isEmpty(email));
-
-            mId = id;
-            mName = name;
-            mEmail = email;
-        }
-
-        @Override
-        public int hashCode() {
-            return (mId.hashCode() + mName.hashCode() + mEmail.hashCode());
-        }
-
-        @SuppressWarnings("RedundantIfStatement")
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
-                return false;
-
-            if (obj == this)
-                return true;
-
-            if (!(obj instanceof UserData))
-                return false;
-
-            UserData userData = (UserData) obj;
-
-            if (!mId.equals(userData.mId))
-                return false;
-
-            if (!mName.equals(userData.mName))
-                return false;
-
-            if (!mEmail.equals(userData.mEmail))
                 return false;
 
             return true;

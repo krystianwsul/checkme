@@ -772,6 +772,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             if (!mToolbarEditText.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
+            if (!mNote.equals(mData.TaskData.mNote))
+                return true;
+
             if (mData.TaskData.mParentKey != null) {
                 if (!hasValueParentInGeneral())
                     return true;
@@ -796,6 +799,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             }
         } else {
             if (!TextUtils.isEmpty(mToolbarEditText.getText()))
+                return true;
+
+            if (!TextUtils.isEmpty(mNote))
                 return true;
 
             if (mParentTaskKeyHint != null) {

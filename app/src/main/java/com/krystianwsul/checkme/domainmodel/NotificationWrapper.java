@@ -296,32 +296,35 @@ public abstract class NotificationWrapper {
 
         @Override
         public void cleanGroup(@NonNull Context context, @Nullable Integer lastNotificationId) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
-                return;
-
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            Assert.assertTrue(notificationManager != null);
-
-            StatusBarNotification[] statusBarNotifications = notificationManager.getActiveNotifications();
-
-            if (lastNotificationId != null) {
-                if (statusBarNotifications.length > 2) {
-                    cancelNotification(context, lastNotificationId);
-                } else {
-                    Assert.assertTrue(statusBarNotifications.length == 2);
-
-                    cancelNotification(context, 0);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                if (lastNotificationId != null) {
                     cancelNotification(context, lastNotificationId);
                 }
             } else {
-                if (statusBarNotifications.length != 1)
-                    return;
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                Assert.assertTrue(notificationManager != null);
 
-                Log.e("sadf", "cleaning group");
+                StatusBarNotification[] statusBarNotifications = notificationManager.getActiveNotifications();
 
-                Assert.assertTrue(statusBarNotifications[0].getId() == 0);
+                if (lastNotificationId != null) {
+                    if (statusBarNotifications.length > 2) {
+                        cancelNotification(context, lastNotificationId);
+                    } else {
+                        Assert.assertTrue(statusBarNotifications.length == 2);
 
-                cancelNotification(context, 0);
+                        cancelNotification(context, 0);
+                        cancelNotification(context, lastNotificationId);
+                    }
+                } else {
+                    if (statusBarNotifications.length != 1)
+                        return;
+
+                    Log.e("sadf", "cleaning group");
+
+                    Assert.assertTrue(statusBarNotifications[0].getId() == 0);
+
+                    cancelNotification(context, 0);
+                }
             }
         }
     }

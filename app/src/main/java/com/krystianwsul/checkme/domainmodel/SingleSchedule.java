@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -97,7 +98,7 @@ public class SingleSchedule extends Schedule {
     }
 
     @NonNull
-    private TimePair getTimePair() {
+    public TimePair getTimePair() {
         CustomTimeKey customTimeKey = mSingleScheduleBridge.getCustomTimeKey();
         Integer hour = mSingleScheduleBridge.getHour();
         Integer minute = mSingleScheduleBridge.getMinute();
@@ -116,7 +117,7 @@ public class SingleSchedule extends Schedule {
     }
 
     @NonNull
-    private Date getDate() {
+    public Date getDate() {
         return new Date(mSingleScheduleBridge.getYear(), mSingleScheduleBridge.getMonth(), mSingleScheduleBridge.getDay());
     }
 
@@ -157,5 +158,11 @@ public class SingleSchedule extends Schedule {
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
         return new CreateTaskLoader.SingleScheduleData(getDate(), getTimePair());
+    }
+
+    @NonNull
+    @Override
+    public ScheduleType getScheduleType() {
+        return ScheduleType.SINGLE;
     }
 }

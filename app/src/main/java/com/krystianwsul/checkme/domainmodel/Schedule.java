@@ -92,4 +92,7 @@ public abstract class Schedule {
     Pair<String, String> getRemoteCustomTimeKey() {
         return getScheduleBridge().getRemoteCustomTimeKey();
     }
+
+    @NonNull
+    public abstract ScheduleType getScheduleType();
 }

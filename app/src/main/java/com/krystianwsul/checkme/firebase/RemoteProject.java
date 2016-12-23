@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
@@ -22,7 +21,6 @@ import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteUserRecord;
-import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -34,7 +32,6 @@ import junit.framework.Assert;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -173,11 +170,7 @@ public class RemoteProject {
 
         mRemoteTasks.put(remoteTask.getId(), remoteTask);
 
-        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(localTask.getSchedules())
-                .map(Schedule::getScheduleData)
-                .collect(Collectors.toList());
-
-        remoteTask.createSchedules(now, scheduleDatas);
+        remoteTask.copySchedules(localTask.getSchedules());
 
         return remoteTask;
     }
@@ -218,11 +211,7 @@ public class RemoteProject {
 
         mRemoteTasks.put(remoteTask.getId(), remoteTask);
 
-        List<CreateTaskLoader.ScheduleData> scheduleDatas = Stream.of(localTask.getSchedules())
-                .map(Schedule::getScheduleData)
-                .collect(Collectors.toList());
-
-        remoteTask.createSchedules(now, scheduleDatas);
+        remoteTask.copySchedules(localTask.getSchedules());
 
         return remoteTask;
     }

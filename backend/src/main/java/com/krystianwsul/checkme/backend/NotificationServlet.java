@@ -98,6 +98,8 @@ public class NotificationServlet extends HttpServlet {
 
             resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(userKeys));
 
+            // todo use project.users
+
             for (String userKey : userKeys) {
                 Assert.assertTrue(!StringUtils.isEmpty(userKey));
 

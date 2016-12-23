@@ -228,32 +228,24 @@ public class RemoteProject {
         return remoteTaskHierarchy;
     }
 
-    public void updateRecordOf(@NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        mRemoteProjectRecord.updateRecordOf(addedFriends, removedFriends);
+    public void updateRecordOf(@NonNull Set<UserData> addedFriends, @NonNull Set<String> removedFriends) {
+        mRemoteProjectRecord.updateRecordOf(Stream.of(addedFriends)
+                .map(UserData::getKey)
+                .collect(Collectors.toSet()), removedFriends);
 
-        // todo user
+        for (UserData addedFriend : addedFriends) {
+            Assert.assertTrue(addedFriend != null);
 
-        Map<String, UserData> friends = mDomainFactory.getFriends();
-        Assert.assertTrue(friends != null);
-
-        for (String addedFriend : addedFriends) {
-            Assert.assertTrue(!mRemoteUsers.containsKey(addedFriend));
-
-            if (friends.containsKey(addedFriend)) {
-                UserData userData = friends.get(addedFriend);
-                Assert.assertTrue(userData != null);
-
-                addUserData(userData);
-            }
+            addUserData(addedFriend);
         }
 
         for (String removedFriend : removedFriends) {
-            if (mRemoteUsers.containsKey(removedFriend)) {
-                RemoteUser remoteUser = mRemoteUsers.get(removedFriend);
-                Assert.assertTrue(remoteUser != null);
+            Assert.assertTrue(mRemoteUsers.containsKey(removedFriend));
 
-                remoteUser.delete();
-            }
+            RemoteUser remoteUser = mRemoteUsers.get(removedFriend);
+            Assert.assertTrue(remoteUser != null);
+
+            remoteUser.delete();
         }
     }
 

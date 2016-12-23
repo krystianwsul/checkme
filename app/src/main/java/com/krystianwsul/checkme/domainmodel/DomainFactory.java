@@ -1708,13 +1708,16 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mFriends != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
 
         remoteProject.setName(name);
-        remoteProject.updateRecordOf(addedFriends, removedFriends);
+        remoteProject.updateRecordOf(Stream.of(addedFriends)
+                .map(mFriends::get)
+                .collect(Collectors.toSet()), removedFriends);
 
         updateNotificationsAndNotifyCloud(context, now, remoteProject);
 

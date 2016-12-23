@@ -759,8 +759,6 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         if (mData == null)
             return false;
 
-        // todo parent picker modified note didn't get checked
-
         Assert.assertTrue(!hasValueParentTask() || !hasValueSchedule());
 
         if (mTaskKey != null) {

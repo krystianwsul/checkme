@@ -362,8 +362,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskKeys.size() > 1);
 
-                        // todo parent project
-                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData.DataId, name, getScheduleDatas(), mTaskKeys, mNote, mFriendIds);
+                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData.DataId, name, getScheduleDatas(), mTaskKeys, mNote, projectId);
 
                         finish();
                     } else {
@@ -425,8 +424,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else if (mTaskKeys != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        // todo parent project
-                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskKeys, mNote, mFriendIds);
+                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskKeys, mNote, projectId);
 
                         finish();
                     } else {

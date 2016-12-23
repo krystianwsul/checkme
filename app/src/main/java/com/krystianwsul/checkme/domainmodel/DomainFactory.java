@@ -1314,7 +1314,7 @@ public class DomainFactory {
         return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, projectId);
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1322,31 +1322,41 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskKeys.size() > 1);
 
-        Set<String> mergedFriends = new HashSet<>(friendIds);
+        List<String> joinProjectIds = Stream.of(joinTaskKeys)
+                .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+                .distinct()
+                .collect(Collectors.toList());
+        Assert.assertTrue(joinProjectIds.size() == 1);
+
+        String joinProjectId = joinProjectIds.get(0);
+
+        final String finalProjectId;
+        if (!TextUtils.isEmpty(joinProjectId)) {
+            Assert.assertTrue(TextUtils.isEmpty(projectId));
+
+            finalProjectId = joinProjectId;
+        } else if (!TextUtils.isEmpty(projectId)) {
+            finalProjectId = projectId;
+        } else {
+            finalProjectId = null;
+        }
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTaskForce)
                 .collect(Collectors.toList());
 
-        for (Task task : joinTasks)
-            mergedFriends.addAll(task.getRecordOf());
-
         Task newParentTask;
-        if (!mergedFriends.isEmpty()) {
+        if (!TextUtils.isEmpty(finalProjectId)) {
             Assert.assertTrue(mRemoteFactory != null);
             Assert.assertTrue(mUserData != null);
 
-            mergedFriends.remove(mUserData.getKey());
-
-            newParentTask = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, mergedFriends);
+            newParentTask = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId);
         } else {
-            Assert.assertTrue(mergedFriends.isEmpty());
-
             newParentTask = mLocalFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
         }
 
         joinTasks = Stream.of(joinTasks)
-                .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
+                .map(joinTask -> joinTask.updateProject(context, now, finalProjectId))
                 .collect(Collectors.toList());
 
         joinTasks(newParentTask, joinTasks, now);
@@ -1596,7 +1606,7 @@ public class DomainFactory {
         createRootTask(context, now, dataId, name, note, projectId);
     }
 
-    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @NonNull List<String> friendIds) {
+    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createJoinRootTask");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
 
@@ -1605,31 +1615,41 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Set<String> mergedFriends = new HashSet<>(friendIds);
+        List<String> joinProjectIds = Stream.of(joinTaskKeys)
+                .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+                .distinct()
+                .collect(Collectors.toList());
+        Assert.assertTrue(joinProjectIds.size() == 1);
+
+        String joinProjectId = joinProjectIds.get(0);
+
+        final String finalProjectId;
+        if (!TextUtils.isEmpty(joinProjectId)) {
+            Assert.assertTrue(TextUtils.isEmpty(projectId));
+
+            finalProjectId = joinProjectId;
+        } else if (!TextUtils.isEmpty(projectId)) {
+            finalProjectId = projectId;
+        } else {
+            finalProjectId = null;
+        }
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTaskForce)
                 .collect(Collectors.toList());
 
-        for (Task task : joinTasks)
-            mergedFriends.addAll(task.getRecordOf());
-
         Task newParentTask;
-        if (!mergedFriends.isEmpty()) {
+        if (!TextUtils.isEmpty(finalProjectId)) {
             Assert.assertTrue(mRemoteFactory != null);
             Assert.assertTrue(mUserData != null);
 
-            mergedFriends.remove(mUserData.getKey());
-
-            newParentTask = mRemoteFactory.createRemoteTaskHelper(now, name, note, mergedFriends);
+            newParentTask = mRemoteFactory.createRemoteTaskHelper(now, name, note, finalProjectId);
         } else {
-            Assert.assertTrue(mergedFriends.isEmpty());
-
             newParentTask = mLocalFactory.createLocalTaskHelper(this, name, now, note);
         }
 
         joinTasks = Stream.of(joinTasks)
-                .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
+                .map(joinTask -> joinTask.updateProject(context, now, finalProjectId))
                 .collect(Collectors.toList());
 
         joinTasks(newParentTask, joinTasks, now);

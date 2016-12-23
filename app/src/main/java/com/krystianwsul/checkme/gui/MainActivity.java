@@ -456,7 +456,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         Assert.assertTrue(headerView != null);
 
         headerView.setOnLongClickListener(v -> {
-            mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_projects).setVisible(true);
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_debug).setVisible(true);
             return true;
         });

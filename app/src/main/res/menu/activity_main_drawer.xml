@@ -14,8 +14,7 @@
         <item
             android:id="@+id/main_drawer_projects"
             android:title="@string/projects"
-            android:icon="@drawable/ic_group_work_black_24dp"
-            android:visible="false"/>
+            android:icon="@drawable/ic_group_work_black_24dp"/>
         <item
             android:id="@+id/main_drawer_custom_times"
             android:title="@string/times"

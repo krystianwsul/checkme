@@ -1378,19 +1378,14 @@ public class DomainFactory {
         Task parentTask = getTaskForce(parentTaskKey);
         Assert.assertTrue(parentTask.current(now));
 
-        Set<String> mergedFriends = new HashSet<>(parentTask.getRecordOf());
+        List<String> joinProjectIds = Stream.of(joinTaskKeys)
+                .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+                .distinct()
+                .collect(Collectors.toList());
+        Assert.assertTrue(joinProjectIds.size() == 1);
 
         List<Task> joinTasks = Stream.of(joinTaskKeys)
                 .map(this::getTaskForce)
-                .collect(Collectors.toList());
-
-        for (Task task : joinTasks)
-            mergedFriends.addAll(task.getRecordOf());
-
-        parentTask = parentTask.updateFriends(mergedFriends, context, now);
-
-        joinTasks = Stream.of(joinTasks)
-                .map(joinTask -> joinTask.updateFriends(mergedFriends, context, now))
                 .collect(Collectors.toList());
 
         Task childTask = parentTask.createChildTask(now, name, note);
@@ -1414,17 +1409,6 @@ public class DomainFactory {
 
         Task newParentTask = getTaskForce(parentTaskKey);
         Assert.assertTrue(task.current(now));
-
-        Set<String> mergedFriends = new HashSet<>(task.getRecordOf());
-        mergedFriends.addAll(newParentTask.getRecordOf());
-        if (mUserData != null) {
-            mergedFriends.remove(mUserData.getKey());
-        } else {
-            Assert.assertTrue(mergedFriends.isEmpty());
-        }
-
-        task = task.updateFriends(new HashSet<>(mergedFriends), context, now);
-        newParentTask = newParentTask.updateFriends(mergedFriends, context, now);
 
         task.setName(name, note);
 
@@ -2034,55 +2018,6 @@ public class DomainFactory {
     }
 
     @NonNull
-    public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull Set<String> recordOf) {
-        Assert.assertTrue(mRemoteFactory != null);
-        Assert.assertTrue(mUserData != null);
-
-        recordOf.add(mUserData.getKey());
-
-        LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
-        mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask);
-
-        updateNotifications(context, true, now, Stream.of(localToRemoteConversion.mLocalTasks.values())
-                .map(pair -> pair.first.getTaskKey())
-                .collect(Collectors.toList()));
-
-        RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(recordOf, now);
-
-        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
-            Assert.assertTrue(pair != null);
-
-            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, recordOf, pair.second, now);
-            localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
-        }
-
-        for (LocalTaskHierarchy localTaskHierarchy : localToRemoteConversion.mLocalTaskHierarchies) {
-            Assert.assertTrue(localTaskHierarchy != null);
-
-            RemoteTask parentRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getParentTaskId());
-            Assert.assertTrue(parentRemoteTask != null);
-
-            RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
-            Assert.assertTrue(childRemoteTask != null);
-
-            RemoteTaskHierarchy remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, recordOf, parentRemoteTask.getId(), childRemoteTask.getId());
-            localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
-        }
-
-        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
-            Stream.of(pair.second)
-                    .forEach(LocalInstance::delete);
-
-            pair.first.delete();
-        }
-
-        RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(startingLocalTask.getId());
-        Assert.assertTrue(remoteTask != null);
-
-        return remoteTask;
-    }
-
-    @NonNull
     public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
 
@@ -2101,7 +2036,7 @@ public class DomainFactory {
         for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
             Assert.assertTrue(pair != null);
 
-            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, pair.second, now);
+            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, pair.second);
             localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
         }
 

@@ -23,7 +23,6 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -142,22 +141,6 @@ public class LocalTask extends Task {
     @Override
     public Collection<Schedule> getSchedules() {
         return mSchedules;
-    }
-
-    @NonNull
-    @Override
-    public Set<String> getRecordOf() {
-        return new HashSet<>();
-    }
-
-    @NonNull
-    @Override
-    protected Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now) {
-        if (friends.isEmpty()) {
-            return this;
-        } else {
-            return mDomainFactory.convertLocalToRemote(context, now, this, friends);
-        }
     }
 
     @Override

@@ -100,11 +100,6 @@ public class RemoteProject {
         return mRemoteProjectRecord.getName();
     }
 
-    @NonNull
-    Set<String> getRecordOf() {
-        return mRemoteProjectRecord.getRecordOf();
-    }
-
     @Nullable
     public ExactTimeStamp getEndExactTimeStamp() {
         if (mRemoteProjectRecord.getEndTime() == null)
@@ -134,49 +129,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Set<String> recordOf, @NonNull Collection<LocalInstance> localInstances, @NonNull ExactTimeStamp now) {
-        Long endTime = (localTask.getEndExactTimeStamp() != null ? localTask.getEndExactTimeStamp().getLong() : null);
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        Date oldestVisible = localTask.getOldestVisible();
-        Integer oldestVisibleYear;
-        Integer oldestVisibleMonth;
-        Integer oldestVisibleDay;
-        if (oldestVisible != null) {
-            oldestVisibleYear = oldestVisible.getYear();
-            oldestVisibleMonth = oldestVisible.getMonth();
-            oldestVisibleDay = oldestVisible.getDay();
-        } else {
-            oldestVisibleYear = null;
-            oldestVisibleMonth = null;
-            oldestVisibleDay = null;
-        }
-
-        Map<String, InstanceJson> instanceJsons = new HashMap<>();
-        for (LocalInstance localInstance : localInstances) {
-            Assert.assertTrue(localInstance.getTaskId() == localTask.getId());
-
-            InstanceJson instanceJson = getInstanceJson(localInstance, recordOf, now);
-            ScheduleKey scheduleKey = localInstance.getScheduleKey();
-
-            instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), scheduleKey), instanceJson);
-        }
-
-        TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote(), instanceJsons);
-        RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(mDomainFactory, taskJson);
-
-        RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord);
-        Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
-
-        mRemoteTasks.put(remoteTask.getId(), remoteTask);
-
-        remoteTask.copySchedules(localTask.getSchedules());
-
-        return remoteTask;
-    }
-
-    @NonNull
-    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Collection<LocalInstance> localInstances, @NonNull ExactTimeStamp now) {
+    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Collection<LocalInstance> localInstances) {
         Long endTime = (localTask.getEndExactTimeStamp() != null ? localTask.getEndExactTimeStamp().getLong() : null);
 
         Date oldestVisible = localTask.getOldestVisible();
@@ -197,7 +150,7 @@ public class RemoteProject {
         for (LocalInstance localInstance : localInstances) {
             Assert.assertTrue(localInstance.getTaskId() == localTask.getId());
 
-            InstanceJson instanceJson = getInstanceJson(localInstance, getRecordOf(), now);
+            InstanceJson instanceJson = getInstanceJson(localInstance);
             ScheduleKey scheduleKey = localInstance.getScheduleKey();
 
             instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), scheduleKey), instanceJson);
@@ -217,9 +170,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    private InstanceJson getInstanceJson(@NonNull LocalInstance localInstance, @NonNull Set<String> recordOf, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(!recordOf.isEmpty());
-
+    private InstanceJson getInstanceJson(@NonNull LocalInstance localInstance) {
         Long done = (localInstance.getDone() != null ? localInstance.getDone().getLong() : null);
 
         Date instanceDate = localInstance.getInstanceDate();
@@ -238,7 +189,7 @@ public class RemoteProject {
         } else {
             Assert.assertTrue(instanceTimePair.mCustomTimeKey != null);
 
-            instanceRemoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(instanceTimePair.mCustomTimeKey, recordOf, now);
+            instanceRemoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(instanceTimePair.mCustomTimeKey, this);
 
             instanceHour = null;
             instanceMinute = null;
@@ -258,24 +209,6 @@ public class RemoteProject {
     @NonNull
     public Collection<RemoteTask> getRemoteTasks() {
         return mRemoteTasks.values();
-    }
-
-    @NonNull
-    public RemoteTaskHierarchy copyLocalTaskHierarchy(@NonNull LocalTaskHierarchy localTaskHierarchy, @NonNull Set<String> recordOf, @NonNull String remoteParentTaskId, @NonNull String remoteChildTaskId) {
-        Assert.assertTrue(!TextUtils.isEmpty(remoteParentTaskId));
-        Assert.assertTrue(!TextUtils.isEmpty(remoteChildTaskId));
-        Assert.assertTrue(!recordOf.isEmpty());
-
-        Long endTime = (localTaskHierarchy.getEndExactTimeStamp() != null ? localTaskHierarchy.getEndExactTimeStamp().getLong() : null);
-
-        TaskHierarchyJson taskHierarchyJson = new TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, localTaskHierarchy.getStartExactTimeStamp().getLong(), endTime);
-        RemoteTaskHierarchyRecord remoteTaskHierarchyRecord = mRemoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson);
-
-        RemoteTaskHierarchy remoteTaskHierarchy = new RemoteTaskHierarchy(mDomainFactory, this, remoteTaskHierarchyRecord);
-
-        mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy);
-
-        return remoteTaskHierarchy;
     }
 
     @NonNull

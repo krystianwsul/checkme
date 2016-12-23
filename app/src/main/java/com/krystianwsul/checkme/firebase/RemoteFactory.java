@@ -26,7 +26,6 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,15 +59,6 @@ public class RemoteFactory {
     }
 
     @NonNull
-    public RemoteTask createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull Collection<String> friends) {
-        RemoteTask remoteTask = createRemoteTaskHelper(now, name, note, friends);
-
-        remoteTask.createSchedules(now, scheduleDatas);
-
-        return remoteTask;
-    }
-
-    @NonNull
     public RemoteTask createScheduleRootTask(@NonNull ExactTimeStamp now, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @NonNull String projectId) {
         RemoteTask remoteTask = createRemoteTaskHelper(now, name, note, projectId);
 
@@ -78,59 +68,13 @@ public class RemoteFactory {
     }
 
     @NonNull
-    private String getProjectName(@NonNull Set<String> recordOf) {
-        Assert.assertTrue(mDomainFactory.getFriends() != null);
-
-        Map<String, UserData> lookup = new HashMap<>(mDomainFactory.getFriends());
-        lookup.put(mUserData.getKey(), mUserData);
-
-        List<String> names = new ArrayList<>();
-        for (String key : recordOf) {
-            UserData userData = lookup.get(key);
-            Assert.assertTrue(userData != null); // todo what if one of the owners isn't a friend?
-
-            String first = userData.getDisplayName().split(" ")[0];
-            Assert.assertTrue(!TextUtils.isEmpty(first));
-
-            names.add(first);
-        }
-
-        return TextUtils.join("/", names);
-    }
-
-    @NonNull
-    public RemoteTask createRemoteTaskHelper(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull Collection<String> friends) {
-        TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
-
-        Set<String> recordOf = new HashSet<>(friends);
-        recordOf.add(mUserData.getKey());
-
-        return getRemoteProjectForce(recordOf, now).newRemoteTask(taskJson);
-    }
-
-    @NonNull
     public RemoteTask createRemoteTaskHelper(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull String projectId) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
 
         return getRemoteProjectForce(projectId).newRemoteTask(taskJson);
     }
 
-    @NonNull
-    public RemoteProject getRemoteProjectForce(@NonNull Set<String> recordOf, @NonNull ExactTimeStamp now) {
-        List<RemoteProject> matches = Stream.of(mRemoteProjects.values())
-                .filter(remoteProject -> remoteProject.getRecordOf().equals(recordOf))
-                .filter(remoteProject -> remoteProject.getEndExactTimeStamp() == null)
-                .collect(Collectors.toList());
-
-        if (!matches.isEmpty()) {
-            return matches.get(0);
-        } else {
-            return createRemoteProject(getProjectName(recordOf), now, recordOf);
-        }
-    }
-
-    @NonNull
-    public RemoteProject createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
+    public void createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Map<String, UserData> friends = mDomainFactory.getFriends();
@@ -165,8 +109,6 @@ public class RemoteFactory {
         Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
 
         mRemoteProjects.put(remoteProject.getId(), remoteProject);
-
-        return remoteProject;
     }
 
     public void save() {
@@ -185,16 +127,6 @@ public class RemoteFactory {
         return Stream.of(mRemoteProjects.values())
                 .map(RemoteProject::getRemoteTasks)
                 .flatMap(Stream::of);
-    }
-
-    @NonNull
-    String getRemoteCustomTimeId(@NonNull CustomTimeKey customTimeKey, @NonNull Set<String> recordOf, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
-        Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
-
-        RemoteProject remoteProject = getRemoteProjectForce(recordOf, now);
-
-        return getRemoteCustomTimeId(customTimeKey, remoteProject);
     }
 
     @NonNull
@@ -333,11 +265,6 @@ public class RemoteFactory {
         Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.mRemoteTaskId));
 
         return getRemoteProjectForce(childTaskKey).getTaskHierarchiesByChildTaskKey(childTaskKey);
-    }
-
-    @NonNull
-    UserData getUserData() {
-        return mUserData;
     }
 
     @NonNull

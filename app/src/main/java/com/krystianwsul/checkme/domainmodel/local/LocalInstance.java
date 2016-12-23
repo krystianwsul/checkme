@@ -77,7 +77,7 @@ public class LocalInstance extends Instance {
 
     @NonNull
     @Override
-    public Date getScheduleDate() {
+    protected Date getScheduleDate() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);

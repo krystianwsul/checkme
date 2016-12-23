@@ -280,12 +280,6 @@ public abstract class Task {
 
     public abstract void setName(@NonNull String name, @Nullable String note);
 
-    @NonNull
-    public abstract Set<String> getRecordOf();
-
-    @NonNull
-    protected abstract Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now);
-
     void updateSchedules(@NonNull List<CreateTaskLoader.ScheduleData> newScheduleDatas, @NonNull ExactTimeStamp now) {
         List<Schedule> removeSchedules = new ArrayList<>();
         List<CreateTaskLoader.ScheduleData> addScheduleDatas = new ArrayList<>(newScheduleDatas);

@@ -48,7 +48,7 @@ public class SaveService extends IntentService {
         }
     }
 
-    static void save(@NonNull SQLiteDatabase sqLiteDatabase, @NonNull List<InsertCommand> insertCommands, @NonNull List<UpdateCommand> updateCommands, @NonNull List<DeleteCommand> deleteCommands) {
+    private static void save(@NonNull SQLiteDatabase sqLiteDatabase, @NonNull List<InsertCommand> insertCommands, @NonNull List<UpdateCommand> updateCommands, @NonNull List<DeleteCommand> deleteCommands) {
         sqLiteDatabase.beginTransaction();
 
         try {

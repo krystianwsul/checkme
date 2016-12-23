@@ -135,12 +135,6 @@ public class RemoteTask extends Task {
         return new TaskKey(mRemoteProject.getId(), mRemoteTaskRecord.getId());
     }
 
-    @NonNull
-    @Override
-    public Set<String> getRecordOf() {
-        return mRemoteProject.getRecordOf();
-    }
-
     @Override
     protected void setMyEndExactTimeStamp(@NonNull ExactTimeStamp now) {
         mRemoteTaskRecord.setEndTime(now.getLong());
@@ -206,39 +200,6 @@ public class RemoteTask extends Task {
 
         mRemoteTaskRecord.setName(name);
         mRemoteTaskRecord.setNote(note);
-    }
-
-    @NonNull
-    @Override
-    protected Task updateFriends(@NonNull Set<String> friends, @NonNull Context context, @NonNull ExactTimeStamp now) {
-        Assert.assertTrue(mDomainFactory.getFriends() != null);
-
-        UserData userData = getRemoteFactory().getUserData();
-
-        String myKey = userData.getKey();
-        Assert.assertTrue(!friends.contains(myKey));
-
-        Set<String> allFriends = mDomainFactory.getFriends().keySet();
-        Assert.assertTrue(!allFriends.contains(myKey));
-
-        Set<String> oldFriends = Stream.of(getRecordOf())
-                .filter(allFriends::contains)
-                .filterNot(myKey::equals)
-                .collect(Collectors.toSet());
-
-        Set<String> addedFriends = Stream.of(friends)
-                .filterNot(oldFriends::contains)
-                .collect(Collectors.toSet());
-        Assert.assertTrue(!addedFriends.contains(myKey));
-
-        Set<String> removedFriends = Stream.of(oldFriends)
-                .filterNot(friends::contains)
-                .collect(Collectors.toSet());
-        Assert.assertTrue(!removedFriends.contains(myKey));
-
-        mRemoteProject.updateRecordOf(addedFriends, removedFriends);
-
-        return this;
     }
 
     @Override

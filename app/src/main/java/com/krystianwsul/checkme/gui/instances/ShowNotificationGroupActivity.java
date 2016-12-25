@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
@@ -12,15 +14,19 @@ import android.view.MenuItem;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractActivity;
+import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
-public class ShowNotificationGroupActivity extends AbstractActivity implements GroupListFragment.GroupListListener {
+public class ShowNotificationGroupActivity extends AbstractActivity implements GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowNotificationGroupLoader.Data> {
     private static final String INSTANCES_KEY = "instanceKeys";
+
+    private Set<InstanceKey> mInstanceKeys;
 
     private GroupListFragment mGroupListFragment;
 
@@ -60,7 +66,26 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        mGroupListFragment.setInstanceKeys(new HashSet<>(instanceKeys));
+        mInstanceKeys = new HashSet<>(instanceKeys);
+
+        getSupportLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<ShowNotificationGroupLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new ShowNotificationGroupLoader(this, mInstanceKeys);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ShowNotificationGroupLoader.Data> loader, ShowNotificationGroupLoader.Data data) {
+        Assert.assertTrue(data != null);
+
+        mGroupListFragment.setInstanceKeys(mInstanceKeys, data.DataId, data.mDataWrapper);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ShowNotificationGroupLoader.Data> loader) {
+
     }
 
     @Override

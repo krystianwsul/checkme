@@ -4,9 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -21,67 +19,29 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
-    @Nullable
-    private final Integer mPosition;
+    private final int mPosition;
 
-    @Nullable
+    @NonNull
     private final MainActivity.TimeRange mTimeRange;
 
-    @Nullable
-    private final Set<InstanceKey> mInstanceKeys;
-
-    public GroupListLoader(@NonNull Context context, @Nullable Set<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
-        super(context, needsFirebase(instanceKeys, position));
-
-        Log.e("asdf", "GroupListLoader needs firebase? " + needsFirebase(instanceKeys, position));
-
-        Assert.assertTrue((position == null) == (timeRange == null));
-        Assert.assertTrue((position != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
+    public GroupListLoader(@NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
+        super(context, FirebaseLevel.WANT);
 
         mPosition = position;
         mTimeRange = timeRange;
-        mInstanceKeys = instanceKeys;
-    }
-
-    @SuppressWarnings("SimplifiableIfStatement")
-    @NonNull
-    private static FirebaseLevel needsFirebase(@Nullable Set<InstanceKey> instanceKeys, @Nullable Integer position) {
-        if (instanceKeys != null) {
-            Assert.assertTrue(position == null);
-
-            return (Stream.of(instanceKeys)
-                    .map(InstanceKey::getType)
-                    .anyMatch(type -> type == TaskKey.Type.REMOTE) ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
-        } else {
-            Assert.assertTrue(position != null);
-
-            return FirebaseLevel.WANT;
-        }
     }
 
     @Override
     String getName() {
-        return "GroupListLoader, position: " + mPosition + ", timeRange: " + mTimeRange + ", instanceKeys: " + mInstanceKeys;
+        return "GroupListLoader, position: " + mPosition + ", timeRange: " + mTimeRange;
     }
 
     @Override
     public Data loadDomain(@NonNull DomainFactory domainFactory) {
-        if (mPosition != null) {
-            Assert.assertTrue(mTimeRange != null);
-
-            Assert.assertTrue(mInstanceKeys == null);
-
-            return domainFactory.getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
-        } else {
-            Assert.assertTrue(mInstanceKeys != null);
-            Assert.assertTrue(!mInstanceKeys.isEmpty());
-
-            return domainFactory.getGroupListData(getContext(), mInstanceKeys);
-        }
+        return domainFactory.getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
     }
 
     public static class Data extends DomainLoader.Data {

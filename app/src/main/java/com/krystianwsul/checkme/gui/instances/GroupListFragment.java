@@ -608,7 +608,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         initialize(dataId, dataWrapper);
     }
 
-    public void setInstanceKeys(@NonNull Set<InstanceKey> instanceKeys) {
+    public void setInstanceKeys(@NonNull Set<InstanceKey> instanceKeys, int dataId, @NonNull GroupListLoader.DataWrapper dataWrapper) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
@@ -617,7 +617,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
         mInstanceKeys = instanceKeys;
 
-        getLoaderManager().initLoader(0, null, this);
+        initialize(dataId, dataWrapper);
     }
 
     private boolean useGroups() {
@@ -652,8 +652,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKeys == null);
 
-        return new GroupListLoader(getActivity(), mInstanceKeys, mPosition, mTimeRange);
+        return new GroupListLoader(getActivity(), mPosition, mTimeRange);
     }
 
     @Override

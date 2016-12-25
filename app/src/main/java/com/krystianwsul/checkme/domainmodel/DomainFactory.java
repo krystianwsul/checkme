@@ -45,6 +45,7 @@ import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
+import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
@@ -537,7 +538,7 @@ public class DomainFactory {
     public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getGroupListData");
+        MyCrashlytics.log("DomainFactory.getShowNotificationGroupData");
 
         Assert.assertTrue(position >= 0);
 
@@ -621,7 +622,7 @@ public class DomainFactory {
 
         dataWrapper.setInstanceDatas(instanceDatas);
 
-        Log.e("asdf", "getGroupListData returning " + data);
+        Log.e("asdf", "getShowNotificationGroupData returning " + data);
         return data;
     }
 
@@ -650,10 +651,10 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
+    public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getGroupListData");
+        MyCrashlytics.log("DomainFactory.getShowNotificationGroupData");
 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
@@ -674,7 +675,6 @@ public class DomainFactory {
                 .collect(Collectors.toList());
 
         GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, null, null);
-        GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
 
         HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : instances) {
@@ -689,7 +689,7 @@ public class DomainFactory {
 
         dataWrapper.setInstanceDatas(instanceDatas);
 
-        return data;
+        return new ShowNotificationGroupLoader.Data(dataWrapper);
     }
 
     @NonNull

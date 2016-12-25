@@ -2,15 +2,19 @@ package com.krystianwsul.checkme.gui.projects;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -20,6 +24,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
 import com.krystianwsul.checkme.gui.tree.TreeNode;
@@ -38,6 +43,89 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     private TextView mEmptyText;
     private RecyclerView mProjectListRecycler;
     private FloatingActionButton mProjectListFab;
+
+    @Nullable
+    private TreeViewAdapter mTreeViewAdapter;
+
+    private final SelectionCallback mSelectionCallback = new SelectionCallback() {
+        @Override
+        protected void unselect() {
+            Assert.assertTrue(mTreeViewAdapter != null);
+
+            mTreeViewAdapter.unselect();
+        }
+
+        @Override
+        protected void onMenuClick(MenuItem menuItem) {
+            Assert.assertTrue(mTreeViewAdapter != null);
+
+            List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
+            Assert.assertTrue(!selected.isEmpty());
+
+            List<ProjectListAdapter.ProjectNode> projectNodes = Stream.of(selected)
+                    .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()))
+                    .collect(Collectors.toList());
+
+            List<ProjectListLoader.ProjectData> projectDatas = Stream.of(projectNodes)
+                    .map(projectNode -> projectNode.mProjectData)
+                    .collect(Collectors.toList());
+
+            List<String> projectIds = Stream.of(projectDatas)
+                    .map(childTaskData -> childTaskData.mId)
+                    .collect(Collectors.toList());
+
+            switch (menuItem.getItemId()) {
+                case R.id.action_project_delete:
+                    // todo delete
+
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        protected void onFirstAdded() {
+            Assert.assertTrue(mTreeViewAdapter != null);
+
+            ((AppCompatActivity) getActivity()).startSupportActionMode(this);
+
+            mTreeViewAdapter.onCreateActionMode();
+
+            mActionMode.getMenuInflater().inflate(R.menu.menu_projects, mActionMode.getMenu());
+
+            mProjectListFab.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected void onSecondAdded() {
+
+        }
+
+        @Override
+        protected void onOtherAdded() {
+
+        }
+
+        @Override
+        protected void onLastRemoved() {
+            Assert.assertTrue(mTreeViewAdapter != null);
+
+            mTreeViewAdapter.onDestroyActionMode();
+
+            mProjectListFab.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onSecondToLastRemoved() {
+
+        }
+
+        @Override
+        protected void onOtherRemoved() {
+
+        }
+    };
 
     @NonNull
     public static ProjectListFragment newInstance() {
@@ -95,8 +183,8 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             mEmptyText.setVisibility(View.GONE);
         }
 
-        TreeViewAdapter treeViewAdapter = ProjectListAdapter.getAdapter(getActivity(), data.mProjectDatas);
-        mProjectListRecycler.setAdapter(treeViewAdapter.getAdapter());
+        mTreeViewAdapter = new ProjectListAdapter(getActivity()).initialize(data.mProjectDatas);
+        mProjectListRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
         mProjectListFab.setVisibility(View.VISIBLE);
         mProjectListFab.setOnClickListener(v -> startActivity(ShowProjectActivity.newIntent(getActivity())));
@@ -107,7 +195,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
     }
 
-    private static class ProjectListAdapter implements TreeModelAdapter {
+    private class ProjectListAdapter implements TreeModelAdapter {
         @NonNull
         private final Context mContext;
 
@@ -115,14 +203,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
         private TreeViewAdapter mTreeViewAdapter;
 
-        @NonNull
-        static TreeViewAdapter getAdapter(@NonNull Context context, @NonNull TreeMap<String, ProjectListLoader.ProjectData> projectDatas) {
-            ProjectListAdapter projectListAdapter = new ProjectListAdapter(context);
-
-            return projectListAdapter.initialize(projectDatas);
-        }
-
-        private ProjectListAdapter(@NonNull Context context) {
+        ProjectListAdapter(@NonNull Context context) {
             mContext = context;
         }
 
@@ -159,35 +240,17 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
         @Override
         public boolean hasActionMode() {
-            return false;
+            return mSelectionCallback.hasActionMode();
         }
 
         @Override
         public void incrementSelected() {
-            throw new UnsupportedOperationException();
+            mSelectionCallback.incrementSelected();
         }
 
         @Override
         public void decrementSelected() {
-            throw new UnsupportedOperationException();
-        }
-
-        static class Holder extends RecyclerView.ViewHolder {
-            @NonNull
-            final TextView mProjectName;
-
-            @NonNull
-            final TextView mProjectUsers;
-
-            Holder(View itemView) {
-                super(itemView);
-
-                mProjectName = (TextView) itemView.findViewById(R.id.project_name);
-                Assert.assertTrue(mProjectName != null);
-
-                mProjectUsers = (TextView) itemView.findViewById(R.id.project_users);
-                Assert.assertTrue(mProjectUsers != null);
-            }
+            mSelectionCallback.decrementSelected();
         }
 
         private class ProjectNode implements ModelNode {
@@ -216,6 +279,13 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                 holder.mProjectUsers.setText(mProjectData.mUsers);
 
                 holder.itemView.setOnClickListener(mTreeNode.getOnClickListener());
+
+                holder.itemView.setOnLongClickListener(mTreeNode.getOnLongClickListener());
+
+                if (mTreeNode.isSelected())
+                    holder.itemView.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
+                else
+                    holder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
 
             @Override
@@ -225,7 +295,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
             @Override
             public boolean selectable() {
-                return false;
+                return true;
             }
 
             @Override
@@ -256,6 +326,24 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
                 return mProjectData.mId.compareTo(projectNode.mProjectData.mId);
             }
+        }
+    }
+
+    static class Holder extends RecyclerView.ViewHolder {
+        @NonNull
+        final TextView mProjectName;
+
+        @NonNull
+        final TextView mProjectUsers;
+
+        Holder(View itemView) {
+            super(itemView);
+
+            mProjectName = (TextView) itemView.findViewById(R.id.project_name);
+            Assert.assertTrue(mProjectName != null);
+
+            mProjectUsers = (TextView) itemView.findViewById(R.id.project_users);
+            Assert.assertTrue(mProjectUsers != null);
         }
     }
 }

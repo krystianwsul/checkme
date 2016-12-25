@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 public class NotificationServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        List<String> projects = Arrays.asList(req.getParameterValues("projects"));
-        Assert.assertTrue(!projects.isEmpty());
-
         String productionParam = req.getParameter("production");
         boolean production = !StringUtils.isEmpty(productionParam);
 
@@ -46,13 +44,6 @@ public class NotificationServlet extends HttpServlet {
         resp.getWriter().println();
 
         String prefix = (production ? "production" : "development");
-
-        String sender = req.getParameter("sender");
-        resp.getWriter().println("sender: " + sender);
-        resp.getWriter().println();
-
-        resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
-        resp.getWriter().println();
 
         GoogleCredential googleCred = GoogleCredential.fromStream(new FileInputStream("WEB-INF/check-me-add47-firebase-adminsdk-5hvuz-436ce98200.json"));
         Assert.assertTrue(googleCred != null);
@@ -74,83 +65,104 @@ public class NotificationServlet extends HttpServlet {
 
         Gson gson = new Gson();
 
-        for (String project : projects) {
-            Assert.assertTrue(!StringUtils.isEmpty(project));
+        Set<String> userKeys;
+        if (req.getParameterValues("projects") != null) {
+            List<String> projects = Arrays.asList(req.getParameterValues("projects"));
+            Assert.assertTrue(!projects.isEmpty());
 
-            URL recordOfUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/records/" + project + "/recordOf.json?access_token=" + firebaseToken);
-
-            resp.getWriter().println(recordOfUrl.toString());
+            resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
             resp.getWriter().println();
 
-            BufferedReader recordOfReader = new BufferedReader(new InputStreamReader(recordOfUrl.openStream()));
-            @SuppressWarnings("InstantiatingObjectToGetClassObject") Map<String, Boolean> recordOf = gson.fromJson(recordOfReader, new HashMap<String, Boolean>().getClass());
-            recordOfReader.close();
+            String sender = req.getParameter("sender");
+            resp.getWriter().println("sender: " + sender);
+            resp.getWriter().println();
 
-            if (recordOf == null)
-                throw new NoRecordOfException(recordOfUrl.toString());
+            userKeys = new HashSet<>();
 
-            Set<String> userKeys = recordOf.keySet();
+            for (String project : projects) {
+                Assert.assertTrue(!StringUtils.isEmpty(project));
 
-            resp.getWriter().println("user keys before removing sender: " + Joiner.on(", ").join(userKeys));
+                URL recordOfUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/records/" + project + "/recordOf.json?access_token=" + firebaseToken);
 
-            if (!StringUtils.isEmpty(sender))
-                userKeys.remove(sender);
-
-            resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(userKeys));
-
-            // todo use project.users
-
-            for (String userKey : userKeys) {
-                Assert.assertTrue(!StringUtils.isEmpty(userKey));
-
-                URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
-
-                resp.getWriter().println(tokenUrl.toString());
+                resp.getWriter().println(recordOfUrl.toString());
                 resp.getWriter().println();
 
-                BufferedReader tokenReader = new BufferedReader(new InputStreamReader(tokenUrl.openStream()));
-                String userToken = gson.fromJson(tokenReader, String.class);
-                tokenReader.close();
+                BufferedReader recordOfReader = new BufferedReader(new InputStreamReader(recordOfUrl.openStream()));
+                @SuppressWarnings("InstantiatingObjectToGetClassObject") Map<String, Boolean> recordOf = gson.fromJson(recordOfReader, new HashMap<String, Boolean>().getClass());
+                recordOfReader.close();
 
-                resp.getWriter().println("user token: " + userToken);
-                if (StringUtils.isEmpty(userToken)) {
-                    resp.getWriter().println("empty, skipping");
+                if (recordOf == null)
+                    throw new NoRecordOfException(recordOfUrl.toString());
+
+                userKeys.addAll(recordOf.keySet());
+
+                resp.getWriter().println("user keys before removing sender: " + Joiner.on(", ").join(userKeys));
+
+                if (!StringUtils.isEmpty(sender))
+                    userKeys.remove(sender);
+
+                resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(userKeys));
+
+                // todo use project.users
+            }
+        } else {
+            userKeys = new HashSet<>(Arrays.asList(req.getParameterValues("userKeys")));
+            Assert.assertTrue(!userKeys.isEmpty());
+
+            resp.getWriter().print("userKeys: " + Joiner.on(", ").join(userKeys));
+            resp.getWriter().println();
+        }
+
+        for (String userKey : userKeys) {
+            Assert.assertTrue(!StringUtils.isEmpty(userKey));
+
+            URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
+
+            resp.getWriter().println(tokenUrl.toString());
+            resp.getWriter().println();
+
+            BufferedReader tokenReader = new BufferedReader(new InputStreamReader(tokenUrl.openStream()));
+            String userToken = gson.fromJson(tokenReader, String.class);
+            tokenReader.close();
+
+            resp.getWriter().println("user token: " + userToken);
+            if (StringUtils.isEmpty(userToken)) {
+                resp.getWriter().println("empty, skipping");
+                resp.getWriter().println();
+            } else {
+                resp.getWriter().println();
+
+                URL fcmUrl = new URL("https://fcm.googleapis.com/fcm/send");
+                URLConnection urlConnection = fcmUrl.openConnection();
+                HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
+
+                httpURLConnection.setRequestProperty("Authorization", "key=AAAACS58vvk:APA91bGMSthxVrK-Tw9Kht63VM09uw2TBbCZLg6Y1utntVFLy4PGfjsvxm2QK830JGO_S87yvaxeDByMzWRqGBPXzqBpEMZPbWOUHDnYvSQXF_KllfCpcn17UBIKE9RPAXzhwkk3CqYEWvbxZCvl4L_MYodKHfhNMQ");
+                httpURLConnection.setRequestProperty("Content-Type", "application/json");
+
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setRequestMethod("POST");
+
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
+                outputStreamWriter.write(gson.toJson(new Notification(userToken)));
+                outputStreamWriter.close();
+
+                int respCode = httpURLConnection.getResponseCode();
+                if (respCode == HttpsURLConnection.HTTP_OK) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                    String response = IOUtils.toString(reader);
+                    IOUtils.closeQuietly(reader);
+
+                    resp.getWriter().println("response: " + response);
                     resp.getWriter().println();
                 } else {
+                    resp.getWriter().println("error: " + httpURLConnection.getResponseCode() + " " + httpURLConnection.getResponseMessage());
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                    String response = IOUtils.toString(reader);
+                    IOUtils.closeQuietly(reader);
+
+                    resp.getWriter().println("response: " + response);
                     resp.getWriter().println();
-
-                    URL fcmUrl = new URL("https://fcm.googleapis.com/fcm/send");
-                    URLConnection urlConnection = fcmUrl.openConnection();
-                    HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
-
-                    httpURLConnection.setRequestProperty("Authorization", "key=AAAACS58vvk:APA91bGMSthxVrK-Tw9Kht63VM09uw2TBbCZLg6Y1utntVFLy4PGfjsvxm2QK830JGO_S87yvaxeDByMzWRqGBPXzqBpEMZPbWOUHDnYvSQXF_KllfCpcn17UBIKE9RPAXzhwkk3CqYEWvbxZCvl4L_MYodKHfhNMQ");
-                    httpURLConnection.setRequestProperty("Content-Type", "application/json");
-
-                    httpURLConnection.setDoOutput(true);
-                    httpURLConnection.setRequestMethod("POST");
-
-                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
-                    outputStreamWriter.write(gson.toJson(new Notification(userToken)));
-                    outputStreamWriter.close();
-
-                    int respCode = httpURLConnection.getResponseCode();
-                    if (respCode == HttpsURLConnection.HTTP_OK) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                        String response = IOUtils.toString(reader);
-                        IOUtils.closeQuietly(reader);
-
-                        resp.getWriter().println("response: " + response);
-                        resp.getWriter().println();
-                    } else {
-                        resp.getWriter().println("error: " + httpURLConnection.getResponseCode() + " " + httpURLConnection.getResponseMessage());
-
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                        String response = IOUtils.toString(reader);
-                        IOUtils.closeQuietly(reader);
-
-                        resp.getWriter().println("response: " + response);
-                        resp.getWriter().println();
-                    }
                 }
             }
         }

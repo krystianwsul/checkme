@@ -35,10 +35,14 @@ import com.krystianwsul.checkme.loaders.ProjectListLoader;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class ProjectListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<ProjectListLoader.Data> {
+    private static final String SELECTED_PROJECT_IDS = "selectedProjectIds";
+
     private ProgressBar mProjectListProgress;
     private TextView mEmptyText;
     private RecyclerView mProjectListRecycler;
@@ -128,12 +132,27 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     };
 
     @NonNull
+    private Set<String> mSelectedProjectIds = new HashSet<>();
+
+    @NonNull
     public static ProjectListFragment newInstance() {
         return new ProjectListFragment();
     }
 
     public ProjectListFragment() {
 
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_PROJECT_IDS)) {
+            List<String> selectedProjectIds = savedInstanceState.getStringArrayList(SELECTED_PROJECT_IDS);
+            Assert.assertTrue(selectedProjectIds != null);
+
+            mSelectedProjectIds = new HashSet<>(selectedProjectIds);
+        }
     }
 
     @Override
@@ -183,8 +202,15 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             mEmptyText.setVisibility(View.GONE);
         }
 
+        if (mTreeViewAdapter != null)
+            mSelectedProjectIds = Stream.of(mTreeViewAdapter.getSelectedNodes())
+                    .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()).mProjectData.mId)
+                    .collect(Collectors.toSet());
+
         mTreeViewAdapter = new ProjectListAdapter(getActivity()).initialize(data.mProjectDatas);
         mProjectListRecycler.setAdapter(mTreeViewAdapter.getAdapter());
+
+        mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
         mProjectListFab.setVisibility(View.VISIBLE);
         mProjectListFab.setOnClickListener(v -> startActivity(ShowProjectActivity.newIntent(getActivity())));
@@ -193,6 +219,18 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     @Override
     public void onLoaderReset(Loader<ProjectListLoader.Data> loader) {
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (mTreeViewAdapter != null)
+            mSelectedProjectIds = Stream.of(mTreeViewAdapter.getSelectedNodes())
+                    .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()).mProjectData.mId)
+                    .collect(Collectors.toSet());
+
+        outState.putStringArrayList(SELECTED_PROJECT_IDS, new ArrayList<>(mSelectedProjectIds));
     }
 
     private class ProjectListAdapter implements TreeModelAdapter {
@@ -265,7 +303,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
             @NonNull
             TreeNode initialize(@NonNull TreeNodeCollection treeNodeCollection) {
-                mTreeNode = new TreeNode(this, treeNodeCollection, false, false);
+                mTreeNode = new TreeNode(this, treeNodeCollection, false, mSelectedProjectIds.contains(mProjectData.mId));
                 mTreeNode.setChildTreeNodes(new ArrayList<>());
                 return mTreeNode;
             }

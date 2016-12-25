@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
@@ -51,6 +52,8 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     @Nullable
     private TreeViewAdapter mTreeViewAdapter;
 
+    private Integer mDataId;
+
     private final SelectionCallback mSelectionCallback = new SelectionCallback() {
         @Override
         protected void unselect() {
@@ -70,17 +73,25 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                     .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()))
                     .collect(Collectors.toList());
 
-            List<ProjectListLoader.ProjectData> projectDatas = Stream.of(projectNodes)
-                    .map(projectNode -> projectNode.mProjectData)
-                    .collect(Collectors.toList());
-
-            List<String> projectIds = Stream.of(projectDatas)
-                    .map(childTaskData -> childTaskData.mId)
-                    .collect(Collectors.toList());
+            Set<String> projectIds = Stream.of(projectNodes)
+                    .map(projectNode -> projectNode.mProjectData.mId)
+                    .collect(Collectors.toSet());
 
             switch (menuItem.getItemId()) {
                 case R.id.action_project_delete:
-                    // todo delete
+                    Assert.assertTrue(mDataId != null);
+
+                    for (TreeNode treeNode : selected) {
+                        Assert.assertTrue(treeNode != null);
+
+                        ProjectListAdapter.ProjectNode projectNode = (ProjectListAdapter.ProjectNode) treeNode.getModelNode();
+
+                        projectNode.remove();
+
+                        decrementSelected();
+                    }
+
+                    DomainFactory.getDomainFactory(getActivity()).deleteProjects(getActivity(), mDataId, projectIds);
 
                     break;
                 default:
@@ -192,6 +203,8 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     public void onLoadFinished(Loader<ProjectListLoader.Data> loader, ProjectListLoader.Data data) {
         Assert.assertTrue(data != null);
 
+        mDataId = data.DataId;
+
         mProjectListProgress.setVisibility(View.GONE);
         if (data.mProjectDatas.isEmpty()) {
             mProjectListRecycler.setVisibility(View.GONE);
@@ -240,6 +253,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         private List<ProjectNode> mProjectNodes;
 
         private TreeViewAdapter mTreeViewAdapter;
+        private TreeNodeCollection mTreeNodeCollection;
 
         ProjectListAdapter(@NonNull Context context) {
             mContext = context;
@@ -247,15 +261,15 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
         private TreeViewAdapter initialize(@NonNull TreeMap<String, ProjectListLoader.ProjectData> projectDatas) {
             mProjectNodes = Stream.of(projectDatas.values())
-                    .map(ProjectNode::new)
+                    .map(projectData -> new ProjectNode(this, projectData))
                     .collect(Collectors.toList());
 
             mTreeViewAdapter = new TreeViewAdapter(false, this);
-            TreeNodeCollection treeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
-            mTreeViewAdapter.setTreeNodeCollection(treeNodeCollection);
+            mTreeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
+            mTreeViewAdapter.setTreeNodeCollection(mTreeNodeCollection);
 
-            treeNodeCollection.setNodes(Stream.of(mProjectNodes)
-                    .map(projectNode -> projectNode.initialize(treeNodeCollection))
+            mTreeNodeCollection.setNodes(Stream.of(mProjectNodes)
+                    .map(projectNode -> projectNode.initialize(mTreeNodeCollection))
                     .collect(Collectors.toList()));
 
             return mTreeViewAdapter;
@@ -291,13 +305,27 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             mSelectionCallback.decrementSelected();
         }
 
+        private void remove(@NonNull ProjectNode projectNode) {
+            Assert.assertTrue(mProjectNodes.contains(projectNode));
+
+            mProjectNodes.remove(projectNode);
+
+            TreeNode treeNode = projectNode.mTreeNode;
+
+            mTreeNodeCollection.remove(treeNode);
+        }
+
         private class ProjectNode implements ModelNode {
+            @NonNull
+            private final ProjectListAdapter mProjectListAdapter;
+
             @NonNull
             private final ProjectListLoader.ProjectData mProjectData;
 
             private TreeNode mTreeNode;
 
-            ProjectNode(@NonNull ProjectListLoader.ProjectData projectData) {
+            ProjectNode(@NonNull ProjectListAdapter projectListAdapter, @NonNull ProjectListLoader.ProjectData projectData) {
+                mProjectListAdapter = projectListAdapter;
                 mProjectData = projectData;
             }
 
@@ -363,6 +391,10 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                 ProjectNode projectNode = (ProjectNode) modelNode;
 
                 return mProjectData.mId.compareTo(projectNode.mProjectData.mId);
+            }
+
+            void remove() {
+                mProjectListAdapter.remove(this);
             }
         }
     }

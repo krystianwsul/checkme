@@ -42,6 +42,20 @@ class BackendNotifier {
         return PREFIX + TextUtils.join("&", parameters);
     }
 
+    @NonNull
+    private static String getUrl(@NonNull List<String> userKeys, boolean production) {
+        Assert.assertTrue(!userKeys.isEmpty());
+
+        List<String> parameters = Stream.of(userKeys)
+                .map(userKey -> "userKeys=" + userKey)
+                .collect(Collectors.toList());
+
+        if (production)
+            parameters.add("production=1");
+
+        return PREFIX + TextUtils.join("&", parameters);
+    }
+
     BackendNotifier(@NonNull Set<RemoteProject> remoteProjects, @NonNull UserData userData) {
         String root = DatabaseWrapper.getRoot();
 
@@ -62,6 +76,33 @@ class BackendNotifier {
                 .collect(Collectors.toSet());
 
         String url = getUrl(projectIds, production, userData.getKey());
+        Assert.assertTrue(!TextUtils.isEmpty(url));
+
+        run(url);
+    }
+
+    BackendNotifier(@NonNull List<String> userKeys) {
+        String root = DatabaseWrapper.getRoot();
+
+        boolean production;
+        switch (root) {
+            case "development":
+                production = false;
+                break;
+            case "production":
+                production = true;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
+        String url = getUrl(userKeys, production);
+        Assert.assertTrue(!TextUtils.isEmpty(url));
+
+        run(url);
+    }
+
+    private void run(@NonNull String url) {
         Assert.assertTrue(!TextUtils.isEmpty(url));
 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
@@ -91,18 +132,5 @@ class BackendNotifier {
         };
 
         asyncTask.execute();
-
-        /*
-        RequestQueue queue = Volley.newRequestQueue(context.getApplicationContext());
-
-        StringRequest stringRequest = new StringRequest(
-                Request.Method.GET, url,
-                (response) -> Log.e("asdf", "BackendNotifier response:" + response),
-                MyCrashlytics::logException);
-
-        queue.add(stringRequest);
-
-        Log.e("asdf", "BackendNotifier queued projects " + projectIds);
-        */
     }
 }

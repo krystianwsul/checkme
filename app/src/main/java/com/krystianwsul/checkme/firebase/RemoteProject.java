@@ -356,4 +356,15 @@ public class RemoteProject {
 
         mRemoteProjectRecord.setName(name);
     }
+
+    @NonNull
+    public Set<String> getRecordOf() {
+        return mRemoteProjectRecord.getRecordOf();
+    }
+
+    public void delete() {
+        getRemoteFactory().deleteProject(this);
+
+        mRemoteProjectRecord.delete();
+    }
 }

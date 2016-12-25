@@ -287,4 +287,11 @@ public class RemoteFactory {
 
         return remoteProject;
     }
+
+    void deleteProject(@NonNull RemoteProject remoteProject) {
+        String projectId = remoteProject.getId();
+
+        Assert.assertTrue(mRemoteProjects.containsKey(projectId));
+        mRemoteProjects.remove(projectId);
+    }
 }

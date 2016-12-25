@@ -1646,6 +1646,36 @@ public class DomainFactory {
         save(context, dataId);
     }
 
+    public synchronized void deleteProjects(@NonNull Context context, int dataId, @NonNull Set<String> projectIds) {
+        MyCrashlytics.log("DomainFactory.createProject");
+
+        Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(!projectIds.isEmpty());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        List<RemoteProject> remoteProjects = Stream.of(projectIds)
+                .map(mRemoteFactory::getRemoteProjectForce)
+                .collect(Collectors.toList());
+
+        Set<String> userKeys = Stream.of(remoteProjects)
+                .map(RemoteProject::getRecordOf)
+                .flatMap(Stream::of)
+                .collect(Collectors.toSet());
+
+        String key = mUserData.getKey();
+        Assert.assertTrue(userKeys.contains(key));
+        userKeys.remove(key);
+
+        Stream.of(remoteProjects)
+                .forEach(RemoteProject::delete);
+
+        updateNotificationsAndNotifyCloud(context, now, new ArrayList<>(userKeys));
+
+        save(context, dataId);
+    }
+
     // internal
 
     @Nullable
@@ -2301,6 +2331,13 @@ public class DomainFactory {
 
             new BackendNotifier(remoteProjects, mUserData);
         }
+    }
+
+    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<String> userKeys) {
+        updateNotifications(context, now);
+
+        if (!userKeys.isEmpty())
+            new BackendNotifier(userKeys);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {

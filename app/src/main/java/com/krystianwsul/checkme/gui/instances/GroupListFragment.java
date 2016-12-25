@@ -518,8 +518,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     }
 
     @NonNull
-    public static GroupListFragment getGroupInstance(MainActivity.TimeRange timeRange, int position) {
-        Assert.assertTrue(timeRange != null);
+    public static GroupListFragment getGroupInstance(@NonNull MainActivity.TimeRange timeRange, int position) {
         Assert.assertTrue(position >= 0);
 
         GroupListFragment groupListFragment = new GroupListFragment();

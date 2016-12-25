@@ -26,11 +26,11 @@ public class DayFragment extends AbstractFragment {
     private static final String POSITION_KEY = "position";
     private static final String TIME_RANGE_KEY = "timeRange";
 
+    private TabLayout mDayTabLayout;
     private GroupListFragment mGroupListFragment;
 
     @NonNull
-    public static DayFragment newInstance(MainActivity.TimeRange timeRange, int day) {
-        Assert.assertTrue(timeRange != null);
+    public static DayFragment newInstance(@NonNull MainActivity.TimeRange timeRange, int day) {
         Assert.assertTrue(day >= 0);
 
         DayFragment dayFragment = new DayFragment();
@@ -49,7 +49,13 @@ public class DayFragment extends AbstractFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_day, container, false);
+        View view = inflater.inflate(R.layout.fragment_day, container, false);
+        Assert.assertTrue(view != null);
+
+        mDayTabLayout = (TabLayout) view.findViewById(R.id.day_tab_layout);
+        Assert.assertTrue(mDayTabLayout != null);
+
+        return view;
     }
 
     @Override
@@ -67,11 +73,7 @@ public class DayFragment extends AbstractFragment {
         MainActivity.TimeRange timeRange = (MainActivity.TimeRange) args.getSerializable(TIME_RANGE_KEY);
         Assert.assertTrue(timeRange != null);
 
-        View view = getView();
-        Assert.assertTrue(view != null);
-
         String title;
-
         if (timeRange == MainActivity.TimeRange.DAY) {
             switch (position) {
                 case 0:
@@ -119,11 +121,8 @@ public class DayFragment extends AbstractFragment {
             }
         }
 
-        TabLayout dayTabLayout = (TabLayout) view.findViewById(R.id.day_tab_layout);
-        Assert.assertTrue(dayTabLayout != null);
-
-        dayTabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
-        dayTabLayout.addTab(dayTabLayout.newTab().setText(title));
+        mDayTabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
+        mDayTabLayout.addTab(mDayTabLayout.newTab().setText(title));
 
         FragmentManager fragmentManager = getChildFragmentManager();
         mGroupListFragment = (GroupListFragment) fragmentManager.findFragmentById(R.id.day_frame);

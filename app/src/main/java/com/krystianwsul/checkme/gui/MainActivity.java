@@ -116,6 +116,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         MONTH
     }
 
+    @NonNull
     private TimeRange mTimeRange = TimeRange.DAY;
 
     private final Map<Integer, Boolean> mGroupSelectAllVisible = new ArrayMap<>();
@@ -247,7 +248,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             }
 
             Assert.assertTrue(savedInstanceState.containsKey(TIME_RANGE_KEY));
+            //noinspection ConstantConditions
             mTimeRange = (TimeRange) savedInstanceState.getSerializable(TIME_RANGE_KEY);
+            Assert.assertTrue(mTimeRange != null);
         }
 
         mMainActivityAppBarLayout = (AppBarLayout) findViewById(R.id.main_activity_app_bar_layout);

@@ -631,17 +631,7 @@ public class DomainFactory {
 
         MyCrashlytics.log("DomainFactory.getShowGroupData");
 
-        Calendar endCalendar = timeStamp.getCalendar();
-        endCalendar.add(Calendar.MINUTE, 1);
-        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
-
         ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
-
-        List<Instance> currentInstances = Stream.of(rootInstances)
-                .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
-                .collect(Collectors.toList());
 
         Date date = timeStamp.getDate();
         DayOfWeek dayOfWeek = date.getDayOfWeek();
@@ -656,48 +646,7 @@ public class DomainFactory {
 
         String displayText = new DateTime(date, time).getDisplayText(context);
 
-        return new ShowGroupLoader.Data(displayText, !currentInstances.isEmpty());
-    }
-
-    @NonNull
-    public synchronized GroupListLoader.Data getGroupListData(@NonNull TimeStamp timeStamp) {
-        fakeDelay();
-
-        MyCrashlytics.log("DomainFactory.getGroupListData");
-
-        Calendar endCalendar = timeStamp.getCalendar();
-        endCalendar.add(Calendar.MINUTE, 1);
-        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
-
-        ExactTimeStamp now = ExactTimeStamp.getNow();
-
-        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
-
-        List<Instance> currentInstances = Stream.of(rootInstances)
-                .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
-                .collect(Collectors.toList());
-
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
-                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
-                .collect(Collectors.toList());
-
-        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, null, null);
-        GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
-
-        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
-        for (Instance instance : currentInstances) {
-            Task task = instance.getTask();
-
-            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
-            instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
-            instanceDatas.put(instance.getInstanceKey(), instanceData);
-        }
-
-        dataWrapper.setInstanceDatas(instanceDatas);
-
-        return data;
+        return new ShowGroupLoader.Data(displayText, getGroupListData(timeStamp, now));
     }
 
     @NonNull
@@ -2721,6 +2670,39 @@ public class DomainFactory {
             instanceShownRecord.setNotified(true);
             instanceShownRecord.setNotificationShown(false);
         }
+    }
+
+    private GroupListLoader.DataWrapper getGroupListData(@NonNull TimeStamp timeStamp, @NonNull ExactTimeStamp now) {
+        Calendar endCalendar = timeStamp.getCalendar();
+        endCalendar.add(Calendar.MINUTE, 1);
+        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
+
+        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
+
+        List<Instance> currentInstances = Stream.of(rootInstances)
+                .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
+                .collect(Collectors.toList());
+
+        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+                .collect(Collectors.toList());
+
+        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, null, null);
+
+        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
+        for (Instance instance : currentInstances) {
+            Task task = instance.getTask();
+
+            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+
+            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
+            instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
+            instanceDatas.put(instance.getInstanceKey(), instanceData);
+        }
+
+        dataWrapper.setInstanceDatas(instanceDatas);
+
+        return dataWrapper;
     }
 
     static class Irrelevant {

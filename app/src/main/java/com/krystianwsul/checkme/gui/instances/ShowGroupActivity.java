@@ -59,7 +59,6 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
         Assert.assertTrue(mGroupListFragment != null);
-        mGroupListFragment.setTimeStamp(mTimeStamp);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
@@ -71,10 +70,17 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<ShowGroupLoader.Data> loader, ShowGroupLoader.Data data) {
-        mActionBar.setTitle(data.DisplayText);
+        Assert.assertTrue(data != null);
 
-        if (!data.HasInstances)
+        mActionBar.setTitle(data.mDisplayText);
+
+        if (data.mDataWrapper == null) {
             finish();
+
+            return;
+        }
+
+        mGroupListFragment.setTimeStamp(mTimeStamp, data.DataId, data.mDataWrapper);
     }
 
     @Override

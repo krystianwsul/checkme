@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -30,19 +31,26 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
     }
 
     public static class Data extends DomainLoader.Data {
-        public final String DisplayText;
-        public final boolean HasInstances;
+        @NonNull
+        public final String mDisplayText;
 
-        public Data(String displayText, boolean hasInstances) {
+        @Nullable
+        public final GroupListLoader.DataWrapper mDataWrapper;
+
+
+        public Data(@NonNull String displayText, @Nullable GroupListLoader.DataWrapper dataWrapper) {
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
 
-            DisplayText = displayText;
-            HasInstances = hasInstances;
+            mDisplayText = displayText;
+            mDataWrapper = dataWrapper;
         }
 
         @Override
         public int hashCode() {
-            return (DisplayText.hashCode() + (HasInstances ? 1 : 0));
+            int hash = mDisplayText.hashCode();
+            if (mDataWrapper != null)
+                hash += mDataWrapper.hashCode();
+            return hash;
         }
 
         @Override
@@ -58,7 +66,18 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
 
             Data data = (Data) object;
 
-            return (DisplayText.equals(data.DisplayText) && (HasInstances == data.HasInstances));
+            if (!mDisplayText.equals(data.mDisplayText))
+                return false;
+
+            if (mDataWrapper == null) {
+                if (data.mDataWrapper != null)
+                    return false;
+            } else {
+                if (!mDataWrapper.equals(data.mDataWrapper))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

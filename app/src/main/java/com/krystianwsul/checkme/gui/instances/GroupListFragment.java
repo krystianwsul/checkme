@@ -583,16 +583,16 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         getLoaderManager().initLoader(0, null, this);
     }
 
-    public void setTimeStamp(@NonNull TimeStamp timeStamp) {
+    public void setTimeStamp(@NonNull TimeStamp timeStamp, int dataId, @NonNull GroupListLoader.DataWrapper dataWrapper) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
-        Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mTimeStamp == null || mTimeStamp.equals(timeStamp));
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
 
         mTimeStamp = timeStamp;
 
-        getLoaderManager().initLoader(0, null, this);
+        initialize(dataId, dataWrapper);
     }
 
     public void setInstanceKey(@NonNull InstanceKey instanceKey) {
@@ -649,7 +649,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
     @Override
     public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new GroupListLoader(getActivity(), mTimeStamp, mInstanceKey, mInstanceKeys, mPosition, mTimeRange);
+        Assert.assertTrue(mTimeStamp == null);
+
+        return new GroupListLoader(getActivity(), mInstanceKey, mInstanceKeys, mPosition, mTimeRange);
     }
 
     @Override
@@ -662,7 +664,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         initialize(data.DataId, data.mDataWrapper);
     }
 
-    public void initialize(int dataId, @NonNull GroupListLoader.DataWrapper dataWrapper) {
+    private void initialize(int dataId, @NonNull GroupListLoader.DataWrapper dataWrapper) {
         mGroupListProgress.setVisibility(View.GONE);
 
         if (mDataWrapper != null) {

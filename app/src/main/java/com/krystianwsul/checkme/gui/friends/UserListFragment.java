@@ -34,7 +34,6 @@ import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -226,7 +225,8 @@ public class UserListFragment extends AbstractFragment {
         });
     }
 
-    public void initialize(@NonNull ShowProjectLoader.Data data) {
+    public void initialize(@Nullable String projectId, @NonNull ShowProjectLoader.Data data) {
+        mProjectId = projectId;
         mData = data;
 
         if (mFriendListAdapter != null)
@@ -280,7 +280,7 @@ public class UserListFragment extends AbstractFragment {
         return false;
     }
 
-    public void save(int dataId, @NonNull String name) {
+    public void save(@NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mFriendListAdapter != null);
@@ -290,9 +290,9 @@ public class UserListFragment extends AbstractFragment {
         if (TextUtils.isEmpty(mProjectId)) {
             Assert.assertTrue(saveState.mRemovedIds.isEmpty());
 
-            DomainFactory.getDomainFactory(getActivity()).createProject(getActivity(), Arrays.asList(mData.DataId, dataId), name, saveState.mAddedIds);
+            DomainFactory.getDomainFactory(getActivity()).createProject(getActivity(), mData.DataId, name, saveState.mAddedIds);
         } else {
-            DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), Arrays.asList(mData.DataId, dataId), mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
+            DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), mData.DataId, mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
         }
     }
 

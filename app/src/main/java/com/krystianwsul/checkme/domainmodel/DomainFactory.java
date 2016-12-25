@@ -1604,7 +1604,7 @@ public class DomainFactory {
         save(context, 0);
     }
 
-    public synchronized void updateProject(@NonNull Context context, List<Integer> dataIds, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+    public synchronized void updateProject(@NonNull Context context, int dataId, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         MyCrashlytics.log("DomainFactory.updateProject");
 
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
@@ -1623,10 +1623,10 @@ public class DomainFactory {
 
         updateNotificationsAndNotifyCloud(context, now, remoteProject);
 
-        save(context, dataIds);
+        save(context, dataId);
     }
 
-    public synchronized void createProject(@NonNull Context context, List<Integer> dataIds, @NonNull String name, @NonNull Set<String> friends) {
+    public synchronized void createProject(@NonNull Context context, int dataId, @NonNull String name, @NonNull Set<String> friends) {
         MyCrashlytics.log("DomainFactory.createProject");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1643,7 +1643,7 @@ public class DomainFactory {
 
         mRemoteFactory.createRemoteProject(name, now, recordOf);
 
-        save(context, dataIds);
+        save(context, dataId);
     }
 
     // internal

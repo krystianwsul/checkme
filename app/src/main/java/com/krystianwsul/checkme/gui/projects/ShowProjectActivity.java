@@ -79,7 +79,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
                 if (updateError())
                     break;
 
-                mUserListFragment.save(mData.DataId, mToolbarEditText.getText().toString());
+                mUserListFragment.save(mToolbarEditText.getText().toString());
 
                 finish();
 
@@ -190,7 +190,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
         invalidateOptionsMenu();
 
-        mUserListFragment.initialize(data);
+        mUserListFragment.initialize(mProjectId, data);
     }
 
     @Override

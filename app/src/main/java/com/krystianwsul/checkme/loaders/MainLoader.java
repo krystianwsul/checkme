@@ -2,39 +2,23 @@ package com.krystianwsul.checkme.loaders;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.utils.TaskKey;
 
-public class TaskListLoader extends DomainLoader<TaskListLoader.Data> {
-    @Nullable
-    private final TaskKey mTaskKey;
-
-    public TaskListLoader(@NonNull Context context, @Nullable TaskKey taskKey) {
-        super(context, needsFirebase(taskKey));
-
-        mTaskKey = taskKey;
-    }
-
-    @NonNull
-    private static FirebaseLevel needsFirebase(@Nullable TaskKey taskKey) {
-        if (taskKey != null && taskKey.getType() == TaskKey.Type.REMOTE) {
-            return FirebaseLevel.NEED;
-        } else {
-            return FirebaseLevel.WANT;
-        }
+public class MainLoader extends DomainLoader<MainLoader.Data> {
+    public MainLoader(@NonNull Context context) {
+        super(context, FirebaseLevel.WANT);
     }
 
     @Override
     String getName() {
-        return "TaskListLoader, taskKey: " + mTaskKey;
+        return "MainLoader";
     }
 
     @Override
     public Data loadDomain(@NonNull DomainFactory domainFactory) {
-        return domainFactory.getTaskListData(getContext(), mTaskKey);
+        return domainFactory.getMainData(getContext());
     }
 
     public static class Data extends DomainLoader.Data {

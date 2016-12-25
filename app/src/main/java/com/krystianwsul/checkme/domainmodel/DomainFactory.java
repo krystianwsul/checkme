@@ -42,6 +42,7 @@ import com.krystianwsul.checkme.loaders.DayLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.FriendListLoader;
+import com.krystianwsul.checkme.loaders.MainLoader;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
@@ -50,7 +51,6 @@ import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
-import com.krystianwsul.checkme.loaders.TaskListLoader;
 import com.krystianwsul.checkme.loaders.UserListLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
@@ -877,18 +877,23 @@ public class DomainFactory {
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now));
+        List<TaskListFragment.ChildTaskData> childTaskDatas = Stream.of(task.getChildTasks(now))
+                .map(childTask -> new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
+                .collect(Collectors.toList());
+        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
+
+        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()));
     }
 
     @NonNull
-    public synchronized TaskListLoader.Data getTaskListData(@NonNull Context context, @Nullable TaskKey taskKey) {
+    public synchronized MainLoader.Data getMainData(@NonNull Context context) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getTaskListData");
+        MyCrashlytics.log("DomainFactory.getMainData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return getTaskListData(now, context, taskKey);
+        return new MainLoader.Data(getMainData(now, context, null));
     }
 
     @NonNull
@@ -1347,11 +1352,9 @@ public class DomainFactory {
         return task.getTaskKey();
     }
 
-    public synchronized void setTaskEndTimeStamp(@NonNull Context context, @NonNull ArrayList<Integer> dataIds, @NonNull TaskKey taskKey) {
+    public synchronized void setTaskEndTimeStamp(@NonNull Context context, int dataId, @NonNull TaskKey taskKey) {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp");
         Assert.assertTrue(mRemoteFactory == null || !mRemoteFactory.isSaved());
-
-        Assert.assertTrue(!dataIds.isEmpty());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1362,7 +1365,7 @@ public class DomainFactory {
 
         updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
 
-        save(context, dataIds);
+        save(context, dataId);
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {
@@ -2142,19 +2145,19 @@ public class DomainFactory {
     }
 
     @NonNull
-    TaskListLoader.Data getTaskListData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable TaskKey taskKey) {
+    TaskListFragment.TaskData getMainData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable TaskKey taskKey) {
         List<TaskListFragment.ChildTaskData> childTaskDatas;
         String note;
 
         if (taskKey != null) {
-            Task parentTask = getTaskForce(taskKey);
+            Task task = getTaskForce(taskKey);
 
-            List<Task> tasks = parentTask.getChildTasks(now);
-            childTaskDatas = Stream.of(tasks)
-                    .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+            List<Task> childTasks = task.getChildTasks(now);
+            childTaskDatas = Stream.of(childTasks)
+                    .map(childTask -> new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
                     .collect(Collectors.toList());
 
-            note = parentTask.getNote();
+            note = task.getNote();
         } else {
             childTaskDatas = getTasks()
                     .filter(task -> task.current(now))
@@ -2170,7 +2173,7 @@ public class DomainFactory {
         if (taskKey == null)
             Collections.reverse(childTaskDatas);
 
-        return new TaskListLoader.Data(new TaskListFragment.TaskData(childTaskDatas, note));
+        return new TaskListFragment.TaskData(childTaskDatas, note);
     }
 
     @NonNull

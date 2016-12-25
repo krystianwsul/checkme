@@ -28,8 +28,6 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 public class ShowInstanceActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data>, GroupListFragment.GroupListListener {
     private static final String INSTANCE_KEY = "instanceKey";
     private static final String SET_NOTIFIED_KEY = "setNotified";
@@ -151,13 +149,10 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
-                ArrayList<Integer> dataIds = new ArrayList<>();
-                dataIds.add(mDataId);
-
                 if (!mInstanceData.mExists)
                     getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceKey.mTaskKey);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, mDataId, mInstanceKey.mTaskKey);
 
                 if (!mInstanceData.mExists)
                     finish();

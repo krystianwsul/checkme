@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,7 +33,6 @@ import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
 import com.krystianwsul.checkme.gui.tree.TreeNode;
 import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
 import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
-import com.krystianwsul.checkme.loaders.TaskListLoader;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -47,7 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<TaskListLoader.Data> {
+public class TaskListFragment extends AbstractFragment {
     private static final String SELECTED_TASK_KEYS_KEY = "selectedTaskKeys";
     private static final String EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys";
 
@@ -60,7 +57,11 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     @Nullable
     private TaskKey mTaskKey;
 
-    private TaskListLoader.Data mData;
+    @Nullable
+    private Integer mDataId;
+
+    @Nullable
+    private TaskData mTaskData;
 
     private TreeViewAdapter mTreeViewAdapter;
 
@@ -106,6 +107,8 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                         startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mTaskKey));
                     break;
                 case R.id.action_task_delete:
+                    Assert.assertTrue(mDataId != null);
+
                     do {
                         TreeNode treeNode = selected.get(0);
                         Assert.assertTrue(treeNode != null);
@@ -117,7 +120,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                         decrementSelected();
                     } while (!(selected = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mData.DataId, taskKeys);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mDataId, taskKeys);
 
                     updateSelectAll();
 
@@ -280,11 +283,11 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
     @Nullable
     public String getShareData() {
-        Assert.assertTrue(mData != null);
+        Assert.assertTrue(mTaskData != null);
 
         List<String> lines = new ArrayList<>();
 
-        for (ChildTaskData childTaskData : mData.mTaskData.mChildTaskDatas)
+        for (ChildTaskData childTaskData : mTaskData.mChildTaskDatas)
             printTree(lines, 1, childTaskData);
 
         return TextUtils.join("\n", lines);
@@ -368,18 +371,24 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         initialize();
     }
 
-    public void setAllTasks() {
+    public void setAllTasks(int dataId, @NonNull TaskData taskData) {
         Assert.assertTrue(mTaskKey == null);
 
         mAllTasks = true;
 
+        mDataId = dataId;
+        mTaskData = taskData;
+
         initialize();
     }
 
-    public void setTaskKey(@NonNull TaskKey taskKey) {
+    public void setTaskKey(@NonNull TaskKey taskKey, int dataId, @NonNull TaskData taskData) {
         Assert.assertTrue(!mAllTasks);
 
         mTaskKey = taskKey;
+
+        mDataId = dataId;
+        mTaskData = taskData;
 
         initialize();
     }
@@ -388,20 +397,10 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         if (getActivity() == null)
             return;
 
-        if (!mAllTasks && (mTaskKey == null))
+        if (mTaskData == null)
             return;
 
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
-    public Loader<TaskListLoader.Data> onCreateLoader(int id, Bundle args) {
-        return new TaskListLoader(getActivity(), mTaskKey);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<TaskListLoader.Data> loader, TaskListLoader.Data data) {
-        mData = data;
+        Assert.assertTrue(mDataId != null);
 
         if (mTreeViewAdapter != null) {
             List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
@@ -432,7 +431,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mTaskKey));
         });
 
-        mTreeViewAdapter = TaskAdapter.getAdapter(this, data, mSelectedTaskKeys, mExpandedTaskIds);
+        mTreeViewAdapter = TaskAdapter.getAdapter(this, mTaskData, mSelectedTaskKeys, mExpandedTaskIds);
 
         mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
@@ -440,7 +439,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         mTaskListFragmentFab.setVisibility(View.VISIBLE);
 
-        if (mData.mTaskData.mChildTaskDatas.isEmpty() && TextUtils.isEmpty(mData.mTaskData.mNote)) {
+        if (mTaskData.mChildTaskDatas.isEmpty() && TextUtils.isEmpty(mTaskData.mNote)) {
             mTaskListFragmentRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
 
@@ -462,10 +461,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         TaskAdapter taskAdapter = (TaskAdapter) mTreeViewAdapter.getTreeModelAdapter();
 
         ((TaskListListener) getActivity()).setTaskSelectAllVisibility(!taskAdapter.mTaskWrappers.isEmpty());
-    }
-
-    @Override
-    public void onLoaderReset(Loader<TaskListLoader.Data> loader) {
     }
 
     @Override
@@ -494,15 +489,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         }
     }
 
-    public int getDataId() {
-        Assert.assertTrue(mData != null);
-        return mData.DataId;
-    }
-
-    public void destroyLoader() {
-        getLoaderManager().destroyLoader(0);
-    }
-
     public void selectAll() {
         mTreeViewAdapter.selectAll();
     }
@@ -526,15 +512,12 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         private TreeNodeCollection mTreeNodeCollection;
 
         @NonNull
-        static TreeViewAdapter getAdapter(TaskListFragment taskListFragment, TaskListLoader.Data data, List<TaskKey> selectedTaskKeys, List<TaskKey> expandedTaskKeys) {
-            Assert.assertTrue(taskListFragment != null);
-            Assert.assertTrue(data != null);
-
+        static TreeViewAdapter getAdapter(@NonNull TaskListFragment taskListFragment, @NonNull TaskData taskData, @Nullable List<TaskKey> selectedTaskKeys, @Nullable List<TaskKey> expandedTaskKeys) {
             TaskAdapter taskAdapter = new TaskAdapter(taskListFragment);
 
             float density = taskListFragment.getActivity().getResources().getDisplayMetrics().density;
 
-            return taskAdapter.initialize(density, data, selectedTaskKeys, expandedTaskKeys);
+            return taskAdapter.initialize(density, taskData, selectedTaskKeys, expandedTaskKeys);
         }
 
         private TaskAdapter(@NonNull TaskListFragment taskListFragment) {
@@ -542,7 +525,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         }
 
         @NonNull
-        private TreeViewAdapter initialize(float density, @NonNull TaskListLoader.Data data, List<TaskKey> selectedTaskKeys, List<TaskKey> expandedTaskKeys) {
+        private TreeViewAdapter initialize(float density, @NonNull TaskData taskData, @Nullable List<TaskKey> selectedTaskKeys, @Nullable List<TaskKey> expandedTaskKeys) {
             mTreeViewAdapter = new TreeViewAdapter(false, this);
 
             mTreeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
@@ -551,15 +534,15 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
             List<TreeNode> treeNodes = new ArrayList<>();
 
-            if (!TextUtils.isEmpty(data.mTaskData.mNote)) {
-                NoteNode noteNode = new NoteNode(data.mTaskData.mNote);
+            if (!TextUtils.isEmpty(taskData.mNote)) {
+                NoteNode noteNode = new NoteNode(taskData.mNote);
 
                 treeNodes.add(noteNode.initialize(mTreeNodeCollection));
             }
 
             mTaskWrappers = new ArrayList<>();
 
-            for (ChildTaskData childTaskData : data.mTaskData.mChildTaskDatas) {
+            for (ChildTaskData childTaskData : taskData.mChildTaskDatas) {
                 Assert.assertTrue(childTaskData != null);
 
                 TaskWrapper taskWrapper = new TaskWrapper(density, 0, this, childTaskData);

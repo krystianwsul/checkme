@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
@@ -36,11 +37,15 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
         @Nullable
         public final String ScheduleText;
 
-        public Data(@NonNull String name, @Nullable String scheduleText) {
+        @NonNull
+        public final TaskListFragment.TaskData mTaskData;
+
+        public Data(@NonNull String name, @Nullable String scheduleText, @NonNull TaskListFragment.TaskData taskData) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;
             ScheduleText = scheduleText;
+            mTaskData = taskData;
         }
 
         @Override
@@ -49,6 +54,7 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
+            hashCode += mTaskData.hashCode();
             return hashCode;
         }
 
@@ -69,10 +75,10 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
             if (!Name.equals(data.Name))
                 return false;
 
-            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(data.ScheduleText))
+            if (TextUtils.equals(ScheduleText, data.ScheduleText))
                 return false;
 
-            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(data.ScheduleText))
+            if (!mTaskData.equals(data.mTaskData))
                 return false;
 
             return true;

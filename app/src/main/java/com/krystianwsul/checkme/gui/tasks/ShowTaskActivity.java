@@ -23,8 +23,6 @@ import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
-
 public class ShowTaskActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
     public static final String TASK_KEY_KEY = "taskKey";
 
@@ -129,7 +127,6 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         switch (item.getItemId()) {
             case R.id.task_menu_edit:
                 getSupportLoaderManager().destroyLoader(0);
-                mTaskListFragment.destroyLoader();
 
                 startActivityForResult(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mTaskKey), REQUEST_EDIT_TASK);
                 break;
@@ -150,12 +147,8 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
                 Assert.assertTrue(taskListFragment != null);
 
                 getSupportLoaderManager().destroyLoader(0);
-                taskListFragment.destroyLoader();
 
-                ArrayList<Integer> dataIds = new ArrayList<>();
-                dataIds.add(mData.DataId);
-                dataIds.add(taskListFragment.getDataId());
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mTaskKey);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, mData.DataId, mTaskKey);
 
                 finish();
                 break;
@@ -192,7 +185,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
         invalidateOptionsMenu();
 
-        mTaskListFragment.setTaskKey(mTaskKey);
+        mTaskListFragment.setTaskKey(mTaskKey, data.DataId, data.mTaskData);
     }
 
     @Override

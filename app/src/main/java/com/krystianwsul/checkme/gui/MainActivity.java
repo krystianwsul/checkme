@@ -10,6 +10,8 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
@@ -52,6 +54,7 @@ import com.krystianwsul.checkme.gui.instances.DayFragment;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
+import com.krystianwsul.checkme.loaders.MainLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 
 import junit.framework.Assert;
@@ -60,7 +63,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, FriendListFragment.Listener {
+public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, FriendListFragment.Listener, LoaderManager.LoaderCallbacks<MainLoader.Data> {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
@@ -89,8 +92,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private FrameLayout mMainCustomTimesFrame;
     private FrameLayout mMainFriendListFrame;
     private FrameLayout mMainDebugFrame;
-
     private DrawerLayout mMainActivityDrawer;
+
+    private TaskListFragment mTaskListFragment;
 
     @Nullable
     private DrawerLayout.DrawerListener mDrawerTaskListener;
@@ -299,22 +303,22 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_task_list_frame);
+        mTaskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_task_list_frame);
         Fragment projectListFragment = fragmentManager.findFragmentById(R.id.main_project_frame);
         Fragment userListFragment = fragmentManager.findFragmentById(R.id.main_friend_list_frame);
         Fragment showCustomTimesFragment = fragmentManager.findFragmentById(R.id.main_custom_times_frame);
         Fragment debugFragment = fragmentManager.findFragmentById(R.id.main_debug_frame);
 
-        if (taskListFragment == null) {
+        if (mTaskListFragment == null) {
             Assert.assertTrue(showCustomTimesFragment == null);
             Assert.assertTrue(debugFragment == null);
             Assert.assertTrue(projectListFragment == null);
             Assert.assertTrue(userListFragment == null);
 
-            taskListFragment = TaskListFragment.newInstance();
+            mTaskListFragment = TaskListFragment.newInstance();
 
             fragmentManager.beginTransaction()
-                    .add(R.id.main_task_list_frame, taskListFragment)
+                    .add(R.id.main_task_list_frame, mTaskListFragment)
                     .add(R.id.main_project_frame, ProjectListFragment.newInstance())
                     .add(R.id.main_friend_list_frame, FriendListFragment.newInstance())
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
@@ -325,8 +329,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(debugFragment != null);
             Assert.assertTrue(projectListFragment != null);
         }
-
-        taskListFragment.setAllTasks();
 
         mDaysPager = (ViewPager) findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);
@@ -488,6 +490,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 .build();
 
         mFirebaseAuth = FirebaseAuth.getInstance();
+
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -495,6 +499,23 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         super.onStart();
 
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+    }
+
+    @Override
+    public Loader<MainLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new MainLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<MainLoader.Data> loader, MainLoader.Data data) {
+        Assert.assertTrue(data != null);
+
+        mTaskListFragment.setAllTasks(data.DataId, data.mTaskData);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<MainLoader.Data> loader) {
+
     }
 
     @Override

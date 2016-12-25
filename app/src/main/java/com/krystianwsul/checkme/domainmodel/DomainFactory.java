@@ -1647,7 +1647,7 @@ public class DomainFactory {
     }
 
     public synchronized void deleteProjects(@NonNull Context context, int dataId, @NonNull Set<String> projectIds) {
-        MyCrashlytics.log("DomainFactory.createProject");
+        MyCrashlytics.log("DomainFactory.deleteProjects");
 
         Assert.assertTrue(mRemoteFactory != null);
         Assert.assertTrue(mUserData != null);
@@ -1668,6 +1668,7 @@ public class DomainFactory {
         Assert.assertTrue(userKeys.contains(key));
         userKeys.remove(key);
 
+        // todo set end time instead of deleting, add to irrelevant algorithm
         Stream.of(remoteProjects)
                 .forEach(RemoteProject::delete);
 

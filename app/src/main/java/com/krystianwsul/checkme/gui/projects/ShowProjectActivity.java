@@ -79,6 +79,8 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
                 if (updateError())
                     break;
 
+                getSupportLoaderManager().destroyLoader(0);
+
                 mUserListFragment.save(mToolbarEditText.getText().toString());
 
                 finish();

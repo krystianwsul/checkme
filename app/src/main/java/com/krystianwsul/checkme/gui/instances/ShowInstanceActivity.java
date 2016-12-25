@@ -115,7 +115,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.IsRootInstance);
 
-                startActivity(EditInstanceActivity.getIntent(this, mInstanceData.InstanceKey));
+                startActivity(EditInstanceActivity.getIntent(this, mInstanceKey));
                 break;
             case R.id.instance_menu_share:
                 Assert.assertTrue(mInstanceData != null);
@@ -134,9 +134,8 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
                 getSupportLoaderManager().destroyLoader(0);
-                mGroupListFragment.destroyLoader();
 
-                startActivityForResult(ShowTaskActivity.newIntent(this, mInstanceData.InstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
+                startActivityForResult(ShowTaskActivity.newIntent(this, mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
                 break;
             case R.id.instance_menu_edit_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -144,9 +143,8 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(mInstanceData.TaskCurrent);
 
                 getSupportLoaderManager().destroyLoader(0);
-                mGroupListFragment.destroyLoader();
 
-                startActivityForResult(CreateTaskActivity.getEditIntent(this, mInstanceData.InstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
+                startActivityForResult(CreateTaskActivity.getEditIntent(this, mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
                 break;
             case R.id.instance_menu_delete_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -156,12 +154,10 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mDataId);
 
-                if (!mInstanceData.mExists) {
+                if (!mInstanceData.mExists)
                     getSupportLoaderManager().destroyLoader(0);
-                    mGroupListFragment.destroyLoader();
-                }
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceData.InstanceKey.mTaskKey);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mInstanceKey.mTaskKey);
 
                 if (!mInstanceData.mExists)
                     finish();
@@ -205,8 +201,6 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
         Assert.assertTrue(mGroupListFragment != null);
 
-        mGroupListFragment.setInstanceKey(mInstanceKey);
-
         getSupportLoaderManager().initLoader(0, null, this);
 
         NotificationWrapper.getInstance().cleanGroup(this, null);
@@ -231,7 +225,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-            DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, mInstanceData.InstanceKey);
+            DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, mInstanceKey);
         }
 
         mActionBar.setTitle(mInstanceData.Name);
@@ -242,10 +236,12 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
             mActionBar.setSubtitle(mInstanceData.DisplayText);
 
         invalidateOptionsMenu();
+
+        mGroupListFragment.setInstanceKey(mInstanceKey, data.DataId, mInstanceData.mDataWrapper);
     }
 
     private void setDone(boolean done) {
-        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mDataId, mInstanceData.InstanceKey, done);
+        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mDataId, mInstanceKey, done);
         mInstanceData.Done = done;
 
         invalidateOptionsMenu();
@@ -286,6 +282,5 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         }
 
         getSupportLoaderManager().initLoader(0, null, this);
-        mGroupListFragment.initLoader(mInstanceKey);
     }
 }

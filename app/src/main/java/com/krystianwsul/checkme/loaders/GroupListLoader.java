@@ -32,34 +32,25 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     private final MainActivity.TimeRange mTimeRange;
 
     @Nullable
-    private final InstanceKey mInstanceKey;
-
-    @Nullable
     private final ArrayList<InstanceKey> mInstanceKeys;
 
-    public GroupListLoader(@NonNull Context context, @Nullable InstanceKey instanceKey, @Nullable ArrayList<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
-        super(context, needsFirebase(instanceKey, instanceKeys, position));
+    public GroupListLoader(@NonNull Context context, @Nullable ArrayList<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
+        super(context, needsFirebase(instanceKeys, position));
 
-        Log.e("asdf", "GroupListLoader needs firebase? " + needsFirebase(instanceKey, instanceKeys, position));
+        Log.e("asdf", "GroupListLoader needs firebase? " + needsFirebase(instanceKeys, position));
 
         Assert.assertTrue((position == null) == (timeRange == null));
-        Assert.assertTrue((position != null ? 1 : 0) + (instanceKey != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
+        Assert.assertTrue((position != null ? 1 : 0) + (instanceKeys != null ? 1 : 0) == 1);
 
         mPosition = position;
         mTimeRange = timeRange;
-        mInstanceKey = instanceKey;
         mInstanceKeys = instanceKeys;
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
     @NonNull
-    private static FirebaseLevel needsFirebase(@Nullable InstanceKey instanceKey, @Nullable List<InstanceKey> instanceKeys, @Nullable Integer position) {
-        if (instanceKey != null) {
-            Assert.assertTrue(instanceKeys == null);
-            Assert.assertTrue(position == null);
-
-            return (instanceKey.getType() == TaskKey.Type.REMOTE ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
-        } else if (instanceKeys != null) {
+    private static FirebaseLevel needsFirebase(@Nullable List<InstanceKey> instanceKeys, @Nullable Integer position) {
+        if (instanceKeys != null) {
             Assert.assertTrue(position == null);
 
             return (Stream.of(instanceKeys)
@@ -74,7 +65,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     @Override
     String getName() {
-        return "GroupListLoader, position: " + mPosition + ", timeRange: " + mTimeRange + ", instanceKey: " + mInstanceKey + ", instanceKeys: " + mInstanceKeys;
+        return "GroupListLoader, position: " + mPosition + ", timeRange: " + mTimeRange + ", instanceKeys: " + mInstanceKeys;
     }
 
     @Override
@@ -82,14 +73,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
         if (mPosition != null) {
             Assert.assertTrue(mTimeRange != null);
 
-            Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
             return domainFactory.getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
-        } else if (mInstanceKey != null) {
-            Assert.assertTrue(mInstanceKeys == null);
-
-            return domainFactory.getGroupListData(mInstanceKey);
         } else {
             Assert.assertTrue(mInstanceKeys != null);
             Assert.assertTrue(!mInstanceKeys.isEmpty());

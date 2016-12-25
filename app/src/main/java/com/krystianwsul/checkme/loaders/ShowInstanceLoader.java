@@ -61,20 +61,19 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
 
             Data data = (Data) object;
 
-            if ((mInstanceData == null) != (data.mInstanceData == null))
-                return false;
-
-            if ((mInstanceData != null) && !mInstanceData.equals(data.mInstanceData))
-                return false;
+            if (mInstanceData == null) {
+                if (data.mInstanceData != null)
+                    return false;
+            } else {
+                if (!mInstanceData.equals(data.mInstanceData))
+                    return false;
+            }
 
             return true;
         }
     }
 
     public static class InstanceData {
-        @NonNull
-        public final InstanceKey InstanceKey;
-
         @NonNull
         public final String Name;
 
@@ -86,22 +85,24 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final boolean IsRootInstance;
         public final boolean mExists;
 
-        public InstanceData(@NonNull InstanceKey instanceKey, @NonNull String name, @Nullable String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, boolean exists) {
+        @NonNull
+        public final GroupListLoader.DataWrapper mDataWrapper;
+
+        public InstanceData(@NonNull String name, @Nullable String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, boolean exists, @NonNull GroupListLoader.DataWrapper dataWrapper) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
-            InstanceKey = instanceKey;
             Name = name;
             DisplayText = displayText;
             Done = done;
             TaskCurrent = taskCurrent;
             IsRootInstance = isRootInstance;
             mExists = exists;
+            mDataWrapper = dataWrapper;
         }
 
         @Override
         public int hashCode() {
             int hashCode = 0;
-            hashCode += InstanceKey.hashCode();
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(DisplayText))
                 hashCode += DisplayText.hashCode();
@@ -109,6 +110,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             hashCode += (TaskCurrent ? 1 : 0);
             hashCode += (IsRootInstance ? 1 : 0);
             hashCode += (mExists ? 1 : 0);
+            hashCode += mDataWrapper.hashCode();
             return hashCode;
         }
 
@@ -126,16 +128,10 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
 
             InstanceData instanceData = (InstanceData) object;
 
-            if (!InstanceKey.equals(instanceData.InstanceKey))
-                return false;
-
             if (!Name.equals(instanceData.Name))
                 return false;
 
-            if (TextUtils.isEmpty(DisplayText) != TextUtils.isEmpty(instanceData.DisplayText))
-                return false;
-
-            if (!TextUtils.isEmpty(DisplayText) && !DisplayText.equals(instanceData.DisplayText))
+            if (TextUtils.equals(DisplayText, instanceData.DisplayText))
                 return false;
 
             if (Done != instanceData.Done)
@@ -148,6 +144,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
                 return false;
 
             if (mExists != instanceData.mExists)
+                return false;
+
+            if (!mDataWrapper.equals(instanceData.mDataWrapper))
                 return false;
 
             return true;

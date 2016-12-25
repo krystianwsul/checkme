@@ -595,16 +595,16 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         initialize(dataId, dataWrapper);
     }
 
-    public void setInstanceKey(@NonNull InstanceKey instanceKey) {
+    public void setInstanceKey(@NonNull InstanceKey instanceKey, int dataId, @NonNull GroupListLoader.DataWrapper dataWrapper) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
-        Assert.assertTrue(mInstanceKey == null);
+        Assert.assertTrue(mInstanceKey == null || mInstanceKey.equals(instanceKey));
         Assert.assertTrue(mInstanceKeys == null);
 
         mInstanceKey = instanceKey;
 
-        getLoaderManager().initLoader(0, null, this);
+        initialize(dataId, dataWrapper);
     }
 
     public void setInstanceKeys(@NonNull ArrayList<InstanceKey> instanceKeys) {
@@ -650,8 +650,9 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     @Override
     public Loader<GroupListLoader.Data> onCreateLoader(int id, Bundle args) {
         Assert.assertTrue(mTimeStamp == null);
+        Assert.assertTrue(mInstanceKey == null);
 
-        return new GroupListLoader(getActivity(), mInstanceKey, mInstanceKeys, mPosition, mTimeRange);
+        return new GroupListLoader(getActivity(), mInstanceKeys, mPosition, mTimeRange);
     }
 
     @Override
@@ -3577,17 +3578,5 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
 
     public void selectAll() {
         mTreeViewAdapter.selectAll();
-    }
-
-    public void destroyLoader() {
-        getLoaderManager().destroyLoader(0);
-    }
-
-    public void initLoader(@NonNull InstanceKey instanceKey) {
-        Assert.assertTrue(mInstanceKey != null);
-
-        mInstanceKey = instanceKey;
-
-        getLoaderManager().initLoader(0, null, this);
     }
 }

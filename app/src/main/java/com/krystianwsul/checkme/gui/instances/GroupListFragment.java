@@ -592,9 +592,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         }
     }
 
-    private void setAll(MainActivity.TimeRange timeRange, int position) {
-        Assert.assertTrue(timeRange != null);
-
+    private void setAll(@NonNull MainActivity.TimeRange timeRange, int position) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
@@ -609,40 +607,37 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         getLoaderManager().initLoader(0, null, this);
     }
 
-    public void setTimeStamp(TimeStamp timeStamp) {
+    public void setTimeStamp(@NonNull TimeStamp timeStamp) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
 
-        Assert.assertTrue(timeStamp != null);
         mTimeStamp = timeStamp;
 
         getLoaderManager().initLoader(0, null, this);
     }
 
-    public void setInstanceKey(InstanceKey instanceKey) {
+    public void setInstanceKey(@NonNull InstanceKey instanceKey) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
 
-        Assert.assertTrue(instanceKey != null);
         mInstanceKey = instanceKey;
 
         getLoaderManager().initLoader(0, null, this);
     }
 
-    public void setInstanceKeys(ArrayList<InstanceKey> instanceKeys) {
+    public void setInstanceKeys(@NonNull ArrayList<InstanceKey> instanceKeys) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
         Assert.assertTrue(mInstanceKeys == null);
 
-        Assert.assertTrue(instanceKeys != null);
         mInstanceKeys = instanceKeys;
 
         getLoaderManager().initLoader(0, null, this);

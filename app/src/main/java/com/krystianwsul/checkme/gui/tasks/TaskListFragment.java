@@ -38,6 +38,7 @@ import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.TaskListLoader;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
@@ -78,7 +79,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                     .map(treeNode -> ((TaskAdapter.TaskWrapper) treeNode.getModelNode()))
                     .collect(Collectors.toList());
 
-            List<TaskListLoader.ChildTaskData> childTaskDatas = Stream.of(taskWrappers)
+            List<ChildTaskData> childTaskDatas = Stream.of(taskWrappers)
                     .map(taskWrapper -> taskWrapper.mChildTaskData)
                     .collect(Collectors.toList());
 
@@ -94,7 +95,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 case R.id.action_task_edit:
                     Assert.assertTrue(selected.size() == 1);
 
-                    TaskListLoader.ChildTaskData childTaskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
+                    ChildTaskData childTaskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
 
                     startActivity(CreateTaskActivity.getEditIntent(getActivity(), childTaskData.mTaskKey));
                     break;
@@ -124,7 +125,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 case R.id.action_task_add:
                     Assert.assertTrue(selected.size() == 1);
 
-                    TaskListLoader.ChildTaskData childTaskData1 = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
+                    ChildTaskData childTaskData1 = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
                     Assert.assertTrue(childTaskData1 != null);
 
                     startActivity(CreateTaskActivity.getCreateIntent(getActivity(), childTaskData1.mTaskKey));
@@ -257,12 +258,12 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     };
 
     @NonNull
-    private String getShareData(@NonNull List<TaskListLoader.ChildTaskData> childTaskDatas) {
+    private String getShareData(@NonNull List<ChildTaskData> childTaskDatas) {
         Assert.assertTrue(!childTaskDatas.isEmpty());
 
-        List<TaskListLoader.ChildTaskData> tree = new ArrayList<>();
+        List<ChildTaskData> tree = new ArrayList<>();
 
-        for (TaskListLoader.ChildTaskData childTaskData : childTaskDatas) {
+        for (ChildTaskData childTaskData : childTaskDatas) {
             Assert.assertTrue(childTaskData != null);
 
             if (!inTree(tree, childTaskData))
@@ -271,7 +272,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         List<String> lines = new ArrayList<>();
 
-        for (TaskListLoader.ChildTaskData childTaskData : tree)
+        for (ChildTaskData childTaskData : tree)
             printTree(lines, 0, childTaskData);
 
         return TextUtils.join("\n", lines);
@@ -283,14 +284,14 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         List<String> lines = new ArrayList<>();
 
-        for (TaskListLoader.ChildTaskData childTaskData : mData.mChildTaskDatas)
+        for (ChildTaskData childTaskData : mData.mTaskData.mChildTaskDatas)
             printTree(lines, 1, childTaskData);
 
         return TextUtils.join("\n", lines);
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
-    private boolean inTree(@NonNull List<TaskListLoader.ChildTaskData> shareTree, @NonNull TaskListLoader.ChildTaskData childTaskData) {
+    private boolean inTree(@NonNull List<ChildTaskData> shareTree, @NonNull ChildTaskData childTaskData) {
         if (shareTree.isEmpty())
             return false;
 
@@ -301,7 +302,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 .anyMatch(currChildTaskData -> inTree(currChildTaskData.Children, childTaskData));
     }
 
-    private void printTree(@NonNull List<String> lines, int indentation, @NonNull TaskListLoader.ChildTaskData childTaskData) {
+    private void printTree(@NonNull List<String> lines, int indentation, @NonNull ChildTaskData childTaskData) {
         lines.add(StringUtils.repeat("-", indentation) + childTaskData.Name);
 
         Stream.of(childTaskData.Children)
@@ -439,7 +440,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
         mTaskListFragmentFab.setVisibility(View.VISIBLE);
 
-        if (mData.mChildTaskDatas.isEmpty() && TextUtils.isEmpty(mData.mNote)) {
+        if (mData.mTaskData.mChildTaskDatas.isEmpty() && TextUtils.isEmpty(mData.mTaskData.mNote)) {
             mTaskListFragmentRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
 
@@ -550,15 +551,15 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
             List<TreeNode> treeNodes = new ArrayList<>();
 
-            if (!TextUtils.isEmpty(data.mNote)) {
-                NoteNode noteNode = new NoteNode(data.mNote);
+            if (!TextUtils.isEmpty(data.mTaskData.mNote)) {
+                NoteNode noteNode = new NoteNode(data.mTaskData.mNote);
 
                 treeNodes.add(noteNode.initialize(mTreeNodeCollection));
             }
 
             mTaskWrappers = new ArrayList<>();
 
-            for (TaskListLoader.ChildTaskData childTaskData : data.mChildTaskDatas) {
+            for (ChildTaskData childTaskData : data.mTaskData.mChildTaskDatas) {
                 Assert.assertTrue(childTaskData != null);
 
                 TaskWrapper taskWrapper = new TaskWrapper(density, 0, this, childTaskData);
@@ -667,7 +668,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             @NonNull
             private final TaskParent mTaskParent;
 
-            final TaskListLoader.ChildTaskData mChildTaskData;
+            final ChildTaskData mChildTaskData;
 
             private TreeNode mTreeNode;
 
@@ -676,7 +677,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
             private final float mDensity;
             private final int mIndentation;
 
-            TaskWrapper(float density, int indentation, @NonNull TaskParent taskParent, @NonNull TaskListLoader.ChildTaskData childTaskData) {
+            TaskWrapper(float density, int indentation, @NonNull TaskParent taskParent, @NonNull ChildTaskData childTaskData) {
                 mDensity = density;
                 mIndentation = indentation;
                 mTaskParent = taskParent;
@@ -703,7 +704,7 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
                 List<TreeNode> treeNodes = new ArrayList<>();
 
-                for (TaskListLoader.ChildTaskData childTaskData : mChildTaskData.Children) {
+                for (ChildTaskData childTaskData : mChildTaskData.Children) {
                     Assert.assertTrue(childTaskData != null);
 
                     TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, this, childTaskData);
@@ -1017,5 +1018,134 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
         TaskAdapter getTaskAdapter();
 
         void remove(@NonNull TaskAdapter.TaskWrapper taskWrapper);
+    }
+
+    public static class TaskData {
+        @NonNull
+        public final List<ChildTaskData> mChildTaskDatas;
+
+        @Nullable
+        final String mNote;
+
+        public TaskData(@NonNull List<ChildTaskData> childTaskDatas, @Nullable String note) {
+            mChildTaskDatas = childTaskDatas;
+            mNote = note;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = mChildTaskDatas.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hashCode += mNote.hashCode();
+            return hashCode;
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof TaskData))
+                return false;
+
+            TaskData taskData = (TaskData) object;
+
+            if (!mChildTaskDatas.equals(taskData.mChildTaskDatas))
+                return false;
+
+            if (TextUtils.equals(mNote, taskData.mNote))
+                return false;
+
+            return true;
+        }
+    }
+
+    public static class ChildTaskData {
+        @NonNull
+        public final String Name;
+
+        @Nullable
+        final String ScheduleText;
+
+        @NonNull
+        public final List<ChildTaskData> Children;
+
+        @Nullable
+        final String mNote;
+
+        @NonNull
+        public final ExactTimeStamp mStartExactTimeStamp;
+
+        @NonNull
+        public final TaskKey mTaskKey;
+
+        public ChildTaskData(@NonNull String name, @Nullable String scheduleText, @NonNull List<ChildTaskData> children, @Nullable String note, @NonNull ExactTimeStamp startExactTimeStamp, @NonNull TaskKey taskKey) {
+            Assert.assertTrue(!TextUtils.isEmpty(name));
+
+            Name = name;
+            ScheduleText = scheduleText;
+            Children = children;
+            mNote = note;
+            mStartExactTimeStamp = startExactTimeStamp;
+            mTaskKey = taskKey;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = Name.hashCode();
+            if (!TextUtils.isEmpty(ScheduleText))
+                hashCode += ScheduleText.hashCode();
+            hashCode += Children.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hashCode += mNote.hashCode();
+            hashCode += mStartExactTimeStamp.hashCode();
+            hashCode += mTaskKey.hashCode();
+            return hashCode;
+        }
+
+        @SuppressWarnings("RedundantIfStatement")
+        @Override
+        public boolean equals(Object object) {
+            if (object == null)
+                return false;
+
+            if (object == this)
+                return true;
+
+            if (!(object instanceof ChildTaskData))
+                return false;
+
+            ChildTaskData childTaskData = (ChildTaskData) object;
+
+            if (!Name.equals(childTaskData.Name))
+                return false;
+
+            if (TextUtils.isEmpty(ScheduleText) != TextUtils.isEmpty(childTaskData.ScheduleText))
+                return false;
+
+            if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(childTaskData.ScheduleText))
+                return false;
+
+            if (!Children.equals(childTaskData.Children))
+                return false;
+
+            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(childTaskData.mNote))
+                return false;
+
+            if (!TextUtils.isEmpty(mNote) && !mNote.equals(childTaskData.mNote))
+                return false;
+
+            if (!mStartExactTimeStamp.equals(childTaskData.mStartExactTimeStamp))
+                return false;
+
+            if (!mTaskKey.equals(childTaskData.mTaskKey))
+                return false;
+
+            return true;
+        }
     }
 }

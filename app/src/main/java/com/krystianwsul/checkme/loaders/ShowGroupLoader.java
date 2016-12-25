@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -35,10 +36,10 @@ public class ShowGroupLoader extends DomainLoader<ShowGroupLoader.Data> {
         public final String mDisplayText;
 
         @Nullable
-        public final GroupListLoader.DataWrapper mDataWrapper;
+        public final GroupListFragment.DataWrapper mDataWrapper;
 
 
-        public Data(@NonNull String displayText, @Nullable GroupListLoader.DataWrapper dataWrapper) {
+        public Data(@NonNull String displayText, @Nullable GroupListFragment.DataWrapper dataWrapper) {
             Assert.assertTrue(!TextUtils.isEmpty(displayText));
 
             mDisplayText = displayText;

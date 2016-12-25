@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 
@@ -86,9 +87,9 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
         public final boolean mExists;
 
         @NonNull
-        public final GroupListLoader.DataWrapper mDataWrapper;
+        public final GroupListFragment.DataWrapper mDataWrapper;
 
-        public InstanceData(@NonNull String name, @Nullable String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, boolean exists, @NonNull GroupListLoader.DataWrapper dataWrapper) {
+        public InstanceData(@NonNull String name, @Nullable String displayText, boolean done, boolean taskCurrent, boolean isRootInstance, boolean exists, @NonNull GroupListFragment.DataWrapper dataWrapper) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;

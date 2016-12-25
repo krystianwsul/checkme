@@ -35,11 +35,12 @@ import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.RemoteUser;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
+import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.loaders.DayLoader;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.FriendListLoader;
-import com.krystianwsul.checkme.loaders.GroupListLoader;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
@@ -535,7 +536,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
+    public synchronized DayLoader.Data getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getShowNotificationGroupData");
@@ -591,31 +592,31 @@ public class DomainFactory {
 
         List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
-                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        List<GroupListLoader.TaskData> taskDatas = null;
+        List<GroupListFragment.TaskData> taskDatas = null;
         if (position == 0) {
             taskDatas = getTasks()
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
                     .filter(task -> task.getCurrentSchedules(now).isEmpty())
-                    .map(task -> new GroupListLoader.TaskData(task.getTaskKey(), task.getName(), getChildTaskDatas(task, now), task.getStartExactTimeStamp()))
+                    .map(task -> new GroupListFragment.TaskData(task.getTaskKey(), task.getName(), getChildTaskDatas(task, now), task.getStartExactTimeStamp()))
                     .collect(Collectors.toList());
         }
 
-        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, taskDatas, null);
-        GroupListLoader.Data data = new GroupListLoader.Data(dataWrapper);
+        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null);
+        DayLoader.Data data = new DayLoader.Data(dataWrapper);
 
-        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
             Task task = instance.getTask();
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instanceData.InstanceKey, instanceData);
         }
@@ -670,19 +671,19 @@ public class DomainFactory {
 
         Collections.sort(instances, (lhs, rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));
 
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
-                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, null, null);
+        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, null, null);
 
-        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : instances) {
             Task task = instance.getTask();
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
@@ -1873,15 +1874,15 @@ public class DomainFactory {
     }
 
     @NonNull
-    private HashMap<InstanceKey, GroupListLoader.InstanceData> getChildInstanceDatas(@NonNull Instance instance, @NonNull ExactTimeStamp now, @NonNull GroupListLoader.InstanceDataParent instanceDataParent) {
-        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
+    private HashMap<InstanceKey, GroupListFragment.InstanceData> getChildInstanceDatas(@NonNull Instance instance, @NonNull ExactTimeStamp now, @NonNull GroupListFragment.InstanceDataParent instanceDataParent) {
+        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
 
         for (Instance childInstance : instance.getChildInstances(now)) {
             Task childTask = childInstance.getTask();
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), instanceDataParent, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp());
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), instanceDataParent, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(childInstance, now, instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }
@@ -2133,9 +2134,9 @@ public class DomainFactory {
     }
 
     @NonNull
-    private List<GroupListLoader.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
+    private List<GroupListFragment.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
         return Stream.of(parentTask.getChildTasks(now))
-                .map(childTask -> new GroupListLoader.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp()))
+                .map(childTask -> new GroupListFragment.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp()))
                 .collect(Collectors.toList());
     }
 
@@ -2635,7 +2636,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private GroupListLoader.DataWrapper getGroupListData(@NonNull TimeStamp timeStamp, @NonNull ExactTimeStamp now) {
+    private GroupListFragment.DataWrapper getGroupListData(@NonNull TimeStamp timeStamp, @NonNull ExactTimeStamp now) {
         Calendar endCalendar = timeStamp.getCalendar();
         endCalendar.add(Calendar.MINUTE, 1);
         TimeStamp endTimeStamp = new TimeStamp(endCalendar);
@@ -2646,19 +2647,19 @@ public class DomainFactory {
                 .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 .collect(Collectors.toList());
 
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
-                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, null, null, null);
+        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, null, null);
 
-        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
         for (Instance instance : currentInstances) {
             Task task = instance.getTask();
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), dataWrapper, instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(instance, now, instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
@@ -2669,21 +2670,21 @@ public class DomainFactory {
     }
 
     @NonNull
-    private GroupListLoader.DataWrapper getGroupListData(@NonNull Instance instance, @NonNull Task task, @NonNull ExactTimeStamp now) {
-        HashMap<InstanceKey, GroupListLoader.InstanceData> instanceDatas = new HashMap<>();
+    private GroupListFragment.DataWrapper getGroupListData(@NonNull Instance instance, @NonNull Task task, @NonNull ExactTimeStamp now) {
+        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
 
-        List<GroupListLoader.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
-                .map(customTime -> new GroupListLoader.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        GroupListLoader.DataWrapper dataWrapper = new GroupListLoader.DataWrapper(customTimeDatas, task.current(now), null, task.getNote());
+        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, task.getNote());
 
         for (Instance childInstance : instance.getChildInstances(now)) {
             Task childTask = childInstance.getTask();
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
-            GroupListLoader.InstanceData instanceData = new GroupListLoader.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), dataWrapper, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp());
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), dataWrapper, childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp());
             instanceData.setChildren(getChildInstanceDatas(childInstance, now, instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }

@@ -3,45 +3,32 @@ package com.krystianwsul.checkme.loaders;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
-import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.TaskKey;
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
-import junit.framework.Assert;
-
-import java.util.Set;
-
-public class ShowNotificationGroupLoader extends DomainLoader<ShowNotificationGroupLoader.Data> {
-    @NonNull
-    private final Set<InstanceKey> mInstanceKeys;
-
-    public ShowNotificationGroupLoader(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
-        super(context, needsFirebase(instanceKeys));
-
-        Assert.assertTrue(!instanceKeys.isEmpty());
-
-        mInstanceKeys = instanceKeys;
-    }
+public class DayLoader extends DomainLoader<DayLoader.Data> {
+    private final int mPosition;
 
     @NonNull
-    private static FirebaseLevel needsFirebase(@NonNull Set<InstanceKey> instanceKeys) {
-        return (Stream.of(instanceKeys)
-                .map(InstanceKey::getType)
-                .anyMatch(type -> type == TaskKey.Type.REMOTE) ? FirebaseLevel.NEED : FirebaseLevel.NOTHING);
+    private final MainActivity.TimeRange mTimeRange;
+
+    public DayLoader(@NonNull Context context, int position, @NonNull MainActivity.TimeRange timeRange) {
+        super(context, FirebaseLevel.WANT);
+
+        mPosition = position;
+        mTimeRange = timeRange;
     }
 
     @Override
     String getName() {
-        return "ShowNotificationGroupLoader, instanceKeys: " + mInstanceKeys;
+        return "DayLoader, position: " + mPosition + ", timeRange: " + mTimeRange;
     }
 
     @Override
     public Data loadDomain(@NonNull DomainFactory domainFactory) {
-        Assert.assertTrue(!mInstanceKeys.isEmpty());
-
-        return domainFactory.getShowNotificationGroupData(getContext(), mInstanceKeys);
+        return domainFactory.getGroupListData(getContext(), ExactTimeStamp.getNow(), mPosition, mTimeRange);
     }
 
     public static class Data extends DomainLoader.Data {

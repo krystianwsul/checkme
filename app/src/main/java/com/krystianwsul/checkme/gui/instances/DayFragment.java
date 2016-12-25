@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import android.view.ViewGroup;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.MainActivity;
+import com.krystianwsul.checkme.loaders.DayLoader;
 import com.krystianwsul.checkme.utils.time.Date;
 
 import junit.framework.Assert;
@@ -22,9 +25,12 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class DayFragment extends AbstractFragment {
+public class DayFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<DayLoader.Data> {
     private static final String POSITION_KEY = "position";
     private static final String TIME_RANGE_KEY = "timeRange";
+
+    private int mPosition;
+    private MainActivity.TimeRange mTimeRange;
 
     private TabLayout mDayTabLayout;
     private GroupListFragment mGroupListFragment;
@@ -66,16 +72,16 @@ public class DayFragment extends AbstractFragment {
         Assert.assertTrue(args != null);
 
         Assert.assertTrue(args.containsKey(POSITION_KEY));
-        int position = args.getInt(POSITION_KEY);
-        Assert.assertTrue(position >= 0);
+        mPosition = args.getInt(POSITION_KEY);
+        Assert.assertTrue(mPosition >= 0);
 
         Assert.assertTrue(args.containsKey(TIME_RANGE_KEY));
-        MainActivity.TimeRange timeRange = (MainActivity.TimeRange) args.getSerializable(TIME_RANGE_KEY);
-        Assert.assertTrue(timeRange != null);
+        mTimeRange = (MainActivity.TimeRange) args.getSerializable(TIME_RANGE_KEY);
+        Assert.assertTrue(mTimeRange != null);
 
         String title;
-        if (timeRange == MainActivity.TimeRange.DAY) {
-            switch (position) {
+        if (mTimeRange == MainActivity.TimeRange.DAY) {
+            switch (mPosition) {
                 case 0:
                     title = getActivity().getString(R.string.today);
                     break;
@@ -84,22 +90,22 @@ public class DayFragment extends AbstractFragment {
                     break;
                 default:
                     Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.DATE, position);
+                    calendar.add(Calendar.DATE, mPosition);
                     Date date = new Date(calendar);
                     title = date.getDayOfWeek().toString() + ", " + date.toString();
             }
         } else {
-            if (timeRange == MainActivity.TimeRange.WEEK) {
+            if (mTimeRange == MainActivity.TimeRange.WEEK) {
                 Calendar start = Calendar.getInstance();
 
-                if (position > 0) {
-                    start.add(Calendar.WEEK_OF_YEAR, position);
+                if (mPosition > 0) {
+                    start.add(Calendar.WEEK_OF_YEAR, mPosition);
                     start.set(Calendar.DAY_OF_WEEK, start.getFirstDayOfWeek());
                 }
 
                 Calendar end = Calendar.getInstance();
 
-                end.add(Calendar.WEEK_OF_YEAR, position + 1);
+                end.add(Calendar.WEEK_OF_YEAR, mPosition + 1);
                 end.set(Calendar.DAY_OF_WEEK, end.getFirstDayOfWeek());
                 end.add(Calendar.DATE, -1);
 
@@ -110,10 +116,10 @@ public class DayFragment extends AbstractFragment {
 
                 title = dateFormat.format(startDate) + " - " + dateFormat.format(endDate);
             } else {
-                Assert.assertTrue(timeRange == MainActivity.TimeRange.MONTH);
+                Assert.assertTrue(mTimeRange == MainActivity.TimeRange.MONTH);
 
                 Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.MONTH, position);
+                calendar.add(Calendar.MONTH, mPosition);
 
                 int month = calendar.get(Calendar.MONTH);
 
@@ -127,7 +133,24 @@ public class DayFragment extends AbstractFragment {
         mGroupListFragment = (GroupListFragment) fragmentManager.findFragmentById(R.id.day_frame);
         Assert.assertTrue(mGroupListFragment != null);
 
-        mGroupListFragment.setAll(timeRange, position);
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<DayLoader.Data> onCreateLoader(int id, Bundle args) {
+        return new DayLoader(getActivity(), mPosition, mTimeRange);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DayLoader.Data> loader, DayLoader.Data data) {
+        Assert.assertTrue(data != null);
+
+        mGroupListFragment.setAll(mTimeRange, mPosition, data.DataId, data.mDataWrapper);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DayLoader.Data> loader) {
+
     }
 
     public void selectAll() {

@@ -15,7 +15,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.GroupListLoader;
+import com.krystianwsul.checkme.loaders.DayLoader;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -406,7 +406,7 @@ public class DomainFactoryTest {
         Task singleTask1 = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, "singleTask1", Collections.singletonList(singleData), null, null);
         Task singleTask2 = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, "singleTask2", Collections.singletonList(singleData), null, null);
 
-        GroupListLoader.Data twoInstancesData = domainFactory.getGroupListData(mContext, new ExactTimeStamp(singleDate, new HourMilli(2, 0, 0, 0)), 0, MainActivity.TimeRange.DAY);
+        DayLoader.Data twoInstancesData = domainFactory.getGroupListData(mContext, new ExactTimeStamp(singleDate, new HourMilli(2, 0, 0, 0)), 0, MainActivity.TimeRange.DAY);
         Assert.assertTrue(twoInstancesData.mDataWrapper.InstanceDatas.size() == 2);
 
         ExactTimeStamp doneExactTimeStamp = new ExactTimeStamp(startDate, new HourMilli(3, 0, 0, 0));
@@ -422,7 +422,7 @@ public class DomainFactoryTest {
 
         domainFactory.createScheduleJoinRootTask(mContext, joinExactTimeStamp, 0, "joinTask", Collections.singletonList(joinData), joinTaskKeys, null, null);
 
-        GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(singleDate, new HourMilli(6, 0, 0, 0)), 0, MainActivity.TimeRange.DAY);
+        DayLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(singleDate, new HourMilli(6, 0, 0, 0)), 0, MainActivity.TimeRange.DAY);
 
         Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 3);
     }
@@ -545,7 +545,7 @@ public class DomainFactoryTest {
         // works up to here
 
         {
-            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(day2, hour0.toHourMilli()), range1, MainActivity.TimeRange.DAY);
+            DayLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(day2, hour0.toHourMilli()), range1, MainActivity.TimeRange.DAY);
 
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 2);
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.get(firstTaskInstanceKey).Children.size() == 1);
@@ -557,7 +557,7 @@ public class DomainFactoryTest {
         domainFactory.setInstanceDone(mContext, new ExactTimeStamp(day2, hour1.toHourMilli()), dataId, secondTaskInstanceKey, true);
 
         {
-            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(day2, hour2.toHourMilli()), range1, MainActivity.TimeRange.DAY);
+            DayLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(day2, hour2.toHourMilli()), range1, MainActivity.TimeRange.DAY);
 
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 2);
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.get(firstTaskInstanceKey).Children.size() == 1);
@@ -609,7 +609,7 @@ public class DomainFactoryTest {
 
         InstanceKey parentInstanceKey;
         {
-            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY);
+            DayLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY);
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 1);
 
             parentInstanceKey = data.mDataWrapper.InstanceDatas.keySet().iterator().next();
@@ -663,7 +663,7 @@ public class DomainFactoryTest {
 
         InstanceKey splitInstanceKey;
         {
-            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY);
+            DayLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY);
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 1);
 
             splitInstanceKey = data.mDataWrapper.InstanceDatas.keySet().iterator().next();
@@ -675,7 +675,7 @@ public class DomainFactoryTest {
 
         InstanceKey parentInstanceKey;
         {
-            GroupListLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY);
+            DayLoader.Data data = domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY);
             Assert.assertTrue(data.mDataWrapper.InstanceDatas.size() == 2);
 
             parentInstanceKey = Stream.of(data.mDataWrapper.InstanceDatas.keySet())

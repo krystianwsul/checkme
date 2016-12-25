@@ -3,7 +3,7 @@ package com.krystianwsul.checkme;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.krystianwsul.checkme.loaders.GroupListLoader;
+import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;
@@ -16,13 +16,13 @@ import java.util.Map;
 public class DataDiff {
     private static List<String> sDiff;
 
-    public static void diffData(@NonNull GroupListLoader.DataWrapper oldData, @NonNull GroupListLoader.DataWrapper newData) {
+    public static void diffData(@NonNull GroupListFragment.DataWrapper oldData, @NonNull GroupListFragment.DataWrapper newData) {
         sDiff = new ArrayList<>();
 
         diffMap("", oldData.InstanceDatas, newData.InstanceDatas);
     }
 
-    private static void diffMap(String indent, Map<InstanceKey, GroupListLoader.InstanceData> oldInstanceDatas, Map<InstanceKey, GroupListLoader.InstanceData> newInstanceDatas) {
+    private static void diffMap(String indent, Map<InstanceKey, GroupListFragment.InstanceData> oldInstanceDatas, Map<InstanceKey, GroupListFragment.InstanceData> newInstanceDatas) {
         Assert.assertTrue(indent != null);
         Assert.assertTrue(oldInstanceDatas != null);
         Assert.assertTrue(newInstanceDatas != null);
@@ -38,7 +38,7 @@ public class DataDiff {
                 continue;
             }
 
-            GroupListLoader.InstanceData oldInstanceData = oldInstanceDatas.get(instanceKey);
+            GroupListFragment.InstanceData oldInstanceData = oldInstanceDatas.get(instanceKey);
             Assert.assertTrue(oldInstanceData != null);
 
             if (!newInstanceDatas.keySet().contains(instanceKey)) {
@@ -46,7 +46,7 @@ public class DataDiff {
                 continue;
             }
 
-            GroupListLoader.InstanceData newInstanceData = newInstanceDatas.get(instanceKey);
+            GroupListFragment.InstanceData newInstanceData = newInstanceDatas.get(instanceKey);
             Assert.assertTrue(newInstanceData != null);
 
             if (!oldInstanceData.equals(newInstanceData)) {
@@ -57,7 +57,7 @@ public class DataDiff {
         }
     }
 
-    private static void diffInstance(String indent, GroupListLoader.InstanceData oldInstanceData, GroupListLoader.InstanceData newInstanceData) {
+    private static void diffInstance(String indent, GroupListFragment.InstanceData oldInstanceData, GroupListFragment.InstanceData newInstanceData) {
         Assert.assertTrue(!TextUtils.isEmpty(indent));
         Assert.assertTrue(oldInstanceData != null);
         Assert.assertTrue(newInstanceData != null);

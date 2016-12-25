@@ -121,20 +121,13 @@ public class DayFragment extends AbstractFragment {
             }
         }
 
-        mDayTabLayout.setTabGravity(TabLayout.GRAVITY_CENTER);
         mDayTabLayout.addTab(mDayTabLayout.newTab().setText(title));
 
         FragmentManager fragmentManager = getChildFragmentManager();
         mGroupListFragment = (GroupListFragment) fragmentManager.findFragmentById(R.id.day_frame);
+        Assert.assertTrue(mGroupListFragment != null);
 
-        Assert.assertTrue((savedInstanceState == null) == (mGroupListFragment == null));
-
-        if (mGroupListFragment == null) {
-            mGroupListFragment = GroupListFragment.getGroupInstance(timeRange, position);
-            fragmentManager.beginTransaction()
-                    .add(R.id.day_frame, mGroupListFragment)
-                    .commit();
-        }
+        mGroupListFragment.setAll(timeRange, position);
     }
 
     public void selectAll() {

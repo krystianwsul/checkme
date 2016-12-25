@@ -71,9 +71,6 @@ import java.util.List;
 import java.util.Map;
 
 public class GroupListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
-    private final static String POSITION_KEY = "position";
-    private static final String TIME_RANGE_KEY = "timeRange";
-
     private final static String EXPANSION_STATE_KEY = "expansionState";
     private final static String SELECTED_NODES_KEY = "selectedNodes";
 
@@ -517,18 +514,6 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 .forEach(child -> printTree(lines, indentation + 1, child));
     }
 
-    @NonNull
-    public static GroupListFragment getGroupInstance(@NonNull MainActivity.TimeRange timeRange, int position) {
-        Assert.assertTrue(position >= 0);
-
-        GroupListFragment groupListFragment = new GroupListFragment();
-        Bundle args = new Bundle();
-        args.putInt(POSITION_KEY, position);
-        args.putSerializable(TIME_RANGE_KEY, timeRange);
-        groupListFragment.setArguments(args);
-        return groupListFragment;
-    }
-
     public GroupListFragment() {
 
     }
@@ -540,16 +525,8 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_group_list, container, false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        View view = getView();
-        Assert.assertTrue(view != null);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(EXPANSION_STATE_KEY)) {
             mExpansionState = savedInstanceState.getParcelable(EXPANSION_STATE_KEY);
@@ -560,6 +537,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
                 Assert.assertTrue(!mSelectedNodes.isEmpty());
             }
         }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_group_list, container, false);
+        Assert.assertTrue(view != null);
 
         mGroupListProgress = (ProgressBar) view.findViewById(R.id.group_list_progress);
         Assert.assertTrue(mGroupListProgress != null);
@@ -575,23 +558,10 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         mEmptyText = (TextView) view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
-        Bundle args = getArguments();
-        if (args != null) {
-            Assert.assertTrue(args.containsKey(POSITION_KEY));
-            Assert.assertTrue(args.containsKey(TIME_RANGE_KEY));
-
-            int position = args.getInt(POSITION_KEY);
-
-            MainActivity.TimeRange timeRange = (MainActivity.TimeRange) args.getSerializable(TIME_RANGE_KEY);
-            Assert.assertTrue(timeRange != null);
-
-            Assert.assertTrue(position >= 0);
-
-            setAll(timeRange, position);
-        }
+        return view;
     }
 
-    private void setAll(@NonNull MainActivity.TimeRange timeRange, int position) {
+    public void setAll(@NonNull MainActivity.TimeRange timeRange, int position) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);

@@ -51,7 +51,6 @@ import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
-import com.krystianwsul.checkme.loaders.UserListLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
@@ -917,35 +916,6 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized UserListLoader.Data getUserListData(@Nullable String projectId) {
-        fakeDelay();
-
-        MyCrashlytics.log("DomainFactory.getUserListData");
-
-        Assert.assertTrue(mRemoteFactory != null);
-        Assert.assertTrue(mUserData != null);
-        Assert.assertTrue(mFriends != null);
-
-        Set<UserListLoader.UserListData> userListDatas;
-        if (!TextUtils.isEmpty(projectId)) {
-            RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
-
-            userListDatas = Stream.of(remoteProject.getUsers())
-                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
-                    .map(remoteUser -> new UserListLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
-                    .collect(Collectors.toSet());
-        } else {
-            userListDatas = new HashSet<>();
-        }
-
-        Map<String, UserListLoader.UserListData> friendDatas = Stream.of(mFriends.values())
-                .map(userData -> new UserListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
-                .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
-
-        return new UserListLoader.Data(userListDatas, friendDatas);
-    }
-
-    @NonNull
     public synchronized FriendListLoader.Data getFriendListData() {
         fakeDelay();
 
@@ -967,14 +937,30 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.getShowProjectData");
 
         Assert.assertTrue(mRemoteFactory != null);
+        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mFriends != null);
 
+        Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(mFriends.values())
+                .map(userData -> new ShowProjectLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
+
+        String name;
+        Set<ShowProjectLoader.UserListData> userListDatas;
         if (!TextUtils.isEmpty(projectId)) {
             RemoteProject remoteProject = mRemoteFactory.getRemoteProjectForce(projectId);
 
-            return new ShowProjectLoader.Data(remoteProject.getName());
+            name = remoteProject.getName();
+
+            userListDatas = Stream.of(remoteProject.getUsers())
+                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
+                    .map(remoteUser -> new ShowProjectLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
+                    .collect(Collectors.toSet());
         } else {
-            return new ShowProjectLoader.Data(null);
+            name = null;
+            userListDatas = new HashSet<>();
         }
+
+        return new ShowProjectLoader.Data(name, userListDatas, friendDatas);
     }
 
     // sets

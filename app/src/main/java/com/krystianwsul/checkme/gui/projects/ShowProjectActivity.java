@@ -153,10 +153,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
         mUserListFragment = (UserListFragment) getSupportFragmentManager().findFragmentById(R.id.show_project_frame);
         if (mUserListFragment == null) {
-            if (!TextUtils.isEmpty(mProjectId))
-                mUserListFragment = UserListFragment.newInstance(mProjectId);
-            else
-                mUserListFragment = UserListFragment.newInstance();
+            mUserListFragment = UserListFragment.newInstance();
 
             getSupportFragmentManager()
                     .beginTransaction()
@@ -192,6 +189,8 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         mToolbarLayout.setHintAnimationEnabled(true);
 
         invalidateOptionsMenu();
+
+        mUserListFragment.initialize(data);
     }
 
     @Override

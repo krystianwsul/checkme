@@ -299,7 +299,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        Fragment taskListFragment = fragmentManager.findFragmentById(R.id.main_task_list_frame);
+        TaskListFragment taskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_task_list_frame);
         Fragment projectListFragment = fragmentManager.findFragmentById(R.id.main_project_frame);
         Fragment userListFragment = fragmentManager.findFragmentById(R.id.main_friend_list_frame);
         Fragment showCustomTimesFragment = fragmentManager.findFragmentById(R.id.main_custom_times_frame);
@@ -311,8 +311,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(projectListFragment == null);
             Assert.assertTrue(userListFragment == null);
 
+            taskListFragment = TaskListFragment.newInstance();
+
             fragmentManager.beginTransaction()
-                    .add(R.id.main_task_list_frame, TaskListFragment.getInstance())
+                    .add(R.id.main_task_list_frame, taskListFragment)
                     .add(R.id.main_project_frame, ProjectListFragment.newInstance())
                     .add(R.id.main_friend_list_frame, FriendListFragment.newInstance())
                     .add(R.id.main_custom_times_frame, ShowCustomTimesFragment.newInstance())
@@ -323,6 +325,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(debugFragment != null);
             Assert.assertTrue(projectListFragment != null);
         }
+
+        taskListFragment.setAllTasks();
 
         mDaysPager = (ViewPager) findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);

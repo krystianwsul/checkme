@@ -76,7 +76,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
         mTaskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
         if (mTaskListFragment == null) {
-            mTaskListFragment = TaskListFragment.getInstance(mTaskKey);
+            mTaskListFragment = TaskListFragment.newInstance();
             getSupportFragmentManager()
                     .beginTransaction()
                     .add(R.id.show_task_fragment, mTaskListFragment)
@@ -103,7 +103,6 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         }
 
         getSupportLoaderManager().initLoader(0, null, this);
-        mTaskListFragment.initLoader(mTaskKey);
     }
 
     @Override
@@ -192,6 +191,8 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
             mActionBar.setSubtitle(data.ScheduleText);
 
         invalidateOptionsMenu();
+
+        mTaskListFragment.setTaskKey(mTaskKey);
     }
 
     @Override

@@ -598,7 +598,6 @@ public class GroupListFragment extends AbstractFragment {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
-        Assert.assertTrue(mInstanceKey == null || mInstanceKey.equals(instanceKey));
         Assert.assertTrue(mInstanceKeys == null);
 
         mInstanceKey = instanceKey;
@@ -611,7 +610,6 @@ public class GroupListFragment extends AbstractFragment {
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
-        Assert.assertTrue(mInstanceKeys == null || mInstanceKeys.equals(instanceKeys));
 
         mInstanceKeys = instanceKeys;
 

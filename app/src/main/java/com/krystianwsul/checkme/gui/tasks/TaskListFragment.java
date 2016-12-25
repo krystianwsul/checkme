@@ -50,12 +50,11 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     private static final String SELECTED_TASK_KEYS_KEY = "selectedTaskKeys";
     private static final String EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys";
 
-    private static final String ALL_TASKS_KEY = "allTasks";
-    private static final String TASK_KEY_KEY = "taskKey";
-
     private RecyclerView mTaskListFragmentRecycler;
     private FloatingActionButton mTaskListFragmentFab;
     private TextView mEmptyText;
+
+    private boolean mAllTasks;
 
     @Nullable
     private TaskKey mTaskKey;
@@ -312,25 +311,9 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     private List<TaskKey> mSelectedTaskKeys;
     private List<TaskKey> mExpandedTaskIds;
 
-    public static TaskListFragment getInstance() {
-        TaskListFragment taskListFragment = new TaskListFragment();
-
-        Bundle args = new Bundle();
-        args.putBoolean(ALL_TASKS_KEY, true);
-        taskListFragment.setArguments(args);
-
-        return taskListFragment;
-    }
-
     @NonNull
-    public static TaskListFragment getInstance(@NonNull TaskKey taskKey) {
-        TaskListFragment taskListFragment = new TaskListFragment();
-
-        Bundle args = new Bundle();
-        args.putParcelable(TASK_KEY_KEY, taskKey);
-        taskListFragment.setArguments(args);
-
-        return taskListFragment;
+    public static TaskListFragment newInstance() {
+        return new TaskListFragment();
     }
 
     @Override
@@ -340,34 +323,8 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_task_list, container, false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        Bundle args = getArguments();
-        Assert.assertTrue(args != null);
-
-        boolean allTasks = args.getBoolean(ALL_TASKS_KEY, false);
-
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(TASK_KEY_KEY)) {
-                mTaskKey = savedInstanceState.getParcelable(TASK_KEY_KEY);
-                Assert.assertTrue(mTaskKey != null);
-            }
-        } else if (args.containsKey(TASK_KEY_KEY)) {
-            Assert.assertTrue(!allTasks);
-
-            mTaskKey = args.getParcelable(TASK_KEY_KEY);
-            Assert.assertTrue(mTaskKey != null);
-        } else {
-            Assert.assertTrue(allTasks);
-
-            mTaskKey = null;
-        }
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(SELECTED_TASK_KEYS_KEY)) {
@@ -382,18 +339,56 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
                 Assert.assertTrue(!mExpandedTaskIds.isEmpty());
             }
         }
+    }
 
-        View view = getView();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_task_list, container, false);
         Assert.assertTrue(view != null);
 
         mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.task_list_recycler);
-        mTaskListFragmentRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        Assert.assertTrue(mTaskListFragmentRecycler != null);
 
         mTaskListFragmentFab = (FloatingActionButton) view.findViewById(R.id.task_list_fab);
         Assert.assertTrue(mTaskListFragmentFab != null);
 
         mEmptyText = (TextView) view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
+
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mTaskListFragmentRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        initialize();
+    }
+
+    public void setAllTasks() {
+        Assert.assertTrue(mTaskKey == null);
+
+        mAllTasks = true;
+
+        initialize();
+    }
+
+    public void setTaskKey(@NonNull TaskKey taskKey) {
+        Assert.assertTrue(!mAllTasks);
+
+        mTaskKey = taskKey;
+
+        initialize();
+    }
+
+    private void initialize() {
+        if (getActivity() == null)
+            return;
+
+        if (!mAllTasks && (mTaskKey == null))
+            return;
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -476,9 +471,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mTaskKey != null)
-            outState.putParcelable(TASK_KEY_KEY, mTaskKey);
-
         if (mTreeViewAdapter != null) {
             List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
 
@@ -508,14 +500,6 @@ public class TaskListFragment extends AbstractFragment implements LoaderManager.
 
     public void destroyLoader() {
         getLoaderManager().destroyLoader(0);
-    }
-
-    public void initLoader(@NonNull TaskKey taskKey) {
-        Assert.assertTrue(mTaskKey != null);
-
-        mTaskKey = taskKey;
-
-        getLoaderManager().initLoader(0, null, this);
     }
 
     public void selectAll() {

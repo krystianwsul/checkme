@@ -16,8 +16,15 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.tree.ModelNode;
+import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
+import com.krystianwsul.checkme.gui.tree.TreeNode;
+import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
+import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
 
 import junit.framework.Assert;
@@ -88,7 +95,8 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             mEmptyText.setVisibility(View.GONE);
         }
 
-        mProjectListRecycler.setAdapter(new ProjectListAdapter(getActivity(), data.mProjectDatas));
+        TreeViewAdapter treeViewAdapter = ProjectListAdapter.getAdapter(getActivity(), data.mProjectDatas);
+        mProjectListRecycler.setAdapter(treeViewAdapter.getAdapter());
 
         mProjectListFab.setVisibility(View.VISIBLE);
         mProjectListFab.setOnClickListener(v -> startActivity(ShowProjectActivity.newIntent(getActivity())));
@@ -99,20 +107,43 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
     }
 
-    private static class ProjectListAdapter extends RecyclerView.Adapter<ProjectListAdapter.Holder> {
+    private static class ProjectListAdapter implements TreeModelAdapter {
         @NonNull
         private final Context mContext;
 
-        @NonNull
-        private final List<ProjectListLoader.ProjectData> mProjectDatas;
+        private List<ProjectNode> mProjectNodes;
 
-        ProjectListAdapter(@NonNull Context context, @NonNull TreeMap<String, ProjectListLoader.ProjectData> projectDatas) {
+        private TreeViewAdapter mTreeViewAdapter;
+
+        @NonNull
+        static TreeViewAdapter getAdapter(@NonNull Context context, @NonNull TreeMap<String, ProjectListLoader.ProjectData> projectDatas) {
+            ProjectListAdapter projectListAdapter = new ProjectListAdapter(context);
+
+            return projectListAdapter.initialize(projectDatas);
+        }
+
+        private ProjectListAdapter(@NonNull Context context) {
             mContext = context;
-            mProjectDatas = new ArrayList<>(projectDatas.values());
+        }
+
+        private TreeViewAdapter initialize(@NonNull TreeMap<String, ProjectListLoader.ProjectData> projectDatas) {
+            mProjectNodes = Stream.of(projectDatas.values())
+                    .map(ProjectNode::new)
+                    .collect(Collectors.toList());
+
+            mTreeViewAdapter = new TreeViewAdapter(false, this);
+            TreeNodeCollection treeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
+            mTreeViewAdapter.setTreeNodeCollection(treeNodeCollection);
+
+            treeNodeCollection.setNodes(Stream.of(mProjectNodes)
+                    .map(projectNode -> projectNode.initialize(treeNodeCollection))
+                    .collect(Collectors.toList()));
+
+            return mTreeViewAdapter;
         }
 
         @Override
-        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(mContext);
 
             View rowProject = layoutInflater.inflate(R.layout.row_project, parent, false);
@@ -122,22 +153,23 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         }
 
         @Override
-        public void onBindViewHolder(Holder holder, int position) {
-            Assert.assertTrue(holder != null);
-
-            ProjectListLoader.ProjectData projectData = mProjectDatas.get(position);
-            Assert.assertTrue(projectData != null);
-
-            holder.mProjectName.setText(projectData.mName);
-
-            holder.mProjectUsers.setText(projectData.mUsers);
-
-            holder.itemView.setOnClickListener(v -> mContext.startActivity(ShowProjectActivity.newIntent(mContext, projectData.mId)));
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            mTreeViewAdapter.getNode(position).onBindViewHolder(holder);
         }
 
         @Override
-        public int getItemCount() {
-            return mProjectDatas.size();
+        public boolean hasActionMode() {
+            return false;
+        }
+
+        @Override
+        public void incrementSelected() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void decrementSelected() {
+            throw new UnsupportedOperationException();
         }
 
         static class Holder extends RecyclerView.ViewHolder {
@@ -155,6 +187,74 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
                 mProjectUsers = (TextView) itemView.findViewById(R.id.project_users);
                 Assert.assertTrue(mProjectUsers != null);
+            }
+        }
+
+        private class ProjectNode implements ModelNode {
+            @NonNull
+            private final ProjectListLoader.ProjectData mProjectData;
+
+            private TreeNode mTreeNode;
+
+            ProjectNode(@NonNull ProjectListLoader.ProjectData projectData) {
+                mProjectData = projectData;
+            }
+
+            @NonNull
+            TreeNode initialize(@NonNull TreeNodeCollection treeNodeCollection) {
+                mTreeNode = new TreeNode(this, treeNodeCollection, false, false);
+                mTreeNode.setChildTreeNodes(new ArrayList<>());
+                return mTreeNode;
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
+                Holder holder = (Holder) viewHolder;
+
+                holder.mProjectName.setText(mProjectData.mName);
+
+                holder.mProjectUsers.setText(mProjectData.mUsers);
+
+                holder.itemView.setOnClickListener(mTreeNode.getOnClickListener());
+            }
+
+            @Override
+            public int getItemViewType() {
+                return 0;
+            }
+
+            @Override
+            public boolean selectable() {
+                return false;
+            }
+
+            @Override
+            public void onClick() {
+                mContext.startActivity(ShowProjectActivity.newIntent(mContext, mProjectData.mId));
+            }
+
+            @Override
+            public boolean visibleWhenEmpty() {
+                return true;
+            }
+
+            @Override
+            public boolean visibleDuringActionMode() {
+                return true;
+            }
+
+            @Override
+            public boolean separatorVisibleWhenNotExpanded() {
+                return false;
+            }
+
+            @Override
+            public int compareTo(@NonNull ModelNode modelNode) {
+                Assert.assertTrue(modelNode instanceof ProjectNode);
+
+                ProjectNode projectNode = (ProjectNode) modelNode;
+
+                return mProjectData.mId.compareTo(projectNode.mProjectData.mId);
             }
         }
     }

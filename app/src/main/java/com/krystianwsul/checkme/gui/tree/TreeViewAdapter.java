@@ -16,13 +16,12 @@ public class TreeViewAdapter {
 
     private TreeNodeCollection mTreeNodeCollection;
 
+    @NonNull
     private final TreeModelAdapter mTreeModelAdapter;
 
     private Adapter mAdapter;
 
-    public TreeViewAdapter(boolean showPadding, TreeModelAdapter treeModelAdapter) {
-        Assert.assertTrue(treeModelAdapter != null);
-
+    public TreeViewAdapter(boolean showPadding, @NonNull TreeModelAdapter treeModelAdapter) {
         mShowPadding = showPadding;
         mTreeModelAdapter = treeModelAdapter;
     }
@@ -44,9 +43,7 @@ public class TreeViewAdapter {
         return mTreeModelAdapter;
     }
 
-    public void setTreeNodeCollection(TreeNodeCollection treeNodeCollection) {
-        Assert.assertTrue(treeNodeCollection != null);
-
+    public void setTreeNodeCollection(@NonNull TreeNodeCollection treeNodeCollection) {
         mTreeNodeCollection = treeNodeCollection;
     }
 

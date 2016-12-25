@@ -53,9 +53,7 @@ public class TreeNodeCollection implements NodeContainer {
         return treeNode.getItemViewType();
     }
 
-    public void setNodes(List<TreeNode> rootTreeNodes) {
-        Assert.assertTrue(rootTreeNodes != null);
-
+    public void setNodes(@NonNull List<TreeNode> rootTreeNodes) {
         mTreeNodes = rootTreeNodes;
 
         Collections.sort(mTreeNodes);

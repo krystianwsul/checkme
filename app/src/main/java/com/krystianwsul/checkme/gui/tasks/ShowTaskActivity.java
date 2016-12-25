@@ -131,7 +131,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
                 getSupportLoaderManager().destroyLoader(0);
                 mTaskListFragment.destroyLoader();
 
-                startActivityForResult(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mData.mTaskKey), REQUEST_EDIT_TASK);
+                startActivityForResult(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mTaskKey), REQUEST_EDIT_TASK);
                 break;
             case R.id.task_menu_share:
                 Assert.assertTrue(mData != null);
@@ -155,7 +155,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
                 ArrayList<Integer> dataIds = new ArrayList<>();
                 dataIds.add(mData.DataId);
                 dataIds.add(taskListFragment.getDataId());
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mData.mTaskKey);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataIds, mTaskKey);
 
                 finish();
                 break;

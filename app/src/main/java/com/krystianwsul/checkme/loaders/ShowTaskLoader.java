@@ -36,15 +36,11 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
         @Nullable
         public final String ScheduleText;
 
-        @NonNull
-        public final TaskKey mTaskKey;
-
-        public Data(@NonNull String name, @Nullable String scheduleText, @NonNull TaskKey taskKey) {
+        public Data(@NonNull String name, @Nullable String scheduleText) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             Name = name;
             ScheduleText = scheduleText;
-            mTaskKey = taskKey;
         }
 
         @Override
@@ -53,7 +49,6 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
             hashCode += Name.hashCode();
             if (!TextUtils.isEmpty(ScheduleText))
                 hashCode += ScheduleText.hashCode();
-            hashCode += mTaskKey.hashCode();
             return hashCode;
         }
 
@@ -78,9 +73,6 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
                 return false;
 
             if (!TextUtils.isEmpty(ScheduleText) && !ScheduleText.equals(data.ScheduleText))
-                return false;
-
-            if (!mTaskKey.equals(data.mTaskKey))
                 return false;
 
             return true;

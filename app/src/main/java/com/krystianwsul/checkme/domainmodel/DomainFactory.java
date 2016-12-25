@@ -876,7 +876,7 @@ public class DomainFactory {
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), task.getTaskKey());
+        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now));
     }
 
     @NonNull

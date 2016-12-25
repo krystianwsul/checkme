@@ -19,9 +19,9 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
@@ -32,9 +32,9 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
     private final MainActivity.TimeRange mTimeRange;
 
     @Nullable
-    private final ArrayList<InstanceKey> mInstanceKeys;
+    private final Set<InstanceKey> mInstanceKeys;
 
-    public GroupListLoader(@NonNull Context context, @Nullable ArrayList<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
+    public GroupListLoader(@NonNull Context context, @Nullable Set<InstanceKey> instanceKeys, @Nullable Integer position, @Nullable MainActivity.TimeRange timeRange) {
         super(context, needsFirebase(instanceKeys, position));
 
         Log.e("asdf", "GroupListLoader needs firebase? " + needsFirebase(instanceKeys, position));
@@ -49,7 +49,7 @@ public class GroupListLoader extends DomainLoader<GroupListLoader.Data> {
 
     @SuppressWarnings("SimplifiableIfStatement")
     @NonNull
-    private static FirebaseLevel needsFirebase(@Nullable List<InstanceKey> instanceKeys, @Nullable Integer position) {
+    private static FirebaseLevel needsFirebase(@Nullable Set<InstanceKey> instanceKeys, @Nullable Integer position) {
         if (instanceKeys != null) {
             Assert.assertTrue(position == null);
 

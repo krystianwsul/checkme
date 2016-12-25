@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GroupListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<GroupListLoader.Data> {
     private final static String EXPANSION_STATE_KEY = "expansionState";
@@ -84,7 +85,7 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
     private MainActivity.TimeRange mTimeRange;
     private TimeStamp mTimeStamp;
     private InstanceKey mInstanceKey;
-    private ArrayList<InstanceKey> mInstanceKeys;
+    private Set<InstanceKey> mInstanceKeys;
 
     private ExpansionState mExpansionState;
     private ArrayList<InstanceKey> mSelectedNodes;
@@ -607,12 +608,12 @@ public class GroupListFragment extends AbstractFragment implements LoaderManager
         initialize(dataId, dataWrapper);
     }
 
-    public void setInstanceKeys(@NonNull ArrayList<InstanceKey> instanceKeys) {
+    public void setInstanceKeys(@NonNull Set<InstanceKey> instanceKeys) {
         Assert.assertTrue(mPosition == null);
         Assert.assertTrue(mTimeRange == null);
         Assert.assertTrue(mTimeStamp == null);
         Assert.assertTrue(mInstanceKey == null);
-        Assert.assertTrue(mInstanceKeys == null);
+        Assert.assertTrue(mInstanceKeys == null || mInstanceKeys.equals(instanceKeys));
 
         mInstanceKeys = instanceKeys;
 

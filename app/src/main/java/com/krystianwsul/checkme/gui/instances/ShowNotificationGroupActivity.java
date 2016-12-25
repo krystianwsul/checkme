@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.utils.InstanceKey;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class ShowNotificationGroupActivity extends AbstractActivity implements GroupListFragment.GroupListListener {
     private static final String INSTANCES_KEY = "instanceKeys";
@@ -59,7 +60,7 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        mGroupListFragment.setInstanceKeys(instanceKeys);
+        mGroupListFragment.setInstanceKeys(new HashSet<>(instanceKeys));
     }
 
     @Override

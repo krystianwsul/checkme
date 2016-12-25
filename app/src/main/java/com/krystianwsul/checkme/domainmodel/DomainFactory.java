@@ -650,7 +650,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, @NonNull ArrayList<InstanceKey> instanceKeys) {
+    public synchronized GroupListLoader.Data getGroupListData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getGroupListData");

@@ -428,7 +428,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                         mFirebaseAuth.signOut();
 
-                        if (mVisibleTab == Tab.FRIENDS) {
+                        if (mVisibleTab == Tab.FRIENDS || mVisibleTab == Tab.PROJECTS) {
                             mMainActivityNavigation.setCheckedItem(R.id.main_drawer_instances);
                             showTab(Tab.INSTANCES);
                         }

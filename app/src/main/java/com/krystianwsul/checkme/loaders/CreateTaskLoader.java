@@ -780,7 +780,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
             TaskSortKey taskSortKey = (TaskSortKey) sortKey;
 
-            return taskSortKey.mStartExactTimeStamp.compareTo(taskSortKey.mStartExactTimeStamp);
+            return mStartExactTimeStamp.compareTo(taskSortKey.mStartExactTimeStamp);
         }
     }
 }

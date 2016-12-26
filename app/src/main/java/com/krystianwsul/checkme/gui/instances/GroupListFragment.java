@@ -1608,6 +1608,7 @@ public class GroupListFragment extends AbstractFragment {
                         Assert.assertTrue(!notDoneGroupTreeNode.expanded());
 
                         return Stream.of(mInstanceDatas)
+                                .sortBy(instanceData -> instanceData.mTaskStartExactTimeStamp)
                                 .map(instanceData -> instanceData.Name)
                                 .collect(Collectors.joining(", "));
                     }

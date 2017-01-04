@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -72,7 +73,7 @@ public class ShowProjectLoader extends DomainLoader<ShowProjectLoader.Data> {
 
             Data data = (Data) object;
 
-            if (TextUtils.equals(mName, data.mName))
+            if (Utils.stringEquals(mName, data.mName))
                 return false;
 
             if (!mUserListDatas.equals(data.mUserListDatas))

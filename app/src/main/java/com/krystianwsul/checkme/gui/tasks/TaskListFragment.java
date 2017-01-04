@@ -1040,7 +1040,7 @@ public class TaskListFragment extends AbstractFragment {
             if (!mChildTaskDatas.equals(taskData.mChildTaskDatas))
                 return false;
 
-            if (TextUtils.equals(mNote, taskData.mNote))
+            if (Utils.stringEquals(mNote, taskData.mNote))
                 return false;
 
             return true;

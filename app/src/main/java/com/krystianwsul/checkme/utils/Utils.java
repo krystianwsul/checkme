@@ -124,4 +124,12 @@ public class Utils {
 
         return parcel.readString();
     }
+
+    public static boolean stringEquals(@Nullable String s1, @Nullable String s2) {
+        if (TextUtils.isEmpty(s1)) {
+            return TextUtils.isEmpty(s2);
+        } else {
+            return s1.equals(s2);
+        }
+    }
 }

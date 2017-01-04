@@ -35,6 +35,7 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
+import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
@@ -770,7 +771,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             if (!mToolbarEditText.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
-            if (!mNote.equals(mData.TaskData.mNote))
+            if (!Utils.stringEquals(mNote, mData.TaskData.mNote))
                 return true;
 
             if (mData.TaskData.mParentKey != null) {

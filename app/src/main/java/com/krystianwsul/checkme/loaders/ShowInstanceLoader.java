@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -132,7 +133,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             if (!Name.equals(instanceData.Name))
                 return false;
 
-            if (TextUtils.equals(DisplayText, instanceData.DisplayText))
+            if (Utils.stringEquals(DisplayText, instanceData.DisplayText))
                 return false;
 
             if (Done != instanceData.Done)

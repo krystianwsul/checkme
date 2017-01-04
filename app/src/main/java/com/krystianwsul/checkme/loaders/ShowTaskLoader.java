@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.utils.TaskKey;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -75,7 +76,7 @@ public class ShowTaskLoader extends DomainLoader<ShowTaskLoader.Data> {
             if (!Name.equals(data.Name))
                 return false;
 
-            if (TextUtils.equals(ScheduleText, data.ScheduleText))
+            if (Utils.stringEquals(ScheduleText, data.ScheduleText))
                 return false;
 
             if (!mTaskData.equals(data.mTaskData))

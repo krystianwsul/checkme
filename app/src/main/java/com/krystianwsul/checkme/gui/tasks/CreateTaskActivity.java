@@ -1029,11 +1029,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 }
                 case TYPE_NOTE: {
                     View noteRow = getLayoutInflater().inflate(R.layout.row_note, parent, false);
+                    Assert.assertTrue(noteRow != null);
 
-                    EditText noteText = (EditText) noteRow.findViewById(R.id.note_text);
-                    Assert.assertTrue(noteText != null);
-
-                    return new NoteHolder(noteRow, noteText);
+                    return new NoteHolder(noteRow);
                 }
                 default:
                     throw new UnsupportedOperationException();
@@ -1054,6 +1052,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     scheduleHolder.mScheduleText.setText(mParent.Name);
                 else
                     scheduleHolder.mScheduleText.setText(null);
+                scheduleHolder.mScheduleLayout.setHintAnimationEnabled(mData != null);
 
                 scheduleHolder.mScheduleText.setEnabled(true);
 
@@ -1074,6 +1073,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 scheduleHolder.mScheduleLayout.setError(scheduleEntry.mError);
 
                 scheduleHolder.mScheduleText.setText(scheduleEntry.getText(mData.CustomTimeDatas, CreateTaskActivity.this));
+                scheduleHolder.mScheduleLayout.setHintAnimationEnabled(false);
 
                 scheduleHolder.mScheduleText.setEnabled(true);
 
@@ -1087,6 +1087,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 scheduleHolder.mScheduleLayout.setError(null);
 
                 scheduleHolder.mScheduleText.setText(null);
+                scheduleHolder.mScheduleLayout.setHintAnimationEnabled(false);
 
                 scheduleHolder.mScheduleText.setEnabled(true);
 
@@ -1104,6 +1105,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 NoteHolder noteHolder = (NoteHolder) holder;
 
                 noteHolder.mNoteText.setText(mNote);
+                noteHolder.mNoteLayout.setHintAnimationEnabled(mData != null);
 
                 noteHolder.mNoteText.removeTextChangedListener(mNameListener);
                 noteHolder.mNoteText.addTextChangedListener(mNameListener);
@@ -1181,12 +1183,20 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         }
 
         class NoteHolder extends Holder {
+            @NonNull
+            final TextInputLayout mNoteLayout;
+
+            @NonNull
             final EditText mNoteText;
 
-            NoteHolder(@NonNull View scheduleRow, @NonNull EditText noteText) {
+            NoteHolder(@NonNull View scheduleRow) {
                 super(scheduleRow);
 
-                mNoteText = noteText;
+                mNoteLayout = (TextInputLayout) scheduleRow.findViewById(R.id.note_layout);
+                Assert.assertTrue(mNoteLayout != null);
+
+                mNoteText = (EditText) scheduleRow.findViewById(R.id.note_text);
+                Assert.assertTrue(mNoteText != null);
             }
         }
     }

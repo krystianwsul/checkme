@@ -20,7 +20,8 @@
         android:layout_height="wrap_content"
         android:hint="@string/parentTask"
         android:textColorHint="@color/textDisabled"
-        app:errorEnabled="true">
+        app:errorEnabled="true"
+        app:hintAnimationEnabled="false">
 
         <EditText
             android:id="@+id/schedule_text"

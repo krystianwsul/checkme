@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -33,6 +32,7 @@ import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
@@ -301,20 +301,17 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
 
             mFirst = false;
 
-            Date date = Stream.of(mData.InstanceDatas.values())
-                    .map(instanceData -> instanceData.InstanceDate)
+            DateTime dateTime = Stream.of(mData.InstanceDatas.values())
+                    .map(instanceData -> instanceData.mInstanceDateTime)
                     .sorted()
                     .findFirst()
                     .get();
-            Assert.assertTrue(date != null);
+            Assert.assertTrue(dateTime != null);
 
-            Pair<Date, HourMinute> nextHour = HourMinute.getNextHour(date);
-            mDate = nextHour.first;
+            mDate = dateTime.getDate();
+            mTimePairPersist = new TimePairPersist(dateTime.getTime().getTimePair());
 
-            mTimePairPersist = new TimePairPersist(nextHour.second);
-
-            mInitialHourMinute = nextHour.second;
-
+            mInitialHourMinute = mTimePairPersist.getHourMinute();
             mInitialDate = mDate;
         }
 

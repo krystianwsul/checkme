@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
-import com.krystianwsul.checkme.utils.time.Date;
+import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 
@@ -94,20 +94,22 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
     }
 
     public static class InstanceData extends DomainLoader.Data {
-        public final Date InstanceDate;
+        @NonNull
+        public final DateTime mInstanceDateTime;
+
+        @NonNull
         public final String Name;
 
-        public InstanceData(Date instanceDate, String name) {
-            Assert.assertTrue(instanceDate != null);
+        public InstanceData(@NonNull DateTime instanceDateTime, @NonNull String name) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
-            InstanceDate = instanceDate;
+            mInstanceDateTime = instanceDateTime;
             Name = name;
         }
 
         @Override
         public int hashCode() {
-            return (InstanceDate.hashCode() + Name.hashCode());
+            return (mInstanceDateTime.hashCode() + Name.hashCode());
         }
 
         @Override
@@ -123,7 +125,7 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
 
             InstanceData instanceData = (InstanceData) object;
 
-            return (InstanceDate.equals(instanceData.InstanceDate) && Name.equals(instanceData.Name));
+            return (mInstanceDateTime.equals(instanceData.mInstanceDateTime) && Name.equals(instanceData.Name));
         }
     }
 

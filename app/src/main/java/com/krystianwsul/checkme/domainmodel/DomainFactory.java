@@ -486,7 +486,7 @@ public class DomainFactory {
             Assert.assertTrue(instance.isRootInstance(now));
             Assert.assertTrue(instance.getDone() == null);
 
-            instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDate(), instance.getName()));
+            instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDateTime(), instance.getName()));
 
             if (instance.getInstanceTimePair().mCustomTimeKey != null) {
                 CustomTime customTime = getCustomTime(instance.getInstanceTimePair().mCustomTimeKey);

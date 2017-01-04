@@ -48,37 +48,47 @@ public class InstanceDoneService extends IntentService {
         NotificationWrapper notificationWrapper = NotificationWrapper.getInstance();
         notificationWrapper.cleanGroup(this, notificationId);
 
-        if (instanceKey.getType().equals(TaskKey.Type.REMOTE)) {
-            needsFirebase(this, domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
-        } else {
-            setInstanceNotificationDone(DomainFactory.getDomainFactory(this), instanceKey);
-        }
+        throttleFirebase(this, instanceKey.getType().equals(TaskKey.Type.REMOTE), domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
     }
 
     private void setInstanceNotificationDone(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {
         domainFactory.setInstanceNotificationDone(this, 0, instanceKey);
     }
 
-    public static void needsFirebase(@NonNull Context context, @NonNull DomainFactory.FirebaseListener firebaseListener) {
+    public static void throttleFirebase(@NonNull Context context, boolean needsFirebase, @NonNull DomainFactory.FirebaseListener firebaseListener) {
         DomainFactory domainFactory = DomainFactory.getDomainFactory(context.getApplicationContext());
 
         if (domainFactory.isConnected()) {
-            firebaseListener.onFirebaseResult(domainFactory);
-        } else {
-            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-            if (firebaseUser != null) {
-                UserData userData = new UserData(firebaseUser);
-
-                domainFactory.setUserData(context.getApplicationContext(), userData);
-                domainFactory.addFirebaseListener(firebaseListener);
+            if (domainFactory.isSaved()) {
+                queueFirebase(domainFactory, context, firebaseListener);
             } else {
-                throw new NeedsFirebaseException();
+                firebaseListener.onFirebaseResult(domainFactory);
+            }
+        } else {
+            if (needsFirebase) {
+                queueFirebase(domainFactory, context, firebaseListener);
+            } else {
+                firebaseListener.onFirebaseResult(domainFactory);
             }
         }
     }
 
+    private static void queueFirebase(@NonNull DomainFactory domainFactory, @NonNull Context context, @NonNull DomainFactory.FirebaseListener firebaseListener) {
+        Assert.assertTrue(!domainFactory.isConnected() || domainFactory.isSaved());
+
+        if (!domainFactory.isConnected()) {
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (firebaseUser == null)
+                throw new NeedsFirebaseException();
+
+            domainFactory.setUserData(context.getApplicationContext(), new UserData(firebaseUser));
+        }
+
+        domainFactory.addFirebaseListener(firebaseListener);
+    }
+
     public static class NeedsFirebaseException extends RuntimeException {
-        public NeedsFirebaseException() {
+        NeedsFirebaseException() {
             super();
         }
     }

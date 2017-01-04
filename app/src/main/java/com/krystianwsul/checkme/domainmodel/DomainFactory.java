@@ -379,7 +379,7 @@ public class DomainFactory {
     }
 
     public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
-        Assert.assertTrue(mRemoteFactory == null);
+        Assert.assertTrue(mRemoteFactory == null || mRemoteFactory.isSaved());
 
         mNotTickFirebaseListeners.add(firebaseListener);
     }
@@ -420,6 +420,12 @@ public class DomainFactory {
 
     public synchronized boolean isConnected() {
         return (mRemoteFactory != null);
+    }
+
+    public synchronized boolean isSaved() {
+        Assert.assertTrue(mRemoteFactory != null);
+
+        return mRemoteFactory.isSaved();
     }
 
     public synchronized boolean hasFriends() {

@@ -21,7 +21,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
         UserData userData = new UserData(firebaseUser);
 
-        InstanceDoneService.needsFirebase(this, domainFactory -> domainFactory.updateUserData(this, userData));
+        InstanceDoneService.throttleFirebase(this, true, domainFactory -> domainFactory.updateUserData(this, userData));
     }
 
     @Nullable

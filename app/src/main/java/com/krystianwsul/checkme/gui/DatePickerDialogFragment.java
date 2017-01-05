@@ -44,7 +44,7 @@ public class DatePickerDialogFragment extends AbstractDialogFragment {
         Assert.assertTrue(date != null);
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), mOnDateSetListener, date.getYear(), date.getMonth() - 1, date.getDay());
-        datePickerDialog.getDatePicker().setMinDate(ExactTimeStamp.getNow().getLong());
+        datePickerDialog.getDatePicker().setMinDate(ExactTimeStamp.getNow().getLong() - 1000); // -1000 odejmuje sekundę żeby obejść bug na ver. < 5.0
 
         return datePickerDialog;
     }

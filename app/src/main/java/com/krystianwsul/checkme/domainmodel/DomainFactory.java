@@ -2265,7 +2265,14 @@ public class DomainFactory {
 
         // relevant hack
         Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(tasks).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
-        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.of(getExistingInstances()).collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
+
+        List<Instance> existingInstances = getExistingInstances();
+        List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now);
+
+        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.concat(Stream.of(existingInstances), Stream.of(rootInstances))
+                .distinct()
+                .collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
+
         Map<Integer, LocalCustomTimeRelevance> localCustomTimeRelevances = Stream.of(mLocalFactory.getLocalCustomTimes()).collect(Collectors.toMap(LocalCustomTime::getId, LocalCustomTimeRelevance::new));
 
         Stream.of(tasks)
@@ -2276,12 +2283,12 @@ public class DomainFactory {
                 .map(taskRelevances::get)
                 .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now));
 
-        Stream.of(getRootInstances(null, now.plusOne(), now))
+        Stream.of(rootInstances)
                 .map(Instance::getInstanceKey)
                 .map(instanceRelevances::get)
                 .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now));
 
-        Stream.of(getExistingInstances())
+        Stream.of(existingInstances)
                 .filter(instance -> instance.isRootInstance(now))
                 .filter(instance -> instance.isVisible(now))
                 .map(Instance::getInstanceKey)
@@ -2310,7 +2317,7 @@ public class DomainFactory {
                 .filter(Instance::exists)
                 .collect(Collectors.toList());
 
-        List<Instance> irrelevantExistingInstances = getExistingInstances();
+        List<Instance> irrelevantExistingInstances = new ArrayList<>(existingInstances);
         irrelevantExistingInstances.removeAll(relevantExistingInstances);
 
         Assert.assertTrue(Stream.of(irrelevantExistingInstances)

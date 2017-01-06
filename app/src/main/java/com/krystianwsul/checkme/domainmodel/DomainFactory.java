@@ -1691,8 +1691,8 @@ public class DomainFactory {
         notifyCloud(remoteProject);
     }
 
-    public synchronized void deleteProjects(@NonNull Context context, int dataId, @NonNull Set<String> projectIds) {
-        MyCrashlytics.log("DomainFactory.deleteProjects");
+    public synchronized void setProjectEndTimeStamps(@NonNull Context context, int dataId, @NonNull Set<String> projectIds) {
+        MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps");
 
         Assert.assertTrue(mRemoteFactory != null);
         Assert.assertTrue(mUserData != null);
@@ -1700,28 +1700,21 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<RemoteProject> remoteProjects = Stream.of(projectIds)
+        Set<RemoteProject> remoteProjects = Stream.of(projectIds)
                 .map(mRemoteFactory::getRemoteProjectForce)
-                .collect(Collectors.toList());
-
-        Set<String> userKeys = Stream.of(remoteProjects)
-                .map(RemoteProject::getRecordOf)
-                .flatMap(Stream::of)
                 .collect(Collectors.toSet());
 
-        String key = mUserData.getKey();
-        Assert.assertTrue(userKeys.contains(key));
-        userKeys.remove(key);
+        Assert.assertTrue(Stream.of(remoteProjects)
+                .allMatch(remoteProject -> remoteProject.current(now)));
 
-        // todo set end time instead of deleting, add to irrelevant algorithm
         Stream.of(remoteProjects)
-                .forEach(RemoteProject::delete);
+                .forEach(remoteProject -> remoteProject.setEndExactTimeStamp(now));
 
         updateNotifications(context, now);
 
         save(context, dataId);
 
-        notifyCloud(userKeys);
+        notifyCloud(remoteProjects);
     }
 
     // internal

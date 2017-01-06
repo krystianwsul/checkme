@@ -137,7 +137,7 @@ public abstract class Task {
 
     protected abstract void setMyEndExactTimeStamp(@NonNull ExactTimeStamp now);
 
-    void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
         Assert.assertTrue(current(now));
 
         List<Schedule> schedules = getCurrentSchedules(now);

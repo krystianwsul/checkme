@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
@@ -98,6 +99,11 @@ public class RemoteProject {
     @NonNull
     public String getName() {
         return mRemoteProjectRecord.getName();
+    }
+
+    @NonNull
+    public ExactTimeStamp getStartExactTimeStamp() {
+        return new ExactTimeStamp(mRemoteProjectRecord.getStartTime());
     }
 
     @Nullable
@@ -366,5 +372,22 @@ public class RemoteProject {
         getRemoteFactory().deleteProject(this);
 
         mRemoteProjectRecord.delete();
+    }
+
+    public boolean current(@NonNull ExactTimeStamp exactTimeStamp) {
+        ExactTimeStamp startExactTimeStamp = getStartExactTimeStamp();
+        ExactTimeStamp endExactTimeStamp = getEndExactTimeStamp();
+
+        return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
+    }
+
+    public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
+        Assert.assertTrue(current(now));
+
+        for (Task task : mRemoteTasks.values())
+            if (task.current(now))
+                task.setEndExactTimeStamp(now);
+
+        mRemoteProjectRecord.setEndTime(now.getLong());
     }
 }

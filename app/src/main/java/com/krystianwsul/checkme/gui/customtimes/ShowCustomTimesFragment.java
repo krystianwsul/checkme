@@ -25,6 +25,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 
@@ -33,10 +34,9 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShowCustomTimesFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data> {
+public class ShowCustomTimesFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data>, FabUser {
     private static final String SELECTED_CUSTOM_TIME_IDS_KEY = "selectedCustomTimeIds";
 
-    private FloatingActionButton mShowTimesFab;
     private RecyclerView mShowTimesList;
     private CustomTimesAdapter mCustomTimesAdapter;
     private TextView mEmptyText;
@@ -73,7 +73,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_custom_times, mActionMode.getMenu());
 
-            mShowTimesFab.setVisibility(View.GONE);
+            updateFabVisibility();
 
             ((CustomTimesListListener) getActivity()).onCreateCustomTimesActionMode(mActionMode);
         }
@@ -90,7 +90,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
         @Override
         protected void onLastRemoved() {
-            mShowTimesFab.setVisibility(View.VISIBLE);
+            updateFabVisibility();
 
             ((CustomTimesListListener) getActivity()).onDestroyCustomTimesActionMode();
         }
@@ -105,6 +105,11 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
         }
     };
+
+    @Nullable
+    private FloatingActionButton mShowTimesFab;
+
+    ShowCustomTimesLoader.Data mData;
 
     public static ShowCustomTimesFragment newInstance() {
         return new ShowCustomTimesFragment();
@@ -136,11 +141,6 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         mShowTimesList = (RecyclerView) view.findViewById(R.id.show_times_list);
         mShowTimesList.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mShowTimesFab = (FloatingActionButton) view.findViewById(R.id.show_times_fab);
-        Assert.assertTrue(mShowTimesFab != null);
-
-        mShowTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
-
         mEmptyText = (TextView) view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
@@ -164,6 +164,8 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     public void onLoadFinished(Loader<ShowCustomTimesLoader.Data> loader, ShowCustomTimesLoader.Data data) {
         Assert.assertTrue(data != null);
 
+        mData = data;
+
         if (mCustomTimesAdapter != null) {
             ArrayList<Integer> selectedCustomTimeIds = mCustomTimesAdapter.getSelected();
             if (selectedCustomTimeIds.isEmpty())
@@ -177,8 +179,6 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
         mSelectionCallback.setSelected(mCustomTimesAdapter.getSelected().size());
 
-        mShowTimesFab.setVisibility(View.VISIBLE);
-
         if (data.Entries.isEmpty()) {
             mShowTimesList.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
@@ -189,6 +189,8 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         }
 
         updateSelectAll();
+
+        updateFabVisibility();
     }
 
     @Override
@@ -214,6 +216,38 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
     public void selectAll() {
         mCustomTimesAdapter.selectAll();
+    }
+
+    @Override
+    public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+        Assert.assertTrue(mShowTimesFab == null);
+
+        mShowTimesFab = floatingActionButton;
+
+        mShowTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
+
+        updateFabVisibility();
+    }
+
+    private void updateFabVisibility() {
+        if (mShowTimesFab == null)
+            return;
+
+        if (mData != null && !mSelectionCallback.hasActionMode()) {
+            mShowTimesFab.show();
+        } else {
+            mShowTimesFab.hide();
+        }
+    }
+
+    @Override
+    public void clearFab() {
+        if (mShowTimesFab == null)
+            return;
+
+        mShowTimesFab.setOnClickListener(null);
+
+        mShowTimesFab = null;
     }
 
     public class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {

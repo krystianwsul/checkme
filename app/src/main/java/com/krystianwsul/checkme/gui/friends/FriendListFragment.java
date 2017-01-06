@@ -253,8 +253,6 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         mFriendListFab.setOnClickListener(null);
 
-        mFriendListFab.hide();
-
         mFriendListFab = null;
     }
 

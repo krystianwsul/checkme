@@ -212,13 +212,6 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
             super.onBackPressed();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        mUserListFragment.clearFab();
-    }
-
     private boolean tryClose() {
         if (dataChanged()) {
             DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();

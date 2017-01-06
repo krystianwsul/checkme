@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +44,7 @@ class BackendNotifier {
     }
 
     @NonNull
-    private static String getUrl(@NonNull List<String> userKeys, boolean production) {
+    private static String getUrl(@NonNull Collection<String> userKeys, boolean production) {
         Assert.assertTrue(!userKeys.isEmpty());
 
         List<String> parameters = Stream.of(userKeys)
@@ -81,7 +82,7 @@ class BackendNotifier {
         run(url);
     }
 
-    BackendNotifier(@NonNull List<String> userKeys) {
+    BackendNotifier(@NonNull Collection<String> userKeys) {
         String root = DatabaseWrapper.getRoot();
 
         boolean production;

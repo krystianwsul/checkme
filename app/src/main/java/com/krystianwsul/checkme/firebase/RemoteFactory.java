@@ -74,7 +74,8 @@ public class RemoteFactory {
         return getRemoteProjectForce(projectId).newRemoteTask(taskJson);
     }
 
-    public void createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
+    @NonNull
+    public RemoteProject createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Map<String, UserData> friends = mDomainFactory.getFriends();
@@ -109,6 +110,8 @@ public class RemoteFactory {
         Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
 
         mRemoteProjects.put(remoteProject.getId(), remoteProject);
+
+        return remoteProject;
     }
 
     public void save() {

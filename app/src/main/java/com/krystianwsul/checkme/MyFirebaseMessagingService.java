@@ -24,7 +24,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Assert.assertTrue(remoteMessage != null);
 
-        Log.e("asdf", "remoteMessage: " + remoteMessage);
+        Log.e("asdf", "remoteMessage.getData: " + remoteMessage.getData());
 
         Map<String, String> data = remoteMessage.getData();
         Assert.assertTrue(data != null);

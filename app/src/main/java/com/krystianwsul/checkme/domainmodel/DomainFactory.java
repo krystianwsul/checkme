@@ -74,6 +74,7 @@ import junit.framework.Assert;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -981,9 +982,11 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
 
-        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(instance.getRemoteNullableProject());
     }
 
     public synchronized void setInstancesDateTime(@NonNull Context context, int dataId, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
@@ -1006,9 +1009,11 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(remoteProjects);
     }
 
     public synchronized void setInstanceAddHourService(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
@@ -1027,9 +1032,11 @@ public class DomainFactory {
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
         instance.setNotificationShown(false, now);
 
-        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(instance.getRemoteNullableProject());
     }
 
     public synchronized void setInstanceAddHourActivity(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
@@ -1047,9 +1054,11 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
 
-        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(instance.getRemoteNullableProject());
     }
 
     public synchronized void setInstanceNotificationDone(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
@@ -1064,9 +1073,11 @@ public class DomainFactory {
         instance.setNotificationShown(false, now);
         instance.setNotified(now);
 
-        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(instance.getRemoteNullableProject());
     }
 
     @NonNull
@@ -1088,9 +1099,11 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(remoteProjects);
 
         return now;
     }
@@ -1143,9 +1156,11 @@ public class DomainFactory {
             task = mRemoteFactory.createScheduleRootTask(now, name, scheduleDatas, note, projectId);
         }
 
-        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(task.getRemoteNullableProject());
 
         return task;
     }
@@ -1180,9 +1195,11 @@ public class DomainFactory {
 
         task.updateSchedules(scheduleDatas, now);
 
-        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
@@ -1247,9 +1264,11 @@ public class DomainFactory {
 
         joinTasks(newParentTask, joinTasks, now);
 
-        updateNotificationsAndNotifyCloud(context, now, newParentTask.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(newParentTask.getRemoteNullableProject());
     }
 
     Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
@@ -1260,9 +1279,11 @@ public class DomainFactory {
 
         Task childTask = parentTask.createChildTask(now, name, note);
 
-        updateNotificationsAndNotifyCloud(context, now, childTask.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(childTask.getRemoteNullableProject());
 
         return childTask;
     }
@@ -1302,9 +1323,11 @@ public class DomainFactory {
 
         joinTasks(childTask, joinTasks, now);
 
-        updateNotificationsAndNotifyCloud(context, now, childTask.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(childTask.getRemoteNullableProject());
     }
 
     @NonNull
@@ -1337,9 +1360,11 @@ public class DomainFactory {
             newParentTask.addChild(task, now);
         }
 
-        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
@@ -1355,9 +1380,11 @@ public class DomainFactory {
 
         task.setEndExactTimeStamp(now);
 
-        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(task.getRemoteNullableProject());
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {
@@ -1383,9 +1410,11 @@ public class DomainFactory {
                 .map(Task::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(remoteProjects);
     }
 
     public synchronized int createCustomTime(@NonNull Context context, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
@@ -1458,9 +1487,11 @@ public class DomainFactory {
             task = mRemoteFactory.createRemoteTaskHelper(now, name, note, projectId);
         }
 
-        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(task.getRemoteNullableProject());
 
         return task;
     }
@@ -1522,9 +1553,11 @@ public class DomainFactory {
 
         joinTasks(newParentTask, joinTasks, now);
 
-        updateNotificationsAndNotifyCloud(context, now, newParentTask.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(newParentTask.getRemoteNullableProject());
     }
 
     @NonNull
@@ -1550,9 +1583,11 @@ public class DomainFactory {
         Stream.of(task.getCurrentSchedules(now))
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
-        updateNotificationsAndNotifyCloud(context, now, task.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
@@ -1627,9 +1662,12 @@ public class DomainFactory {
                 .map(mFriends::get)
                 .collect(Collectors.toSet()), removedFriends);
 
-        updateNotificationsAndNotifyCloud(context, now, remoteProject);
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(remoteProject);
+        notifyCloud(removedFriends); // todo combine request
     }
 
     public synchronized void createProject(@NonNull Context context, int dataId, @NonNull String name, @NonNull Set<String> friends) {
@@ -1647,9 +1685,11 @@ public class DomainFactory {
         Assert.assertTrue(!recordOf.contains(key));
         recordOf.add(key);
 
-        mRemoteFactory.createRemoteProject(name, now, recordOf);
+        RemoteProject remoteProject = mRemoteFactory.createRemoteProject(name, now, recordOf);
 
         save(context, dataId);
+
+        notifyCloud(remoteProject);
     }
 
     public synchronized void deleteProjects(@NonNull Context context, int dataId, @NonNull Set<String> projectIds) {
@@ -1678,9 +1718,11 @@ public class DomainFactory {
         Stream.of(remoteProjects)
                 .forEach(RemoteProject::delete);
 
-        updateNotificationsAndNotifyCloud(context, now, new ArrayList<>(userKeys));
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(userKeys);
     }
 
     // internal
@@ -2205,9 +2247,11 @@ public class DomainFactory {
 
         instance.setDone(done, now);
 
-        updateNotificationsAndNotifyCloud(context, now, instance.getRemoteNullableProject());
+        updateNotifications(context, now);
 
         save(context, dataId);
+
+        notifyCloud(instance.getRemoteNullableProject());
 
         return instance;
     }
@@ -2322,17 +2366,15 @@ public class DomainFactory {
         return new Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes);
     }
 
-    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull ExactTimeStamp now, @Nullable RemoteProject remoteProject) {
+    private void notifyCloud(@Nullable RemoteProject remoteProject) {
         Set<RemoteProject> remoteProjects = new HashSet<>();
         if (remoteProject != null)
             remoteProjects.add(remoteProject);
 
-        updateNotificationsAndNotifyCloud(context, now, remoteProjects);
+        notifyCloud(remoteProjects);
     }
 
-    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull Set<RemoteProject> remoteProjects) {
-        updateNotifications(context, now);
-
+    private void notifyCloud(@NonNull Set<RemoteProject> remoteProjects) {
         if (!remoteProjects.isEmpty()) {
             Assert.assertTrue(mUserData != null);
 
@@ -2340,9 +2382,7 @@ public class DomainFactory {
         }
     }
 
-    private void updateNotificationsAndNotifyCloud(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<String> userKeys) {
-        updateNotifications(context, now);
-
+    private void notifyCloud(@NonNull Collection<String> userKeys) {
         if (!userKeys.isEmpty())
             new BackendNotifier(userKeys);
     }

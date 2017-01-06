@@ -1666,8 +1666,7 @@ public class DomainFactory {
 
         save(context, dataId);
 
-        notifyCloud(remoteProject);
-        notifyCloud(removedFriends); // todo combine request
+        notifyCloud(remoteProject, removedFriends);
     }
 
     public synchronized void createProject(@NonNull Context context, int dataId, @NonNull String name, @NonNull Set<String> friends) {
@@ -2385,13 +2384,24 @@ public class DomainFactory {
         if (!remoteProjects.isEmpty()) {
             Assert.assertTrue(mUserData != null);
 
-            new BackendNotifier(remoteProjects, mUserData);
+            new BackendNotifier(remoteProjects, mUserData, new ArrayList<>());
         }
     }
 
     private void notifyCloud(@NonNull Collection<String> userKeys) {
-        if (!userKeys.isEmpty())
-            new BackendNotifier(userKeys);
+        if (!userKeys.isEmpty()) {
+            Assert.assertTrue(mUserData != null);
+
+            new BackendNotifier(new HashSet<>(), mUserData, userKeys);
+        }
+    }
+
+    private void notifyCloud(@NonNull RemoteProject remoteProject, @NonNull Collection<String> userKeys) {
+        Assert.assertTrue(mUserData != null);
+
+        Set<RemoteProject> remoteProjects = Collections.singleton(remoteProject);
+
+        new BackendNotifier(remoteProjects, mUserData, userKeys);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {

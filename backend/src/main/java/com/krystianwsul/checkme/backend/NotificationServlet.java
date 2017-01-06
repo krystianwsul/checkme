@@ -25,7 +25,6 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,7 +66,7 @@ public class NotificationServlet extends HttpServlet {
 
         Set<String> userTokens = new HashSet<>();
         if (req.getParameterValues("projects") != null) {
-            List<String> projects = Arrays.asList(req.getParameterValues("projects"));
+            Set<String> projects = new HashSet<>(Arrays.asList(req.getParameterValues("projects")));
             Assert.assertTrue(!projects.isEmpty());
 
             resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
@@ -115,7 +114,9 @@ public class NotificationServlet extends HttpServlet {
                     }
                 }
             }
-        } else {
+        }
+
+        if (req.getParameterValues("userKeys") != null) {
             Set<String> userKeys = new HashSet<>(Arrays.asList(req.getParameterValues("userKeys")));
             Assert.assertTrue(!userKeys.isEmpty());
 

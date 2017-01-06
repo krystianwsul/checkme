@@ -13,6 +13,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +55,7 @@ public class BackendNotifierTest {
         Set<String> projects = new TreeSet<>(Collections.singletonList("-KXvJTar2cCxxrGCtN_w"));
         String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, false, "asdf");
+        String url = BackendNotifier.getUrl(projects, false, "asdf", new ArrayList<>());
 
         Assert.assertTrue(correctUrl.equals(url));
     }
@@ -64,7 +65,7 @@ public class BackendNotifierTest {
         Set<String> projects = new TreeSet<>(Collections.singletonList("-KXvJTar2cCxxrGCtN_w"));
         String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&production=1&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, true, "asdf");
+        String url = BackendNotifier.getUrl(projects, true, "asdf", new ArrayList<>());
 
         Assert.assertTrue(correctUrl.equals(url));
     }
@@ -74,7 +75,7 @@ public class BackendNotifierTest {
         Set<String> projects = new TreeSet<>(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"));
         String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, false, "asdf");
+        String url = BackendNotifier.getUrl(projects, false, "asdf", new ArrayList<>());
 
         Assert.assertTrue(correctUrl.equals(url));
     }
@@ -84,7 +85,18 @@ public class BackendNotifierTest {
         Set<String> projects = new TreeSet<>(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"));
         String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&production=1&sender=asdf";
 
-        String url = BackendNotifier.getUrl(projects, true, "asdf");
+        String url = BackendNotifier.getUrl(projects, true, "asdf", new ArrayList<>());
+
+        Assert.assertTrue(correctUrl.equals(url));
+    }
+
+    @Test
+    public void testTwoProjectsTwoUsersProduction() {
+        Set<String> projects = new TreeSet<>(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"));
+        Set<String> userKeys = new TreeSet<>(Arrays.asList("a", "b"));
+        String correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&userKeys=a&userKeys=b&production=1&sender=asdf";
+
+        String url = BackendNotifier.getUrl(projects, true, "asdf", userKeys);
 
         Assert.assertTrue(correctUrl.equals(url));
     }

@@ -910,7 +910,10 @@ public class DomainFactory {
 
         Assert.assertTrue(mRemoteFactory != null);
 
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
         TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteFactory.getRemoteProjects())
+                .filter(remoteProject -> remoteProject.current(now))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
                     String users = Stream.of(remoteProject.getUsers())
                             .map(RemoteUser::getName)

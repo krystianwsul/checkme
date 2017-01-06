@@ -77,7 +77,6 @@ public class NotificationServlet extends HttpServlet {
             resp.getWriter().println("sender: " + sender);
             resp.getWriter().println();
 
-            Set<String> userKeys = new HashSet<>();
             for (String project : projects) {
                 Assert.assertTrue(!StringUtils.isEmpty(project));
 
@@ -93,36 +92,27 @@ public class NotificationServlet extends HttpServlet {
                 if (users == null)
                     throw new NoUsersException(usersUrl.toString());
 
-                userKeys.addAll(users.keySet());
-
-                resp.getWriter().println("user keys before removing sender: " + Joiner.on(", ").join(userKeys));
+                resp.getWriter().println("user keys before removing sender: " + Joiner.on(", ").join(users.keySet()));
 
                 if (!StringUtils.isEmpty(sender))
-                    userKeys.remove(sender);
+                    users.remove(sender);
 
-                resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(userKeys));
-            }
+                resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(users.keySet()));
 
-            for (String userKey : userKeys) {
-                Assert.assertTrue(!StringUtils.isEmpty(userKey));
+                for (Map<String, String> user : users.values()) {
+                    Assert.assertTrue(user != null);
 
-                URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
+                    String userToken = user.get("token");
 
-                resp.getWriter().println(tokenUrl.toString());
-                resp.getWriter().println();
+                    resp.getWriter().println("user token: " + userToken);
+                    if (StringUtils.isEmpty(userToken)) {
+                        resp.getWriter().println("empty, skipping");
+                        resp.getWriter().println();
+                    } else {
+                        resp.getWriter().println();
 
-                BufferedReader tokenReader = new BufferedReader(new InputStreamReader(tokenUrl.openStream()));
-                String userToken = gson.fromJson(tokenReader, String.class);
-                tokenReader.close();
-
-                resp.getWriter().println("user token: " + userToken);
-                if (StringUtils.isEmpty(userToken)) {
-                    resp.getWriter().println("empty, skipping");
-                    resp.getWriter().println();
-                } else {
-                    resp.getWriter().println();
-
-                    userTokens.add(userToken);
+                        userTokens.add(userToken);
+                    }
                 }
             }
         } else {

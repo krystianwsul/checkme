@@ -27,6 +27,7 @@ import com.google.common.collect.Sets;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tasks.FriendPickerFragment;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
@@ -40,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class UserListFragment extends AbstractFragment {
+public class UserListFragment extends AbstractFragment implements FabUser {
     private static final String PROJECT_ID_KEY = "projectId";
 
     private static final String SAVE_STATE_KEY = "saveState";
@@ -49,7 +50,6 @@ public class UserListFragment extends AbstractFragment {
 
     private ProgressBar mFriendListProgress;
     private RecyclerView mFriendListRecycler;
-    private FloatingActionButton mFriendListFab;
     private TextView mEmptyText;
 
     @Nullable
@@ -91,7 +91,7 @@ public class UserListFragment extends AbstractFragment {
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_custom_times, mActionMode.getMenu());
 
-            mFriendListFab.setVisibility(View.GONE);
+            updateFabVisibility();
         }
 
         @Override
@@ -106,7 +106,7 @@ public class UserListFragment extends AbstractFragment {
 
         @Override
         protected void onLastRemoved() {
-            mFriendListFab.setVisibility(View.VISIBLE);
+            updateFabVisibility();
         }
 
         @Override
@@ -119,6 +119,9 @@ public class UserListFragment extends AbstractFragment {
 
         }
     };
+
+    @Nullable
+    private FloatingActionButton mFriendListFab;
 
     @NonNull
     public static UserListFragment newInstance() {
@@ -161,15 +164,6 @@ public class UserListFragment extends AbstractFragment {
         Assert.assertTrue(mFriendListRecycler != null);
 
         mFriendListRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        mFriendListFab = (FloatingActionButton) friendListLayout.findViewById(R.id.friend_list_fab);
-        Assert.assertTrue(mFriendListFab != null);
-
-        mFriendListFab.setOnClickListener(v -> {
-            FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
-            initializeFriendPickerFragment(friendPickerFragment);
-            friendPickerFragment.show(getChildFragmentManager(), FRIEND_PICKER_TAG);
-        });
 
         mEmptyText = (TextView) friendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
@@ -240,7 +234,8 @@ public class UserListFragment extends AbstractFragment {
         mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
 
         mFriendListProgress.setVisibility(View.GONE);
-        mFriendListFab.setVisibility(View.VISIBLE);
+
+        updateFabVisibility();
 
         if (data.mUserListDatas.isEmpty()) {
             mFriendListRecycler.setVisibility(View.GONE);
@@ -294,6 +289,41 @@ public class UserListFragment extends AbstractFragment {
         } else {
             DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), mData.DataId, mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
         }
+    }
+
+    @Override
+    public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+        Assert.assertTrue(mFriendListFab == null);
+
+        mFriendListFab = floatingActionButton;
+
+        mFriendListFab.setOnClickListener(v -> {
+            FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
+            initializeFriendPickerFragment(friendPickerFragment);
+            friendPickerFragment.show(getChildFragmentManager(), FRIEND_PICKER_TAG);
+        });
+
+        updateFabVisibility();
+    }
+
+    private void updateFabVisibility() {
+        if (mFriendListFab == null)
+            return;
+
+        if (mData != null && !mSelectionCallback.hasActionMode()) {
+            mFriendListFab.show();
+        } else {
+            mFriendListFab.hide();
+        }
+    }
+
+    @Override
+    public void clearFab() {
+        Assert.assertTrue(mFriendListFab != null);
+
+        mFriendListFab.setOnClickListener(null);
+
+        mFriendListFab = null;
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {

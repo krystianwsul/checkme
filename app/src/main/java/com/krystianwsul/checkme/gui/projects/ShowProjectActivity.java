@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -36,6 +37,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
     private TextInputLayout mToolbarLayout;
     private EditText mToolbarEditText;
+    private FloatingActionButton mShowProjectFab;
 
     private ShowProjectLoader.Data mData;
 
@@ -123,6 +125,9 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
 
+        mShowProjectFab = (FloatingActionButton) findViewById(R.id.show_project_fab);
+        Assert.assertTrue(mShowProjectFab != null);
+
         mToolbarEditText.addTextChangedListener(new TextWatcher() {
             private boolean mSkip = true;
 
@@ -162,6 +167,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
                     .add(R.id.show_project_frame, mUserListFragment)
                     .commit();
         }
+        mUserListFragment.setFab(mShowProjectFab);
 
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)
@@ -204,6 +210,13 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
     public void onBackPressed() {
         if (tryClose())
             super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mUserListFragment.clearFab();
     }
 
     private boolean tryClose() {

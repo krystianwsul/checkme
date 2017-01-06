@@ -27,6 +27,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.loaders.FriendListLoader;
 
@@ -37,12 +38,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class FriendListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<FriendListLoader.Data> {
+public class FriendListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<FriendListLoader.Data>, FabUser {
     private static final String SELECTED_IDS_KEY = "selectedIds";
 
     private ProgressBar mFriendListProgress;
     private RecyclerView mFriendListRecycler;
-    private FloatingActionButton mFriendListFab;
     private TextView mEmptyText;
 
     private FriendListAdapter mFriendListAdapter;
@@ -82,7 +82,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_custom_times, mActionMode.getMenu());
 
-            mFriendListFab.setVisibility(View.GONE);
+            updateFabVisibility();
 
             ((Listener) getActivity()).onCreateUserActionMode(mActionMode);
         }
@@ -99,7 +99,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         @Override
         protected void onLastRemoved() {
-            mFriendListFab.setVisibility(View.VISIBLE);
+            updateFabVisibility();
 
             ((Listener) getActivity()).onDestroyUserActionMode();
         }
@@ -114,6 +114,9 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         }
     };
+
+    @Nullable
+    private FloatingActionButton mFriendListFab;
 
     @NonNull
     public static FriendListFragment newInstance() {
@@ -151,11 +154,6 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         mFriendListRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mFriendListFab = (FloatingActionButton) friendListLayout.findViewById(R.id.friend_list_fab);
-        Assert.assertTrue(mFriendListFab != null);
-
-        mFriendListFab.setOnClickListener(v -> startActivity(FindFriendActivity.newIntent(getActivity())));
-
         mEmptyText = (TextView) friendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
@@ -189,7 +187,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
 
         mFriendListProgress.setVisibility(View.GONE);
-        mFriendListFab.setVisibility(View.VISIBLE);
+
+        updateFabVisibility();
 
         if (data.mUserListDatas.isEmpty()) {
             mFriendListRecycler.setVisibility(View.GONE);
@@ -223,6 +222,40 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
     public void selectAll() {
         mFriendListAdapter.selectAll();
+    }
+
+    @Override
+    public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+        Assert.assertTrue(mFriendListFab == null);
+
+        mFriendListFab = floatingActionButton;
+
+        mFriendListFab.setOnClickListener(v -> startActivity(FindFriendActivity.newIntent(getActivity())));
+
+        updateFabVisibility();
+    }
+
+    private void updateFabVisibility() {
+        if (mFriendListFab == null)
+            return;
+
+        if (mData != null && !mSelectionCallback.hasActionMode()) {
+            mFriendListFab.show();
+        } else {
+            mFriendListFab.hide();
+        }
+    }
+
+    @Override
+    public void clearFab() {
+        if (mFriendListFab == null)
+            return;
+
+        mFriendListFab.setOnClickListener(null);
+
+        mFriendListFab.hide();
+
+        mFriendListFab = null;
     }
 
     public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
@@ -392,4 +425,5 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         void setUserSelectAllVisibility(boolean selectAllVisible);
     }
+
 }

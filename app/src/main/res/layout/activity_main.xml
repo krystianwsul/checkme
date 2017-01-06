@@ -41,46 +41,64 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/main_pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
         <FrameLayout
-            android:id="@+id/main_task_list_frame"
+            android:id="@+id/main_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:visibility="gone"/>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <FrameLayout
-            android:id="@+id/main_custom_times_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:visibility="gone"/>
+            <android.support.v4.view.ViewPager
+                android:id="@+id/main_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
-        <FrameLayout
-            android:id="@+id/main_debug_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:visibility="gone"/>
+            <FrameLayout
+                android:id="@+id/main_task_list_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:visibility="gone"/>
 
-        <FrameLayout
-            android:id="@+id/main_friend_list_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:visibility="gone"/>
+            <FrameLayout
+                android:id="@+id/main_custom_times_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:visibility="gone"/>
 
-        <FrameLayout
-            android:id="@+id/main_project_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:visibility="gone"/>
+            <FrameLayout
+                android:id="@+id/main_debug_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:visibility="gone"/>
+
+            <FrameLayout
+                android:id="@+id/main_friend_list_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:visibility="gone"/>
+
+            <FrameLayout
+                android:id="@+id/main_project_frame"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:visibility="gone"/>
+
+        </FrameLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/main_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:useCompatPadding="true"
+            android:src="@android:drawable/ic_input_add"
+            android:tint="@android:color/white"
+            android:visibility="gone"
+            app:layout_anchor="@id/main_frame"
+            app:layout_anchorGravity="bottom|right|end"/>
 
     </android.support.design.widget.CoordinatorLayout>
 

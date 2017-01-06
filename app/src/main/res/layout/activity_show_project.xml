@@ -23,7 +23,7 @@
         app:useCompatPadding="true"
         android:src="@android:drawable/ic_input_add"
         android:tint="@android:color/white"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_anchor="@id/show_project_frame"
         app:layout_anchorGravity="bottom|right|end"/>
 

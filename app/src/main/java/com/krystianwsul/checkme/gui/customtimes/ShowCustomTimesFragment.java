@@ -220,8 +220,6 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
     @Override
     public void setFab(@NonNull FloatingActionButton floatingActionButton) {
-        Assert.assertTrue(mShowTimesFab == null);
-
         mShowTimesFab = floatingActionButton;
 
         mShowTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));

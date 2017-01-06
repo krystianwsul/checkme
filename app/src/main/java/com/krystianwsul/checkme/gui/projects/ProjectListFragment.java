@@ -25,6 +25,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
@@ -41,12 +42,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class ProjectListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<ProjectListLoader.Data> {
+public class ProjectListFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<ProjectListLoader.Data>, FabUser {
     private static final String SELECTED_PROJECT_IDS = "selectedProjectIds";
 
     private ProgressBar mProjectListProgress;
     private TextView mEmptyText;
     private RecyclerView mProjectListRecycler;
+
+    @Nullable
     private FloatingActionButton mProjectListFab;
 
     @Nullable
@@ -109,7 +112,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_projects, mActionMode.getMenu());
 
-            mProjectListFab.setVisibility(View.GONE);
+            updateFabVisibility();
         }
 
         @Override
@@ -128,7 +131,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
             mTreeViewAdapter.onDestroyActionMode();
 
-            mProjectListFab.setVisibility(View.VISIBLE);
+            updateFabVisibility();
         }
 
         @Override
@@ -179,9 +182,6 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         mProjectListRecycler = (RecyclerView) view.findViewById(R.id.projectListRecycler);
         Assert.assertTrue(mProjectListRecycler != null);
 
-        mProjectListFab = (FloatingActionButton) view.findViewById(R.id.projectListFab);
-        Assert.assertTrue(mProjectListFab != null);
-
         return view;
     }
 
@@ -225,8 +225,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
-        mProjectListFab.setVisibility(View.VISIBLE);
-        mProjectListFab.setOnClickListener(v -> startActivity(ShowProjectActivity.newIntent(getActivity())));
+        updateFabVisibility();
     }
 
     @Override
@@ -244,6 +243,36 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                     .collect(Collectors.toSet());
 
         outState.putStringArrayList(SELECTED_PROJECT_IDS, new ArrayList<>(mSelectedProjectIds));
+    }
+
+    @Override
+    public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+        mProjectListFab = floatingActionButton;
+
+        mProjectListFab.setOnClickListener(v -> startActivity(ShowProjectActivity.newIntent(getActivity())));
+
+        updateFabVisibility();
+    }
+
+    private void updateFabVisibility() {
+        if (mProjectListFab == null)
+            return;
+
+        if (mDataId != null && !mSelectionCallback.hasActionMode()) {
+            mProjectListFab.show();
+        } else {
+            mProjectListFab.hide();
+        }
+    }
+
+    @Override
+    public void clearFab() {
+        if (mProjectListFab == null)
+            return;
+
+        mProjectListFab.setOnClickListener(null);
+
+        mProjectListFab = null;
     }
 
     private class ProjectListAdapter implements TreeModelAdapter {

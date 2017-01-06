@@ -97,6 +97,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private DrawerLayout mMainActivityDrawer;
 
     private TaskListFragment mTaskListFragment;
+    private ProjectListFragment mProjectListFragment;
     private ShowCustomTimesFragment mShowCustomTimesFragment;
     private FriendListFragment mFriendListFragment;
 
@@ -302,7 +303,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
         mTaskListFragment = (TaskListFragment) fragmentManager.findFragmentById(R.id.main_task_list_frame);
-        Fragment projectListFragment = fragmentManager.findFragmentById(R.id.main_project_frame);
+        mProjectListFragment = (ProjectListFragment) fragmentManager.findFragmentById(R.id.main_project_frame);
         Fragment userListFragment = fragmentManager.findFragmentById(R.id.main_friend_list_frame);
         mShowCustomTimesFragment = (ShowCustomTimesFragment) fragmentManager.findFragmentById(R.id.main_custom_times_frame);
         Fragment debugFragment = fragmentManager.findFragmentById(R.id.main_debug_frame);
@@ -311,17 +312,18 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         if (mTaskListFragment == null) {
             Assert.assertTrue(mShowCustomTimesFragment == null);
             Assert.assertTrue(debugFragment == null);
-            Assert.assertTrue(projectListFragment == null);
+            Assert.assertTrue(mProjectListFragment == null);
             Assert.assertTrue(userListFragment == null);
             Assert.assertTrue(mFriendListFragment == null);
 
             mTaskListFragment = TaskListFragment.newInstance();
+            mProjectListFragment = ProjectListFragment.newInstance();
             mShowCustomTimesFragment = ShowCustomTimesFragment.newInstance();
             mFriendListFragment = FriendListFragment.newInstance();
 
             fragmentManager.beginTransaction()
                     .add(R.id.main_task_list_frame, mTaskListFragment)
-                    .add(R.id.main_project_frame, ProjectListFragment.newInstance())
+                    .add(R.id.main_project_frame, mProjectListFragment)
                     .add(R.id.main_friend_list_frame, mFriendListFragment)
                     .add(R.id.main_custom_times_frame, mShowCustomTimesFragment)
                     .add(R.id.main_debug_frame, DebugFragment.newInstance())
@@ -329,7 +331,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         } else {
             Assert.assertTrue(mShowCustomTimesFragment != null);
             Assert.assertTrue(debugFragment != null);
-            Assert.assertTrue(projectListFragment != null);
+            Assert.assertTrue(mProjectListFragment != null);
             Assert.assertTrue(mFriendListFragment != null);
         }
 
@@ -569,6 +571,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
                 mMainFab.hide();
@@ -585,6 +588,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
                 mMainFab.hide();
@@ -601,9 +605,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mProjectListFragment.setFab(mMainFab);
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
-                mMainFab.hide();
 
                 break;
             case CUSTOM_TIMES:
@@ -617,6 +621,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.setFab(mMainFab);
                 mFriendListFragment.clearFab();
 
@@ -633,8 +638,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 ViewCompat.setElevation(mMainActivityAppBarLayout, NORMAL_ELEVATION * density);
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.VISIBLE);
-                mFriendListFragment.setFab(mMainFab);
 
+                mProjectListFragment.clearFab();
+                mFriendListFragment.setFab(mMainFab);
                 mShowCustomTimesFragment.clearFab();
 
                 break;
@@ -649,6 +655,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
                 mMainFab.hide();

@@ -28,6 +28,6 @@
         app:useCompatPadding="true"
         android:src="@android:drawable/ic_input_add"
         android:tint="@android:color/white"
-        android:visibility="gone"/>
+        android:visibility="invisible"/>
 
 </RelativeLayout>

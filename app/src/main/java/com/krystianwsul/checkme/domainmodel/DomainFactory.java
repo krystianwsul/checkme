@@ -2339,17 +2339,28 @@ public class DomainFactory {
                 .forEach(LocalCustomTime::delete);
 
         List<RemoteCustomTime> irrelevantRemoteCustomTimes;
+        List<RemoteProject> irrelevantRemoteProjects;
         if (mRemoteFactory != null) {
             List<RemoteCustomTime> remoteCustomTimes = mRemoteFactory.getRemoteCustomTimes();
             Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances = Stream.of(remoteCustomTimes).collect(Collectors.toMap(remoteCustomTime -> Pair.create(remoteCustomTime.getProjectId(), remoteCustomTime.getId()), RemoteCustomTimeRelevance::new));
 
+            Collection<RemoteProject> remoteProjects = mRemoteFactory.getRemoteProjects();
+            Map<String, RemoteProjectRelevance> remoteProjectRelevances = Stream.of(remoteProjects)
+                    .collect(Collectors.toMap(RemoteProject::getId, RemoteProjectRelevance::new));
+
+            Stream.of(remoteProjects)
+                    .filter(remoteProject -> remoteProject.current(now))
+                    .map(RemoteProject::getId)
+                    .map(remoteProjectRelevances::get)
+                    .forEach(RemoteProjectRelevance::setRelevant);
+
             Stream.of(taskRelevances.values())
                     .filter(TaskRelevance::getRelevant)
-                    .forEach(taskRelevance -> taskRelevance.setRemoteCustomTimeRelevant(remoteCustomTimeRelevances));
+                    .forEach(taskRelevance -> taskRelevance.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances));
 
             Stream.of(instanceRelevances.values())
                     .filter(InstanceRelevance::getRelevant)
-                    .forEach(instanceRelevance -> instanceRelevance.setRemoteCustomTimeRelevant(remoteCustomTimeRelevances));
+                    .forEach(instanceRelevance -> instanceRelevance.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances));
 
             List<RemoteCustomTime> relevantRemoteCustomTimes = Stream.of(remoteCustomTimeRelevances.values())
                     .filter(RemoteCustomTimeRelevance::getRelevant)
@@ -2361,11 +2372,23 @@ public class DomainFactory {
 
             Stream.of(irrelevantRemoteCustomTimes)
                     .forEach(RemoteCustomTime::delete);
+
+            List<RemoteProject> relevantRemoteProjects = Stream.of(remoteProjectRelevances.values())
+                    .filter(RemoteProjectRelevance::getRelevant)
+                    .map(RemoteProjectRelevance::getRemoteProject)
+                    .collect(Collectors.toList());
+
+            irrelevantRemoteProjects = new ArrayList<>(remoteProjects);
+            irrelevantRemoteProjects.removeAll(relevantRemoteProjects);
+
+            Stream.of(irrelevantRemoteProjects)
+                    .forEach(RemoteProject::delete);
         } else {
             irrelevantRemoteCustomTimes = null;
+            irrelevantRemoteProjects = null;
         }
 
-        return new Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes);
+        return new Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects);
     }
 
     private void notifyCloud(@Nullable RemoteProject remoteProject) {
@@ -2794,11 +2817,15 @@ public class DomainFactory {
         @Nullable
         final List<RemoteCustomTime> mRemoteCustomTimes;
 
-        Irrelevant(@NonNull List<LocalCustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<Instance> instances, @Nullable List<RemoteCustomTime> remoteCustomTimes) {
+        @Nullable
+        final List<RemoteProject> mRemoteProjects;
+
+        Irrelevant(@NonNull List<LocalCustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<Instance> instances, @Nullable List<RemoteCustomTime> remoteCustomTimes, @Nullable List<RemoteProject> remoteProjects) {
             mLocalCustomTimes = customTimes;
             mTasks = tasks;
             mInstances = instances;
             mRemoteCustomTimes = remoteCustomTimes;
+            mRemoteProjects = remoteProjects;
         }
     }
 
@@ -2869,7 +2896,7 @@ public class DomainFactory {
             return mTask;
         }
 
-        void setRemoteCustomTimeRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances) {
+        void setRemoteRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
             Assert.assertTrue(mRelevant);
 
             Stream.of(mTask.getSchedules())
@@ -2877,6 +2904,10 @@ public class DomainFactory {
                     .filter(pair -> pair != null)
                     .map(remoteCustomTimeRelevances::get)
                     .forEach(RemoteCustomTimeRelevance::setRelevant);
+
+            RemoteProject remoteProject = mTask.getRemoteNullableProject();
+            if (remoteProject != null)
+                remoteProjectRelevances.get(remoteProject.getId()).setRelevant();
         }
     }
 
@@ -2947,12 +2978,19 @@ public class DomainFactory {
             }
         }
 
-        void setRemoteCustomTimeRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances) {
+        void setRemoteRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
             Assert.assertTrue(mRelevant);
 
             Pair<String, String> pair = mInstance.getRemoteCustomTimeKey();
-            if (pair != null)
+            RemoteProject remoteProject = mInstance.getRemoteNullableProject();
+            if (pair != null) {
+                Assert.assertTrue(remoteProject != null);
+
                 remoteCustomTimeRelevances.get(pair).setRelevant();
+            }
+
+            if (remoteProject != null)
+                remoteProjectRelevances.get(remoteProject.getId()).setRelevant();
         }
 
         boolean getRelevant() {
@@ -3020,6 +3058,30 @@ public class DomainFactory {
         @NonNull
         RemoteCustomTime getRemoteCustomTime() {
             return mRemoteCustomTime;
+        }
+    }
+
+    private static class RemoteProjectRelevance {
+        @NonNull
+        private final RemoteProject mRemoteProject;
+
+        private boolean mRelevant = false;
+
+        RemoteProjectRelevance(@NonNull RemoteProject remoteProject) {
+            mRemoteProject = remoteProject;
+        }
+
+        void setRelevant() {
+            mRelevant = true;
+        }
+
+        boolean getRelevant() {
+            return mRelevant;
+        }
+
+        @NonNull
+        RemoteProject getRemoteProject() {
+            return mRemoteProject;
         }
     }
 

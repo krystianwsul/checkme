@@ -555,6 +555,8 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
     public interface ParentKey extends Parcelable {
         @NonNull
         ParentType getType();
+
+        boolean equals(Object obj);
     }
 
     public enum ParentType {

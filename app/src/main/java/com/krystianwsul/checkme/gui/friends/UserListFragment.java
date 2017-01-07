@@ -242,7 +242,7 @@ public class UserListFragment extends AbstractFragment {
         mFriendListProgress.setVisibility(View.GONE);
         mFriendListFab.setVisibility(View.VISIBLE);
 
-        if (data.mUserListDatas.isEmpty()) {
+        if (mFriendListAdapter.mUserDataWrappers.isEmpty()) {
             mFriendListRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
             mEmptyText.setText(R.string.friends_empty);

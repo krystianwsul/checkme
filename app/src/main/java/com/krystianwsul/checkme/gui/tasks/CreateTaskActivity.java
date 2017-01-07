@@ -809,7 +809,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 if (!hasValueParentTask())
                     return true;
 
-                if (mParent == null || !mParent.mParentKey.equals(mParentTaskKeyHint))
+                if (mParent == null || !mParent.mParentKey.equals(new CreateTaskLoader.TaskParentKey(mParentTaskKeyHint)))
                     return true;
 
                 return false;

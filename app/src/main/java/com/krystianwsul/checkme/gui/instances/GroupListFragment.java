@@ -34,6 +34,7 @@ import com.krystianwsul.checkme.DataDiff;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
@@ -69,14 +70,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class GroupListFragment extends AbstractFragment {
+public class GroupListFragment extends AbstractFragment implements FabUser {
     private final static String EXPANSION_STATE_KEY = "expansionState";
     private final static String SELECTED_NODES_KEY = "selectedNodes";
 
     private ProgressBar mGroupListProgress;
     private RecyclerView mGroupListRecycler;
     private TreeViewAdapter mTreeViewAdapter;
-    private FloatingActionButton mFloatingActionButton;
     private TextView mEmptyText;
 
     private Integer mPosition;
@@ -95,8 +95,6 @@ public class GroupListFragment extends AbstractFragment {
     private DataWrapper mDataWrapper;
 
     private final SelectionCallback mSelectionCallback = new SelectionCallback() {
-        private Integer mOldVisibility = null;
-
         @Override
         protected void unselect() {
             mTreeViewAdapter.unselect();
@@ -332,9 +330,7 @@ public class GroupListFragment extends AbstractFragment {
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_edit_groups, mActionMode.getMenu());
 
-            Assert.assertTrue(mOldVisibility == null);
-            mOldVisibility = mFloatingActionButton.getVisibility();
-            mFloatingActionButton.setVisibility(View.GONE);
+            updateFabVisibility();
 
             ((GroupListListener) getActivity()).onCreateGroupActionMode(mActionMode);
 
@@ -355,8 +351,7 @@ public class GroupListFragment extends AbstractFragment {
         protected void onLastRemoved() {
             mTreeViewAdapter.onDestroyActionMode();
 
-            mFloatingActionButton.setVisibility(mOldVisibility);
-            mOldVisibility = null;
+            updateFabVisibility();
 
             ((GroupListListener) getActivity()).onDestroyGroupActionMode();
         }
@@ -454,6 +449,14 @@ public class GroupListFragment extends AbstractFragment {
             addParents(parents, parent);
         }
     };
+
+    @Nullable
+    private FloatingActionButton mFloatingActionButton;
+
+    @NonNull
+    public static GroupListFragment newInstance() {
+        return new GroupListFragment();
+    }
 
     @NonNull
     private String getShareData(@NonNull List<InstanceData> instanceDatas) {
@@ -557,9 +560,6 @@ public class GroupListFragment extends AbstractFragment {
         Assert.assertTrue(mGroupListRecycler != null);
 
         mGroupListRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.group_list_fab);
-        Assert.assertTrue(mFloatingActionButton != null);
 
         mEmptyText = (TextView) view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
@@ -680,8 +680,6 @@ public class GroupListFragment extends AbstractFragment {
             }
         }
 
-        boolean showFab;
-        Activity activity = getActivity();
         Integer emptyTextId;
         if (mPosition != null) {
             Assert.assertTrue(mTimeRange != null);
@@ -692,22 +690,12 @@ public class GroupListFragment extends AbstractFragment {
 
             Assert.assertTrue(mDataWrapper.TaskEditable == null);
 
-            showFab = true;
-            mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition)))));
-
             emptyTextId = R.string.instances_empty_root;
         } else if (mTimeStamp != null) {
             Assert.assertTrue(mInstanceKey == null);
             Assert.assertTrue(mInstanceKeys == null);
 
             Assert.assertTrue(mDataWrapper.TaskEditable == null);
-
-            if (mTimeStamp.compareTo(TimeStamp.getNow()) > 0) {
-                showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(mTimeStamp.getDate(), mTimeStamp.getHourMinute()))));
-            } else {
-                showFab = false;
-            }
 
             emptyTextId = null;
         } else if (mInstanceKey != null) {
@@ -716,13 +704,8 @@ public class GroupListFragment extends AbstractFragment {
             Assert.assertTrue(mDataWrapper.TaskEditable != null);
 
             if (mDataWrapper.TaskEditable) {
-                showFab = true;
-                mFloatingActionButton.setOnClickListener(v -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, mInstanceKey.mTaskKey)));
-
                 emptyTextId = R.string.empty_child;
             } else {
-                showFab = false;
-
                 emptyTextId = R.string.empty_disabled;
             }
         } else {
@@ -730,14 +713,12 @@ public class GroupListFragment extends AbstractFragment {
             Assert.assertTrue(!mInstanceKeys.isEmpty());
             Assert.assertTrue(mDataWrapper.TaskEditable == null);
 
-            showFab = false;
-
             emptyTextId = null;
         }
 
-        mFloatingActionButton.setVisibility(showFab ? View.VISIBLE : View.GONE);
+        updateFabVisibility();
 
-        mTreeViewAdapter = GroupAdapter.getAdapter(this, mDataId, mDataWrapper.CustomTimeDatas, useGroups(), showFab, mDataWrapper.InstanceDatas.values(), mExpansionState, mSelectedNodes, mDataWrapper.TaskDatas, mDataWrapper.mNote);
+        mTreeViewAdapter = GroupAdapter.getAdapter(this, mDataId, mDataWrapper.CustomTimeDatas, useGroups(), showPadding(), mDataWrapper.InstanceDatas.values(), mExpansionState, mSelectedNodes, mDataWrapper.TaskDatas, mDataWrapper.mNote);
 
         mGroupListRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
@@ -764,6 +745,185 @@ public class GroupListFragment extends AbstractFragment {
 
         ((GroupListListener) getActivity()).setGroupSelectAllVisibility(mPosition, Stream.of(mDataWrapper.InstanceDatas.values())
                 .anyMatch(instanceData -> instanceData.Done == null));
+    }
+
+    @NonNull
+    private static Date rangePositionToDate(MainActivity.TimeRange timeRange, int position) {
+        Assert.assertTrue(timeRange != null);
+        Assert.assertTrue(position >= 0);
+
+        Calendar calendar = Calendar.getInstance();
+
+        if (position > 0) {
+            switch (timeRange) {
+                case DAY:
+                    calendar.add(Calendar.DATE, position);
+                    break;
+                case WEEK:
+                    calendar.add(Calendar.WEEK_OF_YEAR, position);
+                    calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+                    break;
+                case MONTH:
+                    calendar.add(Calendar.MONTH, position);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+            }
+        }
+
+        return new Date(calendar);
+    }
+
+    private static List<InstanceData> nodesToInstanceDatas(List<TreeNode> treeNodes) {
+        Assert.assertTrue(treeNodes != null);
+
+        List<InstanceData> instanceDatas = new ArrayList<>();
+        for (TreeNode treeNode : treeNodes) {
+            if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
+                InstanceData instanceData = ((GroupAdapter.NodeCollection.NotDoneGroupNode) treeNode.getModelNode()).getSingleInstanceData();
+
+                instanceDatas.add(instanceData);
+            } else {
+                Assert.assertTrue(treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode);
+
+                instanceDatas.add(((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) treeNode.getModelNode()).mInstanceData);
+            }
+        }
+
+        return instanceDatas;
+    }
+
+    private static void recursiveExists(InstanceData instanceData) {
+        Assert.assertTrue(instanceData != null);
+
+        instanceData.Exists = true;
+
+        if (instanceData.mInstanceDataParent instanceof InstanceData) {
+            InstanceData instanceData1 = (InstanceData) instanceData.mInstanceDataParent;
+            recursiveExists(instanceData1);
+        } else {
+            Assert.assertTrue(instanceData.mInstanceDataParent instanceof DataWrapper);
+        }
+    }
+
+    private static String getChildrenText(boolean expanded, @NonNull Collection<InstanceData> instanceDatas, @Nullable String note) {
+        if (!instanceDatas.isEmpty() && !expanded) {
+            Stream<InstanceData> notDone = Stream.of(instanceDatas)
+                    .filter(instanceData -> instanceData.Done == null)
+                    .sortBy(instanceData -> instanceData.mTaskStartExactTimeStamp);
+
+            //noinspection ConstantConditions
+            Stream<InstanceData> done = Stream.of(instanceDatas)
+                    .filter(instanceData -> instanceData.Done != null)
+                    .sortBy(instanceData -> -instanceData.Done.getLong());
+
+            return Stream.concat(notDone, done)
+                    .map(instanceData -> instanceData.Name)
+                    .collect(Collectors.joining(", "));
+        } else {
+            Assert.assertTrue(!TextUtils.isEmpty(note));
+
+            return note;
+        }
+    }
+
+    public void selectAll() {
+        mTreeViewAdapter.selectAll();
+    }
+
+    @Override
+    public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+        Log.e("asdf", "setFab");
+
+        mFloatingActionButton = floatingActionButton;
+
+        mFloatingActionButton.setOnClickListener(v -> {
+            Assert.assertTrue(mDataWrapper != null);
+            Assert.assertTrue(mInstanceKeys == null);
+
+            if (mPosition != null) {
+                Assert.assertTrue(mTimeRange != null);
+
+                Assert.assertTrue(mTimeStamp == null);
+                Assert.assertTrue(mInstanceKey == null);
+
+                Assert.assertTrue(mDataWrapper.TaskEditable == null);
+
+                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition))));
+            } else if (mTimeStamp != null) {
+                Assert.assertTrue(mInstanceKey == null);
+
+                Assert.assertTrue(mDataWrapper.TaskEditable == null);
+
+                Assert.assertTrue(mTimeStamp.compareTo(TimeStamp.getNow()) > 0);
+
+                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new CreateTaskActivity.ScheduleHint(mTimeStamp.getDate(), mTimeStamp.getHourMinute())));
+            } else {
+                Assert.assertTrue(mInstanceKey != null);
+
+                Assert.assertTrue(mDataWrapper.TaskEditable != null);
+
+                Assert.assertTrue(mDataWrapper.TaskEditable);
+
+                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mInstanceKey.mTaskKey));
+            }
+        });
+
+        updateFabVisibility();
+    }
+
+    private boolean showPadding() {
+        Assert.assertTrue(mDataWrapper != null);
+
+        if (mPosition != null) {
+            Assert.assertTrue(mTimeRange != null);
+
+            Assert.assertTrue(mTimeStamp == null);
+            Assert.assertTrue(mInstanceKey == null);
+            Assert.assertTrue(mInstanceKeys == null);
+
+            Assert.assertTrue(mDataWrapper.TaskEditable == null);
+
+            return true;
+        } else if (mTimeStamp != null) {
+            Assert.assertTrue(mInstanceKey == null);
+            Assert.assertTrue(mInstanceKeys == null);
+
+            Assert.assertTrue(mDataWrapper.TaskEditable == null);
+
+            return (mTimeStamp.compareTo(TimeStamp.getNow()) > 0);
+        } else if (mInstanceKey != null) {
+            Assert.assertTrue(mInstanceKeys == null);
+
+            Assert.assertTrue(mDataWrapper.TaskEditable != null);
+
+            return mDataWrapper.TaskEditable;
+        } else {
+            Assert.assertTrue(mInstanceKeys != null);
+            Assert.assertTrue(!mInstanceKeys.isEmpty());
+            Assert.assertTrue(mDataWrapper.TaskEditable == null);
+
+            return false;
+        }
+    }
+
+    private void updateFabVisibility() {
+        if (mFloatingActionButton == null)
+            return;
+
+        if (mDataWrapper != null && !mSelectionCallback.hasActionMode() && showPadding()) {
+            mFloatingActionButton.show();
+        } else {
+            mFloatingActionButton.hide();
+        }
+    }
+
+    @Override
+    public void clearFab() {
+        if (mFloatingActionButton == null)
+            return;
+
+        mFloatingActionButton.setOnClickListener(null);
+
+        mFloatingActionButton = null;
     }
 
     public static class GroupAdapter implements TreeModelAdapter, NodeCollectionParent {
@@ -3472,88 +3632,6 @@ public class GroupListFragment extends AbstractFragment {
     private interface TaskParent {
         @NonNull
         GroupAdapter getGroupAdapter();
-    }
-
-    @NonNull
-    private static Date rangePositionToDate(MainActivity.TimeRange timeRange, int position) {
-        Assert.assertTrue(timeRange != null);
-        Assert.assertTrue(position >= 0);
-
-        Calendar calendar = Calendar.getInstance();
-
-        if (position > 0) {
-            switch (timeRange) {
-                case DAY:
-                    calendar.add(Calendar.DATE, position);
-                    break;
-                case WEEK:
-                    calendar.add(Calendar.WEEK_OF_YEAR, position);
-                    calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
-                    break;
-                case MONTH:
-                    calendar.add(Calendar.MONTH, position);
-                    calendar.set(Calendar.DAY_OF_MONTH, 1);
-            }
-        }
-
-        return new Date(calendar);
-    }
-
-    private static List<InstanceData> nodesToInstanceDatas(List<TreeNode> treeNodes) {
-        Assert.assertTrue(treeNodes != null);
-
-        List<InstanceData> instanceDatas = new ArrayList<>();
-        for (TreeNode treeNode : treeNodes) {
-            if (treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode) {
-                InstanceData instanceData = ((GroupAdapter.NodeCollection.NotDoneGroupNode) treeNode.getModelNode()).getSingleInstanceData();
-
-                instanceDatas.add(instanceData);
-            } else {
-                Assert.assertTrue(treeNode.getModelNode() instanceof GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode);
-
-                instanceDatas.add(((GroupAdapter.NodeCollection.NotDoneGroupNode.NotDoneInstanceNode) treeNode.getModelNode()).mInstanceData);
-            }
-        }
-
-        return instanceDatas;
-    }
-
-    private static void recursiveExists(InstanceData instanceData) {
-        Assert.assertTrue(instanceData != null);
-
-        instanceData.Exists = true;
-
-        if (instanceData.mInstanceDataParent instanceof InstanceData) {
-            InstanceData instanceData1 = (InstanceData) instanceData.mInstanceDataParent;
-            recursiveExists(instanceData1);
-        } else {
-            Assert.assertTrue(instanceData.mInstanceDataParent instanceof DataWrapper);
-        }
-    }
-
-    private static String getChildrenText(boolean expanded, @NonNull Collection<InstanceData> instanceDatas, @Nullable String note) {
-        if (!instanceDatas.isEmpty() && !expanded) {
-            Stream<InstanceData> notDone = Stream.of(instanceDatas)
-                    .filter(instanceData -> instanceData.Done == null)
-                    .sortBy(instanceData -> instanceData.mTaskStartExactTimeStamp);
-
-            //noinspection ConstantConditions
-            Stream<InstanceData> done = Stream.of(instanceDatas)
-                    .filter(instanceData -> instanceData.Done != null)
-                    .sortBy(instanceData -> -instanceData.Done.getLong());
-
-            return Stream.concat(notDone, done)
-                    .map(instanceData -> instanceData.Name)
-                    .collect(Collectors.joining(", "));
-        } else {
-            Assert.assertTrue(!TextUtils.isEmpty(note));
-
-            return note;
-        }
-    }
-
-    public void selectAll() {
-        mTreeViewAdapter.selectAll();
     }
 
     public static class DataWrapper implements InstanceDataParent {

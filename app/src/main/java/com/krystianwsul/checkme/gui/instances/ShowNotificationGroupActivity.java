@@ -58,7 +58,13 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         actionBar.setTitle(null);
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
-        Assert.assertTrue(mGroupListFragment != null);
+        if (mGroupListFragment == null) {
+            mGroupListFragment = GroupListFragment.newInstance();
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.show_notification_group_list, mGroupListFragment)
+                    .commit();
+        }
 
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(INSTANCES_KEY));

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -27,6 +26,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
@@ -61,7 +61,6 @@ import com.krystianwsul.checkme.notifications.TickService;
 import junit.framework.Assert;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, FriendListFragment.Listener, LoaderManager.LoaderCallbacks<MainLoader.Data> {
@@ -338,8 +337,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mDaysPager = (ViewPager) findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);
 
-        mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
-
         mDaysPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -356,6 +353,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
             }
         });
+
+        mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
 
         mMainTaskListFrame = (FrameLayout) findViewById(R.id.main_task_list_frame);
         Assert.assertTrue(mMainTaskListFrame != null);
@@ -571,11 +570,11 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).setFab(mMainFab);
                 mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
-                mMainFab.hide();
 
                 break;
             case TASKS:
@@ -589,6 +588,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.setFab(mMainFab);
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
@@ -606,6 +606,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.clearFab();
                 mProjectListFragment.setFab(mMainFab);
                 mShowCustomTimesFragment.clearFab();
@@ -623,6 +624,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.setFab(mMainFab);
@@ -642,6 +644,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.VISIBLE);
 
+                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mFriendListFragment.setFab(mMainFab);
@@ -659,6 +662,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
@@ -946,9 +950,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         return sUserData;
     }
 
-    private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
-        @SuppressLint("UseSparseArrays")
-        private final Map<Integer, WeakReference<DayFragment>> mDayFragments = new HashMap<>();
+    private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter implements FabUser {
+        @Nullable
+        private WeakReference<DayFragment> mCurrentItem;
+
+        @Nullable
+        private FloatingActionButton mFloatingActionButton;
 
         MyFragmentStatePagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -956,11 +963,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         @Override
         public Fragment getItem(int position) {
-            DayFragment dayFragment = DayFragment.newInstance(mTimeRange, position);
-
-            mDayFragments.put(position, new WeakReference<>(dayFragment));
-
-            return dayFragment;
+            return DayFragment.newInstance(mTimeRange, position);
         }
 
         @Override
@@ -970,13 +973,63 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         @NonNull
         DayFragment getCurrentItem() {
-            int position = mDaysPager.getCurrentItem();
-            Assert.assertTrue(mDayFragments.containsKey(position));
+            Assert.assertTrue(mCurrentItem != null);
 
-            DayFragment dayFragment = mDayFragments.get(position).get();
+            DayFragment dayFragment = mCurrentItem.get();
             Assert.assertTrue(dayFragment != null);
 
             return dayFragment;
+        }
+
+        @Override
+        public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+            mFloatingActionButton = floatingActionButton;
+
+            if (mCurrentItem != null) {
+                DayFragment dayFragment = mCurrentItem.get();
+                Assert.assertTrue(dayFragment != null);
+
+                dayFragment.setFab(mFloatingActionButton);
+            }
+        }
+
+        @Override
+        public void clearFab() {
+            mFloatingActionButton = null;
+
+            if (mCurrentItem != null) {
+                DayFragment dayFragment = mCurrentItem.get();
+                Assert.assertTrue(dayFragment != null);
+
+                dayFragment.clearFab();
+            }
+        }
+
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+            super.setPrimaryItem(container, position, object);
+
+            if (mCurrentItem != null) {
+                DayFragment dayFragment = mCurrentItem.get();
+                Assert.assertTrue(dayFragment != null);
+
+                if (dayFragment != object) {
+                    dayFragment.clearFab();
+                } else {
+                    return;
+                }
+            }
+
+            if (object == null) {
+                mCurrentItem = null;
+            } else {
+                DayFragment dayFragment = (DayFragment) object;
+
+                if (mFloatingActionButton != null)
+                    dayFragment.setFab(mFloatingActionButton);
+
+                mCurrentItem = new WeakReference<>(dayFragment);
+            }
         }
     }
 

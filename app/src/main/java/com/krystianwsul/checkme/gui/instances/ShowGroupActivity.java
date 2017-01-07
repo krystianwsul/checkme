@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -51,6 +52,9 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
 
         mActionBar.setTitle(null);
 
+        FloatingActionButton showGroupFab = (FloatingActionButton) findViewById(R.id.show_group_fab);
+        Assert.assertTrue(showGroupFab != null);
+
         Intent intent = getIntent();
         Assert.assertTrue(intent.hasExtra(TIME_KEY));
         long time = intent.getLongExtra(TIME_KEY, -1);
@@ -58,7 +62,15 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
         mTimeStamp = new TimeStamp(time);
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
-        Assert.assertTrue(mGroupListFragment != null);
+        if (mGroupListFragment == null) {
+            mGroupListFragment = GroupListFragment.newInstance();
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.show_group_list, mGroupListFragment)
+                    .commit();
+        }
+
+        mGroupListFragment.setFab(showGroupFab);
 
         getSupportLoaderManager().initLoader(0, null, this);
     }

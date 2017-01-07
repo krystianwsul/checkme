@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
@@ -185,6 +186,9 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         mActionBar.setTitle(null);
 
+        FloatingActionButton showInstanceFab = (FloatingActionButton) findViewById(R.id.show_instance_fab);
+        Assert.assertTrue(showInstanceFab != null);
+
         if (savedInstanceState == null)
             mFirst = true;
 
@@ -194,7 +198,15 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         Assert.assertTrue(mInstanceKey != null);
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
-        Assert.assertTrue(mGroupListFragment != null);
+        if (mGroupListFragment == null) {
+            mGroupListFragment = GroupListFragment.newInstance();
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.show_instance_list, mGroupListFragment)
+                    .commit();
+        }
+
+        mGroupListFragment.setFab(showInstanceFab);
 
         getSupportLoaderManager().initLoader(0, null, this);
 

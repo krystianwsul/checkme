@@ -4,8 +4,8 @@ package com.krystianwsul.checkme.gui.instances;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.DayLoader;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -25,7 +26,7 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class DayFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<DayLoader.Data> {
+public class DayFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<DayLoader.Data>, FabUser {
     private static final String POSITION_KEY = "position";
     private static final String TIME_RANGE_KEY = "timeRange";
 
@@ -34,6 +35,9 @@ public class DayFragment extends AbstractFragment implements LoaderManager.Loade
 
     private TabLayout mDayTabLayout;
     private GroupListFragment mGroupListFragment;
+
+    @Nullable
+    private FloatingActionButton mFloatingActionButton;
 
     @NonNull
     public static DayFragment newInstance(@NonNull MainActivity.TimeRange timeRange, int day) {
@@ -129,9 +133,11 @@ public class DayFragment extends AbstractFragment implements LoaderManager.Loade
 
         mDayTabLayout.addTab(mDayTabLayout.newTab().setText(title));
 
-        FragmentManager fragmentManager = getChildFragmentManager();
-        mGroupListFragment = (GroupListFragment) fragmentManager.findFragmentById(R.id.day_frame);
+        mGroupListFragment = (GroupListFragment) getChildFragmentManager().findFragmentById(R.id.day_frame);
         Assert.assertTrue(mGroupListFragment != null);
+
+        if (mFloatingActionButton != null)
+            mGroupListFragment.setFab(mFloatingActionButton);
 
         getLoaderManager().initLoader(0, null, this);
     }
@@ -155,5 +161,23 @@ public class DayFragment extends AbstractFragment implements LoaderManager.Loade
 
     public void selectAll() {
         mGroupListFragment.selectAll();
+    }
+
+    @Override
+    public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+        if (mFloatingActionButton == floatingActionButton)
+            return;
+
+        mFloatingActionButton = floatingActionButton;
+
+        if (mGroupListFragment != null)
+            mGroupListFragment.setFab(floatingActionButton);
+    }
+
+    @Override
+    public void clearFab() {
+        mFloatingActionButton = null;
+
+        mGroupListFragment.clearFab();
     }
 }

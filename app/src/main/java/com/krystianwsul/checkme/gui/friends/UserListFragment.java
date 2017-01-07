@@ -237,7 +237,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
 
         updateFabVisibility();
 
-        if (data.mUserListDatas.isEmpty()) {
+        if (mFriendListAdapter.mUserDataWrappers.isEmpty()) {
             mFriendListRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
             mEmptyText.setText(R.string.friends_empty);

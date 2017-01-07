@@ -26,6 +26,7 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
+import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.gui.tree.NodeContainer;
@@ -44,12 +45,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskListFragment extends AbstractFragment {
+public class TaskListFragment extends AbstractFragment implements FabUser {
     private static final String SELECTED_TASK_KEYS_KEY = "selectedTaskKeys";
     private static final String EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys";
 
     private RecyclerView mTaskListFragmentRecycler;
-    private FloatingActionButton mTaskListFragmentFab;
     private TextView mEmptyText;
 
     private boolean mAllTasks;
@@ -146,7 +146,7 @@ public class TaskListFragment extends AbstractFragment {
 
             mActionMode.getMenuInflater().inflate(R.menu.menu_edit_tasks, mActionMode.getMenu());
 
-            mTaskListFragmentFab.setVisibility(View.GONE);
+            updateFabVisibility();
 
             ((TaskListListener) getActivity()).onCreateTaskActionMode(mActionMode);
         }
@@ -192,7 +192,7 @@ public class TaskListFragment extends AbstractFragment {
         protected void onLastRemoved() {
             mTreeViewAdapter.onDestroyActionMode();
 
-            mTaskListFragmentFab.setVisibility(View.VISIBLE);
+            updateFabVisibility();
 
             ((TaskListListener) getActivity()).onDestroyTaskActionMode();
         }
@@ -259,6 +259,9 @@ public class TaskListFragment extends AbstractFragment {
             addParents(parents, parentNode);
         }
     };
+
+    @Nullable
+    private FloatingActionButton mTaskListFragmentFab;
 
     @NonNull
     private String getShareData(@NonNull List<ChildTaskData> childTaskDatas) {
@@ -353,9 +356,6 @@ public class TaskListFragment extends AbstractFragment {
         mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.task_list_recycler);
         Assert.assertTrue(mTaskListFragmentRecycler != null);
 
-        mTaskListFragmentFab = (FloatingActionButton) view.findViewById(R.id.task_list_fab);
-        Assert.assertTrue(mTaskListFragmentFab != null);
-
         mEmptyText = (TextView) view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
@@ -424,20 +424,13 @@ public class TaskListFragment extends AbstractFragment {
             }
         }
 
-        mTaskListFragmentFab.setOnClickListener(v -> {
-            if (mTaskKey == null)
-                startActivity(CreateTaskActivity.getCreateIntent(getContext()));
-            else
-                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mTaskKey));
-        });
-
         mTreeViewAdapter = TaskAdapter.getAdapter(this, mTaskData, mSelectedTaskKeys, mExpandedTaskIds);
 
         mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter.getAdapter());
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
-        mTaskListFragmentFab.setVisibility(View.VISIBLE);
+        updateFabVisibility();
 
         if (mTaskData.mChildTaskDatas.isEmpty() && TextUtils.isEmpty(mTaskData.mNote)) {
             mTaskListFragmentRecycler.setVisibility(View.GONE);
@@ -491,6 +484,41 @@ public class TaskListFragment extends AbstractFragment {
 
     public void selectAll() {
         mTreeViewAdapter.selectAll();
+    }
+
+    @Override
+    public void setFab(@NonNull FloatingActionButton floatingActionButton) {
+        mTaskListFragmentFab = floatingActionButton;
+
+        mTaskListFragmentFab.setOnClickListener(v -> {
+            if (mTaskKey == null)
+                startActivity(CreateTaskActivity.getCreateIntent(getContext()));
+            else
+                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mTaskKey));
+        });
+
+        updateFabVisibility();
+    }
+
+    private void updateFabVisibility() {
+        if (mTaskListFragmentFab == null)
+            return;
+
+        if (mDataId != null && !mSelectionCallback.hasActionMode()) {
+            mTaskListFragmentFab.show();
+        } else {
+            mTaskListFragmentFab.hide();
+        }
+    }
+
+    @Override
+    public void clearFab() {
+        if (mTaskListFragmentFab == null)
+            return;
+
+        mTaskListFragmentFab.setOnClickListener(null);
+
+        mTaskListFragmentFab = null;
     }
 
     public interface TaskListListener {

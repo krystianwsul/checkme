@@ -571,6 +571,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
@@ -588,10 +589,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mTaskListFragment.setFab(mMainFab);
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
-                mMainFab.hide();
 
                 break;
             case PROJECTS:
@@ -605,6 +606,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mTaskListFragment.clearFab();
                 mProjectListFragment.setFab(mMainFab);
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
@@ -621,6 +623,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.setFab(mMainFab);
                 mFriendListFragment.clearFab();
@@ -639,6 +642,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.VISIBLE);
 
+                mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mFriendListFragment.setFab(mMainFab);
                 mShowCustomTimesFragment.clearFab();
@@ -655,6 +659,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.GONE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
+                mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();

@@ -67,6 +67,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
+    private static final String DEBUG_KEY = "debug";
 
     private static final int RC_SIGN_IN = 1000;
 
@@ -157,6 +158,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         updateSignInState(firebaseUser);
     };
+
+    private boolean mDebug = false;
 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_select_all, menu);
@@ -255,6 +258,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             //noinspection ConstantConditions
             mTimeRange = (TimeRange) savedInstanceState.getSerializable(TIME_RANGE_KEY);
             Assert.assertTrue(mTimeRange != null);
+
+            Assert.assertTrue(savedInstanceState.containsKey(DEBUG_KEY));
+            mDebug = savedInstanceState.getBoolean(DEBUG_KEY);
         }
 
         mMainActivityAppBarLayout = (AppBarLayout) findViewById(R.id.main_activity_app_bar_layout);
@@ -461,10 +467,14 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             return true;
         });
 
+        mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_debug).setVisible(mDebug);
+
         View headerView = mMainActivityNavigation.getHeaderView(0);
         Assert.assertTrue(headerView != null);
 
         headerView.setOnLongClickListener(v -> {
+            mDebug = true;
+
             mMainActivityNavigation.getMenu().findItem(R.id.main_drawer_debug).setVisible(true);
             return true;
         });
@@ -546,6 +556,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         }
 
         outState.putSerializable(TIME_RANGE_KEY, mTimeRange);
+        outState.putBoolean(DEBUG_KEY, mDebug);
     }
 
     private void showTab(@NonNull Tab tab) {

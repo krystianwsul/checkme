@@ -34,6 +34,7 @@ import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.HourMinute;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimePairPersist;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
@@ -115,7 +116,7 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         updateDateText();
     };
 
-    private HourMinute mInitialHourMinute;
+    private TimePair mInitialTimePair;
     private Date mInitialDate;
 
     public static Intent getIntent(Context context, ArrayList<InstanceKey> instanceKeys) {
@@ -215,8 +216,8 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
             Assert.assertTrue(mTimePairPersist != null);
 
             Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY));
-            mInitialHourMinute = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
-            Assert.assertTrue(mInitialHourMinute != null);
+            mInitialTimePair = mSavedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY);
+            Assert.assertTrue(mInitialTimePair != null);
 
             Assert.assertTrue(mSavedInstanceState.containsKey(INITIAL_DATE_KEY));
             mInitialDate = mSavedInstanceState.getParcelable(INITIAL_DATE_KEY);
@@ -266,8 +267,8 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
             Assert.assertTrue(mTimePairPersist != null);
             outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist);
 
-            Assert.assertTrue(mInitialHourMinute != null);
-            outState.putParcelable(INITIAL_HOUR_MINUTE_KEY, mInitialHourMinute);
+            Assert.assertTrue(mInitialTimePair != null);
+            outState.putParcelable(INITIAL_HOUR_MINUTE_KEY, mInitialTimePair);
 
             Assert.assertTrue(mInitialDate != null);
             outState.putParcelable(INITIAL_DATE_KEY, mInitialDate);
@@ -295,7 +296,7 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState.containsKey(DATE_KEY))) {
             Assert.assertTrue(mDate == null);
             Assert.assertTrue(mTimePairPersist == null);
-            Assert.assertTrue(mInitialHourMinute == null);
+            Assert.assertTrue(mInitialTimePair == null);
             Assert.assertTrue(mInitialDate == null);
             Assert.assertTrue(!mData.InstanceDatas.isEmpty());
 
@@ -311,7 +312,7 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
             mDate = dateTime.getDate();
             mTimePairPersist = new TimePairPersist(dateTime.getTime().getTimePair());
 
-            mInitialHourMinute = mTimePairPersist.getHourMinute();
+            mInitialTimePair = mTimePairPersist.getTimePair();
             mInitialDate = mDate;
         }
 
@@ -440,15 +441,11 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         if (mData == null)
             return false;
 
-        if (mTimePairPersist.getCustomTimeKey() != null)
-            return true;
-
-        Assert.assertTrue(mInitialHourMinute != null);
-
-        if (!mTimePairPersist.getHourMinute().equals(mInitialHourMinute))
-            return true;
-
+        Assert.assertTrue(mInitialTimePair != null);
         Assert.assertTrue(mInitialDate != null);
+
+        if (!mTimePairPersist.getTimePair().equals(mInitialTimePair))
+            return true;
 
         if (!mInitialDate.equals(mDate))
             return true;

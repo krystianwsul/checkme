@@ -353,7 +353,7 @@ public class RemoteProject {
         RemoteUser remoteUser = mRemoteUsers.get(key);
         Assert.assertTrue(remoteUser != null);
 
-        remoteUser.setName(userData.getDisplayName());
+        remoteUser.setName(userData.getName());
         remoteUser.setToken(userData.getToken());
     }
 

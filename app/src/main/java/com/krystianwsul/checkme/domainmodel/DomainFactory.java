@@ -934,7 +934,7 @@ public class DomainFactory {
         Assert.assertTrue(mFriends != null);
 
         Set<FriendListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
-                .map(userData -> new FriendListLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                .map(userData -> new FriendListLoader.UserListData(userData.getName(), userData.getEmail(), userData.getKey()))
                 .collect(Collectors.toSet());
 
         return new FriendListLoader.Data(userListDatas);
@@ -951,7 +951,7 @@ public class DomainFactory {
         Assert.assertTrue(mFriends != null);
 
         Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(mFriends.values())
-                .map(userData -> new ShowProjectLoader.UserListData(userData.getDisplayName(), userData.getEmail(), userData.getKey()))
+                .map(userData -> new ShowProjectLoader.UserListData(userData.getName(), userData.getEmail(), userData.getKey()))
                 .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
 
         String name;

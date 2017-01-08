@@ -213,7 +213,7 @@ public class FindFriendActivity extends AppCompatActivity {
             mFindFriendUserLayout.setVisibility(View.VISIBLE);
             mFindFriendProgress.setVisibility(View.GONE);
 
-            mFindFriendUserName.setText(mUserData.getDisplayName());
+            mFindFriendUserName.setText(mUserData.getName());
             mFindFriendUserEmail.setText(mUserData.getEmail());
         } else if (mLoading) {
             mFindFriendEmail.setEnabled(false);

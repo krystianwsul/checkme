@@ -15,13 +15,13 @@ import junit.framework.Assert;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RemoteManager {
+public class RemoteProjectManager {
     private boolean mSaved = false;
 
     @NonNull
     public final Map<String, RemoteProjectRecord> mRemoteProjectRecords = new HashMap<>();
 
-    public RemoteManager(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children) {
+    public RemoteProjectManager(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children) {
         for (DataSnapshot child : children) {
             Assert.assertTrue(child != null);
 
@@ -43,7 +43,7 @@ public class RemoteManager {
         Stream.of(mRemoteProjectRecords.values())
                 .forEach(remoteRecord -> remoteRecord.getValues(values));
 
-        Log.e("asdf", "RemoteManager.save values: " + values);
+        Log.e("asdf", "RemoteProjectManager.save values: " + values);
 
         if (!values.isEmpty()) {
             mSaved = true;

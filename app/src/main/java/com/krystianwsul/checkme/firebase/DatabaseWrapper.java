@@ -149,6 +149,12 @@ public class DatabaseWrapper {
         sRootReference.child(RECORDS_KEY).updateChildren(values);
     }
 
+    public static void updateFriends(@NonNull Map<String, Object> values) {
+        Assert.assertTrue(sRootReference != null);
+
+        sRootReference.child(USERS_KEY).updateChildren(values);
+    }
+
     @NonNull
     public static String getRoot() {
         Assert.assertTrue(!TextUtils.isEmpty(sRoot));

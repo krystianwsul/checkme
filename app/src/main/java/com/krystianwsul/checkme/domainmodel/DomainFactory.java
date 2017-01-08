@@ -35,8 +35,7 @@ import com.krystianwsul.checkme.firebase.RemoteRootUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.UserData;
-import com.krystianwsul.checkme.firebase.json.UserWrapper;
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteFriendManager;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
@@ -372,9 +371,7 @@ public class DomainFactory {
     }
 
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
-        mFriends = Stream.of(dataSnapshot.getChildren())
-                .map(child -> child.getValue(UserWrapper.class))
-                .map(userWrapper -> new RemoteRootUserRecord(false, userWrapper))
+        mFriends = Stream.of(new RemoteFriendManager(dataSnapshot.getChildren()).mRemoteRootUserRecords.values())
                 .map(RemoteRootUser::new)
                 .collect(Collectors.toMap(RemoteRootUser::getId, remoteRootUser -> remoteRootUser));
 

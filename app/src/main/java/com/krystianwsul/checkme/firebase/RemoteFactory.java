@@ -15,7 +15,7 @@ import com.krystianwsul.checkme.firebase.json.ProjectJson;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
-import com.krystianwsul.checkme.firebase.records.RemoteManager;
+import com.krystianwsul.checkme.firebase.records.RemoteProjectManager;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -42,7 +42,7 @@ public class RemoteFactory {
     private final UserData mUserData;
 
     @NonNull
-    private final RemoteManager mRemoteManager;
+    private final RemoteProjectManager mRemoteProjectManager;
 
     @NonNull
     private final Map<String, RemoteProject> mRemoteProjects;
@@ -51,9 +51,9 @@ public class RemoteFactory {
         mDomainFactory = domainFactory;
         mUserData = userData;
 
-        mRemoteManager = new RemoteManager(domainFactory, children);
+        mRemoteProjectManager = new RemoteProjectManager(domainFactory, children);
 
-        mRemoteProjects = Stream.of(mRemoteManager.mRemoteProjectRecords.values())
+        mRemoteProjects = Stream.of(mRemoteProjectManager.mRemoteProjectRecords.values())
                 .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserData))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> remoteProject));
     }
@@ -99,7 +99,7 @@ public class RemoteFactory {
 
         ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), userJsons);
 
-        RemoteProjectRecord remoteProjectRecord = mRemoteManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
+        RemoteProjectRecord remoteProjectRecord = mRemoteProjectManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
 
         RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserData);
 
@@ -111,14 +111,14 @@ public class RemoteFactory {
     }
 
     public void save() {
-        Assert.assertTrue(!mRemoteManager.isSaved());
+        Assert.assertTrue(!mRemoteProjectManager.isSaved());
 
-        mRemoteManager.save();
+        mRemoteProjectManager.save();
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isSaved() {
-        return mRemoteManager.isSaved();
+        return mRemoteProjectManager.isSaved();
     }
 
     @NonNull

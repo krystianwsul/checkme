@@ -234,15 +234,15 @@ public class RemoteProject {
         return remoteTaskHierarchy;
     }
 
-    public void updateRecordOf(@NonNull Set<UserData> addedFriends, @NonNull Set<String> removedFriends) {
+    public void updateRecordOf(@NonNull Set<RemoteRootUser> addedFriends, @NonNull Set<String> removedFriends) {
         mRemoteProjectRecord.updateRecordOf(Stream.of(addedFriends)
-                .map(UserData::getKey)
+                .map(RemoteRootUser::getId)
                 .collect(Collectors.toSet()), removedFriends);
 
-        for (UserData addedFriend : addedFriends) {
+        for (RemoteRootUser addedFriend : addedFriends) {
             Assert.assertTrue(addedFriend != null);
 
-            addUserData(addedFriend);
+            addUser(addedFriend);
         }
 
         for (String removedFriend : removedFriends) {
@@ -253,6 +253,17 @@ public class RemoteProject {
 
             remoteProjectUser.delete();
         }
+    }
+
+    private void addUser(@NonNull RemoteRootUser remoteRootUser) {
+        String id = remoteRootUser.getId();
+
+        Assert.assertTrue(!mRemoteUsers.containsKey(id));
+
+        RemoteProjectUserRecord remoteProjectUserRecord = mRemoteProjectRecord.newRemoteUserRecord(remoteRootUser.getUserJson());
+        RemoteProjectUser remoteProjectUser = new RemoteProjectUser(this, remoteProjectUserRecord);
+
+        mRemoteUsers.put(id, remoteProjectUser);
     }
 
     private void addUserData(@NonNull UserData userData) {

@@ -78,10 +78,10 @@ public class RemoteFactory {
     public RemoteProject createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Map<String, UserData> friends = mDomainFactory.getFriends();
+        Map<String, RemoteRootUser> friends = mDomainFactory.getFriends();
         Assert.assertTrue(friends != null);
 
-        Set<UserData> userDatas = new HashSet<>();
+        Map<String, UserJson> userJsons = new HashMap<>();
         for (String id : recordOf) {
             Assert.assertTrue(!TextUtils.isEmpty(id));
 
@@ -89,17 +89,13 @@ public class RemoteFactory {
                 continue;
 
             Assert.assertTrue(friends.containsKey(id));
-            UserData userData = friends.get(id);
-            Assert.assertTrue(userData != null);
+            RemoteRootUser remoteRootUser = friends.get(id);
+            Assert.assertTrue(remoteRootUser != null);
 
-            userDatas.add(userData);
+            userJsons.put(remoteRootUser.getId(), remoteRootUser.getUserJson());
         }
 
-        userDatas.add(mUserData);
-
-        Map<String, UserJson> userJsons = Stream.of(userDatas)
-                .map(UserData::toUserJson)
-                .collect(Collectors.toMap(userJson -> UserData.getKey(userJson.getEmail()), userJson -> userJson));
+        userJsons.put(mUserData.getKey(), mUserData.toUserJson());
 
         ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), userJsons);
 

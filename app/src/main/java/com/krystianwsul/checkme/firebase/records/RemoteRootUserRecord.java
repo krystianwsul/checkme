@@ -15,14 +15,14 @@ public class RemoteRootUserRecord extends RemoteRecord {
     @NonNull
     private final UserWrapper mUserWrapper;
 
-    RemoteRootUserRecord(boolean create, @NonNull UserWrapper userWrapper) {
+    public RemoteRootUserRecord(boolean create, @NonNull UserWrapper userWrapper) {
         super(create);
 
         mUserWrapper = userWrapper;
     }
 
     @NonNull
-    private UserJson getUserJson() {
+    public UserJson getUserJson() {
         return mUserWrapper.getUserData();
     }
 
@@ -54,7 +54,7 @@ public class RemoteRootUserRecord extends RemoteRecord {
     }
 
     @Nullable
-    public String getToken() {
+    private String getToken() {
         return getUserJson().getToken();
     }
 

@@ -31,9 +31,12 @@ import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
+import com.krystianwsul.checkme.firebase.RemoteRootUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.firebase.json.UserWrapper;
+import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
@@ -95,7 +98,7 @@ public class DomainFactory {
     private UserData mUserData;
 
     @Nullable
-    private Map<String, UserData> mFriends;
+    private Map<String, RemoteRootUser> mFriends;
 
     @Nullable
     private Query mRecordQuery;
@@ -370,9 +373,10 @@ public class DomainFactory {
 
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
         mFriends = Stream.of(dataSnapshot.getChildren())
-                .map(child -> child.child("userData"))
-                .map(userData -> userData.getValue(UserData.class))
-                .collect(Collectors.toMap(UserData::getKey, userData -> userData));
+                .map(child -> child.getValue(UserWrapper.class))
+                .map(userWrapper -> new RemoteRootUserRecord(false, userWrapper))
+                .map(RemoteRootUser::new)
+                .collect(Collectors.toMap(RemoteRootUser::getId, remoteRootUser -> remoteRootUser));
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
 
@@ -934,7 +938,7 @@ public class DomainFactory {
         Assert.assertTrue(mFriends != null);
 
         Set<FriendListLoader.UserListData> userListDatas = Stream.of(mFriends.values())
-                .map(userData -> new FriendListLoader.UserListData(userData.getName(), userData.getEmail(), userData.getKey()))
+                .map(remoteRootUser -> new FriendListLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
                 .collect(Collectors.toSet());
 
         return new FriendListLoader.Data(userListDatas);
@@ -951,7 +955,7 @@ public class DomainFactory {
         Assert.assertTrue(mFriends != null);
 
         Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(mFriends.values())
-                .map(userData -> new ShowProjectLoader.UserListData(userData.getName(), userData.getEmail(), userData.getKey()))
+                .map(remoteRootUser -> new ShowProjectLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
                 .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
 
         String name;
@@ -2193,7 +2197,7 @@ public class DomainFactory {
     }
 
     @Nullable
-    public Map<String, UserData> getFriends() {
+    public Map<String, RemoteRootUser> getFriends() {
         return mFriends;
     }
 

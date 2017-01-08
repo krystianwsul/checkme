@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
 
 import junit.framework.Assert;
@@ -12,7 +13,7 @@ public class RemoteRootUser {
     @NonNull
     private final RemoteRootUserRecord mRemoteRootUserRecord;
 
-    RemoteRootUser(@NonNull RemoteRootUserRecord remoteRootUserRecord) {
+    public RemoteRootUser(@NonNull RemoteRootUserRecord remoteRootUserRecord) {
         mRemoteRootUserRecord = remoteRootUserRecord;
     }
 
@@ -39,5 +40,10 @@ public class RemoteRootUser {
 
     void setToken(@Nullable String token) {
         mRemoteRootUserRecord.setToken(token);
+    }
+
+    @NonNull
+    UserJson getUserJson() {
+        return mRemoteRootUserRecord.getUserJson();
     }
 }

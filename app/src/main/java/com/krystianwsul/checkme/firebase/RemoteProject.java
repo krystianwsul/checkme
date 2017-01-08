@@ -53,7 +53,7 @@ public class RemoteProject {
     private final Map<String, RemoteCustomTime> mRemoteCustomTimes = new HashMap<>();
 
     @NonNull
-    private final Map<String, RemoteUser> mRemoteUsers = new HashMap<>();
+    private final Map<String, RemoteProjectUser> mRemoteUsers = new HashMap<>();
 
     RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserData userData) {
         mDomainFactory = domainFactory;
@@ -85,7 +85,7 @@ public class RemoteProject {
                 .forEach(remoteTaskHierarchy -> mRemoteTaskHierarchies.add(remoteTaskHierarchy.getId(), remoteTaskHierarchy));
 
         Stream.of(mRemoteProjectRecord.getRemoteUserRecords().values())
-                .map(remoteUserRecord -> new RemoteUser(this, remoteUserRecord))
+                .map(remoteUserRecord -> new RemoteProjectUser(this, remoteUserRecord))
                 .forEach(remoteUser -> mRemoteUsers.put(remoteUser.getId(), remoteUser));
 
         updateUserData(userData);
@@ -248,10 +248,10 @@ public class RemoteProject {
         for (String removedFriend : removedFriends) {
             Assert.assertTrue(mRemoteUsers.containsKey(removedFriend));
 
-            RemoteUser remoteUser = mRemoteUsers.get(removedFriend);
-            Assert.assertTrue(remoteUser != null);
+            RemoteProjectUser remoteProjectUser = mRemoteUsers.get(removedFriend);
+            Assert.assertTrue(remoteProjectUser != null);
 
-            remoteUser.delete();
+            remoteProjectUser.delete();
         }
     }
 
@@ -261,9 +261,9 @@ public class RemoteProject {
         Assert.assertTrue(!mRemoteUsers.containsKey(id));
 
         RemoteProjectUserRecord remoteProjectUserRecord = mRemoteProjectRecord.newRemoteUserRecord(userData.toUserJson());
-        RemoteUser remoteUser = new RemoteUser(this, remoteProjectUserRecord);
+        RemoteProjectUser remoteProjectUser = new RemoteProjectUser(this, remoteProjectUserRecord);
 
-        mRemoteUsers.put(id, remoteUser);
+        mRemoteUsers.put(id, remoteProjectUser);
     }
 
     void deleteTask(@NonNull RemoteTask remoteTask) {
@@ -334,15 +334,15 @@ public class RemoteProject {
         mRemoteCustomTimes.remove(remoteCustomTime.getId());
     }
 
-    void deleteUser(@NonNull RemoteUser remoteUser) {
-        String id = remoteUser.getId();
+    void deleteUser(@NonNull RemoteProjectUser remoteProjectUser) {
+        String id = remoteProjectUser.getId();
         Assert.assertTrue(mRemoteUsers.containsKey(id));
 
         mRemoteUsers.remove(id);
     }
 
     @NonNull
-    public Collection<RemoteUser> getUsers() {
+    public Collection<RemoteProjectUser> getUsers() {
         return mRemoteUsers.values();
     }
 
@@ -350,11 +350,11 @@ public class RemoteProject {
         String key = userData.getKey();
         Assert.assertTrue(mRemoteUsers.containsKey(key));
 
-        RemoteUser remoteUser = mRemoteUsers.get(key);
-        Assert.assertTrue(remoteUser != null);
+        RemoteProjectUser remoteProjectUser = mRemoteUsers.get(key);
+        Assert.assertTrue(remoteProjectUser != null);
 
-        remoteUser.setName(userData.getName());
-        remoteUser.setToken(userData.getToken());
+        remoteProjectUser.setName(userData.getName());
+        remoteProjectUser.setToken(userData.getToken());
     }
 
     public void setName(@NonNull String name) {

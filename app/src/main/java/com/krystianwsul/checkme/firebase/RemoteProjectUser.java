@@ -8,14 +8,14 @@ import com.krystianwsul.checkme.firebase.records.RemoteProjectUserRecord;
 
 import junit.framework.Assert;
 
-public class RemoteUser {
+public class RemoteProjectUser {
     @NonNull
     private final RemoteProject mRemoteProject;
 
     @NonNull
     private final RemoteProjectUserRecord mRemoteProjectUserRecord;
 
-    RemoteUser(@NonNull RemoteProject remoteProject, @NonNull RemoteProjectUserRecord remoteProjectUserRecord) {
+    RemoteProjectUser(@NonNull RemoteProject remoteProject, @NonNull RemoteProjectUserRecord remoteProjectUserRecord) {
         mRemoteProject = remoteProject;
         mRemoteProjectUserRecord = remoteProjectUserRecord;
     }

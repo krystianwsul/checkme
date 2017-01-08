@@ -30,9 +30,9 @@ import com.krystianwsul.checkme.firebase.RemoteCustomTime;
 import com.krystianwsul.checkme.firebase.RemoteFactory;
 import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteProject;
+import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
-import com.krystianwsul.checkme.firebase.RemoteUser;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
@@ -916,7 +916,7 @@ public class DomainFactory {
                 .filter(remoteProject -> remoteProject.current(now))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
                     String users = Stream.of(remoteProject.getUsers())
-                            .map(RemoteUser::getName)
+                            .map(RemoteProjectUser::getName)
                             .collect(Collectors.joining(", "));
 
                     return new ProjectListLoader.ProjectData(remoteProject.getId(), remoteProject.getName(), users);
@@ -1976,7 +1976,7 @@ public class DomainFactory {
             parentTreeDatas.putAll(Stream.of(mRemoteFactory.getRemoteProjects())
                     .collect(Collectors.toMap(remoteProject -> new CreateTaskLoader.ProjectParentKey(remoteProject.getId()), remoteProject -> {
                         String users = Stream.of(remoteProject.getUsers())
-                                .map(RemoteUser::getName)
+                                .map(RemoteProjectUser::getName)
                                 .collect(Collectors.joining(", "));
 
                         return new CreateTaskLoader.ParentTreeData(remoteProject.getName(), getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys), new CreateTaskLoader.ProjectParentKey(remoteProject.getId()), users, null, new CreateTaskLoader.ProjectSortKey(remoteProject.getId()));

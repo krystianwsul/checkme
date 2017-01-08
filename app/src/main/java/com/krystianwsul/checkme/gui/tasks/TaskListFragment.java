@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.annimon.stream.Collectors;
@@ -49,6 +50,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
     private static final String SELECTED_TASK_KEYS_KEY = "selectedTaskKeys";
     private static final String EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys";
 
+    private ProgressBar mTaskListProgress;
     private RecyclerView mTaskListFragmentRecycler;
     private TextView mEmptyText;
 
@@ -353,6 +355,9 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         View view = inflater.inflate(R.layout.fragment_task_list, container, false);
         Assert.assertTrue(view != null);
 
+        mTaskListProgress = (ProgressBar) view.findViewById(R.id.task_list_progress);
+        Assert.assertTrue(mTaskListProgress != null);
+
         mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.task_list_recycler);
         Assert.assertTrue(mTaskListFragmentRecycler != null);
 
@@ -431,6 +436,8 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
         updateFabVisibility();
+
+        mTaskListProgress.setVisibility(View.GONE);
 
         if (mTaskData.mChildTaskDatas.isEmpty() && TextUtils.isEmpty(mTaskData.mNote)) {
             mTaskListFragmentRecycler.setVisibility(View.GONE);

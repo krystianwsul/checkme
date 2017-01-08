@@ -831,8 +831,6 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
     @Override
     public void setFab(@NonNull FloatingActionButton floatingActionButton) {
-        Log.e("asdf", "setFab");
-
         mFloatingActionButton = floatingActionButton;
 
         mFloatingActionButton.setOnClickListener(v -> {

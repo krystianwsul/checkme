@@ -581,11 +581,12 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainActivitySpinner.setVisibility(View.VISIBLE);
                 mMainFriendListFrame.setVisibility(View.GONE);
 
-                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).setFab(mMainFab);
                 mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
+
+                ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).setFab(mMainFab);
 
                 break;
             case TASKS:
@@ -600,10 +601,11 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 mMainFriendListFrame.setVisibility(View.GONE);
 
                 ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
-                mTaskListFragment.setFab(mMainFab);
                 mProjectListFragment.clearFab();
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
+
+                mTaskListFragment.setFab(mMainFab);
 
                 break;
             case PROJECTS:
@@ -619,9 +621,10 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                 ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.clearFab();
-                mProjectListFragment.setFab(mMainFab);
                 mShowCustomTimesFragment.clearFab();
                 mFriendListFragment.clearFab();
+
+                mProjectListFragment.setFab(mMainFab);
 
                 break;
             case CUSTOM_TIMES:
@@ -638,8 +641,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
-                mShowCustomTimesFragment.setFab(mMainFab);
                 mFriendListFragment.clearFab();
+
+                mShowCustomTimesFragment.setFab(mMainFab);
 
                 break;
             case FRIENDS:
@@ -658,8 +662,9 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                 ((MyFragmentStatePagerAdapter) mDaysPager.getAdapter()).clearFab();
                 mTaskListFragment.clearFab();
                 mProjectListFragment.clearFab();
-                mFriendListFragment.setFab(mMainFab);
                 mShowCustomTimesFragment.clearFab();
+
+                mFriendListFragment.setFab(mMainFab);
 
                 break;
             case DEBUG:

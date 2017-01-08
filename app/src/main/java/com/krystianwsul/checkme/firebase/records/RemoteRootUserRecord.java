@@ -6,61 +6,64 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.firebase.json.UserJson;
+import com.krystianwsul.checkme.firebase.json.UserWrapper;
 
-public class RemoteUserRecord extends RemoteRecord {
+public class RemoteRootUserRecord extends RemoteRecord {
     private static final String USERS = "users";
+    private static final String USER_DATA = "userData";
 
     @NonNull
-    private final RemoteProjectRecord mRemoteProjectRecord;
+    private final UserWrapper mUserWrapper;
 
-    @NonNull
-    private final UserJson mUserJson;
-
-    RemoteUserRecord(boolean create, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserJson userJson) {
+    RemoteRootUserRecord(boolean create, @NonNull UserWrapper userWrapper) {
         super(create);
 
-        mRemoteProjectRecord = remoteProjectRecord;
-        mUserJson = userJson;
+        mUserWrapper = userWrapper;
+    }
+
+    @NonNull
+    private UserJson getUserJson() {
+        return mUserWrapper.getUserData();
     }
 
     @NonNull
     @Override
-    protected UserJson getCreateObject() {
-        return mUserJson;
+    protected UserWrapper getCreateObject() {
+        return mUserWrapper;
     }
 
     @NonNull
     public String getId() {
-        return UserData.getKey(mUserJson.getEmail());
+        return UserData.getKey(getUserJson().getEmail());
     }
 
     @NonNull
     @Override
     protected String getKey() {
-        return mRemoteProjectRecord.getKey() + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + USERS + "/" + getId();
+        return getId();
     }
 
     @NonNull
     public String getName() {
-        return mUserJson.getName();
+        return getUserJson().getName();
     }
 
     @NonNull
     public String getEmail() {
-        return mUserJson.getEmail();
+        return getUserJson().getEmail();
     }
 
     @Nullable
     public String getToken() {
-        return mUserJson.getToken();
+        return getUserJson().getToken();
     }
 
     public void setName(@NonNull String name) {
         if (getName().equals(name))
             return;
 
-        mUserJson.setName(name);
-        addValue(getKey() + "/name", name);
+        getUserJson().setName(name);
+        addValue(getKey() + "/" + USER_DATA + "/name", name);
     }
 
     public void setToken(@Nullable String token) {
@@ -70,7 +73,7 @@ public class RemoteUserRecord extends RemoteRecord {
         if (!TextUtils.isEmpty(getToken()) && getToken().equals(token))
             return;
 
-        mUserJson.setToken(token);
-        addValue(getKey() + "/token", token);
+        getUserJson().setToken(token);
+        addValue(getKey() + "/" + USER_DATA + "/token", token);
     }
 }

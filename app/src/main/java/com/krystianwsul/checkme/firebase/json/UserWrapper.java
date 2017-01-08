@@ -33,4 +33,16 @@ public class UserWrapper {
 
         this.userData = userJson;
     }
+
+    @Nullable
+    public Map<String, Boolean> getFriendOf() {
+        return friendOf;
+    }
+
+    @NonNull
+    public UserJson getUserData() {
+        Assert.assertTrue(userData != null);
+
+        return userData;
+    }
 }

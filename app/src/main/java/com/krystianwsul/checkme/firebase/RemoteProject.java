@@ -19,9 +19,9 @@ import com.krystianwsul.checkme.firebase.json.TaskJson;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteProjectUserRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord;
-import com.krystianwsul.checkme.firebase.records.RemoteUserRecord;
 import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -260,8 +260,8 @@ public class RemoteProject {
 
         Assert.assertTrue(!mRemoteUsers.containsKey(id));
 
-        RemoteUserRecord remoteUserRecord = mRemoteProjectRecord.newRemoteUserRecord(userData.toUserJson());
-        RemoteUser remoteUser = new RemoteUser(this, remoteUserRecord);
+        RemoteProjectUserRecord remoteProjectUserRecord = mRemoteProjectRecord.newRemoteUserRecord(userData.toUserJson());
+        RemoteUser remoteUser = new RemoteUser(this, remoteProjectUserRecord);
 
         mRemoteUsers.put(id, remoteUser);
     }

@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.krystianwsul.checkme.firebase.records.RemoteUserRecord;
+import com.krystianwsul.checkme.firebase.records.RemoteProjectUserRecord;
 
 import junit.framework.Assert;
 
@@ -13,41 +13,41 @@ public class RemoteUser {
     private final RemoteProject mRemoteProject;
 
     @NonNull
-    private final RemoteUserRecord mRemoteUserRecord;
+    private final RemoteProjectUserRecord mRemoteProjectUserRecord;
 
-    RemoteUser(@NonNull RemoteProject remoteProject, @NonNull RemoteUserRecord remoteUserRecord) {
+    RemoteUser(@NonNull RemoteProject remoteProject, @NonNull RemoteProjectUserRecord remoteProjectUserRecord) {
         mRemoteProject = remoteProject;
-        mRemoteUserRecord = remoteUserRecord;
+        mRemoteProjectUserRecord = remoteProjectUserRecord;
     }
 
     @NonNull
     public String getId() {
-        return mRemoteUserRecord.getId();
+        return mRemoteProjectUserRecord.getId();
     }
 
     public void delete() {
         mRemoteProject.deleteUser(this);
 
-        mRemoteUserRecord.delete();
+        mRemoteProjectUserRecord.delete();
     }
 
     @NonNull
     public String getName() {
-        return mRemoteUserRecord.getName();
+        return mRemoteProjectUserRecord.getName();
     }
 
     @NonNull
     public String getEmail() {
-        return mRemoteUserRecord.getEmail();
+        return mRemoteProjectUserRecord.getEmail();
     }
 
     public void setName(@NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        mRemoteUserRecord.setName(name);
+        mRemoteProjectUserRecord.setName(name);
     }
 
     void setToken(@Nullable String token) {
-        mRemoteUserRecord.setToken(token);
+        mRemoteProjectUserRecord.setToken(token);
     }
 }

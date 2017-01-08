@@ -38,7 +38,7 @@ public class RemoteProjectRecord extends RemoteRecord {
     private final Map<String, RemoteCustomTimeRecord> mRemoteCustomTimeRecords = new HashMap<>();
 
     @NonNull
-    private final Map<String, RemoteUserRecord> mRemoteUserRecords = new HashMap<>();
+    private final Map<String, RemoteProjectUserRecord> mRemoteUserRecords = new HashMap<>();
 
     RemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull String id, @NonNull JsonWrapper jsonWrapper) {
         super(false);
@@ -96,7 +96,7 @@ public class RemoteProjectRecord extends RemoteRecord {
             UserJson userJson = entry.getValue();
             Assert.assertTrue(userJson != null);
 
-            mRemoteUserRecords.put(id, new RemoteUserRecord(false, this, userJson));
+            mRemoteUserRecords.put(id, new RemoteProjectUserRecord(false, this, userJson));
         }
     }
 
@@ -147,7 +147,7 @@ public class RemoteProjectRecord extends RemoteRecord {
                 .collect(Collectors.toMap(RemoteCustomTimeRecord::getId, RemoteCustomTimeRecord::getCreateObject)));
 
         projectJson.setUsers(Stream.of(mRemoteUserRecords.values())
-                .collect(Collectors.toMap(RemoteUserRecord::getId, RemoteUserRecord::getCreateObject)));
+                .collect(Collectors.toMap(RemoteProjectUserRecord::getId, RemoteProjectUserRecord::getCreateObject)));
 
         return mJsonWrapper;
     }
@@ -190,7 +190,7 @@ public class RemoteProjectRecord extends RemoteRecord {
     }
 
     @NonNull
-    public Map<String, RemoteUserRecord> getRemoteUserRecords() {
+    public Map<String, RemoteProjectUserRecord> getRemoteUserRecords() {
         return mRemoteUserRecords;
     }
 
@@ -252,8 +252,8 @@ public class RemoteProjectRecord extends RemoteRecord {
             for (RemoteCustomTimeRecord remoteCustomTimeRecord : mRemoteCustomTimeRecords.values())
                 remoteCustomTimeRecord.getValues(values);
 
-            for (RemoteUserRecord remoteUserRecord : mRemoteUserRecords.values())
-                remoteUserRecord.getValues(values);
+            for (RemoteProjectUserRecord remoteProjectUserRecord : mRemoteUserRecords.values())
+                remoteProjectUserRecord.getValues(values);
         }
     }
 
@@ -285,11 +285,11 @@ public class RemoteProjectRecord extends RemoteRecord {
     }
 
     @NonNull
-    public RemoteUserRecord newRemoteUserRecord(@NonNull UserJson userJson) {
-        RemoteUserRecord remoteUserRecord = new RemoteUserRecord(true, this, userJson);
-        Assert.assertTrue(!mRemoteCustomTimeRecords.containsKey(remoteUserRecord.getId()));
+    public RemoteProjectUserRecord newRemoteUserRecord(@NonNull UserJson userJson) {
+        RemoteProjectUserRecord remoteProjectUserRecord = new RemoteProjectUserRecord(true, this, userJson);
+        Assert.assertTrue(!mRemoteCustomTimeRecords.containsKey(remoteProjectUserRecord.getId()));
 
-        mRemoteUserRecords.put(remoteUserRecord.getId(), remoteUserRecord);
-        return remoteUserRecord;
+        mRemoteUserRecords.put(remoteProjectUserRecord.getId(), remoteProjectUserRecord);
+        return remoteProjectUserRecord;
     }
 }

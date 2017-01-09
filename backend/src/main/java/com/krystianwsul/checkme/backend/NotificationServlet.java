@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +65,10 @@ public class NotificationServlet extends HttpServlet {
 
         Gson gson = new Gson();
 
+        String senderToken = req.getParameter("senderToken");
+        resp.getWriter().println("sender token: " + senderToken);
+        resp.getWriter().println();
+
         Set<String> userTokens = new HashSet<>();
         if (req.getParameterValues("projects") != null) {
             Set<String> projects = new HashSet<>(Arrays.asList(req.getParameterValues("projects")));
@@ -101,17 +106,18 @@ public class NotificationServlet extends HttpServlet {
                 for (Map<String, String> user : users.values()) {
                     Assert.assertTrue(user != null);
 
-                    String userToken = user.get("token");
+                    String tokensString = user.get("tokens");
+                    resp.getWriter().println("user token string: " + tokensString);
 
-                    resp.getWriter().println("user token: " + userToken);
-                    if (StringUtils.isEmpty(userToken)) {
-                        resp.getWriter().println("empty, skipping");
-                        resp.getWriter().println();
-                    } else {
-                        resp.getWriter().println();
+                    if (StringUtils.isEmpty(tokensString))
+                        continue;
 
-                        userTokens.add(userToken);
-                    }
+                    @SuppressWarnings("InstantiatingObjectToGetClassObject") HashMap<String, String> userTokenMap = gson.fromJson(tokensString, new HashMap<String, String>().getClass());
+
+                    ArrayList<String> tokens = new ArrayList<>(userTokenMap.values());
+
+                    resp.getWriter().println("user tokens: " + tokens);
+                    userTokens.addAll(tokens);
                 }
             }
         }
@@ -126,29 +132,36 @@ public class NotificationServlet extends HttpServlet {
             for (String userKey : userKeys) {
                 Assert.assertTrue(!StringUtils.isEmpty(userKey));
 
-                URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/users/" + userKey + "/userData/token.json?access_token=" + firebaseToken);
+                URL tokenUrl = new URL("https://check-me-add47.firebaseio.com/" + prefix + "/users/" + userKey + "/userData/tokens.json?access_token=" + firebaseToken);
 
                 resp.getWriter().println(tokenUrl.toString());
                 resp.getWriter().println();
 
                 BufferedReader tokenReader = new BufferedReader(new InputStreamReader(tokenUrl.openStream()));
-                String userToken = gson.fromJson(tokenReader, String.class);
+                @SuppressWarnings("InstantiatingObjectToGetClassObject") Map<String, String> userTokenMap = gson.fromJson(tokenReader, new HashMap<String, String>().getClass());
                 tokenReader.close();
 
-                resp.getWriter().println("user token: " + userToken);
-                if (StringUtils.isEmpty(userToken)) {
+                if (userTokenMap == null) {
                     resp.getWriter().println("empty, skipping");
-                    resp.getWriter().println();
-                } else {
-                    resp.getWriter().println();
-
-                    userTokens.add(userToken);
+                    continue;
                 }
+
+                ArrayList<String> tokens = new ArrayList<>(userTokenMap.values());
+
+                resp.getWriter().println("user tokens: " + tokens);
+                userTokens.addAll(tokens);
             }
         }
 
         for (String userToken : userTokens) {
             Assert.assertTrue(!StringUtils.isEmpty(userToken));
+
+            if (userToken.equals(senderToken)) {
+                resp.getWriter().println("skipping sender token: " + senderToken);
+                continue;
+            }
+
+            resp.getWriter().println("sending to token: " + userToken);
 
             URL fcmUrl = new URL("https://fcm.googleapis.com/fcm/send");
             URLConnection urlConnection = fcmUrl.openConnection();

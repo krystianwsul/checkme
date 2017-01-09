@@ -9,6 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.krystianwsul.checkme.OrganizatorApplication;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteScheduleRecord;
@@ -39,11 +40,11 @@ public class DatabaseWrapper {
         Assert.assertTrue(sRootReference != null);
     }
 
-    public static void setUserData(@NonNull UserData userData) {
+    public static void setUserInfo(@NonNull UserInfo userInfo) {
         Assert.assertTrue(sRootReference != null);
 
-        String key = userData.getKey();
-        sRootReference.child(USERS_KEY).child(key).child("userData").setValue(userData);
+        String key = userInfo.getKey();
+        sRootReference.child(USERS_KEY).child(key).child("userData").updateChildren(userInfo.getValues());
     }
 
     public static DatabaseReference getUserDataDatabaseReference(@NonNull String key) {
@@ -52,10 +53,10 @@ public class DatabaseWrapper {
         return sRootReference.child(USERS_KEY).child(key).child("userData");
     }
 
-    public static void addFriend(@NonNull UserData userData, @NonNull UserData friendUserData) {
+    public static void addFriend(@NonNull UserInfo userInfo, @NonNull UserData friendUserData) {
         Assert.assertTrue(sRootReference != null);
 
-        String myKey = userData.getKey();
+        String myKey = userInfo.getKey();
         String friendKey = friendUserData.getKey();
 
         sRootReference.child(USERS_KEY).child(friendKey).child("friendOf").child(myKey).setValue(true);
@@ -70,10 +71,10 @@ public class DatabaseWrapper {
     }
 
     @NonNull
-    public static Query getFriendsQuery(@NonNull UserData userData) {
+    public static Query getFriendsQuery(@NonNull UserInfo userInfo) {
         Assert.assertTrue(sRootReference != null);
 
-        String key = userData.getKey();
+        String key = userInfo.getKey();
 
         Query query = sRootReference.child(USERS_KEY).orderByChild("friendOf/" + key).equalTo(true);
         Assert.assertTrue(query != null);
@@ -132,10 +133,10 @@ public class DatabaseWrapper {
     }
 
     @NonNull
-    public static Query getTaskRecordsQuery(@NonNull UserData userData) {
+    public static Query getTaskRecordsQuery(@NonNull UserInfo userInfo) {
         Assert.assertTrue(sRootReference != null);
 
-        String key = userData.getKey();
+        String key = userInfo.getKey();
 
         Query query = sRootReference.child(RECORDS_KEY).orderByChild("recordOf/" + key).equalTo(true);
         Assert.assertTrue(query != null);

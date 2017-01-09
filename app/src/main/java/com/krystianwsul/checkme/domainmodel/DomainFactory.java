@@ -34,7 +34,6 @@ import com.krystianwsul.checkme.firebase.RemoteProjectFactory;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
-import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
@@ -94,7 +93,7 @@ public class DomainFactory {
     private static ExactTimeStamp sStop;
 
     @Nullable
-    private UserData mUserData;
+    private UserInfo mUserInfo;
 
     @Nullable
     private RemoteFriendFactory mRemoteFriendFactory;
@@ -168,14 +167,14 @@ public class DomainFactory {
     }
 
     public synchronized void reset(@NonNull Context context) {
-        UserData userData = mUserData;
-        clearUserData(context);
+        UserInfo userInfo = mUserInfo;
+        clearUserInfo(context);
 
         sDomainFactory = null;
         mLocalFactory.reset();
 
-        if (userData != null)
-            setUserData(context, userData);
+        if (userInfo != null)
+            setUserInfo(context, userInfo);
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
 
@@ -220,18 +219,18 @@ public class DomainFactory {
 
     // firebase
 
-    public synchronized void setUserData(@NonNull Context context, @NonNull UserData userData) {
-        if (mUserData != null) {
+    public synchronized void setUserInfo(@NonNull Context context, @NonNull UserInfo userInfo) {
+        if (mUserInfo != null) {
             Assert.assertTrue(mRecordQuery != null);
             Assert.assertTrue(mFriendQuery != null);
 
-            if (mUserData.equals(userData))
+            if (mUserInfo.equals(userInfo))
                 return;
 
-            clearUserData(context);
+            clearUserInfo(context);
         }
 
-        Assert.assertTrue(mUserData == null);
+        Assert.assertTrue(mUserInfo == null);
 
         Assert.assertTrue(mRecordQuery == null);
         Assert.assertTrue(mRecordListener == null);
@@ -239,12 +238,12 @@ public class DomainFactory {
         Assert.assertTrue(mFriendQuery == null);
         Assert.assertTrue(mFriendListener == null);
 
-        mUserData = userData;
+        mUserInfo = userInfo;
 
         Context applicationContext = context.getApplicationContext();
         Assert.assertTrue(applicationContext != null);
 
-        mRecordQuery = DatabaseWrapper.getTaskRecordsQuery(userData);
+        mRecordQuery = DatabaseWrapper.getTaskRecordsQuery(userInfo);
         mRecordListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -268,7 +267,7 @@ public class DomainFactory {
         };
         mRecordQuery.addValueEventListener(mRecordListener);
 
-        mFriendQuery = DatabaseWrapper.getFriendsQuery(mUserData);
+        mFriendQuery = DatabaseWrapper.getFriendsQuery(mUserInfo);
         mFriendListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -289,10 +288,10 @@ public class DomainFactory {
         mFriendQuery.addValueEventListener(mFriendListener);
     }
 
-    public synchronized void clearUserData(@NonNull Context context) {
+    public synchronized void clearUserInfo(@NonNull Context context) {
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        if (mUserData == null) {
+        if (mUserInfo == null) {
             Assert.assertTrue(mRecordQuery == null);
             Assert.assertTrue(mRecordListener == null);
             Assert.assertTrue(mFriendQuery == null);
@@ -308,7 +307,7 @@ public class DomainFactory {
             mRemoteProjectFactory = null;
             mRemoteFriendFactory = null;
 
-            mUserData = null;
+            mUserInfo = null;
 
             mRecordQuery.removeEventListener(mRecordListener);
             mRecordQuery = null;
@@ -325,12 +324,12 @@ public class DomainFactory {
     }
 
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
-        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mUserInfo != null);
 
         mLocalFactory.clearRemoteCustomTimeRecords();
 
         boolean silent = (mRemoteProjectFactory == null);
-        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserData); // todo lack of connection yielding null children
+        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo);
 
         tryNotifyFriendListeners(); // assuming they're all getters
 
@@ -946,7 +945,7 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.getShowProjectData");
 
         Assert.assertTrue(mRemoteProjectFactory != null);
-        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteFriendFactory != null);
 
         Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(mRemoteFriendFactory.getFriends())
@@ -961,7 +960,7 @@ public class DomainFactory {
             name = remoteProject.getName();
 
             userListDatas = Stream.of(remoteProject.getUsers())
-                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserData.getKey()))
+                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserInfo.getKey()))
                     .map(remoteUser -> new ShowProjectLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
                     .collect(Collectors.toSet());
         } else {
@@ -1253,7 +1252,7 @@ public class DomainFactory {
         Task newParentTask;
         if (!TextUtils.isEmpty(finalProjectId)) {
             Assert.assertTrue(mRemoteProjectFactory != null);
-            Assert.assertTrue(mUserData != null);
+            Assert.assertTrue(mUserInfo != null);
 
             newParentTask = mRemoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId);
         } else {
@@ -1542,7 +1541,7 @@ public class DomainFactory {
         Task newParentTask;
         if (!TextUtils.isEmpty(finalProjectId)) {
             Assert.assertTrue(mRemoteProjectFactory != null);
-            Assert.assertTrue(mUserData != null);
+            Assert.assertTrue(mUserInfo != null);
 
             newParentTask = mRemoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId);
         } else {
@@ -1620,29 +1619,29 @@ public class DomainFactory {
     public synchronized void removeFriends(@NonNull Set<String> keys) {
         MyCrashlytics.log("DomainFactory.removeFriends");
 
-        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteProjectFactory != null);
         Assert.assertTrue(mRemoteFriendFactory != null);
         Assert.assertTrue(!mRemoteFriendFactory.isSaved());
 
         Stream.of(keys)
-                .forEach(friendId -> mRemoteFriendFactory.removeFriend(mUserData.getKey(), friendId));
+                .forEach(friendId -> mRemoteFriendFactory.removeFriend(mUserInfo.getKey(), friendId));
 
         mRemoteFriendFactory.save();
     }
 
-    public synchronized void updateUserData(@NonNull Context context, @NonNull UserData userData) {
-        MyCrashlytics.log("DomainFactory.updateUserData");
-        Assert.assertTrue(mUserData != null);
+    public synchronized void updateUserInfo(@NonNull Context context, @NonNull UserInfo userInfo) {
+        MyCrashlytics.log("DomainFactory.updateUserInfo");
+        Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteProjectFactory != null);
 
-        if (mUserData.equals(userData))
+        if (mUserInfo.equals(userInfo))
             return;
 
-        mUserData = userData;
-        DatabaseWrapper.setUserData(userData);
+        mUserInfo = userInfo;
+        DatabaseWrapper.setUserInfo(userInfo);
 
-        mRemoteProjectFactory.updateUserData(userData);
+        mRemoteProjectFactory.updateUserInfo(userInfo);
 
         save(context, 0);
     }
@@ -1676,13 +1675,13 @@ public class DomainFactory {
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(mRemoteProjectFactory != null);
-        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mUserInfo != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
         Set<String> recordOf = new HashSet<>(friends);
 
-        String key = mUserData.getKey();
+        String key = mUserInfo.getKey();
         Assert.assertTrue(!recordOf.contains(key));
         recordOf.add(key);
 
@@ -1697,7 +1696,7 @@ public class DomainFactory {
         MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps");
 
         Assert.assertTrue(mRemoteProjectFactory != null);
-        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(!projectIds.isEmpty());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -2000,7 +1999,7 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
 
         Assert.assertTrue(mRemoteProjectFactory != null);
-        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mUserInfo != null);
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask);
@@ -2402,26 +2401,26 @@ public class DomainFactory {
 
     private void notifyCloud(@NonNull Set<RemoteProject> remoteProjects) {
         if (!remoteProjects.isEmpty()) {
-            Assert.assertTrue(mUserData != null);
+            Assert.assertTrue(mUserInfo != null);
 
-            new BackendNotifier(remoteProjects, mUserData, new ArrayList<>());
+            new BackendNotifier(remoteProjects, mUserInfo, new ArrayList<>());
         }
     }
 
     private void notifyCloud(@NonNull Collection<String> userKeys) {
         if (!userKeys.isEmpty()) {
-            Assert.assertTrue(mUserData != null);
+            Assert.assertTrue(mUserInfo != null);
 
-            new BackendNotifier(new HashSet<>(), mUserData, userKeys);
+            new BackendNotifier(new HashSet<>(), mUserInfo, userKeys);
         }
     }
 
     private void notifyCloud(@NonNull RemoteProject remoteProject, @NonNull Collection<String> userKeys) {
-        Assert.assertTrue(mUserData != null);
+        Assert.assertTrue(mUserInfo != null);
 
         Set<RemoteProject> remoteProjects = Collections.singleton(remoteProject);
 
-        new BackendNotifier(remoteProjects, mUserData, userKeys);
+        new BackendNotifier(remoteProjects, mUserInfo, userKeys);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {

@@ -8,6 +8,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.google.firebase.database.DataSnapshot;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson;
 import com.krystianwsul.checkme.firebase.json.JsonWrapper;
@@ -39,7 +40,7 @@ public class RemoteProjectFactory {
     private final DomainFactory mDomainFactory;
 
     @NonNull
-    private final UserData mUserData;
+    private final UserInfo mUserInfo;
 
     @NonNull
     private final RemoteProjectManager mRemoteProjectManager;
@@ -47,14 +48,14 @@ public class RemoteProjectFactory {
     @NonNull
     private final Map<String, RemoteProject> mRemoteProjects;
 
-    public RemoteProjectFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserData userData) {
+    public RemoteProjectFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserInfo userInfo) {
         mDomainFactory = domainFactory;
-        mUserData = userData;
+        mUserInfo = userInfo;
 
         mRemoteProjectManager = new RemoteProjectManager(domainFactory, children);
 
         mRemoteProjects = Stream.of(mRemoteProjectManager.mRemoteProjectRecords.values())
-                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserData))
+                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserInfo))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> remoteProject));
     }
 
@@ -79,16 +80,16 @@ public class RemoteProjectFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Set<String> friendIds = new HashSet<>(recordOf);
-        friendIds.remove(mUserData.getKey());
+        friendIds.remove(mUserInfo.getKey());
 
         Map<String, UserJson> userJsons = mDomainFactory.getUserJsons(friendIds);
-        userJsons.put(mUserData.getKey(), mUserData.toUserJson());
+        userJsons.put(mUserInfo.getKey(), mUserInfo.toUserJson());
 
         ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), userJsons);
 
         RemoteProjectRecord remoteProjectRecord = mRemoteProjectManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
 
-        RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserData);
+        RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserInfo);
 
         Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
 
@@ -258,9 +259,9 @@ public class RemoteProjectFactory {
         return mRemoteProjects.values();
     }
 
-    public void updateUserData(@NonNull UserData userData) {
+    public void updateUserInfo(@NonNull UserInfo userInfo) {
         Stream.of(mRemoteProjects.values())
-                .forEach(remoteProject -> remoteProject.updateUserData(userData));
+                .forEach(remoteProject -> remoteProject.updateUserInfo(userInfo));
     }
 
     @NonNull

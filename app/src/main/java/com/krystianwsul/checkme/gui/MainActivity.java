@@ -47,8 +47,8 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
-import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.friends.FriendListFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -140,22 +140,24 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     private TextView mNavHeaderEmail;
 
     private FirebaseAuth mFirebaseAuth;
-    private static UserData sUserData = null;
+
+    @Nullable
+    private static UserInfo sUserInfo = null;
 
     private final FirebaseAuth.AuthStateListener mAuthStateListener = firebaseAuth -> {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
-            sUserData = new UserData(firebaseUser);
+            sUserInfo = new UserInfo(firebaseUser);
 
-            DatabaseWrapper.setUserData(sUserData);
+            DatabaseWrapper.setUserInfo(sUserInfo);
 
-            DomainFactory.getDomainFactory(this).setUserData(this, sUserData);
+            DomainFactory.getDomainFactory(this).setUserInfo(this, sUserInfo);
 
             Log.e("asdf", "firebase logged in");
         } else {
-            sUserData = null;
+            sUserInfo = null;
 
-            DomainFactory.getDomainFactory(this).clearUserData(this);
+            DomainFactory.getDomainFactory(this).clearUserInfo(this);
 
             Log.e("asdf", "firebase logged out");
         }
@@ -436,7 +438,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                     break;
                 case R.id.main_drawer_sign_in:
-                    if (sUserData != null) {
+                    if (sUserInfo != null) {
                         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
 
                         mFirebaseAuth.signOut();
@@ -647,7 +649,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
                 break;
             case FRIENDS:
-                Assert.assertTrue(sUserData != null);
+                Assert.assertTrue(sUserInfo != null);
 
                 mActionBar.setTitle(R.string.friends);
                 mDaysPager.setVisibility(View.GONE);
@@ -962,8 +964,8 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     }
 
     @Nullable
-    public static UserData getUserData() {
-        return sUserData;
+    public static UserInfo getUserInfo() {
+        return sUserInfo;
     }
 
     private class MyFragmentStatePagerAdapter extends FragmentStatePagerAdapter implements FabUser {

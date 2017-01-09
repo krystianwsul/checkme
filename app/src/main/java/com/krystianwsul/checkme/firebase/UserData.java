@@ -7,10 +7,8 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.krystianwsul.checkme.MyFirebaseInstanceIdService;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.utils.Utils;
 
@@ -32,16 +30,6 @@ public class UserData implements Parcelable {
     @SuppressWarnings("unused")
     public UserData() {
 
-    }
-
-    public UserData(@NonNull FirebaseUser firebaseUser) {
-        email = firebaseUser.getEmail();
-        Assert.assertTrue(!TextUtils.isEmpty(email));
-
-        name = firebaseUser.getDisplayName();
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        token = MyFirebaseInstanceIdService.getToken();
     }
 
     private UserData(@NonNull String email, @NonNull String name, @Nullable String token) {

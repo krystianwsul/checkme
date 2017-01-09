@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 
 import junit.framework.Assert;
 
@@ -37,11 +37,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             if (firebaseUser != null) {
-                UserData userData = new UserData(firebaseUser);
+                UserInfo userInfo = new UserInfo(firebaseUser);
 
                 DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
 
-                domainFactory.setUserData(this, userData);
+                domainFactory.setUserInfo(this, userInfo);
 
                 domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(false, "MyFirebaseMessagingService"));
             }

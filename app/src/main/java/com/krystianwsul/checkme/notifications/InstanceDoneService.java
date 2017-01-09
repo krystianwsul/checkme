@@ -10,7 +10,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper;
-import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 
@@ -81,7 +81,7 @@ public class InstanceDoneService extends IntentService {
             if (firebaseUser == null)
                 throw new NeedsFirebaseException();
 
-            domainFactory.setUserData(context.getApplicationContext(), new UserData(firebaseUser));
+            domainFactory.setUserInfo(context.getApplicationContext(), new UserInfo(firebaseUser));
         }
 
         domainFactory.addFirebaseListener(firebaseListener);

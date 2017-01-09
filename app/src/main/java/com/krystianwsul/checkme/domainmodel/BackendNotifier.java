@@ -10,7 +10,6 @@ import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteProject;
-import com.krystianwsul.checkme.firebase.UserData;
 
 import junit.framework.Assert;
 
@@ -47,7 +46,7 @@ class BackendNotifier {
         return PREFIX + TextUtils.join("&", parameters);
     }
 
-    BackendNotifier(@NonNull Set<RemoteProject> remoteProjects, @NonNull UserData userData, @NonNull Collection<String> userKeys) {
+    BackendNotifier(@NonNull Set<RemoteProject> remoteProjects, @NonNull UserInfo userInfo, @NonNull Collection<String> userKeys) {
         String root = DatabaseWrapper.getRoot();
 
         boolean production;
@@ -66,7 +65,7 @@ class BackendNotifier {
                 .map(RemoteProject::getId)
                 .collect(Collectors.toSet());
 
-        String url = getUrl(projectIds, production, userData.getKey(), userKeys);
+        String url = getUrl(projectIds, production, userInfo.getKey(), userKeys);
         Assert.assertTrue(!TextUtils.isEmpty(url));
 
         run(url);

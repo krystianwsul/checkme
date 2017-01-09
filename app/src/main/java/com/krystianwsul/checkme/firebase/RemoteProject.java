@@ -8,6 +8,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.Task;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
@@ -55,7 +56,7 @@ public class RemoteProject {
     @NonNull
     private final Map<String, RemoteProjectUser> mRemoteUsers = new HashMap<>();
 
-    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserData userData) {
+    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserInfo userInfo) {
         mDomainFactory = domainFactory;
         mRemoteProjectRecord = remoteProjectRecord;
 
@@ -88,7 +89,7 @@ public class RemoteProject {
                 .map(remoteUserRecord -> new RemoteProjectUser(this, remoteUserRecord))
                 .forEach(remoteUser -> mRemoteUsers.put(remoteUser.getId(), remoteUser));
 
-        updateUserData(userData);
+        updateUserInfo(userInfo);
     }
 
     @NonNull
@@ -357,15 +358,15 @@ public class RemoteProject {
         return mRemoteUsers.values();
     }
 
-    void updateUserData(@NonNull UserData userData) {
-        String key = userData.getKey();
+    void updateUserInfo(@NonNull UserInfo userInfo) {
+        String key = userInfo.getKey();
         Assert.assertTrue(mRemoteUsers.containsKey(key));
 
         RemoteProjectUser remoteProjectUser = mRemoteUsers.get(key);
         Assert.assertTrue(remoteProjectUser != null);
 
-        remoteProjectUser.setName(userData.getName());
-        remoteProjectUser.setToken(userData.getToken());
+        remoteProjectUser.setName(userInfo.mName);
+        remoteProjectUser.setToken(userInfo.mToken);
     }
 
     public void setName(@NonNull String name) {

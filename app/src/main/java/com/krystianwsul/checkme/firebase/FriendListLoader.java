@@ -13,6 +13,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 
 import junit.framework.Assert;
 
@@ -24,12 +25,12 @@ public class FriendListLoader extends Loader<List<UserData>> {
 
     private List<UserData> mUserDatas;
 
-    public FriendListLoader(@NonNull Context context, @NonNull UserData userData) {
+    public FriendListLoader(@NonNull Context context, @NonNull UserInfo userInfo) {
         super(context);
 
         Log.e("asdf", "FriendListLoader.construct");
 
-        mQuery = DatabaseWrapper.getFriendsQuery(userData);
+        mQuery = DatabaseWrapper.getFriendsQuery(userInfo);
     }
 
     @Override

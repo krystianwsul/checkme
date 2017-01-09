@@ -9,7 +9,7 @@ import android.text.TextUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 
 import junit.framework.Assert;
 
@@ -68,9 +68,7 @@ public class TickService extends IntentService {
         if (!domainFactory.isConnected()) {
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             if (firebaseUser != null) {
-                UserData userData = new UserData(firebaseUser);
-
-                domainFactory.setUserData(this, userData);
+                domainFactory.setUserInfo(this, new UserInfo(firebaseUser));
 
                 domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(silent, source));
             }

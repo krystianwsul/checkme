@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.notifications.InstanceDoneService;
 
 public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
@@ -19,9 +19,9 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         if (firebaseUser == null)
             return;
 
-        UserData userData = new UserData(firebaseUser);
+        UserInfo userInfo = new UserInfo(firebaseUser);
 
-        InstanceDoneService.throttleFirebase(this, true, domainFactory -> domainFactory.updateUserData(this, userData));
+        InstanceDoneService.throttleFirebase(this, true, domainFactory -> domainFactory.updateUserInfo(this, userInfo));
     }
 
     @Nullable

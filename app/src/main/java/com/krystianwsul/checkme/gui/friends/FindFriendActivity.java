@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.gui.MainActivity;
@@ -102,10 +103,10 @@ public class FindFriendActivity extends AppCompatActivity {
             Assert.assertTrue(mUserData != null);
             Assert.assertTrue(!mLoading);
 
-            UserData myUserData = MainActivity.getUserData();
-            Assert.assertTrue(myUserData != null);
+            UserInfo myUserInfo = MainActivity.getUserInfo();
+            Assert.assertTrue(myUserInfo != null);
 
-            DatabaseWrapper.addFriend(myUserData, mUserData);
+            DatabaseWrapper.addFriend(myUserInfo, mUserData);
 
             finish();
         });

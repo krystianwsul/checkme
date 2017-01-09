@@ -8,7 +8,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.ObserverHolder;
-import com.krystianwsul.checkme.firebase.UserData;
+import com.krystianwsul.checkme.domainmodel.UserInfo;
 
 import junit.framework.Assert;
 
@@ -94,9 +94,9 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
 
                     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                     if (firebaseUser != null && !mDomainFactory.isConnected()) {
-                        UserData userData = new UserData(firebaseUser);
+                        UserInfo userInfo = new UserInfo(firebaseUser);
 
-                        mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                        mDomainFactory.setUserInfo(getContext().getApplicationContext(), userInfo);
                     }
 
                     break;
@@ -109,9 +109,9 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                         if (firebaseUser == null)
                             return;
 
-                        UserData userData = new UserData(firebaseUser);
+                        UserInfo userInfo = new UserInfo(firebaseUser);
 
-                        mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                        mDomainFactory.setUserInfo(getContext().getApplicationContext(), userInfo);
                         mDomainFactory.addFirebaseListener(mFirebaseListener);
                     }
 
@@ -123,9 +123,9 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                     } else {
                         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                         if (firebaseUser != null) {
-                            UserData userData = new UserData(firebaseUser);
+                            UserInfo userInfo = new UserInfo(firebaseUser);
 
-                            mDomainFactory.setUserData(getContext().getApplicationContext(), userData);
+                            mDomainFactory.setUserInfo(getContext().getApplicationContext(), userInfo);
                             mDomainFactory.addFriendFirebaseListener(mFirebaseListener);
                         }
                     }

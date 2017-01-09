@@ -62,14 +62,6 @@ public class DatabaseWrapper {
         sRootReference.child(USERS_KEY).child(friendKey).child("friendOf").child(myKey).setValue(true);
     }
 
-    public static void removeFriend(@NonNull UserData userData, @NonNull String friendKey) {
-        Assert.assertTrue(sRootReference != null);
-
-        String myKey = userData.getKey();
-
-        sRootReference.child(USERS_KEY).child(friendKey).child("friendOf").child(myKey).setValue(null);
-    }
-
     @NonNull
     public static Query getFriendsQuery(@NonNull UserInfo userInfo) {
         Assert.assertTrue(sRootReference != null);

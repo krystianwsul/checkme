@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class RemoteFactory {
+public class RemoteProjectFactory {
     @NonNull
     private final DomainFactory mDomainFactory;
 
@@ -47,7 +47,7 @@ public class RemoteFactory {
     @NonNull
     private final Map<String, RemoteProject> mRemoteProjects;
 
-    public RemoteFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserData userData) {
+    public RemoteProjectFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserData userData) {
         mDomainFactory = domainFactory;
         mUserData = userData;
 
@@ -78,23 +78,10 @@ public class RemoteFactory {
     public RemoteProject createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        Map<String, RemoteRootUser> friends = mDomainFactory.getFriends();
-        Assert.assertTrue(friends != null);
+        Set<String> friendIds = new HashSet<>(recordOf);
+        friendIds.remove(mUserData.getKey());
 
-        Map<String, UserJson> userJsons = new HashMap<>();
-        for (String id : recordOf) {
-            Assert.assertTrue(!TextUtils.isEmpty(id));
-
-            if (id.equals(mUserData.getKey()))
-                continue;
-
-            Assert.assertTrue(friends.containsKey(id));
-            RemoteRootUser remoteRootUser = friends.get(id);
-            Assert.assertTrue(remoteRootUser != null);
-
-            userJsons.put(remoteRootUser.getId(), remoteRootUser.getUserJson());
-        }
-
+        Map<String, UserJson> userJsons = mDomainFactory.getUserJsons(friendIds);
         userJsons.put(mUserData.getKey(), mUserData.toUserJson());
 
         ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), userJsons);

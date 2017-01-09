@@ -8,14 +8,18 @@ import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.json.UserWrapper;
 
+import junit.framework.Assert;
+
+import java.util.Map;
+
 public class RemoteRootUserRecord extends RemoteRecord {
-    private static final String USERS = "users";
     private static final String USER_DATA = "userData";
+    private static final String FRIEND_OF = "friendOf";
 
     @NonNull
     private final UserWrapper mUserWrapper;
 
-    public RemoteRootUserRecord(boolean create, @NonNull UserWrapper userWrapper) {
+    RemoteRootUserRecord(boolean create, @NonNull UserWrapper userWrapper) {
         super(create);
 
         mUserWrapper = userWrapper;
@@ -75,5 +79,17 @@ public class RemoteRootUserRecord extends RemoteRecord {
 
         getUserJson().setToken(token);
         addValue(getKey() + "/" + USER_DATA + "/token", token);
+    }
+
+    public void removeFriendOf(@NonNull String friendId) {
+        Assert.assertTrue(!TextUtils.isEmpty(friendId));
+
+        Map<String, Boolean> friendOf = mUserWrapper.getFriendOf();
+        Assert.assertTrue(friendOf != null);
+        Assert.assertTrue(friendOf.containsKey(friendId));
+
+        friendOf.remove(friendId);
+
+        addValue(getKey() + "/" + FRIEND_OF + "/" + friendId, null);
     }
 }

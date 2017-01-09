@@ -13,7 +13,7 @@ public class RemoteRootUser {
     @NonNull
     private final RemoteRootUserRecord mRemoteRootUserRecord;
 
-    public RemoteRootUser(@NonNull RemoteRootUserRecord remoteRootUserRecord) {
+    RemoteRootUser(@NonNull RemoteRootUserRecord remoteRootUserRecord) {
         mRemoteRootUserRecord = remoteRootUserRecord;
     }
 
@@ -45,5 +45,11 @@ public class RemoteRootUser {
     @NonNull
     UserJson getUserJson() {
         return mRemoteRootUserRecord.getUserJson();
+    }
+
+    void removeFriend(@NonNull String friendId) {
+        Assert.assertTrue(!TextUtils.isEmpty(friendId));
+
+        mRemoteRootUserRecord.removeFriendOf(friendId);
     }
 }

@@ -205,11 +205,11 @@ public class RemoteProject {
     }
 
     @NonNull
-    private RemoteFactory getRemoteFactory() {
-        RemoteFactory remoteFactory = mDomainFactory.getRemoteFactory();
-        Assert.assertTrue(remoteFactory != null);
+    private RemoteProjectFactory getRemoteFactory() {
+        RemoteProjectFactory remoteProjectFactory = mDomainFactory.getRemoteFactory();
+        Assert.assertTrue(remoteProjectFactory != null);
 
-        return remoteFactory;
+        return remoteProjectFactory;
     }
 
     @NonNull

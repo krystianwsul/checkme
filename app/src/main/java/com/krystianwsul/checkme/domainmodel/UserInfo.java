@@ -5,10 +5,8 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.Exclude;
 import com.krystianwsul.checkme.MyFirebaseInstanceIdService;
 import com.krystianwsul.checkme.firebase.UserData;
-import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
@@ -44,12 +42,16 @@ public class UserInfo {
     }
 
     @NonNull
-    public Map<String, Object> getValues() {
+    public Map<String, Object> getValues(@NonNull String uuid) {
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put(uuid, mToken);
+
         Map<String, Object> values = new HashMap<>();
 
         values.put("email", mEmail);
         values.put("name", mName);
         values.put("token", mToken);
+        values.put("tokens", tokens);
 
         return values;
     }
@@ -87,11 +89,5 @@ public class UserInfo {
             return false;
 
         return true;
-    }
-
-    @NonNull
-    @Exclude
-    public UserJson toUserJson() {
-        return new UserJson(mEmail, mName, mToken);
     }
 }

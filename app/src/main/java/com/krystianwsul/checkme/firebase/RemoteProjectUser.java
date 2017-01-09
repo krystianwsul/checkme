@@ -47,7 +47,7 @@ public class RemoteProjectUser {
         mRemoteProjectUserRecord.setName(name);
     }
 
-    void setToken(@Nullable String token) {
-        mRemoteProjectUserRecord.setToken(token);
+    void setToken(@Nullable String token, @NonNull String uuid) {
+        mRemoteProjectUserRecord.setToken(token, uuid);
     }
 }

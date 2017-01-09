@@ -32,9 +32,12 @@ import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
+import com.krystianwsul.checkme.firebase.RemoteRootUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.json.UserJson;
+import com.krystianwsul.checkme.firebase.json.UserWrapper;
+import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
@@ -110,11 +113,20 @@ public class DomainFactory {
     @Nullable
     private ValueEventListener mFriendListener;
 
+    @Nullable
+    private Query mUserQuery;
+
+    @Nullable
+    private ValueEventListener mUserListener;
+
     @NonNull
     private final LocalFactory mLocalFactory;
 
     @Nullable
     private RemoteProjectFactory mRemoteProjectFactory;
+
+    @Nullable
+    private RemoteRootUser mRemoteRootUser;
 
     @NonNull
     private final List<FirebaseListener> mNotTickFirebaseListeners = new ArrayList<>();
@@ -223,6 +235,7 @@ public class DomainFactory {
         if (mUserInfo != null) {
             Assert.assertTrue(mRecordQuery != null);
             Assert.assertTrue(mFriendQuery != null);
+            Assert.assertTrue(mUserQuery != null);
 
             if (mUserInfo.equals(userInfo))
                 return;
@@ -238,10 +251,15 @@ public class DomainFactory {
         Assert.assertTrue(mFriendQuery == null);
         Assert.assertTrue(mFriendListener == null);
 
+        Assert.assertTrue(mUserQuery == null);
+        Assert.assertTrue(mUserListener == null);
+
         mUserInfo = userInfo;
 
         Context applicationContext = context.getApplicationContext();
         Assert.assertTrue(applicationContext != null);
+
+        DatabaseWrapper.setUserInfo(userInfo, mLocalFactory.getUuid());
 
         mRecordQuery = DatabaseWrapper.getTaskRecordsQuery(userInfo);
         mRecordListener = new ValueEventListener() {
@@ -286,6 +304,26 @@ public class DomainFactory {
             }
         };
         mFriendQuery.addValueEventListener(mFriendListener);
+
+        mUserQuery = DatabaseWrapper.getUserQuery(userInfo);
+        mUserListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.e("asdf", "DomainFactory.mUserListener.onDataChange, dataSnapshot: " + dataSnapshot);
+                Assert.assertTrue(dataSnapshot != null);
+
+                setUserRecord(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Assert.assertTrue(databaseError != null);
+                Log.e("asdf", "DomainFactory.mUserListener.onCancelled", databaseError.toException());
+
+                MyCrashlytics.logException(databaseError.toException());
+            }
+        };
+        mUserQuery.addValueEventListener(mUserListener);
     }
 
     public synchronized void clearUserInfo(@NonNull Context context) {
@@ -296,11 +334,15 @@ public class DomainFactory {
             Assert.assertTrue(mRecordListener == null);
             Assert.assertTrue(mFriendQuery == null);
             Assert.assertTrue(mFriendListener == null);
+            Assert.assertTrue(mUserQuery == null);
+            Assert.assertTrue(mUserListener == null);
         } else {
             Assert.assertTrue(mRecordQuery != null);
             Assert.assertTrue(mRecordListener != null);
             Assert.assertTrue(mFriendQuery != null);
             Assert.assertTrue(mFriendListener != null);
+            Assert.assertTrue(mUserQuery != null);
+            Assert.assertTrue(mUserListener != null);
 
             mLocalFactory.clearRemoteCustomTimeRecords();
 
@@ -317,6 +359,10 @@ public class DomainFactory {
             mFriendQuery = null;
             mFriendListener = null;
 
+            mUserQuery.removeEventListener(mUserListener);
+            mUserQuery = null;
+            mUserListener = null;
+
             updateNotifications(context, now);
 
             ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
@@ -329,7 +375,7 @@ public class DomainFactory {
         mLocalFactory.clearRemoteCustomTimeRecords();
 
         boolean silent = (mRemoteProjectFactory == null);
-        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo);
+        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo, mLocalFactory.getUuid());
 
         tryNotifyFriendListeners(); // assuming they're all getters
 
@@ -375,6 +421,14 @@ public class DomainFactory {
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
 
         tryNotifyFriendListeners();
+    }
+
+    private synchronized void setUserRecord(@NonNull DataSnapshot dataSnapshot) {
+        UserWrapper userWrapper = dataSnapshot.getValue(UserWrapper.class);
+        Assert.assertTrue(userWrapper != null);
+
+        RemoteRootUserRecord remoteRootUserRecord = new RemoteRootUserRecord(false, userWrapper);
+        mRemoteRootUser = new RemoteRootUser(remoteRootUserRecord);
     }
 
     public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
@@ -1639,7 +1693,7 @@ public class DomainFactory {
             return;
 
         mUserInfo = userInfo;
-        DatabaseWrapper.setUserInfo(userInfo);
+        DatabaseWrapper.setUserInfo(userInfo, mLocalFactory.getUuid());
 
         mRemoteProjectFactory.updateUserInfo(userInfo);
 
@@ -1676,6 +1730,7 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(mRemoteProjectFactory != null);
         Assert.assertTrue(mUserInfo != null);
+        Assert.assertTrue(mRemoteRootUser != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1685,7 +1740,7 @@ public class DomainFactory {
         Assert.assertTrue(!recordOf.contains(key));
         recordOf.add(key);
 
-        RemoteProject remoteProject = mRemoteProjectFactory.createRemoteProject(name, now, recordOf);
+        RemoteProject remoteProject = mRemoteProjectFactory.createRemoteProject(name, now, recordOf, mRemoteRootUser);
 
         save(context, dataId);
 

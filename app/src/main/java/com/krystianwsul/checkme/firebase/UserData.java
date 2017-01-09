@@ -9,7 +9,6 @@ import android.util.Base64;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
@@ -77,12 +76,6 @@ public class UserData implements Parcelable {
     @Exclude
     public String getKey() {
         return getKey(getEmail());
-    }
-
-    @NonNull
-    @Exclude
-    UserJson toUserJson() {
-        return new UserJson(getEmail(), getName(), token);
     }
 
     @Override

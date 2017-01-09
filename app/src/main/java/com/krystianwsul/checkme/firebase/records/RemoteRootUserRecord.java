@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.json.UserWrapper;
+import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -19,7 +20,7 @@ public class RemoteRootUserRecord extends RemoteRecord {
     @NonNull
     private final UserWrapper mUserWrapper;
 
-    RemoteRootUserRecord(boolean create, @NonNull UserWrapper userWrapper) {
+    public RemoteRootUserRecord(boolean create, @NonNull UserWrapper userWrapper) {
         super(create);
 
         mUserWrapper = userWrapper;
@@ -70,15 +71,17 @@ public class RemoteRootUserRecord extends RemoteRecord {
         addValue(getKey() + "/" + USER_DATA + "/name", name);
     }
 
-    public void setToken(@Nullable String token) {
-        if (TextUtils.isEmpty(getToken()) && TextUtils.isEmpty(token))
+    public void setToken(@Nullable String token, @NonNull String uuid) {
+        Assert.assertTrue(!TextUtils.isEmpty(uuid));
+
+        Map<String, String> tokens = getUserJson().getTokens();
+
+        if (Utils.stringEquals(getToken(), token) && Utils.stringEquals(tokens.get(uuid), token))
             return;
 
-        if (!TextUtils.isEmpty(getToken()) && getToken().equals(token))
-            return;
-
-        getUserJson().setToken(token);
+        getUserJson().setToken(token, uuid);
         addValue(getKey() + "/" + USER_DATA + "/token", token);
+        addValue(getKey() + "/" + USER_DATA + "/tokens/" + uuid, token);
     }
 
     public void removeFriendOf(@NonNull String friendId) {

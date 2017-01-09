@@ -48,7 +48,6 @@ import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.UserInfo;
-import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.friends.FriendListFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
@@ -148,8 +147,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if (firebaseUser != null) {
             sUserInfo = new UserInfo(firebaseUser);
-
-            DatabaseWrapper.setUserInfo(sUserInfo);
 
             DomainFactory.getDomainFactory(this).setUserInfo(this, sUserInfo);
 

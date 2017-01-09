@@ -48,14 +48,18 @@ public class RemoteProjectFactory {
     @NonNull
     private final Map<String, RemoteProject> mRemoteProjects;
 
-    public RemoteProjectFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserInfo userInfo) {
+    @NonNull
+    private final String mUuid;
+
+    public RemoteProjectFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserInfo userInfo, @NonNull String uuid) {
         mDomainFactory = domainFactory;
         mUserInfo = userInfo;
+        mUuid = uuid;
 
         mRemoteProjectManager = new RemoteProjectManager(domainFactory, children);
 
         mRemoteProjects = Stream.of(mRemoteProjectManager.mRemoteProjectRecords.values())
-                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserInfo))
+                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserInfo, uuid))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> remoteProject));
     }
 
@@ -76,20 +80,20 @@ public class RemoteProjectFactory {
     }
 
     @NonNull
-    public RemoteProject createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf) {
+    public RemoteProject createRemoteProject(@NonNull String name, @NonNull ExactTimeStamp now, @NonNull Set<String> recordOf, @NonNull RemoteRootUser remoteRootUser) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Set<String> friendIds = new HashSet<>(recordOf);
         friendIds.remove(mUserInfo.getKey());
 
         Map<String, UserJson> userJsons = mDomainFactory.getUserJsons(friendIds);
-        userJsons.put(mUserInfo.getKey(), mUserInfo.toUserJson());
+        userJsons.put(mUserInfo.getKey(), remoteRootUser.getUserJson());
 
         ProjectJson projectJson = new ProjectJson(name, now.getLong(), null, new HashMap<>(), new HashMap<>(), new HashMap<>(), userJsons);
 
         RemoteProjectRecord remoteProjectRecord = mRemoteProjectManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
 
-        RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserInfo);
+        RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserInfo, mUuid);
 
         Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
 
@@ -261,7 +265,7 @@ public class RemoteProjectFactory {
 
     public void updateUserInfo(@NonNull UserInfo userInfo) {
         Stream.of(mRemoteProjects.values())
-                .forEach(remoteProject -> remoteProject.updateUserInfo(userInfo));
+                .forEach(remoteProject -> remoteProject.updateUserInfo(userInfo, mUuid));
     }
 
     @NonNull

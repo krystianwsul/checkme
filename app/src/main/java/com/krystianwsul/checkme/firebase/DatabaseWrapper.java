@@ -40,13 +40,14 @@ public class DatabaseWrapper {
         Assert.assertTrue(sRootReference != null);
     }
 
-    public static void setUserInfo(@NonNull UserInfo userInfo) {
+    public static void setUserInfo(@NonNull UserInfo userInfo, @NonNull String uuid) {
         Assert.assertTrue(sRootReference != null);
 
         String key = userInfo.getKey();
-        sRootReference.child(USERS_KEY).child(key).child("userData").updateChildren(userInfo.getValues());
+        sRootReference.child(USERS_KEY).child(key).child("userData").updateChildren(userInfo.getValues(uuid));
     }
 
+    @NonNull
     public static DatabaseReference getUserDataDatabaseReference(@NonNull String key) {
         Assert.assertTrue(sRootReference != null);
 
@@ -153,5 +154,17 @@ public class DatabaseWrapper {
         Assert.assertTrue(!TextUtils.isEmpty(sRoot));
 
         return sRoot;
+    }
+
+    @NonNull
+    public static Query getUserQuery(@NonNull UserInfo userInfo) {
+        Assert.assertTrue(sRootReference != null);
+
+        String key = userInfo.getKey();
+
+        Query query = sRootReference.child(USERS_KEY + "/" + userInfo.getKey());
+        Assert.assertTrue(query != null);
+
+        return query;
     }
 }

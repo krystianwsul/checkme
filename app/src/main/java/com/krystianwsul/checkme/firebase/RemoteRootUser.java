@@ -13,7 +13,7 @@ public class RemoteRootUser {
     @NonNull
     private final RemoteRootUserRecord mRemoteRootUserRecord;
 
-    RemoteRootUser(@NonNull RemoteRootUserRecord remoteRootUserRecord) {
+    public RemoteRootUser(@NonNull RemoteRootUserRecord remoteRootUserRecord) {
         mRemoteRootUserRecord = remoteRootUserRecord;
     }
 
@@ -38,8 +38,8 @@ public class RemoteRootUser {
         mRemoteRootUserRecord.setName(name);
     }
 
-    void setToken(@Nullable String token) {
-        mRemoteRootUserRecord.setToken(token);
+    void setToken(@Nullable String token, @NonNull String uuid) {
+        mRemoteRootUserRecord.setToken(token, uuid);
     }
 
     @NonNull

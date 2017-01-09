@@ -56,7 +56,7 @@ public class RemoteProject {
     @NonNull
     private final Map<String, RemoteProjectUser> mRemoteUsers = new HashMap<>();
 
-    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserInfo userInfo) {
+    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserInfo userInfo, @NonNull String uuid) {
         mDomainFactory = domainFactory;
         mRemoteProjectRecord = remoteProjectRecord;
 
@@ -89,7 +89,7 @@ public class RemoteProject {
                 .map(remoteUserRecord -> new RemoteProjectUser(this, remoteUserRecord))
                 .forEach(remoteUser -> mRemoteUsers.put(remoteUser.getId(), remoteUser));
 
-        updateUserInfo(userInfo);
+        updateUserInfo(userInfo, uuid);
     }
 
     @NonNull
@@ -267,17 +267,6 @@ public class RemoteProject {
         mRemoteUsers.put(id, remoteProjectUser);
     }
 
-    private void addUserData(@NonNull UserData userData) {
-        String id = userData.getKey();
-
-        Assert.assertTrue(!mRemoteUsers.containsKey(id));
-
-        RemoteProjectUserRecord remoteProjectUserRecord = mRemoteProjectRecord.newRemoteUserRecord(userData.toUserJson());
-        RemoteProjectUser remoteProjectUser = new RemoteProjectUser(this, remoteProjectUserRecord);
-
-        mRemoteUsers.put(id, remoteProjectUser);
-    }
-
     void deleteTask(@NonNull RemoteTask remoteTask) {
         Assert.assertTrue(mRemoteTasks.containsKey(remoteTask.getId()));
 
@@ -358,7 +347,7 @@ public class RemoteProject {
         return mRemoteUsers.values();
     }
 
-    void updateUserInfo(@NonNull UserInfo userInfo) {
+    void updateUserInfo(@NonNull UserInfo userInfo, @NonNull String uuid) {
         String key = userInfo.getKey();
         Assert.assertTrue(mRemoteUsers.containsKey(key));
 
@@ -366,7 +355,7 @@ public class RemoteProject {
         Assert.assertTrue(remoteProjectUser != null);
 
         remoteProjectUser.setName(userInfo.mName);
-        remoteProjectUser.setToken(userInfo.mToken);
+        remoteProjectUser.setToken(userInfo.mToken, uuid);
     }
 
     public void setName(@NonNull String name) {

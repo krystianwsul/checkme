@@ -6,6 +6,11 @@ import android.text.TextUtils;
 
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.firebase.json.UserJson;
+import com.krystianwsul.checkme.utils.Utils;
+
+import junit.framework.Assert;
+
+import java.util.Map;
 
 public class RemoteProjectUserRecord extends RemoteRecord {
     private static final String USERS = "users";
@@ -51,7 +56,7 @@ public class RemoteProjectUserRecord extends RemoteRecord {
     }
 
     @Nullable
-    public String getToken() {
+    private String getToken() {
         return mUserJson.getToken();
     }
 
@@ -63,14 +68,16 @@ public class RemoteProjectUserRecord extends RemoteRecord {
         addValue(getKey() + "/name", name);
     }
 
-    public void setToken(@Nullable String token) {
-        if (TextUtils.isEmpty(getToken()) && TextUtils.isEmpty(token))
+    public void setToken(@Nullable String token, @NonNull String uuid) {
+        Assert.assertTrue(!TextUtils.isEmpty(uuid));
+
+        Map<String, String> tokens = mUserJson.getTokens();
+
+        if (Utils.stringEquals(getToken(), token) && Utils.stringEquals(tokens.get(uuid), token))
             return;
 
-        if (!TextUtils.isEmpty(getToken()) && getToken().equals(token))
-            return;
-
-        mUserJson.setToken(token);
+        mUserJson.setToken(token, uuid);
         addValue(getKey() + "/token", token);
+        addValue(getKey() + "/tokens/" + uuid, token);
     }
 }

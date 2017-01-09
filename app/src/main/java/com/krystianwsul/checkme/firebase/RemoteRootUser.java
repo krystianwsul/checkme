@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.firebase.json.UserJson;
@@ -36,10 +35,6 @@ public class RemoteRootUser {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mRemoteRootUserRecord.setName(name);
-    }
-
-    void setToken(@Nullable String token, @NonNull String uuid) {
-        mRemoteRootUserRecord.setToken(token, uuid);
     }
 
     @NonNull

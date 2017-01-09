@@ -43,15 +43,12 @@ public class UserInfo {
 
     @NonNull
     public Map<String, Object> getValues(@NonNull String uuid) {
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put(uuid, mToken);
-
         Map<String, Object> values = new HashMap<>();
 
         values.put("email", mEmail);
         values.put("name", mName);
         values.put("token", mToken);
-        values.put("tokens", tokens);
+        values.put("tokens/" + uuid, mToken);
 
         return values;
     }

@@ -1,11 +1,14 @@
 package com.krystianwsul.checkme.backend;
 
-class Notification {
-    private final String to;
-    private final Object data = new Data();
+import java.util.List;
 
-    Notification(String to) {
-        this.to = to;
+class Notification {
+    private final List<String> registration_ids;
+    private final Object data = new Data();
+    private final String priority = "high";
+
+    Notification(List<String> registrationIds) {
+        this.registration_ids = registrationIds;
     }
 
     private static class Data {

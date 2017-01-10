@@ -90,7 +90,7 @@ public class NotificationServlet extends HttpServlet {
                 resp.getWriter().println();
 
                 BufferedReader usersReader = new BufferedReader(new InputStreamReader(usersUrl.openStream()));
-                @SuppressWarnings("InstantiatingObjectToGetClassObject") Map<String, Map<String, String>> users = gson.fromJson(usersReader, new HashMap<String, Map<String, String>>().getClass());
+                @SuppressWarnings("InstantiatingObjectToGetClassObject") Map<String, Map<String, Map<String, String>>> users = gson.fromJson(usersReader, new HashMap<String, Map<String, Map<String, String>>>().getClass());
                 usersReader.close();
 
                 if (users == null)
@@ -103,20 +103,19 @@ public class NotificationServlet extends HttpServlet {
 
                 resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(users.keySet()));
 
-                for (Map<String, String> user : users.values()) {
+                for (Map<String, Map<String, String>> user : users.values()) {
                     Assert.assertTrue(user != null);
 
-                    String tokensString = user.get("tokens");
-                    resp.getWriter().println("user token string: " + tokensString);
+                    Map<String, String> userTokenMap = user.get("tokens");
 
-                    if (StringUtils.isEmpty(tokensString))
+                    if (userTokenMap == null) {
+                        resp.getWriter().println("user/tokens is null");
                         continue;
-
-                    @SuppressWarnings("InstantiatingObjectToGetClassObject") HashMap<String, String> userTokenMap = gson.fromJson(tokensString, new HashMap<String, String>().getClass());
+                    }
 
                     ArrayList<String> tokens = new ArrayList<>(userTokenMap.values());
 
-                    resp.getWriter().println("user tokens: " + tokens);
+                    resp.getWriter().println("user/tokens: " + tokens);
                     userTokens.addAll(tokens);
                 }
             }

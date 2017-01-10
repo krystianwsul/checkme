@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -152,48 +153,45 @@ public class NotificationServlet extends HttpServlet {
             }
         }
 
-        for (String userToken : userTokens) {
-            Assert.assertTrue(!StringUtils.isEmpty(userToken));
+        List<String> prunedUserTokens = new ArrayList<>(userTokens);
 
-            if (userToken.equals(senderToken)) {
-                resp.getWriter().println("skipping sender token: " + senderToken);
-                continue;
-            }
+        resp.getWriter().println("user tokens before removing sender: " + prunedUserTokens);
 
-            resp.getWriter().println("sending to token: " + userToken);
+        prunedUserTokens.remove(senderToken);
 
-            URL fcmUrl = new URL("https://fcm.googleapis.com/fcm/send");
-            URLConnection urlConnection = fcmUrl.openConnection();
-            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
+        resp.getWriter().println("user tokens after removing sender: " + prunedUserTokens);
 
-            httpURLConnection.setRequestProperty("Authorization", "key=AAAACS58vvk:APA91bGMSthxVrK-Tw9Kht63VM09uw2TBbCZLg6Y1utntVFLy4PGfjsvxm2QK830JGO_S87yvaxeDByMzWRqGBPXzqBpEMZPbWOUHDnYvSQXF_KllfCpcn17UBIKE9RPAXzhwkk3CqYEWvbxZCvl4L_MYodKHfhNMQ");
-            httpURLConnection.setRequestProperty("Content-Type", "application/json");
+        URL fcmUrl = new URL("https://fcm.googleapis.com/fcm/send");
+        URLConnection urlConnection = fcmUrl.openConnection();
+        HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
 
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setRequestMethod("POST");
+        httpURLConnection.setRequestProperty("Authorization", "key=AAAACS58vvk:APA91bGMSthxVrK-Tw9Kht63VM09uw2TBbCZLg6Y1utntVFLy4PGfjsvxm2QK830JGO_S87yvaxeDByMzWRqGBPXzqBpEMZPbWOUHDnYvSQXF_KllfCpcn17UBIKE9RPAXzhwkk3CqYEWvbxZCvl4L_MYodKHfhNMQ");
+        httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
-            outputStreamWriter.write(gson.toJson(new Notification(userToken)));
-            outputStreamWriter.close();
+        httpURLConnection.setDoOutput(true);
+        httpURLConnection.setRequestMethod("POST");
 
-            int respCode = httpURLConnection.getResponseCode();
-            if (respCode == HttpsURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                String response = IOUtils.toString(reader);
-                IOUtils.closeQuietly(reader);
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
+        outputStreamWriter.write(gson.toJson(new Notification(prunedUserTokens)));
+        outputStreamWriter.close();
 
-                resp.getWriter().println("response: " + response);
-                resp.getWriter().println();
-            } else {
-                resp.getWriter().println("error: " + httpURLConnection.getResponseCode() + " " + httpURLConnection.getResponseMessage());
+        int respCode = httpURLConnection.getResponseCode();
+        if (respCode == HttpsURLConnection.HTTP_OK) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+            String response = IOUtils.toString(reader);
+            IOUtils.closeQuietly(reader);
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                String response = IOUtils.toString(reader);
-                IOUtils.closeQuietly(reader);
+            resp.getWriter().println("response: " + response);
+            resp.getWriter().println();
+        } else {
+            resp.getWriter().println("error: " + httpURLConnection.getResponseCode() + " " + httpURLConnection.getResponseMessage());
 
-                resp.getWriter().println("response: " + response);
-                resp.getWriter().println();
-            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+            String response = IOUtils.toString(reader);
+            IOUtils.closeQuietly(reader);
+
+            resp.getWriter().println("response: " + response);
+            resp.getWriter().println();
         }
     }
 

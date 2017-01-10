@@ -78,7 +78,7 @@ public class NotificationServlet extends HttpServlet {
             resp.getWriter().print("projects: " + Joiner.on(", ").join(projects));
             resp.getWriter().println();
 
-            String sender = req.getParameter("sender");
+            String sender = req.getParameter("sender"); // todo usunąć ten parametr bo aplikacja już go nie wysyła
             resp.getWriter().println("sender: " + sender);
             resp.getWriter().println();
 

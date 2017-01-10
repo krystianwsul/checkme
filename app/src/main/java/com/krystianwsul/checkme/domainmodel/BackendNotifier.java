@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -26,7 +27,7 @@ class BackendNotifier {
     private static final String PREFIX = "http://check-me-add47.appspot.com/notify?";
 
     @NonNull
-    static String getUrl(@NonNull Set<String> projects, boolean production, @NonNull String sender, @NonNull Collection<String> userKeys) {
+    static String getUrl(@NonNull Set<String> projects, boolean production, @NonNull String sender, @NonNull Collection<String> userKeys, @Nullable String senderToken) {
         Assert.assertTrue(!projects.isEmpty());
         Assert.assertTrue(!TextUtils.isEmpty(sender));
 
@@ -42,6 +43,8 @@ class BackendNotifier {
             parameters.add("production=1");
 
         parameters.add("sender=" + sender);
+
+        parameters.add("senderToken=" + senderToken);
 
         return PREFIX + TextUtils.join("&", parameters);
     }
@@ -65,7 +68,7 @@ class BackendNotifier {
                 .map(RemoteProject::getId)
                 .collect(Collectors.toSet());
 
-        String url = getUrl(projectIds, production, userInfo.getKey(), userKeys);
+        String url = getUrl(projectIds, production, userInfo.getKey(), userKeys, userInfo.mToken);
         Assert.assertTrue(!TextUtils.isEmpty(url));
 
         run(url);

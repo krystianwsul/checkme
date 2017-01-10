@@ -9,7 +9,6 @@ import android.util.Base64;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -23,21 +22,17 @@ public class UserData implements Parcelable {
     @Nullable
     private String name;
 
-    @Nullable
-    private String token;
-
     @SuppressWarnings("unused")
     public UserData() {
 
     }
 
-    private UserData(@NonNull String email, @NonNull String name, @Nullable String token) {
+    private UserData(@NonNull String email, @NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(email));
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         this.email = email;
         this.name = name;
-        this.token = token;
     }
 
     @NonNull
@@ -52,12 +47,6 @@ public class UserData implements Parcelable {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         return name;
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    @Nullable
-    public String getToken() {
-        return token;
     }
 
     @NonNull
@@ -82,8 +71,6 @@ public class UserData implements Parcelable {
     public int hashCode() {
         int hash = getEmail().hashCode();
         hash += getName().hashCode();
-        if (!TextUtils.isEmpty(token))
-            hash += token.hashCode();
         return hash;
     }
 
@@ -107,9 +94,6 @@ public class UserData implements Parcelable {
         if (!getName().equals(userData.getName()))
             return false;
 
-        if (Utils.stringEquals(token, userData.token))
-            return false;
-
         return true;
     }
 
@@ -117,7 +101,6 @@ public class UserData implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(getEmail());
         dest.writeString(getName());
-        Utils.writeStringToParcel(dest, token);
     }
 
     @Override
@@ -134,9 +117,7 @@ public class UserData implements Parcelable {
             String name = in.readString();
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
-            String token = Utils.readStringFromParcel(in);
-
-            return new UserData(email, name, token);
+            return new UserData(email, name);
         }
 
         @Override

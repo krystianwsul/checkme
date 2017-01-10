@@ -47,7 +47,6 @@ public class UserInfo {
 
         values.put("email", mEmail);
         values.put("name", mName);
-        values.put("token", mToken);
         values.put("tokens/" + uuid, mToken);
 
         return values;

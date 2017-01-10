@@ -55,11 +55,6 @@ public class RemoteProjectUserRecord extends RemoteRecord {
         return mUserJson.getEmail();
     }
 
-    @Nullable
-    private String getToken() {
-        return mUserJson.getToken();
-    }
-
     public void setName(@NonNull String name) {
         if (getName().equals(name))
             return;
@@ -73,11 +68,10 @@ public class RemoteProjectUserRecord extends RemoteRecord {
 
         Map<String, String> tokens = mUserJson.getTokens();
 
-        if (Utils.stringEquals(getToken(), token) && Utils.stringEquals(tokens.get(uuid), token))
+        if (Utils.stringEquals(tokens.get(uuid), token))
             return;
 
-        mUserJson.setToken(token, uuid);
-        addValue(getKey() + "/token", token);
+        mUserJson.addToken(token, uuid);
         addValue(getKey() + "/tokens/" + uuid, token);
     }
 }

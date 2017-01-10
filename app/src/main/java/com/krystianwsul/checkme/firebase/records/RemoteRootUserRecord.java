@@ -58,11 +58,6 @@ public class RemoteRootUserRecord extends RemoteRecord {
         return getUserJson().getEmail();
     }
 
-    @Nullable
-    private String getToken() {
-        return getUserJson().getToken();
-    }
-
     public void setName(@NonNull String name) {
         if (getName().equals(name))
             return;
@@ -76,11 +71,10 @@ public class RemoteRootUserRecord extends RemoteRecord {
 
         Map<String, String> tokens = getUserJson().getTokens();
 
-        if (Utils.stringEquals(getToken(), token) && Utils.stringEquals(tokens.get(uuid), token))
+        if (Utils.stringEquals(tokens.get(uuid), token))
             return;
 
-        getUserJson().setToken(token, uuid);
-        addValue(getKey() + "/" + USER_DATA + "/token", token);
+        getUserJson().addToken(token, uuid);
         addValue(getKey() + "/" + USER_DATA + "/tokens/" + uuid, token);
     }
 

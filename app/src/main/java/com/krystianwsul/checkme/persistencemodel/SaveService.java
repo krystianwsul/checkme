@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.persistencemodel;
 
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,6 +7,7 @@ import android.support.annotation.NonNull;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 
 import junit.framework.Assert;
@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class SaveService extends IntentService {
+public class SaveService extends WakefulIntentService {
     private static final String INSERT_COMMAND_KEY = "insertCommands";
     private static final String UPDATE_COMMAND_KEY = "updateCommands";
     private static final String DELETE_COMMAND_KEY = "deleteCommands";
@@ -27,7 +27,7 @@ public class SaveService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void doWakefulWork(Intent intent) {
         ArrayList<InsertCommand> insertCommands = intent.getParcelableArrayListExtra(INSERT_COMMAND_KEY);
         Assert.assertTrue(insertCommands != null);
 
@@ -200,7 +200,7 @@ public class SaveService extends IntentService {
                 intent.putParcelableArrayListExtra(UPDATE_COMMAND_KEY, updateCommands);
                 intent.putParcelableArrayListExtra(DELETE_COMMAND_KEY, deleteCommands);
 
-                context.startService(intent);
+                WakefulIntentService.sendWakefulWork(context, intent);
             }
 
             @NonNull

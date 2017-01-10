@@ -34,7 +34,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Assert.assertTrue(!TextUtils.isEmpty(refresh));
             Assert.assertTrue(data.get(REFRESH_KEY).equals("true"));
 
-
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             if (firebaseUser != null) {
                 UserInfo userInfo = new UserInfo(firebaseUser);
@@ -43,7 +42,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 domainFactory.setUserInfo(this, userInfo);
 
-                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(false, "MyFirebaseMessagingService"));
+                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(false, "MyFirebaseMessagingService", this));
             }
         } else {
             MyCrashlytics.logException(new UnknownMessageException(data));

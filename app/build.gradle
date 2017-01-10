@@ -12,6 +12,9 @@ apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    maven {
+        url "https://s3.amazonaws.com/repo.commonsware.com"
+    }
 }
 
 apply plugin: 'me.tatarka.retrolambda'
@@ -79,6 +82,7 @@ dependencies {
     compile "com.google.firebase:firebase-auth:${firebaseVersion}"
     compile "com.google.firebase:firebase-database:${firebaseVersion}"
     compile "com.google.firebase:firebase-messaging:${firebaseVersion}"
+    compile 'com.commonsware.cwac:wakeful:1.0.5'
 }
 
 apply plugin: 'com.google.gms.google-services'

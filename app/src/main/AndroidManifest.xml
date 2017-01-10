@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
         android:name=".OrganizatorApplication"
@@ -95,12 +96,16 @@
             android:name=".gui.friends.FindFriendActivity"
             android:windowSoftInputMode="stateVisible"/>
 
-        <service android:name=".MyFirebaseMessagingService">
+        <service
+            android:name=".MyFirebaseMessagingService"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
-        <service android:name=".MyFirebaseInstanceIdService">
+        <service
+            android:name=".MyFirebaseInstanceIdService"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>

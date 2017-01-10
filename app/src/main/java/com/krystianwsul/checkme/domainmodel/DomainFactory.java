@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -390,6 +391,9 @@ public class DomainFactory {
                 updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
             } else {
                 updateNotificationsTick(context, mTickData.mSilent, mTickData.mSource);
+
+                mTickData.release();
+
                 mTickData = null;
             }
 
@@ -453,9 +457,11 @@ public class DomainFactory {
             Assert.assertTrue(mTickData == null);
 
             updateNotificationsTick(context, tickData.mSilent, tickData.mSource);
+
+            tickData.release();
         } else {
             if (mTickData != null) {
-                mTickData = mergeTickDatas(mTickData, tickData);
+                mTickData = mergeTickDatas(context, mTickData, tickData);
             } else {
                 mTickData = tickData;
             }
@@ -463,12 +469,15 @@ public class DomainFactory {
     }
 
     @NonNull
-    static TickData mergeTickDatas(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
+    private static TickData mergeTickDatas(@NonNull Context context, @NonNull TickData oldTickData, @NonNull TickData newTickData) {
         boolean silent = (oldTickData.mSilent && newTickData.mSilent);
 
         String source = "merged (" + oldTickData + ", " + newTickData + ")";
 
-        return new TickData(silent, source);
+        oldTickData.release();
+        newTickData.release();
+
+        return new TickData(silent, source, context);
     }
 
     public synchronized boolean isConnected() {
@@ -3153,16 +3162,28 @@ public class DomainFactory {
     }
 
     public static class TickData {
+        private static final String WAKELOCK_TAG = "myWakelockTag";
         final boolean mSilent;
 
         @NonNull
         private final String mSource;
 
-        public TickData(boolean silent, @NonNull String source) {
+        @NonNull
+        private final PowerManager.WakeLock mWakelock;
+
+        public TickData(boolean silent, @NonNull String source, @NonNull Context context) {
             Assert.assertTrue(!TextUtils.isEmpty(source));
 
             mSilent = silent;
             mSource = source;
+
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+            mWakelock.acquire(30 * 1000);
+        }
+
+        void release() {
+            mWakelock.release();
         }
     }
 }

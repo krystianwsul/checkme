@@ -1,11 +1,11 @@
 package com.krystianwsul.checkme.notifications;
 
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.domainmodel.UserInfo;
 
 import junit.framework.Assert;
 
-public class TickService extends IntentService {
+public class TickService extends WakefulIntentService {
     public static final int MAX_NOTIFICATIONS = 3;
     public static final String GROUP_KEY = "group";
 
@@ -27,15 +27,15 @@ public class TickService extends IntentService {
     // DON'T HOLD STATE IN STATIC VARIABLES
 
     public static void startServiceRegister(@NonNull Context context, @NonNull String source) {
-        context.startService(getIntent(context, true, source));
+        WakefulIntentService.sendWakefulWork(context, getIntent(context, true, source));
     }
 
     public static void startServiceTimeChange(@NonNull Context context, @NonNull String source) {
-        context.startService(getIntent(context, true, source));
+        WakefulIntentService.sendWakefulWork(context, getIntent(context, true, source));
     }
 
     public static void startServiceDebug(@NonNull Context context, @NonNull String source) {
-        context.startService(getIntent(context, false, source));
+        WakefulIntentService.sendWakefulWork(context, getIntent(context, false, source));
     }
 
     public static Intent getIntent(@NonNull Context context, boolean silent, @NonNull String source) {
@@ -52,7 +52,7 @@ public class TickService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void doWakefulWork(Intent intent) {
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
         Assert.assertTrue(intent.hasExtra(SOURCE_KEY));
 
@@ -70,7 +70,7 @@ public class TickService extends IntentService {
             if (firebaseUser != null) {
                 domainFactory.setUserInfo(this, new UserInfo(firebaseUser));
 
-                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(silent, source));
+                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(silent, source, this));
             }
         }
     }

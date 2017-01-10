@@ -732,24 +732,4 @@ public class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.size() == 1);
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).mDataWrapper.InstanceDatas.keySet().iterator().next().mScheduleKey.ScheduleTimePair.mHourMinute.equals(hour6));
     }
-
-    @Test
-    public void testMergeTickDatasSilent() {
-        DomainFactory.TickData oldTickData = new DomainFactory.TickData(true, "asdf");
-        DomainFactory.TickData newTickData = new DomainFactory.TickData(true, "asdf");
-
-        DomainFactory.TickData mergedTickData = DomainFactory.mergeTickDatas(oldTickData, newTickData);
-
-        Assert.assertTrue(mergedTickData.mSilent);
-    }
-
-    @Test
-    public void testMergeTickDatasNotSilent() {
-        DomainFactory.TickData oldTickData = new DomainFactory.TickData(true, "asdf");
-        DomainFactory.TickData newTickData = new DomainFactory.TickData(false, "asdf");
-
-        DomainFactory.TickData mergedTickData = DomainFactory.mergeTickDatas(oldTickData, newTickData);
-
-        Assert.assertTrue(!mergedTickData.mSilent);
-    }
 }

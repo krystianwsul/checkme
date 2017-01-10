@@ -161,6 +161,12 @@ public class NotificationServlet extends HttpServlet {
 
         resp.getWriter().println("user tokens after removing sender: " + prunedUserTokens);
 
+        if (prunedUserTokens.isEmpty()) {
+            resp.getWriter().println("no user tokens, exiting");
+            return;
+        }
+
+
         URL fcmUrl = new URL("https://fcm.googleapis.com/fcm/send");
         URLConnection urlConnection = fcmUrl.openConnection();
         HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;

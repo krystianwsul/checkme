@@ -27,9 +27,8 @@ class BackendNotifier {
     private static final String PREFIX = "http://check-me-add47.appspot.com/notify?";
 
     @NonNull
-    static String getUrl(@NonNull Set<String> projects, boolean production, @NonNull String sender, @NonNull Collection<String> userKeys, @Nullable String senderToken) {
+    static String getUrl(@NonNull Set<String> projects, boolean production, @NonNull Collection<String> userKeys, @Nullable String senderToken) {
         Assert.assertTrue(!projects.isEmpty());
-        Assert.assertTrue(!TextUtils.isEmpty(sender));
 
         List<String> parameters = Stream.of(projects)
                 .map(project -> "projects=" + project)
@@ -41,8 +40,6 @@ class BackendNotifier {
 
         if (production)
             parameters.add("production=1");
-
-        parameters.add("sender=" + sender);
 
         parameters.add("senderToken=" + senderToken);
 
@@ -68,7 +65,7 @@ class BackendNotifier {
                 .map(RemoteProject::getId)
                 .collect(Collectors.toSet());
 
-        String url = getUrl(projectIds, production, userInfo.getKey(), userKeys, userInfo.mToken);
+        String url = getUrl(projectIds, production, userKeys, userInfo.mToken);
         Assert.assertTrue(!TextUtils.isEmpty(url));
 
         run(url);

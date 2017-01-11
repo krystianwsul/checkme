@@ -81,7 +81,7 @@ public class UserInfo {
         if (!mName.equals(userInfo.mName))
             return false;
 
-        if (Utils.stringEquals(mToken, userInfo.mToken))
+        if (!Utils.stringEquals(mToken, userInfo.mToken))
             return false;
 
         return true;

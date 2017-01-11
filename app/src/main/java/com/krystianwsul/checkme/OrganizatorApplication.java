@@ -14,6 +14,7 @@ public class OrganizatorApplication extends Application {
         MyCrashlytics.initialize(this);
 
         FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         DatabaseWrapper.initialize(this);
     }

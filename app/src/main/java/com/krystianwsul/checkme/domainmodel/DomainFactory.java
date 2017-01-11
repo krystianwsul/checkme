@@ -346,6 +346,7 @@ public class DomainFactory {
             Assert.assertTrue(mUserListener != null);
 
             mLocalFactory.clearRemoteCustomTimeRecords();
+            Log.e("asdf", "clearing mRemoteProjectFactory", new Exception());
 
             mRemoteProjectFactory = null;
             mRemoteFriendFactory = null;
@@ -375,26 +376,28 @@ public class DomainFactory {
 
         mLocalFactory.clearRemoteCustomTimeRecords();
 
-        boolean silent = (mRemoteProjectFactory == null);
+        boolean firstThereforeSilent = (mRemoteProjectFactory == null);
         mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo, mLocalFactory.getUuid());
 
         tryNotifyFriendListeners(); // assuming they're all getters
 
         if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
-            updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
+            updateNotifications(context, firstThereforeSilent, ExactTimeStamp.getNow(), new ArrayList<>());
 
             save(context, new ArrayList<>());
         } else {
             mSkipSave = true;
 
             if (mTickData == null) {
-                updateNotifications(context, silent, ExactTimeStamp.getNow(), new ArrayList<>());
+                updateNotifications(context, firstThereforeSilent, ExactTimeStamp.getNow(), new ArrayList<>());
             } else {
                 updateNotificationsTick(context, mTickData.mSilent, mTickData.mSource);
 
-                mTickData.release();
+                if (!firstThereforeSilent) {
+                    mTickData.release();
 
-                mTickData = null;
+                    mTickData = null;
+                }
             }
 
             Stream.of(mNotTickFirebaseListeners)
@@ -2472,14 +2475,6 @@ public class DomainFactory {
         }
     }
 
-    private void notifyCloud(@NonNull Collection<String> userKeys) {
-        if (!userKeys.isEmpty()) {
-            Assert.assertTrue(mUserInfo != null);
-
-            new BackendNotifier(new HashSet<>(), mUserInfo, userKeys);
-        }
-    }
-
     private void notifyCloud(@NonNull RemoteProject remoteProject, @NonNull Collection<String> userKeys) {
         Assert.assertTrue(mUserInfo != null);
 
@@ -3172,9 +3167,6 @@ public class DomainFactory {
         @NonNull
         private final PowerManager.WakeLock mWakelock;
 
-        private static int sCounter = 0;
-        private static String sWakelogLog = "";
-
         public TickData(boolean silent, @NonNull String source, @NonNull Context context) {
             Assert.assertTrue(!TextUtils.isEmpty(source));
 
@@ -3184,33 +3176,11 @@ public class DomainFactory {
             PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
             mWakelock.acquire(30 * 1000);
-
-            sCounter++;
-            sWakelogLog += "; " + ExactTimeStamp.getNow() + " acquired, " + sCounter;
         }
 
         void release() {
-            sWakelogLog += "; " + ExactTimeStamp.getNow() + " releasing, " + sCounter;
-
-            try {
+            if (mWakelock.isHeld())
                 mWakelock.release();
-                sCounter--;
-
-                sWakelogLog += "; " + ExactTimeStamp.getNow() + " released, " + sCounter;
-            } catch (RuntimeException e) {
-                String log = sWakelogLog;
-
-                sWakelogLog = "";
-                sCounter = 0;
-
-                throw new WakelockException(log);
-            }
-        }
-
-        private static class WakelockException extends RuntimeException {
-            WakelockException(String message) {
-                super(message);
-            }
         }
     }
 }

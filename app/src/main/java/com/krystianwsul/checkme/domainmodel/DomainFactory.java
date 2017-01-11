@@ -3171,6 +3171,9 @@ public class DomainFactory {
         @NonNull
         private final PowerManager.WakeLock mWakelock;
 
+        private static int sCounter = 0;
+        private static String sWakelogLog = "";
+
         public TickData(boolean silent, @NonNull String source, @NonNull Context context) {
             Assert.assertTrue(!TextUtils.isEmpty(source));
 
@@ -3180,10 +3183,33 @@ public class DomainFactory {
             PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
             mWakelock.acquire(30 * 1000);
+
+            sCounter++;
+            sWakelogLog += "; " + ExactTimeStamp.getNow() + " acquired, " + sCounter;
         }
 
         void release() {
-            mWakelock.release();
+            sWakelogLog += "; " + ExactTimeStamp.getNow() + " releasing, " + sCounter;
+
+            try {
+                mWakelock.release();
+                sCounter--;
+
+                sWakelogLog += "; " + ExactTimeStamp.getNow() + " released, " + sCounter;
+            } catch (RuntimeException e) {
+                String log = sWakelogLog;
+
+                sWakelogLog = "";
+                sCounter = 0;
+
+                throw new WakelockException(log);
+            }
+        }
+
+        private static class WakelockException extends RuntimeException {
+            WakelockException(String message) {
+                super(message);
+            }
         }
     }
 }

@@ -2036,6 +2036,7 @@ public class DomainFactory {
 
         if (mRemoteProjectFactory != null) {
             parentTreeDatas.putAll(Stream.of(mRemoteProjectFactory.getRemoteProjects())
+                    .filter(remoteProject -> remoteProject.current(now))
                     .collect(Collectors.toMap(remoteProject -> new CreateTaskLoader.ProjectParentKey(remoteProject.getId()), remoteProject -> {
                         String users = Stream.of(remoteProject.getUsers())
                                 .map(RemoteProjectUser::getName)

@@ -16,6 +16,7 @@ import android.util.Log;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
@@ -394,9 +395,13 @@ public class DomainFactory {
                 updateNotificationsTick(context, mTickData.mSilent, mTickData.mSource);
 
                 if (!firstThereforeSilent) {
+                    Log.e("asdf", "not first, clearing mTickData");
+
                     mTickData.release();
 
                     mTickData = null;
+                } else {
+                    Log.e("asdf", "first, keeping mTickData");
                 }
             }
 
@@ -456,9 +461,9 @@ public class DomainFactory {
     }
 
     public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull TickData tickData) {
-        if (mRemoteProjectFactory != null && !mRemoteProjectFactory.isSaved()) {
-            Assert.assertTrue(mTickData == null);
+        Assert.assertTrue(FirebaseAuth.getInstance().getCurrentUser() != null);
 
+        if ((mRemoteProjectFactory != null) && !mRemoteProjectFactory.isSaved() && (mTickData == null)) {
             updateNotificationsTick(context, tickData.mSilent, tickData.mSource);
 
             tickData.release();

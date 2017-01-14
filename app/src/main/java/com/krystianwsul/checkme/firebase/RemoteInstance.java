@@ -46,6 +46,9 @@ public class RemoteInstance extends Instance {
         mTaskId = null;
         mScheduleDateTime = null;
         mInstanceShownRecord = instanceShownRecord;
+
+        if (mInstanceShownRecord != null && mRemoteInstanceRecord.getDone() != null)
+            mInstanceShownRecord.setNotified(false);
     }
 
     public RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull String taskId, @NonNull DateTime scheduleDateTime, @Nullable InstanceShownRecord instanceShownRecord) {
@@ -292,13 +295,13 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue(mRemoteInstanceRecord != null);
 
             mRemoteInstanceRecord.setDone(now.getLong());
+
+            if (mInstanceShownRecord != null)
+                mInstanceShownRecord.setNotified(false);
         } else {
             Assert.assertTrue(mRemoteInstanceRecord != null);
 
             mRemoteInstanceRecord.setDone(null);
-
-            if (mInstanceShownRecord != null)
-                mInstanceShownRecord.setNotified(false);
         }
     }
 

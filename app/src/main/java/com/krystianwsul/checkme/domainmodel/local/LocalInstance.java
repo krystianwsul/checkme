@@ -210,16 +210,16 @@ public class LocalInstance extends Instance {
     @Override
     public void setDone(boolean done, @NonNull ExactTimeStamp now) {
         if (done) {
-            if (mInstanceRecord == null) {
+            if (mInstanceRecord == null)
                 createInstanceHierarchy(now);
-                mInstanceRecord.setDone(now.getLong());
-            } else {
-                mInstanceRecord.setDone(now.getLong());
-            }
+
+            Assert.assertTrue(mInstanceRecord != null);
+
+            mInstanceRecord.setDone(now.getLong());
+            mInstanceRecord.setNotified(false);
         } else {
             Assert.assertTrue(mInstanceRecord != null);
             mInstanceRecord.setDone(null);
-            mInstanceRecord.setNotified(false);
         }
     }
 

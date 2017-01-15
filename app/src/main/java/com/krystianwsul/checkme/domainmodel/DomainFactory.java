@@ -375,10 +375,12 @@ public class DomainFactory {
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
         Assert.assertTrue(mUserInfo != null);
 
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
         mLocalFactory.clearRemoteCustomTimeRecords();
 
         boolean firstThereforeSilent = (mRemoteProjectFactory == null);
-        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo, mLocalFactory.getUuid());
+        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo, mLocalFactory.getUuid(), now);
 
         tryNotifyFriendListeners(); // assuming they're all getters
 
@@ -2086,7 +2088,7 @@ public class DomainFactory {
         for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
             Assert.assertTrue(pair != null);
 
-            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, pair.second);
+            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, pair.second, now);
             localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
         }
 

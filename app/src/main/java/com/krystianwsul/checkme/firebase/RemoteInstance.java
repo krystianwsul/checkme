@@ -38,7 +38,7 @@ public class RemoteInstance extends Instance {
     @Nullable
     private InstanceShownRecord mInstanceShownRecord;
 
-    RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteInstanceRecord remoteInstanceRecord, @Nullable InstanceShownRecord instanceShownRecord) {
+    RemoteInstance(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteInstanceRecord remoteInstanceRecord, @Nullable InstanceShownRecord instanceShownRecord, @NonNull ExactTimeStamp now) {
         super(domainFactory);
 
         mRemoteProject = remoteProject;
@@ -47,7 +47,9 @@ public class RemoteInstance extends Instance {
         mScheduleDateTime = null;
         mInstanceShownRecord = instanceShownRecord;
 
-        if (mInstanceShownRecord != null && mRemoteInstanceRecord.getDone() != null)
+        Date date = getInstanceDate();
+        ExactTimeStamp instanceTimeStamp = new ExactTimeStamp(date, getInstanceTime().getHourMinute(date.getDayOfWeek()).toHourMilli());
+        if (mInstanceShownRecord != null && (mRemoteInstanceRecord.getDone() != null || (instanceTimeStamp.compareTo(now) > 0)))
             mInstanceShownRecord.setNotified(false);
     }
 
@@ -183,7 +185,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue((mRemoteInstanceRecord.getInstanceHour() == null) || (mRemoteInstanceRecord.getInstanceCustomTimeId() == null));
 
             if (mRemoteInstanceRecord.getInstanceCustomTimeId() != null) {
-                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), mRemoteInstanceRecord.getInstanceCustomTimeId()));
+                return mRemoteProject.getRemoteCustomTime(mRemoteInstanceRecord.getInstanceCustomTimeId());
             } else if (mRemoteInstanceRecord.getInstanceHour() != null) {
                 return new NormalTime(mRemoteInstanceRecord.getInstanceHour(), mRemoteInstanceRecord.getInstanceMinute());
             } else {

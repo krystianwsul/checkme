@@ -62,14 +62,14 @@ public class RemoteTask extends Task {
     @NonNull
     private final List<Schedule> mRemoteSchedules = new ArrayList<>();
 
-    RemoteTask(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteTaskRecord remoteTaskRecord) {
+    RemoteTask(@NonNull DomainFactory domainFactory, @NonNull RemoteProject remoteProject, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ExactTimeStamp now) {
         super(domainFactory);
 
         mRemoteProject = remoteProject;
         mRemoteTaskRecord = remoteTaskRecord;
 
         mExistingRemoteInstances = Stream.of(mRemoteTaskRecord.getRemoteInstanceRecords().values())
-                .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, mRemoteProject, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(mRemoteProject.getId(), remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute())))
+                .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, mRemoteProject, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(mRemoteProject.getId(), remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute()), now))
                 .collect(Collectors.toMap(RemoteInstance::getScheduleKey, remoteInstance -> remoteInstance));
 
         for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteTaskRecord.mRemoteSingleScheduleRecords.values())
@@ -150,7 +150,7 @@ public class RemoteTask extends Task {
     public Task createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
 
-        RemoteTask childTask = mRemoteProject.newRemoteTask(taskJson);
+        RemoteTask childTask = mRemoteProject.newRemoteTask(taskJson, now);
 
         mRemoteProject.createTaskHierarchy(this, childTask, now);
 

@@ -56,7 +56,7 @@ public class RemoteProject {
     @NonNull
     private final Map<String, RemoteProjectUser> mRemoteUsers = new HashMap<>();
 
-    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserInfo userInfo, @NonNull String uuid) {
+    RemoteProject(@NonNull DomainFactory domainFactory, @NonNull RemoteProjectRecord remoteProjectRecord, @NonNull UserInfo userInfo, @NonNull String uuid, @NonNull ExactTimeStamp now) {
         mDomainFactory = domainFactory;
         mRemoteProjectRecord = remoteProjectRecord;
 
@@ -78,7 +78,7 @@ public class RemoteProject {
         }
 
         mRemoteTasks = Stream.of(mRemoteProjectRecord.getRemoteTaskRecords().values())
-                .map(remoteTaskRecord -> new RemoteTask(domainFactory, this, remoteTaskRecord))
+                .map(remoteTaskRecord -> new RemoteTask(domainFactory, this, remoteTaskRecord, now))
                 .collect(Collectors.toMap(RemoteTask::getId, remoteTask -> remoteTask));
 
         Stream.of(mRemoteProjectRecord.getRemoteTaskHierarchyRecords().values())
@@ -116,10 +116,10 @@ public class RemoteProject {
     }
 
     @NonNull
-    RemoteTask newRemoteTask(@NonNull TaskJson taskJson) {
+    RemoteTask newRemoteTask(@NonNull TaskJson taskJson, @NonNull ExactTimeStamp now) {
         RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(mDomainFactory, taskJson);
 
-        RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord);
+        RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord, now);
         Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
         mRemoteTasks.put(remoteTask.getId(), remoteTask);
 
@@ -136,7 +136,7 @@ public class RemoteProject {
     }
 
     @NonNull
-    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Collection<LocalInstance> localInstances) {
+    public RemoteTask copyLocalTask(@NonNull LocalTask localTask, @NonNull Collection<LocalInstance> localInstances, @NonNull ExactTimeStamp now) {
         Long endTime = (localTask.getEndExactTimeStamp() != null ? localTask.getEndExactTimeStamp().getLong() : null);
 
         Date oldestVisible = localTask.getOldestVisible();
@@ -166,7 +166,7 @@ public class RemoteProject {
         TaskJson taskJson = new TaskJson(localTask.getName(), localTask.getStartExactTimeStamp().getLong(), endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.getNote(), instanceJsons);
         RemoteTaskRecord remoteTaskRecord = mRemoteProjectRecord.newRemoteTaskRecord(mDomainFactory, taskJson);
 
-        RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord);
+        RemoteTask remoteTask = new RemoteTask(mDomainFactory, this, remoteTaskRecord, now);
         Assert.assertTrue(!mRemoteTasks.containsKey(remoteTask.getId()));
 
         mRemoteTasks.put(remoteTask.getId(), remoteTask);

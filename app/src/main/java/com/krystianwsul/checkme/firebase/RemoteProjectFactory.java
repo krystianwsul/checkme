@@ -51,7 +51,7 @@ public class RemoteProjectFactory {
     @NonNull
     private final String mUuid;
 
-    public RemoteProjectFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserInfo userInfo, @NonNull String uuid) {
+    public RemoteProjectFactory(@NonNull DomainFactory domainFactory, @NonNull Iterable<DataSnapshot> children, @NonNull UserInfo userInfo, @NonNull String uuid, @NonNull ExactTimeStamp now) {
         mDomainFactory = domainFactory;
         mUserInfo = userInfo;
         mUuid = uuid;
@@ -59,7 +59,7 @@ public class RemoteProjectFactory {
         mRemoteProjectManager = new RemoteProjectManager(domainFactory, children);
 
         mRemoteProjects = Stream.of(mRemoteProjectManager.mRemoteProjectRecords.values())
-                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserInfo, uuid))
+                .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserInfo, uuid, now))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> remoteProject));
     }
 
@@ -76,7 +76,7 @@ public class RemoteProjectFactory {
     public RemoteTask createRemoteTaskHelper(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note, @NonNull String projectId) {
         TaskJson taskJson = new TaskJson(name, now.getLong(), null, null, null, null, note, Collections.emptyMap());
 
-        return getRemoteProjectForce(projectId).newRemoteTask(taskJson);
+        return getRemoteProjectForce(projectId).newRemoteTask(taskJson, now);
     }
 
     @NonNull
@@ -93,7 +93,7 @@ public class RemoteProjectFactory {
 
         RemoteProjectRecord remoteProjectRecord = mRemoteProjectManager.newRemoteProjectRecord(mDomainFactory, new JsonWrapper(recordOf, projectJson));
 
-        RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserInfo, mUuid);
+        RemoteProject remoteProject = new RemoteProject(mDomainFactory, remoteProjectRecord, mUserInfo, mUuid, now);
 
         Assert.assertTrue(!mRemoteProjects.containsKey(remoteProject.getId()));
 

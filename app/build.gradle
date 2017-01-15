@@ -83,6 +83,7 @@ dependencies {
     compile "com.google.firebase:firebase-database:${firebaseVersion}"
     compile "com.google.firebase:firebase-messaging:${firebaseVersion}"
     compile 'com.commonsware.cwac:wakeful:1.0.5'
+    compile 'com.android.volley:volley:1.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

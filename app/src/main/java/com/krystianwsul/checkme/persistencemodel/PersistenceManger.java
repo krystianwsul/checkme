@@ -9,18 +9,15 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.domainmodel.CustomTime;
-import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
-import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
+import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
@@ -440,23 +437,20 @@ public class PersistenceManger {
     }
 
     @NonNull
-    public InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
-        Date scheduleDate = scheduleDateTime.getDate();
-        Time scheduleTime = scheduleDateTime.getTime();
-
+    public InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull Date scheduleDate, @NonNull TimePair scheduleTimePair, @NonNull ExactTimeStamp now) {
         Integer scheduleCustomTimeId = null;
         Integer scheduleHour = null;
         Integer scheduleMinute = null;
-        if (scheduleDateTime.getTime() instanceof CustomTime) {
-            Assert.assertTrue(scheduleDateTime.getTime() instanceof LocalCustomTime);
+        if (scheduleTimePair.mCustomTimeKey != null) {
+            Assert.assertTrue(scheduleTimePair.mHourMinute == null);
 
-            scheduleCustomTimeId = ((LocalCustomTime) scheduleTime).getId();
+            scheduleCustomTimeId = scheduleTimePair.mCustomTimeKey.mLocalCustomTimeId;
+            Assert.assertTrue(scheduleCustomTimeId != null);
         } else {
-            Assert.assertTrue(scheduleTime instanceof NormalTime);
+            Assert.assertTrue(scheduleTimePair.mHourMinute != null);
 
-            HourMinute hourMinute = ((NormalTime) scheduleTime).getHourMinute();
-            scheduleHour = hourMinute.getHour();
-            scheduleMinute = hourMinute.getMinute();
+            scheduleHour = scheduleTimePair.mHourMinute.getHour();
+            scheduleMinute = scheduleTimePair.mHourMinute.getMinute();
         }
 
         int id = ++mInstanceMaxId;

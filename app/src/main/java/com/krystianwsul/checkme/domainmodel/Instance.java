@@ -188,7 +188,7 @@ public abstract class Instance {
             Task task = getTask();
 
             Date oldestVisible = task.getOldestVisible();
-            Date date = getScheduleDateTime().getDate();
+            Date date = getScheduleDate();
 
             if (oldestVisible != null && date.compareTo(oldestVisible) < 0) {
                 if (exists()) {
@@ -267,7 +267,7 @@ public abstract class Instance {
     }
 
     @NonNull
-    public TimePair getScheduleTimePair() {
+    protected TimePair getScheduleTimePair() {
         return new TimePair(getScheduleCustomTimeKey(), getScheduleHourMinute());
     }
 

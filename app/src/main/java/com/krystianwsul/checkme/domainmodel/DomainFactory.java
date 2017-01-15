@@ -2930,7 +2930,7 @@ public class DomainFactory {
 
             // mark instances relevant
             Stream.of(getPastInstances(mTask, now))
-                    .filter(instance -> instance.getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
+                    .filter(instance -> instance.getScheduleDate().compareTo(oldestVisible) >= 0)
                     .map(instance -> {
                         InstanceKey instanceKey = instance.getInstanceKey();
 
@@ -2942,7 +2942,7 @@ public class DomainFactory {
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             Stream.of(mTask.getExistingInstances().values())
-                    .filter(instance -> instance.getScheduleDateTime().getDate().compareTo(oldestVisible) >= 0)
+                    .filter(instance -> instance.getScheduleDate().compareTo(oldestVisible) >= 0)
                     .map(Instance::getInstanceKey)
                     .map(instanceRelevances::get)
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));

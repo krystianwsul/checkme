@@ -191,7 +191,7 @@ public abstract class Task {
         Date oldestVisible;
 
         if (optional.isPresent()) {
-            oldestVisible = optional.get().getScheduleDateTime().getDate();
+            oldestVisible = optional.get().getScheduleDate();
 
             if (oldestVisible.compareTo(now.getDate()) > 0)
                 oldestVisible = now.getDate();

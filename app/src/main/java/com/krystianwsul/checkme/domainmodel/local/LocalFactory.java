@@ -448,10 +448,10 @@ public class LocalFactory {
     }
 
     @NonNull
-    InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
+    InstanceRecord createInstanceRecord(@NonNull LocalTask localTask, @NonNull LocalInstance localInstance, @NonNull Date scheduleDate, @NonNull TimePair scheduleTimePair, @NonNull ExactTimeStamp now) {
         mExistingLocalInstances.add(localInstance);
 
-        return mPersistenceManager.createInstanceRecord(localTask, scheduleDateTime, now);
+        return mPersistenceManager.createInstanceRecord(localTask, scheduleDate, scheduleTimePair, now);
     }
 
     @NonNull

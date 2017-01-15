@@ -239,9 +239,7 @@ public class LocalInstance extends Instance {
     private void createInstanceRecord(@NonNull ExactTimeStamp now) {
         LocalTask localTask = getTask();
 
-        DateTime scheduleDateTime = getScheduleDateTime();
-
-        mInstanceRecord = mDomainFactory.getLocalFactory().createInstanceRecord(localTask, this, scheduleDateTime, now);
+        mInstanceRecord = mDomainFactory.getLocalFactory().createInstanceRecord(localTask, this, getScheduleDate(), getScheduleTimePair(), now);
 
         mTaskId = null;
         mScheduleDateTime = null;

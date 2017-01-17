@@ -305,12 +305,20 @@ public abstract class NotificationWrapper {
                 Assert.assertTrue(notificationManager != null);
 
                 StatusBarNotification[] statusBarNotifications = notificationManager.getActiveNotifications();
+                Assert.assertTrue(statusBarNotifications != null);
 
                 if (lastNotificationId != null) {
                     if (statusBarNotifications.length > 2) {
                         cancelNotification(context, lastNotificationId);
                     } else {
-                        Assert.assertTrue(statusBarNotifications.length == 2);
+                        if (statusBarNotifications.length < 2)
+                            NotificationException.throwException(lastNotificationId, statusBarNotifications);
+
+                        if (Stream.of(statusBarNotifications).noneMatch(statusBarNotification -> statusBarNotification.getId() == 0))
+                            NotificationException.throwException(lastNotificationId, statusBarNotifications);
+
+                        if (Stream.of(statusBarNotifications).noneMatch(statusBarNotification -> Integer.valueOf(statusBarNotification.getId()).equals(lastNotificationId)))
+                            NotificationException.throwException(lastNotificationId, statusBarNotifications);
 
                         cancelNotification(context, 0);
                         cancelNotification(context, lastNotificationId);
@@ -326,6 +334,19 @@ public abstract class NotificationWrapper {
                     cancelNotification(context, 0);
                 }
             }
+        }
+    }
+
+    private static class NotificationException extends RuntimeException {
+        static void throwException(int lastNotificationId, @NonNull StatusBarNotification[] statusBarNotifications) {
+            throw new NotificationException("last id: " + lastNotificationId + "shown ids: " + Stream.of(statusBarNotifications)
+                    .map(StatusBarNotification::getId)
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(", ")));
+        }
+
+        NotificationException(@NonNull String message) {
+            super(message);
         }
     }
 }

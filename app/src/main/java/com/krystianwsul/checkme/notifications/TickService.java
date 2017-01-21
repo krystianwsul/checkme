@@ -63,9 +63,15 @@ public class TickService extends WakefulIntentService {
 
         DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
 
-        domainFactory.updateNotificationsTick(this, silent, source);
+        if (domainFactory.isConnected()) {
+            if (domainFactory.isSaved()) {
+                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(silent, source, this));
+            } else {
+                domainFactory.updateNotificationsTick(this, silent, source);
+            }
+        } else {
+            domainFactory.updateNotificationsTick(this, silent, source);
 
-        if (!domainFactory.isConnected()) {
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             if (firebaseUser != null) {
                 domainFactory.setUserInfo(this, new UserInfo(firebaseUser));

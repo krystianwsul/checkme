@@ -85,6 +85,7 @@ dependencies {
     compile 'com.commonsware.cwac:wakeful:1.0.5'
     compile 'com.android.volley:volley:1.0.0'
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+    protoCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 }

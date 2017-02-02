@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.firebase.json.JsonWrapper;
 import com.krystianwsul.checkme.firebase.json.ProjectJson;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
 import com.krystianwsul.checkme.firebase.json.UserJson;
-import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectManager;
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
@@ -132,9 +131,9 @@ public class RemoteProjectFactory {
         if (!localCustomTime.hasRemoteRecord(remoteProject.getId())) {
             CustomTimeJson customTimeJson = new CustomTimeJson(mDomainFactory.getLocalFactory().getUuid(), localCustomTime.getId(), localCustomTime.getName(), localCustomTime.getHourMinute(DayOfWeek.SUNDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.SUNDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.MONDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.MONDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.TUESDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.TUESDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.THURSDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.THURSDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.FRIDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.FRIDAY).getMinute(), localCustomTime.getHourMinute(DayOfWeek.SATURDAY).getHour(), localCustomTime.getHourMinute(DayOfWeek.SATURDAY).getMinute());
 
-            RemoteCustomTimeRecord customTimeRecord = remoteProject.newRemoteCustomTimeRecord(customTimeJson);
+            RemoteCustomTime remoteCustomTime = remoteProject.newRemoteCustomTime(customTimeJson);
 
-            localCustomTime.addRemoteCustomTimeRecord(customTimeRecord);
+            localCustomTime.addRemoteCustomTimeRecord(remoteCustomTime.getRemoteCustomTimeRecord());
         }
 
         return localCustomTime.getRemoteId(remoteProject.getId());

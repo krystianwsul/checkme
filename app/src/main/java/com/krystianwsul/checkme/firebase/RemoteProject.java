@@ -325,8 +325,16 @@ public class RemoteProject {
     }
 
     @NonNull
-    RemoteCustomTimeRecord newRemoteCustomTimeRecord(@NonNull CustomTimeJson customTimeJson) {
-        return mRemoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson);
+    RemoteCustomTime newRemoteCustomTime(@NonNull CustomTimeJson customTimeJson) {
+        RemoteCustomTimeRecord remoteCustomTimeRecord = mRemoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson);
+
+        RemoteCustomTime remoteCustomTime = new RemoteCustomTime(mDomainFactory, this, remoteCustomTimeRecord);
+
+        Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getId()));
+
+        mRemoteCustomTimes.put(remoteCustomTime.getId(), remoteCustomTime);
+
+        return remoteCustomTime;
     }
 
     void deleteCustomTime(@NonNull RemoteCustomTime remoteCustomTime) {
@@ -362,11 +370,6 @@ public class RemoteProject {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mRemoteProjectRecord.setName(name);
-    }
-
-    @NonNull
-    public Set<String> getRecordOf() {
-        return mRemoteProjectRecord.getRecordOf();
     }
 
     public void delete() {

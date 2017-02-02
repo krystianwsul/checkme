@@ -105,4 +105,9 @@ public class RemoteCustomTime implements CustomTime {
 
         mRemoteCustomTimeRecord.delete();
     }
+
+    @NonNull
+    RemoteCustomTimeRecord getRemoteCustomTimeRecord() {
+        return mRemoteCustomTimeRecord;
+    }
 }

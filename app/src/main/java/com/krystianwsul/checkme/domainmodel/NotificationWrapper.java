@@ -118,7 +118,7 @@ public abstract class NotificationWrapper {
                 style = null;
             }
 
-            notify(context, instance.getName(), text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.getInstanceDateTime().getTimeStamp().getLong(), style, true, nougat, false, instance.getInstanceDateTime().getTimeStamp().getLong().toString());
+            notify(context, instance.getName(), text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.getInstanceDateTime().getTimeStamp().getLong(), style, true, nougat, false, instance.getInstanceDateTime().getTimeStamp().getLong().toString() + instance.getTask().getStartExactTimeStamp().toString());
         }
 
         @NonNull

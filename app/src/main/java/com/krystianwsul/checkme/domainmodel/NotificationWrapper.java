@@ -203,7 +203,7 @@ public abstract class NotificationWrapper {
                     .forEach(builder::addAction);
 
             if (when != null)
-                builder.setWhen(when);
+                builder.setWhen(when).setShowWhen(true);
 
             if (style != null)
                 builder.setStyle(style);

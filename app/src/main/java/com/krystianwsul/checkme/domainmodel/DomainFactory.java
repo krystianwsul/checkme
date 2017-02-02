@@ -681,7 +681,7 @@ public class DomainFactory {
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
                     .filter(task -> task.getCurrentSchedules(now).isEmpty())
-                    .map(task -> new GroupListFragment.TaskData(task.getTaskKey(), task.getName(), getChildTaskDatas(task, now), task.getStartExactTimeStamp()))
+                    .map(task -> new GroupListFragment.TaskData(task.getTaskKey(), task.getName(), getChildTaskDatas(task, now), task.getStartExactTimeStamp(), task.getNote()))
                     .collect(Collectors.toList());
         }
 
@@ -2275,7 +2275,7 @@ public class DomainFactory {
     @NonNull
     private List<GroupListFragment.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
         return Stream.of(parentTask.getChildTasks(now))
-                .map(childTask -> new GroupListFragment.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp()))
+                .map(childTask -> new GroupListFragment.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp(), childTask.getNote()))
                 .collect(Collectors.toList());
     }
 

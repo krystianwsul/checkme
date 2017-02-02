@@ -3421,7 +3421,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 @Override
                 int getChildrenVisibility() {
-                    if (mTaskData.Children.isEmpty() || expanded()) {
+                    if ((mTaskData.Children.isEmpty() || expanded()) && TextUtils.isEmpty(mTaskData.mNote)) {
                         return View.GONE;
                     } else {
                         return View.VISIBLE;
@@ -3430,19 +3430,21 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 @Override
                 String getChildren() {
-                    Assert.assertTrue(!expanded());
-                    Assert.assertTrue(!mTaskData.Children.isEmpty());
+                    if (!expanded() && !mTaskData.Children.isEmpty()) {
+                        return Stream.of(mTaskData.Children)
+                                .sortBy(task -> task.mStartExactTimeStamp)
+                                .map(task -> task.Name)
+                                .collect(Collectors.joining(", "));
+                    } else {
+                        Assert.assertTrue(!TextUtils.isEmpty(mTaskData.mNote));
 
-                    return Stream.of(mTaskData.Children)
-                            .sortBy(task -> task.mStartExactTimeStamp)
-                            .map(task -> task.Name)
-                            .collect(Collectors.joining(", "));
+                        return mTaskData.mNote;
+                    }
                 }
 
                 @Override
                 int getChildrenColor() {
-                    Assert.assertTrue(!expanded());
-                    Assert.assertTrue(!mTaskData.Children.isEmpty());
+                    Assert.assertTrue((!expanded() && !mTaskData.Children.isEmpty()) || !TextUtils.isEmpty(mTaskData.mNote));
 
                     return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textSecondary);
                 }
@@ -3933,13 +3935,17 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         @NonNull
         final ExactTimeStamp mStartExactTimeStamp;
 
-        public TaskData(@NonNull TaskKey taskKey, @NonNull String name, @NonNull List<TaskData> children, @NonNull ExactTimeStamp startExactTimeStamp) {
+        @Nullable
+        final String mNote;
+
+        public TaskData(@NonNull TaskKey taskKey, @NonNull String name, @NonNull List<TaskData> children, @NonNull ExactTimeStamp startExactTimeStamp, @Nullable String note) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
 
             mTaskKey = taskKey;
             Name = name;
             Children = children;
             mStartExactTimeStamp = startExactTimeStamp;
+            mNote = note;
         }
 
         @Override
@@ -3949,6 +3955,8 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
             hashCode += Name.hashCode();
             hashCode += Children.hashCode();
             hashCode += mStartExactTimeStamp.hashCode();
+            if (!TextUtils.isEmpty(mNote))
+                hashCode += mNote.hashCode();
             return hashCode;
         }
 
@@ -3976,6 +3984,9 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                 return false;
 
             if (!mStartExactTimeStamp.equals(taskData.mStartExactTimeStamp))
+                return false;
+
+            if (!Utils.stringEquals(mNote, taskData.mNote))
                 return false;
 
             return true;

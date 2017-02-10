@@ -110,7 +110,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTime(mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), customTimeId));
+                return mRemoteProject.getRemoteCustomTime(customTimeId);
             } else {
                 return new NormalTime(hour, minute);
             }

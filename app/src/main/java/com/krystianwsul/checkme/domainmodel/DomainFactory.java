@@ -1145,7 +1145,6 @@ public class DomainFactory {
 
         instance.setDone(true, now);
         instance.setNotificationShown(false, now);
-        instance.setNotified(now);
 
         updateNotifications(context, now);
 

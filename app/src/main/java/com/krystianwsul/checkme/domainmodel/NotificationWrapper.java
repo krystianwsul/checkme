@@ -311,17 +311,18 @@ public abstract class NotificationWrapper {
                     if (statusBarNotifications.length > 2) {
                         cancelNotification(context, lastNotificationId);
                     } else {
-                        if (statusBarNotifications.length < 2)
-                            NotificationException.throwException(lastNotificationId, statusBarNotifications);
+                        if (statusBarNotifications.length < 2) {
+                            Assert.assertTrue(statusBarNotifications.length == 0);
+                        } else {
+                            if (Stream.of(statusBarNotifications).noneMatch(statusBarNotification -> statusBarNotification.getId() == 0))
+                                NotificationException.throwException(lastNotificationId, statusBarNotifications);
 
-                        if (Stream.of(statusBarNotifications).noneMatch(statusBarNotification -> statusBarNotification.getId() == 0))
-                            NotificationException.throwException(lastNotificationId, statusBarNotifications);
+                            if (Stream.of(statusBarNotifications).noneMatch(statusBarNotification -> Integer.valueOf(statusBarNotification.getId()).equals(lastNotificationId)))
+                                NotificationException.throwException(lastNotificationId, statusBarNotifications);
 
-                        if (Stream.of(statusBarNotifications).noneMatch(statusBarNotification -> Integer.valueOf(statusBarNotification.getId()).equals(lastNotificationId)))
-                            NotificationException.throwException(lastNotificationId, statusBarNotifications);
-
-                        cancelNotification(context, 0);
-                        cancelNotification(context, lastNotificationId);
+                            cancelNotification(context, 0);
+                            cancelNotification(context, lastNotificationId);
+                        }
                     }
                 } else {
                     if (statusBarNotifications.length != 1)

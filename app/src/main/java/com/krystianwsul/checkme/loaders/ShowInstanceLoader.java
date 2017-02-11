@@ -133,7 +133,7 @@ public class ShowInstanceLoader extends DomainLoader<ShowInstanceLoader.Data> {
             if (!Name.equals(instanceData.Name))
                 return false;
 
-            if (Utils.stringEquals(DisplayText, instanceData.DisplayText))
+            if (!Utils.stringEquals(DisplayText, instanceData.DisplayText))
                 return false;
 
             if (Done != instanceData.Done)

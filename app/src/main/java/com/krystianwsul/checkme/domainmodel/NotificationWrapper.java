@@ -327,7 +327,7 @@ public abstract class NotificationWrapper {
                     if (statusBarNotifications.length != 1)
                         return;
 
-                    Log.e("sadf", "cleaning group");
+                    Log.e("asdf", "cleaning group");
 
                     Assert.assertTrue(statusBarNotifications[0].getId() == 0);
 
@@ -339,7 +339,7 @@ public abstract class NotificationWrapper {
 
     private static class NotificationException extends RuntimeException {
         static void throwException(int lastNotificationId, @NonNull StatusBarNotification[] statusBarNotifications) {
-            throw new NotificationException("last id: " + lastNotificationId + "shown ids: " + Stream.of(statusBarNotifications)
+            throw new NotificationException("last id: " + lastNotificationId + ", shown ids: " + Stream.of(statusBarNotifications)
                     .map(StatusBarNotification::getId)
                     .map(String::valueOf)
                     .collect(Collectors.joining(", ")));

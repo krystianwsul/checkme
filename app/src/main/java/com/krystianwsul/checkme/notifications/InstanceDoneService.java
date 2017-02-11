@@ -46,7 +46,7 @@ public class InstanceDoneService extends IntentService {
         Assert.assertTrue(notificationId != -1);
 
         NotificationWrapper notificationWrapper = NotificationWrapper.getInstance();
-        notificationWrapper.cleanGroup(this, notificationId);
+        notificationWrapper.cleanGroup(this, notificationId); // todo uodpornić na podwójne kliknięcie
 
         throttleFirebase(this, instanceKey.getType().equals(TaskKey.Type.REMOTE), domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
     }

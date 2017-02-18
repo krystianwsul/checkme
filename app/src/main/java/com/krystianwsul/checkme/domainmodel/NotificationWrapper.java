@@ -26,8 +26,12 @@ import com.krystianwsul.checkme.notifications.InstanceDoneService;
 import com.krystianwsul.checkme.notifications.InstanceHourService;
 import com.krystianwsul.checkme.notifications.InstanceNotificationDeleteService;
 import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.ScheduleKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 
 import junit.framework.Assert;
@@ -55,9 +59,9 @@ public abstract class NotificationWrapper {
 
     public abstract void cancelNotification(@NonNull Context context, int id);
 
-    public abstract void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
+    public abstract void notifyInstance(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
 
-    public abstract void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
+    public abstract void notifyGroup(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat);
 
     public abstract void setAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm);
 
@@ -77,13 +81,37 @@ public abstract class NotificationWrapper {
             notificationManager.cancel(id);
         }
 
-        @Override
-        public void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
-            Task task = instance.getTask();
-            int notificationId = instance.getNotificationId();
+        @NonNull
+        private InstanceKey getRemoteCustomTimeFixInstanceKey(@NonNull DomainFactory domainFactory, @NonNull Instance instance) { // remote custom time key hack
             InstanceKey instanceKey = instance.getInstanceKey();
 
-            Intent deleteIntent = InstanceNotificationDeleteService.getIntent(context, instanceKey);
+            if (instanceKey.getType() == TaskKey.Type.LOCAL)
+                return instanceKey;
+
+            if (instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey == null)
+                return instanceKey;
+
+            if (instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey.getType() == TaskKey.Type.REMOTE)
+                return instanceKey;
+
+            String projectId = instance.getTask().getRemoteNonNullProject().getId();
+
+            String customTimeId = domainFactory.getRemoteCustomTimeId(projectId, instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey);
+
+            CustomTimeKey customTimeKey = new CustomTimeKey(projectId, customTimeId);
+            ScheduleKey scheduleKey = new ScheduleKey(instanceKey.mScheduleKey.ScheduleDate, new TimePair(customTimeKey));
+            return new InstanceKey(instanceKey.mTaskKey, scheduleKey);
+        }
+
+        @Override
+        public void notifyInstance(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            Task task = instance.getTask();
+            int notificationId = instance.getNotificationId();
+
+            InstanceKey instanceKey = instance.getInstanceKey();
+            InstanceKey remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instance);
+
+            Intent deleteIntent = InstanceNotificationDeleteService.getIntent(context, remoteCustomTimeFixInstanceKey);
             PendingIntent pendingDeleteIntent = PendingIntent.getService(context, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
             Intent contentIntent = ShowInstanceActivity.getNotificationIntent(context, instanceKey);
@@ -242,15 +270,17 @@ public abstract class NotificationWrapper {
         }
 
         @Override
-        public void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+        public void notifyGroup(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
             ArrayList<String> names = new ArrayList<>();
             ArrayList<InstanceKey> instanceKeys = new ArrayList<>();
+            ArrayList<InstanceKey> remoteCustomTimeFixInstanceKeys = new ArrayList<>();
             for (Instance instance : instances) {
                 names.add(instance.getName());
                 instanceKeys.add(instance.getInstanceKey());
+                remoteCustomTimeFixInstanceKeys.add(getRemoteCustomTimeFixInstanceKey(domainFactory, instance));
             }
 
-            Intent deleteIntent = GroupNotificationDeleteService.getIntent(context, instanceKeys);
+            Intent deleteIntent = GroupNotificationDeleteService.getIntent(context, remoteCustomTimeFixInstanceKeys);
             PendingIntent pendingDeleteIntent = PendingIntent.getService(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
             Intent contentIntent = ShowNotificationGroupActivity.getIntent(context, instanceKeys);

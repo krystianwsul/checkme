@@ -4,8 +4,10 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
+import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.InstanceKey;
+import com.krystianwsul.checkme.utils.TaskKey;
 
 import junit.framework.Assert;
 
@@ -19,6 +21,12 @@ public class GroupNotificationDeleteService extends IntentService {
         Assert.assertTrue(context != null);
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
+
+        Assert.assertTrue(Stream.of(instanceKeys)
+                .filter(instanceKey -> instanceKey.getType() == TaskKey.Type.REMOTE)
+                .map(instanceKey -> instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey)
+                .filter(customTimeKey -> customTimeKey != null)
+                .allMatch(customTimeKey -> customTimeKey.getType() == TaskKey.Type.REMOTE));
 
         Intent intent = new Intent(context, GroupNotificationDeleteService.class);
         intent.putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys);

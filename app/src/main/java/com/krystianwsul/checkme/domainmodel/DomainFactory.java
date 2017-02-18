@@ -2588,9 +2588,9 @@ public class DomainFactory {
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now, false);
+                        NotificationWrapper.getInstance().notifyGroup(context, this, notificationInstances.values(), silent, now, false);
                     } else {
-                        NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, false);
+                        NotificationWrapper.getInstance().notifyGroup(context, this, notificationInstances.values(), true, now, false);
                     }
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
@@ -2607,7 +2607,7 @@ public class DomainFactory {
                         }
                     }
 
-                    NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), silent, now, false);
+                    NotificationWrapper.getInstance().notifyGroup(context, this, notificationInstances.values(), silent, now, false);
                 }
             } else { // show instances
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
@@ -2651,7 +2651,7 @@ public class DomainFactory {
                 NotificationWrapper.getInstance().cancelNotification(context, 0);
             } else {
                 message += ", sg";
-                NotificationWrapper.getInstance().notifyGroup(context, notificationInstances.values(), true, now, true);
+                NotificationWrapper.getInstance().notifyGroup(context, this, notificationInstances.values(), true, now, true);
             }
 
             message += ", hiding " + hideInstanceKeys.size();
@@ -2733,7 +2733,7 @@ public class DomainFactory {
     }
 
     private void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
-        NotificationWrapper.getInstance().notifyInstance(context, instance, silent, now, nougat);
+        NotificationWrapper.getInstance().notifyInstance(context, this, instance, silent, now, nougat);
 
         if (!silent)
             mLastNotificationBeeps.put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
@@ -2756,11 +2756,11 @@ public class DomainFactory {
             }
         }
 
-        NotificationWrapper.getInstance().notifyInstance(context, instance, true, now, nougat);
+        NotificationWrapper.getInstance().notifyInstance(context, this, instance, true, now, nougat);
     }
 
     private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {
-        if (instanceKey.getType().equals(TaskKey.Type.LOCAL)) {
+        if (instanceKey.getType() == TaskKey.Type.LOCAL) {
             Instance instance = getInstance(instanceKey);
 
             instance.setNotified(now);
@@ -2778,6 +2778,7 @@ public class DomainFactory {
             Date scheduleDate = scheduleKey.ScheduleDate;
 
             Stream<InstanceShownRecord> stream = Stream.of(mLocalFactory.getInstanceShownRecords())
+                    .filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId))
                     .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleDate.getYear())
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleDate.getMonth())
@@ -2787,7 +2788,12 @@ public class DomainFactory {
             if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
                 Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
 
-                String customTimeId = getRemoteCustomTimeId(projectId, scheduleKey.ScheduleTimePair.mCustomTimeKey);
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.mCustomTimeKey.getType() == TaskKey.Type.REMOTE); // remote custom time key hack
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.mCustomTimeKey.mLocalCustomTimeId == null);
+                Assert.assertTrue(projectId.equals(scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteProjectId));
+
+                String customTimeId = scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId;
+                Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
 
                 matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
                         .collect(Collectors.toList());

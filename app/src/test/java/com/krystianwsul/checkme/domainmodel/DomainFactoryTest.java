@@ -79,12 +79,12 @@ public class DomainFactoryTest {
             }
 
             @Override
-            public void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            public void notifyInstance(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
 
             }
 
             @Override
-            public void notifyGroup(@NonNull Context context, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            public void notifyGroup(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
 
             }
 

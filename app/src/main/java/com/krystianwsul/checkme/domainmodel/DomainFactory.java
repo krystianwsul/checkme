@@ -814,13 +814,19 @@ public class DomainFactory {
         if (taskKey != null) {
             Task task = getTaskForce(taskKey);
 
-            CreateTaskLoader.ParentKey parentKey;
+            CreateTaskLoader.TaskParentKey taskParentKey;
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
+            String projectName;
 
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
 
-                parentKey = null;
+                taskParentKey = null;
+                RemoteProject remoteProject = task.getRemoteNullableProject();
+                if (remoteProject == null)
+                    projectName = null;
+                else
+                    projectName = remoteProject.getName();
 
                 if (!schedules.isEmpty()) {
                     scheduleDatas = new ArrayList<>();
@@ -896,10 +902,11 @@ public class DomainFactory {
                 Task parentTask = task.getParentTask(now);
                 Assert.assertTrue(parentTask != null);
 
-                parentKey = new CreateTaskLoader.TaskParentKey(parentTask.getTaskKey());
+                taskParentKey = new CreateTaskLoader.TaskParentKey(parentTask.getTaskKey());
+                projectName = null;
             }
 
-            taskData = new CreateTaskLoader.TaskData(task.getName(), parentKey, scheduleDatas, task.getNote());
+            taskData = new CreateTaskLoader.TaskData(task.getName(), taskParentKey, scheduleDatas, task.getNote(), projectName);
 
             if (task instanceof RemoteTask) {
                 RemoteTask remoteTask = (RemoteTask) task;

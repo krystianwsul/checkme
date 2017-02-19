@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
+import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -121,7 +122,7 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         public final String Name;
 
         @Nullable
-        public final ParentKey mParentKey;
+        public final TaskParentKey mTaskParentKey;
 
         @Nullable
         public final List<ScheduleData> ScheduleDatas;
@@ -129,27 +130,36 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         @Nullable
         public final String mNote;
 
-        public TaskData(@NonNull String name, @Nullable ParentKey parentKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note) {
+        @Nullable
+        public final String mProjectName;
+
+        public TaskData(@NonNull String name, @Nullable TaskParentKey taskParentKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectName) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
+            Assert.assertTrue(taskParentKey == null || TextUtils.isEmpty(projectName));
 
             Name = name;
-            mParentKey = parentKey;
+            mTaskParentKey = taskParentKey;
             ScheduleDatas = scheduleDatas;
             mNote = note;
+            mProjectName = projectName;
         }
 
         @Override
         public int hashCode() {
             int hash = 0;
             hash += Name.hashCode();
-            if (mParentKey != null) {
+            if (mTaskParentKey != null) {
                 Assert.assertTrue(ScheduleDatas == null);
+                Assert.assertTrue(TextUtils.isEmpty(mProjectName));
 
-                hash += mParentKey.hashCode();
+                hash += mTaskParentKey.hashCode();
             } else {
                 Assert.assertTrue(ScheduleDatas != null);
 
                 hash += ScheduleDatas.hashCode();
+
+                if (!TextUtils.isEmpty(mProjectName))
+                    hash += mProjectName.hashCode();
             }
             if (!TextUtils.isEmpty(mNote))
                 hash += mNote.hashCode();
@@ -173,10 +183,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if (!Name.equals(taskData.Name))
                 return false;
 
-            if ((mParentKey == null) != (taskData.mParentKey == null))
+            if ((mTaskParentKey == null) != (taskData.mTaskParentKey == null))
                 return false;
 
-            if ((mParentKey != null) && !mParentKey.equals(taskData.mParentKey))
+            if ((mTaskParentKey != null) && !mTaskParentKey.equals(taskData.mTaskParentKey))
                 return false;
 
             if ((ScheduleDatas == null) != (taskData.ScheduleDatas == null))
@@ -185,10 +195,10 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             if ((ScheduleDatas != null) && !ScheduleDatas.equals(taskData.ScheduleDatas))
                 return false;
 
-            if (TextUtils.isEmpty(mNote) != TextUtils.isEmpty(taskData.mNote))
+            if (Utils.stringEquals(mNote, taskData.mNote))
                 return false;
 
-            if (!TextUtils.isEmpty(mNote) && !mNote.equals(taskData.mNote))
+            if (!Utils.stringEquals(mProjectName, taskData.mProjectName))
                 return false;
 
             return true;

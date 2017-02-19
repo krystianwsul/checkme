@@ -569,12 +569,12 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
             mNoteHasFocus = mSavedInstanceState.getBoolean(NOTE_HAS_FOCUS_KEY);
         } else {
-            if (mData.TaskData != null && mData.TaskData.mParentKey != null) {
+            if (mData.TaskData != null && mData.TaskData.mTaskParentKey != null) {
                 Assert.assertTrue(mParentTaskKeyHint == null);
                 Assert.assertTrue(mTaskKeys == null);
                 Assert.assertTrue(mTaskKey != null);
 
-                mParent = findTaskData(mData.TaskData.mParentKey);
+                mParent = findTaskData(mData.TaskData.mTaskParentKey);
             } else if (mParentTaskKeyHint != null) {
                 Assert.assertTrue(mTaskKey == null);
 
@@ -774,11 +774,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             if (!Utils.stringEquals(mNote, mData.TaskData.mNote))
                 return true;
 
-            if (mData.TaskData.mParentKey != null) {
+            if (mData.TaskData.mTaskParentKey != null) {
                 if (!hasValueParentInGeneral())
                     return true;
 
-                if (!mParent.mParentKey.equals(mData.TaskData.mParentKey))
+                if (!mParent.mParentKey.equals(mData.TaskData.mTaskParentKey))
                     return true;
 
                 return false;
@@ -1017,6 +1017,14 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 mNote = s.toString();
             }
         };
+
+        CreateTaskAdapter() {
+            Assert.assertTrue(mData != null);
+
+            if (mData.TaskData != null && mData.TaskData.mTaskParentKey != null && !TextUtils.isEmpty(mData.TaskData.mProjectName)) {
+
+            }
+        }
 
         @Override
         public Holder onCreateViewHolder(ViewGroup parent, int viewType) {

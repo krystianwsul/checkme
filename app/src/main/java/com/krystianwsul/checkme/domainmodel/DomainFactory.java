@@ -1988,8 +1988,10 @@ public class DomainFactory {
             return null;
         } else {
             Assert.assertTrue(parentTaskHierarchy.notDeleted(exactTimeStamp));
+
             Task parentTask = parentTaskHierarchy.getParentTask();
-            Assert.assertTrue(parentTask.current(exactTimeStamp));
+            Assert.assertTrue(parentTask.notDeleted(exactTimeStamp));
+
             return parentTask;
         }
     }

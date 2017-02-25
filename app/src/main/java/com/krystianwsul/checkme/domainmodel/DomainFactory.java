@@ -816,17 +816,11 @@ public class DomainFactory {
 
             CreateTaskLoader.TaskParentKey taskParentKey;
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
-            String projectName;
 
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
 
                 taskParentKey = null;
-                RemoteProject remoteProject = task.getRemoteNullableProject();
-                if (remoteProject == null)
-                    projectName = null;
-                else
-                    projectName = remoteProject.getName();
 
                 if (!schedules.isEmpty()) {
                     scheduleDatas = new ArrayList<>();
@@ -895,7 +889,6 @@ public class DomainFactory {
                                 throw new UnsupportedOperationException();
                             }
                         }
-
                     }
                 }
             } else {
@@ -903,8 +896,12 @@ public class DomainFactory {
                 Assert.assertTrue(parentTask != null);
 
                 taskParentKey = new CreateTaskLoader.TaskParentKey(parentTask.getTaskKey());
-                projectName = null;
             }
+
+            RemoteProject remoteProject = task.getRemoteNullableProject();
+            String projectName = null;
+            if (remoteProject != null)
+                projectName = remoteProject.getName();
 
             taskData = new CreateTaskLoader.TaskData(task.getName(), taskParentKey, scheduleDatas, task.getNote(), projectName);
 

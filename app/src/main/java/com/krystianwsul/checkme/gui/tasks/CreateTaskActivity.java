@@ -112,7 +112,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
             mParent = null;
 
-            View view = mScheduleTimes.getChildAt(0);
+            View view = mScheduleTimes.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1);
             Assert.assertTrue(view != null);
 
             CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
@@ -138,9 +138,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                 mCreateTaskAdapter.addScheduleEntry(ScheduleEntry.fromScheduleDialogData(scheduleDialogData));
             } else {
-                Assert.assertTrue(mHourMinutePickerPosition > 0);
+                Assert.assertTrue(mHourMinutePickerPosition >= mCreateTaskAdapter.elementsBeforeSchedules());
 
-                mScheduleEntries.set(mHourMinutePickerPosition - 1, ScheduleEntry.fromScheduleDialogData(scheduleDialogData));
+                mScheduleEntries.set(mHourMinutePickerPosition - mCreateTaskAdapter.elementsBeforeSchedules(), ScheduleEntry.fromScheduleDialogData(scheduleDialogData));
 
                 mCreateTaskAdapter.notifyItemChanged(mHourMinutePickerPosition);
 
@@ -151,10 +151,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         @Override
         public void onScheduleDialogDelete() {
             Assert.assertTrue(mHourMinutePickerPosition != null);
-            Assert.assertTrue(mHourMinutePickerPosition > 0);
+            Assert.assertTrue(mHourMinutePickerPosition >= mCreateTaskAdapter.elementsBeforeSchedules());
             Assert.assertTrue(mData != null);
 
-            mScheduleEntries.remove(mHourMinutePickerPosition - 1);
+            mScheduleEntries.remove(mHourMinutePickerPosition - mCreateTaskAdapter.elementsBeforeSchedules());
 
             mCreateTaskAdapter.notifyItemRemoved(mHourMinutePickerPosition);
 
@@ -164,7 +164,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         @Override
         public void onScheduleDialogCancel() {
             if (mHourMinutePickerPosition != null) {
-                Assert.assertTrue(mHourMinutePickerPosition > 0);
+                Assert.assertTrue(mHourMinutePickerPosition > mCreateTaskAdapter.elementsBeforeSchedules());
 
                 mHourMinutePickerPosition = null;
             }
@@ -484,7 +484,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             outState.putParcelableArrayList(SCHEDULE_ENTRIES_KEY, new ArrayList<>(mScheduleEntries));
 
             if (mHourMinutePickerPosition != null) {
-                Assert.assertTrue(mHourMinutePickerPosition > 0);
+                Assert.assertTrue(mHourMinutePickerPosition > mCreateTaskAdapter.elementsBeforeSchedules());
 
                 outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
             }
@@ -640,7 +640,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         mScheduleTimes.setAdapter(mCreateTaskAdapter);
 
         if (mNoteHasFocus) { // keyboard hack
-            int notePosition = mScheduleEntries.size() + 2;
+            int notePosition = mScheduleEntries.size() + 1 + mCreateTaskAdapter.elementsBeforeSchedules();
 
             LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mScheduleTimes.getLayoutManager();
 
@@ -746,7 +746,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         int index = mScheduleEntries.indexOf(scheduleEntry);
         Assert.assertTrue(index >= 0);
 
-        View view = mScheduleTimes.getChildAt(index + 1);
+        View view = mScheduleTimes.getChildAt(index + mCreateTaskAdapter.elementsBeforeSchedules());
         if (view != null) {
             CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
             Assert.assertTrue(scheduleHolder != null);
@@ -861,7 +861,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     private void updateParentView() {
-        View view = mScheduleTimes.getChildAt(0);
+        View view = mScheduleTimes.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1);
         if (view == null)
             return;
 
@@ -930,7 +930,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         int scheduleCount = mScheduleEntries.size();
 
         mScheduleEntries = new ArrayList<>();
-        mCreateTaskAdapter.notifyItemRangeRemoved(1, scheduleCount);
+        mCreateTaskAdapter.notifyItemRangeRemoved(mCreateTaskAdapter.elementsBeforeSchedules(), scheduleCount);
     }
 
     private void removeListenerHelper() { // keyboard hack
@@ -1018,11 +1018,15 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             }
         };
 
+        private final String mProjectName;
+
         CreateTaskAdapter() {
             Assert.assertTrue(mData != null);
 
-            if (mData.TaskData != null && mData.TaskData.mTaskParentKey != null && !TextUtils.isEmpty(mData.TaskData.mProjectName)) {
-
+            if (mData.TaskData != null && !TextUtils.isEmpty(mData.TaskData.mProjectName)) {
+                mProjectName = mData.TaskData.mProjectName;
+            } else {
+                mProjectName = null;
             }
         }
 
@@ -1048,10 +1052,29 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         @Override
         public void onBindViewHolder(final Holder holder, int position) {
-            if (position == 0) {
+            if (position == 0 && !TextUtils.isEmpty(mProjectName)) {
+
+                Assert.assertTrue(!TextUtils.isEmpty(mProjectName));
+
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 scheduleHolder.mScheduleMargin.setVisibility(View.VISIBLE);
+
+                scheduleHolder.mScheduleLayout.setHint(getString(R.string.parentProject));
+                scheduleHolder.mScheduleLayout.setError(null);
+
+                scheduleHolder.mScheduleText.setText(mProjectName);
+                scheduleHolder.mScheduleLayout.setHintAnimationEnabled(false);
+
+                scheduleHolder.mScheduleText.setEnabled(false);
+                scheduleHolder.mScheduleText.setOnClickListener(null);
+            } else if (position < elementsBeforeSchedules()) {
+                ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
+
+                if (position == 0)
+                    scheduleHolder.mScheduleMargin.setVisibility(View.VISIBLE);
+                else
+                    scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
 
                 scheduleHolder.mScheduleLayout.setHint(getString(R.string.parentTask));
                 scheduleHolder.mScheduleLayout.setError(null);
@@ -1069,10 +1092,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     parentPickerFragment.show(getSupportFragmentManager(), PARENT_PICKER_FRAGMENT_TAG);
                     parentPickerFragment.initialize(mData.mParentTreeDatas, mParentFragmentListener);
                 });
-            } else if (position < 1 + mScheduleEntries.size()) {
+            } else if (position < elementsBeforeSchedules() + mScheduleEntries.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
-                ScheduleEntry scheduleEntry = mScheduleEntries.get(position - 1);
+                ScheduleEntry scheduleEntry = mScheduleEntries.get(position - elementsBeforeSchedules());
                 Assert.assertTrue(scheduleEntry != null);
 
                 scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
@@ -1086,7 +1109,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 scheduleHolder.mScheduleText.setEnabled(true);
 
                 scheduleHolder.mScheduleText.setOnClickListener(v -> scheduleHolder.onTextClick());
-            } else if (position == 1 + mScheduleEntries.size()) {
+            } else if (position == elementsBeforeSchedules() + mScheduleEntries.size()) {
                 ScheduleHolder scheduleHolder = (ScheduleHolder) holder;
 
                 scheduleHolder.mScheduleMargin.setVisibility(View.GONE);
@@ -1108,7 +1131,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
                 });
             } else {
-                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1);
+                Assert.assertTrue(position == elementsBeforeSchedules() + mScheduleEntries.size() + 1);
 
                 NoteHolder noteHolder = (NoteHolder) holder;
 
@@ -1122,21 +1145,30 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             }
         }
 
+        private int elementsBeforeSchedules() {
+            if (TextUtils.isEmpty(mProjectName))
+                return 1;
+            else
+                return 2;
+        }
+
         @Override
         public int getItemCount() {
-            return (1 + mScheduleEntries.size() + 1 + 1);
+            return (elementsBeforeSchedules() + mScheduleEntries.size() + 1 + 1);
         }
 
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
                 return TYPE_SCHEDULE;
-            } else if (position < 1 + mScheduleEntries.size()) {
+            } else if (position < elementsBeforeSchedules()) {
                 return TYPE_SCHEDULE;
-            } else if (position == 1 + mScheduleEntries.size()) {
+            } else if (position < elementsBeforeSchedules() + mScheduleEntries.size()) {
+                return TYPE_SCHEDULE;
+            } else if (position == elementsBeforeSchedules() + mScheduleEntries.size()) {
                 return TYPE_SCHEDULE;
             } else {
-                Assert.assertTrue(position == 1 + mScheduleEntries.size() + 1);
+                Assert.assertTrue(position == elementsBeforeSchedules() + mScheduleEntries.size() + 1);
 
                 return TYPE_NOTE;
             }
@@ -1145,7 +1177,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         void addScheduleEntry(ScheduleEntry scheduleEntry) {
             Assert.assertTrue(scheduleEntry != null);
 
-            int position = 1 + mScheduleEntries.size();
+            int position = elementsBeforeSchedules() + mScheduleEntries.size();
 
             mScheduleEntries.add(scheduleEntry);
             notifyItemInserted(position);
@@ -1181,7 +1213,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
                 mHourMinutePickerPosition = getAdapterPosition();
 
-                ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition - 1);
+                ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition - mCreateTaskAdapter.elementsBeforeSchedules());
                 Assert.assertTrue(scheduleEntry != null);
 
                 ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), mScheduleHint), true);

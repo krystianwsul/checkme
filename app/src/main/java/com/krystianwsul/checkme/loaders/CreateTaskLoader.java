@@ -135,7 +135,6 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         public TaskData(@NonNull String name, @Nullable TaskParentKey taskParentKey, @Nullable List<ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectName) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(taskParentKey == null || TextUtils.isEmpty(projectName));
 
             Name = name;
             mTaskParentKey = taskParentKey;
@@ -150,17 +149,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
             hash += Name.hashCode();
             if (mTaskParentKey != null) {
                 Assert.assertTrue(ScheduleDatas == null);
-                Assert.assertTrue(TextUtils.isEmpty(mProjectName));
 
                 hash += mTaskParentKey.hashCode();
             } else {
                 Assert.assertTrue(ScheduleDatas != null);
 
                 hash += ScheduleDatas.hashCode();
-
-                if (!TextUtils.isEmpty(mProjectName))
-                    hash += mProjectName.hashCode();
             }
+
+            if (!TextUtils.isEmpty(mProjectName))
+                hash += mProjectName.hashCode();
+
             if (!TextUtils.isEmpty(mNote))
                 hash += mNote.hashCode();
             return hash;

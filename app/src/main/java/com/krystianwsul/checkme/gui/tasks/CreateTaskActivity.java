@@ -164,7 +164,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         @Override
         public void onScheduleDialogCancel() {
             if (mHourMinutePickerPosition != null) {
-                Assert.assertTrue(mHourMinutePickerPosition > mCreateTaskAdapter.elementsBeforeSchedules());
+                Assert.assertTrue(mHourMinutePickerPosition >= mCreateTaskAdapter.elementsBeforeSchedules());
 
                 mHourMinutePickerPosition = null;
             }

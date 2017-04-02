@@ -53,6 +53,7 @@ public class TickService extends WakefulIntentService {
 
     @Override
     protected void doWakefulWork(Intent intent) {
+        Assert.assertTrue(intent != null);
         Assert.assertTrue(intent.hasExtra(SILENT_KEY));
         Assert.assertTrue(intent.hasExtra(SOURCE_KEY));
 

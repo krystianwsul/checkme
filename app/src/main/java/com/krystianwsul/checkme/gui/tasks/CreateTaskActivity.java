@@ -484,7 +484,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             outState.putParcelableArrayList(SCHEDULE_ENTRIES_KEY, new ArrayList<>(mScheduleEntries));
 
             if (mHourMinutePickerPosition != null) {
-                Assert.assertTrue(mHourMinutePickerPosition > mCreateTaskAdapter.elementsBeforeSchedules());
+                Assert.assertTrue(mHourMinutePickerPosition >= mCreateTaskAdapter.elementsBeforeSchedules());
 
                 outState.putInt(HOUR_MINUTE_PICKER_POSITION_KEY, mHourMinutePickerPosition);
             }
@@ -997,7 +997,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         };
     }
 
-    protected class CreateTaskAdapter extends RecyclerView.Adapter<CreateTaskAdapter.Holder> {
+    class CreateTaskAdapter extends RecyclerView.Adapter<CreateTaskAdapter.Holder> {
         private static final int TYPE_SCHEDULE = 0;
         private static final int TYPE_NOTE = 1;
 

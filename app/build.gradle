@@ -54,8 +54,8 @@ android {
 }
 
 ext {
-    supportLibVersion = '25.2.0'
-    firebaseVersion = '10.0.1'
+    supportLibVersion = '25.3.1'
+    firebaseVersion = '10.2.1'
 }
 
 dependencies {
@@ -68,14 +68,14 @@ dependencies {
     compile('com.github.afollestad.material-dialogs:core:0.8.5.8@aar') {
         transitive = true
     }
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.7@aar') {
         transitive = true;
     }
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
     compile 'com.code-troopers.betterpickers:library:2.5.2'
     compile 'com.annimon:stream:1.0.9'
-    compile 'com.google.guava:guava:19.0'
+    compile 'com.google.guava:guava:20.0'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile "com.google.android.gms:play-services-auth:${firebaseVersion}"
     compile "com.google.firebase:firebase-core:${firebaseVersion}"
@@ -88,6 +88,7 @@ dependencies {
     protoCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    compile 'net.danlew:android.joda:2.9.9'
 }
 
 apply plugin: 'com.google.gms.google-services'

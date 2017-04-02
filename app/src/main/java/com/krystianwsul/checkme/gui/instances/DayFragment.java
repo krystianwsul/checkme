@@ -94,6 +94,7 @@ public class DayFragment extends AbstractFragment implements LoaderManager.Loade
                     break;
                 default:
                     Calendar calendar = Calendar.getInstance();
+
                     calendar.add(Calendar.DATE, mPosition);
                     Date date = new Date(calendar);
                     title = date.getDayOfWeek().toString() + ", " + date.toString();

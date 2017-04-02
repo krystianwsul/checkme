@@ -38,3 +38,7 @@
 -dontwarn   java.lang.ClassValue
 -keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
 -dontwarn   org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+-dontwarn com.google.errorprone.annotations.CanIgnoreReturnValue
+-dontwarn com.google.errorprone.annotations.concurrent.LazyInit
+-dontwarn com.google.errorprone.annotations.ForOverride

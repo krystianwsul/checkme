@@ -7,8 +7,10 @@ import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.R;
 
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -72,10 +74,9 @@ public class Date implements Comparable<Date>, Parcelable, Serializable {
         return DayOfWeek.getDayFromCalendar(new GregorianCalendar(mYear, mMonth - 1, mDay));
     }
 
-    @SuppressWarnings({"deprecation"})
     public String toString() {
-        java.util.Date javaDate = new java.util.Date(mYear, mMonth - 1, mDay);
-        return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(javaDate);
+        LocalDate localDate = new LocalDate(mYear, mMonth, mDay);
+        return DateTimeFormat.forStyle("S-").print(localDate);
     }
 
     @NonNull

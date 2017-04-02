@@ -13,13 +13,13 @@ import io.fabric.sdk.android.Fabric;
 public class MyCrashlytics {
     private static Boolean sEnabled = null;
 
-    static void initialize(@NonNull OrganizatorApplication organizatorApplication) {
+    static void initialize(@NonNull MyApplication myApplication) {
         Assert.assertTrue(sEnabled == null);
 
-        sEnabled = organizatorApplication.getResources().getBoolean(R.bool.crashlytics_enabled);
+        sEnabled = myApplication.getResources().getBoolean(R.bool.crashlytics_enabled);
 
         if (sEnabled)
-            Fabric.with(organizatorApplication, new Crashlytics());
+            Fabric.with(myApplication, new Crashlytics());
     }
 
     public static void initialize() {

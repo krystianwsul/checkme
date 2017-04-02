@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.krystianwsul.checkme.OrganizatorApplication;
+import com.krystianwsul.checkme.MyApplication;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord;
@@ -30,10 +30,10 @@ public class DatabaseWrapper {
     @Nullable
     private static DatabaseReference sRootReference;
 
-    public static void initialize(@NonNull OrganizatorApplication organizatorApplication) {
+    public static void initialize(@NonNull MyApplication myApplication) {
         Assert.assertTrue(sRootReference == null);
 
-        sRoot = organizatorApplication.getResources().getString(R.string.firebase_root);
+        sRoot = myApplication.getResources().getString(R.string.firebase_root);
         Assert.assertTrue(!TextUtils.isEmpty(sRoot));
 
         sRootReference = FirebaseDatabase.getInstance().getReference().child(sRoot);

@@ -336,7 +336,7 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
                 case MONTHLY_WEEK:
                     customTimeDatas = Stream.of(mCustomTimeDatas.values())
                             .filter(customTimeData -> customTimeData.mCustomTimeKey.mLocalCustomTimeId != null)
-                            .sortBy(customTimeData -> customTimeData.mCustomTimeKey.mLocalCustomTimeId)
+                            .sortBy(customTimeData -> Stream.of(customTimeData.HourMinutes.values()).map(hourMinute -> hourMinute.getHour() * 60 + hourMinute.getMinute()).reduce(0, (a, b) -> a + b))
                             .map(customTimeData -> new TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name))
                             .collect(Collectors.toCollection(ArrayList::new));
                     break;
@@ -352,7 +352,6 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
             }
 
             TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas);
-            Assert.assertTrue(timeDialogFragment != null);
 
             timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
 
@@ -736,7 +735,7 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
         mScheduleDialogListener.onScheduleDialogCancel();
     }
 
-    public static class ScheduleDialogData implements Parcelable {
+    static class ScheduleDialogData implements Parcelable {
         @NonNull
         Date mDate;
 
@@ -817,7 +816,7 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
         };
     }
 
-    public interface ScheduleDialogListener {
+    interface ScheduleDialogListener {
         void onScheduleDialogResult(@NonNull ScheduleDialogData scheduleDialogData);
 
         void onScheduleDialogDelete();

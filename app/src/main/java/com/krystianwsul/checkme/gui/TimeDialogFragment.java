@@ -23,9 +23,8 @@ public class TimeDialogFragment extends AbstractDialogFragment {
 
     private TimeDialogListener mTimeDialogListener;
 
-    public static TimeDialogFragment newInstance(ArrayList<CustomTimeData> customTimeDatas) {
-        Assert.assertTrue(customTimeDatas != null);
-
+    @NonNull
+    public static TimeDialogFragment newInstance(@NonNull ArrayList<CustomTimeData> customTimeDatas) {
         TimeDialogFragment timeDialogFragment = new TimeDialogFragment();
 
         Bundle args = new Bundle();
@@ -76,8 +75,7 @@ public class TimeDialogFragment extends AbstractDialogFragment {
                 .show();
     }
 
-    public void setTimeDialogListener(TimeDialogListener timeDialogListener) {
-        Assert.assertTrue(timeDialogListener != null);
+    public void setTimeDialogListener(@NonNull TimeDialogListener timeDialogListener) {
         mTimeDialogListener = timeDialogListener;
     }
 

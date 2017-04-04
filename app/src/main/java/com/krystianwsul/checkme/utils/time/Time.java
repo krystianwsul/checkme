@@ -14,4 +14,7 @@ public interface Time {
 
     @NonNull
     TimePair getTimePair();
+
+    @NonNull
+    String toString();
 }

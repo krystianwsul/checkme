@@ -5,8 +5,10 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializable {
@@ -81,9 +83,7 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
 
     @SuppressWarnings({"deprecation"})
     public String toString() {
-        Date date = TimeStamp.getNow().getDate();
-        java.util.Date javaDate = new java.util.Date(date.getYear(), date.getMonth(), date.getDay(), mHour, mMinute);
-        return SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(javaDate);
+        return DateTimeFormat.forStyle("-S").print(new LocalTime(mHour, mMinute));
     }
 
     @Override

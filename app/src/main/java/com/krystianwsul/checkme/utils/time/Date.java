@@ -74,9 +74,9 @@ public class Date implements Comparable<Date>, Parcelable, Serializable {
         return DayOfWeek.getDayFromCalendar(new GregorianCalendar(mYear, mMonth - 1, mDay));
     }
 
+    @NonNull
     public String toString() {
-        LocalDate localDate = new LocalDate(mYear, mMonth, mDay);
-        return DateTimeFormat.forStyle("S-").print(localDate);
+        return DateTimeFormat.forStyle("S-").print(new LocalDate(mYear, mMonth, mDay));
     }
 
     @NonNull

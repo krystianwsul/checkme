@@ -21,9 +21,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 
 import junit.framework.Assert;
 
-import java.text.DateFormat;
 import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class DayFragment extends AbstractFragment implements LoaderManager.LoaderCallbacks<DayLoader.Data>, FabUser {
@@ -114,12 +112,10 @@ public class DayFragment extends AbstractFragment implements LoaderManager.Loade
                 end.set(Calendar.DAY_OF_WEEK, end.getFirstDayOfWeek());
                 end.add(Calendar.DATE, -1);
 
-                java.util.Date startDate = new java.util.Date(start.getTimeInMillis());
-                java.util.Date endDate = new java.util.Date(end.getTimeInMillis());
+                Date startDate = new Date(start);
+                Date endDate = new Date(end);
 
-                DateFormat dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT);
-
-                title = dateFormat.format(startDate) + " - " + dateFormat.format(endDate);
+                title = startDate.toString() + " - " + endDate.toString();
             } else {
                 Assert.assertTrue(mTimeRange == MainActivity.TimeRange.MONTH);
 

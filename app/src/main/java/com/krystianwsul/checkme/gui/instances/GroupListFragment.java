@@ -924,7 +924,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         mFloatingActionButton = null;
     }
 
-    public static class GroupAdapter implements TreeModelAdapter, NodeCollectionParent {
+    private static class GroupAdapter implements TreeModelAdapter, NodeCollectionParent {
         private static final int TYPE_GROUP = 0;
 
         @NonNull
@@ -3542,7 +3542,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         }
     }
 
-    public static class ExpansionState implements Parcelable {
+    private static class ExpansionState implements Parcelable {
         final boolean DoneExpanded;
 
         @NonNull

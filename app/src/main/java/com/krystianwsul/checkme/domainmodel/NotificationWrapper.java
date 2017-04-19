@@ -18,6 +18,7 @@ import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity;
@@ -78,6 +79,7 @@ public abstract class NotificationWrapper {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             Assert.assertTrue(notificationManager != null);
 
+            MyCrashlytics.log("NotificationManager.cancel " + id);
             notificationManager.cancel(id);
         }
 
@@ -252,6 +254,7 @@ public abstract class NotificationWrapper {
             if (!silent)
                 notification.defaults |= Notification.DEFAULT_VIBRATE;
 
+            MyCrashlytics.log("NotificationManager.notify " + notificationId);
             notificationManager.notify(notificationId, notification);
         }
 
@@ -368,6 +371,7 @@ public abstract class NotificationWrapper {
         }
     }
 
+    @SuppressLint("NewApi")
     private static class NotificationException extends RuntimeException {
         static void throwException(int lastNotificationId, @NonNull StatusBarNotification[] statusBarNotifications) {
             throw new NotificationException("last id: " + lastNotificationId + ", shown ids: " + Stream.of(statusBarNotifications)

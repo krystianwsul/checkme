@@ -160,6 +160,9 @@ public class RemoteProject {
             InstanceJson instanceJson = getInstanceJson(localInstance);
             ScheduleKey scheduleKey = localInstance.getScheduleKey();
 
+            if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null)
+                getRemoteFactory().getRemoteCustomTimeId(scheduleKey.ScheduleTimePair.mCustomTimeKey, this);
+
             instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), scheduleKey), instanceJson);
         }
 

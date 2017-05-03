@@ -1359,6 +1359,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 abstract int getNameVisibility();
 
+                @NonNull
                 abstract String getName();
 
                 abstract int getNameColor();
@@ -1367,12 +1368,14 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 abstract int getDetailsVisibility();
 
+                @NonNull
                 abstract String getDetails();
 
                 abstract int getDetailsColor();
 
                 abstract int getChildrenVisibility();
 
+                @NonNull
                 abstract String getChildren();
 
                 abstract int getChildrenColor();
@@ -1381,20 +1384,24 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 abstract int getExpandImageResource();
 
+                @NonNull
                 abstract View.OnClickListener getExpandOnClickListener();
 
                 abstract int getCheckBoxVisibility();
 
                 abstract boolean getCheckBoxChecked();
 
+                @NonNull
                 abstract View.OnClickListener getCheckBoxOnClickListener();
 
                 abstract int getSeparatorVisibility();
 
                 abstract int getBackgroundColor();
 
+                @Nullable
                 abstract View.OnLongClickListener getOnLongClickListener();
 
+                @Nullable
                 abstract View.OnClickListener getOnClickListener();
 
                 @SuppressWarnings("unused")
@@ -1509,6 +1516,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.VISIBLE;
                 }
 
+                @NonNull
                 @Override
                 String getName() {
                     return mNote;
@@ -1529,6 +1537,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.GONE;
                 }
 
+                @NonNull
                 @Override
                 String getDetails() {
                     throw new UnsupportedOperationException();
@@ -1544,6 +1553,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.GONE;
                 }
 
+                @NonNull
                 @Override
                 String getChildren() {
                     throw new UnsupportedOperationException();
@@ -1564,6 +1574,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     throw new UnsupportedOperationException();
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
                     throw new UnsupportedOperationException();
@@ -1579,6 +1590,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     throw new UnsupportedOperationException();
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getCheckBoxOnClickListener() {
                     throw new UnsupportedOperationException();
@@ -1754,6 +1766,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     }
                 }
 
+                @NonNull
                 @Override
                 String getName() {
                     TreeNode notDoneGroupTreeNode = getTreeNode();
@@ -1834,6 +1847,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     }
                 }
 
+                @NonNull
                 @Override
                 String getDetails() {
                     TreeNode notDoneGroupTreeNode = getTreeNode();
@@ -1896,6 +1910,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     }
                 }
 
+                @NonNull
                 @Override
                 String getChildren() {
                     Assert.assertTrue(singleInstance());
@@ -1972,6 +1987,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     }
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
                     return getTreeNode().getExpandListener();
@@ -2009,6 +2025,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return false;
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getCheckBoxOnClickListener() {
                     final NotDoneGroupCollection notDoneGroupCollection = getNotDoneGroupCollection();
@@ -2024,6 +2041,8 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode());
 
                     return v -> {
+                        v.setOnClickListener(null);
+
                         instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, instanceData.InstanceKey, true);
                         Assert.assertTrue(instanceData.Done != null);
 
@@ -2334,6 +2353,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         return View.VISIBLE;
                     }
 
+                    @NonNull
                     @Override
                     String getName() {
                         return mInstanceData.Name;
@@ -2360,6 +2380,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         return View.GONE;
                     }
 
+                    @NonNull
                     @Override
                     String getDetails() {
                         throw new UnsupportedOperationException();
@@ -2379,6 +2400,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         }
                     }
 
+                    @NonNull
                     @Override
                     String getChildren() {
                         Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
@@ -2427,6 +2449,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                             return R.drawable.ic_expand_more_black_36dp;
                     }
 
+                    @NonNull
                     @Override
                     View.OnClickListener getExpandOnClickListener() {
                         TreeNode treeNode = getTreeNode();
@@ -2454,6 +2477,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         return false;
                     }
 
+                    @NonNull
                     @Override
                     View.OnClickListener getCheckBoxOnClickListener() {
                         final NotDoneGroupNode notDoneGroupNode = getParentNotDoneGroupNode();
@@ -2469,6 +2493,8 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode());
 
                         return v -> {
+                            v.setOnClickListener(null);
+
                             Assert.assertTrue(notDoneGroupTreeNode.expanded());
 
                             mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, mInstanceData.InstanceKey, true);
@@ -2620,6 +2646,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.VISIBLE;
                 }
 
+                @NonNull
                 @Override
                 String getName() {
                     return getGroupListFragment().getString(R.string.done);
@@ -2640,6 +2667,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.GONE;
                 }
 
+                @NonNull
                 @Override
                 String getDetails() {
                     throw new UnsupportedOperationException();
@@ -2655,6 +2683,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.GONE;
                 }
 
+                @NonNull
                 @Override
                 String getChildren() {
                     throw new UnsupportedOperationException();
@@ -2680,6 +2709,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         return R.drawable.ic_expand_more_black_36dp;
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
                     Assert.assertTrue(mTreeNode != null);
@@ -2697,6 +2727,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     throw new UnsupportedOperationException();
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getCheckBoxOnClickListener() {
                     throw new UnsupportedOperationException();
@@ -2881,6 +2912,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.VISIBLE;
                 }
 
+                @NonNull
                 @Override
                 String getName() {
                     return mInstanceData.Name;
@@ -2911,6 +2943,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     }
                 }
 
+                @NonNull
                 @Override
                 String getDetails() {
                     Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.DisplayText));
@@ -2935,6 +2968,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     }
                 }
 
+                @NonNull
                 @Override
                 String getChildren() {
                     Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
@@ -2975,6 +3009,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         return R.drawable.ic_expand_more_black_36dp;
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
                     Assert.assertTrue(!mInstanceData.Children.isEmpty());
@@ -2992,6 +3027,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return true;
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getCheckBoxOnClickListener() {
                     final DividerNode dividerNode = getDividerNode();
@@ -3001,6 +3037,8 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
 
                     return v -> {
+                        v.setOnClickListener(null);
+
                         mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, mInstanceData.InstanceKey, false);
                         Assert.assertTrue(mInstanceData.Done == null);
 
@@ -3162,6 +3200,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.VISIBLE;
                 }
 
+                @NonNull
                 @Override
                 String getName() {
                     return getGroupListFragment().getString(R.string.noReminder);
@@ -3182,6 +3221,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.GONE;
                 }
 
+                @NonNull
                 @Override
                 String getDetails() {
                     throw new UnsupportedOperationException();
@@ -3197,6 +3237,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.GONE;
                 }
 
+                @NonNull
                 @Override
                 String getChildren() {
                     throw new UnsupportedOperationException();
@@ -3220,6 +3261,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         return R.drawable.ic_expand_more_black_36dp;
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
                     return getTreeNode().getExpandListener();
@@ -3235,6 +3277,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     throw new UnsupportedOperationException();
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getCheckBoxOnClickListener() {
                     throw new UnsupportedOperationException();
@@ -3389,6 +3432,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.VISIBLE;
                 }
 
+                @NonNull
                 @Override
                 String getName() {
                     return mTaskData.Name;
@@ -3409,6 +3453,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return View.GONE;
                 }
 
+                @NonNull
                 @Override
                 String getDetails() {
                     throw new UnsupportedOperationException();
@@ -3428,6 +3473,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     }
                 }
 
+                @NonNull
                 @Override
                 String getChildren() {
                     if (!expanded() && !mTaskData.Children.isEmpty()) {
@@ -3470,6 +3516,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         return R.drawable.ic_expand_more_black_36dp;
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getExpandOnClickListener() {
                     Assert.assertTrue(!mTaskData.Children.isEmpty());
@@ -3487,6 +3534,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     throw new UnsupportedOperationException();
                 }
 
+                @NonNull
                 @Override
                 View.OnClickListener getCheckBoxOnClickListener() {
                     throw new UnsupportedOperationException();

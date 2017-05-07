@@ -184,7 +184,7 @@ public class RemoteTask extends Task {
     public void delete() {
         TaskKey taskKey = getTaskKey();
 
-        Stream.of(getRemoteFactory().getTaskHierarchiesByChildTaskKey(taskKey))
+        Stream.of(new ArrayList<>(getRemoteFactory().getTaskHierarchiesByChildTaskKey(taskKey)))
                 .forEach(TaskHierarchy::delete);
 
         Stream.of(new ArrayList<>(getSchedules()))

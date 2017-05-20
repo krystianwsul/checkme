@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:descendantFocusability="blocksDescendants"
-    android:paddingTop="@dimen/listVerticalPadding"
-    android:orientation="vertical">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:descendantFocusability="blocksDescendants"
+              android:paddingTop="@dimen/listVerticalPadding"
+              android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/group_row_container"
@@ -34,7 +35,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/textPrimary"
-                android:textColor="@color/textPrimary"/>
+                android:textColor="@color/textPrimary"
+                tools:ignore="Deprecated"/>
 
             <TextView
                 android:id="@+id/group_row_details"
@@ -42,7 +44,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/textSecondary"
-                android:textColor="@color/textSecondary"/>
+                android:textColor="@color/textSecondary"
+                tools:ignore="Deprecated"/>
 
             <TextView
                 android:id="@+id/group_row_children"
@@ -50,7 +53,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/textSecondary"
-                android:textColor="@color/textSecondary"/>
+                android:textColor="@color/textSecondary"
+                tools:ignore="Deprecated"/>
 
         </LinearLayout>
 

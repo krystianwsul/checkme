@@ -10,4 +10,4 @@
     android:ellipsize="marquee"
     android:textAlignment="inherit"
     android:paddingStart="0dp"
-    tools:ignore="RtlSymmetry"/>
+    tools:ignore="Deprecated,RtlSymmetry"/>

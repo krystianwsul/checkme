@@ -2222,7 +2222,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return childTreeNode;
                 }
 
-                public boolean expanded() {
+                boolean expanded() {
                     Assert.assertTrue(mTreeNode != null);
 
                     return mTreeNode.expanded();
@@ -2628,7 +2628,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return childTreeNode;
                 }
 
-                public boolean expanded() {
+                boolean expanded() {
                     TreeNode treeNode = getTreeNode();
 
                     return treeNode.expanded();
@@ -3157,7 +3157,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     return mNodeCollection;
                 }
 
-                public boolean expanded() {
+                boolean expanded() {
                     return getTreeNode().expanded();
                 }
 

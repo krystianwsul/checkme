@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.backend;
 
 import java.util.List;
 
+@SuppressWarnings("FieldCanBeLocal")
 class Notification {
     private final List<String> registration_ids;
     private final Object data = new Data();

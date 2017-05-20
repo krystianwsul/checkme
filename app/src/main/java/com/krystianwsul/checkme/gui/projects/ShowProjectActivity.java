@@ -37,7 +37,6 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
     private TextInputLayout mToolbarLayout;
     private EditText mToolbarEditText;
-    private FloatingActionButton mShowProjectFab;
 
     private ShowProjectLoader.Data mData;
 
@@ -125,8 +124,8 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
 
-        mShowProjectFab = (FloatingActionButton) findViewById(R.id.show_project_fab);
-        Assert.assertTrue(mShowProjectFab != null);
+        FloatingActionButton showProjectFab = (FloatingActionButton) findViewById(R.id.show_project_fab);
+        Assert.assertTrue(showProjectFab != null);
 
         mToolbarEditText.addTextChangedListener(new TextWatcher() {
             private boolean mSkip = true;
@@ -167,7 +166,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
                     .add(R.id.show_project_frame, mUserListFragment)
                     .commit();
         }
-        mUserListFragment.setFab(mShowProjectFab);
+        mUserListFragment.setFab(showProjectFab);
 
         DiscardDialogFragment discardDialogFragment = (DiscardDialogFragment) getSupportFragmentManager().findFragmentByTag(DISCARD_TAG);
         if (discardDialogFragment != null)

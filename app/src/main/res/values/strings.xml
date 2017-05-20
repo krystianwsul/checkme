@@ -12,7 +12,6 @@
     <string name="multiple_reminders">reminders</string>
     <string name="join">Join</string>
     <string name="done">Done</string>
-    <string name="crash_toast_text">Error!</string>
     <string name="more">more</string>
     <string name="hour">In an hour</string>
     <string name="delete">Delete</string>
@@ -38,11 +37,7 @@
     <string name="tasks_empty_root">Add a task by clicking the plus at the bottom.</string>
     <string name="empty_child">Make a list by clicking the plus at the bottom.</string>
     <string name="empty_disabled">You can\'t add anything here, because the task has been removed.</string>
-    <string name="day">Day</string>
-    <string name="week">Week</string>
-    <string name="month">Month</string>
     <string name="parent_dialog_title">Pick a task</string>
-    <string name="error_parent">No parent task chosen</string>
     <string name="add">Add</string>
     <string name="parentTask">Parent</string>
     <string name="share">Share</string>
@@ -66,7 +61,6 @@
     <string name="search">Search</string>
     <string name="connectionError">A connection error occurred.</string>
     <string name="userNotFound">User not found.</string>
-    <string name="addFriend">Add a friend</string>
     <string name="friend_dialog_title">Pick a friend</string>
     <string name="instanceMarkedDone">This reminder has been marked as done.</string>
     <string name="projects">Projects</string>

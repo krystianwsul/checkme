@@ -125,21 +125,6 @@ public class DailySchedule extends RepeatingSchedule {
         return mDailyScheduleBridge.getCustomTimeKey();
     }
 
-    @Nullable
-    public HourMinute getHourMinute() {
-        if (mDailyScheduleBridge.getCustomTimeKey() != null) {
-            Assert.assertTrue(mDailyScheduleBridge.getHour() == null);
-            Assert.assertTrue(mDailyScheduleBridge.getMinute() == null);
-
-            return null;
-        } else {
-            Assert.assertTrue(mDailyScheduleBridge.getHour() != null);
-            Assert.assertTrue(mDailyScheduleBridge.getMinute() != null);
-
-            return new HourMinute(mDailyScheduleBridge.getHour(), mDailyScheduleBridge.getMinute());
-        }
-    }
-
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {

@@ -1,5 +1,8 @@
 package com.krystianwsul.checkme.utils.time;
 
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+
 import junit.framework.Assert;
 
 import java.text.DateFormatSymbols;
@@ -14,18 +17,21 @@ public enum DayOfWeek {
     FRIDAY,
     SATURDAY;
 
-    public static DayOfWeek getDayFromCalendar(Calendar calendar) {
-        Assert.assertTrue(calendar != null);
-
+    @NonNull
+    public static DayOfWeek getDayFromCalendar(@NonNull Calendar calendar) {
         int day = calendar.get(Calendar.DAY_OF_WEEK);
-        return values()[day-1];
+
+        DayOfWeek dayOfWeek = values()[day - 1];
+        Assert.assertTrue(dayOfWeek != null);
+
+        return dayOfWeek;
     }
 
+    @NonNull
     public String toString() {
-        return DateFormatSymbols.getInstance().getWeekdays()[this.ordinal() + 1];
-    }
+        String weekDay = DateFormatSymbols.getInstance().getWeekdays()[this.ordinal() + 1];
+        Assert.assertTrue(!TextUtils.isEmpty(weekDay));
 
-    public static DayOfWeek today() {
-        return Date.today().getDayOfWeek();
+        return weekDay;
     }
 }

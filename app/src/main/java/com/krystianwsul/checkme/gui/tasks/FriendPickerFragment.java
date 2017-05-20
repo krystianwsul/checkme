@@ -25,8 +25,6 @@ import junit.framework.Assert;
 import java.util.List;
 
 public class FriendPickerFragment extends AbstractDialogFragment {
-    private static final String SHOW_DELETE_KEY = "showDelete";
-
     private ProgressBar mFriendPickerProgress;
     private RecyclerView mFriendPickerRecycler;
 
@@ -36,14 +34,8 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     private Listener mListener;
 
     @NonNull
-    public static FriendPickerFragment newInstance(boolean showDelete) {
-        FriendPickerFragment parentPickerFragment = new FriendPickerFragment();
-
-        Bundle args = new Bundle();
-        args.putBoolean(SHOW_DELETE_KEY, showDelete);
-        parentPickerFragment.setArguments(args);
-
-        return parentPickerFragment;
+    public static FriendPickerFragment newInstance() {
+        return new FriendPickerFragment();
     }
 
     public FriendPickerFragment() {
@@ -58,16 +50,6 @@ public class FriendPickerFragment extends AbstractDialogFragment {
                 .customView(R.layout.fragment_friend_picker, false)
                 .negativeText(android.R.string.cancel)
                 .onNegative((dialog, which) -> dialog.cancel());
-
-        Bundle args = getArguments();
-        Assert.assertTrue(args != null);
-        Assert.assertTrue(args.containsKey(SHOW_DELETE_KEY));
-
-        boolean showDelete = args.getBoolean(SHOW_DELETE_KEY);
-
-        if (showDelete)
-            builder.neutralText(R.string.delete)
-                    .onNeutral((dialog, which) -> mListener.onFriendDeleted());
 
         MaterialDialog materialDialog = builder.build();
 
@@ -122,12 +104,10 @@ public class FriendPickerFragment extends AbstractDialogFragment {
     public interface Listener {
         void onFriendSelected(@NonNull String friendId);
 
-        void onFriendDeleted();
-
         void onFriendCancel();
     }
 
-    public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
+    class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
         @Override
         public int getItemCount() {
             Assert.assertTrue(mFriendDatas != null);

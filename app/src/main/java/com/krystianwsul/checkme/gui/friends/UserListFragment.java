@@ -208,11 +208,6 @@ public class UserListFragment extends AbstractFragment implements FabUser {
             }
 
             @Override
-            public void onFriendDeleted() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
             public void onFriendCancel() {
 
             }
@@ -298,7 +293,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         mFriendListFab = floatingActionButton;
 
         mFriendListFab.setOnClickListener(v -> {
-            FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance(false);
+            FriendPickerFragment friendPickerFragment = FriendPickerFragment.newInstance();
             initializeFriendPickerFragment(friendPickerFragment);
             friendPickerFragment.show(getChildFragmentManager(), FRIEND_PICKER_TAG);
         });
@@ -326,7 +321,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         mFriendListFab = null;
     }
 
-    public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
+    class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {
         @NonNull
         private final List<UserDataWrapper> mUserDataWrappers;
 
@@ -504,7 +499,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         }
     }
 
-    static class SaveState implements Parcelable {
+    private static class SaveState implements Parcelable {
         @NonNull
         final Set<String> mAddedIds;
 

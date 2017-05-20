@@ -186,30 +186,22 @@ public class UserListFragment extends AbstractFragment implements FabUser {
                 .map(friendData -> new FriendPickerFragment.FriendData(friendData.mId, friendData.mName, friendData.mEmail))
                 .collect(Collectors.toList());
 
-        friendPickerFragment.initialize(friendDatas, new FriendPickerFragment.Listener() {
-            @Override
-            public void onFriendSelected(@NonNull String friendId) {
-                Assert.assertTrue(mData.mFriendDatas.containsKey(friendId));
-                Assert.assertTrue(Stream.of(mFriendListAdapter.mUserDataWrappers)
-                        .noneMatch(userDataWrapper -> userDataWrapper.mUserListData.mId.equals(friendId)));
+        friendPickerFragment.initialize(friendDatas, friendId -> {
+            Assert.assertTrue(mData.mFriendDatas.containsKey(friendId));
+            Assert.assertTrue(Stream.of(mFriendListAdapter.mUserDataWrappers)
+                    .noneMatch(userDataWrapper -> userDataWrapper.mUserListData.mId.equals(friendId)));
 
-                ShowProjectLoader.UserListData friendData = mData.mFriendDatas.get(friendId);
-                Assert.assertTrue(friendData != null);
+            ShowProjectLoader.UserListData friendData = mData.mFriendDatas.get(friendId);
+            Assert.assertTrue(friendData != null);
 
-                int position = mFriendListAdapter.getItemCount();
+            int position = mFriendListAdapter.getItemCount();
 
-                mFriendListAdapter.mUserDataWrappers.add(new UserDataWrapper(friendData, new HashSet<>()));
-                mFriendListAdapter.notifyItemChanged(position);
+            mFriendListAdapter.mUserDataWrappers.add(new UserDataWrapper(friendData, new HashSet<>()));
+            mFriendListAdapter.notifyItemChanged(position);
 
-                if (mData.mUserListDatas.isEmpty()) {
-                    mEmptyText.setVisibility(View.GONE);
-                    mFriendListRecycler.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onFriendCancel() {
-
+            if (mData.mUserListDatas.isEmpty()) {
+                mEmptyText.setVisibility(View.GONE);
+                mFriendListRecycler.setVisibility(View.VISIBLE);
             }
         });
     }

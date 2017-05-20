@@ -31,12 +31,6 @@ public class RemoteRootUser {
         return mRemoteRootUserRecord.getEmail();
     }
 
-    public void setName(@NonNull String name) {
-        Assert.assertTrue(!TextUtils.isEmpty(name));
-
-        mRemoteRootUserRecord.setName(name);
-    }
-
     @NonNull
     UserJson getUserJson() {
         return mRemoteRootUserRecord.getUserJson();

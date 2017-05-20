@@ -54,18 +54,6 @@ public class InstanceMap<T extends Instance> {
         return true;
     }
 
-    public void removeIfPresent(@NonNull Instance instance) {
-        TaskKey taskKey = instance.getTaskKey();
-
-        HashMap<ScheduleKey, T> innerMap = mInstances.get(taskKey);
-        if (innerMap == null)
-            return;
-
-        InstanceKey instanceKey = instance.getInstanceKey();
-
-        innerMap.remove(instanceKey.mScheduleKey);
-    }
-
     public void removeForce(@NonNull Instance instance) {
         TaskKey taskKey = instance.getTaskKey();
 
@@ -96,17 +84,6 @@ public class InstanceMap<T extends Instance> {
             return null;
 
         return innerMap.get(instanceKey.mScheduleKey);
-    }
-
-    @NonNull
-    public T getForce(@NonNull InstanceKey instanceKey) {
-        HashMap<ScheduleKey, T> innerMap = mInstances.get(instanceKey.mTaskKey);
-        Assert.assertTrue(innerMap != null);
-
-        T instance = innerMap.get(instanceKey.mScheduleKey);
-        Assert.assertTrue(instance != null);
-
-        return instance;
     }
 
     public int size() {

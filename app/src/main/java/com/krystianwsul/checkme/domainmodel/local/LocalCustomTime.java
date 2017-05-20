@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.local;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.CustomTime;
@@ -164,12 +163,6 @@ public class LocalCustomTime implements CustomTime {
 
     public int getId() {
         return mCustomTimeRecord.getId();
-    }
-
-    @NonNull
-    @Override
-    public Pair<CustomTime, HourMinute> getPair() {
-        return new Pair<>(this, null);
     }
 
     public boolean getCurrent() {

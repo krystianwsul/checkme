@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.domainmodel.CustomTime;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -75,12 +74,6 @@ public class RemoteCustomTime implements CustomTime {
     @NonNull
     public String toString() {
         return getName();
-    }
-
-    @NonNull
-    @Override
-    public Pair<CustomTime, HourMinute> getPair() {
-        return new Pair<>(this, null);
     }
 
     @NonNull

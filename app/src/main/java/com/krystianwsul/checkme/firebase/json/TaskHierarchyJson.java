@@ -13,6 +13,7 @@ public class TaskHierarchyJson {
     private long startTime;
     private Long endTime;
 
+    @SuppressWarnings("unused")
     public TaskHierarchyJson() {
 
     }

@@ -132,21 +132,6 @@ public class SingleSchedule extends Schedule {
         return mSingleScheduleBridge.getCustomTimeKey();
     }
 
-    @Nullable
-    public HourMinute getHourMinute() {
-        if (mSingleScheduleBridge.getCustomTimeKey() != null) {
-            Assert.assertTrue(mSingleScheduleBridge.getHour() == null);
-            Assert.assertTrue(mSingleScheduleBridge.getMinute() == null);
-
-            return null;
-        } else {
-            Assert.assertTrue(mSingleScheduleBridge.getHour() != null);
-            Assert.assertTrue(mSingleScheduleBridge.getMinute() != null);
-
-            return new HourMinute(mSingleScheduleBridge.getHour(), mSingleScheduleBridge.getMinute());
-        }
-    }
-
     @Override
     public boolean isVisible(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(current(now));

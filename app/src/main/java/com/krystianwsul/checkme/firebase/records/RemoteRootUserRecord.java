@@ -1,13 +1,11 @@
 package com.krystianwsul.checkme.firebase.records;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.firebase.UserData;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.json.UserWrapper;
-import com.krystianwsul.checkme.utils.Utils;
 
 import junit.framework.Assert;
 
@@ -64,18 +62,6 @@ public class RemoteRootUserRecord extends RemoteRecord {
 
         getUserJson().setName(name);
         addValue(getKey() + "/" + USER_DATA + "/name", name);
-    }
-
-    public void setToken(@Nullable String token, @NonNull String uuid) {
-        Assert.assertTrue(!TextUtils.isEmpty(uuid));
-
-        Map<String, String> tokens = getUserJson().getTokens();
-
-        if (Utils.stringEquals(tokens.get(uuid), token))
-            return;
-
-        getUserJson().addToken(token, uuid);
-        addValue(getKey() + "/" + USER_DATA + "/tokens/" + uuid, token);
     }
 
     public void removeFriendOf(@NonNull String friendId) {

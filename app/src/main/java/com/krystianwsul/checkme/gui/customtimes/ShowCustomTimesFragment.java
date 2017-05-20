@@ -109,7 +109,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     @Nullable
     private FloatingActionButton mShowTimesFab;
 
-    ShowCustomTimesLoader.Data mData;
+    private ShowCustomTimesLoader.Data mData;
 
     public static ShowCustomTimesFragment newInstance() {
         return new ShowCustomTimesFragment();
@@ -248,7 +248,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         mShowTimesFab = null;
     }
 
-    public class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
+    class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
         private final int mDataId;
         private final List<CustomTimeWrapper> mCustomTimeWrappers;
 

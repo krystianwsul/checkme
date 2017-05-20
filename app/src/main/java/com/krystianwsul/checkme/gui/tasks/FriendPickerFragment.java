@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tasks;
 
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -94,17 +93,8 @@ public class FriendPickerFragment extends AbstractDialogFragment {
         mFriendPickerRecycler.setAdapter(new FriendListAdapter());
     }
 
-    @Override
-    public void onCancel(DialogInterface dialog) {
-        super.onCancel(dialog);
-
-        mListener.onFriendCancel();
-    }
-
     public interface Listener {
         void onFriendSelected(@NonNull String friendId);
-
-        void onFriendCancel();
     }
 
     class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.FriendHolder> {

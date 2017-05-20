@@ -106,11 +106,6 @@ public class RemoteProjectRecord extends RemoteRecord {
     }
 
     @NonNull
-    public Set<String> getRecordOf() {
-        return mJsonWrapper.recordOf.keySet();
-    }
-
-    @NonNull
     @Override
     protected String getKey() {
         return getId();

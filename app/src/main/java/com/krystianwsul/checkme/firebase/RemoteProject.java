@@ -103,12 +103,12 @@ public class RemoteProject {
     }
 
     @NonNull
-    public ExactTimeStamp getStartExactTimeStamp() {
+    private ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mRemoteProjectRecord.getStartTime());
     }
 
     @Nullable
-    public ExactTimeStamp getEndExactTimeStamp() {
+    private ExactTimeStamp getEndExactTimeStamp() {
         if (mRemoteProjectRecord.getEndTime() == null)
             return null;
         else

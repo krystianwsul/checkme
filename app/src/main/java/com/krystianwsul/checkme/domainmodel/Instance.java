@@ -173,6 +173,7 @@ public abstract class Instance {
 
     public abstract void setInstanceDateTime(@NonNull Date date, @NonNull TimePair timePair, @NonNull ExactTimeStamp now);
 
+    @SuppressWarnings("WeakerAccess")
     public abstract void createInstanceHierarchy(@NonNull ExactTimeStamp now);
 
     public abstract void setNotificationShown(boolean notificationShown, @NonNull ExactTimeStamp now);

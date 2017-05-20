@@ -30,6 +30,7 @@ public class ProjectJson {
     @Nullable
     private Map<String, UserJson> users;
 
+    @SuppressWarnings("unused")
     public ProjectJson() {
 
     }

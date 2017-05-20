@@ -55,7 +55,7 @@ android {
 
 ext {
     supportLibVersion = '25.3.1'
-    firebaseVersion = '10.2.4'
+    firebaseVersion = '10.2.6'
 }
 
 dependencies {
@@ -68,7 +68,7 @@ dependencies {
     compile('com.github.afollestad.material-dialogs:core:0.8.5.8@aar') {
         transitive = true
     }
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.7@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
     compile "com.android.support:appcompat-v7:${supportLibVersion}"

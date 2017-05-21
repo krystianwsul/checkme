@@ -48,7 +48,7 @@ public class TaskHierarchyContainer<T, U extends TaskHierarchy> {
         TaskKey parentTaskKey = taskHierarchy.getParentTaskKey();
         Assert.assertTrue(mTaskHierarchiesByParent.containsEntry(parentTaskKey, taskHierarchy));
 
-        Assert.assertTrue(mTaskHierarchiesByChild.remove(parentTaskKey, taskHierarchy));
+        Assert.assertTrue(mTaskHierarchiesByParent.remove(parentTaskKey, taskHierarchy));
     }
 
     @NonNull

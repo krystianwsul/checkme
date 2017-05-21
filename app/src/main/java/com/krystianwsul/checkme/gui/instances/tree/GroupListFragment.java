@@ -2994,9 +2994,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                     getDividerNode().remove(this);
                 }
             }
-
         }
-
     }
 
     private static class ExpansionState implements Parcelable {
@@ -3079,11 +3077,6 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         void onDestroyGroupActionMode();
 
         void setGroupSelectAllVisibility(Integer position, boolean selectAllVisible);
-    }
-
-    private interface NodeCollectionParent {
-        @NonNull
-        GroupAdapter getGroupAdapter();
     }
 
     public static class DataWrapper implements InstanceDataParent {

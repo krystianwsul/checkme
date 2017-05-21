@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.utils.time;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import junit.framework.Assert;
-
 public class DateTime implements Comparable<DateTime> {
     @NonNull
     private final Date mDate;
@@ -13,10 +11,6 @@ public class DateTime implements Comparable<DateTime> {
     private final Time mTime;
 
     public DateTime(@NonNull Date date, @NonNull Time time) {
-        Assert.assertTrue(date != null);
-        Assert.assertTrue(time != null);
-        Assert.assertTrue(time.getHourMinute(date.getDayOfWeek()) != null);
-
         mDate = date;
         mTime = time;
     }
@@ -38,10 +32,8 @@ public class DateTime implements Comparable<DateTime> {
 
         DayOfWeek day = mDate.getDayOfWeek();
         HourMinute myHourMinute = mTime.getHourMinute(day);
-        Assert.assertTrue(myHourMinute != null);
 
         HourMinute otherHourMinute = dateTime.getTime().getHourMinute(day);
-        Assert.assertTrue(otherHourMinute != null);
 
         return myHourMinute.compareTo(otherHourMinute);
     }

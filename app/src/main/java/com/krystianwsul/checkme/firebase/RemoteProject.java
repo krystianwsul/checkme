@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
@@ -391,9 +390,9 @@ public class RemoteProject {
     public void setEndExactTimeStamp(@NonNull ExactTimeStamp now) {
         Assert.assertTrue(current(now));
 
-        for (Task task : mRemoteTasks.values())
-            if (task.current(now))
-                task.setEndExactTimeStamp(now);
+        Stream.of(mRemoteTasks.values())
+                .filter(task -> task.current(now))
+                .forEach(task -> task.setEndExactTimeStamp(now));
 
         mRemoteProjectRecord.setEndTime(now.getLong());
     }

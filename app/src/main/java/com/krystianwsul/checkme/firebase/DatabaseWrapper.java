@@ -161,8 +161,9 @@ public class DatabaseWrapper {
         Assert.assertTrue(sRootReference != null);
 
         String key = userInfo.getKey();
+        Assert.assertTrue(!TextUtils.isEmpty(key));
 
-        Query query = sRootReference.child(USERS_KEY + "/" + userInfo.getKey());
+        Query query = sRootReference.child(USERS_KEY + "/" + key);
         Assert.assertTrue(query != null);
 
         return query;

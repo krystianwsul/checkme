@@ -55,7 +55,6 @@ public class RemoteInstanceRecordTest {
         Mockito.when(mDomainFactory.getRemoteCustomTimeId(any(String.class), any(CustomTimeKey.class))).thenAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) {
-                String remoteProjectId = (String) invocation.getArguments()[0];
                 CustomTimeKey customTimeKey = (CustomTimeKey) invocation.getArguments()[1];
 
                 return customTimeKey.mRemoteCustomTimeId;

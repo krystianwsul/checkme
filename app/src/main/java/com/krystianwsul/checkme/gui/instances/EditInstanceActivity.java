@@ -317,7 +317,6 @@ public class EditInstanceActivity extends AbstractActivity implements LoaderMana
                     .collect(Collectors.toList()));
 
             TimeDialogFragment timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas);
-            Assert.assertTrue(timeDialogFragment != null);
 
             timeDialogFragment.setTimeDialogListener(mTimeDialogListener);
 

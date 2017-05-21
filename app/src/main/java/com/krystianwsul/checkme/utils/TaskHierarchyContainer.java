@@ -28,8 +28,8 @@ public class TaskHierarchyContainer<T, U extends TaskHierarchy> {
         Assert.assertTrue(!mTaskHierarchiesById.containsKey(id));
 
         mTaskHierarchiesById.put(id, taskHierarchy);
-        mTaskHierarchiesByChild.put(taskHierarchy.getChildTaskKey(), taskHierarchy);
-        mTaskHierarchiesByParent.put(taskHierarchy.getParentTaskKey(), taskHierarchy);
+        Assert.assertTrue(mTaskHierarchiesByChild.put(taskHierarchy.getChildTaskKey(), taskHierarchy));
+        Assert.assertTrue(mTaskHierarchiesByParent.put(taskHierarchy.getParentTaskKey(), taskHierarchy));
     }
 
     public void removeForce(T id) {
@@ -43,12 +43,12 @@ public class TaskHierarchyContainer<T, U extends TaskHierarchy> {
         TaskKey childTaskKey = taskHierarchy.getChildTaskKey();
         Assert.assertTrue(mTaskHierarchiesByChild.containsEntry(childTaskKey, taskHierarchy));
 
-        mTaskHierarchiesByChild.remove(childTaskKey, taskHierarchy);
+        Assert.assertTrue(mTaskHierarchiesByChild.remove(childTaskKey, taskHierarchy));
 
         TaskKey parentTaskKey = taskHierarchy.getParentTaskKey();
         Assert.assertTrue(mTaskHierarchiesByParent.containsEntry(parentTaskKey, taskHierarchy));
 
-        mTaskHierarchiesByChild.remove(parentTaskKey, taskHierarchy);
+        Assert.assertTrue(mTaskHierarchiesByChild.remove(parentTaskKey, taskHierarchy));
     }
 
     @NonNull

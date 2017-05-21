@@ -21,13 +21,13 @@ import java.util.List;
 
 class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
     @NonNull
-    private final GroupListFragment.GroupAdapter.NodeCollection mNodeCollection;
+    private final NodeCollection mNodeCollection;
 
     private TreeNode mTreeNode;
 
     private List<TaskNode> mTaskNodes;
 
-    UnscheduledNode(float density, @NonNull GroupListFragment.GroupAdapter.NodeCollection nodeCollection) {
+    UnscheduledNode(float density, @NonNull NodeCollection nodeCollection) {
         super(density, 0);
 
         mNodeCollection = nodeCollection;
@@ -60,7 +60,7 @@ class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
     }
 
     @NonNull
-    private GroupListFragment.GroupAdapter.NodeCollection getNodeCollection() {
+    private NodeCollection getNodeCollection() {
         return mNodeCollection;
     }
 

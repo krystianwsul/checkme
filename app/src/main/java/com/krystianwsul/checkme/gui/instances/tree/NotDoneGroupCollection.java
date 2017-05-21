@@ -20,7 +20,7 @@ import java.util.Map;
 
 class NotDoneGroupCollection {
     @NonNull
-    private final GroupListFragment.GroupAdapter.NodeCollection mNodeCollection;
+    private final NodeCollection mNodeCollection;
 
     @NonNull
     private final NodeContainer mNodeContainer;
@@ -32,7 +32,7 @@ class NotDoneGroupCollection {
 
     private final boolean mSelectable;
 
-    NotDoneGroupCollection(float density, int indentation, @NonNull GroupListFragment.GroupAdapter.NodeCollection nodeCollection, @NonNull NodeContainer nodeContainer, boolean selectable) {
+    NotDoneGroupCollection(float density, int indentation, @NonNull NodeCollection nodeCollection, @NonNull NodeContainer nodeContainer, boolean selectable) {
         mDensity = density;
         mIndentation = indentation;
         mNodeCollection = nodeCollection;
@@ -44,7 +44,7 @@ class NotDoneGroupCollection {
     List<TreeNode> initialize(@NonNull List<GroupListFragment.InstanceData> notDoneInstanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, @Nullable ArrayList<InstanceKey> selectedNodes) {
         ArrayList<TreeNode> notDoneGroupTreeNodes = new ArrayList<>();
 
-        GroupListFragment.GroupAdapter.NodeCollection nodeCollection = getNodeCollection();
+        NodeCollection nodeCollection = getNodeCollection();
 
         if (nodeCollection.mUseGroups) {
             HashMap<TimeStamp, ArrayList<GroupListFragment.InstanceData>> instanceDataHash = new HashMap<>();
@@ -85,7 +85,7 @@ class NotDoneGroupCollection {
     }
 
     public void add(@NonNull GroupListFragment.InstanceData instanceData) {
-        GroupListFragment.GroupAdapter.NodeCollection nodeCollection = getNodeCollection();
+        NodeCollection nodeCollection = getNodeCollection();
 
         NodeContainer nodeContainer = nodeCollection.getNodeContainer();
 
@@ -127,7 +127,7 @@ class NotDoneGroupCollection {
     }
 
     @NonNull
-    GroupListFragment.GroupAdapter.NodeCollection getNodeCollection() {
+    NodeCollection getNodeCollection() {
         return mNodeCollection;
     }
 

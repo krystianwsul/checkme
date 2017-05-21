@@ -26,7 +26,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     final GroupListFragment.InstanceData mInstanceData;
 
-    private GroupListFragment.GroupAdapter.NodeCollection mNodeCollection;
+    private NodeCollection mNodeCollection;
 
     DoneInstanceNode(float density, int indentation, @NonNull GroupListFragment.InstanceData instanceData, @NonNull DividerNode dividerNode) {
         super(density, indentation);
@@ -45,7 +45,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
         mTreeNode = new TreeNode(this, dividerTreeNode, expanded, false);
 
-        mNodeCollection = new GroupListFragment.GroupAdapter.NodeCollection(mDensity, mIndentation + 1, this, false, mTreeNode, null);
+        mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, this, false, mTreeNode, null);
         mTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceData.Children.values(), null, expandedInstances, doneExpanded, null, false, null, false, null));
 
         return mTreeNode;
@@ -64,7 +64,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     }
 
     @NonNull
-    private GroupListFragment.GroupAdapter.NodeCollection getParentNodeCollection() {
+    private NodeCollection getParentNodeCollection() {
         return getDividerNode().getNodeCollection();
     }
 
@@ -221,7 +221,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     View.OnClickListener getCheckBoxOnClickListener() {
         final DividerNode dividerNode = getDividerNode();
 
-        GroupListFragment.GroupAdapter.NodeCollection nodeCollection = dividerNode.getNodeCollection();
+        NodeCollection nodeCollection = dividerNode.getNodeCollection();
 
         GroupListFragment.GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
 

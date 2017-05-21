@@ -22,13 +22,13 @@ import java.util.List;
 
 class DividerNode extends GroupHolderNode implements ModelNode {
     @NonNull
-    private final GroupListFragment.GroupAdapter.NodeCollection mNodeCollection;
+    private final NodeCollection mNodeCollection;
 
     private TreeNode mTreeNode;
 
     private final ArrayList<DoneInstanceNode> mDoneInstanceNodes = new ArrayList<>();
 
-    DividerNode(float density, int indentation, @NonNull GroupListFragment.GroupAdapter.NodeCollection nodeCollection) {
+    DividerNode(float density, int indentation, @NonNull NodeCollection nodeCollection) {
         super(density, indentation);
 
         mNodeCollection = nodeCollection;
@@ -207,7 +207,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
     }
 
     @NonNull
-    GroupListFragment.GroupAdapter.NodeCollection getNodeCollection() {
+    NodeCollection getNodeCollection() {
         return mNodeCollection;
     }
 

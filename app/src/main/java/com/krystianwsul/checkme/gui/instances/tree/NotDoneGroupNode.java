@@ -39,7 +39,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
     private final List<GroupListFragment.InstanceData> mInstanceDatas;
 
     private final ArrayList<NotDoneInstanceNode> mNotDoneInstanceNodes = new ArrayList<>();
-    private GroupListFragment.GroupAdapter.NodeCollection mNodeCollection;
+    private NodeCollection mNodeCollection;
 
     final ExactTimeStamp mExactTimeStamp;
 
@@ -85,7 +85,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         mTreeNode = new TreeNode(this, nodeContainer, expanded, selected);
 
         if (mInstanceDatas.size() == 1) {
-            mNodeCollection = new GroupListFragment.GroupAdapter.NodeCollection(mDensity, mIndentation + 1, this, false, mTreeNode, null);
+            mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, this, false, mTreeNode, null);
 
             mTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceDatas.get(0).Children.values(), expandedGroups, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
         } else {
@@ -172,7 +172,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
     }
 
     @NonNull
-    GroupListFragment.GroupAdapter.NodeCollection getNodeCollection() {
+    NodeCollection getNodeCollection() {
         return getNotDoneGroupCollection().getNodeCollection();
     }
 
@@ -411,7 +411,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
     View.OnClickListener getCheckBoxOnClickListener() {
         final NotDoneGroupCollection notDoneGroupCollection = getNotDoneGroupCollection();
 
-        GroupListFragment.GroupAdapter.NodeCollection nodeCollection = getNodeCollection();
+        NodeCollection nodeCollection = getNodeCollection();
 
         GroupListFragment.GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
 
@@ -527,7 +527,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             notDoneGroupTreeNode.remove(childTreeNode1);
 
-            mNodeCollection = new GroupListFragment.GroupAdapter.NodeCollection(mDensity, mIndentation + 1, this, false, notDoneGroupTreeNode, null);
+            mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, this, false, notDoneGroupTreeNode, null);
 
             List<TreeNode> childTreeNodes = mNodeCollection.initialize(mInstanceDatas.get(0).Children.values(), null, null, false, null, mSelectable, null, false, null);
 
@@ -649,7 +649,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         @NonNull
         final GroupListFragment.InstanceData mInstanceData;
 
-        private GroupListFragment.GroupAdapter.NodeCollection mNodeCollection;
+        private NodeCollection mNodeCollection;
 
         private final boolean mSelectable;
 
@@ -673,7 +673,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             mTreeNode = new TreeNode(this, notDoneGroupTreeNode, expanded, selected);
 
-            mNodeCollection = new GroupListFragment.GroupAdapter.NodeCollection(mDensity, mIndentation + 1, this, false, mTreeNode, null);
+            mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, this, false, mTreeNode, null);
             mTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceData.Children.values(), null, expandedInstances, doneExpanded, selectedNodes, mSelectable, null, false, null));
 
             return mTreeNode;
@@ -697,7 +697,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         }
 
         @NonNull
-        GroupListFragment.GroupAdapter.NodeCollection getParentNodeCollection() {
+        NodeCollection getParentNodeCollection() {
             return getParentNotDoneGroupCollection().getNodeCollection();
         }
 
@@ -867,7 +867,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             Assert.assertTrue(notDoneGroupTreeNode.expanded());
 
-            GroupListFragment.GroupAdapter.NodeCollection nodeCollection = getParentNodeCollection();
+            NodeCollection nodeCollection = getParentNodeCollection();
 
             GroupListFragment.GroupAdapter groupAdapter = nodeCollection.getGroupAdapter();
 

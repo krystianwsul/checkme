@@ -97,7 +97,7 @@ class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
         if (modelNode instanceof DividerNode) {
             return -1;
         } else {
-            Assert.assertTrue(modelNode instanceof GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode);
+            Assert.assertTrue(modelNode instanceof NotDoneGroupNode);
             return 1;
         }
     }

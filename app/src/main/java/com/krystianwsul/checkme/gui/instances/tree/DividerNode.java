@@ -233,7 +233,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
 
     @Override
     public int compareTo(@NonNull ModelNode another) {
-        Assert.assertTrue(another instanceof GroupListFragment.GroupAdapter.NodeCollection.NoteNode || another instanceof GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode || another instanceof UnscheduledNode);
+        Assert.assertTrue(another instanceof GroupListFragment.GroupAdapter.NodeCollection.NoteNode || another instanceof NotDoneGroupNode || another instanceof UnscheduledNode);
         return 1;
     }
 

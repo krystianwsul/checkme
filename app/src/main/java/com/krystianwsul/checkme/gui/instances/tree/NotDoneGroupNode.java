@@ -497,7 +497,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         return null;
     }
 
-    public void remove(@NonNull NotDoneInstanceNode notDoneInstanceNode) {
+    private void remove(@NonNull NotDoneInstanceNode notDoneInstanceNode) {
         TreeNode notDoneGroupTreeNode = getTreeNode();
 
         Assert.assertTrue(mInstanceDatas.contains(notDoneInstanceNode.mInstanceData));

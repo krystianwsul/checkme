@@ -54,7 +54,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 
-@SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions"})
+@SuppressWarnings({"UnnecessaryLocalVariable", "ConstantConditions", "CanBeFinal"})
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(value = {TextUtils.class, Log.class, Context.class, ContentValues.class, SystemClock.class})
 public class DomainFactoryTest {

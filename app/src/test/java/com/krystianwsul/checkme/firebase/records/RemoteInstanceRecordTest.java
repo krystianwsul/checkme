@@ -24,6 +24,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Matchers.any;
 
+@SuppressWarnings("CanBeFinal")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TextUtils.class})
 public class RemoteInstanceRecordTest {

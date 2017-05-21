@@ -41,7 +41,7 @@ class NoteNode extends GroupHolderNode implements ModelNode {
     }
 
     @NonNull
-    TreeNode getTreeNode() {
+    private TreeNode getTreeNode() {
         Assert.assertTrue(mTreeNode != null);
 
         return mTreeNode;

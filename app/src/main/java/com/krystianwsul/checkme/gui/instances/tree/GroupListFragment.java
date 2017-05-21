@@ -523,8 +523,9 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+
         Assert.assertTrue(context instanceof GroupListListener);
     }
 
@@ -793,6 +794,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         }
     }
 
+    @NonNull
     static String getChildrenText(boolean expanded, @NonNull Collection<InstanceData> instanceDatas, @Nullable String note) {
         if (!instanceDatas.isEmpty() && !expanded) {
             Stream<InstanceData> notDone = Stream.of(instanceDatas)
@@ -1218,7 +1220,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object object) {
+        public boolean equals(@Nullable Object object) {
             if (object == null)
                 return false;
 
@@ -1258,8 +1260,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         }
 
         @Override
-        public void remove(InstanceKey instanceKey) {
-            Assert.assertTrue(instanceKey != null);
+        public void remove(@NonNull InstanceKey instanceKey) {
             Assert.assertTrue(InstanceDatas.containsKey(instanceKey));
 
             InstanceDatas.remove(instanceKey);
@@ -1418,8 +1419,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         }
 
         @Override
-        public void remove(InstanceKey instanceKey) {
-            Assert.assertTrue(instanceKey != null);
+        public void remove(@NonNull InstanceKey instanceKey) {
             Assert.assertTrue(Children.containsKey(instanceKey));
 
             Children.remove(instanceKey);
@@ -1427,12 +1427,14 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
     }
 
     public static class CustomTimeData {
+        @NonNull
         public final String Name;
+
+        @NonNull
         public final TreeMap<DayOfWeek, HourMinute> HourMinutes;
 
-        public CustomTimeData(String name, TreeMap<DayOfWeek, HourMinute> hourMinutes) {
+        public CustomTimeData(@NonNull String name, @NonNull TreeMap<DayOfWeek, HourMinute> hourMinutes) {
             Assert.assertTrue(!TextUtils.isEmpty(name));
-            Assert.assertTrue(hourMinutes != null);
             Assert.assertTrue(hourMinutes.size() == 7);
 
             Name = name;
@@ -1445,7 +1447,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         }
 
         @Override
-        public boolean equals(Object object) {
+        public boolean equals(@Nullable Object object) {
             if (object == null)
                 return false;
 
@@ -1462,7 +1464,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
     }
 
     public interface InstanceDataParent {
-        void remove(InstanceKey instanceKey);
+        void remove(@NonNull InstanceKey instanceKey);
     }
 
     public static class TaskData {
@@ -1535,5 +1537,4 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
             return true;
         }
     }
-
 }

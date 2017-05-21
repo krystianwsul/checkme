@@ -94,7 +94,7 @@ class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
 
     @Override
     public int compareTo(@NonNull ModelNode modelNode) {
-        if (modelNode instanceof GroupListFragment.GroupAdapter.NodeCollection.DividerNode) {
+        if (modelNode instanceof DividerNode) {
             return -1;
         } else {
             Assert.assertTrue(modelNode instanceof GroupListFragment.GroupAdapter.NodeCollection.NotDoneGroupNode);

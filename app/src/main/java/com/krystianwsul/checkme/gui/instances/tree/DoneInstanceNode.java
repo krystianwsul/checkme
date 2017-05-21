@@ -20,7 +20,7 @@ import java.util.HashMap;
 
 class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollectionParent {
     @NonNull
-    private final GroupListFragment.GroupAdapter.NodeCollection.DividerNode mDividerNode;
+    private final DividerNode mDividerNode;
 
     private TreeNode mTreeNode;
 
@@ -28,7 +28,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     private GroupListFragment.GroupAdapter.NodeCollection mNodeCollection;
 
-    DoneInstanceNode(float density, int indentation, @NonNull GroupListFragment.InstanceData instanceData, @NonNull GroupListFragment.GroupAdapter.NodeCollection.DividerNode dividerNode) {
+    DoneInstanceNode(float density, int indentation, @NonNull GroupListFragment.InstanceData instanceData, @NonNull DividerNode dividerNode) {
         super(density, indentation);
 
         mInstanceData = instanceData;
@@ -59,7 +59,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     }
 
     @NonNull
-    private GroupListFragment.GroupAdapter.NodeCollection.DividerNode getDividerNode() {
+    private DividerNode getDividerNode() {
         return mDividerNode;
     }
 
@@ -219,7 +219,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @NonNull
     @Override
     View.OnClickListener getCheckBoxOnClickListener() {
-        final GroupListFragment.GroupAdapter.NodeCollection.DividerNode dividerNode = getDividerNode();
+        final DividerNode dividerNode = getDividerNode();
 
         GroupListFragment.GroupAdapter.NodeCollection nodeCollection = dividerNode.getNodeCollection();
 

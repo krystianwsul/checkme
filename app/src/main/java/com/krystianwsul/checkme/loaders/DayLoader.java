@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.MainActivity;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
+import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 public class DayLoader extends DomainLoader<DayLoader.Data> {

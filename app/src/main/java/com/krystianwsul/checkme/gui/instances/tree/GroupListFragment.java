@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances;
+package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.app.Activity;
 import android.content.Context;
@@ -37,6 +37,10 @@ import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.SelectionCallback;
+import com.krystianwsul.checkme.gui.instances.EditInstanceActivity;
+import com.krystianwsul.checkme.gui.instances.EditInstancesActivity;
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity;
+import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.gui.tree.ModelNode;
@@ -924,7 +928,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         mFloatingActionButton = null;
     }
 
-    private static class GroupAdapter implements TreeModelAdapter, NodeCollectionParent {
+    static class GroupAdapter implements TreeModelAdapter, NodeCollectionParent {
         private static final int TYPE_GROUP = 0;
 
         @NonNull
@@ -3673,11 +3677,6 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
     }
 
     private interface NodeCollectionParent {
-        @NonNull
-        GroupAdapter getGroupAdapter();
-    }
-
-    private interface TaskParent {
         @NonNull
         GroupAdapter getGroupAdapter();
     }

@@ -41,7 +41,7 @@ import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.json.UserWrapper;
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
 import com.krystianwsul.checkme.gui.MainActivity;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
+import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.DayLoader;

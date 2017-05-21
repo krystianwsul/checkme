@@ -14,6 +14,7 @@ import android.view.MenuItem;
 
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractActivity;
+import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.utils.InstanceKey;
 

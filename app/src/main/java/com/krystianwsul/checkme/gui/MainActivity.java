@@ -51,7 +51,7 @@ import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment;
 import com.krystianwsul.checkme.gui.friends.FriendListFragment;
 import com.krystianwsul.checkme.gui.instances.DayFragment;
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
+import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.MainLoader;

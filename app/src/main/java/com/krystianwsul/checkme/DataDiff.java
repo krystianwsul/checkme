@@ -3,7 +3,7 @@ package com.krystianwsul.checkme;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.krystianwsul.checkme.gui.instances.GroupListFragment;
+import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.utils.InstanceKey;
 
 import junit.framework.Assert;

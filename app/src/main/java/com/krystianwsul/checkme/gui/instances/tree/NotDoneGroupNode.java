@@ -541,7 +541,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     @Override
     public int compareTo(@NonNull ModelNode another) {
-        if (another instanceof GroupListFragment.GroupAdapter.NodeCollection.NoteNode) {
+        if (another instanceof NoteNode) {
             return 1;
         } else if (another instanceof NotDoneGroupNode) {
             NotDoneGroupNode notDoneGroupNode = (NotDoneGroupNode) another;

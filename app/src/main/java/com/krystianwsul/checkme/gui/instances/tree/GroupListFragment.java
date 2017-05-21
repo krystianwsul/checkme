@@ -1,14 +1,12 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,7 +38,6 @@ import com.krystianwsul.checkme.gui.instances.EditInstanceActivity;
 import com.krystianwsul.checkme.gui.instances.EditInstancesActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
-import com.krystianwsul.checkme.gui.tree.ModelNode;
 import com.krystianwsul.checkme.gui.tree.NodeContainer;
 import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
 import com.krystianwsul.checkme.gui.tree.TreeNode;
@@ -1354,189 +1351,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         notDoneGroupNode.addExpandedInstances(expandedInstances);
                 }
             }
-
-            static class NoteNode extends GroupHolderNode implements ModelNode {
-                @NonNull
-                private final GroupAdapter mGroupAdapter;
-
-                private final String mNote;
-
-                private TreeNode mTreeNode;
-
-                NoteNode(float density, @NonNull String note, @NonNull GroupAdapter groupAdapter) {
-                    super(density, 0);
-
-                    Assert.assertTrue(!TextUtils.isEmpty(note));
-
-                    mNote = note;
-                    mGroupAdapter = groupAdapter;
-                }
-
-                @NonNull
-                TreeNode initialize(@NonNull NodeContainer nodeContainer) {
-                    mTreeNode = new TreeNode(this, nodeContainer, false, false);
-
-                    mTreeNode.setChildTreeNodes(new ArrayList<>());
-                    return mTreeNode;
-                }
-
-                @NonNull
-                TreeNode getTreeNode() {
-                    Assert.assertTrue(mTreeNode != null);
-
-                    return mTreeNode;
-                }
-
-                @NonNull
-                GroupAdapter getGroupAdapter() {
-                    return mGroupAdapter;
-                }
-
-                @NonNull
-                private GroupListFragment getGroupListFragment() {
-                    return getGroupAdapter().mGroupListFragment;
-                }
-
-                @Override
-                int getNameVisibility() {
-                    return View.VISIBLE;
-                }
-
-                @NonNull
-                @Override
-                String getName() {
-                    return mNote;
-                }
-
-                @Override
-                int getNameColor() {
-                    return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textPrimary);
-                }
-
-                @Override
-                boolean getNameSingleLine() {
-                    return false;
-                }
-
-                @Override
-                int getDetailsVisibility() {
-                    return View.GONE;
-                }
-
-                @NonNull
-                @Override
-                String getDetails() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                int getDetailsColor() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                int getChildrenVisibility() {
-                    return View.GONE;
-                }
-
-                @NonNull
-                @Override
-                String getChildren() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                int getChildrenColor() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                int getExpandVisibility() {
-                    return View.GONE;
-                }
-
-                @Override
-                int getExpandImageResource() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @NonNull
-                @Override
-                View.OnClickListener getExpandOnClickListener() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                int getCheckBoxVisibility() {
-                    return View.GONE;
-                }
-
-                @Override
-                boolean getCheckBoxChecked() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @NonNull
-                @Override
-                View.OnClickListener getCheckBoxOnClickListener() {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                int getSeparatorVisibility() {
-                    return (getTreeNode().getSeparatorVisibility() ? View.VISIBLE : View.INVISIBLE);
-                }
-
-                @Override
-                int getBackgroundColor() {
-                    return Color.TRANSPARENT;
-                }
-
-                @Override
-                View.OnLongClickListener getOnLongClickListener() {
-                    return null;
-                }
-
-                @Override
-                View.OnClickListener getOnClickListener() {
-                    return null;
-                }
-
-                @Override
-                public boolean selectable() {
-                    return false;
-                }
-
-                @Override
-                public void onClick() {
-
-                }
-
-                @Override
-                public boolean visibleWhenEmpty() {
-                    return true;
-                }
-
-                @Override
-                public boolean visibleDuringActionMode() {
-                    return false;
-                }
-
-                @Override
-                public boolean separatorVisibleWhenNotExpanded() {
-                    return true;
-                }
-
-                @Override
-                public int compareTo(@NonNull ModelNode o) {
-                    Assert.assertTrue(o instanceof NotDoneGroupNode || o instanceof UnscheduledNode || o instanceof DividerNode);
-
-                    return -1;
-                }
-            }
-
         }
-
     }
 
     private static class ExpansionState implements Parcelable {

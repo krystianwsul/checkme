@@ -26,8 +26,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 64
-        versionName "0.4.25"
+        versionCode 65
+        versionName "0.4.26"
     }
     buildTypes {
         release {

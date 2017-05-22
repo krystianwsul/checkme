@@ -545,7 +545,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_group_list, container, false);
         Assert.assertTrue(view != null);
 

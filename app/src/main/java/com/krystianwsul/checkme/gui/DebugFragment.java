@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import junit.framework.Assert;
 
 public class DebugFragment extends AbstractFragment {
+    @NonNull
     public static DebugFragment newInstance() {
         return new DebugFragment();
     }
@@ -31,7 +33,7 @@ public class DebugFragment extends AbstractFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_debug, container, false);
     }
 

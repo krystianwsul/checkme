@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
@@ -14,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 public class DataDiff {
-    private static List<String> sDiff;
+    @NonNull
+    private static List<String> sDiff = new ArrayList<>();
 
     public static void diffData(@NonNull GroupListFragment.DataWrapper oldData, @NonNull GroupListFragment.DataWrapper newData) {
         sDiff = new ArrayList<>();
@@ -22,11 +24,8 @@ public class DataDiff {
         diffMap("", oldData.InstanceDatas, newData.InstanceDatas);
     }
 
-    private static void diffMap(String indent, Map<InstanceKey, GroupListFragment.InstanceData> oldInstanceDatas, Map<InstanceKey, GroupListFragment.InstanceData> newInstanceDatas) {
-        Assert.assertTrue(indent != null);
-        Assert.assertTrue(oldInstanceDatas != null);
-        Assert.assertTrue(newInstanceDatas != null);
-        Assert.assertTrue(sDiff != null);
+    private static void diffMap(@NonNull String indent, @NonNull Map<InstanceKey, GroupListFragment.InstanceData> oldInstanceDatas, @NonNull Map<InstanceKey, GroupListFragment.InstanceData> newInstanceDatas) {
+        Assert.assertTrue(!TextUtils.isEmpty(indent));
 
         HashSet<InstanceKey> instanceKeys = new HashSet<>();
         instanceKeys.addAll(oldInstanceDatas.keySet());
@@ -57,12 +56,9 @@ public class DataDiff {
         }
     }
 
-    private static void diffInstance(String indent, GroupListFragment.InstanceData oldInstanceData, GroupListFragment.InstanceData newInstanceData) {
+    private static void diffInstance(@NonNull String indent, @NonNull GroupListFragment.InstanceData oldInstanceData, @NonNull GroupListFragment.InstanceData newInstanceData) {
         Assert.assertTrue(!TextUtils.isEmpty(indent));
-        Assert.assertTrue(oldInstanceData != null);
-        Assert.assertTrue(newInstanceData != null);
         Assert.assertTrue(oldInstanceData.InstanceKey.equals(newInstanceData.InstanceKey));
-        Assert.assertTrue(sDiff != null);
 
         if (((oldInstanceData.Done == null) != (newInstanceData.Done == null)) || ((oldInstanceData.Done != null) && !oldInstanceData.Done.equals(newInstanceData.Done)))
             sDiff.add(indent + "oldInstanceData.Done == " + oldInstanceData.Done + ", newInstanceData.Done == " + newInstanceData.Done);
@@ -97,9 +93,8 @@ public class DataDiff {
         }
     }
 
+    @Nullable
     public static String getDiff() {
-        Assert.assertTrue(sDiff != null);
-
         return TextUtils.join("\n", sDiff);
     }
 }

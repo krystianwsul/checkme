@@ -25,8 +25,6 @@ public class DataDiff {
     }
 
     private static void diffMap(@NonNull String indent, @NonNull Map<InstanceKey, GroupListFragment.InstanceData> oldInstanceDatas, @NonNull Map<InstanceKey, GroupListFragment.InstanceData> newInstanceDatas) {
-        Assert.assertTrue(!TextUtils.isEmpty(indent));
-
         HashSet<InstanceKey> instanceKeys = new HashSet<>();
         instanceKeys.addAll(oldInstanceDatas.keySet());
         instanceKeys.addAll(newInstanceDatas.keySet());

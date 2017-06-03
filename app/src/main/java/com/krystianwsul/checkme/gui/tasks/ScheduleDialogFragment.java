@@ -257,6 +257,7 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
             Assert.assertTrue(args.containsKey(SCHEDULE_DIALOG_DATA_KEY));
 
             mScheduleDialogData = args.getParcelable(SCHEDULE_DIALOG_DATA_KEY);
+            Assert.assertTrue(mScheduleDialogData != null);
         }
 
         ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.schedule_types, R.layout.spinner_no_padding);
@@ -305,8 +306,6 @@ public class ScheduleDialogFragment extends AbstractDialogFragment {
                     default:
                         throw new UnsupportedOperationException();
                 }
-
-                mScheduleDialogData.mScheduleType = ScheduleType.values()[i];
 
                 if (getActivity() != null && mCustomTimeDatas != null)
                     initialize();

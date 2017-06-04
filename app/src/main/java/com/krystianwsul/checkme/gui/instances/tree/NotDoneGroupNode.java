@@ -14,15 +14,15 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
-import com.krystianwsul.checkme.gui.tree.ModelNode;
-import com.krystianwsul.checkme.gui.tree.NodeContainer;
-import com.krystianwsul.checkme.gui.tree.TreeNode;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
+import com.krystianwsul.treeadapter.ModelNode;
+import com.krystianwsul.treeadapter.NodeContainer;
+import com.krystianwsul.treeadapter.TreeNode;
 
 import junit.framework.Assert;
 

@@ -29,15 +29,15 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.tree.ModelNode;
-import com.krystianwsul.checkme.gui.tree.NodeContainer;
-import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
-import com.krystianwsul.checkme.gui.tree.TreeNode;
-import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
-import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
+import com.krystianwsul.treeadapter.ModelNode;
+import com.krystianwsul.treeadapter.NodeContainer;
+import com.krystianwsul.treeadapter.TreeModelAdapter;
+import com.krystianwsul.treeadapter.TreeNode;
+import com.krystianwsul.treeadapter.TreeNodeCollection;
+import com.krystianwsul.treeadapter.TreeViewAdapter;
 
 import junit.framework.Assert;
 
@@ -534,7 +534,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         void setTaskSelectAllVisibility(boolean selectAllVisible);
     }
 
-    public static class TaskAdapter implements TreeModelAdapter, TaskParent {
+    private static class TaskAdapter implements TreeModelAdapter, TaskParent {
         private static final int TYPE_TASK = 0;
         private static final int TYPE_NOTE = 1;
 

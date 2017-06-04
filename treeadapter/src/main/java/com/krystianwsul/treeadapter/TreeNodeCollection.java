@@ -1,9 +1,11 @@
-package com.krystianwsul.checkme.gui.tree;
+package com.krystianwsul.treeadapter;
 
 import android.support.annotation.NonNull;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.annimon.stream.function.Consumer;
+import com.annimon.stream.function.Function;
 
 import junit.framework.Assert;
 
@@ -69,23 +71,43 @@ public class TreeNodeCollection implements NodeContainer {
     @NonNull
     List<TreeNode> getSelectedNodes() {
         return Stream.of(mTreeNodes)
-                .flatMap(TreeNode::getSelectedNodes)
-                .collect(Collectors.toList());
+                .flatMap(new Function<TreeNode, Stream<TreeNode>>() {
+                    @Override
+                    public Stream<TreeNode> apply(TreeNode treeNode) {
+                        return treeNode.getSelectedNodes();
+                    }
+                })
+                .collect(Collectors.<TreeNode>toList());
     }
 
     void onCreateActionMode() {
         Stream.of(mTreeNodes)
-                .forEach(TreeNode::onCreateActionMode);
+                .forEach(new Consumer<TreeNode>() {
+                    @Override
+                    public void accept(TreeNode treeNode) {
+                        treeNode.onCreateActionMode();
+                    }
+                });
     }
 
     void onDestroyActionMode() {
         Stream.of(mTreeNodes)
-                .forEach(TreeNode::onDestroyActionMode);
+                .forEach(new Consumer<TreeNode>() {
+                    @Override
+                    public void accept(TreeNode treeNode) {
+                        treeNode.onDestroyActionMode();
+                    }
+                });
     }
 
     void unselect() {
         Stream.of(mTreeNodes)
-                .forEach(TreeNode::unselect);
+                .forEach(new Consumer<TreeNode>() {
+                    @Override
+                    public void accept(TreeNode treeNode) {
+                        treeNode.unselect();
+                    }
+                });
     }
 
     @Override
@@ -147,7 +169,13 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     public void selectAll() {
-        Stream.of(mTreeNodes).forEach(TreeNode::selectAll);
+        Stream.of(mTreeNodes)
+                .forEach(new Consumer<TreeNode>() {
+                    @Override
+                    public void accept(TreeNode treeNode) {
+                        treeNode.selectAll();
+                    }
+                });
     }
 
     @Override

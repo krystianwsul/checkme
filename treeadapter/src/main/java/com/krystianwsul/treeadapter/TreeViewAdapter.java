@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree;
+package com.krystianwsul.treeadapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;

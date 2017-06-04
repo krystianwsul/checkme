@@ -38,10 +38,6 @@ import com.krystianwsul.checkme.gui.instances.EditInstanceActivity;
 import com.krystianwsul.checkme.gui.instances.EditInstancesActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
-import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
-import com.krystianwsul.checkme.gui.tree.TreeNode;
-import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
-import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -51,6 +47,10 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
+import com.krystianwsul.treeadapter.TreeModelAdapter;
+import com.krystianwsul.treeadapter.TreeNode;
+import com.krystianwsul.treeadapter.TreeNodeCollection;
+import com.krystianwsul.treeadapter.TreeViewAdapter;
 
 import junit.framework.Assert;
 

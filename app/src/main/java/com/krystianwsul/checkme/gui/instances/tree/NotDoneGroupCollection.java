@@ -5,11 +5,11 @@ import android.support.annotation.Nullable;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.gui.tree.NodeContainer;
-import com.krystianwsul.checkme.gui.tree.TreeNode;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
+import com.krystianwsul.treeadapter.NodeContainer;
+import com.krystianwsul.treeadapter.TreeNode;
 
 import junit.framework.Assert;
 

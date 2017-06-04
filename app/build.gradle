@@ -89,6 +89,7 @@ dependencies {
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     compile 'net.danlew:android.joda:2.9.9'
+    compile project(path: ':treeadapter')
 }
 
 apply plugin: 'com.google.gms.google-services'

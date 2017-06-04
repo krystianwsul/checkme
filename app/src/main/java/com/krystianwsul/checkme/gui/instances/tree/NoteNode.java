@@ -7,9 +7,9 @@ import android.text.TextUtils;
 import android.view.View;
 
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.gui.tree.ModelNode;
-import com.krystianwsul.checkme.gui.tree.NodeContainer;
-import com.krystianwsul.checkme.gui.tree.TreeNode;
+import com.krystianwsul.treeadapter.ModelNode;
+import com.krystianwsul.treeadapter.NodeContainer;
+import com.krystianwsul.treeadapter.TreeNode;
 
 import junit.framework.Assert;
 

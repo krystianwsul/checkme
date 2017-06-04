@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.tree;
+package com.krystianwsul.treeadapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,10 @@ import android.view.View;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.annimon.stream.function.BiFunction;
+import com.annimon.stream.function.Consumer;
+import com.annimon.stream.function.Function;
+import com.annimon.stream.function.Predicate;
 
 import junit.framework.Assert;
 
@@ -74,20 +78,25 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @NonNull
     public View.OnLongClickListener getOnLongClickListener() {
-        return v -> {
-            onLongClick();
-            return true;
+        return new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                TreeNode.this.onLongClick();
+                return true;
+            }
         };
     }
 
-
     @NonNull
     public View.OnClickListener getOnClickListener() {
-        return v -> {
-            if (hasActionMode()) {
-                onLongClick();
-            } else {
-                mModelNode.onClick();
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasActionMode()) {
+                    onLongClick();
+                } else {
+                    mModelNode.onClick();
+                }
             }
         };
     }
@@ -144,7 +153,19 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             return 0;
         } else {
             if (mExpanded) {
-                return 1 + Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (a, b) -> a + b);
+                return 1 + Stream.of(mChildTreeNodes)
+                        .map(new Function<TreeNode, Integer>() {
+                            @Override
+                            public Integer apply(TreeNode treeNode) {
+                                return treeNode.displayedSize();
+                            }
+                        })
+                        .reduce(0, new BiFunction<Integer, Integer, Integer>() {
+                            @Override
+                            public Integer apply(Integer a, Integer b) {
+                                return a + b;
+                            }
+                        });
             } else {
                 return 1;
             }
@@ -156,7 +177,19 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             return 0;
         } else {
             if (mExpanded) {
-                return 1 + Stream.of(mChildTreeNodes).map(TreeNode::visibleSize).reduce(0, (a, b) -> a + b);
+                return 1 + Stream.of(mChildTreeNodes)
+                        .map(new Function<TreeNode, Integer>() {
+                            @Override
+                            public Integer apply(TreeNode treeNode) {
+                                return treeNode.visibleSize();
+                            }
+                        })
+                        .reduce(0, new BiFunction<Integer, Integer, Integer>() {
+                            @Override
+                            public Integer apply(Integer a, Integer b) {
+                                return a + b;
+                            }
+                        });
             } else {
                 return 1;
             }
@@ -224,13 +257,18 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         }
 
         List<TreeNode> selected = getSelectedNodes()
-                .collect(Collectors.toList());
+                .collect(Collectors.<TreeNode>toList());
 
         if (!selected.isEmpty()) {
             Assert.assertTrue(mExpanded);
 
             Stream.of(selected)
-                    .forEach(TreeNode::unselect);
+                    .forEach(new Consumer<TreeNode>() {
+                        @Override
+                        public void accept(TreeNode treeNode) {
+                            treeNode.unselect();
+                        }
+                    });
 
             treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
         }
@@ -252,7 +290,13 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mExpanded) {
             Assert.assertTrue(!mChildTreeNodes.isEmpty());
 
-            Stream.of(mChildTreeNodes).forEach(TreeNode::selectAll);
+            Stream.of(mChildTreeNodes)
+                    .forEach(new Consumer<TreeNode>() {
+                        @Override
+                        public void accept(TreeNode treeNode) {
+                            treeNode.selectAll();
+                        }
+                    });
         }
     }
 
@@ -268,39 +312,47 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             selectedTreeNodes.add(this);
 
         selectedTreeNodes.addAll(Stream.of(mChildTreeNodes)
-                .flatMap(TreeNode::getSelectedNodes)
-                .collect(Collectors.toList()));
+                .flatMap(new Function<TreeNode, Stream<TreeNode>>() {
+                    @Override
+                    public Stream<TreeNode> apply(TreeNode treeNode) {
+                        return treeNode.getSelectedNodes();
+                    }
+                })
+                .collect(Collectors.<TreeNode>toList()));
 
         return Stream.of(selectedTreeNodes);
     }
 
     @NonNull
     public View.OnClickListener getExpandListener() {
-        return v -> {
-            Assert.assertTrue(!mChildTreeNodes.isEmpty());
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Assert.assertTrue(!mChildTreeNodes.isEmpty());
 
-            TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
+                TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-            Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode()));
+                Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode()));
 
-            int position = treeNodeCollection.getPosition(this);
-            Assert.assertTrue(position >= 0);
+                int position = treeNodeCollection.getPosition(TreeNode.this);
+                Assert.assertTrue(position >= 0);
 
-            if (mExpanded) { // hiding
-                Assert.assertTrue(getSelectedChildren().isEmpty());
+                if (mExpanded) { // hiding
+                    Assert.assertTrue(getSelectedChildren().isEmpty());
 
-                int displayedSize = displayedSize();
-                mExpanded = false;
-                treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
-            } else { // showing
-                mExpanded = true;
-                treeNodeCollection.mTreeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
-            }
+                    int displayedSize = displayedSize();
+                    mExpanded = false;
+                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
+                } else { // showing
+                    mExpanded = true;
+                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
+                }
 
-            if (position > 0) {
-                treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(position - 1, 2);
-            } else {
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
+                if (position > 0) {
+                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(position - 1, 2);
+                } else {
+                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
+                }
             }
         };
     }
@@ -350,7 +402,19 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (expanded) {
             Assert.assertTrue(oldChildPosition >= 0);
 
-            if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
+            if (0 == Stream.of(mChildTreeNodes)
+                    .map(new Function<TreeNode, Integer>() {
+                        @Override
+                        public Integer apply(TreeNode treeNode) {
+                            return treeNode.displayedSize();
+                        }
+                    })
+                    .reduce(0, new BiFunction<Integer, Integer, Integer>() {
+                        @Override
+                        public Integer apply(Integer a, Integer b) {
+                            return a + b;
+                        }
+                    })) {
                 mExpanded = false;
 
                 if (oldParentPosition == 0) {
@@ -379,7 +443,19 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                     treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
             }
         } else {
-            if (Stream.of(mChildTreeNodes).map(TreeNode::displayedSize).reduce(0, (lhs, rhs) -> lhs + rhs) == 0) {
+            if (0 == Stream.of(mChildTreeNodes)
+                    .map(new Function<TreeNode, Integer>() {
+                        @Override
+                        public Integer apply(TreeNode treeNode) {
+                            return treeNode.displayedSize();
+                        }
+                    })
+                    .reduce(0, new BiFunction<Integer, Integer, Integer>() {
+                        @Override
+                        public Integer apply(Integer a, Integer b) {
+                            return a + b;
+                        }
+                    })) {
                 if (oldParentPosition == 0) {
                     if (mModelNode.visibleWhenEmpty()) {
                         treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
@@ -406,7 +482,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public void removeAll() {
         List<TreeNode> oldChildTreeNodes = new ArrayList<>(mChildTreeNodes);
         Stream.of(oldChildTreeNodes)
-                .forEach(this::remove);
+                .forEach(new Consumer<TreeNode>() {
+                    @Override
+                    public void accept(TreeNode treeNode) {
+                        remove(treeNode);
+                    }
+                });
     }
 
     @Override
@@ -518,8 +599,13 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
 
         return Stream.of(mChildTreeNodes)
-                .filter(TreeNode::isSelected)
-                .collect(Collectors.toList());
+                .filter(new Predicate<TreeNode>() {
+                    @Override
+                    public boolean test(TreeNode treeNode) {
+                        return treeNode.isSelected();
+                    }
+                })
+                .collect(Collectors.<TreeNode>toList());
     }
 
     void onCreateActionMode() {
@@ -533,7 +619,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             if (mExpanded)
                 Stream.of(mChildTreeNodes)
-                        .forEach(TreeNode::onCreateActionMode);
+                        .forEach(new Consumer<TreeNode>() {
+                            @Override
+                            public void accept(TreeNode treeNode) {
+                                treeNode.onCreateActionMode();
+                            }
+                        });
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
@@ -561,7 +652,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             if (mExpanded)
                 Stream.of(mChildTreeNodes)
-                        .forEach(TreeNode::onDestroyActionMode);
+                        .forEach(new Consumer<TreeNode>() {
+                            @Override
+                            public void accept(TreeNode treeNode) {
+                                treeNode.onDestroyActionMode();
+                            }
+                        });
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {

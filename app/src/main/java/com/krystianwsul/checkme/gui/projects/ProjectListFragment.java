@@ -27,12 +27,12 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
-import com.krystianwsul.checkme.gui.tree.ModelNode;
-import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
-import com.krystianwsul.checkme.gui.tree.TreeNode;
-import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
-import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
+import com.krystianwsul.treeadapter.ModelNode;
+import com.krystianwsul.treeadapter.TreeModelAdapter;
+import com.krystianwsul.treeadapter.TreeNode;
+import com.krystianwsul.treeadapter.TreeNodeCollection;
+import com.krystianwsul.treeadapter.TreeViewAdapter;
 
 import junit.framework.Assert;
 
@@ -428,7 +428,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         }
     }
 
-    static class Holder extends RecyclerView.ViewHolder {
+    private static class Holder extends RecyclerView.ViewHolder {
         @NonNull
         final TextView mProjectName;
 

@@ -22,13 +22,13 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.gui.AbstractDialogFragment;
-import com.krystianwsul.checkme.gui.tree.ModelNode;
-import com.krystianwsul.checkme.gui.tree.NodeContainer;
-import com.krystianwsul.checkme.gui.tree.TreeModelAdapter;
-import com.krystianwsul.checkme.gui.tree.TreeNode;
-import com.krystianwsul.checkme.gui.tree.TreeNodeCollection;
-import com.krystianwsul.checkme.gui.tree.TreeViewAdapter;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.treeadapter.ModelNode;
+import com.krystianwsul.treeadapter.NodeContainer;
+import com.krystianwsul.treeadapter.TreeModelAdapter;
+import com.krystianwsul.treeadapter.TreeNode;
+import com.krystianwsul.treeadapter.TreeNodeCollection;
+import com.krystianwsul.treeadapter.TreeViewAdapter;
 
 import junit.framework.Assert;
 
@@ -146,7 +146,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
         }
     }
 
-    public static class TaskAdapter implements TreeModelAdapter, TaskParent {
+    private static class TaskAdapter implements TreeModelAdapter, TaskParent {
         @NonNull
         private final ParentPickerFragment mParentPickerFragment;
 

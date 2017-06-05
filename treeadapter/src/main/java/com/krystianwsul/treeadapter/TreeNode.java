@@ -1,6 +1,7 @@
 package com.krystianwsul.treeadapter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -18,8 +19,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class TreeNode implements Comparable<TreeNode>, NodeContainer {
+    @NonNull
     private final ModelNode mModelNode;
 
+    @Nullable
     private List<TreeNode> mChildTreeNodes;
 
     @NonNull
@@ -59,6 +62,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public void setChildTreeNodes(@NonNull List<TreeNode> childTreeNodes) {
+        Assert.assertTrue(mChildTreeNodes == null);
         Assert.assertTrue(!mExpanded || !childTreeNodes.isEmpty());
 
         mChildTreeNodes = childTreeNodes;
@@ -149,6 +153,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public int displayedSize() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mModelNode.visibleDuringActionMode() && hasActionMode())) {
             return 0;
         } else {
@@ -173,6 +180,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     private int visibleSize() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())) {
             return 0;
         } else {
@@ -198,6 +208,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @NonNull
     TreeNode getNode(int position) {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(!mChildTreeNodes.isEmpty() || mModelNode.visibleWhenEmpty());
         Assert.assertTrue(mModelNode.visibleDuringActionMode() || !hasActionMode());
@@ -221,6 +234,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public int getPosition(@NonNull TreeNode treeNode) {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         if (treeNode == this)
             return 0;
 
@@ -275,6 +291,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public void selectAll() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         Assert.assertTrue(!mSelected);
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -302,7 +321,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @NonNull
     Stream<TreeNode> getSelectedNodes() {
-        Assert.assertTrue(mChildTreeNodes != null);
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
 
         Assert.assertTrue(!mSelected || mModelNode.selectable());
 
@@ -325,6 +345,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @NonNull
     public View.OnClickListener getExpandListener() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -358,6 +381,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     private boolean visible() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         NodeContainer nodeContainer = getParent();
 
         if (!mModelNode.visibleDuringActionMode() && hasActionMode())
@@ -378,6 +404,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @Override
     public void remove(@NonNull TreeNode childTreeNode) {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
@@ -480,6 +509,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public void removeAll() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         List<TreeNode> oldChildTreeNodes = new ArrayList<>(mChildTreeNodes);
         Stream.of(oldChildTreeNodes)
                 .forEach(new Consumer<TreeNode>() {
@@ -492,6 +524,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @Override
     public void add(@NonNull TreeNode childTreeNode) {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         if (mExpanded) {
@@ -596,6 +631,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     @NonNull
     @Override
     public List<TreeNode> getSelectedChildren() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         Assert.assertTrue(!mChildTreeNodes.isEmpty());
 
         return Stream.of(mChildTreeNodes)
@@ -609,6 +647,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     void onCreateActionMode() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         int position = treeNodeCollection.getPosition(this);
@@ -642,6 +683,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     void onDestroyActionMode() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         int position = treeNodeCollection.getPosition(this);
@@ -682,6 +726,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @NonNull
     public List<TreeNode> getAllChildren() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
         return mChildTreeNodes;
     }
 
@@ -701,5 +748,11 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(mSelected);
 
         onLongClick();
+    }
+
+    public static class SetChildTreeNodesNotCalledException extends InitializationException {
+        SetChildTreeNodesNotCalledException() {
+            super("TreeNode.setChildTreeNodes() has not been called.");
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.krystianwsul.treeadapter;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TreeNodeCollection implements NodeContainer {
+    @Nullable
     private List<TreeNode> mTreeNodes;
 
     @NonNull
@@ -24,6 +26,9 @@ public class TreeNodeCollection implements NodeContainer {
 
     @NonNull
     TreeNode getNode(int position) {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         Assert.assertTrue(position >= 0);
         Assert.assertTrue(position < displayedSize());
 
@@ -38,6 +43,9 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     public int getPosition(@NonNull TreeNode treeNode) {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         int offset = 0;
         for (TreeNode notDoneGroupTreeNode : mTreeNodes) {
             int position = notDoneGroupTreeNode.getPosition(treeNode);
@@ -56,12 +64,17 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     public void setNodes(@NonNull List<TreeNode> rootTreeNodes) {
+        Assert.assertTrue(mTreeNodes == null);
+
         mTreeNodes = rootTreeNodes;
 
         Collections.sort(mTreeNodes);
     }
 
     public int displayedSize() {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         int displayedSize = 0;
         for (TreeNode notDoneGroupTreeNode : mTreeNodes)
             displayedSize += notDoneGroupTreeNode.displayedSize();
@@ -70,6 +83,9 @@ public class TreeNodeCollection implements NodeContainer {
 
     @NonNull
     List<TreeNode> getSelectedNodes() {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         return Stream.of(mTreeNodes)
                 .flatMap(new Function<TreeNode, Stream<TreeNode>>() {
                     @Override
@@ -81,6 +97,9 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     void onCreateActionMode() {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         Stream.of(mTreeNodes)
                 .forEach(new Consumer<TreeNode>() {
                     @Override
@@ -91,6 +110,9 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     void onDestroyActionMode() {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         Stream.of(mTreeNodes)
                 .forEach(new Consumer<TreeNode>() {
                     @Override
@@ -101,6 +123,9 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     void unselect() {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         Stream.of(mTreeNodes)
                 .forEach(new Consumer<TreeNode>() {
                     @Override
@@ -112,6 +137,9 @@ public class TreeNodeCollection implements NodeContainer {
 
     @Override
     public void add(@NonNull TreeNode notDoneGroupTreeNode) {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         mTreeNodes.add(notDoneGroupTreeNode);
 
         Collections.sort(mTreeNodes);
@@ -129,6 +157,9 @@ public class TreeNodeCollection implements NodeContainer {
 
     @Override
     public void remove(@NonNull TreeNode notDoneGroupTreeNode) {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         Assert.assertTrue(mTreeNodes.contains(notDoneGroupTreeNode));
 
         TreeViewAdapter treeViewAdapter = mTreeViewAdapter;
@@ -169,6 +200,9 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     public void selectAll() {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
         Stream.of(mTreeNodes)
                 .forEach(new Consumer<TreeNode>() {
                     @Override
@@ -181,5 +215,11 @@ public class TreeNodeCollection implements NodeContainer {
     @Override
     public int getIndentation() {
         return 0;
+    }
+
+    public static class SetTreeNodesNotCalledException extends InitializationException {
+        private SetTreeNodesNotCalledException() {
+            super("TreeNodeCollection.seTreeNodes() has not been called.");
+        }
     }
 }

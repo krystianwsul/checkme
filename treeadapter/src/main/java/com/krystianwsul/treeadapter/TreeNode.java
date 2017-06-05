@@ -751,7 +751,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public static class SetChildTreeNodesNotCalledException extends InitializationException {
-        SetChildTreeNodesNotCalledException() {
+        private SetChildTreeNodesNotCalledException() {
             super("TreeNode.setChildTreeNodes() has not been called.");
         }
     }

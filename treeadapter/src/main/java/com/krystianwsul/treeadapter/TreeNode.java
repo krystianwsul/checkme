@@ -33,13 +33,26 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     private boolean mSelected = false;
 
     public TreeNode(@NonNull ModelNode modelNode, @NonNull NodeContainer parent, boolean expanded, boolean selected) {
+        if (selected && !modelNode.selectable())
+            throw new NotSelectableSelectedException();
+
         mModelNode = modelNode;
         mParent = parent;
 
         mExpanded = expanded;
         mSelected = selected;
+    }
 
-        Assert.assertTrue(!mSelected || mModelNode.selectable());
+    public void setChildTreeNodes(@NonNull List<TreeNode> childTreeNodes) {
+        if (mChildTreeNodes != null)
+            throw new SetChildTreeNodesCalledTwiceException();
+
+        if (mExpanded && childTreeNodes.isEmpty())
+            throw new EmptyExpandedException();
+
+        mChildTreeNodes = childTreeNodes;
+
+        Collections.sort(mChildTreeNodes);
     }
 
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
@@ -61,17 +74,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return mModelNode;
     }
 
-    public void setChildTreeNodes(@NonNull List<TreeNode> childTreeNodes) {
-        Assert.assertTrue(mChildTreeNodes == null);
-        Assert.assertTrue(!mExpanded || !childTreeNodes.isEmpty());
-
-        mChildTreeNodes = childTreeNodes;
-
-        Collections.sort(mChildTreeNodes);
-    }
-
     public boolean expanded() {
         Assert.assertTrue(!mExpanded || visibleSize() > 1);
+
         return mExpanded;
     }
 
@@ -152,6 +157,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return getTreeNodeCollection().mTreeViewAdapter;
     }
 
+    @Override
     public int displayedSize() {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
@@ -233,6 +239,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     public int getPosition(@NonNull TreeNode treeNode) {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
@@ -290,11 +297,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         }
     }
 
-    public void selectAll() {
+    void selectAll() {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
 
-        Assert.assertTrue(!mSelected);
+        if (mSelected)
+            throw new SelectAllException();
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
@@ -351,7 +359,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Assert.assertTrue(!mChildTreeNodes.isEmpty());
+                if (mChildTreeNodes.isEmpty())
+                    throw new EmptyExpandedException();
 
                 TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
@@ -361,7 +370,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 Assert.assertTrue(position >= 0);
 
                 if (mExpanded) { // hiding
-                    Assert.assertTrue(getSelectedChildren().isEmpty());
+                    if (getSelectedChildren().isEmpty())
+                        throw new SelectedChildrenException();
 
                     int displayedSize = displayedSize();
                     mExpanded = false;
@@ -409,8 +419,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        Assert.assertTrue(!mChildTreeNodes.isEmpty());
-        Assert.assertTrue(mChildTreeNodes.contains(childTreeNode));
+        if (mChildTreeNodes.contains(childTreeNode))
+            throw new NoSuchNodeException();
 
         int childDisplayedSize = childTreeNode.displayedSize();
 
@@ -610,7 +620,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public boolean getSeparatorVisibility() {
         NodeContainer parent = getParent();
 
-        Assert.assertTrue(parent.expanded());
+        if (!parent.expanded())
+            throw new CollapsedParentException();
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
@@ -634,7 +645,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
 
-        Assert.assertTrue(!mChildTreeNodes.isEmpty());
+        if (mChildTreeNodes.isEmpty())
+            throw new NoChildrenException();
 
         return Stream.of(mChildTreeNodes)
                 .filter(new Predicate<TreeNode>() {
@@ -738,14 +750,18 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public void select() {
-        Assert.assertTrue(!mSelected);
-        Assert.assertTrue(mModelNode.selectable());
+        if (mSelected)
+            throw new SelectCalledTwiceException();
+
+        if (!mModelNode.selectable())
+            throw new NotSelectableSelectedException();
 
         onLongClick();
     }
 
     public void deselect() {
-        Assert.assertTrue(mSelected);
+        if (!mSelected)
+            throw new NotSelectedException();
 
         onLongClick();
     }
@@ -754,6 +770,76 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public static class SetChildTreeNodesNotCalledException extends InitializationException {
         private SetChildTreeNodesNotCalledException() {
             super("TreeNode.setChildTreeNodes() has not been called.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SetChildTreeNodesCalledTwiceException extends InitializationException {
+        private SetChildTreeNodesCalledTwiceException() {
+            super("TreeNode.setChildTreeNodes() has already been called.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class NotSelectableSelectedException extends IllegalStateException {
+        private NotSelectableSelectedException() {
+            super("A TreeNode cannot be selected if its ModelNode is not selectable.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class EmptyExpandedException extends IllegalStateException {
+        private EmptyExpandedException() {
+            super("A TreeNode cannot be expanded if it has no children.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SelectAllException extends UnsupportedOperationException {
+        private SelectAllException() {
+            super("TreeViewAdapter.selectAll() can be called only if no nodes are selected.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SelectedChildrenException extends UnsupportedOperationException {
+        private SelectedChildrenException() {
+            super("A TreeNode cannot be collaped if it has selected children.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class NoSuchNodeException extends IllegalArgumentException {
+        private NoSuchNodeException() {
+            super("The given node is not a direct descendant of this TreeNode.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class CollapsedParentException extends UnsupportedOperationException {
+        private CollapsedParentException() {
+            super("Separator visibility is meaningless if the node is not visible.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class NoChildrenException extends UnsupportedOperationException {
+        private NoChildrenException() {
+            super("Can't get selected children of a node that has no children.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SelectCalledTwiceException extends UnsupportedOperationException {
+        private SelectCalledTwiceException() {
+            super("Can't select a node that is already selected.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class NotSelectedException extends UnsupportedOperationException {
+        private NotSelectedException() {
+            super("Can't deselect a node that is not selected.");
         }
     }
 }

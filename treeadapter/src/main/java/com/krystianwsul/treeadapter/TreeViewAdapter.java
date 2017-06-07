@@ -25,6 +25,13 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mTreeModelAdapter = treeModelAdapter;
     }
 
+    public void setTreeNodeCollection(@NonNull TreeNodeCollection treeNodeCollection) {
+        if (mTreeNodeCollection != null)
+            throw new SetTreeNodeCollectionCalledTwiceException();
+
+        mTreeNodeCollection = treeNodeCollection;
+    }
+
     @Override
     public int getItemCount() {
         if (mTreeNodeCollection == null)
@@ -36,10 +43,6 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @NonNull
     public TreeModelAdapter getTreeModelAdapter() {
         return mTreeModelAdapter;
-    }
-
-    public void setTreeNodeCollection(@NonNull TreeNodeCollection treeNodeCollection) {
-        mTreeNodeCollection = treeNodeCollection;
     }
 
     boolean hasActionMode() {
@@ -132,6 +135,13 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public static class SetTreeNodeCollectionNotCalledException extends InitializationException {
         private SetTreeNodeCollectionNotCalledException() {
             super("TreeViewAdapter.setTreeNodeCollection() has not been called.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SetTreeNodeCollectionCalledTwiceException extends InitializationException {
+        private SetTreeNodeCollectionCalledTwiceException() {
+            super("TreeViewAdapter.setTreeNodeCollection() has already been called.");
         }
     }
 }

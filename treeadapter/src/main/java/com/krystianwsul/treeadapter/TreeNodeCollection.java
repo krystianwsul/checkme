@@ -24,6 +24,15 @@ public class TreeNodeCollection implements NodeContainer {
         mTreeViewAdapter = treeViewAdapter;
     }
 
+    public void setNodes(@NonNull List<TreeNode> rootTreeNodes) {
+        if (mTreeNodes != null)
+            throw new SetTreeNodesCalledTwiceException();
+
+        mTreeNodes = rootTreeNodes;
+
+        Collections.sort(mTreeNodes);
+    }
+
     @NonNull
     TreeNode getNode(int position) {
         if (mTreeNodes == null)
@@ -42,6 +51,7 @@ public class TreeNodeCollection implements NodeContainer {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
     public int getPosition(@NonNull TreeNode treeNode) {
         if (mTreeNodes == null)
             throw new SetTreeNodesNotCalledException();
@@ -63,14 +73,7 @@ public class TreeNodeCollection implements NodeContainer {
         return treeNode.getItemViewType();
     }
 
-    public void setNodes(@NonNull List<TreeNode> rootTreeNodes) {
-        Assert.assertTrue(mTreeNodes == null);
-
-        mTreeNodes = rootTreeNodes;
-
-        Collections.sort(mTreeNodes);
-    }
-
+    @Override
     public int displayedSize() {
         if (mTreeNodes == null)
             throw new SetTreeNodesNotCalledException();
@@ -199,7 +202,7 @@ public class TreeNodeCollection implements NodeContainer {
         return this;
     }
 
-    public void selectAll() {
+    void selectAll() {
         if (mTreeNodes == null)
             throw new SetTreeNodesNotCalledException();
 
@@ -221,6 +224,13 @@ public class TreeNodeCollection implements NodeContainer {
     public static class SetTreeNodesNotCalledException extends InitializationException {
         private SetTreeNodesNotCalledException() {
             super("TreeNodeCollection.setTreeNodes() has not been called.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SetTreeNodesCalledTwiceException extends InitializationException {
+        private SetTreeNodesCalledTwiceException() {
+            super("TreeNodeCollection.setTreeNodes() has already been called.");
         }
     }
 }

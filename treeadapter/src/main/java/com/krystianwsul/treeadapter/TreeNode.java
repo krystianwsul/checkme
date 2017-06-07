@@ -750,6 +750,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         onLongClick();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class SetChildTreeNodesNotCalledException extends InitializationException {
         private SetChildTreeNodesNotCalledException() {
             super("TreeNode.setChildTreeNodes() has not been called.");

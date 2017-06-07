@@ -217,9 +217,10 @@ public class TreeNodeCollection implements NodeContainer {
         return 0;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class SetTreeNodesNotCalledException extends InitializationException {
         private SetTreeNodesNotCalledException() {
-            super("TreeNodeCollection.seTreeNodes() has not been called.");
+            super("TreeNodeCollection.setTreeNodes() has not been called.");
         }
     }
 }

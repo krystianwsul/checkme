@@ -2,14 +2,13 @@ package com.krystianwsul.treeadapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import junit.framework.Assert;
 
 import java.util.List;
 
-public class TreeViewAdapter {
+public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int TYPE_FAB_PADDING = 1000;
 
     private final boolean mShowPadding;
@@ -19,21 +18,12 @@ public class TreeViewAdapter {
     @NonNull
     private final TreeModelAdapter mTreeModelAdapter;
 
-    private Adapter mAdapter;
-
     public TreeViewAdapter(boolean showPadding, @NonNull TreeModelAdapter treeModelAdapter) {
         mShowPadding = showPadding;
         mTreeModelAdapter = treeModelAdapter;
     }
 
-    @NonNull
-    public RecyclerView.Adapter<RecyclerView.ViewHolder> getAdapter() {
-        Assert.assertTrue(mAdapter == null);
-
-        mAdapter = new Adapter(this);
-        return mAdapter;
-    }
-
+    @Override
     public int getItemCount() {
         return mTreeNodeCollection.displayedSize() + (mShowPadding ? 1 : 0);
     }
@@ -91,88 +81,21 @@ public class TreeViewAdapter {
         mTreeNodeCollection.selectAll();
     }
 
-    void notifyItemChanged(int position) {
-        Assert.assertTrue(mAdapter != null);
-
-        Log.e("asdf", "notifyItemChanged(" + position + ")");
-
-        mAdapter.notifyItemChanged(position);
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return mTreeModelAdapter.onCreateViewHolder(parent, viewType);
     }
 
-    void notifyItemInserted(int position) {
-        Assert.assertTrue(mAdapter != null);
-
-        Log.e("asdf", "notifyItemInserted(" + position + ")");
-
-        mAdapter.notifyItemInserted(position);
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        mTreeModelAdapter.onBindViewHolder(holder, position);
     }
 
-    void notifyItemRemoved(int position) {
-        Assert.assertTrue(mAdapter != null);
-
-        Log.e("asdf", "notifyItemRemoved(" + position + ")");
-
-        mAdapter.notifyItemRemoved(position);
-    }
-
-    void notifyItemRangeChanged(int positionStart, int itemCount) {
-        Assert.assertTrue(mAdapter != null);
-
-        Log.e("asdf", "notifyItemRangeChanged(" + positionStart + ", " + itemCount + ")");
-
-        mAdapter.notifyItemRangeChanged(positionStart, itemCount);
-    }
-
-    void notifyItemRangeInserted(int positionStart, int itemCount) {
-        Assert.assertTrue(mAdapter != null);
-
-        Log.e("asdf", "notifyItemRangeInserted(" + positionStart + ", " + itemCount + ")");
-
-        mAdapter.notifyItemRangeInserted(positionStart, itemCount);
-    }
-
-    void notifyItemRangeRemoved(int positionStart, int itemCount) {
-        Assert.assertTrue(mAdapter != null);
-
-        Log.e("asdf", "notifyItemRangeInserted(" + positionStart + ", " + itemCount + ")");
-
-        mAdapter.notifyItemRangeRemoved(positionStart, itemCount);
-    }
-
-    private static class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        @NonNull
-        private final TreeViewAdapter mTreeViewAdapter;
-
-        Adapter(@NonNull TreeViewAdapter treeViewAdapter) {
-            mTreeViewAdapter = treeViewAdapter;
-        }
-
-        @NonNull
-        private TreeViewAdapter getTreeViewAdapter() {
-            return mTreeViewAdapter;
-        }
-
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return getTreeViewAdapter().mTreeModelAdapter.onCreateViewHolder(parent, viewType);
-        }
-
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            getTreeViewAdapter().mTreeModelAdapter.onBindViewHolder(holder, position);
-        }
-
-        @Override
-        public int getItemCount() {
-            return getTreeViewAdapter().getItemCount();
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if (getTreeViewAdapter().mShowPadding && position == getTreeViewAdapter().mTreeNodeCollection.displayedSize())
-                return TYPE_FAB_PADDING;
-            else
-                return getTreeViewAdapter().mTreeNodeCollection.getItemViewType(position);
-        }
+    @Override
+    public int getItemViewType(int position) {
+        if (mShowPadding && position == mTreeNodeCollection.displayedSize())
+            return TYPE_FAB_PADDING;
+        else
+            return mTreeNodeCollection.getItemViewType(position);
     }
 }

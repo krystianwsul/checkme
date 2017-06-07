@@ -221,7 +221,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                     .collect(Collectors.toSet());
 
         mTreeViewAdapter = new ProjectListAdapter(getActivity()).initialize(data.mProjectDatas);
-        mProjectListRecycler.setAdapter(mTreeViewAdapter.getAdapter());
+        mProjectListRecycler.setAdapter(mTreeViewAdapter);
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 
@@ -288,6 +288,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             mContext = context;
         }
 
+        @NonNull
         private TreeViewAdapter initialize(@NonNull TreeMap<String, ProjectListLoader.ProjectData> projectDatas) {
             mProjectNodes = Stream.of(projectDatas.values())
                     .map(projectData -> new ProjectNode(this, projectData))

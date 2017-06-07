@@ -131,7 +131,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
         mTreeViewAdapter = TaskAdapter.getAdapter(this, mTaskDatas, mExpandedParentKeys);
 
-        mRecyclerView.setAdapter(mTreeViewAdapter.getAdapter());
+        mRecyclerView.setAdapter(mTreeViewAdapter);
     }
 
     @Override

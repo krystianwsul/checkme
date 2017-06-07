@@ -714,7 +714,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
         mTreeViewAdapter = GroupAdapter.getAdapter(this, mDataId, mDataWrapper.CustomTimeDatas, useGroups(), showPadding(), mDataWrapper.InstanceDatas.values(), mExpansionState, mSelectedNodes, mDataWrapper.TaskDatas, mDataWrapper.mNote);
 
-        mGroupListRecycler.setAdapter(mTreeViewAdapter.getAdapter());
+        mGroupListRecycler.setAdapter(mTreeViewAdapter);
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 

@@ -431,7 +431,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
         mTreeViewAdapter = TaskAdapter.getAdapter(this, mTaskData, mSelectedTaskKeys, mExpandedTaskIds);
 
-        mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter.getAdapter());
+        mTaskListFragmentRecycler.setAdapter(mTreeViewAdapter);
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
 

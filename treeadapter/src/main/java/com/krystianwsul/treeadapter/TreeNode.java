@@ -370,7 +370,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 Assert.assertTrue(position >= 0);
 
                 if (mExpanded) { // hiding
-                    if (getSelectedChildren().isEmpty())
+                    if (!getSelectedChildren().isEmpty())
                         throw new SelectedChildrenException();
 
                     int displayedSize = displayedSize();
@@ -419,7 +419,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        if (mChildTreeNodes.contains(childTreeNode))
+        if (!mChildTreeNodes.contains(childTreeNode))
             throw new NoSuchNodeException();
 
         int childDisplayedSize = childTreeNode.displayedSize();

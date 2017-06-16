@@ -592,6 +592,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
             return mTreeViewAdapter;
         }
 
+        @NonNull
         @Override
         public TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(mTaskListFragment.getActivity());

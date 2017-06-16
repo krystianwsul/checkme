@@ -984,6 +984,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
             return mTreeViewAdapter;
         }
 
+        @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             if (viewType == TYPE_GROUP) {

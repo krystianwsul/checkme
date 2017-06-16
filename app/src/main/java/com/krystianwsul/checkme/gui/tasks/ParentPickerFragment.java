@@ -192,6 +192,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             return mTreeViewAdapter;
         }
 
+        @NonNull
         @Override
         public TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(mParentPickerFragment.getActivity());

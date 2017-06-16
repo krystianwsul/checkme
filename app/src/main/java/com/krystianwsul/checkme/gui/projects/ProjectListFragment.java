@@ -305,6 +305,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             return mTreeViewAdapter;
         }
 
+        @NonNull
         @Override
         public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(mContext);

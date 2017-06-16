@@ -72,20 +72,25 @@ public class RemoteTask extends Task {
                 .map(remoteInstanceRecord -> new RemoteInstance(domainFactory, mRemoteProject, remoteInstanceRecord, domainFactory.getLocalFactory().getInstanceShownRecord(mRemoteProject.getId(), remoteInstanceRecord.getTaskId(), remoteInstanceRecord.getScheduleYear(), remoteInstanceRecord.getScheduleMonth(), remoteInstanceRecord.getScheduleDay(), remoteInstanceRecord.getScheduleCustomTimeId(), remoteInstanceRecord.getScheduleHour(), remoteInstanceRecord.getScheduleMinute()), now))
                 .collect(Collectors.toMap(RemoteInstance::getScheduleKey, remoteInstance -> remoteInstance));
 
-        for (RemoteSingleScheduleRecord remoteSingleScheduleRecord : mRemoteTaskRecord.mRemoteSingleScheduleRecords.values())
-            mRemoteSchedules.add(new SingleSchedule(domainFactory, new RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)));
+        mRemoteSchedules.addAll(Stream.of(mRemoteTaskRecord.mRemoteSingleScheduleRecords.values())
+                .map(remoteSingleScheduleRecord -> new SingleSchedule(domainFactory, new RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)))
+                .collect(Collectors.toList()));
 
-        for (RemoteDailyScheduleRecord remoteDailyScheduleRecord : mRemoteTaskRecord.mRemoteDailyScheduleRecords.values())
-            mRemoteSchedules.add(new DailySchedule(domainFactory, new RemoteDailyScheduleBridge(domainFactory, remoteDailyScheduleRecord)));
+        mRemoteSchedules.addAll(Stream.of(mRemoteTaskRecord.mRemoteDailyScheduleRecords.values())
+                .map(remoteDailyScheduleRecord -> new DailySchedule(domainFactory, new RemoteDailyScheduleBridge(domainFactory, remoteDailyScheduleRecord)))
+                .collect(Collectors.toList()));
 
-        for (RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord : mRemoteTaskRecord.mRemoteWeeklyScheduleRecords.values())
-            mRemoteSchedules.add(new WeeklySchedule(domainFactory, new RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)));
+        mRemoteSchedules.addAll(Stream.of(mRemoteTaskRecord.mRemoteWeeklyScheduleRecords.values())
+                .map(remoteWeeklyScheduleRecord -> new WeeklySchedule(domainFactory, new RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)))
+                .collect(Collectors.toList()));
 
-        for (RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord : mRemoteTaskRecord.mRemoteMonthlyDayScheduleRecords.values())
-            mRemoteSchedules.add(new MonthlyDaySchedule(domainFactory, new RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)));
+        mRemoteSchedules.addAll(Stream.of(mRemoteTaskRecord.mRemoteMonthlyDayScheduleRecords.values())
+                .map(remoteMonthlyDayScheduleRecord -> new MonthlyDaySchedule(domainFactory, new RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
+                .collect(Collectors.toList()));
 
-        for (RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord : mRemoteTaskRecord.mRemoteMonthlyWeekScheduleRecords.values())
-            mRemoteSchedules.add(new MonthlyWeekSchedule(domainFactory, new RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)));
+        mRemoteSchedules.addAll(Stream.of(mRemoteTaskRecord.mRemoteMonthlyWeekScheduleRecords.values())
+                .map(remoteMonthlyWeekScheduleRecord -> new MonthlyWeekSchedule(domainFactory, new RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)))
+                .collect(Collectors.toList()));
     }
 
     @NonNull

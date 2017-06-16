@@ -26,6 +26,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
 
     private TreeNode mTreeNode;
 
+    @NonNull
     private final ArrayList<DoneInstanceNode> mDoneInstanceNodes = new ArrayList<>();
 
     DividerNode(float density, int indentation, @NonNull NodeCollection nodeCollection) {
@@ -34,7 +35,8 @@ class DividerNode extends GroupHolderNode implements ModelNode {
         mNodeCollection = nodeCollection;
     }
 
-    TreeNode initialize(boolean expanded, NodeContainer nodeContainer, List<GroupListFragment.InstanceData> doneInstanceDatas, HashMap<InstanceKey, Boolean> expandedInstances) {
+    @NonNull
+    TreeNode initialize(boolean expanded, @NonNull NodeContainer nodeContainer, @NonNull List<GroupListFragment.InstanceData> doneInstanceDatas, @Nullable HashMap<InstanceKey, Boolean> expandedInstances) {
         Assert.assertTrue(!expanded || !doneInstanceDatas.isEmpty());
 
         mTreeNode = new TreeNode(this, nodeContainer, expanded, false);
@@ -67,9 +69,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
         return treeNode.expanded();
     }
 
-    void addExpandedInstances(HashMap<InstanceKey, Boolean> expandedInstances) {
-        Assert.assertTrue(expandedInstances != null);
-
+    void addExpandedInstances(@NonNull HashMap<InstanceKey, Boolean> expandedInstances) {
         for (DoneInstanceNode doneInstanceNode : mDoneInstanceNodes)
             doneInstanceNode.addExpandedInstances(expandedInstances);
     }
@@ -177,6 +177,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
         return Color.TRANSPARENT;
     }
 
+    @NonNull
     @Override
     View.OnLongClickListener getOnLongClickListener() {
         TreeNode treeNode = getTreeNode();
@@ -184,6 +185,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
         return treeNode.getOnLongClickListener();
     }
 
+    @NonNull
     @Override
     View.OnClickListener getOnClickListener() {
         TreeNode treeNode = getTreeNode();

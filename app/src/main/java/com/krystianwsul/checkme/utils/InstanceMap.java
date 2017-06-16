@@ -35,25 +35,6 @@ public class InstanceMap<T extends Instance> {
         innerMap.put(instanceKey.mScheduleKey, instance);
     }
 
-    @Deprecated
-    public boolean contains(@NonNull T instance) {
-        TaskKey taskKey = instance.getTaskKey();
-
-        HashMap<ScheduleKey, T> innerMap = mInstances.get(taskKey);
-        if (innerMap == null)
-            return false;
-
-        InstanceKey instanceKey = instance.getInstanceKey();
-
-        T innerInstance = innerMap.get(instanceKey.mScheduleKey);
-        if (innerInstance == null)
-            return false;
-
-        Assert.assertTrue(instance.equals(innerInstance));
-
-        return true;
-    }
-
     public void removeForce(@NonNull Instance instance) {
         TaskKey taskKey = instance.getTaskKey();
 

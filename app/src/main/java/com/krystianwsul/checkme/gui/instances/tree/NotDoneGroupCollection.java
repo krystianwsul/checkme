@@ -119,7 +119,6 @@ class NotDoneGroupCollection {
         NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(mDensity, mIndentation, notDoneGroupCollection, instanceDatas, mSelectable);
 
         TreeNode notDoneGroupTreeNode = notDoneGroupNode.initialize(expandedGroups, expandedInstances, selectedNodes, mNodeContainer);
-        Assert.assertTrue(notDoneGroupTreeNode != null);
 
         mNotDoneGroupNodes.add(notDoneGroupNode);
 
@@ -144,7 +143,7 @@ class NotDoneGroupCollection {
                 .collect(Collectors.toList());
     }
 
-    void addExpandedInstances(HashMap<InstanceKey, Boolean> expandedInstances) {
+    void addExpandedInstances(@NonNull HashMap<InstanceKey, Boolean> expandedInstances) {
         for (NotDoneGroupNode notDoneGroupNode : mNotDoneGroupNodes)
             notDoneGroupNode.addExpandedInstances(expandedInstances);
     }

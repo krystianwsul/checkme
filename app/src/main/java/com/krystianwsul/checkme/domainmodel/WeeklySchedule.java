@@ -131,21 +131,6 @@ public class WeeklySchedule extends RepeatingSchedule {
         return mWeeklyScheduleBridge.getCustomTimeKey();
     }
 
-    @Nullable
-    public HourMinute getHourMinute() {
-        if (mWeeklyScheduleBridge.getCustomTimeKey() != null) {
-            Assert.assertTrue(mWeeklyScheduleBridge.getHour() == null);
-            Assert.assertTrue(mWeeklyScheduleBridge.getMinute() == null);
-
-            return null;
-        } else {
-            Assert.assertTrue(mWeeklyScheduleBridge.getHour() != null);
-            Assert.assertTrue(mWeeklyScheduleBridge.getMinute() != null);
-
-            return new HourMinute(mWeeklyScheduleBridge.getHour(), mWeeklyScheduleBridge.getMinute());
-        }
-    }
-
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {

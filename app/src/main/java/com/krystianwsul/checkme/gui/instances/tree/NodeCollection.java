@@ -81,7 +81,6 @@ class NodeCollection {
         doneExpanded = doneExpanded && !doneInstanceDatas.isEmpty();
 
         TreeNode dividerTreeNode = mDividerNode.initialize(doneExpanded, mNodeContainer, doneInstanceDatas, expandedInstances);
-        Assert.assertTrue(dividerTreeNode != null);
 
         rootTreeNodes.add(dividerTreeNode);
 
@@ -122,7 +121,7 @@ class NodeCollection {
         return mDividerNode;
     }
 
-    void addExpandedInstances(HashMap<InstanceKey, Boolean> expandedInstances) {
+    void addExpandedInstances(@NonNull HashMap<InstanceKey, Boolean> expandedInstances) {
         mNotDoneGroupCollection.addExpandedInstances(expandedInstances);
         mDividerNode.addExpandedInstances(expandedInstances);
     }
@@ -131,6 +130,7 @@ class NodeCollection {
         return (mUnscheduledNode != null && mUnscheduledNode.expanded());
     }
 
+    @Nullable
     List<TaskKey> getExpandedTaskKeys() {
         if (mUnscheduledNode == null)
             return null;

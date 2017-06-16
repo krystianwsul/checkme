@@ -152,21 +152,6 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
         return mMonthlyDayScheduleBridge.getCustomTimeKey();
     }
 
-    @Nullable
-    public HourMinute getHourMinute() {
-        if (mMonthlyDayScheduleBridge.getCustomTimeKey() != null) {
-            Assert.assertTrue(mMonthlyDayScheduleBridge.getHour() == null);
-            Assert.assertTrue(mMonthlyDayScheduleBridge.getMinute() == null);
-
-            return null;
-        } else {
-            Assert.assertTrue(mMonthlyDayScheduleBridge.getHour() != null);
-            Assert.assertTrue(mMonthlyDayScheduleBridge.getMinute() != null);
-
-            return new HourMinute(mMonthlyDayScheduleBridge.getHour(), mMonthlyDayScheduleBridge.getMinute());
-        }
-    }
-
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {

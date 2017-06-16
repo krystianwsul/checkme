@@ -36,9 +36,12 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     private TreeNode mTreeNode;
 
+    @NonNull
     private final List<GroupListFragment.InstanceData> mInstanceDatas;
 
+    @NonNull
     private final ArrayList<NotDoneInstanceNode> mNotDoneInstanceNodes = new ArrayList<>();
+
     private NodeCollection mNodeCollection;
 
     final ExactTimeStamp mExactTimeStamp;
@@ -59,9 +62,8 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         mSelectable = selectable;
     }
 
-    TreeNode initialize(List<TimeStamp> expandedGroups, HashMap<InstanceKey, Boolean> expandedInstances, ArrayList<InstanceKey> selectedNodes, NodeContainer nodeContainer) {
-        Assert.assertTrue(nodeContainer != null);
-
+    @NonNull
+    TreeNode initialize(@Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, @Nullable ArrayList<InstanceKey> selectedNodes, @NonNull NodeContainer nodeContainer) {
         boolean expanded;
         boolean doneExpanded;
         if (mInstanceDatas.size() == 1) {
@@ -115,9 +117,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         return (mInstanceDatas.size() == 1);
     }
 
-    void addExpandedInstances(HashMap<InstanceKey, Boolean> expandedInstances) {
-        Assert.assertTrue(expandedInstances != null);
-
+    void addExpandedInstances(@NonNull HashMap<InstanceKey, Boolean> expandedInstances) {
         if (!expanded())
             return;
 

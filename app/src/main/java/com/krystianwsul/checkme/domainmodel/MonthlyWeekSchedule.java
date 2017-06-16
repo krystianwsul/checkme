@@ -160,21 +160,6 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
         return mMonthlyWeekScheduleBridge.getCustomTimeKey();
     }
 
-    @Nullable
-    public HourMinute getHourMinute() {
-        if (mMonthlyWeekScheduleBridge.getCustomTimeKey() != null) {
-            Assert.assertTrue(mMonthlyWeekScheduleBridge.getHour() == null);
-            Assert.assertTrue(mMonthlyWeekScheduleBridge.getMinute() == null);
-
-            return null;
-        } else {
-            Assert.assertTrue(mMonthlyWeekScheduleBridge.getHour() != null);
-            Assert.assertTrue(mMonthlyWeekScheduleBridge.getMinute() != null);
-
-            return new HourMinute(mMonthlyWeekScheduleBridge.getHour(), mMonthlyWeekScheduleBridge.getMinute());
-        }
-    }
-
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {

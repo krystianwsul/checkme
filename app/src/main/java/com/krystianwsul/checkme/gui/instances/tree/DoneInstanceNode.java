@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree;
 import android.app.Activity;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
@@ -20,11 +21,12 @@ import java.util.HashMap;
 
 class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollectionParent {
     @NonNull
+    final GroupListFragment.InstanceData mInstanceData;
+
+    @NonNull
     private final DividerNode mDividerNode;
 
     private TreeNode mTreeNode;
-
-    final GroupListFragment.InstanceData mInstanceData;
 
     private NodeCollection mNodeCollection;
 
@@ -35,7 +37,8 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
         mDividerNode = dividerNode;
     }
 
-    TreeNode initialize(@NonNull TreeNode dividerTreeNode, HashMap<InstanceKey, Boolean> expandedInstances) {
+    @NonNull
+    TreeNode initialize(@NonNull TreeNode dividerTreeNode, @Nullable HashMap<InstanceKey, Boolean> expandedInstances) {
         boolean expanded = false;
         boolean doneExpanded = false;
         if (expandedInstances != null && expandedInstances.containsKey(mInstanceData.InstanceKey) && !mInstanceData.Children.isEmpty()) {
@@ -72,9 +75,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
         return getTreeNode().expanded();
     }
 
-    void addExpandedInstances(HashMap<InstanceKey, Boolean> expandedInstances) {
-        Assert.assertTrue(expandedInstances != null);
-
+    void addExpandedInstances(@NonNull HashMap<InstanceKey, Boolean> expandedInstances) {
         if (!expanded())
             return;
 
@@ -249,11 +250,13 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
         return Color.TRANSPARENT;
     }
 
+    @NonNull
     @Override
     View.OnLongClickListener getOnLongClickListener() {
         return getTreeNode().getOnLongClickListener();
     }
 
+    @NonNull
     @Override
     View.OnClickListener getOnClickListener() {
         return getTreeNode().getOnClickListener();

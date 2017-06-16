@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,113 +88,38 @@ public class SaveService extends WakefulIntentService {
         private static class FactoryImpl extends Factory {
             @Override
             public void startService(@NonNull Context context, @NonNull PersistenceManger persistenceManger) {
-                ArrayList<InsertCommand> insertCommands = new ArrayList<>();
+                List<Collection<? extends Record>> collections = Arrays.asList(
+                        persistenceManger.mCustomTimeRecords,
+                        persistenceManger.mTaskRecords,
+                        persistenceManger.mTaskHierarchyRecords,
+                        persistenceManger.mScheduleRecords,
+                        persistenceManger.mScheduleRecords,
+                        persistenceManger.mSingleScheduleRecords.values(),
+                        persistenceManger.mDailyScheduleRecords.values(),
+                        persistenceManger.mWeeklyScheduleRecords.values(),
+                        persistenceManger.mMonthlyDayScheduleRecords.values(),
+                        persistenceManger.mMonthlyWeekScheduleRecords.values(),
+                        persistenceManger.mInstanceRecords,
+                        persistenceManger.mInstanceShownRecords);
 
-                for (CustomTimeRecord customTimeRecord : persistenceManger.mCustomTimeRecords)
-                    if (customTimeRecord.needsInsert())
-                        insertCommands.add(customTimeRecord.getInsertCommand());
-
-                for (TaskRecord taskRecord : persistenceManger.mTaskRecords)
-                    if (taskRecord.needsInsert())
-                        insertCommands.add(taskRecord.getInsertCommand());
-
-                for (TaskHierarchyRecord taskHierarchyRecord : persistenceManger.mTaskHierarchyRecords)
-                    if (taskHierarchyRecord.needsInsert())
-                        insertCommands.add(taskHierarchyRecord.getInsertCommand());
-
-                for (ScheduleRecord scheduleRecord : persistenceManger.mScheduleRecords)
-                    if (scheduleRecord.needsInsert())
-                        insertCommands.add(scheduleRecord.getInsertCommand());
-
-                for (SingleScheduleRecord singleScheduleRecord : persistenceManger.mSingleScheduleRecords.values())
-                    if (singleScheduleRecord.needsInsert())
-                        insertCommands.add(singleScheduleRecord.getInsertCommand());
-
-                for (DailyScheduleRecord dailyScheduleRecord : persistenceManger.mDailyScheduleRecords.values())
-                    if (dailyScheduleRecord.needsInsert())
-                        insertCommands.add(dailyScheduleRecord.getInsertCommand());
-
-                for (WeeklyScheduleRecord weeklyScheduleRecord : persistenceManger.mWeeklyScheduleRecords.values())
-                    if (weeklyScheduleRecord.needsInsert())
-                        insertCommands.add(weeklyScheduleRecord.getInsertCommand());
-
-                for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : persistenceManger.mMonthlyDayScheduleRecords.values())
-                    if (monthlyDayScheduleRecord.needsInsert())
-                        insertCommands.add(monthlyDayScheduleRecord.getInsertCommand());
-
-                for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : persistenceManger.mMonthlyWeekScheduleRecords.values())
-                    if (monthlyWeekScheduleRecord.needsInsert())
-                        insertCommands.add(monthlyWeekScheduleRecord.getInsertCommand());
-
-                for (InstanceRecord instanceRecord : persistenceManger.mInstanceRecords)
-                    if (instanceRecord.needsInsert())
-                        insertCommands.add(instanceRecord.getInsertCommand());
-
-                for (InstanceShownRecord instanceShownRecord : persistenceManger.mInstanceShownRecords)
-                    if (instanceShownRecord.needsInsert())
-                        insertCommands.add(instanceShownRecord.getInsertCommand());
+                ArrayList<InsertCommand> insertCommands = Stream.of(collections)
+                        .flatMap(Stream::of)
+                        .filter(Record::needsInsert)
+                        .map(Record::getInsertCommand)
+                        .collect(Collectors.toCollection(ArrayList::new));
 
                 // update
 
-                ArrayList<UpdateCommand> updateCommands = new ArrayList<>();
+                ArrayList<UpdateCommand> updateCommands = Stream.of(collections)
+                        .flatMap(Stream::of)
+                        .filter(Record::needsUpdate)
+                        .map(Record::getUpdateCommand)
+                        .collect(Collectors.toCollection(ArrayList::new));
 
-                for (CustomTimeRecord customTimeRecord : persistenceManger.mCustomTimeRecords)
-                    if (customTimeRecord.needsUpdate())
-                        updateCommands.add(customTimeRecord.getUpdateCommand());
-
-                for (TaskRecord taskRecord : persistenceManger.mTaskRecords)
-                    if (taskRecord.needsUpdate())
-                        updateCommands.add(taskRecord.getUpdateCommand());
-
-                for (TaskHierarchyRecord taskHierarchyRecord : persistenceManger.mTaskHierarchyRecords)
-                    if (taskHierarchyRecord.needsUpdate())
-                        updateCommands.add(taskHierarchyRecord.getUpdateCommand());
-
-                for (ScheduleRecord scheduleRecord : persistenceManger.mScheduleRecords)
-                    if (scheduleRecord.needsUpdate())
-                        updateCommands.add(scheduleRecord.getUpdateCommand());
-
-                for (SingleScheduleRecord singleScheduleRecord : persistenceManger.mSingleScheduleRecords.values())
-                    if (singleScheduleRecord.needsUpdate())
-                        updateCommands.add(singleScheduleRecord.getUpdateCommand());
-
-                for (DailyScheduleRecord dailyScheduleRecord : persistenceManger.mDailyScheduleRecords.values())
-                    if (dailyScheduleRecord.needsUpdate())
-                        updateCommands.add(dailyScheduleRecord.getUpdateCommand());
-
-                for (WeeklyScheduleRecord weeklyScheduleRecord : persistenceManger.mWeeklyScheduleRecords.values())
-                    if (weeklyScheduleRecord.needsUpdate())
-                        updateCommands.add(weeklyScheduleRecord.getUpdateCommand());
-
-                for (MonthlyDayScheduleRecord monthlyDayScheduleRecord : persistenceManger.mMonthlyDayScheduleRecords.values())
-                    if (monthlyDayScheduleRecord.needsUpdate())
-                        updateCommands.add(monthlyDayScheduleRecord.getUpdateCommand());
-
-                for (MonthlyWeekScheduleRecord monthlyWeekScheduleRecord : persistenceManger.mMonthlyWeekScheduleRecords.values())
-                    if (monthlyWeekScheduleRecord.needsUpdate())
-                        updateCommands.add(monthlyWeekScheduleRecord.getUpdateCommand());
-
-                for (InstanceRecord instanceRecord : persistenceManger.mInstanceRecords)
-                    if (instanceRecord.needsUpdate())
-                        updateCommands.add(instanceRecord.getUpdateCommand());
-
-                for (InstanceShownRecord instanceShownRecord : persistenceManger.mInstanceShownRecords)
-                    if (instanceShownRecord.needsUpdate())
-                        updateCommands.add(instanceShownRecord.getUpdateCommand());
-
-                ArrayList<DeleteCommand> deleteCommands = new ArrayList<>();
-
-                deleteCommands.addAll(delete(persistenceManger.mCustomTimeRecords));
-                deleteCommands.addAll(delete(persistenceManger.mTaskRecords));
-                deleteCommands.addAll(delete(persistenceManger.mTaskHierarchyRecords));
-                deleteCommands.addAll(delete(persistenceManger.mScheduleRecords));
-                deleteCommands.addAll(delete(persistenceManger.mSingleScheduleRecords));
-                deleteCommands.addAll(delete(persistenceManger.mDailyScheduleRecords));
-                deleteCommands.addAll(delete(persistenceManger.mWeeklyScheduleRecords));
-                deleteCommands.addAll(delete(persistenceManger.mMonthlyDayScheduleRecords));
-                deleteCommands.addAll(delete(persistenceManger.mMonthlyWeekScheduleRecords));
-                deleteCommands.addAll(delete(persistenceManger.mInstanceRecords));
-                deleteCommands.addAll(delete(persistenceManger.mInstanceShownRecords));
+                ArrayList<DeleteCommand> deleteCommands = Stream.of(collections)
+                        .map(FactoryImpl::delete)
+                        .flatMap(Stream::of)
+                        .collect(Collectors.toCollection(ArrayList::new));
 
                 Intent intent = new Intent(context, SaveService.class);
                 intent.putParcelableArrayListExtra(INSERT_COMMAND_KEY, insertCommands);

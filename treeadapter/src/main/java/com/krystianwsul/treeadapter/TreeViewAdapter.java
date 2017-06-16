@@ -1,8 +1,11 @@
 package com.krystianwsul.treeadapter;
 
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import junit.framework.Assert;
@@ -10,9 +13,11 @@ import junit.framework.Assert;
 import java.util.List;
 
 public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    public static final int TYPE_FAB_PADDING = 1000;
+    private static final int TYPE_PADDING = 1000;
 
-    private final boolean mShowPadding;
+    @Nullable
+    @LayoutRes
+    private final Integer mPaddingLayout;
 
     @Nullable
     private TreeNodeCollection mTreeNodeCollection;
@@ -20,9 +25,13 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @NonNull
     private final TreeModelAdapter mTreeModelAdapter;
 
-    public TreeViewAdapter(boolean showPadding, @NonNull TreeModelAdapter treeModelAdapter) {
-        mShowPadding = showPadding;
+    public TreeViewAdapter(@NonNull TreeModelAdapter treeModelAdapter) {
+        this(treeModelAdapter, null);
+    }
+
+    public TreeViewAdapter(@NonNull TreeModelAdapter treeModelAdapter, @Nullable @LayoutRes Integer paddingLayout) {
         mTreeModelAdapter = treeModelAdapter;
+        mPaddingLayout = paddingLayout;
     }
 
     public void setTreeNodeCollection(@NonNull TreeNodeCollection treeNodeCollection) {
@@ -37,7 +46,7 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (mTreeNodeCollection == null)
             throw new SetTreeNodeCollectionNotCalledException();
 
-        return mTreeNodeCollection.displayedSize() + (mShowPadding ? 1 : 0);
+        return mTreeNodeCollection.displayedSize() + (mPaddingLayout != null ? 1 : 0);
     }
 
     @NonNull
@@ -86,21 +95,6 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mTreeNodeCollection.unselect();
     }
 
-    @NonNull
-    public TreeNode getNode(int position) {
-        if (mTreeNodeCollection == null)
-            throw new SetTreeNodeCollectionNotCalledException();
-
-        return mTreeNodeCollection.getNode(position);
-    }
-
-    public int displayedSize() {
-        if (mTreeNodeCollection == null)
-            throw new SetTreeNodeCollectionNotCalledException();
-
-        return mTreeNodeCollection.displayedSize();
-    }
-
     public void selectAll() {
         if (mTreeNodeCollection == null)
             throw new SetTreeNodeCollectionNotCalledException();
@@ -112,12 +106,38 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return mTreeModelAdapter.onCreateViewHolder(parent, viewType);
+        if (viewType == TYPE_PADDING) {
+            Assert.assertTrue(mPaddingLayout != null);
+
+            View view = LayoutInflater.from(parent.getContext()).inflate(mPaddingLayout, parent, false);
+            Assert.assertTrue(view != null);
+
+            return new PaddingHolder(view);
+        } else {
+            return mTreeModelAdapter.onCreateViewHolder(parent, viewType);
+        }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        mTreeModelAdapter.onBindViewHolder(holder, position);
+        Assert.assertTrue(position >= 0);
+
+        int itemCount = getItemCount();
+        Assert.assertTrue(position < itemCount);
+
+        if (mTreeNodeCollection == null)
+            throw new SetTreeNodeCollectionNotCalledException();
+
+        int displayedSize = mTreeNodeCollection.displayedSize();
+
+        if (position < displayedSize) {
+            TreeNode treeNode = mTreeNodeCollection.getNode(position);
+            treeNode.onBindViewHolder(holder);
+        } else {
+            Assert.assertTrue(position == displayedSize);
+            Assert.assertTrue(mPaddingLayout != null);
+            Assert.assertTrue(position == itemCount - 1);
+        }
     }
 
     @Override
@@ -125,8 +145,8 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (mTreeNodeCollection == null)
             throw new SetTreeNodeCollectionNotCalledException();
 
-        if (mShowPadding && position == mTreeNodeCollection.displayedSize())
-            return TYPE_FAB_PADDING;
+        if (mPaddingLayout != null && position == mTreeNodeCollection.displayedSize())
+            return TYPE_PADDING;
         else
             return mTreeNodeCollection.getItemViewType(position);
     }
@@ -142,6 +162,12 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public static class SetTreeNodeCollectionCalledTwiceException extends InitializationException {
         private SetTreeNodeCollectionCalledTwiceException() {
             super("TreeViewAdapter.setTreeNodeCollection() has already been called.");
+        }
+    }
+
+    private static class PaddingHolder extends RecyclerView.ViewHolder {
+        PaddingHolder(@NonNull View view) {
+            super(view);
         }
     }
 }

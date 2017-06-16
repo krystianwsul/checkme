@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -951,7 +950,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         private TreeViewAdapter initialize(boolean useGroups, Collection<InstanceData> instanceDatas, GroupListFragment.ExpansionState expansionState, ArrayList<InstanceKey> selectedNodes, List<TaskData> taskDatas, @Nullable String note) {
             Assert.assertTrue(instanceDatas != null);
 
-            mTreeViewAdapter = new TreeViewAdapter(mShowFab, this);
+            mTreeViewAdapter = new TreeViewAdapter(this, mShowFab ? R.layout.row_group_list_fab_padding : null);
 
             TreeNodeCollection treeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
 
@@ -987,40 +986,17 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            if (viewType == TYPE_GROUP) {
-                LinearLayout groupRow = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
+            LinearLayout groupRow = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
-                LinearLayout groupRowContainer = (LinearLayout) groupRow.findViewById(R.id.group_row_container);
-                TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
-                TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
-                TextView groupRowChildren = (TextView) groupRow.findViewById(R.id.group_row_children);
-                ImageView groupRowExpand = (ImageView) groupRow.findViewById(R.id.group_row_expand);
-                CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
-                View groupRowSeparator = groupRow.findViewById(R.id.group_row_separator);
+            LinearLayout groupRowContainer = (LinearLayout) groupRow.findViewById(R.id.group_row_container);
+            TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
+            TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
+            TextView groupRowChildren = (TextView) groupRow.findViewById(R.id.group_row_children);
+            ImageView groupRowExpand = (ImageView) groupRow.findViewById(R.id.group_row_expand);
+            CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
+            View groupRowSeparator = groupRow.findViewById(R.id.group_row_separator);
 
-                return new GroupHolder(groupRow, groupRowContainer, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator);
-            } else {
-                Assert.assertTrue(viewType == TreeViewAdapter.TYPE_FAB_PADDING);
-
-                FrameLayout frameLayout = (FrameLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list_fab_padding, parent, false);
-                return new FabPaddingHolder(frameLayout);
-            }
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-            Assert.assertTrue(position >= 0);
-
-            Assert.assertTrue(position < mTreeViewAdapter.getItemCount());
-
-            if (position < mTreeViewAdapter.displayedSize()) {
-                TreeNode treeNode = mTreeViewAdapter.getNode(position);
-                treeNode.onBindViewHolder(viewHolder);
-            } else {
-                Assert.assertTrue(position == mTreeViewAdapter.displayedSize());
-                Assert.assertTrue(mShowFab);
-                Assert.assertTrue(position == mTreeViewAdapter.getItemCount() - 1);
-            }
+            return new GroupHolder(groupRow, groupRowContainer, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator);
         }
 
         @Override
@@ -1088,12 +1064,6 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                 mGroupRowExpand = groupRowExpand;
                 mGroupRowCheckBox = groupRowCheckBox;
                 mGroupRowSeparator = groupRowSeparator;
-            }
-        }
-
-        static class FabPaddingHolder extends RecyclerView.ViewHolder {
-            FabPaddingHolder(FrameLayout frameLayout) {
-                super(frameLayout);
             }
         }
     }

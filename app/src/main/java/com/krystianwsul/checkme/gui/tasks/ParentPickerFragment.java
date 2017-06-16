@@ -169,7 +169,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
         @NonNull
         private TreeViewAdapter initialize(float density, @NonNull Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> taskDatas, @Nullable List<CreateTaskLoader.ParentKey> expandedParentKeys) {
-            mTreeViewAdapter = new TreeViewAdapter(false, this);
+            mTreeViewAdapter = new TreeViewAdapter(this);
 
             TreeNodeCollection treeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
 
@@ -217,11 +217,6 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             Assert.assertTrue(taskRowSeparator != null);
 
             return new TaskHolder(showTaskRow, taskRowContainer, taskRowName, taskRowDetails, taskRowChildren, taskRowImage, taskRowSeparator);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-            getTreeViewAdapter().getNode(position).onBindViewHolder(viewHolder);
         }
 
         @NonNull

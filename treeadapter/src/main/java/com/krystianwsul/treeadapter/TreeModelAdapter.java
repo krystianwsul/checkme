@@ -8,8 +8,6 @@ public interface TreeModelAdapter {
     @NonNull
     RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType);
 
-    void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position);
-
     boolean hasActionMode();
 
     void incrementSelected();

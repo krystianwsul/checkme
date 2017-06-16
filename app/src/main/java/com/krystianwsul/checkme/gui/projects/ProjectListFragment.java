@@ -294,7 +294,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                     .map(projectData -> new ProjectNode(this, projectData))
                     .collect(Collectors.toList());
 
-            mTreeViewAdapter = new TreeViewAdapter(false, this);
+            mTreeViewAdapter = new TreeViewAdapter(this);
             mTreeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
             mTreeViewAdapter.setTreeNodeCollection(mTreeNodeCollection);
 
@@ -314,11 +314,6 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             Assert.assertTrue(rowProject != null);
 
             return new Holder(rowProject);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            mTreeViewAdapter.getNode(position).onBindViewHolder(holder);
         }
 
         @Override

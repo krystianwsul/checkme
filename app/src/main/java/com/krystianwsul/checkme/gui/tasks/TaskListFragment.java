@@ -561,7 +561,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
         @NonNull
         private TreeViewAdapter initialize(float density, @NonNull TaskData taskData, @Nullable List<TaskKey> selectedTaskKeys, @Nullable List<TaskKey> expandedTaskKeys) {
-            mTreeViewAdapter = new TreeViewAdapter(false, this);
+            mTreeViewAdapter = new TreeViewAdapter(this, R.layout.row_group_list_fab_padding);
 
             mTreeNodeCollection = new TreeNodeCollection(mTreeViewAdapter);
 
@@ -619,11 +619,6 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
             return new TaskHolder(showTaskRow, taskRowContainer, taskRowName, taskRowDetails, taskRowChildren, taskRowImage, taskRowSeparator);
         }
 
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-            getTreeViewAdapter().getNode(position).onBindViewHolder(viewHolder);
-        }
-
         public void remove(@NonNull TaskWrapper taskWrapper) {
             Assert.assertTrue(mTaskWrappers.contains(taskWrapper));
 
@@ -639,13 +634,6 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         @NonNull
         TaskListFragment getTaskListFragment() {
             return mTaskListFragment;
-        }
-
-        @NonNull
-        TreeViewAdapter getTreeViewAdapter() {
-            Assert.assertTrue(mTreeViewAdapter != null);
-
-            return mTreeViewAdapter;
         }
 
         @NonNull

@@ -50,7 +50,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mExpanded && childTreeNodes.isEmpty())
             throw new EmptyExpandedException();
 
-        mChildTreeNodes = childTreeNodes;
+        mChildTreeNodes = new ArrayList<>(childTreeNodes);
 
         Collections.sort(mChildTreeNodes);
     }

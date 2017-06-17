@@ -10,6 +10,7 @@ import com.annimon.stream.function.Function;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class TreeNodeCollection implements NodeContainer {
         if (mTreeNodes != null)
             throw new SetTreeNodesCalledTwiceException();
 
-        mTreeNodes = rootTreeNodes;
+        mTreeNodes = new ArrayList<>(rootTreeNodes);
 
         Collections.sort(mTreeNodes);
     }
@@ -57,11 +58,11 @@ public class TreeNodeCollection implements NodeContainer {
             throw new SetTreeNodesNotCalledException();
 
         int offset = 0;
-        for (TreeNode notDoneGroupTreeNode : mTreeNodes) {
-            int position = notDoneGroupTreeNode.getPosition(treeNode);
+        for (TreeNode currTreeNode : mTreeNodes) {
+            int position = currTreeNode.getPosition(treeNode);
             if (position >= 0)
                 return offset + position;
-            offset += notDoneGroupTreeNode.displayedSize();
+            offset += currTreeNode.displayedSize();
         }
 
         return -1;
@@ -79,8 +80,8 @@ public class TreeNodeCollection implements NodeContainer {
             throw new SetTreeNodesNotCalledException();
 
         int displayedSize = 0;
-        for (TreeNode notDoneGroupTreeNode : mTreeNodes)
-            displayedSize += notDoneGroupTreeNode.displayedSize();
+        for (TreeNode treeNode : mTreeNodes)
+            displayedSize += treeNode.displayedSize();
         return displayedSize;
     }
 
@@ -139,17 +140,17 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     @Override
-    public void add(@NonNull TreeNode notDoneGroupTreeNode) {
+    public void add(@NonNull TreeNode treeNode) {
         if (mTreeNodes == null)
             throw new SetTreeNodesNotCalledException();
 
-        mTreeNodes.add(notDoneGroupTreeNode);
+        mTreeNodes.add(treeNode);
 
         Collections.sort(mTreeNodes);
 
         TreeViewAdapter treeViewAdapter = mTreeViewAdapter;
 
-        int newPosition = getPosition(notDoneGroupTreeNode);
+        int newPosition = getPosition(treeNode);
         Assert.assertTrue(newPosition >= 0);
 
         treeViewAdapter.notifyItemInserted(newPosition);
@@ -159,20 +160,20 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     @Override
-    public void remove(@NonNull TreeNode notDoneGroupTreeNode) {
+    public void remove(@NonNull TreeNode treeNode) {
         if (mTreeNodes == null)
             throw new SetTreeNodesNotCalledException();
 
-        Assert.assertTrue(mTreeNodes.contains(notDoneGroupTreeNode));
+        Assert.assertTrue(mTreeNodes.contains(treeNode));
 
         TreeViewAdapter treeViewAdapter = mTreeViewAdapter;
 
-        int oldPosition = getPosition(notDoneGroupTreeNode);
+        int oldPosition = getPosition(treeNode);
         Assert.assertTrue(oldPosition >= 0);
 
-        int displayedSize = notDoneGroupTreeNode.displayedSize();
+        int displayedSize = treeNode.displayedSize();
 
-        mTreeNodes.remove(notDoneGroupTreeNode);
+        mTreeNodes.remove(treeNode);
 
         treeViewAdapter.notifyItemRangeRemoved(oldPosition, displayedSize);
 

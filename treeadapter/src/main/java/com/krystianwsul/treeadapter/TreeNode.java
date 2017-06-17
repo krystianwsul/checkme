@@ -55,7 +55,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Collections.sort(mChildTreeNodes);
     }
 
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
+    void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
         mModelNode.onBindViewHolder(viewHolder);
     }
 

@@ -364,7 +364,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-                Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode()));
+                Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode())); // todo change to error that you can't collapse a node with selected children
 
                 int position = treeNodeCollection.getPosition(TreeNode.this);
                 Assert.assertTrue(position >= 0);

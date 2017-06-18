@@ -368,6 +368,45 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return Stream.of(selectedTreeNodes);
     }
 
+    @SuppressWarnings("RedundantIfStatement")
+    private boolean canBeShown() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
+        if (!mModelNode.visibleDuringActionMode() && hasActionMode())
+            return false;
+
+        if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())
+            return false;
+
+        return true;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean getExpandVisible() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
+        if (!visible())
+            throw new InvisibleNodeException();
+
+        if (mChildTreeNodes.isEmpty())
+            return false;
+
+        if (Stream.of(mChildTreeNodes).noneMatch(new Predicate<TreeNode>() {
+            @Override
+            public boolean test(TreeNode value) {
+                return value.canBeShown();
+            }
+        }))
+            return false;
+
+        if (hasActionMode() && hasSelectedDescendants())
+            return false;
+
+        return true;
+    }
+
     @NonNull
     public View.OnClickListener getExpandListener() {
         if (mChildTreeNodes == null)
@@ -414,10 +453,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         NodeContainer nodeContainer = getParent();
 
-        if (!mModelNode.visibleDuringActionMode() && hasActionMode())
-            return false;
-
-        if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())
+        if (!canBeShown())
             return false;
 
         if (nodeContainer instanceof TreeNodeCollection) {
@@ -639,7 +675,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         NodeContainer parent = getParent();
 
         if (!parent.expanded())
-            throw new CollapsedParentException();
+            throw new InvisibleNodeException();
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
@@ -853,9 +889,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static class CollapsedParentException extends UnsupportedOperationException {
-        private CollapsedParentException() {
-            super("Separator visibility is meaningless if the node is not visible.");
+    public static class InvisibleNodeException extends UnsupportedOperationException {
+        private InvisibleNodeException() {
+            super("This operation is meaningless if the node is not visible.");
         }
     }
 

@@ -331,15 +331,20 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
             GroupListFragment.InstanceData instanceData = getSingleInstanceData();
 
             if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (notDoneGroupTreeNode.hasSelectedDescendants() || notDoneGroupTreeNode.displayedSize() == 1))) {
+                Assert.assertTrue(!notDoneGroupTreeNode.getExpandVisible());
                 return View.INVISIBLE;
             } else {
+                Assert.assertTrue(notDoneGroupTreeNode.getExpandVisible());
                 return View.VISIBLE;
             }
         } else {
-            if (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.hasSelectedDescendants())
+            if (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.hasSelectedDescendants()) {
+                Assert.assertTrue(!notDoneGroupTreeNode.getExpandVisible());
                 return View.INVISIBLE;
-            else
+            } else {
+                Assert.assertTrue(notDoneGroupTreeNode.getExpandVisible());
                 return View.VISIBLE;
+            }
         }
     }
 

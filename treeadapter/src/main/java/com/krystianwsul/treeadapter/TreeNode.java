@@ -373,7 +373,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-                Assert.assertTrue(!(hasSelectedDescendants() && hasActionMode())); // todo change to error that you can't collapse a node with selected children
+                if (hasSelectedDescendants() && hasActionMode())
+                    throw new DescendantSelectedException();
 
                 int position = treeNodeCollection.getPosition(TreeNode.this);
                 Assert.assertTrue(position >= 0);
@@ -861,6 +862,13 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public static class NotSelectedException extends UnsupportedOperationException {
         private NotSelectedException() {
             super("Can't deselect a node that is not selected.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class DescendantSelectedException extends UnsupportedOperationException {
+        private DescendantSelectedException() {
+            super("Can't change a node's expansion state when it has selected descendants.");
         }
     }
 }

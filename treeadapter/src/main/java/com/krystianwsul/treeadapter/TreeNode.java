@@ -36,6 +36,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (selected && !modelNode.selectable())
             throw new NotSelectableSelectedException();
 
+        if (modelNode.selectable() && !modelNode.visibleDuringActionMode())
+            throw new SelectableNotVisibleException();
+
         mModelNode = modelNode;
         mParent = parent;
 
@@ -283,6 +286,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         if (mSelected) {
             Assert.assertTrue(mModelNode.selectable());
+            Assert.assertTrue(mModelNode.visibleDuringActionMode());
 
             mSelected = false;
             treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
@@ -316,6 +320,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         if (mModelNode.selectable()) {
+            Assert.assertTrue(mModelNode.visibleDuringActionMode());
+
             mSelected = true;
 
             treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
@@ -345,8 +351,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         ArrayList<TreeNode> selectedTreeNodes = new ArrayList<>();
 
-        if (mSelected)
+        if (mSelected) {
+            Assert.assertTrue(mModelNode.visibleDuringActionMode());
             selectedTreeNodes.add(this);
+        }
 
         selectedTreeNodes.addAll(Stream.of(mChildTreeNodes)
                 .flatMap(new Function<TreeNode, Stream<TreeNode>>() {
@@ -806,6 +814,13 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public static class NotSelectableSelectedException extends IllegalStateException {
         private NotSelectableSelectedException() {
             super("A TreeNode cannot be selected if its ModelNode is not selectable.");
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class SelectableNotVisibleException extends IllegalStateException {
+        private SelectableNotVisibleException() {
+            super("A TreeNode cannot be selectable if it isn't visible during action mode.");
         }
     }
 

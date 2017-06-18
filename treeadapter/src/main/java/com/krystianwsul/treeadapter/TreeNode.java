@@ -63,10 +63,18 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return mModelNode.getItemViewType();
     }
 
+    @Override
     public void update() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+    }
+
+    @Override
+    public void updateRecursive() {
+        update();
+
+        getParent().updateRecursive();
     }
 
     @NonNull
@@ -74,6 +82,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         return mModelNode;
     }
 
+    @Override
     public boolean expanded() {
         Assert.assertTrue(!mExpanded || visibleSize() > 1);
 
@@ -124,12 +133,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             incrementSelected();
 
             if (parent.getSelectedChildren().size() == 1) // first in group
-                parent.update();
+                parent.updateRecursive();
         } else {
             decrementSelected();
 
             if (parent.getSelectedChildren().size() == 0) // last in group
-                parent.update();
+                parent.updateRecursive();
         }
 
         treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
@@ -364,13 +373,13 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-                Assert.assertTrue(!(!getSelectedChildren().isEmpty() && hasActionMode())); // todo change to error that you can't collapse a node with selected children
+                Assert.assertTrue(!(hasSelectedDescendants() && hasActionMode())); // todo change to error that you can't collapse a node with selected children
 
                 int position = treeNodeCollection.getPosition(TreeNode.this);
                 Assert.assertTrue(position >= 0);
 
                 if (mExpanded) { // hiding
-                    if (!getSelectedChildren().isEmpty())
+                    if (hasSelectedDescendants())
                         throw new SelectedChildrenException();
 
                     int displayedSize = displayedSize();
@@ -656,6 +665,18 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                     }
                 })
                 .collect(Collectors.<TreeNode>toList());
+    }
+
+    public boolean hasSelectedDescendants() {
+        if (mChildTreeNodes == null)
+            throw new SetChildTreeNodesNotCalledException();
+
+        return Stream.of(mChildTreeNodes).anyMatch(new Predicate<TreeNode>() {
+            @Override
+            public boolean test(TreeNode value) {
+                return (value.isSelected() || value.hasSelectedDescendants());
+            }
+        });
     }
 
     void onCreateActionMode() {

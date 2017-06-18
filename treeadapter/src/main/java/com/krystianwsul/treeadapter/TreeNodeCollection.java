@@ -191,6 +191,11 @@ public class TreeNodeCollection implements NodeContainer {
 
     }
 
+    @Override
+    public void updateRecursive() {
+
+    }
+
     @NonNull
     @Override
     public List<TreeNode> getSelectedChildren() {

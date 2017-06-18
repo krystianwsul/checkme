@@ -12,6 +12,8 @@ public interface NodeContainer {
 
     void update();
 
+    void updateRecursive();
+
     @NonNull
     List<TreeNode> getSelectedChildren();
 

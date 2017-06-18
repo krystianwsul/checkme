@@ -330,13 +330,13 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         if (singleInstance()) {
             GroupListFragment.InstanceData instanceData = getSingleInstanceData();
 
-            if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (notDoneGroupTreeNode.getSelectedChildren().size() > 0 || notDoneGroupTreeNode.displayedSize() == 1))) {
+            if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (notDoneGroupTreeNode.hasSelectedDescendants() || notDoneGroupTreeNode.displayedSize() == 1))) {
                 return View.INVISIBLE;
             } else {
                 return View.VISIBLE;
             }
         } else {
-            if (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedChildren().size() > 0)
+            if (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.hasSelectedDescendants())
                 return View.INVISIBLE;
             else
                 return View.VISIBLE;
@@ -359,7 +359,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
             else
                 return R.drawable.ic_expand_more_black_36dp;
         } else {
-            Assert.assertTrue(!(groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.getSelectedChildren().size() > 0));
+            Assert.assertTrue(!(groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.hasSelectedDescendants()));
 
             if (notDoneGroupTreeNode.expanded())
                 return R.drawable.ic_expand_less_black_36dp;
@@ -809,7 +809,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             GroupListFragment groupListFragment = getGroupListFragment();
 
-            if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.getSelectedChildren().size() > 0 || treeNode.displayedSize() == 1))) {
+            if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || treeNode.displayedSize() == 1))) {
                 return View.INVISIBLE;
             } else {
                 return View.VISIBLE;
@@ -822,7 +822,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             GroupListFragment groupListFragment = getGroupListFragment();
 
-            Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedChildren().size() > 0)));
+            Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants())));
 
             if (treeNode.expanded())
                 return R.drawable.ic_expand_less_black_36dp;
@@ -837,7 +837,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             GroupListFragment groupListFragment = getGroupListFragment();
 
-            Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.getSelectedChildren().size() > 0)));
+            Assert.assertTrue(!(mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants())));
 
             return treeNode.getExpandListener();
         }

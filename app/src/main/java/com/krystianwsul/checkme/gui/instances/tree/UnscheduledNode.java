@@ -157,11 +157,15 @@ class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
 
     @Override
     int getExpandVisibility() {
+        Assert.assertTrue(getTreeNode().getExpandVisible());
+
         return View.VISIBLE;
     }
 
     @Override
     int getExpandImageResource() {
+        Assert.assertTrue(getTreeNode().getExpandVisible());
+
         if (getTreeNode().expanded())
             return R.drawable.ic_expand_less_black_36dp;
         else
@@ -171,6 +175,8 @@ class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
     @NonNull
     @Override
     View.OnClickListener getExpandOnClickListener() {
+        Assert.assertTrue(getTreeNode().getExpandVisible());
+
         return getTreeNode().getExpandListener();
     }
 

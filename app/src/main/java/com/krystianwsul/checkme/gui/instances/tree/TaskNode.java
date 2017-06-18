@@ -189,8 +189,12 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     @Override
     int getExpandVisibility() {
         if (mTaskData.Children.isEmpty()) {
+            Assert.assertTrue(!getTreeNode().getExpandVisible());
+
             return View.INVISIBLE;
         } else {
+            Assert.assertTrue(getTreeNode().getExpandVisible());
+
             return View.VISIBLE;
         }
     }
@@ -198,6 +202,8 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     @Override
     int getExpandImageResource() {
         TreeNode treeNode = getTreeNode();
+
+        Assert.assertTrue(treeNode.getExpandVisible());
 
         Assert.assertTrue(!mTaskData.Children.isEmpty());
 
@@ -211,6 +217,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     @Override
     View.OnClickListener getExpandOnClickListener() {
         Assert.assertTrue(!mTaskData.Children.isEmpty());
+        Assert.assertTrue(getTreeNode().getExpandVisible());
 
         return getTreeNode().getExpandListener();
     }

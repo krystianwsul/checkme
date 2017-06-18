@@ -183,8 +183,12 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @Override
     int getExpandVisibility() {
         if (mInstanceData.Children.isEmpty()) {
+            Assert.assertTrue(!getTreeNode().getExpandVisible());
+
             return View.INVISIBLE;
         } else {
+            Assert.assertTrue(getTreeNode().getExpandVisible());
+
             return View.VISIBLE;
         }
     }
@@ -192,6 +196,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @Override
     int getExpandImageResource() {
         Assert.assertTrue(!mInstanceData.Children.isEmpty());
+        Assert.assertTrue(getTreeNode().getExpandVisible());
 
         if (getTreeNode().expanded())
             return R.drawable.ic_expand_less_black_36dp;
@@ -203,6 +208,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @Override
     View.OnClickListener getExpandOnClickListener() {
         Assert.assertTrue(!mInstanceData.Children.isEmpty());
+        Assert.assertTrue(getTreeNode().getExpandVisible());
 
         return getTreeNode().getExpandListener();
     }

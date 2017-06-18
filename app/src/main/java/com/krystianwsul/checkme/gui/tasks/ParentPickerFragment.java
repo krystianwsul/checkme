@@ -341,9 +341,13 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 taskHolder.mTaskRowContainer.setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
 
-                if (mParentTreeData.mParentTreeDatas.isEmpty())
+                if (mParentTreeData.mParentTreeDatas.isEmpty()) {
+                    Assert.assertTrue(!getTreeNode().getExpandVisible());
+
                     taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
-                else {
+                } else {
+                    Assert.assertTrue(getTreeNode().getExpandVisible());
+
                     taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
 
                     if (treeNode.expanded())

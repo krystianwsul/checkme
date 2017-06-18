@@ -767,9 +767,11 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
                 taskHolder.mTaskRowContainer.setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
 
-                if (mChildTaskData.Children.isEmpty())
+                if (!treeNode.getExpandVisible()) {
                     taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
-                else {
+                } else {
+                    Assert.assertTrue(!mChildTaskData.Children.isEmpty());
+
                     taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
 
                     if (treeNode.expanded())

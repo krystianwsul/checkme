@@ -129,14 +129,16 @@ class DividerNode extends GroupHolderNode implements ModelNode {
 
     @Override
     int getExpandVisibility() {
+        Assert.assertTrue(getTreeNode().getExpandVisible());
+
         return View.VISIBLE;
     }
 
     @Override
     int getExpandImageResource() {
-        Assert.assertTrue(mTreeNode != null);
+        Assert.assertTrue(getTreeNode().getExpandVisible());
 
-        if (mTreeNode.expanded())
+        if (getTreeNode().expanded())
             return R.drawable.ic_expand_less_black_36dp;
         else
             return R.drawable.ic_expand_more_black_36dp;
@@ -145,9 +147,9 @@ class DividerNode extends GroupHolderNode implements ModelNode {
     @NonNull
     @Override
     View.OnClickListener getExpandOnClickListener() {
-        Assert.assertTrue(mTreeNode != null);
+        Assert.assertTrue(getTreeNode().getExpandVisible());
 
-        return mTreeNode.getExpandListener();
+        return getTreeNode().getExpandListener();
     }
 
     @Override

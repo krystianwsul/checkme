@@ -376,6 +376,8 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
     @NonNull
     @Override
     View.OnClickListener getExpandOnClickListener() {
+        Assert.assertTrue(getTreeNode().getExpandVisible());
+
         return getTreeNode().getExpandListener();
     }
 
@@ -815,8 +817,12 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
             GroupListFragment groupListFragment = getGroupListFragment();
 
             if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || treeNode.displayedSize() == 1))) {
+                Assert.assertTrue(!treeNode.getExpandVisible());
+
                 return View.INVISIBLE;
             } else {
+                Assert.assertTrue(treeNode.getExpandVisible());
+
                 return View.VISIBLE;
             }
         }
@@ -824,6 +830,8 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         @Override
         int getExpandImageResource() {
             TreeNode treeNode = getTreeNode();
+
+            Assert.assertTrue(treeNode.getExpandVisible());
 
             GroupListFragment groupListFragment = getGroupListFragment();
 
@@ -839,6 +847,8 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         @Override
         View.OnClickListener getExpandOnClickListener() {
             TreeNode treeNode = getTreeNode();
+
+            Assert.assertTrue(treeNode.getExpandVisible());
 
             GroupListFragment groupListFragment = getGroupListFragment();
 

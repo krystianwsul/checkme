@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -827,6 +828,9 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
             Assert.assertTrue(mDataWrapper != null);
             Assert.assertTrue(mInstanceKeys == null);
 
+            Activity activity = getActivity();
+            Assert.assertTrue(activity != null);
+
             if (mPosition != null) {
                 Assert.assertTrue(mTimeRange != null);
 
@@ -835,7 +839,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 Assert.assertTrue(mDataWrapper.TaskEditable == null);
 
-                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition))));
+                startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange, mPosition))));
             } else if (mTimeStamp != null) {
                 Assert.assertTrue(mInstanceKey == null);
 
@@ -843,7 +847,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 Assert.assertTrue(mTimeStamp.compareTo(TimeStamp.getNow()) > 0);
 
-                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), new CreateTaskActivity.ScheduleHint(mTimeStamp.getDate(), mTimeStamp.getHourMinute())));
+                startActivity(CreateTaskActivity.getCreateIntent(activity, new CreateTaskActivity.ScheduleHint(mTimeStamp.getDate(), mTimeStamp.getHourMinute())));
             } else {
                 Assert.assertTrue(mInstanceKey != null);
 
@@ -851,7 +855,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
 
                 Assert.assertTrue(mDataWrapper.TaskEditable);
 
-                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mInstanceKey.mTaskKey));
+                startActivity(CreateTaskActivity.getCreateIntent(activity, mInstanceKey.mTaskKey));
             }
         });
 

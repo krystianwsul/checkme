@@ -323,26 +323,27 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     @Override
     int getExpandVisibility() {
-        TreeNode notDoneGroupTreeNode = getTreeNode();
+        TreeNode treeNode = getTreeNode();
 
         GroupListFragment groupListFragment = getGroupListFragment();
 
         if (singleInstance()) {
             GroupListFragment.InstanceData instanceData = getSingleInstanceData();
 
-            if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (notDoneGroupTreeNode.hasSelectedDescendants() || notDoneGroupTreeNode.displayedSize() == 1))) {
-                Assert.assertTrue(!notDoneGroupTreeNode.getExpandVisible());
+            boolean visibleChildren = Stream.of(treeNode.getAllChildren()).anyMatch(TreeNode::canBeShown);
+            if (instanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren))) {
+                Assert.assertTrue(!treeNode.getExpandVisible());
                 return View.INVISIBLE;
             } else {
-                Assert.assertTrue(notDoneGroupTreeNode.getExpandVisible());
+                Assert.assertTrue(treeNode.getExpandVisible());
                 return View.VISIBLE;
             }
         } else {
-            if (groupListFragment.mSelectionCallback.hasActionMode() && notDoneGroupTreeNode.hasSelectedDescendants()) {
-                Assert.assertTrue(!notDoneGroupTreeNode.getExpandVisible());
+            if (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants()) {
+                Assert.assertTrue(!treeNode.getExpandVisible());
                 return View.INVISIBLE;
             } else {
-                Assert.assertTrue(notDoneGroupTreeNode.getExpandVisible());
+                Assert.assertTrue(treeNode.getExpandVisible());
                 return View.VISIBLE;
             }
         }
@@ -816,7 +817,8 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             GroupListFragment groupListFragment = getGroupListFragment();
 
-            if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || treeNode.displayedSize() == 1))) {
+            boolean visibleChildren = Stream.of(treeNode.getAllChildren()).anyMatch(TreeNode::canBeShown);
+            if (mInstanceData.Children.isEmpty() || (groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren))) {
                 Assert.assertTrue(!treeNode.getExpandVisible());
 
                 return View.INVISIBLE;

@@ -369,7 +369,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     @SuppressWarnings("RedundantIfStatement")
-    private boolean canBeShown() {
+    public boolean canBeShown() {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
 

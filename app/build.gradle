@@ -26,8 +26,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 67
-        versionName "0.4.28"
+        versionCode 68
+        versionName "0.4.29"
     }
     buildTypes {
         release {
@@ -55,7 +55,7 @@ android {
 
 ext {
     supportLibVersion = '25.3.1'
-    firebaseVersion = '10.2.6'
+    firebaseVersion = '11.0.4'
 }
 
 dependencies {

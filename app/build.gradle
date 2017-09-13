@@ -23,12 +23,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 68
         versionName "0.4.29"
     }
@@ -61,7 +61,7 @@ kapt {
 }
 
 ext {
-    supportLibVersion = '25.3.1'
+    supportLibVersion = '26.0.1'
     firebaseVersion = '11.0.4'
 }
 

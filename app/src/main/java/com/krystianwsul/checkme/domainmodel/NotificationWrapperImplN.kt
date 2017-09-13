@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.PendingIntent
 import android.os.Build
 import android.provider.Settings
@@ -69,7 +70,8 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
     override fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
         Assert.assertTrue(title.isNotEmpty())
 
-        val builder = newNotificationBuilder()
+        @Suppress("Deprecation")
+        val builder = NotificationCompat.Builder(MyApplication.instance)
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ikona_bez)
                 .setDeleteIntent(deleteIntent)
@@ -104,8 +106,9 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
 
         val notification = builder.build()
 
+        @Suppress("Deprecation")
         if (!silent)
-            setVibration(notification)
+            notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
 
         MyCrashlytics.log("NotificationManager.notify " + notificationId)
         notificationManager.notify(notificationId, notification)

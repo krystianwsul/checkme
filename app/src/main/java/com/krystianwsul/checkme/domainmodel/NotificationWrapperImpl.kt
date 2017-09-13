@@ -54,7 +54,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return InstanceKey(instanceKey.mTaskKey, scheduleKey)
     }
 
-    override fun notifyInstance(context: Context, domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp, nougat: Boolean) {
+    override fun notifyInstance(context: Context, domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
         val task = instance.task
         val notificationId = instance.notificationId
 
@@ -83,7 +83,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val style: NotificationCompat.Style?
         if (!childNames.isEmpty()) {
             text = childNames.joinToString(", ")
-            style = getInboxStyle(context, childNames, false, nougat)
+            style = getInboxStyle(context, childNames, false)
         } else if (!task.note.isNullOrEmpty()) {
             text = task.note
 
@@ -96,7 +96,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             style = null
         }
 
-        notify(context, instance.name, text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.instanceDateTime.timeStamp.long, style, true, nougat, false, instance.instanceDateTime.timeStamp.long!!.toString() + instance.task.startExactTimeStamp.toString())
+        notify(context, instance.name, text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.instanceDateTime.timeStamp.long, style, true, false, instance.instanceDateTime.timeStamp.long!!.toString() + instance.task.startExactTimeStamp.toString())
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
@@ -121,7 +121,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return (notDone + done).map(Instance::getName)
     }
 
-    private fun getInboxStyle(context: Context, lines: List<String>, group: Boolean, nougat: Boolean): NotificationCompat.InboxStyle {
+    protected open fun getInboxStyle(context: Context, lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
         Assert.assertTrue(!lines.isEmpty())
 
         val max = 5
@@ -132,13 +132,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val extraCount = lines.size - max
 
-        if (extraCount > 0 && !(nougat && group))
+        if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + context.getString(R.string.more))
 
         return inboxStyle
     }
 
-    private fun notify(context: Context, title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, nougat: Boolean, summary: Boolean, sortKey: String) {
+    protected open fun notify(context: Context, title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
         Assert.assertTrue(title.isNotEmpty())
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -171,13 +171,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (autoCancel)
             builder.setAutoCancel(true)
 
-        if (nougat) {
-            builder.setGroup(TickService.GROUP_KEY)
-
-            if (summary)
-                builder.setGroupSummary(true)
-        }
-
         val notification = builder.build()
 
         if (!silent)
@@ -194,7 +187,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
 
-    override fun notifyGroup(context: Context, domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp, nougat: Boolean) {
+    override fun notifyGroup(context: Context, domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
         val remoteCustomTimeFixInstanceKeys = ArrayList<InstanceKey>()
@@ -212,9 +205,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val inboxStyle = getInboxStyle(context, instances
                 .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))
-                .map { it.name + getInstanceText(it, now) }, true, nougat)
+                .map { it.name + getInstanceText(it, now) }, true)
 
-        notify(context, instances.size.toString() + " " + context.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, nougat, true, "0")
+        notify(context, instances.size.toString() + " " + context.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, true, "0")
     }
 
     override fun setAlarm(context: Context, pendingIntent: PendingIntent, nextAlarm: TimeStamp) {

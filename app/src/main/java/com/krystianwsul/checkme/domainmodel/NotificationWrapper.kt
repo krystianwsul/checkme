@@ -20,9 +20,9 @@ abstract class NotificationWrapper {
 
     abstract fun cancelNotification(context: Context, id: Int)
 
-    abstract fun notifyInstance(context: Context, domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp, nougat: Boolean)
+    abstract fun notifyInstance(context: Context, domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp)
 
-    abstract fun notifyGroup(context: Context, domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp, nougat: Boolean)
+    abstract fun notifyGroup(context: Context, domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp)
 
     abstract fun setAlarm(context: Context, pendingIntent: PendingIntent, nextAlarm: TimeStamp)
 

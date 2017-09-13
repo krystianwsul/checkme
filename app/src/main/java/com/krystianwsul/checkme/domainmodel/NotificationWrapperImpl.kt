@@ -83,7 +83,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val style: NotificationCompat.Style?
         if (!childNames.isEmpty()) {
             text = childNames.joinToString(", ")
-            style = getInboxStyle(context, childNames, false)
+            style = getInboxStyle(context, childNames, false, nougat)
         } else if (!task.note.isNullOrEmpty()) {
             text = task.note
 
@@ -121,7 +121,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return (notDone + done).map(Instance::getName)
     }
 
-    private fun getInboxStyle(context: Context, lines: List<String>, nougatGroup: Boolean): NotificationCompat.InboxStyle {
+    private fun getInboxStyle(context: Context, lines: List<String>, group: Boolean, nougat: Boolean): NotificationCompat.InboxStyle {
         Assert.assertTrue(!lines.isEmpty())
 
         val max = 5
@@ -132,7 +132,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val extraCount = lines.size - max
 
-        if (extraCount > 0 && !nougatGroup)
+        if (extraCount > 0 && !(nougat && group))
             inboxStyle.setSummaryText("+" + extraCount + " " + context.getString(R.string.more))
 
         return inboxStyle
@@ -212,7 +212,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val inboxStyle = getInboxStyle(context, instances
                 .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))
-                .map { it.name + getInstanceText(it, now) }, nougat)
+                .map { it.name + getInstanceText(it, now) }, true, nougat)
 
         notify(context, instances.size.toString() + " " + context.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, nougat, true, "0")
     }

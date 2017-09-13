@@ -8,7 +8,10 @@ buildscript {
     }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'io.fabric'
+apply plugin: 'me.tatarka.retrolambda'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -16,8 +19,6 @@ repositories {
         url "https://s3.amazonaws.com/repo.commonsware.com"
     }
 }
-
-apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 25

@@ -8,9 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
-import android.service.notification.StatusBarNotification
 import android.support.v4.app.NotificationCompat
-import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -26,7 +24,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 import junit.framework.Assert
 import java.util.*
 
-class NotificationWrapperImpl : NotificationWrapper() {
+open class NotificationWrapperImpl : NotificationWrapper() {
 
     override fun cancelNotification(context: Context, id: Int) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -190,14 +188,10 @@ class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     @SuppressLint("NewApi")
-    private fun setExact(context: Context, time: Long, pendingIntent: PendingIntent) {
+    protected open fun setExact(context: Context, time: Long, pendingIntent: PendingIntent) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-            else -> alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-        }
+        alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
 
     override fun notifyGroup(context: Context, domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp, nougat: Boolean) {
@@ -243,52 +237,9 @@ class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cleanGroup(context: Context, lastNotificationId: Int?) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (lastNotificationId != null) {
-                cancelNotification(context, lastNotificationId)
-            }
-        } else {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        Assert.assertTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
 
-            val statusBarNotifications = notificationManager.activeNotifications!!
-
-            if (lastNotificationId != null) {
-                if (statusBarNotifications.size > 2) {
-                    cancelNotification(context, lastNotificationId)
-                } else if (statusBarNotifications.size < 2) {
-                    Assert.assertTrue(statusBarNotifications.isEmpty())
-                } else {
-                    Assert.assertTrue(statusBarNotifications.size == 2)
-
-                    if (statusBarNotifications.none { it.id == 0 })
-                        NotificationException.throwException(lastNotificationId, statusBarNotifications)
-
-                    if (statusBarNotifications.any { it.id == lastNotificationId }) {
-                        cancelNotification(context, 0)
-                        cancelNotification(context, lastNotificationId)
-                    }
-                }
-            } else {
-                if (statusBarNotifications.size != 1)
-                    return
-
-                Log.e("asdf", "cleaning group")
-
-                Assert.assertTrue(statusBarNotifications.single().id == 0)
-
-                cancelNotification(context, 0)
-            }
-        }
-    }
-
-    @SuppressLint("NewApi")
-    private class NotificationException(message: String) : RuntimeException(message) {
-
-        companion object {
-
-            fun throwException(lastNotificationId: Int, statusBarNotifications: Array<StatusBarNotification>) {
-                throw NotificationException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
-            }
-        }
+        if (lastNotificationId != null)
+            cancelNotification(context, lastNotificationId)
     }
 }

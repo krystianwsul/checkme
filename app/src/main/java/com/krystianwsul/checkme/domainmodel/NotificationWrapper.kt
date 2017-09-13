@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.app.PendingIntent
 import android.content.Context
+import android.os.Build
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
 
@@ -9,7 +10,12 @@ abstract class NotificationWrapper {
 
     companion object {
 
-        var instance: NotificationWrapper = NotificationWrapperImpl()
+        var instance: NotificationWrapper = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> NotificationWrapperImplN()
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> NotificationWrapperImplM()
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> NotificationWrapperImplKITKAT()
+            else -> NotificationWrapperImpl()
+        }
     }
 
     abstract fun cancelNotification(context: Context, id: Int)

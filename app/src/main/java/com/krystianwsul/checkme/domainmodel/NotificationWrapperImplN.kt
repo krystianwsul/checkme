@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.PendingIntent
 import android.os.Build
 import android.provider.Settings
@@ -15,7 +14,7 @@ import com.krystianwsul.checkme.notifications.TickService
 import junit.framework.Assert
 
 @SuppressLint("NewApi")
-class NotificationWrapperImplN : NotificationWrapperImplM() {
+open class NotificationWrapperImplN : NotificationWrapperImplM() {
 
     override fun cleanGroup(lastNotificationId: Int?) {
         Assert.assertTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -106,7 +105,7 @@ class NotificationWrapperImplN : NotificationWrapperImplM() {
         val notification = builder.build()
 
         if (!silent)
-            notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
+            setVibration(notification)
 
         MyCrashlytics.log("NotificationManager.notify " + notificationId)
         notificationManager.notify(notificationId, notification)

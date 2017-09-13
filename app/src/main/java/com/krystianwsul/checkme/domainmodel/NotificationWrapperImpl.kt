@@ -140,6 +140,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return inboxStyle
     }
 
+    @Suppress("DEPRECATION")
     protected open fun newNotificationBuilder() = NotificationCompat.Builder(MyApplication.instance)
 
     protected open fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
@@ -176,10 +177,15 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val notification = builder.build()
 
         if (!silent)
-            notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
+            setVibration(notification)
 
         MyCrashlytics.log("NotificationManager.notify " + notificationId)
         notificationManager.notify(notificationId, notification)
+    }
+
+    @Suppress("DEPRECATION")
+    protected open fun setVibration(notification: Notification) {
+        notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
     }
 
     @SuppressLint("NewApi")

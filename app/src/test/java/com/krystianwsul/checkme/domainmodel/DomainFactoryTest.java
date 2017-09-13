@@ -72,7 +72,7 @@ public class DomainFactoryTest {
 
     @BeforeClass
     public static void setUpStatic() {
-        NotificationWrapper.setInstance(new NotificationWrapper() {
+        NotificationWrapper.Companion.setInstance(new NotificationWrapper() {
             @Override
             public void cancelNotification(@NonNull Context context, int id) {
 
@@ -84,7 +84,7 @@ public class DomainFactoryTest {
             }
 
             @Override
-            public void notifyGroup(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Collection<Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            public void notifyGroup(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Collection<? extends Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
 
             }
 

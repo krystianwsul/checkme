@@ -42,7 +42,7 @@ public class InstanceHourService extends IntentService {
         int notificationId = intent.getIntExtra(NOTIFICATION_ID_KEY, -1);
         Assert.assertTrue(notificationId != -1);
 
-        NotificationWrapper notificationWrapper = NotificationWrapper.getInstance();
+        NotificationWrapper notificationWrapper = NotificationWrapper.Companion.getInstance();
         notificationWrapper.cleanGroup(this, notificationId);
 
         InstanceDoneService.throttleFirebase(this, instanceKey.getType().equals(TaskKey.Type.REMOTE), domainFactory -> setInstanceAddHour(domainFactory, instanceKey));

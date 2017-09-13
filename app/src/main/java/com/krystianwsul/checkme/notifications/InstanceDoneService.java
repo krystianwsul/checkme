@@ -45,7 +45,7 @@ public class InstanceDoneService extends IntentService {
         int notificationId = intent.getIntExtra(NOTIFICATION_ID_KEY, -1);
         Assert.assertTrue(notificationId != -1);
 
-        NotificationWrapper notificationWrapper = NotificationWrapper.getInstance();
+        NotificationWrapper notificationWrapper = NotificationWrapper.Companion.getInstance();
         notificationWrapper.cleanGroup(this, notificationId); // todo uodpornić na podwójne kliknięcie
 
         throttleFirebase(this, instanceKey.getType().equals(TaskKey.Type.REMOTE), domainFactory -> setInstanceNotificationDone(domainFactory, instanceKey));
@@ -87,7 +87,7 @@ public class InstanceDoneService extends IntentService {
         domainFactory.addFirebaseListener(firebaseListener);
     }
 
-    public static class NeedsFirebaseException extends RuntimeException {
+    private static class NeedsFirebaseException extends RuntimeException {
         NeedsFirebaseException() {
             super();
         }
